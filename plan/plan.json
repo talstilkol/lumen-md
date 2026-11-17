@@ -35997,15 +35997,29 @@
      "kind": "CLOUD-CODE",
      "stage": "13.R",
      "dod": [
-      "npx vitest run src/__tests__/readingProfile.test.ts"
+      "npx vitest run src/__tests__/readingProfile.test.ts",
+      "npx vitest run src/__tests__/readingModeMenu.test.tsx"
      ],
      "dodExpect": [
+      "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
      ],
      "research": [
       "w13/research.md §R"
      ],
-     "files": "src/reading/settings.ts"
+     "files": "src/reading/settings.ts",
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 80,
+      "who": "cloud-code",
+      "missing": "fixed in F13a #1241: the menu offers spread and sidenotes; daf, bilingual and compare read the profile; the tautological sha test replaced; readingModeMenu.test is in the dod. Owed: the paged view (its own print frame) does not read the profile yet."
+     },
+     "status": "⏳ audit r4 PARTIAL 80 · partial: the paged view (its own print frame) does not read the profile yet",
+     "verified": "node",
+     "pr": 1132,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1241: the menu offers spread and sidenotes; daf, bilingual and compare read the profile; the tautological sha test replaced; readingModeMenu.test is in the dod, pending merge."
     },
     {
      "id": "W13.R2",
@@ -36039,7 +36053,19 @@
      ],
      "research": [
       "w13/research.md §R"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 60,
+      "who": "mac",
+      "missing": "fixed in F13a #1241: Hemingway linear on long notes (7.7 s -> 0.26 s on 960k chars), focus span from a window, -ed adjectives and nif'al passives. Owed: the e2e run on the Mac."
+     },
+     "status": "⏳ audit r4 PARTIAL 60 · cloud-complete; owed: the e2e run on the Mac",
+     "verified": "node",
+     "pr": 1139,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1241: Hemingway linear on long notes (7.7 s -> 0.26 s on 960k chars), focus span from a window, -ed adjectives and nif'al passives, pending merge."
     },
     {
      "id": "W13.R3",
@@ -36071,7 +36097,19 @@
      ],
      "research": [
       "w13/research.md §R"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 62,
+      "who": "cloud-code",
+      "missing": "fixed in F13a #1241: RSVP root attribute, arrows by paragraph direction, the Hebrew prefix keeps root letters. Owed: nothing in the cloud; the e2e on the Mac."
+     },
+     "status": "⏳ audit r4 PARTIAL 62 · cloud-complete; owed: nothing in the cloud; the e2e on the Mac",
+     "verified": "node",
+     "pr": 1149,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1241: RSVP root attribute, arrows by paragraph direction, the Hebrew prefix keeps root letters, pending merge."
     },
     {
      "id": "W13.R4",
@@ -36103,7 +36141,19 @@
      ],
      "research": [
       "w13/research.md §R"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 70,
+      "who": "owner",
+      "missing": "fixed in F13a #1241: the anchor observer is scoped to the reading roots. Owed: the owner's reading study (weak evidence, experimental)."
+     },
+     "status": "⏳ audit r4 PARTIAL 70 · cloud-complete; owed: the owner's reading study (weak evidence, experimental)",
+     "verified": "node",
+     "pr": 1151,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1241: the anchor observer is scoped to the reading roots, pending merge."
     },
     {
      "id": "W13.R5",
@@ -36139,7 +36189,18 @@
      ],
      "research": [
       "w13/research.md §R"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 50,
+      "who": "mac",
+      "missing": "Owed: Hebrew POS about 86% on harder text (target 90%); speech loads on demand (F13a #1209); the e2e on the Mac."
+     },
+     "status": "⏳ audit r4 PARTIAL 50 · partial: Hebrew POS about 86% on harder text (target 90%); speech loads on demand (F13a #1209); the e2e on the Mac",
+     "verified": "node",
+     "pr": 1162
     },
     {
      "id": "W13.R6",
@@ -36172,7 +36233,19 @@
      ],
      "research": [
       "w13/research.md §R"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 55,
+      "who": "mac",
+      "missing": "fixed in F13a #1209/#1241: the place is kept by path, never in the file; Space/Enter on the bar's buttons. Owed: the Playwright run on the Mac."
+     },
+     "status": "⏳ audit r4 PARTIAL 55 · cloud-complete; owed: the Playwright run on the Mac",
+     "verified": "node",
+     "pr": 1161,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1209/#1241: the place is kept by path, never in the file; Space/Enter on the bar's buttons, pending merge."
     },
     {
      "id": "W13.R7",
@@ -36206,7 +36279,18 @@
      ],
      "research": [
       "w13/research.md §R"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 60,
+      "who": "mac",
+      "missing": "Owed: the e2e of the linked columns on the Mac (the dod's spec)."
+     },
+     "status": "⏳ audit r4 PARTIAL 60 · cloud-complete; owed: the e2e of the linked columns on the Mac (the dod's spec)",
+     "verified": "node",
+     "pr": 1147
     },
     {
      "id": "W13.R8",
@@ -36241,7 +36325,18 @@
      ],
      "research": [
       "w13/research.md §R"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 75,
+      "who": "mac",
+      "missing": "Owed: the compare view's e2e on the Mac; it is now opened by the a11y dialogs spec (F13a #1241)."
+     },
+     "status": "⏳ audit r4 PARTIAL 75 · cloud-complete; owed: the compare view's e2e on the Mac; it is now opened by the a11y dialogs spec (F13a #1241)",
+     "verified": "node",
+     "pr": 1152
     },
     {
      "id": "W13.R9",
@@ -36275,7 +36370,18 @@
      ],
      "research": [
       "w13/research.md §R"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 70,
+      "who": "mac",
+      "missing": "Owed: the margins' e2e on the Mac; the switch is now in the Reading mode menu (F13a #1241); startup back down (F13a #1209)."
+     },
+     "status": "⏳ audit r4 PARTIAL 70 · cloud-complete; owed: the margins' e2e on the Mac; the switch is now in the Reading mode menu (F13a #1241); startup back down (F13a #1209)",
+     "verified": "node",
+     "pr": 1160
     },
     {
      "id": "W13.R10",
@@ -36309,7 +36415,19 @@
      ],
      "research": [
       "w13/research.md §R"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 50,
+      "who": "mac",
+      "missing": "Owed: the title and dod name paged.js but browser fragmentation is used (wording kept honest below); `npm run budget` needs a dist build (Mac)."
+     },
+     "status": "⏳ audit r4 PARTIAL 50 · partial: the title and dod name paged.js but browser fragmentation is used (wording kept honest below); `npm run budget` needs a dist build (Mac)",
+     "verified": "built",
+     "pr": 1131,
+     "notes": "F13a 17.11 (audit r4 A1.9): paged.js is not used; the page view lays out pages with the browser's own CSS fragmentation (CSS Paged Media in print, multi-column on screen). The title's \"paged.js\" means paged-media layout; wiring paged.js itself is not planned."
     },
     {
      "id": "W13.R11",
@@ -36345,7 +36463,19 @@
      ],
      "research": [
       "w13/research.md §R"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 68,
+      "who": "mac",
+      "missing": "fixed in F13a #1241: the daf has its \"?\" and its linear text reads the profile. Owed: the daf e2e on the Mac."
+     },
+     "status": "⏳ audit r4 PARTIAL 68 · cloud-complete; owed: the daf e2e on the Mac",
+     "verified": "node",
+     "pr": 1135,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1241: the daf has its \"?\" and its linear text reads the profile, pending merge."
     },
     {
      "id": "W13.R12",
@@ -36378,7 +36508,19 @@
      ],
      "research": [
       "w13/research.md §R"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 55,
+      "who": "mac",
+      "missing": "fixed in F13a #1221 (buttons styled) and #1241 (profile). Owed: the Playwright run on the Mac."
+     },
+     "status": "⏳ audit r4 PARTIAL 55 · cloud-complete; owed: the Playwright run on the Mac",
+     "verified": "node",
+     "pr": 1138,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1221 (buttons styled) and #1241 (profile), pending merge."
     },
     {
      "id": "W13.R13",
@@ -36417,7 +36559,19 @@
      ],
      "research": [
       "w13/research.md §R"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 45,
+      "who": "mac",
+      "missing": "fixed in F13a #1241: a DOM-level check mounts each mode it can (readingModesDom.test). Owed: e2e/reading-modes.spec.ts on the Mac (Chromium, Firefox, WebKit)."
+     },
+     "status": "⏳ audit r4 PARTIAL 45 · cloud-complete; owed: e2e/reading-modes.spec.ts on the Mac (Chromium, Firefox, WebKit)",
+     "verified": "node",
+     "pr": 1140,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1241: a DOM-level check mounts each mode it can (readingModesDom.test), pending merge."
     },
     {
      "id": "W13.R14",
@@ -36448,7 +36602,18 @@
      ],
      "research": [
       "w13/research.md §R"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 25,
+      "who": "owner",
+      "missing": "Owed: the owner's devices pass (live and merge)."
+     },
+     "status": "⏳ audit r4 PARTIAL 25 · cloud-complete; owed: the owner's devices pass (live and merge)",
+     "verified": "node",
+     "pr": 1148
     },
     {
      "id": "W13.W1",
@@ -36483,7 +36648,19 @@
      "research": [
       "w13/research.md §W"
      ],
-     "files": "src/agents/writing/ (חדש)"
+     "files": "src/agents/writing/ (חדש)",
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 76,
+      "who": "mac",
+      "missing": "fixed in F13a #1204 (strict static check restored) and #1221 (focus after accept; the real-undo test fails instead of skipping; plan/mac-pack/FC13.json). Owed: that undo test with @codemirror/commands on the Mac."
+     },
+     "status": "⏳ audit r4 PARTIAL 76 · cloud-complete; owed: that undo test with @codemirror/commands on the Mac",
+     "verified": "built",
+     "pr": 1141,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1204 (strict static check restored) and #1221 (focus after accept; the real-undo test fails instead of skipping; plan/mac-pack/FC13.json), pending merge."
     },
     {
      "id": "W13.W2",
@@ -36516,7 +36693,19 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 30,
+      "who": "owner",
+      "missing": "fixed in F13a #1204: eval:card's writing suite fails on a folder without a manifest, --check is real, a card's dataset must exist. Owed: the owner's held-out/public sets (W13.W18)."
+     },
+     "status": "⏳ audit r4 PARTIAL 30 · cloud-complete; owed: the owner's held-out/public sets (W13.W18)",
+     "verified": "node",
+     "pr": 1146,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1204: eval:card's writing suite fails on a folder without a manifest, --check is real, a card's dataset must exist, pending merge."
     },
     {
      "id": "W13.W3",
@@ -36551,7 +36740,18 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 72,
+      "who": "mac",
+      "missing": "Owed: the style coach on real local models (W13.W17)."
+     },
+     "status": "⏳ audit r4 PARTIAL 72 · cloud-complete; owed: the style coach on real local models (W13.W17)",
+     "verified": "node",
+     "pr": 1142
     },
     {
      "id": "W13.W4",
@@ -36586,7 +36786,18 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 60,
+      "who": "mac",
+      "missing": "Owed: the tone shifter on real local models (W13.W17)."
+     },
+     "status": "⏳ audit r4 PARTIAL 60 · cloud-complete; owed: the tone shifter on real local models (W13.W17)",
+     "verified": "node",
+     "pr": 1143
     },
     {
      "id": "W13.W5",
@@ -36620,7 +36831,18 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 60,
+      "who": "mac",
+      "missing": "Owed: concision on real local models (W13.W17)."
+     },
+     "status": "⏳ audit r4 PARTIAL 60 · cloud-complete; owed: concision on real local models (W13.W17)",
+     "verified": "node",
+     "pr": 1145
     },
     {
      "id": "W13.W6",
@@ -36655,7 +36877,19 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 50,
+      "who": "cloud-code",
+      "missing": "fixed in F13a #1221: a hyphen or maqaf against a space is a variant (Tel Aviv / Tel-Aviv, בן גוריון / בן־גוריון). Owed: recall on a real vault."
+     },
+     "status": "⏳ audit r4 PARTIAL 50 · partial: recall on a real vault",
+     "verified": "node",
+     "pr": 1153,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1221: a hyphen or maqaf against a space is a variant (Tel Aviv / Tel-Aviv, בן גוריון / בן־גוריון), pending merge."
     },
     {
      "id": "W13.W7",
@@ -36687,7 +36921,18 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 74,
+      "who": "mac",
+      "missing": "Owed: the topic-sentence judge on a real local model."
+     },
+     "status": "⏳ audit r4 PARTIAL 74 · cloud-complete; owed: the topic-sentence judge on a real local model",
+     "verified": "node",
+     "pr": 1154
     },
     {
      "id": "W13.W8",
@@ -36720,7 +36965,18 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 80,
+      "who": "cloud-code",
+      "missing": "Owed: nothing material in the cloud after r4; the card is dev (synthetic) until W13.W17/W18."
+     },
+     "status": "⏳ audit r4 PARTIAL 80 · cloud-complete; owed: nothing material in the cloud after r4; the card is dev (synthetic) until W13.W17/W18",
+     "verified": "node",
+     "pr": 1155
     },
     {
      "id": "W13.W9",
@@ -36752,7 +37008,19 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 50,
+      "who": "owner",
+      "missing": "fixed in F13a #1221: one syllable counter (82/83 on a word list; was 50/83), the goals dialog labels each scale. Owed: the open graded Hebrew corpus (gate 0.10) to replace the stand-in."
+     },
+     "status": "⏳ audit r4 PARTIAL 50 · cloud-complete; owed: the open graded Hebrew corpus (gate 0.10) to replace the stand-in",
+     "verified": "node",
+     "pr": 1156,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1221: one syllable counter (82/83 on a word list; was 50/83), the goals dialog labels each scale, pending merge."
     },
     {
      "id": "W13.W10",
@@ -36785,7 +37053,18 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 45,
+      "who": "mac",
+      "missing": "Owed: Harper vendored and run on the Mac (a stand-in here)."
+     },
+     "status": "⏳ audit r4 PARTIAL 45 · cloud-complete; owed: Harper vendored and run on the Mac (a stand-in here)",
+     "verified": "node",
+     "pr": 1157
     },
     {
      "id": "W13.W11",
@@ -36816,7 +37095,19 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 70,
+      "who": "cloud-code",
+      "missing": "fixed in F13a #1221: the checks dialog's buttons styled. Owed: nothing else in the cloud."
+     },
+     "status": "⏳ audit r4 PARTIAL 70 · cloud-complete; owed: nothing else in the cloud",
+     "verified": "node",
+     "pr": 1133,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1221: the checks dialog's buttons styled, pending merge."
     },
     {
      "id": "W13.W12",
@@ -36851,7 +37142,18 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 58,
+      "who": "owner",
+      "missing": "Owed: the owner's review of abstracts on real notes; the dialog's buttons styled (F13a #1221)."
+     },
+     "status": "⏳ audit r4 PARTIAL 58 · cloud-complete; owed: the owner's review of abstracts on real notes; the dialog's buttons styled (F13a #1221)",
+     "verified": "node",
+     "pr": 1137
     },
     {
      "id": "W13.W13",
@@ -36883,7 +37185,19 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 76,
+      "who": "cloud-code",
+      "missing": "fixed in F13a #1221: 3 -> three is not a number change; the he \"(אין)\" string replaced. Owed: nothing else in the cloud."
+     },
+     "status": "⏳ audit r4 PARTIAL 76 · cloud-complete; owed: nothing else in the cloud",
+     "verified": "node",
+     "pr": 1133,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1221: 3 -> three is not a number change; the he \"(אין)\" string replaced, pending merge."
     },
     {
      "id": "W13.W14",
@@ -36916,7 +37230,19 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 72,
+      "who": "cloud-code",
+      "missing": "fixed in F13a #1221: the readability scale is labelled. Owed: nothing else in the cloud."
+     },
+     "status": "⏳ audit r4 PARTIAL 72 · cloud-complete; owed: nothing else in the cloud",
+     "verified": "node",
+     "pr": 1133,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1221: the readability scale is labelled, pending merge."
     },
     {
      "id": "W13.W15",
@@ -36948,7 +37274,18 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 74,
+      "who": "cloud-code",
+      "missing": "Owed: nothing material in the cloud after r4."
+     },
+     "status": "⏳ audit r4 PARTIAL 74 · cloud-complete; owed: nothing material in the cloud after r4",
+     "verified": "node",
+     "pr": 1133
     },
     {
      "id": "W13.W16",
@@ -36983,7 +37320,19 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 55,
+      "who": "mac",
+      "missing": "fixed in F13a #1209: modelDefaults is used by the app (the no-model error names the default). Owed: the measured defaults (W13.W17)."
+     },
+     "status": "⏳ audit r4 PARTIAL 55 · cloud-complete; owed: the measured defaults (W13.W17)",
+     "verified": "node",
+     "pr": 1144,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1209: modelDefaults is used by the app (the no-model error names the default), pending merge."
     },
     {
      "id": "W13.W17",
@@ -37016,14 +37365,26 @@
      "kind": "MAC",
      "stage": "13.W",
      "dod": [
-      "npm run eval:card -- --suite writing --check"
+      "npm run eval:card -- --suite writing --check --measured"
      ],
      "dodExpect": [
       "exit 0 on the Mac — heldout cards for every P1 writing agent"
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "NOT DONE",
+      "score": 5,
+      "who": "mac",
+      "missing": "fixed in F13a #1204: its dod now fails with 0 measured reports (`--measured`). Owed: the Mac measurement day itself."
+     },
+     "status": "⏳ audit r4 NOT DONE 5 · cloud-complete; owed: the Mac measurement day itself",
+     "verified": "node",
+     "pr": 1144,
+     "notes": "F13a 17.11 (audit r4): fixed in F13a #1204: its dod now fails with 0 measured reports (`--measured`), pending merge."
     },
     {
      "id": "W13.W18",
@@ -37054,7 +37415,18 @@
      ],
      "research": [
       "w13/research.md §W"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "NOT DONE",
+      "score": 5,
+      "who": "owner",
+      "missing": "Owed: the owner's held-out writing set (2 Hebrew-speaking annotators)."
+     },
+     "status": "⏳ audit r4 NOT DONE 5 · cloud-complete; owed: the owner's held-out writing set (2 Hebrew-speaking annotators)",
+     "verified": "built",
+     "pr": 1144
     },
     {
      "id": "W13.G1",
@@ -37089,7 +37461,18 @@
      ],
      "research": [
       "w13/research.md §G"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 68,
+      "who": "mac",
+      "missing": "Owed (F13b and the Mac): the GPU layout separates clusters more loosely than the CPU one; `npm run budget` needs a dist build."
+     },
+     "status": "⏳ audit r4 PARTIAL 68 · partial: (F13b and the Mac): the GPU layout separates clusters more loosely than the CPU one; `npm run budget` needs a dist build",
+     "verified": "built",
+     "pr": 1164
     },
     {
      "id": "W13.G2",
@@ -37121,7 +37504,18 @@
      ],
      "research": [
       "w13/research.md §G"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 78,
+      "who": "cloud-code",
+      "missing": "Owed (F13b): 3D and SVG labels through prepareLabel; signed and phone numbers in isolateRuns."
+     },
+     "status": "⏳ audit r4 PARTIAL 78 · partial: (F13b): 3D and SVG labels through prepareLabel; signed and phone numbers in isolateRuns",
+     "verified": "node",
+     "pr": 1165
     },
     {
      "id": "W13.G3",
@@ -37156,7 +37550,18 @@
      ],
      "research": [
       "w13/research.md §G"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 50,
+      "who": "mac",
+      "missing": "Owed (F13b): map tiles opt-in and local first (privacy), labels clipped at tile edges, the .pmtiles bidi glitch; the e2e on the Mac."
+     },
+     "status": "⏳ audit r4 PARTIAL 50 · partial: (F13b): map tiles opt-in and local first (privacy), labels clipped at tile edges, the .pmtiles bidi glitch; the e2e on the Mac",
+     "verified": "node",
+     "pr": 1166
     },
     {
      "id": "W13.G4",
@@ -37188,7 +37593,34 @@
      ],
      "research": [
       "w13/research.md §G"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "DONE",
+      "score": 90,
+      "who": "cloud-code",
+      "missing": "Nothing material (Chromium proof in audit4/A3: g4-en/he.png, keyboard and axe)."
+     },
+     "status": "✅ #1167",
+     "verified": "browser",
+     "pr": 1167,
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 1167,
+      "sha": "53dd679c5e",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/pathFinder.test.ts",
+        "pass": 13,
+        "total": 13,
+        "ranOn": "verify/train-7 53dd679c5e (audit r4, offline shim v4)"
+       }
+      ],
+      "browser": "Chromium with the app's compiled CSS, he + en, keyboard path and axe clean (audit4/A3)",
+      "audit": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W13.G5",
@@ -37220,7 +37652,18 @@
      ],
      "research": [
       "w13/research.md §G"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 80,
+      "who": "cloud-code",
+      "missing": "Owed (F13b): the task Gantt reachable in the UI, with time zoom."
+     },
+     "status": "⏳ audit r4 PARTIAL 80 · partial: (F13b): the task Gantt reachable in the UI, with time zoom",
+     "verified": "node",
+     "pr": 1168
     },
     {
      "id": "W13.G6",
@@ -37252,7 +37695,18 @@
      ],
      "research": [
       "w13/research.md §G"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 82,
+      "who": "cloud-code",
+      "missing": "Owed (F13b): localised dates and numbers, named inverse relations."
+     },
+     "status": "⏳ audit r4 PARTIAL 82 · partial: (F13b): localised dates and numbers, named inverse relations",
+     "verified": "node",
+     "pr": 1169
     },
     {
      "id": "W13.G7",
@@ -37284,7 +37738,18 @@
      ],
      "research": [
       "w13/research.md §G"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 62,
+      "who": "cloud-code",
+      "missing": "Owed (F13b): GEDCOM round trip — surname slashes, CHIL-only families, PEDI, no \"P9\", a newline in a GEXF attribute; review 13 M5 quadratic import."
+     },
+     "status": "⏳ audit r4 PARTIAL 62 · partial: (F13b): GEDCOM round trip — surname slashes, CHIL-only families, PEDI, no \"P9\", a newline in a GEXF attribute; review 13 M5 quadratic import",
+     "verified": "node",
+     "pr": 1170
     },
     {
      "id": "W13.G8",
@@ -37316,7 +37781,18 @@
      ],
      "research": [
       "w13/research.md §G"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 75,
+      "who": "cloud-code",
+      "missing": "Owed (F13b): embeddings through the vectors hook with TF-IDF as fallback; ClusterGaps arrow and focus; 10k notes in a worker (review 13 L4)."
+     },
+     "status": "⏳ audit r4 PARTIAL 75 · partial: (F13b): embeddings through the vectors hook with TF-IDF as fallback; ClusterGaps arrow and focus; 10k notes in a worker (review 13 L4)",
+     "verified": "node",
+     "pr": 1163
     },
     {
      "id": "W13.G9",
@@ -37348,7 +37824,34 @@
      ],
      "research": [
       "w13/research.md §G"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "DONE",
+      "score": 88,
+      "who": "cloud-code",
+      "missing": "Nothing material (Chromium proof in audit4/A3: g9-en/he.png, keyboard and axe)."
+     },
+     "status": "✅ #1150",
+     "verified": "browser",
+     "pr": 1150,
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 1150,
+      "sha": "53dd679c5e",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/graphPerspectives.test.ts",
+        "pass": 8,
+        "total": 8,
+        "ranOn": "verify/train-7 53dd679c5e (audit r4, offline shim v4)"
+       }
+      ],
+      "browser": "Chromium with the app's compiled CSS, he + en, keyboard path and axe clean (audit4/A3)",
+      "audit": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "at": "2026-11-17"
+     }
     },
     {
      "id": "W13.G10",
@@ -37379,7 +37882,18 @@
      ],
      "research": [
       "w13/research.md §G"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 62,
+      "who": "mac",
+      "missing": "Owed: the 3D view's labels (F13b) and its run on a real GPU (Mac)."
+     },
+     "status": "⏳ audit r4 PARTIAL 62 · partial: the 3D view's labels (F13b) and its run on a real GPU (Mac)",
+     "verified": "node",
+     "pr": 1159
     },
     {
      "id": "W13.G11",
@@ -37414,7 +37928,18 @@
      ],
      "research": [
       "w13/research.md §G"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 85,
+      "who": "mac",
+      "missing": "Owed: `test:sr` needs @playwright/test (Mac)."
+     },
+     "status": "⏳ audit r4 PARTIAL 85 · cloud-complete; owed: `test:sr` needs @playwright/test (Mac)",
+     "verified": "built",
+     "pr": 1134
     },
     {
      "id": "W13.G12",
@@ -37445,7 +37970,18 @@
      ],
      "research": [
       "w13/research.md §G"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 60,
+      "who": "owner",
+      "missing": "Owed (F13b): the export menu as a menu button; the owner's check of exported images."
+     },
+     "status": "⏳ audit r4 PARTIAL 60 · partial: (F13b): the export menu as a menu button; the owner's check of exported images",
+     "verified": "node",
+     "pr": 1136
     },
     {
      "id": "W13.G13",
@@ -37478,7 +38014,18 @@
      ],
      "research": [
       "w13/research.md §G"
-     ]
+     ],
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
+      "verdict": "PARTIAL",
+      "score": 40,
+      "who": "mac",
+      "missing": "Owed: the perf run on the Mac (github-slugger and idb-keyval are not in the cloud overlays)."
+     },
+     "status": "⏳ audit r4 PARTIAL 40 · cloud-complete; owed: the perf run on the Mac (github-slugger and idb-keyval are not in the cloud overlays)",
+     "verified": "built",
+     "pr": 1171
     }
    ]
   }
