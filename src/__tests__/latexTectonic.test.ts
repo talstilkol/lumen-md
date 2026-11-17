@@ -108,7 +108,9 @@ describe("the Tauri side", () => {
     const lib = readFileSync(join(ROOT, "src-tauri/src/lib.rs"), "utf8");
     expect(lib).toMatch(/^mod tectonic;$/m);
     expect(lib).toMatch(/latex_status,\s*latex_pdf,/);
-    expect(lib).toMatch(/tectonic::compile\(&bin, &tex, &files, &work, offline, tectonic::COMPILE_TIMEOUT\)/);
+    // D1 §5: the call picks its timeout from the warm marker (10 min for the first online download, 120 s after).
+    expect(lib).toMatch(/tectonic::compile_with_marker\(&bin, &tex, &files, &work, offline, marker\.as_deref\(\)\)/);
+    expect(lib).toMatch(/app_cache_dir\(\)\.ok\(\)\.map\(\|d\| d\.join\(tectonic::WARM_MARKER\)\)/);
     // A page that does not say "online" gets the cache only (R8-M1).
     expect(lib).toMatch(/offline\.unwrap_or\(true\)/);
     const core = readFileSync(join(ROOT, "src-tauri/src/tectonic.rs"), "utf8");
@@ -116,5 +118,8 @@ describe("the Tauri side", () => {
     expect(core).toMatch(/"--only-cached"\.into\(\)/);
     expect(core).toMatch(/b\.mode\(0o700\)/);
     expect(core).not.toMatch(/shell-escape/);
+    // compile_with_marker goes through compile() with the timeout compile_timeout() picks: never an unbounded wait.
+    expect(core).toMatch(/let out = compile\(bin, tex, files, work, offline, compile_timeout\(offline, warm\)\);/);
+    expect(core).toMatch(/if offline \|\| warm \{\s*COMPILE_TIMEOUT\s*\} else \{\s*FIRST_DOWNLOAD_TIMEOUT\s*\}/);
   });
 });
