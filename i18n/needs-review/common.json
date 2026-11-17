@@ -11511,5 +11511,104 @@
     "ru": "jyp9ab",
     "zh-CN": "jyp9ab",
     "fa": "jyp9ab"
+  },
+  "fileViewer.nb.blocked": {
+    "ar": "ja8m4j",
+    "de": "ja8m4j",
+    "fa": "ja8m4j",
+    "fr": "ja8m4j",
+    "ja": "ja8m4j",
+    "ru": "ja8m4j",
+    "zh-CN": "ja8m4j"
+  },
+  "fileViewer.geo.kind.waypoint": {
+    "ar": "1gk617e",
+    "de": "1gk617e",
+    "fa": "1gk617e",
+    "fr": "1gk617e",
+    "ja": "1gk617e",
+    "ru": "1gk617e",
+    "zh-CN": "1gk617e"
+  },
+  "fileViewer.geo.kind.track": {
+    "ar": "95ckws",
+    "de": "95ckws",
+    "fa": "95ckws",
+    "fr": "95ckws",
+    "ja": "95ckws",
+    "ru": "95ckws",
+    "zh-CN": "95ckws"
+  },
+  "fileViewer.geo.kind.route": {
+    "ar": "1nvxkfy",
+    "de": "1nvxkfy",
+    "fa": "1nvxkfy",
+    "fr": "1nvxkfy",
+    "ja": "1nvxkfy",
+    "ru": "1nvxkfy",
+    "zh-CN": "1nvxkfy"
+  },
+  "fileViewer.geo.kind.Point": {
+    "ar": "1t3ya7l",
+    "de": "1t3ya7l",
+    "fa": "1t3ya7l",
+    "fr": "1t3ya7l",
+    "ja": "1t3ya7l",
+    "ru": "1t3ya7l",
+    "zh-CN": "1t3ya7l"
+  },
+  "fileViewer.geo.kind.LineString": {
+    "ar": "166mv5z",
+    "de": "166mv5z",
+    "fa": "166mv5z",
+    "fr": "166mv5z",
+    "ja": "166mv5z",
+    "ru": "166mv5z",
+    "zh-CN": "166mv5z"
+  },
+  "fileViewer.geo.kind.Polygon": {
+    "ar": "88rn8k",
+    "de": "88rn8k",
+    "fa": "88rn8k",
+    "fr": "88rn8k",
+    "ja": "88rn8k",
+    "ru": "88rn8k",
+    "zh-CN": "88rn8k"
+  },
+  "fileViewer.geo.kind.MultiPoint": {
+    "ar": "1b5hejq",
+    "de": "1b5hejq",
+    "fa": "1b5hejq",
+    "fr": "1b5hejq",
+    "ja": "1b5hejq",
+    "ru": "1b5hejq",
+    "zh-CN": "1b5hejq"
+  },
+  "fileViewer.geo.kind.MultiLineString": {
+    "ar": "12bghr0",
+    "de": "12bghr0",
+    "fa": "12bghr0",
+    "fr": "12bghr0",
+    "ja": "12bghr0",
+    "ru": "12bghr0",
+    "zh-CN": "12bghr0"
+  },
+  "fileViewer.geo.kind.MultiPolygon": {
+    "ar": "1p40lrp",
+    "de": "1p40lrp",
+    "fa": "1p40lrp",
+    "fr": "1p40lrp",
+    "ja": "1p40lrp",
+    "ru": "1p40lrp",
+    "zh-CN": "1p40lrp"
+  },
+  "fileViewer.data.scrollLabel": {
+    "ar": "9dicwg",
+    "de": "9dicwg",
+    "fa": "9dicwg",
+    "fr": "9dicwg",
+    "ja": "9dicwg",
+    "ru": "9dicwg",
+    "zh-CN": "9dicwg"
   }
 }

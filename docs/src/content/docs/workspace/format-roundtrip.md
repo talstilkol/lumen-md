@@ -14,7 +14,8 @@ a test (`src/__tests__/formatRoundTrip.test.ts`), not estimated.
 
 - **Corpus:** the 652 examples of the [CommonMark 0.31.2 spec](https://spec.commonmark.org/0.31.2/)
   (public, CC-BY-SA 4.0), grouped by the spec section that names the element,
-  and 50 Hebrew sections of this project's own documentation.
+  and 50 Hebrew sections of this project's own documentation, frozen in a
+  fixture so that editing the docs never moves the measurement.
 - **Same means:** the Markdown before and after parse to the same CommonMark
   tree (remark-parse), ignoring positions and runs of spaces inside text.
 - **Gate:** a drop of more than one point for any format or element fails the

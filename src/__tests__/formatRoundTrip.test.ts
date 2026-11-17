@@ -1,7 +1,9 @@
 /**
  * W12.F1: Markdown → X → Markdown for Org, AsciiDoc, LaTeX, OPML, RST and
  * ipynb, measured on the 652 CommonMark 0.31.2 spec examples (public) and on
- * 50 sections of the repository's own Hebrew docs (Markdown files under docs/ that are mostly Hebrew; real project text).
+ * 50 sections of the repository's own Hebrew docs, frozen in
+ * fixtures/format-roundtrip/hebrew-notes.json (scripts/format-roundtrip-corpus.mjs)
+ * so that a docs edit cannot move the gate: it measures converters only.
  *
  * The scores are measurements, not targets: the gate is that no format and no
  * element type drops more than one point below the committed baseline
@@ -9,9 +11,10 @@
  * the baseline upward in the same PR. Report: test-results/format-roundtrip/.
  */
 import { describe, expect, it } from "vitest";
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { markdownToOpml } from "../storage/exportFormats";
+// @ts-expect-error -- plain .mjs script without type declarations
+import { validate as validateCorpus } from "../../scripts/format-roundtrip-corpus.mjs";
 import { opmlToMarkdown } from "../storage/markupFormats";
 import {
   HEBREW_SECTION,
@@ -22,7 +25,6 @@ import {
   regressions,
   reportMarkdown,
   roundTrip,
-  splitAtHeadings,
   survives,
   type CorpusItem,
   type FormatReport,
@@ -33,22 +35,17 @@ const baseline = JSON.parse(readFileSync("src/__tests__/fixtures/format-roundtri
   formats: Record<string, { overall: number; bySection: Record<string, number> }>;
 };
 
-/** Every Markdown file under docs/ (recursively, sorted), the project's own docs. */
-function docsFiles(): string[] {
-  return (readdirSync("docs", { recursive: true }) as string[])
-    .filter((n) => n.endsWith(".md"))
-    .sort()
-    .map((n) => join("docs", n));
-}
-
 const isHebrew = (s: string) => (s.match(/[֐-׿]/g)?.length ?? 0) > (s.match(/[A-Za-z]/g)?.length ?? 0);
 
+/** The frozen Hebrew notes: what the gate measures does not change when docs/ does. */
+const frozen = JSON.parse(readFileSync("src/__tests__/fixtures/format-roundtrip/hebrew-notes.json", "utf8")) as {
+  licence: string;
+  frozenAt: string;
+  notes: { file: string; markdown: string }[];
+};
+
 const examples = extractSpecExamples(spec);
-const hebrewNotes: CorpusItem[] = docsFiles()
-  .flatMap((f) => splitAtHeadings(readFileSync(f, "utf8")))
-  .filter((s) => isHebrew(s) && s.length > 80)
-  .slice(0, 50)
-  .map((markdown) => ({ section: HEBREW_SECTION, markdown }));
+const hebrewNotes: CorpusItem[] = frozen.notes.map((n) => ({ section: HEBREW_SECTION, markdown: n.markdown }));
 const corpus: CorpusItem[] = [
   ...examples.map((e) => ({ section: e.section, markdown: e.markdown, number: e.number })),
   ...hebrewNotes,
@@ -63,9 +60,20 @@ describe("spec example extraction", () => {
     expect(new Set(examples.map((e) => e.section)).size).toBeGreaterThan(20);
   });
 
-  it("takes 50 Hebrew notes from the repo's Hebrew docs", () => {
+  it("takes 50 Hebrew notes from the repo's Hebrew docs, frozen with their source files", () => {
     expect(hebrewNotes).toHaveLength(50);
     for (const n of hebrewNotes) expect(isHebrew(n.markdown)).toBe(true);
+    for (const n of frozen.notes) expect(n.file).toMatch(/^docs\/.+\.md$/);
+    expect(new Set(frozen.notes.map((n) => n.markdown)).size).toBe(50);
+    expect(frozen.licence).toMatch(/MIT/);
+  });
+
+  it("the Hebrew corpus does not follow docs/: an edited docs page leaves the measured notes as they were", () => {
+    // The fixture passes the same check its script runs (50 notes, each over 80 characters, mostly Hebrew, from docs/, no duplicates).
+    expect(validateCorpus(frozen)).toEqual([]);
+    expect(validateCorpus({ ...frozen, notes: frozen.notes.slice(1) })).toContain("49 notes, want 50");
+    // Nothing here reads docs/ at run time.
+    expect(readFileSync(__filename, "utf8")).not.toMatch(/readdirSync\(\s*"docs"/);
   });
 });
 
@@ -167,7 +175,7 @@ describe("round trip per format against the baseline (fails on a drop of more th
     mkdirSync("test-results/format-roundtrip", { recursive: true });
     const sources =
       "Sources: CommonMark spec 0.31.2 examples (652, https://spec.commonmark.org/0.31.2/, CC-BY-SA 4.0) " +
-      `and ${hebrewNotes.length} Hebrew sections of this repository's docs/. Equality is on the remark-parse tree.`;
+      `and ${hebrewNotes.length} Hebrew sections of this repository's docs/ (MIT), frozen at ${frozen.frozenAt}. Equality is on the remark-parse tree.`;
     writeFileSync("test-results/format-roundtrip/report.md", reportMarkdown(Object.values(reports), sources));
     writeFileSync("test-results/format-roundtrip/report.json", JSON.stringify(reports, null, 1));
     if (process.env.FORMAT_RT_BASELINE) {
