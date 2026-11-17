@@ -1,0 +1,31 @@
+/* W13.G6: the entity infobox — Wikipedia's card. On the right in both
+   directions (in Hebrew that is the start side, where the reader begins). */
+.lumen-infobox {
+  float: right;
+  clear: right;
+  inline-size: min(300px, 100%);
+  margin-block: 0 12px;
+  margin-inline: 0;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  background: hsl(var(--bg-subtle, var(--bg)));
+  font-size: 13px;
+  line-height: 1.45;
+  overflow: hidden;
+}
+.lumen-infobox[dir="ltr"] { margin-left: 16px; }
+.lumen-infobox[dir="rtl"] { margin-left: 16px; }
+.lumen-infobox.is-hover { float: none; inline-size: 100%; margin: 0; border: 0; background: none; }
+.lumen-infobox table { inline-size: 100%; border-collapse: collapse; }
+.lumen-infobox caption { padding: 8px 10px 2px; font-size: 15px; font-weight: 700; text-align: center; }
+.lumen-infobox .lumen-infobox-type { padding: 0 10px 6px; text-align: center; color: hsl(var(--fg-muted)); font-size: 12px; }
+.lumen-infobox figure { margin: 0; padding: 4px 10px 8px; text-align: center; }
+.lumen-infobox img { max-inline-size: 100%; max-block-size: 220px; border-radius: 4px; }
+.lumen-infobox th, .lumen-infobox td { padding: 4px 10px; vertical-align: top; text-align: start; border-block-start: 1px solid hsl(var(--border)); }
+.lumen-infobox th { inline-size: 38%; font-weight: 600; color: hsl(var(--fg-muted)); }
+.lumen-infobox td ul { margin: 0; padding: 0; list-style: none; }
+.lumen-infobox .lumen-infobox-section { padding: 6px 10px; font-weight: 700; text-align: center; background: hsl(var(--border) / 0.35); }
+.lumen-infobox .lumen-infobox-key li { padding: 2px 0; }
+.lumen-infobox .lumen-infobox-rel { color: hsl(var(--fg-muted)); font-size: 12px; }
+.lumen-infobox .lumen-infobox-foot { padding: 6px 10px; font-size: 11px; color: hsl(var(--fg-muted)); border-block-start: 1px solid hsl(var(--border)); }
+@media (max-width: 560px) { .lumen-infobox { float: none; inline-size: 100%; margin-left: 0; } }

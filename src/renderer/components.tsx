@@ -36,6 +36,8 @@ const PluginBlockView = lazy(() => import("../plugins/runtime/PluginBlock"));
 const TasksBlock = lazy(() => import("../plugins/TasksBlock"));
 const MediaEmbedBlock = lazy(() => import("../media/MediaEmbed"));
 const EmbedEditor = lazy(() => import("../editor/EmbedEditor"));
+// W13.G6: `![[Entity]]` as an infobox card.
+const EntityInfoboxEmbed = lazy(() => import("../ui/entity/EntityInfoboxBlock"));
 const DataBlock = lazy(() => import("../plugins/DataBlock"));
 const DatabaseBlock = lazy(() => import("../views/DatabaseBlock"));
 const BasesBlock = lazy(() => import("../views/bases/BasesBlock"));
@@ -638,6 +640,15 @@ function LumenEmbedFile(props: { path?: string; name?: string; kind?: string; ch
   );
 }
 
+/** `![[Entity]]` (./embeds, W13.G6): the entity's infobox, loaded on demand. */
+function LumenEntityInfobox(props: { path?: string; text?: string }) {
+  return (
+    <Suspense fallback={null}>
+      <EntityInfoboxEmbed path={props.path} text={props.text} />
+    </Suspense>
+  );
+}
+
 function normalize(src: string): string {
   return src.replace(/^\.\//, "").replace(/^\//, "");
 }
@@ -746,6 +757,7 @@ export const components: Record<string, LumenBlock> = {
   // `![[file.pdf]]` card.
   "lumen-embed-file": LumenEmbedFile as unknown as LumenBlock,
   "lumen-embed-edit": LumenEmbedEdit as unknown as LumenBlock,
+  "lumen-entity-infobox": LumenEntityInfobox as unknown as LumenBlock,
   // GFM task-list checkboxes get an aria-label so they aren't announced bare.
   input: LumenInput as unknown as LumenBlock,
 };

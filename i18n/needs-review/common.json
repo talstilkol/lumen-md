@@ -1092,6 +1092,186 @@
     "ru": "bosydm",
     "zh-CN": "bosydm"
   },
+  "entityGraph.infobox.author": {
+    "ar": "15hxgmu",
+    "de": "15hxgmu",
+    "fr": "15hxgmu",
+    "ja": "15hxgmu",
+    "ru": "15hxgmu",
+    "zh-CN": "15hxgmu",
+    "he": "15hxgmu"
+  },
+  "entityGraph.infobox.born": {
+    "ar": "c1jpr2",
+    "de": "c1jpr2",
+    "fr": "c1jpr2",
+    "ja": "c1jpr2",
+    "ru": "c1jpr2",
+    "zh-CN": "c1jpr2",
+    "he": "c1jpr2"
+  },
+  "entityGraph.infobox.country": {
+    "ar": "1diicx",
+    "de": "1diicx",
+    "fr": "1diicx",
+    "ja": "1diicx",
+    "ru": "1diicx",
+    "zh-CN": "1diicx",
+    "he": "1diicx"
+  },
+  "entityGraph.infobox.date": {
+    "ar": "ggjuyh",
+    "de": "ggjuyh",
+    "fr": "ggjuyh",
+    "ja": "ggjuyh",
+    "ru": "ggjuyh",
+    "zh-CN": "ggjuyh",
+    "he": "ggjuyh"
+  },
+  "entityGraph.infobox.died": {
+    "ar": "1hpc1e7",
+    "de": "1hpc1e7",
+    "fr": "1hpc1e7",
+    "ja": "1hpc1e7",
+    "ru": "1hpc1e7",
+    "zh-CN": "1hpc1e7",
+    "he": "1hpc1e7"
+  },
+  "entityGraph.infobox.empty": {
+    "ar": "15t5urv",
+    "de": "15t5urv",
+    "fr": "15t5urv",
+    "ja": "15t5urv",
+    "ru": "15t5urv",
+    "zh-CN": "15t5urv",
+    "he": "15t5urv"
+  },
+  "entityGraph.infobox.enacted": {
+    "ar": "11868tj",
+    "de": "11868tj",
+    "fr": "11868tj",
+    "ja": "11868tj",
+    "ru": "11868tj",
+    "zh-CN": "11868tj",
+    "he": "11868tj"
+  },
+  "entityGraph.infobox.end": {
+    "ar": "1tj0xqz",
+    "de": "1tj0xqz",
+    "fr": "1tj0xqz",
+    "ja": "1tj0xqz",
+    "ru": "1tj0xqz",
+    "zh-CN": "1tj0xqz",
+    "he": "1tj0xqz"
+  },
+  "entityGraph.infobox.field": {
+    "ar": "4d0paf",
+    "de": "4d0paf",
+    "fr": "4d0paf",
+    "ja": "4d0paf",
+    "ru": "4d0paf",
+    "zh-CN": "4d0paf",
+    "he": "4d0paf"
+  },
+  "entityGraph.infobox.founded": {
+    "ar": "1laj472",
+    "de": "1laj472",
+    "fr": "1laj472",
+    "ja": "1laj472",
+    "ru": "1laj472",
+    "zh-CN": "1laj472",
+    "he": "1laj472"
+  },
+  "entityGraph.infobox.industry": {
+    "ar": "4d0paf",
+    "de": "4d0paf",
+    "fr": "4d0paf",
+    "ja": "4d0paf",
+    "ru": "4d0paf",
+    "zh-CN": "4d0paf",
+    "he": "4d0paf"
+  },
+  "entityGraph.infobox.inverse": {
+    "ar": "1wrekb8",
+    "de": "1wrekb8",
+    "fr": "1wrekb8",
+    "ja": "1wrekb8",
+    "ru": "1wrekb8",
+    "zh-CN": "1wrekb8",
+    "he": "1wrekb8"
+  },
+  "entityGraph.infobox.key": {
+    "ar": "rtk3ex",
+    "de": "rtk3ex",
+    "fr": "rtk3ex",
+    "ja": "rtk3ex",
+    "ru": "rtk3ex",
+    "zh-CN": "rtk3ex",
+    "he": "rtk3ex"
+  },
+  "entityGraph.infobox.location": {
+    "ar": "pghiva",
+    "de": "pghiva",
+    "fr": "pghiva",
+    "ja": "pghiva",
+    "ru": "pghiva",
+    "zh-CN": "pghiva",
+    "he": "pghiva"
+  },
+  "entityGraph.infobox.occupation": {
+    "ar": "dlbn6i",
+    "de": "dlbn6i",
+    "fr": "dlbn6i",
+    "ja": "dlbn6i",
+    "ru": "dlbn6i",
+    "zh-CN": "dlbn6i",
+    "he": "dlbn6i"
+  },
+  "entityGraph.infobox.picture": {
+    "ar": "2u9bfj",
+    "de": "2u9bfj",
+    "fr": "2u9bfj",
+    "ja": "2u9bfj",
+    "ru": "2u9bfj",
+    "zh-CN": "2u9bfj",
+    "he": "2u9bfj"
+  },
+  "entityGraph.infobox.population": {
+    "ar": "1s4ispe",
+    "de": "1s4ispe",
+    "fr": "1s4ispe",
+    "ja": "1s4ispe",
+    "ru": "1s4ispe",
+    "zh-CN": "1s4ispe",
+    "he": "1s4ispe"
+  },
+  "entityGraph.infobox.status": {
+    "ar": "3pd73",
+    "de": "3pd73",
+    "fr": "3pd73",
+    "ja": "3pd73",
+    "ru": "3pd73",
+    "zh-CN": "3pd73",
+    "he": "3pd73"
+  },
+  "entityGraph.infobox.times": {
+    "ar": "17scjz9",
+    "de": "17scjz9",
+    "fr": "17scjz9",
+    "ja": "17scjz9",
+    "ru": "17scjz9",
+    "zh-CN": "17scjz9",
+    "he": "17scjz9"
+  },
+  "entityGraph.infobox.website": {
+    "ar": "dc7alm",
+    "de": "dc7alm",
+    "fr": "dc7alm",
+    "ja": "dc7alm",
+    "ru": "dc7alm",
+    "zh-CN": "dc7alm",
+    "he": "dc7alm"
+  },
   "entityGraph.paths.anyLength": {
     "ar": "13li50t",
     "de": "13li50t",
