@@ -49,13 +49,25 @@ export async function offerScreenshotNote(view: EditorView, placed: PlacedImage[
       run: () =>
         void import("../ai/ScreenshotNoteDialog").then(async (m) => {
           const md = await m.previewScreenshotNote(p.file, lang);
-          if (!md) return;
-          const target = `](${p.url}`;
-          const at = view.state.doc.toString().indexOf(target);
-          const end = at < 0 ? view.state.selection.main.head : view.state.doc.lineAt(at).to;
-          view.dispatch({ changes: { from: end, insert: `\n\n${md}\n` }, userEvent: "input" });
+          if (md) await insertScreenshotNote(view, md, p.url);
         }),
     },
   });
 }
 
+
+/**
+ * The approved text of a screenshot, into the note: after the line of the
+ * image at `imageUrl` (the paste offer), else at the cursor (the palette
+ * command). The text was read by a model (a local vision model, or on-device
+ * OCR), so the insertion carries the AI-text tag (5.9, W10.E37) even after
+ * the user's edits in the preview; the cursor lands after it.
+ */
+export async function insertScreenshotNote(view: EditorView, md: string, imageUrl?: string): Promise<void> {
+  const { aiAuthored } = await import("./aiAuthorship");
+  const at = imageUrl ? view.state.doc.toString().indexOf(`](${imageUrl}`) : -1;
+  const end = at < 0 ? view.state.selection.main.head : view.state.doc.lineAt(at).to;
+  const insert = imageUrl ? `\n\n${md}\n` : `\n${md}\n`;
+  view.dispatch({ changes: { from: end, insert }, userEvent: "input", annotations: aiAuthored.of(true), selection: { anchor: end + insert.length }, scrollIntoView: true });
+  view.focus();
+}

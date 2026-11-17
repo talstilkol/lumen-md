@@ -250,7 +250,11 @@ export function buildScreenshotCommands(ctx: CommandContext): Command[] {
           if (!image) return;
           const { getLocale } = await import("../../i18n");
           const md = await m.previewScreenshotNote(image, getLocale());
-          if (md) ctx.insertSnippet(`\n${md}\n`);
+          if (!md) return;
+          // The source editor: inserted at the cursor, tagged as AI text. The WYSIWYG editor has no CodeMirror view.
+          const view = ctx.getEditorView?.();
+          if (view) await (await import("../../editor/pastedImageText")).insertScreenshotNote(view, md);
+          else ctx.insertSnippet(`\n${md}\n`);
         }),
     },
   ];

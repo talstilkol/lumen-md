@@ -74,3 +74,31 @@ describe("reached from the app", () => {
     expect(await clipboardImage({ read: async () => Promise.reject(new DOMException("denied", "NotAllowedError")) })).toBeNull();
   });
 });
+
+describe("the approved text in the note (W10.C22, 5.9)", () => {
+  it("goes after the pasted image's line, tagged as AI text, with the cursor after it", async () => {
+    const { aiSpansField } = await import("../editor/aiAuthorship");
+    const { insertScreenshotNote } = await import("../editor/pastedImageText");
+    const doc = "before\n![shot](assets/shot.png)\nafter";
+    const view = new EditorView({ state: EditorState.create({ doc, extensions: [aiSpansField] }), parent: document.body });
+    await insertScreenshotNote(view, "# פגישה\n\n- לשלוח תקציב", "assets/shot.png");
+    const out = view.state.doc.toString();
+    expect(out).toBe("before\n![shot](assets/shot.png)\n\n# פגישה\n\n- לשלוח תקציב\n\nafter");
+    const spans = view.state.field(aiSpansField).map(([a, b]) => out.slice(a, b)).join("");
+    expect(spans).toContain("# פגישה");
+    expect(spans).toContain("- לשלוח תקציב");
+    expect(spans).not.toContain("before");
+    expect(view.state.selection.main.head).toBe(out.indexOf("\nafter"));
+    view.destroy();
+  });
+
+  it("from the palette: at the cursor, tagged too", async () => {
+    const { aiSpansField } = await import("../editor/aiAuthorship");
+    const { insertScreenshotNote } = await import("../editor/pastedImageText");
+    const view = new EditorView({ state: EditorState.create({ doc: "ab", extensions: [aiSpansField], selection: { anchor: 1 } }), parent: document.body });
+    await insertScreenshotNote(view, "text");
+    expect(view.state.doc.toString()).toBe("a\ntext\nb");
+    expect(view.state.field(aiSpansField).map(([x, y]) => view.state.doc.toString().slice(x, y)).join("")).toContain("text");
+    view.destroy();
+  });
+});
