@@ -15309,6 +15309,311 @@
       ]
     },
     {
+      "key": "nativeMenu.app",
+      "en": "Lumen",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.app.checkUpdates",
+      "en": "Check for Updates…",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.edit.find",
+      "en": "Find and Replace",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.edit.hebrewTypography",
+      "en": "Hebrew Typography",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.edit.toggleDirection",
+      "en": "Switch Paragraph Direction",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.edit.workspaceSearch",
+      "en": "Search the Vault",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.file.exportDocx",
+      "en": "Export as Word…",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.file.exportHtml",
+      "en": "Export as HTML…",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.file.exportPdf",
+      "en": "Export as PDF…",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.file.insertText",
+      "en": "Insert Text…",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.file.new",
+      "en": "New Note",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.file.open",
+      "en": "Open…",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.file.print",
+      "en": "Print…",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.file.quickCapture",
+      "en": "Quick Capture…",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.file.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.file.saveAs",
+      "en": "Save As…",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.file.toggleWorkspace",
+      "en": "Show or Hide the Workspace",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.help.commandPalette",
+      "en": "Command Palette…",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.help.diagnostics",
+      "en": "Diagnostics…",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.help.feedback",
+      "en": "Send Feedback…",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.help.github",
+      "en": "Lumen on GitHub",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.help.open",
+      "en": "Lumen Help",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.help.shortcuts",
+      "en": "Keyboard Shortcuts",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.help.tour",
+      "en": "Guided Tour",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.help.whatsNew",
+      "en": "What's New",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.note.today",
+      "en": "Today's Note",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.view.backlinks",
+      "en": "Backlinks",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.view.focusMode",
+      "en": "Focus Mode",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.view.graphView",
+      "en": "Graph",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.view.preview",
+      "en": "Preview",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.view.reading",
+      "en": "Reading Mode",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.view.readingOptions",
+      "en": "Reading Options…",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.view.sideBySide",
+      "en": "Side by Side",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.view.source",
+      "en": "Source",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.view.split",
+      "en": "Split",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.view.toggleOutline",
+      "en": "Outline",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.view.toggleTheme",
+      "en": "Light or Dark Theme",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.view.typewriter",
+      "en": "Typewriter Scrolling",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.view.wysiwyg",
+      "en": "Rich Text",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.cmd.window.new",
+      "en": "New Window",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.edit",
+      "en": "Edit",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.file",
+      "en": "File",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.help",
+      "en": "Help",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.about",
+      "en": "About Lumen",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.closeWindow",
+      "en": "Close Window",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.copy",
+      "en": "Copy",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.cut",
+      "en": "Cut",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.fullscreen",
+      "en": "Enter Full Screen",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.hide",
+      "en": "Hide Lumen",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.hideOthers",
+      "en": "Hide Others",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.minimize",
+      "en": "Minimize",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.paste",
+      "en": "Paste",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.quit",
+      "en": "Quit Lumen",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.redo",
+      "en": "Redo",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.selectAll",
+      "en": "Select All",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.services",
+      "en": "Services",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.showAll",
+      "en": "Show All",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.undo",
+      "en": "Undo",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.role.zoom",
+      "en": "Zoom",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.view",
+      "en": "View",
+      "vars": []
+    },
+    {
+      "key": "nativeMenu.window",
+      "en": "Window",
+      "vars": []
+    },
+    {
       "key": "nikud.alt.choose",
       "en": "Use “{word}”",
       "vars": [
