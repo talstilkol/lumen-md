@@ -82,6 +82,8 @@
     --fg-subtle: 220 9% 32%;
     /* WCAG AA (plan 10.1.3): ≥ 4.5:1 on bg, bg-muted and bg-inset. */
     --fg-muted: 220 8% 42%;
+    /* F16: the lightness of a callout's title (its hue and saturation are the callout's): ≥ 4.5:1 on bg and on the callout's 8% tint, for every type. */
+    --callout-ink-l: 27%;
     --border: 220 13% 88%;
     --border-strong: 220 13% 78%;
     /* ≥ 4.5:1 as text on the backgrounds and on its own 10% tint; white text on it ≥ 4.5:1. */
@@ -154,6 +156,7 @@
     --fg: 220 15% 92%;
     --fg-subtle: 220 10% 75%;
     --fg-muted: 220 8% 58%;
+    --callout-ink-l: 72%;
     --border: 224 14% 18%;
     --border-strong: 224 14% 26%;
     /* ≥ 4.5:1 as text on the dark backgrounds and on its own 10% tint. */
@@ -705,6 +708,8 @@
   /* W1.3 — Obsidian callouts (preview; WYSIWYG marks its quotes the same way) */
   .callout {
     --co: 220 90% 60%;
+    /* The title's colour: the callout's hue at --callout-ink-l (the accent --co is for the border and tint only). */
+    --co-ink: 220 90% var(--callout-ink-l, 27%);
     margin: 1.25rem 0;
     padding: 0.75rem 1rem;
     border-inline-start: 4px solid hsl(var(--co));
@@ -714,18 +719,18 @@
   }
   .callout-title {
     font-weight: 600;
-    color: hsl(var(--co));
+    color: hsl(var(--co-ink));
   }
   summary.callout-title { cursor: pointer; }
   .callout-content > :first-child { margin-top: 0.5rem; }
   .callout-content > :last-child { margin-bottom: 0; }
-  .callout-abstract, .callout-info, .callout-todo { --co: 200 85% 50%; }
-  .callout-tip, .callout-success { --co: 160 70% 40%; }
-  .callout-question, .callout-warning { --co: 38 92% 50%; }
-  .callout-failure, .callout-danger, .callout-bug { --co: 0 80% 58%; }
-  .callout-example { --co: 265 70% 60%; }
-  .callout-quote { --co: 0 0% 55%; }
-  blockquote.callout > p:first-child { font-weight: 600; color: hsl(var(--co)); }
+  .callout-abstract, .callout-info, .callout-todo { --co: 200 85% 50%; --co-ink: 200 85% var(--callout-ink-l, 27%); }
+  .callout-tip, .callout-success { --co: 160 70% 40%; --co-ink: 160 70% var(--callout-ink-l, 27%); }
+  .callout-question, .callout-warning { --co: 38 92% 50%; --co-ink: 38 92% var(--callout-ink-l, 27%); }
+  .callout-failure, .callout-danger, .callout-bug { --co: 0 80% 58%; --co-ink: 0 80% var(--callout-ink-l, 27%); }
+  .callout-example { --co: 265 70% 60%; --co-ink: 265 70% var(--callout-ink-l, 27%); }
+  .callout-quote { --co: 0 0% 55%; --co-ink: 0 0% var(--callout-ink-l, 27%); }
+  blockquote.callout > p:first-child { font-weight: 600; color: hsl(var(--co-ink)); }
 
   /* ==highlights== (both editors and the preview) */
   mark.obsidian-highlight, .cm-obs-highlight { background: hsl(50 100% 60% / 0.45); color: inherit; border-radius: 2px; }
