@@ -45,6 +45,16 @@ import ts from "typescript";
 export const MAX_E2E_SKIPS = 15;
 /** Calls of the e2e/_engines.ts skip helpers (R8-L3: today's count, 8; a new one is reviewed with this number). */
 export const MAX_E2E_HELPER_SKIPS = 8;
+/**
+ * W10.F11 (audit r3: "true skip points ~21, engine helpers counted
+ * separately"): the places in e2e/ where a test can be skipped, counted once
+ * each — every skip call outside e2e/_engines.ts plus every call of one of its
+ * helpers (a helper's own body skips only through its call sites, so it is
+ * not counted again). Today's number; it only goes down. W10.F11's target is
+ * E2E_SKIP_POINTS_TARGET.
+ */
+export const MAX_E2E_SKIP_POINTS = 19;
+export const E2E_SKIP_POINTS_TARGET = 15;
 /** The file whose exported skipping functions count as skips where they are called. */
 export const ENGINE_HELPERS_FILE = "e2e/_engines.ts";
 export const MAX_HORIZON_DAYS = 366;
@@ -318,9 +328,12 @@ export function auditSkips(root, { today = new Date() } = {}) {
   const violations = sites.filter((s) => s.problems.length).map((s) => ({ file: s.file, line: s.line, rule: "skip-reason", text: `${s.call}: ${s.problems.join("; ")}` }));
   const e2eCount = sites.filter((s) => s.area === "e2e" && !s.helper).length;
   const e2eHelperCount = sites.filter((s) => s.area === "e2e" && s.helper).length;
+  const e2eSkipPoints = sites.filter((s) => s.area === "e2e" && (s.helper || s.file !== ENGINE_HELPERS_FILE)).length;
   if (e2eCount > MAX_E2E_SKIPS)
     violations.push({ file: "e2e/", line: 0, rule: "skip-count", text: `${e2eCount} skip calls in e2e/, at most ${MAX_E2E_SKIPS}: fix a test or share one helper for an engine gap` });
   if (e2eHelperCount > MAX_E2E_HELPER_SKIPS)
     violations.push({ file: "e2e/", line: 0, rule: "skip-count", text: `${e2eHelperCount} calls of the ${ENGINE_HELPERS_FILE} skip helpers, at most ${MAX_E2E_HELPER_SKIPS}: each one skips engines, so a new one is reviewed` });
-  return { sites, violations, e2eCount, e2eHelperCount };
+  if (e2eSkipPoints > MAX_E2E_SKIP_POINTS)
+    violations.push({ file: "e2e/", line: 0, rule: "skip-count", text: `${e2eSkipPoints} skip points in e2e/ (skip calls outside ${ENGINE_HELPERS_FILE} plus calls of its helpers), at most ${MAX_E2E_SKIP_POINTS} (W10.F11; target ${E2E_SKIP_POINTS_TARGET})` });
+  return { sites, violations, e2eCount, e2eHelperCount, e2eSkipPoints };
 }
