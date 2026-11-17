@@ -1,0 +1,69 @@
+{
+  "plan": "W13.W2",
+  "agent": "concision",
+  "notes": {
+    "he.inventedCaught": 1,
+    "he.factRecall": 1,
+    "he.factPass": 1,
+    "he.lengthAgree": 1,
+    "en.inventedCaught": 1,
+    "en.factRecall": 1,
+    "en.factPass": 1,
+    "en.lengthAgree": 1
+  },
+  "card": {
+    "schema": 1,
+    "tag": "dev",
+    "model": {
+      "name": "rules (length + fact checks; the rewrites need a local model, owed)",
+      "digest": "sha256:05c98788295d67a7983be32e2d4a5e883266da78c8e0901ff608ac80d8e5bbb8"
+    },
+    "seed": 13,
+    "temperature": 0,
+    "dataset": {
+      "name": "eval/writing/concision",
+      "version": "1+ad835ae416fa",
+      "license": "CC0-1.0",
+      "origin": "synthetic"
+    },
+    "n": 320,
+    "metrics": {
+      "invented_caught": {
+        "value": 1,
+        "ci95": [
+          1,
+          1
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      },
+      "fact_recall": {
+        "value": 1,
+        "ci95": [
+          1,
+          1
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      },
+      "fact_pass": {
+        "value": 1,
+        "ci95": [
+          1,
+          1
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      },
+      "length_agree": {
+        "value": 1,
+        "ci95": [
+          1,
+          1
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      }
+    }
+  }
+}

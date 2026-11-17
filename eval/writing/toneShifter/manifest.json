@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "plan": "W13.W2",
+  "agent": "toneShifter",
+  "version": "1",
+  "origin": "synthetic",
+  "license": "CC0-1.0",
+  "about": "The tone shifter's fact guard: a source, a tone rewrite, and whether the rewrite changed a number, name, place or negation.",
+  "generator": "scripts/eval/writing-sets.mjs",
+  "heldoutShare": 0.3,
+  "heldoutNote": "The held-out split here is synthetic and written by the authors of the agents: it can never back a ✅. The sealed set (W6.17, the evaluator key) and real texts (W10.B13) are owed.",
+  "files": {
+    "he.jsonl": {
+      "items": 160,
+      "sha256": "10ccd265a28c2ee09ea30e2eae6801d68a64cfd98aca3519889a9eebea052bf5"
+    },
+    "en.jsonl": {
+      "items": 160,
+      "sha256": "2a9ec9de74c8634b2614f7471e64c92edc8b8206dd0eda4226ff28cd4db6de17"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "plan": "W13.W2",
+  "agent": "concision",
+  "version": "1",
+  "origin": "synthetic",
+  "license": "CC0-1.0",
+  "about": "Shortening checks: a source, a shortened result, and its defect (invented / lost number or name, flipped negation, outside the length range) or none.",
+  "generator": "scripts/eval/writing-sets.mjs",
+  "heldoutShare": 0.3,
+  "heldoutNote": "The held-out split here is synthetic and written by the authors of the agents: it can never back a ✅. The sealed set (W6.17, the evaluator key) and real texts (W10.B13) are owed.",
+  "files": {
+    "he.jsonl": {
+      "items": 160,
+      "sha256": "f01c684df45dc6bb00edfd9d1e4318bd309b61b468ee0bc4b11c7b81a8d296ef"
+    },
+    "en.jsonl": {
+      "items": 160,
+      "sha256": "7cd354474cf397bf3a87ef9d71efb1c3838dfd09229d13a94cfc8b4c32eaac1a"
+    }
+  }
+}

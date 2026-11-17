@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "plan": "W13.W2",
+  "agent": "styleCoach",
+  "version": "1",
+  "origin": "synthetic",
+  "license": "CC0-1.0",
+  "about": "Clarity and style findings: each item is 1–4 sentences with the spans a coach should flag (kind + text); a fifth are clean.",
+  "generator": "scripts/eval/writing-sets.mjs",
+  "heldoutShare": 0.3,
+  "heldoutNote": "The held-out split here is synthetic and written by the authors of the agents: it can never back a ✅. The sealed set (W6.17, the evaluator key) and real texts (W10.B13) are owed.",
+  "files": {
+    "he.jsonl": {
+      "items": 160,
+      "sha256": "d324154e7f9fe285695901b6e7a294b3ccae2874b780a2de99ece382117d24a6"
+    },
+    "en.jsonl": {
+      "items": 160,
+      "sha256": "9322dc0b860b944b5a90b9733a8fdd0341f01d2d972e20665d4b2fa3e87be17c"
+    }
+  }
+}

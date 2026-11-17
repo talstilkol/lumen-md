@@ -1,0 +1,58 @@
+{
+  "plan": "W13.W2",
+  "agent": "toneShifter",
+  "notes": {
+    "he.recall": 1,
+    "he.precision": 1,
+    "he.passKept": 1,
+    "en.recall": 1,
+    "en.precision": 1,
+    "en.passKept": 1
+  },
+  "card": {
+    "schema": 1,
+    "tag": "dev",
+    "model": {
+      "name": "rules (fact guard; the rewrites need a local model, owed)",
+      "digest": "sha256:7e76f445e7fa1e44dfcc9da194bc54668e0d3be96f84b65c7a775b47a0c43e76"
+    },
+    "seed": 13,
+    "temperature": 0,
+    "dataset": {
+      "name": "eval/writing/toneShifter",
+      "version": "1+9431b36bdf46",
+      "license": "CC0-1.0",
+      "origin": "synthetic"
+    },
+    "n": 176,
+    "metrics": {
+      "guard_recall": {
+        "value": 1,
+        "ci95": [
+          1,
+          1
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      },
+      "guard_precision": {
+        "value": 1,
+        "ci95": [
+          1,
+          1
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      },
+      "kept_passed": {
+        "value": 1,
+        "ci95": [
+          1,
+          1
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      }
+    }
+  }
+}
