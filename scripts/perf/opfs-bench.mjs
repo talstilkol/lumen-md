@@ -32,24 +32,13 @@ import { mkdtempSync, readdirSync, readFileSync, statSync, writeFileSync, mkdirS
 import { tmpdir, cpus, platform, release, arch, totalmem } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { treeRssMB } from "../bench/memory.mjs";
+import { fileAt, median, sizes, spans } from "./opfs-bench-files.mjs";
+
+export { fileAt, median, sizes, spans };
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const TARGETS = Object.freeze({ chromiumReadMs: 1500, longTasks: 0 });
-
-/** File sizes: log-normal with the given median (bytes), from a fixed seed. */
-export function sizes(n, median = 2048, sigma = 0.8, seed = 42) {
-  let s = seed >>> 0;
-  const rnd = () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) + 0.5) / 2 ** 32;
-  return Array.from({ length: n }, () => {
-    const z = Math.sqrt(-2 * Math.log(rnd())) * Math.cos(2 * Math.PI * rnd());
-    return Math.max(64, Math.round(median * Math.exp(sigma * z)));
-  });
-}
-
-export function median(xs) {
-  const s = [...xs].sort((a, b) => a - b);
-  return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
-}
 
 /** Real text to cut the files from: the repo's docs, concatenated. */
 function textPool() {
@@ -66,13 +55,8 @@ function textPool() {
 }
 
 export function makeFiles(n, pool = textPool()) {
-  let at = 0;
-  return sizes(n).map((size, i) => {
-    if (at + size > pool.length) at = 0;
-    const text = pool.slice(at, at + size);
-    at += size;
-    return { path: `f${i % 100}/note-${i}.md`, text };
-  });
+  const sp = spans(n, pool.length);
+  return Array.from({ length: n }, (_, i) => fileAt(pool, sp, i));
 }
 
 async function bundle(dir) {
@@ -111,7 +95,9 @@ async function main() {
   const server = await serve(dir);
   const url = `http://127.0.0.1:${server.address().port}/`;
   const pw = await import("playwright");
-  const files = argv.includes("--selftest") ? [] : makeFiles(n);
+  const selftest = argv.includes("--selftest");
+  const pool = selftest ? "" : textPool();
+  const sp = selftest ? [] : spans(n, pool.length);
   const results = {};
   for (const engine of engines) {
     const exe = process.env[`PW_${engine.toUpperCase()}`];
@@ -123,22 +109,38 @@ async function main() {
       continue;
     }
     const page = await browser.newPage();
+    // Memory (W11.Q11): the resident size of this process and the browser's
+    // tree, sampled every 250 ms, and the phase the page last reported, so a
+    // crash says where it happened and at what size.
+    let phase = "load";
+    let peak = 0;
+    const sample = () => (peak = Math.max(peak, treeRssMB(process.pid) ?? 0));
+    const timer = setInterval(sample, 250);
+    let crashed = null;
+    page.on("console", (m) => {
+      const t = m.text();
+      if (t.startsWith("opfs-bench phase: ")) phase = t.slice(18);
+    });
+    page.on("crash", () => (crashed = phase));
     await page.goto(url);
     await page.waitForFunction(() => typeof window.opfsBench === "function");
     try {
-      results[engine] = argv.includes("--selftest") ? await page.evaluate(() => window.opfsSelftest()) : await page.evaluate((a) => window.opfsBench(a), { files, concurrency: 8 });
+      results[engine] = selftest ? await page.evaluate(() => window.opfsSelftest()) : await page.evaluate((a) => window.opfsBench(a), { pool, spans: sp, concurrency: 8 });
       results[engine].version = browser.version();
     } catch (e) {
-      results[engine] = { error: String(e.message).split("\n")[0] };
+      results[engine] = { error: crashed ? `the page crashed during ${crashed}` : String(e.message).split("\n")[0] };
     }
+    clearInterval(timer);
+    sample();
+    results[engine].peakRssMB = peak || null;
     await browser.close();
   }
   server.close();
   const c = cpus();
   const report = {
     date: new Date().toISOString(),
-    files: files.length,
-    medianBytes: files.length ? median(files.map((f) => f.text.length)) : null,
+    files: sp.length / 2,
+    medianBytes: sp.length ? median(sp.filter((_, k) => k % 2 === 1)) : null,
     machine: { platform: platform(), release: release(), arch: arch(), cpu: c[0]?.model, cores: c.length, memGB: Math.round(totalmem() / 2 ** 30) },
     targets: TARGETS,
     results,
