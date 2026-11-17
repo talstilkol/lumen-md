@@ -115,7 +115,9 @@ describe("the no-models hint names the open-licence default (plan 1.7)", () => {
     // Per-domain layout (plan 0.3): the key's domain file is locales/<lang>/ai.json.
     const locales = readdirSync(join(root, "i18n/locales"), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
     expect(locales).toContain("en");
-    expect(locales.length).toBe(8);
+    // Every shipped locale, no fixed count (review 14: fa made it 9).
+    const { SUPPORTED_LOCALES } = await import("../i18n");
+    expect([...locales].sort()).toEqual(SUPPORTED_LOCALES.map((l) => l.code).sort());
     for (const lang of locales) {
       const strings = JSON.parse(readFileSync(join(root, "i18n/locales", lang, "ai.json"), "utf8")) as Record<string, string>;
       expect([lang, strings["ai.settings.ollama.none"]]).toEqual([lang, expect.stringContaining(`ollama pull ${DEFAULT_OLLAMA_MODEL}`)]);

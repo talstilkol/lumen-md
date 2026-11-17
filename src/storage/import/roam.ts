@@ -27,6 +27,7 @@
 import { claimPath, safeName } from "./names";
 import { isoDate, withFrontmatter } from "./frontmatter";
 import { emptyVault, type ConvertedVault } from "./types";
+import { swallowed } from "../../lib/logger";
 
 interface RoamBlock {
   string?: string;
@@ -263,7 +264,8 @@ function readRoamPages(files: Map<string, Uint8Array>, vault: ConvertedVault): R
     let json: unknown;
     try {
       json = JSON.parse(dec.decode(data));
-    } catch {
+    } catch (e) {
+      swallowed("import/roam: a file is not JSON; it is listed as skipped", e);
       vault.skipped.push({ path: p, reason: "unreadable" });
       continue;
     }

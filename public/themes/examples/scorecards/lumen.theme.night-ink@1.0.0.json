@@ -4,7 +4,7 @@
   "reviewer": "lumen-review/1",
   "id": "lumen.theme.night-ink",
   "version": "1.0.0",
-  "reviewedAt": "2026-11-15T05:16:52.345Z",
+  "reviewedAt": "2026-11-17T11:06:01.810Z",
   "passed": true,
   "score": 90,
   "grade": "A",
@@ -66,7 +66,7 @@
         "mode": "light",
         "fg": "--fg-muted",
         "bg": "--bg",
-        "ratio": 5.58,
+        "ratio": 9.62,
         "min": 4.5,
         "pass": true
       },
@@ -74,7 +74,7 @@
         "mode": "light",
         "fg": "--fg-muted",
         "bg": "--bg-muted",
-        "ratio": 4.96,
+        "ratio": 8.56,
         "min": 4.5,
         "pass": true
       },

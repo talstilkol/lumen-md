@@ -39,7 +39,8 @@ describe("what a link would do", () => {
     expect(decideLink({ kind: "new-note", title: null, text: null, folder: null }).ask).toBe(false);
     expect(decideLink({ kind: "new-note", title: "רעיון", text: "x", folder: null })).toMatchObject({ ask: true, source: "link:new", risk: "write", describe: { key: "link.confirm.new", values: { title: "רעיון", text: "x", folder: "—" } } });
     expect(decideLink({ kind: "capture", text: "לקנות חלב" })).toMatchObject({ ask: true, source: "link:capture" });
-    expect(decideLink({ kind: "clip", pageUrl: "https://news.example/a?b=1", title: "T" })).toMatchObject({ ask: true, source: "clip:https://news.example" });
+    // Review 14 M5: a clip's page is only what the link claims: asked every time, never "always".
+    expect(decideLink({ kind: "clip", pageUrl: "https://news.example/a?b=1", title: "T" })).toMatchObject({ ask: true, source: null, describe: { values: { page: "https://news.example" } } });
     expect(decideLink({ kind: "clip", pageUrl: "javascript:alert(1)", title: "T" }).source).toBeNull();
     expect(decideLink({ kind: "open-file", path: "notes/a.md" })).toMatchObject({ ask: true, source: "link:open", warning: null });
   });
@@ -104,9 +105,31 @@ describe("asking, remembering, recording", () => {
     const store = mem();
     expect(await confirmLink({ kind: "capture", text: "x" }, { ask: async () => Promise.reject(new Error("no DOM")), store })).toBe(false);
     store.setItem(ALLOW_KEY, JSON.stringify({ "link:capture": 1, "javascript:alert(1)": 2, "clip:https://ok.example": 3, "link:new": "yes" }));
-    expect(allowedSources(store)).toEqual({ "link:capture": 1, "clip:https://ok.example": 3 });
+    // Review 14 M5: a `clip:` allowance an older version stored is junk now.
+    expect(allowedSources(store)).toEqual({ "link:capture": 1 });
     allowSource("file:///etc/passwd", store);
-    expect(Object.keys(allowedSources(store))).toEqual(["link:capture", "clip:https://ok.example"]);
+    allowSource("clip:https://ok.example", store);
+    expect(Object.keys(allowedSources(store))).toEqual(["link:capture"]);
+  });
+
+  it("review 14 M5: a clip claiming an origin the user once allowed is still asked", async () => {
+    const store = mem();
+    store.setItem(ALLOW_KEY, JSON.stringify({ "clip:https://bank.example": 1 }));
+    const ask = vi.fn(async () => ({ ok: true, always: true }));
+    const clip: LinkAction = { kind: "clip", pageUrl: "https://bank.example/login", title: "x" };
+    expect(await confirmLink(clip, { ask, store })).toBe(true);
+    expect(await confirmLink(clip, { ask, store })).toBe(true);
+    expect(ask).toHaveBeenCalledTimes(2);
+    expect(Object.keys(allowedSources(store))).toEqual([]);
+  });
+
+  it("review 14 M5: bidi controls in what a link quotes are removed", () => {
+    const rlo = "\u202E", lri = "\u2066", pdi = "\u2069", rlm = "\u200F";
+    const d = decideLink({ kind: "new-note", title: `${rlo}txt.exe${pdi}`, text: `a${lri}b${pdi}${rlm}c`, folder: null });
+    expect(d.describe!.values).toMatchObject({ title: "txt.exe", text: "abc" });
+    const c = decideLink({ kind: "clip", pageUrl: "notaurl", title: `${rlo}evil` });
+    expect(c.describe!.values.title).toBe("evil");
+    expect(decideLink({ kind: "capture", text: `\u202Bx\u202C` }).describe!.values.text).toBe("x");
   });
 
   it("every decision is in the privacy ledger, without the note's text", async () => {
@@ -207,6 +230,8 @@ describe("the dialog", () => {
     const onAnswer = vi.fn();
     const { unmount } = render(createElement(LinkConfirmDialog, { decision: decideLink({ kind: "capture", text: "לקנות חלב" }), onAnswer }));
     expect(screen.getByTestId("link-confirm").textContent).toContain("לקנות חלב");
+    // Review 14 M5: the quoted preview is isolated with its own direction.
+    expect(screen.getByTestId("link-confirm").querySelector("#link-confirm-what bdi")?.getAttribute("dir")).toBe("auto");
     expect(document.activeElement?.textContent).toMatch(/Don.t allow/);
     fireEvent.click(screen.getByTestId("link-confirm-always"));
     fireEvent.click(screen.getByTestId("link-confirm-allow"));
@@ -216,5 +241,8 @@ describe("the dialog", () => {
     expect(screen.queryByTestId("link-confirm-always")).toBeNull();
     expect(screen.getByRole("alert").textContent).toMatch(/program \(\.exe\)/);
     r2.unmount();
+    const r3 = render(createElement(LinkConfirmDialog, { decision: decideLink({ kind: "clip", pageUrl: "https://news.example/a", title: "T" }), onAnswer }));
+    expect(screen.queryByTestId("link-confirm-always")).toBeNull();
+    r3.unmount();
   });
 });

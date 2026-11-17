@@ -97,7 +97,7 @@ describe("the setting", () => {
       try {
         walk(join(ROOT, d));
       } catch {
-        /* a folder that is not there has nothing to sync */
+        /* why: a folder that is not there has nothing to sync */
       }
     }
     expect(hits).toEqual([]);

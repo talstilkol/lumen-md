@@ -39,6 +39,10 @@ const MODULES = {
   "reading/openCompare": () => import("../reading/openCompare"),
   // e2e/i18n-pseudo.spec.ts: the pseudo-locales en-XA / ar-XB, installed under codes the picker never lists (W13.I1).
   "i18n/index": () => import("../i18n/index"),
+  // e2e/history-complete.spec.ts: files moved to the trash as the app moves them (W13.S1).
+  "storage/trash": () => import("../storage/trash"),
+  // e2e/a11y.spec.ts: the WCAG 2.2 checks axe can't make, run on the live page (W13.Y3, W13.Y5).
+  "testing/wcag22": () => import("../__tests__/helpers/wcag22"),
 };
 
 export type E2eModuleName = keyof typeof MODULES;

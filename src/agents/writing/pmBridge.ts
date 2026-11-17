@@ -201,7 +201,7 @@ export function acceptInPm(view: EditorView, choices: readonly AcceptChoice[]): 
     else tr.delete(r.from, r.to);
   }
   // The accepted ones drop out as their words change; the others are mapped (the plugin's apply).
-  // ai-authorship: a model's replacement is tagged at the insertion (5.9).
+  // A model's replacement goes through markAiInsert at the insertion (5.9).
   view.dispatch(plan.changes.some((c) => c.ai) ? markAiInsert(tr) : tr);
   return plan;
 }

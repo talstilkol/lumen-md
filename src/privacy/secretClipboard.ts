@@ -9,7 +9,10 @@
  *   - is cleared after 60 seconds if it is still what the clipboard holds.
  *     Natively the plugin compares; in a browser Lumen compares when it may
  *     read the clipboard, and otherwise clears only if nothing else was
- *     copied in the app meanwhile, so a newer copy is never thrown away.
+ *     copied in the app meanwhile and the user never left the window (a copy
+ *     in another app fires nothing here: review 14 Low 3), so a newer copy is
+ *     never thrown away. Then the secret may stay; the user is told to clear
+ *     it where the copy happens.
  *
  * Lumen never reads the clipboard on its own: the only read is the paste a
  * user asks for (clipboardHygiene.test.ts holds the app to it).
@@ -31,6 +34,8 @@ export interface SecretClipboardDeps {
   setTimeout?: (fn: () => void, ms: number) => unknown;
   clearTimeout?: (id: unknown) => void;
   doc?: Pick<Document, "addEventListener" | "removeEventListener">;
+  /** The window: leaving it (blur) means another app may have copied since. */
+  win?: Pick<Window, "addEventListener" | "removeEventListener">;
 }
 
 function nativePlugin(): NativeSecretClipboard | null {
@@ -60,6 +65,7 @@ export async function copySecret(text: string, deps: SecretClipboardDeps = {}): 
   const later = deps.setTimeout ?? ((fn: () => void, ms: number) => globalThis.setTimeout(fn, ms));
   const cancelTimer = deps.clearTimeout ?? ((id: unknown) => globalThis.clearTimeout(id as ReturnType<typeof setTimeout>));
   const doc = deps.doc ?? (typeof document !== "undefined" ? document : undefined);
+  const win = deps.win ?? (typeof window !== "undefined" ? window : undefined);
   pending?.cancel();
   pending = null;
   try {
@@ -69,16 +75,21 @@ export async function copySecret(text: string, deps: SecretClipboardDeps = {}): 
   } catch {
     return false;
   }
-  // Something else copied in the app after the secret: the clipboard is no longer ours to clear.
+  // Something else copied in the app after the secret, or the user went to another app (which may have
+  // copied, unseen from here): the clipboard is no longer known to be ours to clear.
   let replaced = false;
   const onCopy = () => {
     replaced = true;
   };
   doc?.addEventListener("copy", onCopy);
   doc?.addEventListener("cut", onCopy);
+  doc?.addEventListener("visibilitychange", onCopy);
+  win?.addEventListener("blur", onCopy);
   const stop = () => {
     doc?.removeEventListener("copy", onCopy);
     doc?.removeEventListener("cut", onCopy);
+    doc?.removeEventListener("visibilitychange", onCopy);
+    win?.removeEventListener("blur", onCopy);
   };
   const id = later(() => {
     stop();
@@ -100,10 +111,11 @@ async function clearIfStillSecret(
 ): Promise<boolean> {
   try {
     if (o.native) return (await o.native.clearIfEquals({ text })).cleared;
-    if (!o.clipboard || o.replaced()) return false;
+    if (!o.clipboard) return false;
+    // Reading is allowed: compare, that is the answer. Not allowed: clear only if nothing may have replaced it.
     if (o.clipboard.readText && (await o.canRead())) {
       if ((await o.clipboard.readText()) !== text) return false;
-    }
+    } else if (o.replaced()) return false;
     await o.clipboard.writeText("");
     return true;
   } catch {

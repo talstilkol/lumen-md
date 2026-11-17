@@ -84,7 +84,9 @@
 }
 .prompt-btn-ok {
   background: hsl(var(--accent));
-  color: white;
+  /* The accent's own foreground: white on the light theme's violet, near-black on the dark theme's lighter one
+     (white there was under 4.5:1, review 14 / g5 L2). */
+  color: hsl(var(--accent-fg));
 }
 .prompt-btn-ok:hover {
   filter: brightness(1.08);

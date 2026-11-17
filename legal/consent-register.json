@@ -840,6 +840,30 @@
       "status": "meets"
     },
     {
+      "id": "openalex-cite",
+      "routes": [
+        "OpenAlex: cite from a DOI (the DOI you approved only, when you turn it on)"
+      ],
+      "category": "research",
+      "purpose": "Look up the metadata of one DOI the user typed, to cite it",
+      "recipients": [
+        "OurResearch (api.openalex.org)"
+      ],
+      "dataSent": "The one DOI the user typed, nothing from notes",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "The user turns on OpenAlex in Settings → Privacy, runs \"Cite from a DOI\" and approves the dialog that names the DOI and the host; off by default.",
+        "preTicked": false,
+        "namedRecipients": [
+          "OurResearch (api.openalex.org)"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
       "id": "crossref-doi",
       "routes": [
         "CrossRef DOI lookup: the DOI you asked for only"
@@ -907,6 +931,81 @@
           "Tectonic's bundle server (relay.fullyjustified.net)"
         ],
         "withdrawal": "Settings → Privacy → \"Local only\" (or airplane mode) makes every compile cache-only; clearing the stored answer (lumen.latex.tectonicDownloads) asks again.",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "doc-scanner-android",
+      "routes": [
+        "Scans on this device; Play services may download the scanner once"
+      ],
+      "category": "cloud-ai",
+      "purpose": "Scan a paper document into a note on Android",
+      "recipients": [
+        "Google (Google Play services: ML Kit document scanner)"
+      ],
+      "dataSent": "Nothing from the scan; Play services may fetch the scanner module once",
+      "lawfulBasis": "consent",
+      "needsConsent": true,
+      "ppa2026": {
+        "activeOptIn": "Only when the user runs \"Scan document\" on Android under a policy other than local-only; local-only uses photos and on-device OCR.",
+        "preTicked": false,
+        "namedRecipients": [
+          "Google (Google Play services: ML Kit document scanner)"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "lumen-links",
+      "routes": [
+        "A lumen:// link, allowed by your “always allow” on this device",
+        "A lumen:// link; you allowed it",
+        "A lumen:// link; you did not allow it",
+        "A lumen:// link that only moves around in Lumen"
+      ],
+      "category": "third-party",
+      "purpose": "List each decision on a lumen:// link (nothing goes over the network)",
+      "recipients": [
+        "None: the entry stays on this device"
+      ],
+      "dataSent": "Nothing; the ledger line names the action, never the note's text",
+      "lawfulBasis": "performance of the action the user asked for",
+      "needsConsent": false,
+      "ppa2026": {
+        "activeOptIn": "Nothing is sent; a link that writes or opens asks first in its own dialog, and \"always\" is a per-device choice the user makes.",
+        "preTicked": false,
+        "namedRecipients": [
+          "None: the entry stays on this device"
+        ],
+        "withdrawal": "Settings → Privacy → \"Local only\": one switch blocks every route in the cloud-ai, cloud-text, research, third-party, monitoring and plugin categories at once (the ledger's local-only policy), except a single request the user explicitly agrees to at that moment, which the ledger records as consented (Wikidata is refused even then).",
+        "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
+      },
+      "status": "meets"
+    },
+    {
+      "id": "pandoc-local",
+      "routes": [
+        "Pandoc "
+      ],
+      "category": "local-ai",
+      "purpose": "Convert a file the user chose to Markdown with Pandoc, a program the user installed (W13.F5)",
+      "recipients": [
+        "None: Pandoc runs on this device, sandboxed, with no network"
+      ],
+      "dataSent": "Nothing leaves the device",
+      "lawfulBasis": "performance of the action the user asked for",
+      "needsConsent": false,
+      "ppa2026": {
+        "activeOptIn": "Only when the user imports a file and picks Pandoc; Lumen never installs or starts Pandoc on its own.",
+        "preTicked": false,
+        "namedRecipients": [
+          "None: Pandoc runs on this device, sandboxed, with no network"
+        ],
+        "withdrawal": "Uninstall Pandoc or import without it; nothing leaves the device, so there is nothing to withdraw from a recipient.",
         "reconsentOnChange": "A route's purpose or recipient changes only with a release that changes its ledger rule; docs/legal/consent-records.md (Re-consent) says what that release must do."
       },
       "status": "meets"

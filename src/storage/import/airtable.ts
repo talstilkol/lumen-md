@@ -23,6 +23,7 @@ import { claimPath, safeName, stemOf } from "./names";
 import { withFrontmatter, type Props } from "./frontmatter";
 import { parseCsv } from "./notion";
 import { emptyVault, type ConvertedVault } from "./types";
+import { swallowed } from "../../lib/logger";
 
 interface Field {
   id?: string;
@@ -176,7 +177,8 @@ export function convertAirtable(files: Map<string, Uint8Array>, opts: { folder?:
       let json: { baseName?: string; schema: { tables: Table[] }; records: Record<string, { records?: ApiRecord[] } | ApiRecord[]> };
       try {
         json = JSON.parse(dec.decode(data));
-      } catch {
+      } catch (e) {
+        swallowed("import/airtable: a file is not JSON; it is listed as skipped", e);
         vault.skipped.push({ path: p, reason: "unreadable" });
         continue;
       }

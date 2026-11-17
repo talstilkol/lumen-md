@@ -177,7 +177,7 @@ describe("release-run never marks Windows signed without SignPath (W11.S15 accep
   it("the whole dry run without SignPath writes release/signing.json: Windows NOT signed, and says why", () => {
     const dir = mkdtempSync(join(tmpdir(), "lumen-release-sign-"));
     try {
-      for (const p of ["package.json", "package-lock.json", "CHANGELOG.md", "src-tauri/tauri.conf.json", "src-tauri/Cargo.toml", "src-tauri/Cargo.lock", "src-tauri/src/updates.rs"]) {
+      for (const p of ["package.json", "package-lock.json", "CHANGELOG.md", "src-tauri/tauri.conf.json", "src-tauri/Cargo.toml", "src-tauri/Cargo.lock", "src-tauri/src/updates.rs", "src/update/stagedRollout.ts"]) {
         mkdirSync(join(dir, p, ".."), { recursive: true });
         cpSync(join(ROOT, p), join(dir, p));
       }

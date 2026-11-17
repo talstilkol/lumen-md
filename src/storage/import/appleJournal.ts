@@ -12,6 +12,7 @@
 import { claimPath, dirOf, mdEmbed, resolveRel, safeName, stemOf } from "./names";
 import { withFrontmatter, type Props } from "./frontmatter";
 import { emptyVault, type ConvertedVault } from "./types";
+import { swallowed } from "../../lib/logger";
 
 const EN_MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
 const HE_MONTHS = ["ינואר", "פברואר", "מרץ", "אפריל", "מאי", "יוני", "יולי", "אוגוסט", "ספטמבר", "אוקטובר", "נובמבר", "דצמבר"];
@@ -108,7 +109,8 @@ export function convertAppleJournal(files: Map<string, Uint8Array>): ConvertedVa
         let rel = src;
         try {
           rel = decodeURIComponent(src);
-        } catch {
+        } catch (e) {
+          swallowed("import/appleJournal: a resource link is not URI-encoded; it is used as written", e);
           rel = src;
         }
         const target = resources.get(resolveRel(fromDir, rel).normalize("NFC").toLowerCase());

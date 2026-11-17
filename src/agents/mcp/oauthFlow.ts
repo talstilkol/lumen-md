@@ -51,6 +51,22 @@ export interface ProtectedResourceMetadata {
 
 export class OAuthFlowError extends Error {}
 
+/**
+ * Review 14 Low 1: every endpoint a code, a token or a registration goes to is https. The metadata is
+ * checked for its issuer and fetched over https, but its endpoints are the server's word: an http token
+ * endpoint would send the code and the PKCE verifier in the clear.
+ */
+export function requireHttps(url: string | undefined, what: string): void {
+  if (url === undefined) return;
+  let ok = false;
+  try {
+    ok = new URL(url).protocol === "https:";
+  } catch (e) {
+    throw new OAuthFlowError(`the ${what} is not a URL: refused (${String(e)})`);
+  }
+  if (!ok) throw new OAuthFlowError(`the ${what} is not on https: refused`);
+}
+
 async function getJson(fetchImpl: Fetch, url: string): Promise<unknown | null> {
   const res = await fetchImpl(url, { method: "GET", headers: { Accept: "application/json" }, redirect: "error" });
   if (!res.ok) return null;
@@ -88,6 +104,9 @@ export async function discover(serverUrl: string, fetchImpl: Fetch, wwwAuthentic
   if (!meta) meta = (await getJson(fetchImpl, wellKnown(issuer, "openid-configuration"))) as FullAuthServerMetadata | null;
   if (!meta) throw new OAuthFlowError(`no authorization server metadata at ${issuer}`);
   checkAuthServerMetadata(meta, issuer);
+  requireHttps(meta.authorization_endpoint, "authorization endpoint");
+  requireHttps(meta.token_endpoint, "token endpoint");
+  requireHttps(meta.registration_endpoint, "registration endpoint");
   return { resource, meta, ...(prm.scopes_supported ? { scopes: prm.scopes_supported } : {}) };
 }
 
@@ -111,6 +130,7 @@ export interface Registration {
 /** Step 2: which client id to use with this authorization server. DCR is never called when CIMD is advertised. */
 export async function registrationFor(meta: FullAuthServerMetadata, opts: { registry: ClientRegistry; fetchImpl: Fetch; redirectUri: string; allowLegacyDcr?: boolean }): Promise<Registration> {
   if (meta.client_id_metadata_document_supported) return { method: "cimd", clientId: CLIENT_ID };
+  requireHttps(meta.registration_endpoint, "registration endpoint");
   const known = opts.registry.get(meta.issuer);
   if (known) return { method: known.via, clientId: known.clientId };
   if (!opts.allowLegacyDcr || !meta.registration_endpoint) {
@@ -146,6 +166,7 @@ export async function startAuthorization(serverUrl: string, opts: { fetchImpl: F
 }
 
 async function tokenRequest(fetchImpl: Fetch, endpoint: string, form: Record<string, string>): Promise<{ access_token: string; refresh_token?: string; expires_in?: number; token_type?: string }> {
+  requireHttps(endpoint, "token endpoint");
   const res = await fetchImpl(endpoint, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" }, body: new URLSearchParams(form).toString(), redirect: "error" });
   const body = (await res.json().catch(() => null)) as { access_token?: unknown; refresh_token?: unknown; expires_in?: unknown; token_type?: unknown; error?: unknown } | null;
   if (!res.ok || !body || typeof body.access_token !== "string") throw new OAuthFlowError(`the token request failed${body && typeof body.error === "string" ? `: ${body.error}` : ""}`);

@@ -10,7 +10,10 @@
  *     inbox, a web clip) or opens a file asks first, saying what it will
  *     do; "always allow from this source" is remembered on this device only
  *     (localStorage, outside the settings schema: never exported, imported
- *     or synced);
+ *     or synced) — never for a web clip, whose page is only what the link
+ *     itself claims (review 14 M5);
+ *   - what the confirmation quotes from the link has its bidi controls
+ *     removed, so a title cannot reorder the sentence around it (M5);
  *   - a link that only moves around (search, today's note, the empty
  *     capture box, an empty new note) does not ask;
  *   - a file of a type Lumen does not render as a note (an executable, a
@@ -21,8 +24,9 @@
  *
  * The source of a link: the operating system does not say which page or
  * app opened it, so the source is the action itself (`link:new`,
- * `link:capture`); a web clip names its page, so its source is that page's
- * origin (`clip:https://example.com`).
+ * `link:capture`). A web clip names a page, but only by the link's own
+ * claim, so a clip is asked about every time (review 14 M5); a `clip:`
+ * entry an older version stored is ignored.
  */
 
 export type LinkAction =
@@ -71,8 +75,11 @@ export function fileRisk(path: string, html?: string | null): FileRisk {
   return "unknown";
 }
 
+/** Bidi controls (embeddings, overrides, isolates, marks): a link's text could reorder what the dialog says. */
+const BIDI = /[\u061C\u200E\u200F\u202A-\u202E\u2066-\u2069]/g;
+
 const short = (s: string | null | undefined, n = 120) => {
-  const t = (s ?? "").replace(/\s+/g, " ").trim();
+  const t = (s ?? "").replace(BIDI, "").replace(/\s+/g, " ").trim();
   return t.length > n ? `${t.slice(0, n - 1)}…` : t;
 };
 
@@ -97,7 +104,8 @@ export function decideLink(a: LinkAction): LinkDecision {
       return { ask: true, describe: { key: "link.confirm.capture", values: { text: short(a.text) } }, warning: null, source: "link:capture", risk: "write" };
     case "clip": {
       const origin = originOf(a.pageUrl);
-      return { ask: true, describe: { key: "link.confirm.clip", values: { title: short(a.title) || "—", page: origin ?? short(a.pageUrl, 60) } }, warning: null, source: origin ? `clip:${origin}` : null, risk: "write" };
+      // No "always": the page is what the link claims, and any page or app can claim any origin (review 14 M5).
+      return { ask: true, describe: { key: "link.confirm.clip", values: { title: short(a.title) || "—", page: origin ?? short(a.pageUrl, 60) } }, warning: null, source: null, risk: "write" };
     }
     case "open-file": {
       const risk = fileRisk(a.path, a.html);
@@ -128,14 +136,14 @@ export function allowedSources(store: Store | null = defaultStore()): Record<str
   try {
     const v = JSON.parse(store?.getItem(ALLOW_KEY) ?? "{}") as unknown;
     if (!v || typeof v !== "object" || Array.isArray(v)) return {};
-    return Object.fromEntries(Object.entries(v as Record<string, unknown>).filter(([k, t]) => /^(link:[a-z]+|clip:https?:\/\/[^\s/]+)$/.test(k) && typeof t === "number")) as Record<string, number>;
+    return Object.fromEntries(Object.entries(v as Record<string, unknown>).filter(([k, t]) => /^link:[a-z]+$/.test(k) && typeof t === "number")) as Record<string, number>;
   } catch {
     return {};
   }
 }
 
 export function allowSource(source: string, store: Store | null = defaultStore(), now = Date.now()): void {
-  if (!/^(link:[a-z]+|clip:https?:\/\/[^\s/]+)$/.test(source)) return;
+  if (!/^link:[a-z]+$/.test(source)) return;
   store?.setItem(ALLOW_KEY, JSON.stringify({ ...allowedSources(store), [source]: now }));
 }
 
@@ -176,13 +184,21 @@ export async function confirmLink(a: LinkAction, deps: ConfirmDeps): Promise<boo
   return answer.ok;
 }
 
+/** The ledger's reasons for a link decision (PRIVACY.md and PRIVACY.he.md list each one by this text). */
+export const LINK_REASONS = {
+  remembered: "A lumen:// link, allowed by your “always allow” on this device",
+  allowed: "A lumen:// link; you allowed it",
+  refused: "A lumen:// link; you did not allow it",
+  noAsk: "A lumen:// link that only moves around in Lumen",
+} as const;
+
 /**
  * The privacy-ledger entry for a link decision (nothing goes over the network; the line names the action, never
  * the note's text): an allowed link as a share the user made, a refused one as a blocked request.
  */
 export async function recordLinkDecision(a: LinkAction, decision: "allowed" | "blocked", how: "asked" | "remembered" | "no-ask"): Promise<void> {
   const { recordUserShare, recordBlockedRequest } = await import("../ai/privacyLedger");
-  const reason = how === "remembered" ? "A lumen:// link, allowed by your “always allow” on this device" : how === "asked" ? `A lumen:// link; you ${decision === "allowed" ? "allowed" : "did not allow"} it` : "A lumen:// link that only moves around in Lumen";
+  const reason = how === "remembered" ? LINK_REASONS.remembered : how === "asked" ? (decision === "allowed" ? LINK_REASONS.allowed : LINK_REASONS.refused) : LINK_REASONS.noAsk;
   if (decision === "allowed") recordUserShare(ledgerLine(a), 0, reason);
   else recordBlockedRequest(ledgerLine(a), "third-party", reason, "LINK");
 }

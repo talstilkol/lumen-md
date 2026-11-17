@@ -76,7 +76,39 @@ describe("which paths are protected", () => {
     expect(protectedKind("．lumen/plugins/a/main.js")).toBe("plugins");
     expect(protectedKind("Role vaults/x/.lumen/snippets/a.css")).toBe("snippets");
     // Not protected: notes, the vault's types, entities and graph views (data, not code).
-    for (const p of ["notes/a.md", ".lumen/types/book.yaml", ".lumen/entities/people.json", ".lumen/graph/perspectives.json", "plugins/readme.md", ".lumen/pluginsx/a.js"]) expect(protectedKind(p), p).toBeNull();
+    for (const p of ["notes/a.md", ".lumen/types/book.yaml", ".lumen/entities/people.json", ".lumen/graph/perspectives.json", "plugins/readme.md"]) expect(protectedKind(p), p).toBeNull();
+    // Review 14 M3: any other `.lumen/` path is protected (an allow-list), a look-alike folder included.
+    expect(protectedKind(".lumen/pluginsx/a.js")).toBe("settings");
+  });
+
+  /*
+   * Review 14 M3 ($S/review14/probes/r14SharedVault.test.ts): Win32 strips a trailing dot or space from
+   * a name, so `.lumen./plugins` lands in `.lumen/plugins`; `./` and `//` name nothing; the plugin policy and
+   * the clip templates are configuration; and `.lumen/` is an allow-list.
+   */
+  it.each([
+    [".lumen./plugins/x/main.js", "plugins"],
+    [".lumen /plugins/x/main.js", "plugins"],
+    [".lumen/plugins./x/main.js", "plugins"],
+    [".lumen/settings.json.", "settings"],
+    [".lumen/settings.json ", "settings"],
+    [".lumen/plugin-policy.json", "settings"],
+    [".lumen/clip-templates.json", "settings"],
+    [".lumen/zotero-web.json", "settings"],
+    [".lumen/mcp/pending/1.json", "agents"],
+    ["./.lumen/plugins/x/main.js", "plugins"],
+    [".lumen//plugins/x/main.js", "plugins"],
+    [".lumen/./plugins/x/main.js", "plugins"],
+    [".obsidian./snippets/a.css", "snippets"],
+    [".lumen/types./book.yaml", "settings"],
+    [".lumen/something-new.json", "settings"],
+    ["notes/.lumen/plugin-policy.json", "settings"],
+  ] as const)("%j is protected as %s", (p, kind) => {
+    expect(protectedKind(p)).toBe(kind);
+  });
+
+  it("the vault's shared data under .lumen/ passes, and so does the folder itself", () => {
+    for (const p of [".lumen", ".lumen/", ".lumen/vault-id", ".lumen/types", ".lumen/types/sub/book.yaml", ".lumen/entities/edges.jsonl", ".lumen/searches.json", ".lumen/learning.json", ".lumen/review.json", ".lumen/reading-positions.json", ".lumen/maps/il.pmtiles", ".lumen/zotero-library.csl.json", ".lumen/zotero-annotations.json", "notes/chapter 1.md"]) expect(protectedKind(p), p).toBeNull();
   });
 });
 

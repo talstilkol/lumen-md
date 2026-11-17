@@ -12,7 +12,7 @@ import * as net from "node:net";
 import * as path from "node:path";
 import type { Host, Response } from "./host.js";
 import { handle } from "./host.js";
-import { newToken, tokenMatches, writeEndpointFile, ENDPOINT_FILE } from "./endpoint.js";
+import { checkSocketDir, newToken, tokenMatches, writeEndpointFile, ENDPOINT_FILE } from "./endpoint.js";
 import { langOf, type Lang } from "./specs.js";
 
 export const MAX_REQUEST = 1 << 20;
@@ -62,7 +62,10 @@ async function clearStale(endpoint: string): Promise<void> {
 export async function serveIpc(opts: { host: Host; configDir: string; endpoint: string; token?: string; now?: () => Date }): Promise<IpcServer> {
   const token = opts.token ?? newToken();
   await fs.mkdir(opts.configDir, { recursive: true, mode: 0o700 });
-  if (!opts.endpoint.startsWith("\\\\")) await fs.mkdir(path.dirname(opts.endpoint), { recursive: true, mode: 0o700 });
+  if (!opts.endpoint.startsWith("\\\\")) {
+    await fs.mkdir(path.dirname(opts.endpoint), { recursive: true, mode: 0o700 });
+    await checkSocketDir(path.dirname(opts.endpoint));
+  }
   await clearStale(opts.endpoint);
   const server = net.createServer((sock) => {
     let buf = "";
