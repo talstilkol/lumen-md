@@ -77,9 +77,15 @@ HTTP from the native side, and no source maps in the shipped files.
   behind the capability: only Lumen's own commands, a vault path only inside
   the vault, never an updater or shell command. **It is not turned on**:
   `tauri.conf.json` does not use the isolation pattern. Its allow-list also
-  lacks two commands the desktop app has since gained, `vault_write_if` and
-  `vault_remove_if` (compare-and-swap saves), so turning it on as it is would
-  break saving on the desktop. The same test is red on that too.
+  lacks 12 commands the desktop app has since gained (checked 17 November 2026):
+  `vault_write_if` and `vault_remove_if` (compare-and-swap saves),
+  `vault_roots_nested`, `latex_status` and `latex_pdf`, and the local MCP
+  bridge's `mcp_stdio_approved`, `mcp_stdio_approve`, `mcp_stdio_revoke`,
+  `mcp_stdio_spawn`, `mcp_stdio_write`, `mcp_stdio_close` and `mcp_open_url`.
+  Turning it on as it is would break saving on the desktop. Which of the MCP
+  commands the window may send at all is a security review of its own (one
+  of them starts a process), not a line to copy into the list. The same test
+  is red on that too.
 
 Until the allow-list is updated, the test is green and the pattern is on
 (`node scripts/tauri-isolation.mjs --enable`, which also needs a dependency
