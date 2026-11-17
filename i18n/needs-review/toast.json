@@ -54,5 +54,21 @@
     "ja": "195476t",
     "ru": "195476t",
     "zh-CN": "195476t"
+  },
+  "toast.hebrewDates.on": {
+    "ar": "1gk9ket",
+    "de": "1gk9ket",
+    "fr": "1gk9ket",
+    "ja": "1gk9ket",
+    "ru": "1gk9ket",
+    "zh-CN": "1gk9ket"
+  },
+  "toast.hebrewDates.off": {
+    "ar": "1dcdu3i",
+    "de": "1dcdu3i",
+    "fr": "1dcdu3i",
+    "ja": "1dcdu3i",
+    "ru": "1dcdu3i",
+    "zh-CN": "1dcdu3i"
   }
 }

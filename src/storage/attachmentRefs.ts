@@ -1,3 +1,4 @@
+import { compareNames } from "../i18n/collate";
 /**
  * Which attachments a deleted note leaves behind (plan W7.3, Obsidian 1.12's
  * "delete attachments too"). Pure: the caller gives the notes' text and the
@@ -85,7 +86,7 @@ export function candidatesFor(ref: AttachmentRef, notePath: string, files: Reado
   // A bare name (or a path that matched nothing): every file with that name.
   const named = (byName.get(baseOf(ref.target).toLowerCase()) ?? []).filter((p) => ref.target.includes("/") ? p.endsWith(normalise(ref.target)) : true);
   if (one) {
-    const best = [...named].sort((a, b) => Number(dirOf(b) === fromDir) - Number(dirOf(a) === fromDir) || a.length - b.length || a.localeCompare(b))[0];
+    const best = [...named].sort((a, b) => Number(dirOf(b) === fromDir) - Number(dirOf(a) === fromDir) || a.length - b.length || compareNames(a, b))[0];
     return hits.length ? hits.slice(0, 1) : best ? [best] : [];
   }
   for (const p of named) add(p);

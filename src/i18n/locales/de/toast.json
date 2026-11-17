@@ -55,6 +55,8 @@
   "toast.gitWatchOnPullingEvery": "👀 Git-Überwachung aktiv — Pull alle 5 Min.",
   "toast.gitWatchPaused": "⏸ Git-Überwachung pausiert",
   "toast.grammarCheckFailed": "Grammatikprüfung fehlgeschlagen: {error}",
+  "toast.hebrewDates.off": "Daten jetzt im gregorianischen Kalender: heute ist {today}.",
+  "toast.hebrewDates.on": "Daten jetzt im hebräischen Kalender: heute ist {today}.",
   "toast.imageAlt.done": "Alternativtext ergänzt: {done} von {count}",
   "toast.imageAlt.none": "Keine Bilder ohne Alternativtext in dieser Notiz",
   "toast.imageAlt.working": "Bilder werden auf dem Gerät gelesen: {count} …",

@@ -5,6 +5,7 @@
  * suggestions show, and resolve, as the AI's.
  */
 import { mayContainCriticMarkup, parseSuggestions, resolutionChanges, type Resolution, type Suggestion } from "./suggesting";
+import { compareNames } from "../i18n/collate";
 
 /** The author name AI-made suggestions carry (`{>>@AI<<}`). */
 export const AI_AUTHOR = "AI";
@@ -31,7 +32,7 @@ export function suggestionAuthors(text: string): AuthorCount[] {
   }
   return [...counts]
     .map(([author, count]) => ({ author, count, ai: isAiAuthor(author) }))
-    .sort((x, y) => y.count - x.count || (x.author === null ? 1 : y.author === null ? -1 : x.author.localeCompare(y.author)));
+    .sort((x, y) => y.count - x.count || (x.author === null ? 1 : y.author === null ? -1 : compareNames(x.author, y.author)));
 }
 
 /** Accept or reject only `author`'s suggestions (null: those without an author). */

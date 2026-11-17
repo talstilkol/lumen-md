@@ -325,6 +325,20 @@
       ]
     },
     {
+      "key": "toast.hebrewDates.off",
+      "en": "Dates now use the Gregorian calendar: today is {today}.",
+      "vars": [
+        "today"
+      ]
+    },
+    {
+      "key": "toast.hebrewDates.on",
+      "en": "Dates now use the Hebrew calendar: today is {today}.",
+      "vars": [
+        "today"
+      ]
+    },
+    {
       "key": "toast.imageAlt.done",
       "en": "Alt text added: {done} of {count}",
       "vars": [

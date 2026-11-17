@@ -13,6 +13,7 @@
 import { newCard, type Card, type Rating, type Scheduler } from "./fsrs";
 import type { HighlightItem } from "../highlights/hub";
 import { encodeWikiPath } from "../pdf/annotations";
+import { compareNames } from "../i18n/collate";
 
 export const REVIEW_PATH = ".lumen/review.json";
 
@@ -135,8 +136,8 @@ export function dailyQueue(file: ReviewFile, now: Date, opts: QueueOpts = {}): E
   const live = Object.values(file.cards).filter((e) => !e.gone);
   const today = now.toISOString().slice(0, 10);
   const newToday = live.filter((e) => e.introduced?.slice(0, 10) === today).length;
-  const due = live.filter((e) => e.card.state !== "new" && e.card.due <= now.toISOString()).sort((a, b) => a.card.due.localeCompare(b.card.due));
-  const fresh = live.filter((e) => e.card.state === "new").sort((a, b) => a.added.localeCompare(b.added) || a.id.localeCompare(b.id));
+  const due = live.filter((e) => e.card.state !== "new" && e.card.due <= now.toISOString()).sort((a, b) => compareNames(a.card.due, b.card.due));
+  const fresh = live.filter((e) => e.card.state === "new").sort((a, b) => compareNames(a.added, b.added) || compareNames(a.id, b.id));
   return [...due, ...fresh.slice(0, Math.max(0, newPerDay - newToday))].slice(0, max);
 }
 

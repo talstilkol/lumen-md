@@ -39,6 +39,7 @@ import { matchesFilter, parseFilter, type FilterNode } from "./databaseFilter";
 import type { PropertyType, PropertyValue } from "../properties/frontmatter";
 import { compareTyped } from "../properties/valueTypes";
 import { evaluate, parseFormula, type FormulaNode } from "./formula";
+import { compareNames } from "../i18n/collate";
 
 export type DatabaseView = "table" | "cards" | "kanban" | "list" | "calendar" | "map";
 
@@ -121,10 +122,10 @@ export function applyQuery(rows: readonly DatabaseRow[], q: { where?: FilterNode
       // Two amounts by their number ("₪300 אלף" after "₪5,000"), two addresses
       // by city, street and house number (plan R12.17).
       const typed = compareTyped(a.fm[key], b.fm[key]);
-      const d = typed ?? (typeof av === "number" && typeof bv === "number" ? av - bv : String(av).localeCompare(String(bv)));
+      const d = typed ?? (typeof av === "number" && typeof bv === "number" ? av - bv : compareNames(String(av), String(bv)));
       if (d) return desc ? -d : d;
     }
-    return a.basename.localeCompare(b.basename);
+    return compareNames(a.basename, b.basename);
   });
   return out;
 }
@@ -189,7 +190,7 @@ export async function loadDatabaseRows(spec: DatabaseSpec): Promise<DatabaseRow[
     });
   }
 
-  return rows.sort((a, b) => a.basename.localeCompare(b.basename));
+  return rows.sort((a, b) => compareNames(a.basename, b.basename));
 }
 
 function compareValue(v: unknown): string | number {

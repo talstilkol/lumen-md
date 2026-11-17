@@ -4,7 +4,7 @@
  * anyway. The ceiling itself is editor/wysiwygCeiling.ts.
  */
 import { useRef } from "react";
-import { t } from "../i18n";
+import { formatNumber, t } from "../i18n";
 import type { ViewMode } from "../store/useStore";
 import { wysiwygCeiling, type CeilingVerdict } from "../editor/wysiwygCeiling";
 
@@ -27,13 +27,13 @@ export function useWysiwygCeiling(mode: ViewMode, path: string | null, content: 
   return memo.current!.verdict;
 }
 
-const kb = (bytes: number) => Math.round(bytes / 1024).toLocaleString();
+const kb = (bytes: number) => formatNumber(Math.round(bytes / 1024));
 
 /** Above the source editor: why the note is not in WYSIWYG, and the way to it anyway. */
 export function WysiwygCeilingNotice({ verdict, onOpenAnyway }: { verdict: CeilingVerdict; onOpenAnyway: () => void }) {
   return (
     <div role="status" data-testid="wysiwyg-ceiling-notice" className="px-3 py-2 text-xs border-b border-border bg-bg-subtle flex flex-wrap items-center gap-2" dir="auto">
-      <span>{t(verdict.reason === "blocks" ? "editor.wysiwygCeiling.blocks" : "editor.wysiwygCeiling.bytes", { kb: kb(verdict.bytes), blocks: verdict.blocks.toLocaleString() })}</span>
+      <span>{t(verdict.reason === "blocks" ? "editor.wysiwygCeiling.blocks" : "editor.wysiwygCeiling.bytes", { kb: kb(verdict.bytes), blocks: formatNumber(verdict.blocks) })}</span>
       <button type="button" className="underline" onClick={onOpenAnyway} title={t("editor.wysiwygCeiling.warning")}>
         {t("editor.wysiwygCeiling.openAnyway")}
       </button>

@@ -39,6 +39,7 @@ import { noteParagraphs, type Paragraph } from "../../../ai/paragraphAnchors";
 import { RULES_MODEL, conf, type WritingSuggestion } from "../suggestionShape";
 import { STOP, breathe, isHebrewText, niqqudShare, plain, sentences, stem, throwIfAborted, words, type Word } from "../textTools";
 import { disagree, showValue, valuesOf, type Value } from "./values";
+import { compareNames } from "../../../i18n/collate";
 
 export const AGENT_ID = "consistency";
 
@@ -360,7 +361,7 @@ function* consistencySteps(input: ConsistencyInput, opts: ConsistencyOptions): G
     yield;
     out.push(...factSuggestions(ctxs, nameOf));
   }
-  return out.sort((a, b) => (a.path ?? "").localeCompare(b.path ?? "") || a.range.from - b.range.from);
+  return out.sort((a, b) => compareNames((a.path ?? ""), b.path ?? "") || a.range.from - b.range.from);
 }
 
 /* ─── 1. names ───────────────────────────────────────────────────────── */
@@ -407,7 +408,7 @@ function nameSuggestions(ctxs: ParaCtx[], scanner: Scanner, input: ConsistencyIn
     }
     if (byForm.size < 2) continue;
     const own = formKey(entityName.get(list[0].m.entity) ?? "");
-    const ranked = [...byForm.entries()].sort((a, b) => b[1].length - a[1].length || Number(b[0] === own) - Number(a[0] === own) || a[0].localeCompare(b[0]));
+    const ranked = [...byForm.entries()].sort((a, b) => b[1].length - a[1].length || Number(b[0] === own) - Number(a[0] === own) || compareNames(a[0], b[0]));
     const preferred = byForm.has(own) && byForm.get(own)!.length >= ranked[0][1].length / 2 ? own : ranked[0][0];
     const pref = byForm.get(preferred)!;
     const sample = pref[0];

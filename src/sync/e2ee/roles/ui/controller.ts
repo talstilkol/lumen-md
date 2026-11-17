@@ -39,6 +39,7 @@ import {
 import type { RoleProvider } from "../provider";
 import { roleSpaceId } from "../provider";
 import { type RoleRecord, type RoleRecordStore } from "./records";
+import { compareNames } from "../../../../i18n/collate";
 
 export interface RoleDeps {
   fetch?: FetchLike;
@@ -93,7 +94,7 @@ export function memberRows(acl: Acl): MemberRow[] {
   const order: Record<Role, number> = { admin: 0, writer: 1, reader: 2 };
   const live = Object.entries(acl.members)
     .map(([id, m]) => ({ id, role: m.role, personal: !!m.scope, revoked: false }))
-    .sort((a, b) => order[a.role] - order[b.role] || a.id.localeCompare(b.id));
+    .sort((a, b) => order[a.role] - order[b.role] || compareNames(a.id, b.id));
   const gone = acl.revoked.map((r) => ({ id: r.id, role: r.role ?? "reader", personal: !!r.scope, revoked: true }));
   return [...live, ...gone];
 }

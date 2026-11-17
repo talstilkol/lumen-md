@@ -25,6 +25,7 @@
  */
 import * as Y from "yjs";
 import { normalizeForMatch } from "../text/hebrew";
+import { compareNames } from "../i18n/collate";
 
 export const HAVRUTA_VERSION = 1;
 /** Server-side names of study rooms start with this (sync-server and the public worker keep them ≤ 30 days). */
@@ -170,7 +171,7 @@ const asHl = (m: Y.Map<unknown>): HavrutaHighlight => ({ id: String(m.get("id"))
 
 /** Every note, oldest first (ties: by author, so both sides list them alike). */
 export function listNotes(doc: Y.Doc): HavrutaNote[] {
-  return notesArr(doc).toArray().map(asNote).sort((a: HavrutaNote, b: HavrutaNote) => a.at - b.at || a.author - b.author || a.id.localeCompare(b.id));
+  return notesArr(doc).toArray().map(asNote).sort((a: HavrutaNote, b: HavrutaNote) => a.at - b.at || a.author - b.author || compareNames(a.id, b.id));
 }
 
 export function listHighlights(doc: Y.Doc): HavrutaHighlight[] {

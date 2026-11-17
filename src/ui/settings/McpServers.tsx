@@ -22,6 +22,7 @@
  */
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { t } from "../../i18n";
+import { formatTime } from "../../i18n/format";
 import "../mcpServersStrings";
 import { addServer, readServers, removeServer, serverFormError, setPin, setToolPermission, updateServer, type McpServerConfig, type ToolPermission } from "../../agents/mcp/servers";
 import { SUGGESTED, formFromSuggestion, type SuggestedServer } from "../../agents/mcp/suggested";
@@ -116,7 +117,7 @@ function ServerLog({ id }: { id: string }) {
   if (!lines.length) return <p style={muted}>{t("mcpServers.log.empty")}</p>;
   return (
     <pre data-testid={`mcp-log-${id}`} style={{ maxHeight: 160, overflow: "auto", fontSize: 11, direction: "ltr", textAlign: "left", whiteSpace: "pre-wrap" }}>
-      {lines.map((l) => `${new Date(l.ts).toLocaleTimeString()} ${l.stream === "stderr" ? "!" : "·"} ${l.text}`).join("\n")}
+      {lines.map((l) => `${formatTime(l.ts, { timeStyle: "medium" })} ${l.stream === "stderr" ? "!" : "·"} ${l.text}`).join("\n")}
     </pre>
   );
 }

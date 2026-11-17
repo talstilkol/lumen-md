@@ -23,6 +23,7 @@
 import { DataviewError, DataviewLimitError, type Expr, type Source, type DvQuery } from "./dataviewParse";
 import { tasksOf, taskValue } from "./dataviewTasks";
 import { formatDate, isoWeek } from "./dataviewDates";
+import { compareNames } from "../i18n/collate";
 export { DataviewError, DataviewLimitError, parseDataview, type Expr, type Source, type DvQuery } from "./dataviewParse";
 
 /**
@@ -274,7 +275,7 @@ export function compare(a: Value, b: Value): number {
     const d = scalar(a);
     if (d instanceof DateValue) return d.ms - b.ms;
   }
-  return show(a).localeCompare(show(b), undefined, { numeric: true, sensitivity: "base" });
+  return compareNames(show(a), show(b));
 }
 
 function equal(a: Value, b: Value): boolean {

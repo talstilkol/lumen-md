@@ -20,6 +20,7 @@
  */
 
 import { matchesOps, noteTags, parseQuery } from "./queryOps";
+import { compareNames } from "../i18n/collate";
 
 export type QueryView = "list" | "table";
 export type QuerySortKey = "name" | "modified" | "path" | "relevance";
@@ -147,7 +148,7 @@ export function rowsFor(q: EmbeddedQuery, hits: readonly QueryHit[], notes: Read
   if (key !== "relevance") {
     const sign = desc ? -1 : 1;
     rows.sort((a, b) => {
-      const c = key === "modified" ? a.modified - b.modified : (key === "name" ? a.name : a.path).localeCompare(key === "name" ? b.name : b.path, undefined, { numeric: true });
+      const c = key === "modified" ? a.modified - b.modified : compareNames(key === "name" ? a.name : a.path, key === "name" ? b.name : b.path);
       return sign * c || (a.path < b.path ? -1 : 1);
     });
   }

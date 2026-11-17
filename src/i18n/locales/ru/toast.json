@@ -55,6 +55,8 @@
   "toast.gitWatchOnPullingEvery": "👀 Отслеживание Git включено — pull каждые 5 мин",
   "toast.gitWatchPaused": "⏸ Отслеживание Git приостановлено",
   "toast.grammarCheckFailed": "Не удалось проверить грамматику: {error}",
+  "toast.hebrewDates.off": "Даты теперь по григорианскому календарю: сегодня {today}.",
+  "toast.hebrewDates.on": "Даты теперь по еврейскому календарю: сегодня {today}.",
   "toast.imageAlt.done": "Альт-текст добавлен: {done} из {count}",
   "toast.imageAlt.none": "В заметке нет изображений без альт-текста",
   "toast.imageAlt.working": "Обработка изображений на устройстве: {count}…",

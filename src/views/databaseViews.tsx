@@ -22,6 +22,7 @@ import { chosen } from "../academic/registry";
 import { defaultIsrael, holidaysOn } from "../daily/hebrewCalendar";
 import { holidayLabel, nameLang } from "../daily/hebrewCalendarNames";
 import { dayOfValue } from "../daily/israeliTime";
+import { compareNames } from "../i18n/collate";
 
 const NONE = NO_VALUE;
 
@@ -81,7 +82,7 @@ export function sections(rows: DatabaseRow[], groupBy: string): Array<{ key: str
   return [...groups.keys()].sort(columnOrder).map((key) => ({ key, rows: groups.get(key)! }));
 }
 
-const columnOrder = (a: string, b: string) => (a === NONE ? 1 : b === NONE ? -1 : a.localeCompare(b));
+const columnOrder = (a: string, b: string) => (a === NONE ? 1 : b === NONE ? -1 : compareNames(a, b));
 const groupLabel = (key: string) => (key === NONE ? t("db.none") : key);
 
 function SectionHeading({ label, count }: { label: string; count: number }) {
@@ -627,7 +628,7 @@ export function CalendarView({ rows, spec }: { rows: DatabaseRow[]; spec: Databa
   if (buckets.size === 0) {
     return <div style={{ padding: 12, color: "hsl(var(--fg-muted))", fontSize: 12 }}>{t("db.calendar.noDates", { field: dateField })}</div>;
   }
-  const sorted = [...buckets.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  const sorted = [...buckets.entries()].sort((a, b) => compareNames(a[0], b[0]));
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {sorted.map(([date, items]) => (

@@ -11,6 +11,7 @@
  */
 import { parseSkill, VAULT_SKILLS_DIR, SKILL_FILE, type Skill, type SkillSource } from "./skillFile";
 import { starterSkills } from "./starters";
+import { compareNames } from "../../i18n/collate";
 
 export interface SkillStore {
   /** Names of the folders directly under `path` (empty when it does not exist). */
@@ -63,7 +64,7 @@ export async function loadSkills(store: SkillStore | null, opts: { sharedFrom?: 
     }
   }
   for (const s of plugins.values()) if (!byName.has(s.name)) byName.set(s.name, s);
-  return { skills: [...byName.values()].sort((a, b) => a.name.localeCompare(b.name)), problems };
+  return { skills: [...byName.values()].sort((a, b) => compareNames(a.name, b.name)), problems };
 }
 
 /** Skills whose name or title starts with (then contains) what follows the `/`. */

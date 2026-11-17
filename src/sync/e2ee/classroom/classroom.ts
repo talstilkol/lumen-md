@@ -34,6 +34,7 @@ import type { FetchLike } from "../providers/http";
 import type { SyncProvider } from "../provider";
 import { fromBase64Url, toBase64Url, type ClassLink } from "./link";
 import { newKeyPair, open, pad, rawPublic, seal, SealError, unpad } from "./seal";
+import { compareNames } from "../../../i18n/collate";
 
 /** The largest piece of work (Markdown characters) a submission carries. */
 export const MAX_SUBMISSION_CHARS = 512 * 1024;
@@ -190,7 +191,7 @@ export async function fetchSubmissions(a: TeacherAssignment, deps: ClassDeps = {
     }
     out.push({ object, student: o.k, name: o.n, title: o.t, markdown: o.m, at: o.at, version: o.ver });
   }
-  out.sort((x, y) => (x.student === y.student ? y.version - x.version || y.at - x.at : x.name.localeCompare(y.name) || x.student.localeCompare(y.student)));
+  out.sort((x, y) => (x.student === y.student ? y.version - x.version || y.at - x.at : compareNames(x.name, y.name) || compareNames(x.student, y.student)));
   return { submissions: out, unreadable };
 }
 

@@ -602,5 +602,29 @@
     "de": "pa2eo1",
     "ja": "pa2eo1",
     "zh-CN": "pa2eo1"
+  },
+  "cmd.view.hebrewDates.on": {
+    "ar": "e77oek",
+    "de": "e77oek",
+    "fr": "e77oek",
+    "ja": "e77oek",
+    "ru": "e77oek",
+    "zh-CN": "e77oek"
+  },
+  "cmd.view.hebrewDates.off": {
+    "ar": "1wbbsr3",
+    "de": "1wbbsr3",
+    "fr": "1wbbsr3",
+    "ja": "1wbbsr3",
+    "ru": "1wbbsr3",
+    "zh-CN": "1wbbsr3"
+  },
+  "cmd.view.hebrewDates.hint": {
+    "ar": "svyhbp",
+    "de": "svyhbp",
+    "fr": "svyhbp",
+    "ja": "svyhbp",
+    "ru": "svyhbp",
+    "zh-CN": "svyhbp"
   }
 }

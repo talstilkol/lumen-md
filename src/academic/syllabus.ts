@@ -18,6 +18,7 @@
 import { parseEvents, type CalEvent } from "../calendar/ical";
 import { fixedOf, gregorianOf, weekdayOf, type GDay } from "../daily/hebrewCalendar";
 import { adjustDeadline, dayStatus, type TimeOptions } from "../daily/israeliTime";
+import { compareCodePoints } from "../i18n/collate";
 
 const pad2 = (n: number) => String(n).padStart(2, "0");
 export const isoOf = (d: GDay) => `${d.y}-${pad2(d.m)}-${pad2(d.d)}`;
@@ -60,7 +61,7 @@ const lastDay = (e: CalEvent): string => {
  */
 export function semesterFromIcs(ics: string, opts: { after?: string; start?: string; end?: string } = {}): SemesterCalendar | null {
   const events = parseEvents(ics).filter((e) => !e.rrule);
-  events.sort((a, b) => a.start.date.localeCompare(b.start.date));
+  events.sort((a, b) => compareCodePoints(a.start.date, b.start.date));
   const after = opts.after ?? "0000-00-00";
   const start = opts.start ?? events.find((e) => e.start.date >= after && START.test(e.summary))?.start.date;
   if (!start) return null;

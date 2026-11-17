@@ -10,6 +10,7 @@
  */
 import { escapeHtml } from "../lib/escapeHtml";
 import { encodePath } from "./siteLinks";
+import { compareNames } from "../i18n/collate";
 
 export interface GardenPage {
   output: string;
@@ -84,7 +85,7 @@ export function noteTags(md: string): string[] {
   }
   const body = md.replace(/^---\r?\n[\s\S]*?\r?\n---/, "").replace(/```[\s\S]*?```/g, " ").replace(/`[^`]*`/g, " ").replace(/https?:\/\/\S+/g, " ");
   for (const m of body.matchAll(/(?:^|[\s(])#([\p{L}\p{N}_][\p{L}\p{N}_/-]*)/gu)) if (!/^\d+$/.test(m[1])) tags.add(m[1]);
-  return [...tags].sort((a, b) => a.localeCompare(b));
+  return [...tags].sort((a, b) => compareNames(a, b));
 }
 
 /** The output path of a tag's page. */
@@ -207,7 +208,7 @@ export const tagPageMarkdown = (tag: string, pages: readonly GardenPage[], fromO
   `# ${words.taggedWith.replace("{tag}", `#${tag}`)}\n\n` +
   pages
     .slice()
-    .sort((a, b) => a.title.localeCompare(b.title))
+    .sort((a, b) => compareNames(a.title, b.title))
     .map((p) => `- [${p.title.replace(/[[\]\\]/g, "\\$&")}](${relHref(fromOutput, p.output)})`)
     .join("\n") +
   "\n";

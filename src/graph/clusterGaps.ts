@@ -21,6 +21,7 @@
  * user's approval (./clusterGapsStage.ts).
  */
 import { leiden } from "../views/leiden";
+import { compareNames } from "../i18n/collate";
 
 export { convexHull } from "./hull";
 
@@ -126,7 +127,7 @@ export function analyzeClusters(input: GapInput, opts: AnalyzeOptions = {}): Clu
     const c = r.communities.get(id)!;
     (members.get(c) ?? members.set(c, []).get(c)!).push(id);
   }
-  const kept = [...members.values()].filter((m) => m.length >= minSize).sort((a, b) => b.length - a.length || a[0].localeCompare(b[0])).slice(0, maxClusters);
+  const kept = [...members.values()].filter((m) => m.length >= minSize).sort((a, b) => b.length - a.length || compareNames(a[0], b[0])).slice(0, maxClusters);
   const clusterOf = new Map<string, number>(ids.map((id) => [id, -1]));
   kept.forEach((m, i) => m.forEach((id) => clusterOf.set(id, i)));
 
@@ -151,7 +152,7 @@ export function analyzeClusters(input: GapInput, opts: AnalyzeOptions = {}): Clu
   const vec = tf.map((c) => {
     const v = new Map<string, number>();
     for (const [k, x] of c) if (x > 0) v.set(k, x * idf(k));
-    const top = [...v].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 80);
+    const top = [...v].sort((a, b) => b[1] - a[1] || compareNames(a[0], b[0])).slice(0, 80);
     const norm = Math.sqrt(top.reduce((s, [, x]) => s + x * x, 0)) || 1;
     return new Map(top.map(([k, x]) => [k, x / norm]));
   });
@@ -191,7 +192,7 @@ export function analyzeClusters(input: GapInput, opts: AnalyzeOptions = {}): Clu
       const expected = Math.max(1e-9, (deg[i] * deg[j]) / m2);
       if (links >= expected * 0.5) continue;
       const score = Math.max(0, Math.min(1, s * (1 - links / expected)));
-      const shared = [...vec[i].keys()].filter((k) => vec[j].has(k)).sort((x, y) => vec[i].get(y)! * vec[j].get(y)! - vec[i].get(x)! * vec[j].get(x)! || x.localeCompare(y)).slice(0, 5);
+      const shared = [...vec[i].keys()].filter((k) => vec[j].has(k)).sort((x, y) => vec[i].get(y)! * vec[j].get(y)! - vec[i].get(x)! * vec[j].get(x)! || compareNames(x, y)).slice(0, 5);
       gaps.push({ a: i, b: j, similarity: s, links, expected, score, shared, from: "", to: "" });
     }
   gaps.sort((x, y) => y.score - x.score || x.a - y.a || x.b - y.b);

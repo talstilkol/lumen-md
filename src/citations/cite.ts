@@ -19,6 +19,7 @@
  */
 import { formatReference, plainTitle, type CitationLang, type CitationRecord, type Run } from "../data/citationStyles";
 import type { CiteItem, Cluster, LocatorLabel } from "./pandoc";
+import { compareNames } from "../i18n/collate";
 
 export type Style = "apa" | "chicago" | "mla" | "il";
 export const STYLES: ReadonlyArray<{ id: Style; label: string }> = [
@@ -180,7 +181,7 @@ export interface BibEntryOut {
 export function bibliography(cited: ReadonlyArray<{ key: string; record: CitationRecord }>, ctx: Omit<CiteContext, "lookup">): BibEntryOut[][] {
   const sortName = (r: CitationRecord) => (r.authors.length ? r.authors.map((a) => `${a.family} ${a.given ?? ""}`).join(" ") : sortTitle(r.title));
   const order = (xs: Array<{ key: string; record: CitationRecord }>) =>
-    [...xs].sort((a, b) => sortName(a.record).localeCompare(sortName(b.record), isHebrewRecord(a.record) ? "he" : "en", { sensitivity: "base" }) || (a.record.year ?? "").localeCompare(b.record.year ?? "") || (ctx.suffix.get(a.key) ?? "").localeCompare(ctx.suffix.get(b.key) ?? ""));
+    [...xs].sort((a, b) => sortName(a.record).localeCompare(sortName(b.record), isHebrewRecord(a.record) ? "he" : "en", { sensitivity: "base" }) || compareNames((a.record.year ?? ""), b.record.year ?? "") || compareNames((ctx.suffix.get(a.key) ?? ""), ctx.suffix.get(b.key) ?? ""));
   const entry = (x: { key: string; record: CitationRecord }): BibEntryOut => {
     const lang = langFor(x.record, ctx.style, ctx.lang);
     let runs = formatReference(x.record, base(ctx.style), lang);

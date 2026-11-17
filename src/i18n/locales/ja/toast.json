@@ -55,6 +55,8 @@
   "toast.gitWatchOnPullingEvery": "👀 Git 監視オン — 5分ごとにプルします",
   "toast.gitWatchPaused": "⏸ Git 監視を一時停止しました",
   "toast.grammarCheckFailed": "文法チェックに失敗しました: {error}",
+  "toast.hebrewDates.off": "日付はグレゴリオ暦になりました。今日は {today} です。",
+  "toast.hebrewDates.on": "日付はヘブライ暦になりました。今日は {today} です。",
   "toast.imageAlt.done": "代替テキストを追加: {count} 件中 {done} 件",
   "toast.imageAlt.none": "代替テキストが必要な画像はありません",
   "toast.imageAlt.working": "端末上で画像を読み取り中: {count} 件…",

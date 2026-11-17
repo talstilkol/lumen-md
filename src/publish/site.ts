@@ -29,6 +29,7 @@ import { prepareForExport } from "../lib/redaction";
 import { cleanPublishedFile, keepImageMetadata } from "../lib/imageMetadata";
 import { linkTags, wellKnownFile } from "./standardSite";
 import { GARDEN_CSS, GARDEN_EN, GARDEN_HE, PREVIEW_JS, backlinkMap, gardenBlock, noteTags, outgoingLinks, tagOutput, tagPageMarkdown, textLang, type GardenWords } from "./siteGarden";
+import { compareNames } from "../i18n/collate";
 
 export interface SiteNote {
   /** Vault-relative path, POSIX separators (`Projects/Plan.md`). */
@@ -200,12 +201,12 @@ function navTree(pages: SitePage[], current: string, words: SiteWords): string {
   }
   const holds = (d: Dir): boolean => d.pages.some((p) => p.output === current) || [...d.dirs.values()].some(holds);
   const render = (d: Dir): string => {
-    const dirs = [...d.dirs.values()].sort((a, b) => a.name.localeCompare(b.name));
+    const dirs = [...d.dirs.values()].sort((a, b) => compareNames(a.name, b.name));
     const items = [
       ...dirs.map((sub) => `<li><details${holds(sub) ? " open" : ""}><summary>${escapeHtml(sub.name)}</summary>${render(sub)}</details></li>`),
       ...d.pages
         .slice()
-        .sort((a, b) => a.title.localeCompare(b.title))
+        .sort((a, b) => compareNames(a.title, b.title))
         .map((p) => `<li><a href="${escapeHtml(hrefBetween(current, p.output))}"${p.output === current ? ' aria-current="page"' : ""}>${escapeHtml(p.title)}</a></li>`),
     ];
     return `<ul>${items.join("")}</ul>`;
@@ -298,7 +299,7 @@ export async function buildSite(notes: readonly SiteNote[], opts: SiteOptions): 
   const chromeDir: "ltr" | "rtl" = isRtlLang(opts.lang) ? "rtl" : "ltr";
   const seen = new Set<string>();
   const pages: (SitePage & { md: string })[] = [];
-  for (const n of [...notes].sort((a, b) => a.path.localeCompare(b.path))) {
+  for (const n of [...notes].sort((a, b) => compareNames(a.path, b.path))) {
     if (!MD_RE.test(n.path)) continue;
     const output = outputOf(n.path);
     if (seen.has(output.toLowerCase())) continue;
@@ -385,7 +386,7 @@ export async function buildSite(notes: readonly SiteNote[], opts: SiteOptions): 
     }
     files.push({ path: page.output, data: html });
   }
-  for (const [tag, list] of [...tagged].sort((a, b) => a[0].localeCompare(b[0]))) {
+  for (const [tag, list] of [...tagged].sort((a, b) => compareNames(a[0], b[0]))) {
     const out = tagOutput(tag);
     if (outputs.has(out)) continue; // a note already lives there
     files.push({ path: out, data: await pageShell(tagPageMarkdown(tag, list, out, gWords), out, `#${tag} — ${opts.title}`) });
@@ -394,7 +395,7 @@ export async function buildSite(notes: readonly SiteNote[], opts: SiteOptions): 
   if (!hasIndex) {
     const list = navPages
       .slice()
-      .sort((a, b) => a.output.localeCompare(b.output))
+      .sort((a, b) => compareNames(a.output, b.output))
       .map((p) => `- [${p.title.replace(/[[\]\\]/g, "\\$&")}](${encodePath(p.output)})`)
       .join("\n");
     const html = await pageShell(`# ${opts.title}\n\n${list}\n`, "index.html", opts.title);

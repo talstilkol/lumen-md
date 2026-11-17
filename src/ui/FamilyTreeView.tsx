@@ -15,6 +15,7 @@ import { isRTL, t } from "../i18n";
 import { buildFamily, layoutChart, lifeYears, type ChartMode } from "../entities/family";
 import type { ExportPerson } from "../entities/gedcom";
 import type { Edge } from "../entities/model";
+import { compareNames } from "../i18n/collate";
 
 export interface FamilyTreeViewProps {
   people: readonly ExportPerson[];
@@ -71,7 +72,7 @@ export function FamilyTreeView({ people, edges, start, onOpen }: FamilyTreeViewP
         <label>
           {t("family.person")}{" "}
           <select style={field} value={focus} onChange={(e) => setFocus(e.target.value)} data-testid="family-focus">
-            {[...fam.persons.values()].sort((a, b) => a.name.localeCompare(b.name)).map((p) => (
+            {[...fam.persons.values()].sort((a, b) => compareNames(a.name, b.name)).map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
               </option>

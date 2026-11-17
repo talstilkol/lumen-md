@@ -19,6 +19,7 @@
  * words match with or without one prefix letter (ו ה ב ל מ ש כ) and niqqud.
  */
 import { frontmatterTags, mergeTags } from "../../ai/batch";
+import { compareNames } from "../../i18n/collate";
 
 export type OrganizerKind = "link" | "tag" | "merge" | "moc";
 
@@ -345,7 +346,7 @@ export function analyzeVault(input: readonly OrganizerNote[], opts: AnalyzeOptio
     const name = (tags.get(members[0].path) ?? []).find((t) => t.toLowerCase() === tag) ?? tag;
     const path = `${folder ? `${folder}/` : ""}${name.replace(/[\\/:*?"<>|#]/g, "-")}.md`;
     if (covered || byPath.has(path)) continue;
-    const list = members.map((m) => ({ base: basenameOf(m.path), title: titles.get(m.path)! })).sort((x, y) => x.title.localeCompare(y.title));
+    const list = members.map((m) => ({ base: basenameOf(m.path), title: titles.get(m.path)! })).sort((x, y) => compareNames(x.title, y.title));
     const body = `---\ntags: [${JSON.stringify(name)}]\n---\n# ${name}\n\n${list.map((l) => (l.title === l.base ? `- [[${l.base}]]` : `- [[${l.base}|${l.title}]]`)).join("\n")}\n`;
     out.push({
       id: `moc:${tag}`,
@@ -358,5 +359,5 @@ export function analyzeVault(input: readonly OrganizerNote[], opts: AnalyzeOptio
     });
   }
 
-  return out.sort((x, y) => y.confidence - x.confidence || x.id.localeCompare(y.id));
+  return out.sort((x, y) => y.confidence - x.confidence || compareNames(x.id, y.id));
 }

@@ -23,6 +23,7 @@
 import type { CslItem } from "./csl";
 import { entityId, type Edge, type Entity } from "../entities/model";
 import { paragraphHash, splitParagraphs } from "../entities/paragraphs";
+import { compareCodePoints } from "../i18n/collate";
 
 export const CITATION_EXTRACTOR = "citations@1";
 
@@ -192,5 +193,5 @@ export function citationRows(g: CitationGraph): Array<{ citing: string; cited: s
   const name = new Map(g.entities.map((e) => [e.id, e.name]));
   return g.edges
     .map((e) => ({ citing: name.get(e.subject) ?? e.subject, cited: name.get(e.object) ?? e.object, where: e.provenance.note, quote: e.provenance.quote }))
-    .sort((a, b) => a.citing.localeCompare(b.citing) || a.cited.localeCompare(b.cited));
+    .sort((a, b) => compareCodePoints(a.citing, b.citing) || compareCodePoints(a.cited, b.cited));
 }

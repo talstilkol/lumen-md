@@ -18,6 +18,7 @@
  * on the Mac (W11.M5). RRF fuses any of them.
  */
 import { bm25Search, buildBM25Index } from "../../ai/neuralSearch";
+import { compareCodePoints } from "../../i18n/collate";
 
 export interface RetrievalSet {
   name: string;
@@ -148,7 +149,7 @@ export function bm25Retriever(): Retriever {
 export function rrf(lists: readonly (readonly string[])[], k = 60, top = 100): string[] {
   const score = new Map<string, number>();
   for (const l of lists) l.forEach((id, i) => score.set(id, (score.get(id) ?? 0) + 1 / (k + i + 1)));
-  return [...score].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, top).map(([id]) => id);
+  return [...score].sort((a, b) => b[1] - a[1] || compareCodePoints(a[0], b[0])).slice(0, top).map(([id]) => id);
 }
 
 /** RRF of several retrievers as one retriever (each retrieves 100). */

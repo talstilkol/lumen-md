@@ -9,6 +9,7 @@
 import { splitFrontmatter } from "./frontmatter";
 import { stringify } from "yaml";
 import { ENTITY_ROOT, TYPE_INFO, entityId, entityNotePath, isEntityType, isPredicate, type Edge, type Entity } from "./model";
+import { compareNames } from "../i18n/collate";
 
 export const TYPE_PROP = "entity-type";
 
@@ -33,7 +34,7 @@ export function entityNote(e: Entity, outgoing: readonly Edge[] = [], nameOf: (i
     if (!list.includes(link)) list.push(link);
     rel.set(x.predicate, list);
   }
-  for (const [k, v] of [...rel].sort(([a], [b]) => a.localeCompare(b))) props[k] = v;
+  for (const [k, v] of [...rel].sort(([a], [b]) => compareNames(a, b))) props[k] = v;
   const yaml = stringify(props, { lineWidth: 0 }).trimEnd();
   return { path: entityNotePath(e), content: `---\n${yaml}\n---\n\n# ${e.name}\n` };
 }

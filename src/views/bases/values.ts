@@ -11,6 +11,7 @@
 
 import { FormulaError } from "../formula/ast";
 import { asDate as isoDate, formatDate, utcDate } from "../formula/values";
+import { nameCollator } from "../../i18n/collate";
 
 /** One file of the vault, as Bases sees it (`file.*`). */
 export interface BasesFile {
@@ -293,7 +294,8 @@ export function compareValues(a: BValue, b: BValue): number | null {
   return x < y ? -1 : x > y ? 1 : 0;
 }
 
-const collator = new Intl.Collator("en", { numeric: true, sensitivity: "base" });
+// W13.I3: the UI language's name order (numbers as numbers, niqqud and case ignored), cached in src/i18n/collate.ts.
+const collator = { compare: (a: string, b: string) => nameCollator().compare(a, b) };
 
 /** Sort order for a column: empty last, then numbers / dates by size, text in natural order. */
 export function sortCompare(a: BValue, b: BValue): number {

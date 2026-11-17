@@ -16,6 +16,7 @@
 import type { Edge } from "./model";
 import { gematria } from "../daily/gematria";
 import type { ExportPerson } from "./gedcom";
+import { compareNames } from "../i18n/collate";
 
 export interface FamilyPerson {
   id: string;
@@ -62,7 +63,7 @@ export function buildFamily(people: readonly ExportPerson[], edges: readonly Edg
   // Fathers first, then by birth year, then by name: a stable, readable order.
   const byOrder = (a: string, b: string) => {
     const pa = persons.get(a)!, pb = persons.get(b)!;
-    return Number(pb.sex === "M") - Number(pa.sex === "M") || (pa.born ?? "9999").localeCompare(pb.born ?? "9999") || pa.name.localeCompare(pb.name);
+    return Number(pb.sex === "M") - Number(pa.sex === "M") || compareNames((pa.born ?? "9999"), pb.born ?? "9999") || compareNames(pa.name, pb.name);
   };
   for (const m of [parents, children, spouses]) for (const l of m.values()) l.sort(byOrder);
   return { persons, parents, children, spouses };
