@@ -20,6 +20,8 @@ import { GraphCanvas } from "./graph/GraphCanvas";
 import { TimeSlider, untilOf } from "./graph/TimeSlider";
 import { groupColor, resolveColor } from "./graph/graphData";
 import "./entityGraphStrings";
+import "./graph/graph3dStrings";
+import { prefersReducedMotion } from "../lib/motion";
 import { egoDefault } from "../views/graph/ego";
 import { countedSankey, type FlowInput } from "../views/graph/flows";
 import type { SourceMeta } from "../views/graph/claims";
@@ -28,11 +30,13 @@ import type { SourceMeta } from "../views/graph/claims";
 const SankeyView = lazy(() => import("../viz/graph/SankeyView"));
 const AdjacencyMatrixView = lazy(() => import("../viz/graph/AdjacencyMatrixView"));
 const EdgeInspector = lazy(() => import("../viz/graph/EdgeInspector"));
+// W13.G10: the optional 3D view, its own chunk; offered only when motion is allowed.
+const Graph3DView = lazy(() => import("./graph/Graph3DView"));
 
 /** Above this many entities the view opens as an ego graph (R12.8), never as a hairball. */
 export const EGO_MAX = 50;
 
-export type EntityGraphMode = "graph" | "table" | "sankey" | "flows" | "matrix";
+export type EntityGraphMode = "graph" | "table" | "sankey" | "flows" | "matrix" | "3d";
 
 export interface EntityGraphViewProps {
   entities: readonly Entity[];
@@ -61,7 +65,9 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
   const ego = useMemo(() => egoDefault(entities.map((e) => e.id), edges, { max: EGO_MAX, start: start ?? null }), [entities, edges, start]);
   const [center, setCenter] = useState(ego.center ?? "");
   const [depth, setDepth] = useState<1 | 2 | 3>(ego.center ? ego.depth : 1);
-  const [mode, setMode] = useState<EntityGraphMode>(initialMode);
+  // W13.G10: 3D is never the default, and never offered under prefers-reduced-motion.
+  const allow3d = useMemo(() => !prefersReducedMotion(), []);
+  const [mode, setMode] = useState<EntityGraphMode>(initialMode === "3d" && !allow3d ? "graph" : initialMode);
   const [inspect, setInspect] = useState<readonly string[] | null>(null);
   const [rowState, setRow] = useState(0);
   const table = useRef<HTMLTableSectionElement>(null);
@@ -103,7 +109,7 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
 
   const [positions, setPositions] = useState<Float32Array | null>(null);
   useEffect(() => {
-    if (mode !== "graph") return;
+    if (mode !== "graph" && mode !== "3d") return;
     let off = false;
     setPositions(null);
     runLayout(visible.nodes.length, render.pairs, (p) => !off && setPositions(p))
@@ -224,6 +230,7 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
             <option value="sankey">{t("entityGraph.view.mode.sankey")}</option>
             <option value="flows">{t("entityGraph.view.mode.flows")}</option>
             <option value="matrix">{t("entityGraph.view.mode.matrix")}</option>
+            {allow3d && <option value="3d">{t("graph3d.mode")}</option>}
           </select>
         </label>
         {egoShown && (
@@ -259,6 +266,20 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
                 onBand={(ids) => setInspect(ids)}
               />
             )}
+          </Suspense>
+        ) : mode === "3d" ? (
+          <Suspense fallback={null}>
+            <Graph3DView
+              labels={visible.nodes.map((n) => n.name)}
+              edges={render.pairs}
+              neighbors={(i) => adjacency[i] ?? []}
+              positions={positions}
+              colors={style.colors}
+              sizes={style.sizes}
+              edgeColor={resolveColor("hsl(var(--fg-muted))", 0.35)}
+              onOpen={(k) => onOpenEntity?.(visible.nodes[k].id)}
+              ariaLabel={t("graph3d.aria", { nodes: String(visible.nodes.length) })}
+            />
           </Suspense>
         ) : mode === "graph" ? (
           <GraphCanvas

@@ -675,6 +675,62 @@
     "ru": "bosydm",
     "zh-CN": "bosydm"
   },
+  "graph3d.aria": {
+    "ar": "oo6q90",
+    "de": "oo6q90",
+    "fr": "oo6q90",
+    "ja": "oo6q90",
+    "ru": "oo6q90",
+    "zh-CN": "oo6q90"
+  },
+  "graph3d.focused": {
+    "ar": "1ynmg4c",
+    "de": "1ynmg4c",
+    "fr": "1ynmg4c",
+    "ja": "1ynmg4c",
+    "ru": "1ynmg4c",
+    "zh-CN": "1ynmg4c"
+  },
+  "graph3d.keys": {
+    "ar": "5xbg2o",
+    "de": "5xbg2o",
+    "fr": "5xbg2o",
+    "ja": "5xbg2o",
+    "ru": "5xbg2o",
+    "zh-CN": "5xbg2o"
+  },
+  "graph3d.mode": {
+    "ar": "1u3o2xf",
+    "de": "1u3o2xf",
+    "fr": "1u3o2xf",
+    "ja": "1u3o2xf",
+    "ru": "1u3o2xf",
+    "zh-CN": "1u3o2xf"
+  },
+  "graph3d.noWebgl": {
+    "ar": "re6cue",
+    "de": "re6cue",
+    "fr": "re6cue",
+    "ja": "re6cue",
+    "ru": "re6cue",
+    "zh-CN": "re6cue"
+  },
+  "graph3d.reduced": {
+    "ar": "ozvp7q",
+    "de": "ozvp7q",
+    "fr": "ozvp7q",
+    "ja": "ozvp7q",
+    "ru": "ozvp7q",
+    "zh-CN": "ozvp7q"
+  },
+  "graph3d.role": {
+    "ar": "124gavy",
+    "de": "124gavy",
+    "fr": "124gavy",
+    "ja": "124gavy",
+    "ru": "124gavy",
+    "zh-CN": "124gavy"
+  },
   "hl.scan": {
     "ar": "qb0k9u",
     "de": "qb0k9u",
