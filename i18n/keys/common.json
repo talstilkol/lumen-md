@@ -14006,6 +14006,11 @@
       "vars": []
     },
     {
+      "key": "mcpServers.added",
+      "en": "Already added",
+      "vars": []
+    },
+    {
       "key": "mcpServers.approval.check",
       "en": "Check approval",
       "vars": []
@@ -14108,6 +14113,26 @@
     {
       "key": "mcpServers.call.why.new",
       "en": "You have not approved this tool yet.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.chip.address",
+      "en": "An address",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.chip.asks",
+      "en": "Every tool asks before it runs",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.chip.builtin",
+      "en": "Built in",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.chip.program",
+      "en": "A program you install (desktop app)",
       "vars": []
     },
     {
@@ -14270,6 +14295,13 @@
       "vars": []
     },
     {
+      "key": "mcpServers.filled",
+      "en": "The form is filled from {name}. Nothing is connected: review it, then add it.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
       "key": "mcpServers.forget",
       "en": "Forget approvals",
       "vars": []
@@ -14370,6 +14402,11 @@
       "vars": []
     },
     {
+      "key": "mcpServers.installLabel",
+      "en": "Install:",
+      "vars": []
+    },
+    {
       "key": "mcpServers.intro",
       "en": "Outside MCP servers give the local agents more tools. A server is off until you turn it on. Lumen asks before a tool runs the first time, and again whenever a server changes a tool.",
       "vars": []
@@ -14442,8 +14479,118 @@
       "vars": []
     },
     {
+      "key": "mcpServers.s.data-gov-il.about",
+      "en": "Israeli government open data: datasets and their records.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.data-gov-il.name",
+      "en": "data.gov.il",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.data-gov-il.source",
+      "en": "The server's own page (enter its address).",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.everything.about",
+      "en": "The MCP test server: echo, add, elicitation. Good for trying a setup.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.everything.install",
+      "en": "npm i -g @modelcontextprotocol/server-everything",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.everything.name",
+      "en": "Everything (test server)",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.everything.source",
+      "en": "npm: @modelcontextprotocol/server-everything",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.files.about",
+      "en": "The reference filesystem server: only the folders you list as arguments.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.files.install",
+      "en": "npm i -g @modelcontextprotocol/server-filesystem, then add the folders it may use as arguments.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.files.name",
+      "en": "Your files",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.files.source",
+      "en": "npm: @modelcontextprotocol/server-filesystem",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.knesset.about",
+      "en": "Bills, votes and committee protocols, from the Knesset's open API.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.knesset.install",
+      "en": "Clone the Knessy repository, then set the folder to it.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.knesset.name",
+      "en": "Knesset (Knessy)",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.knesset.source",
+      "en": "The Knessy repository (see its README).",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.sefaria.about",
+      "en": "Jewish texts: get a text, its commentaries, search, and the day's learning.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.sefaria.name",
+      "en": "Sefaria",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.sefaria.source",
+      "en": "Built into Lumen (tools ported from Sivan22/mcp-sefaria-server).",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.zotero.about",
+      "en": "Your Zotero library, read on this computer.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.zotero.name",
+      "en": "Zotero",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.s.zotero.source",
+      "en": "A Zotero MCP plugin, installed in Zotero.",
+      "vars": []
+    },
+    {
       "key": "mcpServers.showTools",
       "en": "Show tools",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.sourceLabel",
+      "en": "Where to get it:",
       "vars": []
     },
     {
@@ -14497,6 +14644,13 @@
       "key": "mcpServers.use",
       "en": "Use",
       "vars": []
+    },
+    {
+      "key": "mcpServers.useFor",
+      "en": "Use {name}: fill the form",
+      "vars": [
+        "name"
+      ]
     },
     {
       "key": "mcpServers.yours",

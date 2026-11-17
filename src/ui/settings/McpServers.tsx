@@ -20,7 +20,7 @@
  *     says whether this exact command is still on it (a changed program is
  *     not), "Withdraw approval" takes it off. Neither starts anything.
  */
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { t } from "../../i18n";
 import { formatTime } from "../../i18n/format";
 import "../mcpServersStrings";
@@ -30,15 +30,13 @@ import { serverLog, subscribeServerLog } from "../../agents/mcp/log";
 import { toolApprovals } from "../../agents/mcp/approvals";
 import type { ListedTool } from "../../agents/mcp/registry";
 import { stdioRefusal, type StdioSpec } from "../../agents/mcp/transports/stdio";
+import { btn, btnPrimary, card, chip, field, heading, muted, row } from "./formStyles";
 
 type Draft = { id: string; label: string; transport: "http" | "stdio"; url: string; command: string; args: string; cwd: string; offline: boolean; defaultPermission: ToolPermission };
 
 const EMPTY: Draft = { id: "", label: "", transport: "http", url: "", command: "", args: "", cwd: "", offline: false, defaultPermission: "ask" };
 
-const row: React.CSSProperties = { display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" };
-const card: React.CSSProperties = { border: "1px solid hsl(var(--border))", borderRadius: 6, padding: 10, margin: "8px 0" };
-const muted: React.CSSProperties = { fontSize: 12, opacity: 0.8 };
-const input: React.CSSProperties = { padding: "4px 6px", minWidth: 0, flex: "1 1 200px" };
+const input: React.CSSProperties = { ...field, flex: "1 1 200px" };
 
 function draftOf(cfg: Omit<McpServerConfig, "enabled" | "tools">): Draft {
   return { ...EMPTY, id: cfg.id, label: cfg.label, transport: cfg.transport, url: cfg.url ?? "", command: cfg.command ?? "", args: (cfg.args ?? []).join("\n"), cwd: cfg.cwd ?? "", offline: !!cfg.offline, defaultPermission: cfg.defaultPermission };
@@ -87,11 +85,11 @@ function StdioApproval({ server, approvals }: { server: McpServerConfig; approva
     void f().then(setState, (e) => setState(String((e as Error)?.message ?? e)));
   return (
     <div style={row}>
-      <button type="button" data-testid={`mcp-approval-check-${server.id}`} onClick={() => run(async () => ((await approvals.approved(specOf(server))) ? "yes" : "no"))}>
+      <button type="button" style={btn} data-testid={`mcp-approval-check-${server.id}`} onClick={() => run(async () => ((await approvals.approved(specOf(server))) ? "yes" : "no"))}>
         {t("mcpServers.approval.check")}
       </button>
       {/* Review 10, L4: false means nothing matched this command (nothing was withdrawn). */}
-      <button type="button" data-testid={`mcp-approval-revoke-${server.id}`} onClick={() => run(async () => ((await approvals.revoke(specOf(server))) ? "revoked" : "notRevoked"))}>
+      <button type="button" style={btn} data-testid={`mcp-approval-revoke-${server.id}`} onClick={() => run(async () => ((await approvals.revoke(specOf(server))) ? "revoked" : "notRevoked"))}>
         {t("mcpServers.approval.revoke")}
       </button>
       {state !== "unknown" && (
@@ -132,6 +130,7 @@ function Tools({ server, list, onChange }: { server: McpServerConfig; list: List
             {t(`mcpServers.tools.${x.pin}`)}
           </span>
           <select
+            style={field}
             aria-label={t("mcpServers.tools.permission", { tool: x.tool.name })}
             value={x.permission}
             onChange={(e) => {
@@ -150,6 +149,7 @@ function Tools({ server, list, onChange }: { server: McpServerConfig; list: List
       {list.some((x) => x.pin !== "pinned") && (
         <button
           type="button"
+          style={btn}
           data-testid={`mcp-pin-all-${server.id}`}
           onClick={() => {
             for (const x of list) setPin(server.id, x.tool.name, x.hash);
@@ -160,6 +160,60 @@ function Tools({ server, list, onChange }: { server: McpServerConfig; list: List
         </button>
       )}
     </div>
+  );
+}
+
+/** A suggestion's name, in the user's language (the list's English label otherwise). */
+const suggestionName = (s: SuggestedServer): string => {
+  const k = `mcpServers.s.${s.id}.name`;
+  const v = t(k);
+  return v && v !== k ? v : s.label;
+};
+
+const REACHES = { network: "network", "this computer": "computer", "your files": "files" } as const;
+
+/**
+ * One suggested server (C3): what it is, its licence, what it reaches, that each tool asks first,
+ * how it runs, where to get it and how to install it. "Use" only fills the form below.
+ */
+function SuggestionCard({ s, added, desktop, onUse }: { s: SuggestedServer; added: boolean; desktop: boolean; onUse: () => void }) {
+  const name = suggestionName(s);
+  const about = `mcp-s-${s.id}-about`;
+  const opt = (k: string): string | null => {
+    const v = t(k);
+    return v && v !== k ? v : null;
+  };
+  const install = s.install ? opt(`mcpServers.s.${s.id}.install`) ?? s.install : null;
+  return (
+    <li style={card} data-testid={`mcp-suggested-${s.id}`}>
+      <div style={row}>
+        <strong dir="auto">{name}</strong>
+        {s.builtin && <span style={chip}>{t("mcpServers.chip.builtin")}</span>}
+      </div>
+      <p id={about} style={{ ...muted, margin: "2px 0 6px" }} dir="auto">
+        {opt(`mcpServers.s.${s.id}.about`) ?? s.label}
+      </p>
+      <div style={row} data-testid={`mcp-suggested-chips-${s.id}`}>
+        <span style={chip}>{s.license === "unverified" ? t("mcpServers.licenseUnverified") : t("mcpServers.license", { license: s.license })}</span>
+        <span style={chip}>{t(`mcpServers.reaches.${REACHES[s.reaches]}`)}</span>
+        {s.defaultPermission === "ask" && <span style={chip}>{t("mcpServers.chip.asks")}</span>}
+        <span style={chip}>{t(s.transport === "stdio" ? "mcpServers.chip.program" : "mcpServers.chip.address")}</span>
+      </div>
+      <p style={{ ...muted, marginTop: 6 }}>
+        {t("mcpServers.sourceLabel")} <span dir="auto">{opt(`mcpServers.s.${s.id}.source`) ?? s.source}</span>
+      </p>
+      {install && (
+        <p style={muted}>
+          {t("mcpServers.installLabel")} <span dir="auto">{install}</span>
+        </p>
+      )}
+      {s.transport === "stdio" && !desktop && <p style={muted}>{t("mcpServers.desktopOnly")}</p>}
+      <div style={{ ...row, marginTop: 8 }}>
+        <button type="button" style={btn} data-testid={`mcp-use-${s.id}`} aria-label={added ? `${name}: ${t("mcpServers.added")}` : t("mcpServers.useFor", { name })} aria-describedby={about} disabled={added} onClick={onUse}>
+          {added ? t("mcpServers.added") : t("mcpServers.use")}
+        </button>
+      </div>
+    </li>
   );
 }
 
@@ -201,16 +255,22 @@ export function McpServers({
     }
   };
 
+  // C3: "Use" fills the form (a copy, with the name in the user's language) and connects nothing;
+  // focus goes to the form's first field, and a status line says what happened.
+  const formId = useRef<HTMLInputElement | null>(null);
+  const [filled, setFilled] = useState<string | null>(null);
   const applySuggestion = (s: SuggestedServer) => {
-    setDraft(draftOf(formFromSuggestion(s)));
+    setDraft(draftOf({ ...formFromSuggestion(s), label: suggestionName(s) }));
     setFormError(null);
+    setFilled(suggestionName(s));
+    queueMicrotask(() => formId.current?.focus());
   };
 
   return (
     <div data-testid="mcp-servers">
       <p style={muted}>{t("mcpServers.intro")}</p>
 
-      <h3 style={{ fontSize: 14 }}>{t("mcpServers.yours")}</h3>
+      <h3 style={heading}>{t("mcpServers.yours")}</h3>
       {/* empty-action: the "Add a server" form and the suggested servers below */}
       {!servers.length && <p style={muted}>{t("mcpServers.none")}</p>}
       {servers.map((s) => {
@@ -252,6 +312,7 @@ export function McpServers({
               <label style={row}>
                 {t("mcpServers.default")}
                 <select
+                  style={field}
                   value={s.defaultPermission}
                   onChange={(e) => {
                     updateServer(s.id, { defaultPermission: e.target.value as ToolPermission });
@@ -265,14 +326,15 @@ export function McpServers({
               </label>
             </div>
             <div style={row}>
-              <button type="button" data-testid={`mcp-show-tools-${s.id}`} onClick={() => void showTools(s)}>
+              <button type="button" style={btn} data-testid={`mcp-show-tools-${s.id}`} onClick={() => void showTools(s)}>
                 {t("mcpServers.showTools")}
               </button>
-              <button type="button" onClick={() => setOpenLog(openLog === s.id ? null : s.id)}>
+              <button type="button" style={btn} onClick={() => setOpenLog(openLog === s.id ? null : s.id)}>
                 {t("mcpServers.log")}
               </button>
               <button
                 type="button"
+                style={btn}
                 onClick={() => {
                   toolApprovals.revoke(s.id);
                   refresh();
@@ -282,6 +344,7 @@ export function McpServers({
               </button>
               <button
                 type="button"
+                style={btn}
                 data-testid={`mcp-remove-${s.id}`}
                 onClick={() => {
                   removeServer(s.id);
@@ -299,7 +362,10 @@ export function McpServers({
         );
       })}
 
-      <h3 style={{ fontSize: 14 }}>{t("mcpServers.add")}</h3>
+      <h3 style={heading}>{t("mcpServers.add")}</h3>
+      <p role="status" style={muted} data-testid="mcp-filled">
+        {filled ? t("mcpServers.filled", { name: filled }) : ""}
+      </p>
       <form
         data-testid="mcp-add-form"
         style={card}
@@ -311,7 +377,7 @@ export function McpServers({
         <div style={row}>
           <label style={row}>
             {t("mcpServers.form.id")}
-            <input style={input} value={draft.id} data-testid="mcp-form-id" onChange={(e) => setDraft({ ...draft, id: e.target.value })} />
+            <input ref={formId} style={input} value={draft.id} data-testid="mcp-form-id" onChange={(e) => setDraft({ ...draft, id: e.target.value })} />
           </label>
           <label style={row}>
             {t("mcpServers.form.label")}
@@ -347,7 +413,7 @@ export function McpServers({
             </label>
             <label style={{ display: "block" }}>
               {t("mcpServers.form.args")}
-              <textarea style={{ width: "100%", direction: "ltr" }} rows={3} value={draft.args} data-testid="mcp-form-args" onChange={(e) => setDraft({ ...draft, args: e.target.value })} />
+              <textarea style={{ ...field, width: "100%", direction: "ltr", display: "block" }} rows={3} value={draft.args} data-testid="mcp-form-args" onChange={(e) => setDraft({ ...draft, args: e.target.value })} />
             </label>
             <label style={row}>
               {t("mcpServers.form.cwd")}
@@ -366,29 +432,20 @@ export function McpServers({
             {t(`mcpServers.form.error.${formError}`)}
           </p>
         )}
-        <button type="submit" data-testid="mcp-form-save">
+        <button type="submit" style={btnPrimary} data-testid="mcp-form-save">
           {t("mcpServers.form.save")}
         </button>
       </form>
 
-      <h3 style={{ fontSize: 14 }}>{t("mcpServers.suggested")}</h3>
+      <h3 style={heading} id="mcp-suggested-h">
+        {t("mcpServers.suggested")}
+      </h3>
       <p style={muted}>{t("mcpServers.suggestedNote")}</p>
-      {SUGGESTED.map((s) => (
-        <div key={s.id} style={card} data-testid={`mcp-suggested-${s.id}`}>
-          <div style={row}>
-            <strong>{s.label}</strong>
-            <span style={muted}>{s.license === "unverified" ? t("mcpServers.licenseUnverified") : t("mcpServers.license", { license: s.license })}</span>
-            <span style={muted}>{t(`mcpServers.reaches.${s.reaches === "this computer" ? "computer" : s.reaches === "your files" ? "files" : "network"}`)}</span>
-          </div>
-          <div style={muted}>
-            {s.source}
-            {s.install ? ` · ${s.install}` : ""}
-          </div>
-          <button type="button" data-testid={`mcp-use-${s.id}`} onClick={() => applySuggestion(s)}>
-            {t("mcpServers.use")}
-          </button>
-        </div>
-      ))}
+      <ul aria-labelledby="mcp-suggested-h" style={{ listStyle: "none", padding: 0, margin: 0 }}>
+        {SUGGESTED.map((s) => (
+          <SuggestionCard key={s.id} s={s} added={ids.has(s.id)} desktop={desktop} onUse={() => applySuggestion(s)} />
+        ))}
+      </ul>
     </div>
   );
 }
