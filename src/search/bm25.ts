@@ -234,14 +234,19 @@ export class Bm25Index {
     const expanded = opts.expand ? [...base, ...opts.expand(base)] : base;
     const withTranslit = typeof query === "string" ? [...expanded, ...this.transliterations(base)] : expanded;
     const terms = opts.prefix ? [...withTranslit, ...this.completions(base)] : withTranslit;
-    const groups = new Set(base.map((t) => t.group)).size;
+    // Query words by index (W13.V3: arrays per document, not a Map each — a word in 5,000 notes allocates 5,000 fewer Maps).
+    const groupIndex = new Map<number, number>();
+    for (const t of base) if (!groupIndex.has(t.group)) groupIndex.set(t.group, groupIndex.size);
+    const groups = groupIndex.size;
     const avg = this.totalLength / n || 1;
     // Per document, per query word: the best of its forms (see QueryTerm.group).
-    const scores = new Map<Doc, { best: Map<number, [string, number]> }>();
+    const scores = new Map<Doc, { s: Float64Array; t: (string | undefined)[] }>();
     const allowed = new Map<Doc, boolean>();
     for (const { term, weight, group } of terms) {
       const p = this.postings.get(term);
       if (!p) continue;
+      const gi = groupIndex.get(group);
+      if (gi === undefined) continue;
       const idf = this.idf(term) * weight;
       for (const [num, tf] of p) {
         const doc = this.byNum.get(num)!;
@@ -253,16 +258,32 @@ export class Bm25Index {
         const len = doc.length;
         const s = (idf * tf * (K1 + 1)) / (tf + K1 * (1 - B + (B * len) / avg));
         let e = scores.get(doc);
-        if (!e) scores.set(doc, (e = { best: new Map() }));
-        const prev = e.best.get(group);
-        if (!prev || s > prev[1]) e.best.set(group, [term, s]);
+        if (!e) scores.set(doc, (e = { s: new Float64Array(groups), t: new Array(groups) }));
+        if (e.t[gi] === undefined || s > e.s[gi]) {
+          e.s[gi] = s;
+          e.t[gi] = term;
+        }
       }
     }
     const limit = opts.limit ?? 30;
     const hits: Bm25Hit[] = [];
     for (const [doc, e] of scores) {
-      const parts = [...e.best.values()].sort((a, b) => b[1] - a[1]);
-      hits.push({ id: doc.id, score: parts.reduce((sum, [, v]) => sum + v, 0), matched: parts.map(([t]) => t), complete: e.best.size === groups });
+      let score = 0;
+      let found = 0;
+      const parts: [string, number][] = [];
+      for (let g = 0; g < groups; g++) {
+        const term = e.t[g];
+        if (term === undefined) continue;
+        found++;
+        score += e.s[g];
+        parts.push([term, e.s[g]]);
+      }
+      if (parts.length > 1) {
+        // The same order of addition as before, so equal scores stay equal to the last bit.
+        parts.sort((x, y) => y[1] - x[1]);
+        score = parts.reduce((sum, [, v]) => sum + v, 0);
+      }
+      hits.push({ id: doc.id, score, matched: parts.map(([t]) => t), complete: found === groups });
     }
     hits.sort((a, b) => b.score - a.score || (a.id < b.id ? -1 : 1));
     return hits.slice(0, limit);

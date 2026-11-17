@@ -274,6 +274,8 @@ export const SETTINGS: readonly SettingEntry[] = [
       { value: "logical", label: "editor.cursorMovement.logical" },
     ],
   }),
+  // W13.V6: extra folders the tree, the index and the watcher skip (.git, node_modules… always); `!name` walks a default again.
+  local("lumen.index.ignore", { kind: "setting", tab: "general", label: "settings.indexIgnore", type: "list", maxItems: 50 }),
   local("lumen-reading", { kind: "setting", tab: "general", type: "json" }),
   local("lumen-reading-aids", { kind: "setting", tab: "general", type: "json" }),
   local("lumen-hebrew-typography", { kind: "setting", tab: "general", type: "json" }),

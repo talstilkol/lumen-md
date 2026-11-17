@@ -11283,5 +11283,37 @@
     "ja": "79ey31",
     "ru": "79ey31",
     "zh-CN": "79ey31"
+  },
+  "status.indexing": {
+    "ar": "12kmpny",
+    "de": "12kmpny",
+    "fr": "12kmpny",
+    "ja": "12kmpny",
+    "ru": "12kmpny",
+    "zh-CN": "12kmpny"
+  },
+  "status.indexing.title": {
+    "ar": "1si91v2",
+    "de": "1si91v2",
+    "fr": "1si91v2",
+    "ja": "1si91v2",
+    "ru": "1si91v2",
+    "zh-CN": "1si91v2"
+  },
+  "status.indexing.sr": {
+    "ar": "veiynm",
+    "de": "veiynm",
+    "fr": "veiynm",
+    "ja": "veiynm",
+    "ru": "veiynm",
+    "zh-CN": "veiynm"
+  },
+  "settings.indexIgnore": {
+    "ar": "jyp9ab",
+    "de": "jyp9ab",
+    "fr": "jyp9ab",
+    "ja": "jyp9ab",
+    "ru": "jyp9ab",
+    "zh-CN": "jyp9ab"
   }
 }
