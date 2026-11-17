@@ -50,6 +50,7 @@ import {
   type RekeyResult,
 } from "./engineTypes";
 import { E2eeSyncCore } from "./engineCore";
+import { swallowed } from "../../lib/logger";
 
 /** @internal One of the engine's parts: use `E2eeSync`, never extend these (review 34). */
 export abstract class E2eeSyncKeys extends E2eeSyncCore {
@@ -310,14 +311,14 @@ export abstract class E2eeSyncKeys extends E2eeSyncCore {
     try {
       await this.checkNoPairingPending(true);
     } catch (e) {
-      await this.o.provider.delete(name).catch(() => undefined);
+      await this.o.provider.delete(name).catch((err: unknown) => swallowed("sync/e2ee/engineKeys: an uncommitted key-change object could not be deleted", err));
       throw e;
     }
     try {
       await this.o.provider.put(KEYRING_NAME, prepared.bytes, current ? { ifMatch: current.etag } : { ifNoneMatch: "*" });
     } catch (e) {
       if (e instanceof PreconditionFailedError) {
-        await this.o.provider.delete(name).catch(() => undefined);
+        await this.o.provider.delete(name).catch((err: unknown) => swallowed("sync/e2ee/engineKeys: an uncommitted key-change object could not be deleted", err));
         if (revoke.length) await this.countContestedRevocation(s, previous, revoke);
       }
       throw e; // anything else: the outcome is unknown, and the manifest stays for the keyring that may have landed
@@ -410,7 +411,8 @@ export abstract class E2eeSyncKeys extends E2eeSyncCore {
     let done: RekeyResult;
     try {
       done = await this.rekeyNow({ revoke: missing });
-    } catch {
+    } catch (e) {
+      swallowed("sync/e2ee/engineKeys: revoking again the devices a replacing keyring left out failed; the next round tries again", e);
       return;
     }
     throw new KeyringForkError(`another device's keyring, at epoch ${k.file.epoch}, replaced this device's at ${r.epoch}`, missing, done.epoch);
@@ -482,7 +484,7 @@ export abstract class E2eeSyncKeys extends E2eeSyncCore {
       await confirmCommit(this.o.provider, prepared.keys, prepared.bytes, { wrap: k.wrap }); // N2
     } catch (e) {
       if (!(e instanceof PreconditionFailedError || e instanceof KeyringCommitLostError)) throw e;
-      await this.o.provider.delete(name).catch(() => undefined);
+      await this.o.provider.delete(name).catch((err: unknown) => swallowed("sync/e2ee/engineKeys: an uncommitted key-change object could not be deleted", err));
       return false;
     }
     await this.adopt(prepared.keys);

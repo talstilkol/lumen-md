@@ -405,7 +405,7 @@ async function mirrorWorkspaceToGit(fs: Fs, dir: string, repoFolder: string, sig
       const path = rel ? `${rel}/${name}` : name;
       const st = await fs.promises.stat(`${dir}/${path}`).catch(() => null);
       if (st?.isDirectory()) await prune(path);
-      else if (st?.isFile() && !present.has(path) && !holdsFolder(path)) await fs.promises.unlink!(`${dir}/${path}`).catch(() => undefined);
+      else if (st?.isFile() && !present.has(path) && !holdsFolder(path)) await fs.promises.unlink!(`${dir}/${path}`).catch((e: unknown) => swallowed("sync/git: a file the pull removed could not be deleted from the working copy", e));
     }
   };
   await prune("");
@@ -559,7 +559,7 @@ export async function integrateIntoVault(
     onWritten: (path, text) => editor.onWritten(path, text),
     snapshot: async (path, text) => {
       const { recordSnapshot } = await import("../storage/history");
-      await recordSnapshot(path, text, "git-pull").catch(() => false);
+      await recordSnapshot(path, text, "git-pull").catch((e: unknown) => (swallowed("sync/git: the version before a pull could not be kept in the note's history", e), false));
     },
   });
   // Conflicts left from an earlier pull come back with the new ones (a new

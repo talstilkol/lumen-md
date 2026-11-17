@@ -35,7 +35,7 @@
  * nothing is recorded and nothing is listed.
  */
 
-import { log } from "../lib/logger";
+import { log, swallowed } from "../lib/logger";
 import { lockedNotes } from "./lockedNotesRegistry";
 import { forStore, fromStore, isSealedValue, type SealedValue } from "./vault/restStore";
 
@@ -486,7 +486,7 @@ export async function recordSnapshot(
   } catch (e) {
     if (!isQuotaError(e)) throw e;
     log.warn("[history] quota reached; pruning the oldest snapshots");
-    await pruneOldest().catch(() => 0);
+    await pruneOldest().catch((e: unknown) => (swallowed("storage/history: pruning the oldest versions failed; the history store keeps growing until a later prune", e), 0));
     try {
       return await writeSnapshot(name, content, reason, now, author);
     } catch (e2) {

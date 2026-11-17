@@ -13,6 +13,7 @@
  */
 
 import { VaultError, type VaultData } from "./types";
+import { swallowed } from "../../lib/logger";
 
 /** SHA-256 of `bytes`, lower-case hex (the hash `writeIf` / `removeIf` compare). */
 export async function sha256Hex(bytes: Uint8Array): Promise<string> {
@@ -82,7 +83,7 @@ export async function handleWriteIf(host: HandleCasHost, parts: string[], path: 
   /** A file this call created and did not fill: take it away again. */
   const dropCreated = async () => {
     if (before || !(await unchanged().catch(() => false))) return;
-    await host.removeAt(parts, path).catch(() => undefined);
+    await host.removeAt(parts, path).catch((e: unknown) => swallowed("storage/vault/cas: a file written by a lost compare-and-swap could not be removed", e));
   };
   // Review Z6-M3: from here on, every way out that does not commit (a refused compare, a write that throws, a
   // writable that cannot be opened, an engine that cannot write) takes away a file this call created, still empty.

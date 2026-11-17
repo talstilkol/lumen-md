@@ -338,7 +338,7 @@ export abstract class E2eeSyncCore {
     if (!back.length) return;
     const s = await this.loadState();
     let done: RekeyResult | null = null;
-    if (this.o.access && "wrap" in this.o.access && s.freshness !== "unverified") done = await this.rekeyNow({ revoke: back }).catch(() => null);
+    if (this.o.access && "wrap" in this.o.access && s.freshness !== "unverified") done = await this.rekeyNow({ revoke: back }).catch((e: unknown) => (swallowed("sync/e2ee/engineCore: revoking the readmitted devices again failed; the fork error lists them as not revoked", e), null));
     if (done) throw new KeyringForkError("a keyring that lets a device this device revoked back in", back, done.epoch);
     throw new KeyringForkError("a keyring that lets a device this device revoked back in", [], null, back);
   }

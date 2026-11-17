@@ -11,6 +11,7 @@ import type { IndexEngine } from "./vaultIndexProtocol";
 import { sameNote, utf8Length } from "./indexSnapshot";
 import { summarize } from "./noteSummary";
 import { cache, type ReadNote } from "./workspaceIndexState";
+import { swallowed } from "../lib/logger";
 
 /** Notes sent to the worker per message while building. */
 export const UPSERT_BATCH = 500;
@@ -46,7 +47,9 @@ export async function indexFile(e: { path: string; name: string; modified: numbe
     const modified = e.modified ?? (await mtimeOf(e.path));
     const content = await readWorkspaceFile(e.path);
     return { file: { path: e.path, name: e.name, modified, size: utf8Length(content), ...summarize(content) }, content };
-  } catch {
+  } catch (err) {
+    // Gone since the listing: left out. Anything else leaves a note out of search: said once.
+    if (!(err instanceof VaultNotFoundError)) swallowed("storage/workspaceIndexRead: a note could not be read for the index; it is left out of search", err);
     return null;
   }
 }
@@ -126,7 +129,8 @@ export async function recordVault(): Promise<string> {
     const id = crypto.randomUUID();
     await backend.write(VAULT_ID_PATH, `${id}\n`);
     return ok(id);
-  } catch {
+  } catch (e) {
+    swallowed("storage/workspaceIndexRead: the vault id could not be written; the index is keyed by the backend's id", e);
     return inner.id;
   }
 }
@@ -136,7 +140,8 @@ export async function fillingEncrypted(): Promise<boolean> {
   try {
     if (!getVaultBackend().available()) return true;
     return (await vaultEncryptionReady()) !== "none";
-  } catch {
+  } catch (e) {
+    swallowed("storage/workspaceIndexRead: the vault's encryption state could not be read; treated as encrypted", e);
     return true;
   }
 }

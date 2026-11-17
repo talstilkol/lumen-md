@@ -135,7 +135,7 @@ export async function commitImport(prep: PreparedImport, now = Date.now()): Prom
     }
   } catch (e) {
     // Half an import is worse than none: take back what was written.
-    await undoImport(undo, { force: true }).catch(() => undefined);
+    await undoImport(undo, { force: true }).catch((e: unknown) => swallowed("storage/import/commit: undoing a failed import failed; its notes stay in the import folder", e));
     throw e;
   }
   const written = new Set((await listWorkspace({ includeAssets: true })).map((f) => f.path));

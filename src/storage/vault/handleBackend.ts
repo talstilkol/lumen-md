@@ -234,7 +234,7 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
       // partial tree at the target: it would block a retry, or sit at the
       // name of an original that a replace moved to the trash. The source
       // is untouched either way.
-      if (!target || cleared) await removeAt(dstParts, dst).catch(() => undefined);
+      if (!target || cleared) await removeAt(dstParts, dst).catch((e: unknown) => swallowed("storage/vault/handleBackend: a half-made copy at the move target could not be removed", e));
       throw e;
     }
     await removeAt(src, src.join("/"));
@@ -322,7 +322,7 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
         // Put the entry back under its original name rather than leave it
         // only under the hidden temporary one.
         const left = await lookup(tmp).catch(() => null);
-        if (left) await move(tmp, r.src, left, null).catch(() => undefined);
+        if (left) await move(tmp, r.src, left, null).catch((e: unknown) => swallowed("storage/vault/handleBackend: a file set aside for a move could not be put back; it is under its temporary name", e));
         throw e;
       }
     } else {

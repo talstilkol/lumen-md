@@ -37,6 +37,7 @@ import { liveSync } from "../lan/rpc";
 import { e2eeErrorText } from "./errorText";
 import { explainError } from "../../../lib/userError";
 import { setSyncStatus } from "../../syncStatus";
+import { swallowed } from "../../../lib/logger";
 
 export type Phase = "disconnected" | "connected" | "unlocked";
 
@@ -241,7 +242,7 @@ export function createSession(deps: SessionDeps = {}) {
       timer = setInterval(() => void syncNow().catch(() => undefined), minutes * 60_000);
       if (typeof window !== "undefined") window.addEventListener("online", onOnline);
     }
-    await startWatching().catch(() => undefined);
+    await startWatching().catch((e: unknown) => swallowed("sync/e2ee/session: watching the vault for changes could not start; rounds run on the timer and on demand only", e));
     if (deps.background !== false && typeof document !== "undefined") {
       unbackground = installBackgroundSync({
         unlocked: () => engine !== null,
