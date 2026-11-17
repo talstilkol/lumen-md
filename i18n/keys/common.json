@@ -3044,6 +3044,11 @@
       "vars": []
     },
     {
+      "key": "calendar.conflict.differs",
+      "en": "differs",
+      "vars": []
+    },
+    {
       "key": "calendar.conflict.done",
       "en": "Done",
       "vars": []
@@ -3193,6 +3198,11 @@
       "vars": []
     },
     {
+      "key": "calendar.settings.added",
+      "en": "Subscription added. Its events appear in the daily note.",
+      "vars": []
+    },
+    {
       "key": "calendar.settings.caldav",
       "en": "CalDAV account (tasks)",
       "vars": []
@@ -3201,6 +3211,56 @@
       "key": "calendar.settings.choose",
       "en": "Choose a calendar",
       "vars": []
+    },
+    {
+      "key": "calendar.settings.daily",
+      "en": "In the daily note",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.dailyAddField",
+      "en": "Add the calendar to the daily template",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.dailyFieldAdded",
+      "en": "Added. New daily notes will list the day's events.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.dailyHasField",
+      "en": "Your daily note template has the calendar field: a new daily note lists the day's events.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.dailyNoField",
+      "en": "Your daily note template has no calendar field, so events do not appear yet.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.dailyNoNote",
+      "en": "There is no daily note for today yet ({path}). It gets the events when it is created.",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "calendar.settings.dailyNoSubs",
+      "en": "Add a subscription first: there is nothing to show.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.dailyRefresh",
+      "en": "Refresh today's note",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.dailyRefreshed",
+      "en": "Today's note ({path}) is refreshed: {n} lines from your calendars.",
+      "vars": [
+        "path",
+        "n"
+      ]
     },
     {
       "key": "calendar.settings.fail.auth",
@@ -3248,6 +3308,13 @@
       "vars": []
     },
     {
+      "key": "calendar.settings.foundN",
+      "en": "Found {n} calendars. Choose one.",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "calendar.settings.home",
       "en": "Calendar home (to find calendars)",
       "vars": []
@@ -3260,6 +3327,11 @@
     {
       "key": "calendar.settings.icsName",
       "en": "Name",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.icsNone",
+      "en": "No subscriptions yet. Paste a calendar's ICS or webcal address below.",
       "vars": []
     },
     {
@@ -3315,6 +3387,18 @@
       "vars": []
     },
     {
+      "key": "calendar.settings.removeNamed",
+      "en": "Remove {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "calendar.settings.removed",
+      "en": "Subscription removed.",
+      "vars": []
+    },
+    {
       "key": "calendar.settings.save",
       "en": "Save",
       "vars": []
@@ -3322,6 +3406,21 @@
     {
       "key": "calendar.settings.saved",
       "en": "Saved. The password is in the secret store, not in settings.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.store.encrypted",
+      "en": "The password is kept encrypted on this device, never in settings or an export.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.store.keychain",
+      "en": "The password is kept in your system's keychain, never in settings.",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.store.plain",
+      "en": "This browser has no encrypted store: the password is kept apart from settings, but not encrypted.",
       "vars": []
     },
     {
@@ -3352,6 +3451,11 @@
     {
       "key": "calendar.settings.user",
       "en": "User name",
+      "vars": []
+    },
+    {
+      "key": "calendar.settings.working",
+      "en": "Working…",
       "vars": []
     },
     {

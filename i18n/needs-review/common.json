@@ -175,6 +175,14 @@
     "ru": "1ez99u3",
     "zh-CN": "1ez99u3"
   },
+  "calendar.conflict.differs": {
+    "ar": "f3grfe",
+    "de": "f3grfe",
+    "fr": "f3grfe",
+    "ja": "f3grfe",
+    "ru": "f3grfe",
+    "zh-CN": "f3grfe"
+  },
   "calendar.conflict.done": {
     "ar": "13cn9g1",
     "de": "13cn9g1",
@@ -279,6 +287,14 @@
     "ru": "17rv3f8",
     "zh-CN": "17rv3f8"
   },
+  "calendar.settings.added": {
+    "ar": "aq35r7",
+    "de": "aq35r7",
+    "fr": "aq35r7",
+    "ja": "aq35r7",
+    "ru": "aq35r7",
+    "zh-CN": "aq35r7"
+  },
   "calendar.settings.caldav": {
     "ar": "l38hko",
     "de": "l38hko",
@@ -294,6 +310,78 @@
     "ja": "9g3s43",
     "ru": "9g3s43",
     "zh-CN": "9g3s43"
+  },
+  "calendar.settings.daily": {
+    "ar": "ivplg4",
+    "de": "ivplg4",
+    "fr": "ivplg4",
+    "ja": "ivplg4",
+    "ru": "ivplg4",
+    "zh-CN": "ivplg4"
+  },
+  "calendar.settings.dailyAddField": {
+    "ar": "1h4ex6s",
+    "de": "1h4ex6s",
+    "fr": "1h4ex6s",
+    "ja": "1h4ex6s",
+    "ru": "1h4ex6s",
+    "zh-CN": "1h4ex6s"
+  },
+  "calendar.settings.dailyFieldAdded": {
+    "ar": "1kov5a1",
+    "de": "1kov5a1",
+    "fr": "1kov5a1",
+    "ja": "1kov5a1",
+    "ru": "1kov5a1",
+    "zh-CN": "1kov5a1"
+  },
+  "calendar.settings.dailyHasField": {
+    "ar": "ciarmx",
+    "de": "ciarmx",
+    "fr": "ciarmx",
+    "ja": "ciarmx",
+    "ru": "ciarmx",
+    "zh-CN": "ciarmx"
+  },
+  "calendar.settings.dailyNoField": {
+    "ar": "1j6kuhw",
+    "de": "1j6kuhw",
+    "fr": "1j6kuhw",
+    "ja": "1j6kuhw",
+    "ru": "1j6kuhw",
+    "zh-CN": "1j6kuhw"
+  },
+  "calendar.settings.dailyNoNote": {
+    "ar": "1yh6kw0",
+    "de": "1yh6kw0",
+    "fr": "1yh6kw0",
+    "ja": "1yh6kw0",
+    "ru": "1yh6kw0",
+    "zh-CN": "1yh6kw0"
+  },
+  "calendar.settings.dailyNoSubs": {
+    "ar": "9djugh",
+    "de": "9djugh",
+    "fr": "9djugh",
+    "ja": "9djugh",
+    "ru": "9djugh",
+    "zh-CN": "9djugh"
+  },
+  "calendar.settings.dailyRefresh": {
+    "ar": "1igb4r1",
+    "de": "1igb4r1",
+    "fr": "1igb4r1",
+    "ja": "1igb4r1",
+    "ru": "1igb4r1",
+    "zh-CN": "1igb4r1"
+  },
+  "calendar.settings.dailyRefreshed": {
+    "ar": "1xhyou3",
+    "de": "1xhyou3",
+    "fr": "1xhyou3",
+    "ja": "1xhyou3",
+    "ru": "1xhyou3",
+    "zh-CN": "1xhyou3"
   },
   "calendar.settings.fail.auth": {
     "ar": "8e2hwu",
@@ -366,6 +454,14 @@
     "ru": "10qdesm",
     "zh-CN": "10qdesm"
   },
+  "calendar.settings.foundN": {
+    "ar": "1d259sr",
+    "de": "1d259sr",
+    "fr": "1d259sr",
+    "ja": "1d259sr",
+    "ru": "1d259sr",
+    "zh-CN": "1d259sr"
+  },
   "calendar.settings.home": {
     "ar": "lc2d5g",
     "de": "lc2d5g",
@@ -389,6 +485,14 @@
     "ja": "4el6o6",
     "ru": "4el6o6",
     "zh-CN": "4el6o6"
+  },
+  "calendar.settings.icsNone": {
+    "ar": "2z96jd",
+    "de": "2z96jd",
+    "fr": "2z96jd",
+    "ja": "2z96jd",
+    "ru": "2z96jd",
+    "zh-CN": "2z96jd"
   },
   "calendar.settings.icsNote": {
     "ar": "vas1fo",
@@ -469,6 +573,22 @@
     "ru": "9c35st",
     "zh-CN": "9c35st"
   },
+  "calendar.settings.removeNamed": {
+    "ar": "1yntp1y",
+    "de": "1yntp1y",
+    "fr": "1yntp1y",
+    "ja": "1yntp1y",
+    "ru": "1yntp1y",
+    "zh-CN": "1yntp1y"
+  },
+  "calendar.settings.removed": {
+    "ar": "162ia8y",
+    "de": "162ia8y",
+    "fr": "162ia8y",
+    "ja": "162ia8y",
+    "ru": "162ia8y",
+    "zh-CN": "162ia8y"
+  },
   "calendar.settings.saved": {
     "ar": "gj5eme",
     "de": "gj5eme",
@@ -476,6 +596,30 @@
     "ja": "gj5eme",
     "ru": "gj5eme",
     "zh-CN": "gj5eme"
+  },
+  "calendar.settings.store.encrypted": {
+    "ar": "wo5kdm",
+    "de": "wo5kdm",
+    "fr": "wo5kdm",
+    "ja": "wo5kdm",
+    "ru": "wo5kdm",
+    "zh-CN": "wo5kdm"
+  },
+  "calendar.settings.store.keychain": {
+    "ar": "17fqq5e",
+    "de": "17fqq5e",
+    "fr": "17fqq5e",
+    "ja": "17fqq5e",
+    "ru": "17fqq5e",
+    "zh-CN": "17fqq5e"
+  },
+  "calendar.settings.store.plain": {
+    "ar": "1ywna9o",
+    "de": "1ywna9o",
+    "fr": "1ywna9o",
+    "ja": "1ywna9o",
+    "ru": "1ywna9o",
+    "zh-CN": "1ywna9o"
   },
   "calendar.settings.syncNow": {
     "ar": "7pn7qw",
@@ -516,6 +660,14 @@
     "ja": "p39jit",
     "ru": "p39jit",
     "zh-CN": "p39jit"
+  },
+  "calendar.settings.working": {
+    "ar": "1hfa4bu",
+    "de": "1hfa4bu",
+    "fr": "1hfa4bu",
+    "ja": "1hfa4bu",
+    "ru": "1hfa4bu",
+    "zh-CN": "1hfa4bu"
   },
   "cite.doi.consent.message.openAlex": {
     "ar": "rmaybm",

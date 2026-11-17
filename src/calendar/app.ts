@@ -11,10 +11,12 @@
  *     unresolved and is reported, never decided silently.
  *   • calendarBlockFor: today's events from the ICS subscriptions, as the
  *     daily note's calendar block ({{calendar}} in the template, C6).
+ *   • refreshCalendarInNote: the same block, refreshed in a daily note that
+ *     already exists (Settings → Calendar → "Refresh today's note").
  */
 import { CalDavError, createCalDavClient, discoverCalendars, type DiscoveredCalendar } from "./caldav";
 import { authorizationFor, CALDAV_STATE, calendarFetch, httpUrl, readAccount, readSubscriptions, type CalDavAccount } from "./config";
-import { BLOCK_END, BLOCK_START, eventLines, feedEventsOn } from "./dailyEvents";
+import { BLOCK_END, BLOCK_START, eventLines, feedEventsOn, withCalendarBlock } from "./dailyEvents";
 import { emptyState, runSync, type Choice, type Conflict, type SyncReport, type SyncState, type VaultIO } from "./taskSync";
 
 export type ConnectionResult = { ok: true; tasks: number } | { ok: false; reason: "auth" | "cors" | "not-found" | "server" | "url" | "no-account" };
@@ -136,4 +138,31 @@ export async function calendarBlockFor(day: string, d: CalendarBlockDeps): Promi
   }
   const lines = [...eventLines(feedEventsOn(got, day, d.timeZone), { allDay: d.labels.allDay, none: d.labels.none }), ...failed.map((n) => `- ${d.labels.failed(n)}`)];
   return [BLOCK_START, `## ${d.labels.heading}`, ...lines, BLOCK_END].join("\n");
+}
+
+export interface RefreshDeps extends Omit<CalendarBlockDeps, "labels"> {
+  labels: CalendarBlockDeps["labels"];
+  /** The vault (default: the workspace). */
+  vault?: Pick<VaultIO, "read" | "write">;
+}
+
+export type RefreshResult = { kind: "no-subscriptions" } | { kind: "no-note"; path: string } | { kind: "refreshed"; path: string; events: number };
+
+/**
+ * W10.C6: refresh the calendar block of an existing daily note (`path`, for
+ * `day`): today's events replace the block between its markers, or the block
+ * is added under the note's first heading. Nothing else in the note changes;
+ * with no subscription nothing is fetched and nothing is written.
+ */
+export async function refreshCalendarInNote(path: string, day: string, d: RefreshDeps): Promise<RefreshResult> {
+  const feeds = d.feeds ?? readSubscriptions().map((s) => ({ name: s.name, url: s.url }));
+  if (!feeds.length) return { kind: "no-subscriptions" };
+  const vault = d.vault ?? (await workspaceVault());
+  const note = await vault.read(path);
+  if (note === null) return { kind: "no-note", path };
+  const block = await calendarBlockFor(day, { ...d, feeds });
+  const lines = block.split("\n").slice(2, -1);
+  const next = withCalendarBlock(note, d.labels.heading, lines);
+  if (next !== note) await vault.write(path, next);
+  return { kind: "refreshed", path, events: lines.filter((l) => l !== `- ${d.labels.none}` && !feeds.some((f) => l === `- ${d.labels.failed(f.name)}`)).length };
 }
