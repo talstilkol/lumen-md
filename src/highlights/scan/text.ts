@@ -103,8 +103,8 @@ export interface ReadMark {
 
 /**
  * Marks that continue one another become one passage: the same colour, on
- * the next line (its top within about a line's height of the previous
- * bottom). A highlight that runs over three lines is one highlight.
+ * the next line (its top within two and a half box heights of the previous
+ * bottom: the leading of a printed book). A highlight that runs over three lines is one highlight.
  */
 export function groupPassages(marks: readonly ReadMark[]): ScannedMark[] {
   const out: Array<{ lines: string[]; color: string; last: ReadMark["box"] }> = [];
@@ -112,7 +112,8 @@ export function groupPassages(marks: readonly ReadMark[]): ScannedMark[] {
     if (!m.text.trim()) continue;
     const prev = out[out.length - 1];
     const lineH = Math.max(1, m.box.y1 - m.box.y0);
-    const next = prev && prev.color === m.color && m.box.y0 > prev.last.y0 + lineH * 0.5 && m.box.y0 - prev.last.y1 <= lineH * 1.6;
+    // A book's leading is often 1.5–1.8 lines: the next line's box can start more than a box's height below this one's.
+    const next = prev && prev.color === m.color && m.box.y0 > prev.last.y0 + lineH * 0.5 && m.box.y0 - prev.last.y1 <= lineH * 2.5;
     if (next) {
       prev.lines.push(m.text);
       prev.last = m.box;
