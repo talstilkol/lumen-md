@@ -4,7 +4,7 @@
  * version is its set's current manifest, on ≥ 150 items per language.
  */
 import { describe, expect, it } from "vitest";
-import { cpSync, mkdtempSync, writeFileSync, readFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, writeFileSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
@@ -62,6 +62,15 @@ describe("eval:card for the writing agents (W13.W2)", () => {
     const r = spawnSync(process.execPath, [join(ROOT, "scripts/eval/writing-sets.mjs"), "--check"], { encoding: "utf8" });
     expect(r.stderr).toBe("");
     expect(r.status).toBe(0);
+  });
+
+  it("a folder of plain fixtures without a manifest is not an eval set (INT7: W13.W9/W10's eval/writing folders)", () => {
+    const dir = sandbox();
+    mkdirSync(join(dir, "eval/writing/plainFixtures"), { recursive: true });
+    writeFileSync(join(dir, "eval/writing/plainFixtures/en.jsonl"), "{}\n");
+    const r = run(["--suite", "writing", "--check"], dir);
+    expect(r.out).not.toMatch(/plainFixtures/);
+    expect(r.code).toBe(0);
   });
 
   it("an unknown suite is refused", () => {

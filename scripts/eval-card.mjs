@@ -80,10 +80,10 @@ export function checkWritingAgent(agent, { root = ROOT } = {}) {
   return { ...r, problems };
 }
 
-/** Every writing agent with an eval set. */
+/** Every writing agent with an eval set (a folder with a manifest; W13.W9/W10's plain fixtures are not sets). */
 export function writingAgentsWithSets(root = ROOT) {
   const dir = join(root, "eval/writing");
-  return existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name).sort() : [];
+  return existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory() && existsSync(join(dir, e.name, "manifest.json"))).map((e) => e.name).sort() : [];
 }
 
 /**
