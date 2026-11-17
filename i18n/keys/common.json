@@ -11925,6 +11925,11 @@
       "vars": []
     },
     {
+      "key": "importWizard.how.pandoc",
+      "en": "Converted by the Pandoc installed on this computer (DocBook, MediaWiki, Jira, OPML, txt2tags, DokuWiki, Textile and more). Pick the files; nothing leaves the computer.",
+      "vars": []
+    },
+    {
       "key": "importWizard.how.roam",
       "en": "In Roam: ⋯ (top right) → Export All → JSON. Pick the .json, or the .zip as it came. Blocks stay an outline, block references become ^ids, daily notes go to journal/.",
       "vars": []
@@ -24525,21 +24530,6 @@
     {
       "key": "yiddish.spell.unknown",
       "en": "Not in the Yiddish word list",
-      "vars": []
-    },
-    {
-      "key": "importWizard.how.pandoc",
-      "en": "Converted by the Pandoc installed on this computer (DocBook, MediaWiki, Jira, OPML, txt2tags, DokuWiki, Textile and more). Pick the files; nothing leaves the computer.",
-      "vars": []
-    },
-    {
-      "key": "map.offline.none",
-      "en": "No offline map in the vault. Maps use the online tiles (none in airplane mode).",
-      "vars": []
-    },
-    {
-      "key": "xchg.absent",
-      "en": "(none)",
       "vars": []
     }
   ]
