@@ -192,6 +192,23 @@ export function voiceFor(lang: string, allowNetwork = networkVoicesAllowed(), ch
   return pick ?? voices.find((v) => v.lang.toLowerCase() === lang.toLowerCase()) ?? voices.find((v) => v.lang.toLowerCase().startsWith(base)) ?? (base === "he" ? voices.find((v) => v.lang.toLowerCase().startsWith("iw")) : undefined);
 }
 
+/**
+ * Say one word with an on-device voice only (W13.R5's immersive reader): a
+ * network voice would send the word away, so none is used even when they
+ * are allowed. False when this device has no voice for the language.
+ */
+export function speakWordLocally(word: string, lang: string): boolean {
+  if (typeof speechSynthesis === "undefined" || typeof SpeechSynthesisUtterance === "undefined") return false;
+  const voice = voiceFor(lang, false);
+  if (!voice) return false;
+  const u = new SpeechSynthesisUtterance(word);
+  u.voice = voice;
+  u.lang = voice.lang;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+  return true;
+}
+
 export interface WordRange {
   from: number;
   to: number;

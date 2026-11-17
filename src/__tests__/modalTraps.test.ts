@@ -49,10 +49,10 @@ describe("the modal gate", () => {
     expect(modalProblems(files)).toEqual([]);
   });
 
-  it("every dialog that was a hand-built modal renders <Modal> (86 of 86)", () => {
+  it("every dialog renders <Modal> (98: 86, then wave g3's 12, INT7)", () => {
     const modalFiles = files.filter((f) => f.path !== MODAL_FILE && usesModal(f.text));
     const count = modalFiles.reduce((n, f) => n + (f.text.match(/<Modal\b/g)?.length ?? 0), 0);
-    expect(count).toBe(86);
+    expect(count).toBe(98);
     // The e2e registry names every one of them, with how to open it.
     const registered = new Set((DIALOGS as Array<{ file: string }>).map((d) => d.file));
     for (const f of modalFiles) expect(registered.has(f.path), f.path).toBe(true);

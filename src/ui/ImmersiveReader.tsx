@@ -20,6 +20,7 @@ import { immersiveParagraphs, lexiconTranslation, syllables, POS_COLORS } from "
 import type { LineFocusLines, ReadingProfile } from "../reading/settings";
 import type { Pos } from "../text/hebrewPos";
 import { Modal } from "./Modal";
+import { speakWordLocally } from "../ai/tts";
 
 type Shown = Record<Exclude<Pos, "other">, boolean>;
 const ctl: CSSProperties = { border: "1px solid hsl(var(--border-strong))", borderRadius: 8, padding: "4px 10px", background: "hsl(var(--bg))", color: "hsl(var(--fg))", font: "inherit", fontSize: 13, cursor: "pointer" };
@@ -39,18 +40,9 @@ async function localTranslate(word: string, rtl: boolean): Promise<string> {
   return r.texts[0] ?? "";
 }
 
+/** On-device voices only, through the audited speech route (ai/tts.ts; INT7: cloud-routes gate). */
 function speak(word: string, rtl: boolean): boolean {
-  if (typeof speechSynthesis === "undefined" || typeof SpeechSynthesisUtterance === "undefined") return false;
-  const lang = rtl ? "he" : "en";
-  // On-device voices only: a network voice would send the word away.
-  const voice = speechSynthesis.getVoices().find((v) => v.localService && v.lang.toLowerCase().replace("iw", "he").startsWith(lang));
-  if (!voice) return false;
-  const u = new SpeechSynthesisUtterance(word);
-  u.voice = voice;
-  u.lang = voice.lang;
-  speechSynthesis.cancel();
-  speechSynthesis.speak(u);
-  return true;
+  return speakWordLocally(word, rtl ? "he" : "en");
 }
 
 export function ImmersiveReader({ content, profile, close, translate = localTranslate }: Props) {
