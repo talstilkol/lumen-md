@@ -13,7 +13,7 @@
 
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Pencil, Copy, Trash2, FilePlus2, FolderPlus, ClipboardCopy } from "lucide-react";
+import { Pencil, Copy, Trash2, FilePlus2, FolderPlus, ClipboardCopy, Columns2 } from "lucide-react";
 import { t } from "../i18n";
 
 export interface FileContextAction {
@@ -127,6 +127,10 @@ export function buildFileActions(opts: {
   onCopyPath: () => void;
   onNewFile?: () => void;
   onNewFolder?: () => void;
+  /** Compare (plan W13.R8): keep this note for a compare… */
+  onPickForCompare?: () => void;
+  /** …and compare this one with the kept note (its name in the label). */
+  compareWith?: { label: string; onSelect: () => void };
 }): FileContextAction[] {
   const out: FileContextAction[] = [
     {
@@ -167,6 +171,22 @@ export function buildFileActions(opts: {
         onSelect: opts.onNewFolder,
       });
     }
+  }
+  if (!opts.isFolder && opts.compareWith) {
+    out.push({
+      id: "compareWith",
+      label: t("contextMenu.compareWith", { name: opts.compareWith.label }),
+      icon: <Columns2 size={14} />,
+      onSelect: opts.compareWith.onSelect,
+    });
+  }
+  if (!opts.isFolder && opts.onPickForCompare) {
+    out.push({
+      id: "pickForCompare",
+      label: t("contextMenu.pickForCompare"),
+      icon: <Columns2 size={14} />,
+      onSelect: opts.onPickForCompare,
+    });
   }
   out.push({
     id: "delete",

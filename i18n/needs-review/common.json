@@ -2552,6 +2552,190 @@
     "ru": "17xgkl3",
     "zh-CN": "17xgkl3"
   },
+  "readingViews.compare.after": {
+    "ar": "1pnpdvu",
+    "de": "1pnpdvu",
+    "fr": "1pnpdvu",
+    "ja": "1pnpdvu",
+    "ru": "1pnpdvu",
+    "zh-CN": "1pnpdvu"
+  },
+  "readingViews.compare.before": {
+    "ar": "fy9jwp",
+    "de": "fy9jwp",
+    "fr": "fy9jwp",
+    "ja": "fy9jwp",
+    "ru": "fy9jwp",
+    "zh-CN": "fy9jwp"
+  },
+  "readingViews.compare.body": {
+    "ar": "c1fver",
+    "de": "c1fver",
+    "fr": "c1fver",
+    "ja": "c1fver",
+    "ru": "c1fver",
+    "zh-CN": "c1fver"
+  },
+  "readingViews.compare.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "readingViews.compare.columns": {
+    "ar": "uwpmdu",
+    "de": "uwpmdu",
+    "fr": "uwpmdu",
+    "ja": "uwpmdu",
+    "ru": "uwpmdu",
+    "zh-CN": "uwpmdu"
+  },
+  "readingViews.compare.count": {
+    "ar": "h6eyld",
+    "de": "h6eyld",
+    "fr": "h6eyld",
+    "ja": "h6eyld",
+    "ru": "h6eyld",
+    "zh-CN": "h6eyld"
+  },
+  "readingViews.compare.ignoreNiqqud": {
+    "ar": "n12xuz",
+    "de": "n12xuz",
+    "fr": "n12xuz",
+    "ja": "n12xuz",
+    "ru": "n12xuz",
+    "zh-CN": "n12xuz"
+  },
+  "readingViews.compare.ignoreWhitespace": {
+    "ar": "q8ygem",
+    "de": "q8ygem",
+    "fr": "q8ygem",
+    "ja": "q8ygem",
+    "ru": "q8ygem",
+    "zh-CN": "q8ygem"
+  },
+  "readingViews.compare.inline": {
+    "ar": "1uh05lg",
+    "de": "1uh05lg",
+    "fr": "1uh05lg",
+    "ja": "1uh05lg",
+    "ru": "1uh05lg",
+    "zh-CN": "1uh05lg"
+  },
+  "readingViews.compare.inlineLabel": {
+    "ar": "1ljqnl",
+    "de": "1ljqnl",
+    "fr": "1ljqnl",
+    "ja": "1ljqnl",
+    "ru": "1ljqnl",
+    "zh-CN": "1ljqnl"
+  },
+  "readingViews.compare.layout": {
+    "ar": "1woj3tr",
+    "de": "1woj3tr",
+    "fr": "1woj3tr",
+    "ja": "1woj3tr",
+    "ru": "1woj3tr",
+    "zh-CN": "1woj3tr"
+  },
+  "readingViews.compare.next": {
+    "ar": "ahe95c",
+    "de": "ahe95c",
+    "fr": "ahe95c",
+    "ja": "ahe95c",
+    "ru": "ahe95c",
+    "zh-CN": "ahe95c"
+  },
+  "readingViews.compare.niqqudChange": {
+    "ar": "3mzo7w",
+    "de": "3mzo7w",
+    "fr": "3mzo7w",
+    "ja": "3mzo7w",
+    "ru": "3mzo7w",
+    "zh-CN": "3mzo7w"
+  },
+  "readingViews.compare.none": {
+    "ar": "se7wiy",
+    "de": "se7wiy",
+    "fr": "se7wiy",
+    "ja": "se7wiy",
+    "ru": "se7wiy",
+    "zh-CN": "se7wiy"
+  },
+  "readingViews.compare.position": {
+    "ar": "1ikkgzr",
+    "de": "1ikkgzr",
+    "fr": "1ikkgzr",
+    "ja": "1ikkgzr",
+    "ru": "1ikkgzr",
+    "zh-CN": "1ikkgzr"
+  },
+  "readingViews.compare.prev": {
+    "ar": "1ilpx8w",
+    "de": "1ilpx8w",
+    "fr": "1ilpx8w",
+    "ja": "1ilpx8w",
+    "ru": "1ilpx8w",
+    "zh-CN": "1ilpx8w"
+  },
+  "readingViews.compare.sayChange": {
+    "ar": "1gub13",
+    "de": "1gub13",
+    "fr": "1gub13",
+    "ja": "1gub13",
+    "ru": "1gub13",
+    "zh-CN": "1gub13"
+  },
+  "readingViews.compare.sayDeleted": {
+    "ar": "1so0oe",
+    "de": "1so0oe",
+    "fr": "1so0oe",
+    "ja": "1so0oe",
+    "ru": "1so0oe",
+    "zh-CN": "1so0oe"
+  },
+  "readingViews.compare.sayInserted": {
+    "ar": "1bdf217",
+    "de": "1bdf217",
+    "fr": "1bdf217",
+    "ja": "1bdf217",
+    "ru": "1bdf217",
+    "zh-CN": "1bdf217"
+  },
+  "readingViews.compare.sayPrefix": {
+    "ar": "1sb79uq",
+    "de": "1sb79uq",
+    "fr": "1sb79uq",
+    "ja": "1sb79uq",
+    "ru": "1sb79uq",
+    "zh-CN": "1sb79uq"
+  },
+  "readingViews.compare.title": {
+    "ar": "1n8cxuc",
+    "de": "1n8cxuc",
+    "fr": "1n8cxuc",
+    "ja": "1n8cxuc",
+    "ru": "1n8cxuc",
+    "zh-CN": "1n8cxuc"
+  },
+  "readingViews.compare.tools": {
+    "ar": "10z88un",
+    "de": "10z88un",
+    "fr": "10z88un",
+    "ja": "10z88un",
+    "ru": "10z88un",
+    "zh-CN": "10z88un"
+  },
+  "readingViews.compare.unchanged": {
+    "ar": "1s2az6w",
+    "de": "1s2az6w",
+    "fr": "1s2az6w",
+    "ja": "1s2az6w",
+    "ru": "1s2az6w",
+    "zh-CN": "1s2az6w"
+  },
   "readingViews.triple.on": {
     "ar": "jorirw",
     "de": "jorirw",
@@ -2757,6 +2941,14 @@
     "ja": "195b0jb",
     "ru": "195b0jb",
     "zh-CN": "195b0jb"
+  },
+  "sync.conflict.compareWords": {
+    "ar": "49wgbr",
+    "de": "49wgbr",
+    "fr": "49wgbr",
+    "ja": "49wgbr",
+    "ru": "49wgbr",
+    "zh-CN": "49wgbr"
   },
   "writing.accept": {
     "ar": "me22x5",

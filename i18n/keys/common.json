@@ -21315,6 +21315,156 @@
       "key": "readingViews.triple.on",
       "en": "Three columns: source, preview and outline, scroll linked",
       "vars": []
+    },
+    {
+      "key": "readingViews.compare.after",
+      "en": "After: {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "readingViews.compare.before",
+      "en": "Before: {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "readingViews.compare.body",
+      "en": "Differences",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.columns",
+      "en": "Side by side",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.count",
+      "en": "{n} changes (+{ins} −{del})",
+      "vars": [
+        "n",
+        "ins",
+        "del"
+      ]
+    },
+    {
+      "key": "readingViews.compare.ignoreNiqqud",
+      "en": "Ignore niqqud",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.ignoreWhitespace",
+      "en": "Ignore spaces",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.inline",
+      "en": "Inline",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.inlineLabel",
+      "en": "{old} compared with {new}",
+      "vars": [
+        "old",
+        "new"
+      ]
+    },
+    {
+      "key": "readingViews.compare.layout",
+      "en": "Layout",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.next",
+      "en": "Next change",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.niqqudChange",
+      "en": "niqqud changed: {old} → {new}",
+      "vars": [
+        "old",
+        "new"
+      ]
+    },
+    {
+      "key": "readingViews.compare.none",
+      "en": "No differences",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.position",
+      "en": "Change {i} of {n}",
+      "vars": [
+        "i",
+        "n"
+      ]
+    },
+    {
+      "key": "readingViews.compare.prev",
+      "en": "Previous change",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.sayChange",
+      "en": "Change {i} of {n}: {what}",
+      "vars": [
+        "i",
+        "n",
+        "what"
+      ]
+    },
+    {
+      "key": "readingViews.compare.sayDeleted",
+      "en": "deleted “{text}”",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "readingViews.compare.sayInserted",
+      "en": "inserted “{text}”",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "readingViews.compare.sayPrefix",
+      "en": "prefix changed: {old} → {new}",
+      "vars": [
+        "old",
+        "new"
+      ]
+    },
+    {
+      "key": "readingViews.compare.title",
+      "en": "Compare",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.tools",
+      "en": "Compare tools",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.unchanged",
+      "en": "Show {n} unchanged paragraphs",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "sync.conflict.compareWords",
+      "en": "Compare word by word",
+      "vars": []
     }
   ]
 }
