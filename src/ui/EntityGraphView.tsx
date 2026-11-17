@@ -20,6 +20,7 @@ import { GraphCanvas } from "./graph/GraphCanvas";
 import { TimeSlider, untilOf } from "./graph/TimeSlider";
 import { groupColor, resolveColor } from "./graph/graphData";
 import "./entityGraphStrings";
+import "./familyStrings";
 import { egoDefault } from "../views/graph/ego";
 import { countedSankey, type FlowInput } from "../views/graph/flows";
 import type { SourceMeta } from "../views/graph/claims";
@@ -28,11 +29,13 @@ import type { SourceMeta } from "../views/graph/claims";
 const SankeyView = lazy(() => import("../viz/graph/SankeyView"));
 const AdjacencyMatrixView = lazy(() => import("../viz/graph/AdjacencyMatrixView"));
 const EdgeInspector = lazy(() => import("../viz/graph/EdgeInspector"));
+// W13.G7: the family tree of the people shown, loaded when chosen.
+const FamilyTreeView = lazy(() => import("./FamilyTreeView"));
 
 /** Above this many entities the view opens as an ego graph (R12.8), never as a hairball. */
 export const EGO_MAX = 50;
 
-export type EntityGraphMode = "graph" | "table" | "sankey" | "flows" | "matrix";
+export type EntityGraphMode = "graph" | "table" | "sankey" | "flows" | "matrix" | "family";
 
 export interface EntityGraphViewProps {
   entities: readonly Entity[];
@@ -45,11 +48,13 @@ export interface EntityGraphViewProps {
   start?: string;
   /** Open a note at a paragraph (the claim card's source link). */
   onOpenSource?: (note: string, anchor: string) => void;
+  /** W13.G7: person entities with their front matter (born, died, sex), for the family tree. */
+  people?: ReadonlyArray<import("../entities/gedcom").ExportPerson>;
 }
 
 const field: React.CSSProperties = { fontSize: 12, padding: "2px 6px", borderRadius: 4, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "hsl(var(--fg))" };
 
-export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialMode = "graph", start, onOpenSource }: EntityGraphViewProps) {
+export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialMode = "graph", start, onOpenSource, people }: EntityGraphViewProps) {
   const [types, setTypes] = useState<Set<EntityType>>(new Set(ENTITY_TYPES));
   const [preds, setPreds] = useState<Set<string>>(new Set(PREDICATES.map((p) => p.id)));
   const [folder, setFolder] = useState("");
@@ -100,6 +105,9 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
     return n ? { reliability: n.reliability, sourceClass: n.sourceClass } : undefined;
   };
   const egoShown = !!ego.center && center === ego.center;
+  // W13.G7: the family tree is offered when the graph has parents, children or spouses.
+  const hasFamily = useMemo(() => edges.some((e) => e.predicate === "child" || e.predicate === "spouse"), [edges]);
+  const familyPeople = useMemo(() => people ?? entities.filter((e) => e.type === "person").map((entity) => ({ entity })), [people, entities]);
 
   const [positions, setPositions] = useState<Float32Array | null>(null);
   useEffect(() => {
@@ -224,6 +232,7 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
             <option value="sankey">{t("entityGraph.view.mode.sankey")}</option>
             <option value="flows">{t("entityGraph.view.mode.flows")}</option>
             <option value="matrix">{t("entityGraph.view.mode.matrix")}</option>
+            {hasFamily && <option value="family">{t("family.mode")}</option>}
           </select>
         </label>
         {egoShown && (
@@ -259,6 +268,10 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
                 onBand={(ids) => setInspect(ids)}
               />
             )}
+          </Suspense>
+        ) : mode === "family" ? (
+          <Suspense fallback={null}>
+            <FamilyTreeView people={familyPeople} edges={visible.edges} start={center || undefined} onOpen={onOpenEntity} />
           </Suspense>
         ) : mode === "graph" ? (
           <GraphCanvas
