@@ -16,7 +16,13 @@
  * cache) bypass `fetch` entirely; the worker reports those itself with
  * `reportWorkerDownload` before it loads a model that is not cached
  * (webllm.worker.ts).
+ *
+ * W10.D22: XMLHttpRequest, WebSocket, EventSource and importScripts are
+ * wrapped too (workerLedgerChannels.ts): reported, and blocked in airplane
+ * mode like fetch; a fetch that fails is settled with status 0.
  */
+
+import { wrapWorkerChannels, type ChannelScope } from "./workerLedgerChannels";
 
 export const LEDGER_CHANNEL = "lumen-privacy-ledger";
 
@@ -62,7 +68,7 @@ export type WorkerLedgerMessage =
   | { kind: "start"; id: string; url: string; method: string; bytesOut: number; worker: string }
   | { kind: "end"; id: string; status: number; bytesIn: number | null };
 
-type FetchScope = { fetch: typeof fetch; name?: string; location?: { pathname?: string; href?: string } };
+type FetchScope = { fetch: typeof fetch; name?: string; location?: { pathname?: string; href?: string } } & Omit<ChannelScope, "location">;
 
 /** The channel and worker name `installWorkerLedger` set up, for `reportWorkerDownload`. */
 let installed: { post: (m: WorkerLedgerMessage) => void; worker: string; next: () => string } | null = null;
@@ -147,11 +153,29 @@ export function installWorkerLedger(
     }
     const id = next();
     post({ kind: "start", id, url, method, bytesOut: bodySize(init?.body), worker });
-    const res = await inner(input, init);
+    let res: Response;
+    try {
+      res = await inner(input, init);
+    } catch (e) {
+      // W10.D22: a request that failed is settled too (status 0), never left open in the ledger.
+      post({ kind: "end", id, status: 0, bytesIn: null });
+      throw e;
+    }
     const len = res.headers?.get?.("content-length");
     post({ kind: "end", id, status: res.status, bytesIn: len != null && Number.isFinite(Number(len)) ? Number(len) : null });
     return res;
   } as typeof fetch;
+  // W10.D22: XMLHttpRequest, WebSocket, EventSource and importScripts go through the same ledger and airplane check.
+  wrapWorkerChannels(scope, {
+    worker,
+    post,
+    next,
+    airplane: () => airplane,
+    heard: () => heard,
+    checks: !!air,
+    air,
+    stays: (u) => stays(u, scope.location?.href),
+  });
   return true;
 }
 
