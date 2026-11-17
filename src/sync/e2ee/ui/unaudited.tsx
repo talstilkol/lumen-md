@@ -18,6 +18,7 @@ import { getLocale, t } from "../../../i18n";
 import "../strings";
 import { isEnabled, setFlag } from "../../../flags/flags";
 import { Modal } from "../../../ui/Modal";
+import { HelpButton } from "../../../ui/HelpButton";
 
 export const E2EE_FLAG = "sync.e2ee";
 
@@ -40,6 +41,7 @@ export function E2eeGate({ onEnable, onCancel }: { onEnable: () => void; onCance
         data-testid="e2ee-gate"
         style={{ width: "min(480px, calc(100vw - 32px))", background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 12, padding: 20, display: "grid", gap: 14 }}
       >
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="sync/e2ee" /></span>
         <h2 id="e2ee-gate-title" style={{ margin: 0, fontSize: 18 }}>
           {t("e2ee.gate.title")}
         </h2>

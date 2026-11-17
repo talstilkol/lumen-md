@@ -5,6 +5,7 @@
   "map.offline.imported": "{name} is the offline map now",
   "map.offline.importing": "Copying {name} into the vault…",
   "map.offline.none": "No offline map in the vault. Maps show online tiles only if you allow them (never in airplane mode).",
+  "map.offline.notPmtiles": "“{name}” is not a PMTiles map (version 3). Make one with the pmtiles command below.",
   "map.offline.remove": "Remove",
   "map.offline.removed": "Removed {name}",
   "map.offline.title": "Offline map",

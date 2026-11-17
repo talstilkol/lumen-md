@@ -16,6 +16,9 @@ import { noteParagraphs } from "../ai/paragraphAnchors";
 import { makeSuggestion } from "../agents/writing/suggestion";
 import { stageSuggestion } from "../agents/writingReview";
 import "./abstractDialogStrings";
+import { explainError } from "../lib/userError";
+import { EmptyState, learnHow } from "./EmptyState";
+import { HelpButton } from "./HelpButton";
 
 export interface AbstractTarget {
   getView: () => EditorView | null;
@@ -40,7 +43,7 @@ function stage(target: AbstractTarget, from: number, to: number, after: string, 
     window.dispatchEvent(new Event("lumen-open-agent-review"));
     return true;
   } catch (e) {
-    showAiToast(String((e as Error).message ?? e), "error");
+    showAiToast(explainError(e, "abstract"), "error");
     return false;
   }
 }
@@ -109,7 +112,7 @@ export function AbstractView({ r, target, onClose }: { r: AbstractResult; target
       <section aria-labelledby="abs-abstract">
         <h3 id="abs-abstract" style={{ margin: "0 0 4px", fontSize: 14 }}>{t("abs.abstract")}</h3>
         <div data-testid="abs-abstract" style={{ lineHeight: 1.7 }}>
-          {r.parts ? (["background", "method", "findings"] as const).map(part) : r.abstract.length ? <p style={{ margin: 0 }}>{r.abstract.map(sentence)}</p> : <p>{t("abs.empty")}</p>}
+          {r.parts ? (["background", "method", "findings"] as const).map(part) : r.abstract.length ? <p style={{ margin: 0 }}>{r.abstract.map(sentence)}</p> : <EmptyState style={{ padding: 0 }} message={t("abs.empty")} action={learnHow("editor/writing-agents")} />}
         </div>
       </section>
       <p role="status" style={{ margin: 0, fontSize: 12 }} data-testid="abs-deleted">
@@ -140,6 +143,7 @@ export function openAbstractDialog(r: AbstractResult, target: AbstractTarget): v
   root.render(
     <Modal onClose={close} aria-labelledby="abs-title" data-testid="abstract-dialog" style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: "6vh", zIndex: 9999 }} onClick={(e) => { if (e.target === e.currentTarget) close(); }}>
       <div dir={target.lang === "he" ? "rtl" : "ltr"} style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, width: "min(700px, calc(100vw - 32px))", maxHeight: "84vh", overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 10 }}>
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="editor/writing-agents" /></span>
         <h2 id="abs-title" style={{ margin: 0, fontSize: 16 }}>{t("abs.title")}</h2>
         <AbstractView r={r} target={target} onClose={close} />
       </div>

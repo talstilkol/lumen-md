@@ -2529,6 +2529,7 @@
   "map.offline.imported": "{name} هي الخريطة دون اتصال الآن",
   "map.offline.importing": "جارٍ نسخ {name} إلى الخزنة…",
   "map.offline.none": "لا توجد خريطة غير متصلة في الخزنة. تعرض الخرائط المربعات عبر الإنترنت فقط إذا سمحت بذلك (أبدًا في وضع الطيران).",
+  "map.offline.notPmtiles": "“{name}” is not a PMTiles map (version 3). Make one with the pmtiles command below.",
   "map.offline.remove": "إزالة",
   "map.offline.removed": "أُزيل {name}",
   "map.offline.title": "خريطة دون اتصال",

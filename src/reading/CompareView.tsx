@@ -22,6 +22,7 @@ import { Modal } from "../ui/Modal";
 import { t } from "../i18n";
 import { announce } from "../a11y/announce";
 import { changeRuns, rows as toRows, wordDiff, type DiffOptions, type Piece, type Row, type RowPiece } from "./wordDiffBidi";
+import { HelpButton } from "../ui/HelpButton";
 
 export interface CompareSide {
   /** What the column header says: a note's name, "Version of 12:04", "This device". */
@@ -212,6 +213,7 @@ export function CompareView({ left, right, onClose }: Props) {
         <h2 id="cmp-title" className="cmp-title">
           {t("readingViews.compare.title")}
         </h2>
+        <HelpButton topic="editor/reading-views" />
         <div className="cmp-tools" role="toolbar" aria-label={t("readingViews.compare.tools")}>
           <div className="cmp-seg" role="group" aria-label={t("readingViews.compare.layout")}>
             <button type="button" aria-pressed={prefs.layout === "columns"} onClick={() => update({ layout: "columns" })} data-testid="compare-columns">
@@ -240,7 +242,8 @@ export function CompareView({ left, right, onClose }: Props) {
               ? current >= 0
                 ? t("readingViews.compare.position", { i: String(current + 1), n: String(runs.length) })
                 : t("readingViews.compare.count", { n: String(runs.length), ins: String(stats.ins), del: String(stats.del) })
-              : t("readingViews.compare.none")}
+              : // empty-allow: the toolbar's result count ("no differences"), not an empty panel
+                t("readingViews.compare.none")}
           </span>
           <button type="button" className="cmp-close" onClick={onClose}>
             {t("readingViews.compare.close")}

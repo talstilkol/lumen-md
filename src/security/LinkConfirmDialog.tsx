@@ -11,6 +11,7 @@ import { t } from "../i18n";
 import { Modal } from "../ui/Modal";
 import "./linkConfirmStrings";
 import type { LinkAction, LinkDecision } from "./linkConfirm";
+import { HelpButton } from "../ui/HelpButton";
 
 const BTN = "inline-flex items-center rounded-md border border-border bg-bg px-3 py-1.5 text-sm text-fg hover:bg-bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 const BTN_PRIMARY = "inline-flex items-center rounded-md border border-accent bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
@@ -36,6 +37,7 @@ export function LinkConfirmDialog(props: { decision: LinkDecision; onAnswer: (a:
       style={{ position: "fixed", inset: 0, zIndex: 260, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
     >
       <div style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 12, maxWidth: 480, width: "100%", padding: 20 }}>
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="security" /></span>
         <h2 id="link-confirm-title" style={{ margin: "0 0 10px", fontSize: 17 }}>
           {t("link.confirm.title")}
         </h2>

@@ -2529,6 +2529,7 @@
   "map.offline.imported": "{name} ist jetzt die Offline-Karte",
   "map.offline.importing": "{name} wird in den Tresor kopiert …",
   "map.offline.none": "Keine Offline-Karte im Tresor. Karten zeigen Online-Kacheln nur, wenn du es erlaubst (nie im Flugmodus).",
+  "map.offline.notPmtiles": "“{name}” is not a PMTiles map (version 3). Make one with the pmtiles command below.",
   "map.offline.remove": "Entfernen",
   "map.offline.removed": "{name} entfernt",
   "map.offline.title": "Offline-Karte",

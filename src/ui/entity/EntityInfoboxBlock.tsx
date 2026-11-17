@@ -112,6 +112,7 @@ export default function EntityInfoboxEmbed({ path = "", text = "" }: { path?: st
   const early = useMemo(() => (!ctx ? infoboxFor({ entities: new Map(), pathOf: new Map(), byName: new Map(), edges: [] }, path, text) : null), [ctx, path, text]);
   if (card) return card;
   if (early) return early;
+  // empty-allow: an inline note in a hover card ("no facts"), not a panel
   return failed ? <span role="note">{t("entityGraph.infobox.empty")}</span> : null;
 }
 

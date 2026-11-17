@@ -12,6 +12,7 @@ import { useAppStore } from "../../store/useStore";
 import { Modal } from "../../ui/Modal";
 import { DafView, type DafChoice, type DafNoteRef } from "../../ui/DafView";
 import { commentaryFromNote, dafFromNote, defaultCommentaryPaths, type DafText } from "./dafSources";
+import { HelpButton } from "../../ui/HelpButton";
 
 // The English of this view comes with ../../ui/DafView (its strings, registered when it loads).
 
@@ -62,6 +63,7 @@ export async function openDaf(): Promise<void> {
   mounted = { root, host };
   root.render(
     <Modal aria-label={t("daf.title")} onClose={closeDaf} data-testid="daf-dialog" data-reading-mode="daf" style={{ inlineSize: "min(1180px, 96vw)", maxBlockSize: "94vh", overflow: "auto" }}>
+      <div style={{ display: "flex", justifyContent: "flex-end", paddingInline: 8, paddingBlockStart: 6 }}><HelpButton topic="editor/reading-views" /></div>
       <DafView
         content={content}
         myNotes={myNotes}

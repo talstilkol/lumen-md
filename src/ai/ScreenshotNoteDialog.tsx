@@ -14,6 +14,7 @@ import "../ui/PromptDialog.css";
 import "./screenshotNoteStrings";
 import type { ScreenshotDeps, ScreenshotNote } from "./screenshotNote";
 import { Modal } from "../ui/Modal";
+import { HelpButton } from "../ui/HelpButton";
 
 export function ScreenshotNoteDialog({ run, onResolve }: { run: (signal: AbortSignal) => Promise<ScreenshotNote>; onResolve: (markdown: string | null) => void }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -35,6 +36,7 @@ export function ScreenshotNoteDialog({ run, onResolve }: { run: (signal: AbortSi
   return (
     <Modal onClose={cancel} className="prompt-backdrop" aria-labelledby="shot-title" data-testid="screenshot-note">
       <div className="prompt-dialog" ref={ref} style={{ maxWidth: 640, width: "min(640px, 94vw)" }}>
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="ai/screenshot-note" /></span>
         <div id="shot-title" className="prompt-title">
           {t("screenshotNote.title")}
         </div>

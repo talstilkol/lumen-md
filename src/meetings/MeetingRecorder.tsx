@@ -19,6 +19,7 @@ import { clock } from "../ai/dictation/longform";
 import { explainError } from "../lib/userError";
 import type { MeetingAvailability, MeetingDeps, MeetingResult } from "./meetingFlow";
 import type { TimedFinal } from "./meetingFlowCore";
+import { HelpButton } from "../ui/HelpButton";
 
 type Phase = "checking" | "unavailable" | "idle" | "recording" | "processing" | "done" | "declined" | "error";
 
@@ -152,6 +153,7 @@ export function MeetingRecorder({ onClose, deps }: { onClose: () => void; deps?:
   return (
     <Modal aria-labelledby="meeting-title" onClose={phase === "processing" ? undefined : onClose} data-testid="meeting-recorder" data-phase={phase} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "var(--overlay)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, padding: 20, width: "min(480px, 100%)", maxHeight: "90vh", overflow: "auto", display: "grid", gap: 12 }}>
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="ai/meeting-notes" /></span>
         <h2 id="meeting-title" style={{ margin: 0, fontSize: 17 }}>{t("meetingFlow.title")}</h2>
         <p style={{ margin: 0, fontSize: 12.5, color: "hsl(var(--fg-muted))" }}>{t("meetingFlow.about")}</p>
         {phase === "checking" && <p role="status">{t("meetingFlow.checking")}</p>}

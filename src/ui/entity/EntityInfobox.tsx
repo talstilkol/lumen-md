@@ -9,6 +9,7 @@ import { useEffect, useId, useState } from "react";
 import { getLocale, t } from "../../i18n";
 import { formatInfoValue, type InfoboxModel, type InfoValue } from "../../entities/infobox";
 import "./entityInfobox.css";
+import { HelpButton } from "../HelpButton";
 
 export interface EntityInfoboxProps {
   model: InfoboxModel;
@@ -70,6 +71,7 @@ export function EntityInfobox({ model, resolveImage, linkOf, hover, dir }: Entit
         <tbody>
           <tr>
             <td colSpan={2} className="lumen-infobox-type" style={{ borderBlockStart: 0 }}>
+              <span style={{ float: "inline-end", marginInlineStart: 6 }}><HelpButton topic="workspace/entity-graph" size={18} /></span>
               {t(`entityGraph.type.${e.type}`)}
               {e.aliases.length > 0 && (
                 <>
@@ -132,6 +134,7 @@ export function EntityInfobox({ model, resolveImage, linkOf, hover, dir }: Entit
           )}
           {!model.rows.length && !model.key.length && (
             <tr>
+              {/* empty-allow: a row of the infobox card ("no facts yet"), inside a card that has its own actions */}
               <td colSpan={2} className="lumen-infobox-rel">
                 {t("entityGraph.infobox.empty")}
               </td>

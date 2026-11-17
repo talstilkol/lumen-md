@@ -19,6 +19,7 @@ import { DataKanbanView, DataTableView } from "./DataFileView";
 import { parseGeoFile, type GeoCollection } from "./geoFile";
 import { GeoFileView } from "./GeoFileView";
 import { Modal } from "../ui/Modal";
+import { HelpButton } from "../ui/HelpButton";
 
 type Loaded =
   | { kind: "notebook"; text: string; notebook: Notebook }
@@ -125,6 +126,7 @@ function Viewer({ view, onClose, onOpenAsText, io = workspaceIo }: Props) {
     <Modal className="fv-overlay" aria-label={name} onClose={onClose}>
       <header className="fv-toolbar">
         <h2 dir="auto">{name}</h2>
+        <HelpButton topic="workspace/file-viewers" />
         {l?.kind === "data" && (
           <>
             <button type="button" aria-pressed={mode === "table"} onClick={() => setMode("table")}>

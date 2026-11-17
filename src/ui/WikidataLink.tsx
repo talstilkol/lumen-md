@@ -16,6 +16,7 @@ import { LEDGER_REASON, WIKIDATA_LICENCE, searchWikidata, setWikidataAlways, wik
 import "./entityGraphStrings";
 import { Modal } from "./Modal";
 import { EmptyState, learnHow } from "./EmptyState";
+import { HelpButton } from "./HelpButton";
 
 export interface WikidataVault {
   readWorkspaceFile(path: string): Promise<string>;
@@ -99,6 +100,7 @@ export function WikidataLink({ name, path, onClose, vault, fetchImpl }: Wikidata
   return (
     <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("entityGraph.wikidata.title")} data-testid="wikidata-link">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560, padding: 18, display: "flex", flexDirection: "column", gap: 10, fontSize: 13 }}>
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="workspace/entity-graph" /></span>
         <h2 style={{ margin: 0, fontSize: 16 }}>
           {t("entityGraph.wikidata.title")}: <span dir="auto">{name}</span>
         </h2>

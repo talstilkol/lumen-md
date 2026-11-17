@@ -19,6 +19,7 @@ import { t } from "../i18n";
 import { explainError } from "../lib/userError";
 import { Modal } from "../ui/Modal";
 import { CONSENT_VERSION, CORPUS_RATE, addTake, exportZip, newSession, nextSentence, parseScript, sessionSummary, type Session, type Take } from "./session";
+import { HelpButton } from "../ui/HelpButton";
 
 /** A recording in progress: `stop` ends it and gives mono samples at CORPUS_RATE. */
 export interface Capture {
@@ -147,6 +148,7 @@ export function CorpusRecorder({ onClose, deps = DEFAULT_DEPS }: { onClose: () =
       <div className="cmd-palette" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10, fontSize: 13, maxInlineSize: 640 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <strong style={{ flex: 1 }}>{t("voiceCorpus.title")}</strong>
+          <HelpButton topic="contributing/hebrew-voice" />
           <button type="button" className="icon-btn" onClick={onClose} aria-label={t("voiceCorpus.close")}>✕</button>
         </div>
         {!session && (

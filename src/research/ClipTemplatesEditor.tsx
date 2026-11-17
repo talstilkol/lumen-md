@@ -15,6 +15,7 @@ import { explainError } from "../lib/userError";
 import { Modal } from "../ui/Modal";
 import { DEFAULT_TEMPLATE, SITE_TEMPLATES, renderClip, type ClipTemplate, type ClipVars } from "./clipTemplates";
 import { importObsidianTemplate, loadUserTemplates, saveUserTemplates, templateId, templateProblems, whichTemplate, type TemplateIo } from "./clipTemplateStore";
+import { HelpButton } from "../ui/HelpButton";
 
 /** Sample values for the preview: what a clipped article would give. */
 const SAMPLE: ClipVars = {
@@ -109,6 +110,7 @@ export function ClipTemplatesEditor({ onClose, initial, io }: { onClose: () => v
       <div className="cmd-palette" style={{ padding: 16, display: "flex", flexDirection: "column", gap: 10, fontSize: 13, maxInlineSize: 900, inlineSize: "95vw" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <strong style={{ flex: 1 }}>{t("clipTemplates.title")}</strong>
+          <HelpButton topic="plugins/web-clipper" />
           <button type="button" className="icon-btn" onClick={onClose} aria-label={t("clipTemplates.close")}>✕</button>
         </div>
         <div style={{ display: "flex", gap: 16, minBlockSize: 0, flexWrap: "wrap" }}>

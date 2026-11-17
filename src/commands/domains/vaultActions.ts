@@ -25,7 +25,7 @@ export async function exportEverything(): Promise<void> {
     downloadBytes(`lumen-everything-${new Date().toISOString().slice(0, 10)}.zip`, bytes, "application/zip");
     showAiToast(t("vault.exportEverything.done", { n: String(files) }), "success");
   } catch (e) {
-    showAiToast(t("vault.exportEverything.failed", { error: e instanceof Error ? e.message : String(e) }), "error");
+    showAiToast(t("vault.exportEverything.failed", { error: explainError(e, "export-everything") }), "error");
   }
 }
 

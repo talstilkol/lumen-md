@@ -22,6 +22,7 @@ import "./writingPanelStrings";
 import { HelpButton } from "./HelpButton";
 import { hunksOf, suggestionDiff, type WritingSuggestion } from "../agents/writing/suggestion";
 import type { AcceptChoice, ChangePlan } from "../agents/writing/engine";
+import { EmptyState, learnHow } from "./EmptyState";
 
 /** What the panel needs from the editor that shows the suggestions (cmBridge or pmBridge). */
 export interface WritingHost {
@@ -345,9 +346,7 @@ export function WritingPanel({ host, state, onClose }: { host: WritingHost; stat
         </div>
       ) : null}
       {!list.length && !state.busy && !state.error ? (
-        <p data-testid="ws-empty" style={{ ...muted, margin: 0 }}>
-          {t("writing.empty")}
-        </p>
+        <EmptyState testId="ws-empty" style={{ padding: 0 }} message={t("writing.empty")} action={learnHow("editor/writing-agents")} />
       ) : null}
       <ul ref={listRef} aria-label={t("writing.listLabel")} style={{ margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
         {list.map((s) => (

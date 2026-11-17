@@ -18,6 +18,7 @@ import { EmptyState, learnHow } from "./EmptyState";
 // W13.G7: family trees in (GEDCOM 5.5.1 / 7.0) and out (7.0).
 import { GedcomImport } from "./GedcomImport";
 import "./familyStrings";
+import { HelpButton } from "./HelpButton";
 
 export interface EntityGraphScreenProps {
   onClose: () => void;
@@ -120,6 +121,7 @@ export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphSc
         <h2 id="entity-graph-title" style={{ margin: 0, fontSize: 14, color: "hsl(var(--fg))" }}>
           {t("entityGraph.screen.title")}
         </h2>
+        <HelpButton topic="workspace/entity-graph" />
         {data && (
           <span style={{ fontSize: 12, color: "hsl(var(--fg-muted))" }}>
             {t("entityGraph.screen.counts", { entities: String(data.entities.length), edges: String(data.edges.length) })}

@@ -23,6 +23,7 @@ import { addFieldToTypeText, newTypedNote, newTypeFile, planFieldRename, templat
 import type { TypeRegistry } from "./typeRegistry";
 import "./typedObjectsStrings";
 import { Modal } from "../ui/Modal";
+import { HelpButton } from "../ui/HelpButton";
 
 const btn = { fontSize: 12, padding: "4px 10px", border: "1px solid hsl(var(--border))", borderRadius: 6, background: "transparent", color: "inherit", cursor: "pointer" } as const;
 const field = { fontSize: 12, padding: "3px 6px", border: "1px solid hsl(var(--border))", borderRadius: 4, background: "hsl(var(--bg))", color: "inherit" } as const;
@@ -181,6 +182,7 @@ export function ObjectStudio({ onClose, locale }: { onClose: () => void; locale:
           <h2 id="object-studio-title" style={{ margin: 0, fontSize: 15, flex: 1 }}>
             {t("types.studio.title")}
           </h2>
+          <HelpButton topic="workspace/obsidian-bases" />
           <button type="button" style={btn} onClick={onClose} aria-label={t("types.page.close")}>
             ×
           </button>

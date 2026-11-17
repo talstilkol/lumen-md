@@ -128,9 +128,13 @@ export function useFocusTrap<T extends HTMLElement>(ref: RefObject<T | null>, op
     if (before && root.contains(before)) before = lastOutside;
 
     const enter = () => {
-      if (root.contains(document.activeElement)) return; // the dialog focused something itself
+      const had = document.activeElement;
+      // the dialog focused something itself — but not the "?" (showModal() picks the first focusable, W3.7)
+      if (had && root.contains(had) && !had.classList.contains("lumen-help-btn")) return;
       const auto = root.querySelector<HTMLElement>("[autofocus],[data-autofocus]");
-      const target = auto ?? focusableIn(root)[0];
+      // W3.7: a panel's "?" is never where a dialog starts; the first real control is.
+      const items = focusableIn(root);
+      const target = auto ?? items.find((el) => !el.classList.contains("lumen-help-btn")) ?? items[0];
       if (target) target.focus();
       else {
         if (!root.hasAttribute("tabindex")) root.setAttribute("tabindex", "-1");

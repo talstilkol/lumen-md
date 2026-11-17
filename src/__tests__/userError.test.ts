@@ -19,6 +19,7 @@ const CASES: [unknown, string][] = [
   [dom("TimeoutError", "signal timed out"), "timeout"],
   [dom("NotFoundError", "A requested file or directory could not be found"), "notFound"],
   [new SyntaxError("Unexpected token < in JSON at position 0"), "badFile"],
+  [new Error("pmtiles: not a PMTiles file"), "badFile"],
   [dom("WorkspaceConflictError", '"a.md" already exists'), "conflict"],
   [new Error("HTTP 429 Too Many Requests"), "rateLimit"],
   [Object.assign(new Error("no key"), { name: "AiError", code: "NO_KEY" }), "aiNoKey"],

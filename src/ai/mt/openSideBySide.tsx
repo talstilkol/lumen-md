@@ -17,6 +17,7 @@ import { useToastStore } from "../../store/useToastStore";
 import { Modal } from "../../ui/Modal";
 import { chromeTranslatorApi } from "./chromeTranslator";
 import { sidecarPath, viaLocalLayers, type TranslateTexts } from "./sideBySide";
+import { HelpButton } from "../../ui/HelpButton";
 
 /** The pair for a note: Hebrew → English, anything else → Hebrew (by the share of Hebrew letters). */
 export function pairFor(md: string): { source: string; target: string } {
@@ -55,6 +56,7 @@ export async function openSideBySide(deps: { translate?: TranslateTexts } = {}):
   const render = () =>
     root.render(
       <Modal aria-label={t("mt.sideBySide.title")} onClose={closeSideBySide} data-testid="side-by-side-dialog" data-reading-mode="side-by-side" style={{ maxInlineSize: 1100, inlineSize: "100%", maxBlockSize: "90vh", overflow: "auto" }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", paddingInline: 8, paddingBlockStart: 6 }}><HelpButton topic="ai/translation" /></div>
         <SideBySideTranslation
           sourcePath={path}
           sourceMd={doc.content}

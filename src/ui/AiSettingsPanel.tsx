@@ -327,7 +327,11 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
       void refreshStatus();
     } catch (e) {
       if (!mounted.current || (e as Error)?.name === "AbortError") return;
-      setPullMsg({ ok: false, text: t("ai.settings.ollama.pullFailed", { error: explainError(e) }) });
+      // W3.2: a diagnosis Ollama gave (no such model, a full disk, a bad name) is said in words with the
+      // model's name; anything else gets explainError's sentence. Ollama's own text goes to the log either way.
+      const reason = (e as { reason?: string } | null)?.reason;
+      const error = reason === "missing" || reason === "disk" || reason === "name" ? (explainError(e, "ollama-pull"), t(`ai.settings.ollama.pull.${reason}`, { model })) : explainError(e, "ollama-pull");
+      setPullMsg({ ok: false, text: t("ai.settings.ollama.pullFailed", { error }) });
     } finally {
       if (pullAbort.current === ctrl) pullAbort.current = null;
       if (mounted.current) setPull(null);

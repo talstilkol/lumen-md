@@ -7,6 +7,7 @@ import { t } from "../i18n";
 import { showAiToast } from "../ui/AiToast";
 import "./docScanStrings";
 import { scanDocument, scanToNote, type ScannerPlugin } from "./docScanner";
+import { explainError } from "../lib/userError";
 
 /** The ordinary picker: the camera on a phone, the library or files elsewhere. */
 export function pickPhotos(doc: Document = document): Promise<Blob[]> {
@@ -62,7 +63,7 @@ export async function scanDocumentCommand(): Promise<string | null> {
     showAiToast(t("docScan.saved", { path }), "success");
     return path;
   } catch (e) {
-    showAiToast(t("docScan.failed", { error: e instanceof Error ? e.message : String(e) }), "error");
+    showAiToast(t("docScan.failed", { error: explainError(e, "doc-scan") }), "error");
     return null;
   }
 }

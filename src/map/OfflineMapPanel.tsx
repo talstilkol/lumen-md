@@ -8,6 +8,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { t } from "../i18n";
 import { importOfflineMap, listOfflineMaps, removeOfflineMap, type MapVault, type OfflineMapInfo } from "./offlineStore";
 import "./offlineMapStrings";
+import { errorKind, explainError } from "../lib/userError";
 
 const btn: React.CSSProperties = { fontSize: 12, padding: "3px 10px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit" };
 const mb = (n: number) => `${(n / 1_048_576).toFixed(n < 10 * 1_048_576 ? 1 : 0)} MB`;
@@ -34,7 +35,9 @@ export default function OfflineMapPanel({ vault, onChange }: { vault?: MapVault;
       await refresh();
       onChange?.();
     } catch (e) {
-      setStatus(t("map.offline.bad", { error: e instanceof Error ? e.message : String(e) }));
+      // W3.2: "this is not a PMTiles map" is the diagnosis the person needs; other failures get explainError's sentence.
+      const notMap = errorKind(e) === "badFile";
+      setStatus(t("map.offline.bad", { error: notMap ? (explainError(e, "offline-map"), t("map.offline.notPmtiles", { name: f.name })) : explainError(e, "offline-map") }));
     }
     if (input.current) input.current.value = "";
   };
@@ -46,6 +49,7 @@ export default function OfflineMapPanel({ vault, onChange }: { vault?: MapVault;
       </h3>
       <p style={{ margin: 0, color: "hsl(var(--fg-muted))" }}>{t("map.offline.about")}</p>
       {maps === null ? null : maps.length === 0 ? (
+        // empty-action: the "Import a map" file button below this list
         <p style={{ margin: 0 }} data-testid="offline-map-none">
           {t("map.offline.none")}
         </p>

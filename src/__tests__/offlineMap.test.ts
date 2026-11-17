@@ -466,7 +466,9 @@ describe("the panel", () => {
     await act(async () => {
       fireEvent.change(screen.getByTestId("offline-map-file"), { target: { files: [bad] } });
     });
-    await waitFor(() => expect(screen.getByTestId("offline-map-status").textContent).toMatch(/not a PMTiles/));
+    // W3.2: the diagnosis in words, with the file's name — not the parser's "pmtiles:" text and not a generic sentence.
+    await waitFor(() => expect(screen.getByTestId("offline-map-status").textContent).toMatch(/“bad.pmtiles” is not a PMTiles map/));
+    expect(screen.getByTestId("offline-map-status").textContent).not.toMatch(/pmtiles:/);
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /Remove|הסרה/ }));
     });

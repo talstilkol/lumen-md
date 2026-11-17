@@ -67,7 +67,7 @@ export function errorKind(e: unknown): ErrorKind {
   if (name === "TimeoutError" || /timed? ?out/i.test(msg)) return "timeout";
   if ((name === "TypeError" && /fetch|network|load failed/i.test(msg)) || name === "NetworkError" || /network|offline|ECONNREFUSED|ENOTFOUND|HTTP 5\d\d/i.test(msg)) return "network";
   if (name === "NotFoundError" || /not found|no such file|ENOENT|HTTP 404/i.test(msg)) return "notFound";
-  if (name === "SyntaxError" || name === "DataError" || name === "EncodingError" || /unexpected token|invalid (json|zip|format)|not a zip|corrupt/i.test(msg)) return "badFile";
+  if (name === "SyntaxError" || name === "DataError" || name === "EncodingError" || /unexpected token|invalid (json|zip|format)|not a (zip|[\w.-]+ file)|corrupt/i.test(msg)) return "badFile";
   if (name === "WorkspaceConflictError" || name === "InvalidModificationError" || /already exists|conflict/i.test(msg)) return "conflict";
   return "unknown";
 }

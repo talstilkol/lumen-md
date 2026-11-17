@@ -2529,6 +2529,7 @@
   "map.offline.imported": "{name} 现在是离线地图",
   "map.offline.importing": "正在将 {name} 复制到库中…",
   "map.offline.none": "保险库中没有离线地图。只有在你允许时地图才会显示在线图块（飞行模式下从不显示）。",
+  "map.offline.notPmtiles": "“{name}” is not a PMTiles map (version 3). Make one with the pmtiles command below.",
   "map.offline.remove": "移除",
   "map.offline.removed": "已移除 {name}",
   "map.offline.title": "离线地图",

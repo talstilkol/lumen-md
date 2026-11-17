@@ -17,6 +17,8 @@ import { PerspectiveBar } from "./PerspectiveBar";
 import { groupColor, resolveColor } from "./graphData";
 import "./perspectiveStrings";
 import { compareNames } from "../../i18n/collate";
+import { EmptyState, learnHow } from "../EmptyState";
+import { HelpButton } from "../HelpButton";
 
 export interface SetGraphDialogProps {
   title: string;
@@ -112,6 +114,7 @@ export function SetGraphDialog({ title, rows, paths, onClose, onOpen, vault, loa
           <h2 id="set-graph-title" style={{ margin: 0, fontSize: 14 }}>
             <bdi>{title}</bdi>
           </h2>
+          <HelpButton topic="workspace/graph" />
           <span data-testid="set-graph-stats">{t("graphPersp.stats", { nodes: graph?.nodes.length ?? 0, edges: graph?.edges.length ?? 0 })}</span>
           <fieldset style={{ border: 0, padding: 0, margin: 0, display: "inline-flex", gap: 6 }}>
             <legend className="sr-only">{t("graphPersp.kinds")}</legend>
@@ -153,7 +156,7 @@ export function SetGraphDialog({ title, rows, paths, onClose, onOpen, vault, loa
           ) : !graph ? (
             <p style={{ padding: 16 }}>{t("graphPersp.loading")}</p>
           ) : !graph.nodes.length ? (
-            <p style={{ padding: 16 }} data-testid="set-graph-empty">{t("graphPersp.empty")}</p>
+            <EmptyState testId="set-graph-empty" message={t("graphPersp.empty")} action={learnHow("workspace/graph")} />
           ) : asTable ? (
             <GraphTable labels={graph.nodes.map((n) => n.label)} neighbors={(i) => adjacency[i] ?? []} onOpen={(k) => onOpen?.(graph.nodes[k].id)} />
           ) : (

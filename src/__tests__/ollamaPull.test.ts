@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { createPullTracker, deleteOllamaModel, pullOllamaModel, validOllamaName, OllamaPullError } from "../ai/ollamaPull";
+import { createPullTracker, deleteOllamaModel, pullOllamaModel, pullReason, validOllamaName, OllamaPullError } from "../ai/ollamaPull";
 
 const ndjson = (records: unknown[], split = 0) => {
   const text = records.map((r) => JSON.stringify(r)).join("\n") + "\n";
@@ -64,5 +64,19 @@ describe("ollama pull (plan 5.7)", () => {
     await deleteOllamaModel("http://x", "qwen3:4b", fetchImpl as unknown as typeof fetch);
     expect(fetchImpl.mock.calls[0][0]).toBe("http://x/api/delete");
     expect(fetchImpl.mock.calls[0][1]?.method).toBe("DELETE");
+  });
+});
+
+describe("pullReason — Ollama's diagnoses in words (W3.2)", () => {
+  it("names a missing model, a full disk and a bad name; leaves the rest unnamed", async () => {
+    expect(pullReason("Ollama: pull model manifest: file does not exist")).toBe("missing");
+    expect(pullReason("Ollama API error 404: manifest unknown")).toBe("missing");
+    expect(pullReason("Ollama: pull access denied, repository does not exist")).toBe("missing");
+    expect(pullReason("Ollama: write /x: no space left on device")).toBe("disk");
+    expect(pullReason("Ollama: max retries exceeded: EOF")).toBeUndefined();
+    expect(pullReason("Ollama: the download ended before it finished")).toBeUndefined();
+    await expect(pullOllamaModel("http://x", "bad name")).rejects.toMatchObject({ reason: "name" });
+    const rec = new Response(JSON.stringify({ error: "pull model manifest: file does not exist" }) + "\n", { status: 200 });
+    await expect(pullOllamaModel("http://x", "nope:1b", { fetchImpl: (async () => rec) as unknown as typeof fetch })).rejects.toMatchObject({ reason: "missing" });
   });
 });

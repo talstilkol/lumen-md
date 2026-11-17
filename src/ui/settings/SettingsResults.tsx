@@ -12,6 +12,7 @@ import React, { useEffect, useRef } from "react";
 import { t } from "../../i18n";
 import { highlightParts } from "../../text/filterMatch";
 import type { SettingsHit } from "../../settings/settingsSearch";
+import { EmptyState, learnHow } from "../EmptyState";
 
 interface Props {
   id: string;
@@ -37,9 +38,7 @@ export function SettingsResults({ id, hits, query, active, onActive, onOpen, onK
 
   if (!hits.length) {
     return (
-      <p role="status" data-testid="settings-results-none" style={{ margin: 0, padding: "8px 16px", fontSize: 13, color: "hsl(var(--fg-muted))" }} dir="auto">
-        {t("settingsSearch.none", { q: query.trim() })}
-      </p>
+      <EmptyState testId="settings-results-none" style={{ padding: "8px 16px", fontSize: 13 }} message={t("settingsSearch.none", { q: query.trim() })} action={learnHow("editor/settings")} />
     );
   }
   return (

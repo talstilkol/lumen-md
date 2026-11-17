@@ -2529,6 +2529,7 @@
   "map.offline.imported": "{name} теперь офлайн-карта",
   "map.offline.importing": "Копирование {name} в хранилище…",
   "map.offline.none": "В хранилище нет офлайн-карты. Карты показывают онлайн-фрагменты, только если вы это разрешили (никогда в режиме полёта).",
+  "map.offline.notPmtiles": "“{name}” is not a PMTiles map (version 3). Make one with the pmtiles command below.",
   "map.offline.remove": "Удалить",
   "map.offline.removed": "{name} удалён",
   "map.offline.title": "Офлайн-карта",
