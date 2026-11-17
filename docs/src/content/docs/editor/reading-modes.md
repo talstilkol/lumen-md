@@ -13,6 +13,7 @@ goes back to what it was.
 | Mode | What it does |
 |---|---|
 | Page | The note as a clean page to read and highlight, alone or beside its translation. |
+| One word at a time (RSVP) | Experimental. Each word at a fixed point with rewind built in. |
 | Focus | A distraction-free screen for the editor. The line, the sentence or the paragraph you are in stays bright and the rest dims (as in iA Writer), with optional readability highlights. |
 
 ## Focus: sentence focus and readability highlights
@@ -46,6 +47,32 @@ the clarity and style coach is installed, its findings are shown in the same
 colours instead of these rules. Sentence focus and highlights work in the
 source editor; in the rich-text editor or the preview the bar offers to
 switch to it.
+
+## One word at a time (RSVP) — experimental
+
+The note is shown one word at a time at a fixed place, with the letter the
+eye should land on (the *recognition point*) in colour under two ticks.
+Speed-reading apps like this are popular, but the research found that
+**comprehension falls when you cannot look back** (Schotter, Tran & Rayner
+2014; Rayner et al. 2016). So this reader has rewind built in:
+
+- **Back a sentence** (button, **Backspace** or **Shift+arrow**) goes to the
+  start of the sentence, and again to the one before.
+- When paused, the whole sentence is shown under the word, the word
+  underlined.
+- It stops longer at the end of a sentence and a paragraph, after a comma
+  and on long words.
+
+Keys: **Space** plays and pauses; the **arrows** go a word back or forward
+along the text — in Hebrew → is back and ← is forward; **↑ ↓** change the
+speed (150–600 words per minute).
+
+The recognition point follows Spritz's table: the 1st letter of a 1-letter
+word, the 2nd of 2–5 letters, the 3rd of 6–9, the 4th of 10–13, else the
+5th. In Hebrew it counts from the right, and from the stem: in words of five
+letters or more the prefix letters (ו ה ב כ ל מ ש) are skipped, leaving at
+least three — ״וכשהבית״ is read from ״בית״. A word that only looks prefixed
+(״מחשבה״) puts the point one letter later. Niqqud stays on its letter.
 
 ## The reading profile
 
@@ -95,7 +122,7 @@ are clamped (a `width: 200` reads as the widest column).
 
 | Key | Values |
 |---|---|
-| `mode` | `page`, `focus` |
+| `mode` | `page`, `focus`, `rsvp` |
 | `font` | `default`, `heebo`, `frankRuhl`, `notoSans`, `notoSerif`, `assistant`, `davidLibre` |
 | `size`, `lineHeight`, `width` | 14–28 px, 1.3–2.4, 40–120 ch |
 | `spacedHebrew`, `dyslexiaLatin`, `aids` | `true` / `false` |
@@ -107,3 +134,4 @@ are clamped (a `width: 200` reads as the widest column).
 | `rate` | 0.5–2 |
 | `focusUnit` | `line`, `sentence`, `paragraph` (with `mode: focus`) |
 | `hemingway` | `true` / `false` |
+| `wpm` | 150–600 (RSVP) |

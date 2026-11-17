@@ -1,0 +1,15 @@
+{
+  "rsvp.title": "One word at a time",
+  "rsvp.research": "Why it has rewind: the research",
+  "rsvp.close": "Close",
+  "rsvp.empty": "This note has no words to read.",
+  "rsvp.rewind": "Back a sentence",
+  "rsvp.rewind.hint": "Back to the start of the sentence (again: the one before). Shift+arrow or Backspace.",
+  "rsvp.back": "Previous word",
+  "rsvp.forward": "Next word",
+  "rsvp.play": "Play",
+  "rsvp.pause": "Pause",
+  "rsvp.wpm": "Words per minute",
+  "rsvp.progress": "Word {n} of {total} · about {min} min left",
+  "rsvp.keys": "Space: play / pause · arrows: a word back or forward · Shift+arrow: back a sentence · ↑ ↓: speed · Esc: close"
+}
