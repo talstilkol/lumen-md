@@ -283,6 +283,8 @@
   "vault.export.folder": "In einen Ordner auf diesem Computer",
   "vault.export.where": "Exportieren als…",
   "vault.export.zip": "Eine .zip-Datei",
+  "vault.exportEverything.done": "{n} Dateien exportiert, mit manifest.json (SHA-256 je Datei) und OBSIDIAN.md.",
+  "vault.exportEverything.failed": "Der Export wurde nicht abgeschlossen: {error}",
   "vault.folder.alreadyBrowser": "Der Tresor ist bereits im Browserspeicher.",
   "vault.folder.browserStorage": "Browserspeicher",
   "vault.folder.cancelMove": "Verschieben abbrechen",

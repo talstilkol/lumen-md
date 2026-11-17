@@ -56,6 +56,15 @@ export function buildVaultTransferCommands(): Command[] {
       action: async () => (await import("./vaultActions")).exportVault(),
     },
     {
+      // W13.P3: everything Lumen keeps, in open formats, with a SHA-256 manifest and an Obsidian report.
+      id: "vault.exportEverything",
+      label: t("cmd.vault.exportEverything"),
+      hint: t("cmd.vault.exportEverything.hint"),
+      icon: cmdIcons.Save,
+      group: t("group.file"),
+      action: async () => (await import("./vaultActions")).exportEverything(),
+    },
+    {
       id: "vault.import",
       label: t("cmd.vault.import"),
       hint: t("cmd.vault.import.hint"),

@@ -13178,6 +13178,164 @@
       "vars": []
     },
     {
+      "key": "localData.about.caches",
+      "en": "Fonts, map tiles and the app's own files",
+      "vars": []
+    },
+    {
+      "key": "localData.about.history",
+      "en": "Earlier versions of your notes",
+      "vars": []
+    },
+    {
+      "key": "localData.about.keyring",
+      "en": "Encryption keys, sign-ins and API keys. Deleting them makes an encrypted vault unreadable for good",
+      "vars": []
+    },
+    {
+      "key": "localData.about.models",
+      "en": "Models downloaded to run AI on this device",
+      "vars": []
+    },
+    {
+      "key": "localData.about.notes",
+      "en": "The vault in this browser's private storage",
+      "vars": []
+    },
+    {
+      "key": "localData.about.settings",
+      "en": "Your preferences",
+      "vars": []
+    },
+    {
+      "key": "localData.cat.caches",
+      "en": "Cached files",
+      "vars": []
+    },
+    {
+      "key": "localData.cat.history",
+      "en": "Version history",
+      "vars": []
+    },
+    {
+      "key": "localData.cat.keyring",
+      "en": "Keys and secrets",
+      "vars": []
+    },
+    {
+      "key": "localData.cat.models",
+      "en": "AI models",
+      "vars": []
+    },
+    {
+      "key": "localData.cat.notes",
+      "en": "Notes and attachments",
+      "vars": []
+    },
+    {
+      "key": "localData.cat.settings",
+      "en": "Settings",
+      "vars": []
+    },
+    {
+      "key": "localData.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "localData.confirm",
+      "en": "Delete “{what}” from this device? This can't be undone.",
+      "vars": [
+        "what"
+      ]
+    },
+    {
+      "key": "localData.confirmAll",
+      "en": "Delete everything Lumen keeps on this device: notes, history, models, caches, keys and settings? This can't be undone.",
+      "vars": []
+    },
+    {
+      "key": "localData.confirmKeyring",
+      "en": "Delete the keys? An encrypted vault, and every copy of it anywhere, can then never be decrypted again. This can't be undone.",
+      "vars": []
+    },
+    {
+      "key": "localData.confirmTitle",
+      "en": "Delete from this device?",
+      "vars": []
+    },
+    {
+      "key": "localData.delete",
+      "en": "Delete",
+      "vars": []
+    },
+    {
+      "key": "localData.deleteAll",
+      "en": "Delete everything",
+      "vars": []
+    },
+    {
+      "key": "localData.deleteWhat",
+      "en": "Delete: {what}",
+      "vars": [
+        "what"
+      ]
+    },
+    {
+      "key": "localData.deleted",
+      "en": "Deleted {n} item(s).",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "localData.empty",
+      "en": "nothing",
+      "vars": []
+    },
+    {
+      "key": "localData.export",
+      "en": "Save the report (JSON)",
+      "vars": []
+    },
+    {
+      "key": "localData.kb",
+      "en": "{n} KB",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "localData.loading",
+      "en": "Counting…",
+      "vars": []
+    },
+    {
+      "key": "localData.mb",
+      "en": "{n} MB",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "localData.title",
+      "en": "What is stored on this device",
+      "vars": []
+    },
+    {
+      "key": "localData.total",
+      "en": "In use: {used} of {quota} this browser allows.",
+      "vars": [
+        "used",
+        "quota"
+      ]
+    },
+    {
+      "key": "localData.unknown",
+      "en": "size unknown",
+      "vars": []
+    },
+    {
       "key": "locale.beta",
       "en": "Beta (machine translation, awaiting native review)",
       "vars": []

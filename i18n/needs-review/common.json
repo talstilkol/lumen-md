@@ -7317,5 +7317,237 @@
     "ja": "1ccwmzq",
     "ru": "1ccwmzq",
     "zh-CN": "1ccwmzq"
+  },
+  "localData.title": {
+    "ar": "1fb2803",
+    "de": "1fb2803",
+    "fr": "1fb2803",
+    "ja": "1fb2803",
+    "ru": "1fb2803",
+    "zh-CN": "1fb2803"
+  },
+  "localData.total": {
+    "ar": "1qjdj1",
+    "de": "1qjdj1",
+    "fr": "1qjdj1",
+    "ja": "1qjdj1",
+    "ru": "1qjdj1",
+    "zh-CN": "1qjdj1"
+  },
+  "localData.loading": {
+    "ar": "2cvtae",
+    "de": "2cvtae",
+    "fr": "2cvtae",
+    "ja": "2cvtae",
+    "ru": "2cvtae",
+    "zh-CN": "2cvtae"
+  },
+  "localData.unknown": {
+    "ar": "1n2tcpi",
+    "de": "1n2tcpi",
+    "fr": "1n2tcpi",
+    "ja": "1n2tcpi",
+    "ru": "1n2tcpi",
+    "zh-CN": "1n2tcpi"
+  },
+  "localData.kb": {
+    "ar": "1qsq80c",
+    "de": "1qsq80c",
+    "fr": "1qsq80c",
+    "ja": "1qsq80c",
+    "ru": "1qsq80c",
+    "zh-CN": "1qsq80c"
+  },
+  "localData.mb": {
+    "ar": "dywoiy",
+    "de": "dywoiy",
+    "fr": "dywoiy",
+    "ja": "dywoiy",
+    "ru": "dywoiy",
+    "zh-CN": "dywoiy"
+  },
+  "localData.empty": {
+    "ar": "mvz8ui",
+    "de": "mvz8ui",
+    "fr": "mvz8ui",
+    "ja": "mvz8ui",
+    "ru": "mvz8ui",
+    "zh-CN": "mvz8ui"
+  },
+  "localData.cat.notes": {
+    "ar": "nkvwwx",
+    "de": "nkvwwx",
+    "fr": "nkvwwx",
+    "ja": "nkvwwx",
+    "ru": "nkvwwx",
+    "zh-CN": "nkvwwx"
+  },
+  "localData.cat.history": {
+    "ar": "1dzbo4v",
+    "de": "1dzbo4v",
+    "fr": "1dzbo4v",
+    "ja": "1dzbo4v",
+    "ru": "1dzbo4v",
+    "zh-CN": "1dzbo4v"
+  },
+  "localData.cat.models": {
+    "ar": "p68pnn",
+    "de": "p68pnn",
+    "fr": "p68pnn",
+    "ja": "p68pnn",
+    "ru": "p68pnn",
+    "zh-CN": "p68pnn"
+  },
+  "localData.cat.caches": {
+    "ar": "izmopg",
+    "de": "izmopg",
+    "fr": "izmopg",
+    "ja": "izmopg",
+    "ru": "izmopg",
+    "zh-CN": "izmopg"
+  },
+  "localData.cat.keyring": {
+    "ar": "18ayclp",
+    "de": "18ayclp",
+    "fr": "18ayclp",
+    "ja": "18ayclp",
+    "ru": "18ayclp",
+    "zh-CN": "18ayclp"
+  },
+  "localData.cat.settings": {
+    "ar": "ktdb8o",
+    "de": "ktdb8o",
+    "fr": "ktdb8o",
+    "ja": "ktdb8o",
+    "ru": "ktdb8o",
+    "zh-CN": "ktdb8o"
+  },
+  "localData.about.notes": {
+    "ar": "mn5fcx",
+    "de": "mn5fcx",
+    "fr": "mn5fcx",
+    "ja": "mn5fcx",
+    "ru": "mn5fcx",
+    "zh-CN": "mn5fcx"
+  },
+  "localData.about.history": {
+    "ar": "11tvxhh",
+    "de": "11tvxhh",
+    "fr": "11tvxhh",
+    "ja": "11tvxhh",
+    "ru": "11tvxhh",
+    "zh-CN": "11tvxhh"
+  },
+  "localData.about.models": {
+    "ar": "mno3v9",
+    "de": "mno3v9",
+    "fr": "mno3v9",
+    "ja": "mno3v9",
+    "ru": "mno3v9",
+    "zh-CN": "mno3v9"
+  },
+  "localData.about.caches": {
+    "ar": "od4w20",
+    "de": "od4w20",
+    "fr": "od4w20",
+    "ja": "od4w20",
+    "ru": "od4w20",
+    "zh-CN": "od4w20"
+  },
+  "localData.about.keyring": {
+    "ar": "96ta1k",
+    "de": "96ta1k",
+    "fr": "96ta1k",
+    "ja": "96ta1k",
+    "ru": "96ta1k",
+    "zh-CN": "96ta1k"
+  },
+  "localData.about.settings": {
+    "ar": "17m3tdw",
+    "de": "17m3tdw",
+    "fr": "17m3tdw",
+    "ja": "17m3tdw",
+    "ru": "17m3tdw",
+    "zh-CN": "17m3tdw"
+  },
+  "localData.delete": {
+    "ar": "oay2cq",
+    "de": "oay2cq",
+    "fr": "oay2cq",
+    "ja": "oay2cq",
+    "ru": "oay2cq",
+    "zh-CN": "oay2cq"
+  },
+  "localData.deleteWhat": {
+    "ar": "piikiq",
+    "de": "piikiq",
+    "fr": "piikiq",
+    "ja": "piikiq",
+    "ru": "piikiq",
+    "zh-CN": "piikiq"
+  },
+  "localData.deleteAll": {
+    "ar": "ovrh3r",
+    "de": "ovrh3r",
+    "fr": "ovrh3r",
+    "ja": "ovrh3r",
+    "ru": "ovrh3r",
+    "zh-CN": "ovrh3r"
+  },
+  "localData.export": {
+    "ar": "1dapwf8",
+    "de": "1dapwf8",
+    "fr": "1dapwf8",
+    "ja": "1dapwf8",
+    "ru": "1dapwf8",
+    "zh-CN": "1dapwf8"
+  },
+  "localData.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "localData.confirmTitle": {
+    "ar": "9tnawx",
+    "de": "9tnawx",
+    "fr": "9tnawx",
+    "ja": "9tnawx",
+    "ru": "9tnawx",
+    "zh-CN": "9tnawx"
+  },
+  "localData.confirm": {
+    "ar": "1veacwd",
+    "de": "1veacwd",
+    "fr": "1veacwd",
+    "ja": "1veacwd",
+    "ru": "1veacwd",
+    "zh-CN": "1veacwd"
+  },
+  "localData.confirmKeyring": {
+    "ar": "1mcckgk",
+    "de": "1mcckgk",
+    "fr": "1mcckgk",
+    "ja": "1mcckgk",
+    "ru": "1mcckgk",
+    "zh-CN": "1mcckgk"
+  },
+  "localData.confirmAll": {
+    "ar": "18dg8bt",
+    "de": "18dg8bt",
+    "fr": "18dg8bt",
+    "ja": "18dg8bt",
+    "ru": "18dg8bt",
+    "zh-CN": "18dg8bt"
+  },
+  "localData.deleted": {
+    "ar": "692aez",
+    "de": "692aez",
+    "fr": "692aez",
+    "ja": "692aez",
+    "ru": "692aez",
+    "zh-CN": "692aez"
   }
 }

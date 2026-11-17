@@ -1951,6 +1951,16 @@
       "vars": []
     },
     {
+      "key": "cmd.privacy.localData",
+      "en": "Privacy: what is stored on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.privacy.localData.hint",
+      "en": "Sizes per category; delete each one, or everything; save the report",
+      "vars": []
+    },
+    {
       "key": "cmd.reading.aids",
       "en": "Reading aids…",
       "vars": []
@@ -2713,6 +2723,16 @@
     {
       "key": "cmd.vault.export.hint",
       "en": "Every note and attachment, with folders, as a .zip or into a folder",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.exportEverything",
+      "en": "Vault: export everything (exit test)",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.exportEverything.hint",
+      "en": "Notes, attachments, history, settings and AI profiles in open formats, with a SHA-256 manifest and what Obsidian shows differently",
       "vars": []
     },
     {

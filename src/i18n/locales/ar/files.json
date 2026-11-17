@@ -283,6 +283,8 @@
   "vault.export.folder": "إلى مجلد على هذا الحاسوب",
   "vault.export.where": "تصدير كـ…",
   "vault.export.zip": "ملف zip واحد",
+  "vault.exportEverything.done": "تم تصدير {n} ملفات مع manifest.json (SHA-256 لكل ملف) وOBSIDIAN.md.",
+  "vault.exportEverything.failed": "لم يكتمل التصدير: {error}",
   "vault.folder.alreadyBrowser": "الخزنة موجودة بالفعل في تخزين المتصفح.",
   "vault.folder.browserStorage": "تخزين المتصفح",
   "vault.folder.cancelMove": "إلغاء النقل",

@@ -149,6 +149,15 @@ export function buildAirplaneCommands(): Command[] {
       },
     },
     {
+      // W13.P4: the on-device data inventory, with per-category deletion and crypto-shredding.
+      id: "privacy.localData",
+      label: t("cmd.privacy.localData"),
+      hint: t("cmd.privacy.localData.hint"),
+      icon: cmdIcons.Network,
+      group: t("group.security"),
+      action: () => void import("../../privacy/LocalDataDialog").then((m) => m.openLocalData()),
+    },
+    {
       id: "privacy.networkMonitor",
       label: t("cmd.airplane.monitor"),
       hint: t("cmd.airplane.monitor.hint"),
