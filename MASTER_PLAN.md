@@ -29,7 +29,7 @@
 
 ### התוכנית קדימה — 950 משימות ב-15 שלבים; 28 בוצעו (ממתינות למיזוג), נותרו 4280 ש׳ עבודה (849 חדשות ב-v5, 83 חדשות מאז תוכנית האב המקורית)
 
-**רמת אימות (`verified`):** נבנה בלבד 565 · Node 239 · דפדפן 88 · אמיתי (מוזג) 0 · מחכה לטל 18
+**רמת אימות (`verified`):** נבנה בלבד 564 · Node 222 · דפדפן 106 · אמיתי (מוזג) 0 · מחכה לטל 18
 
 **ב׳ 16.11 13:05 → ו׳ 15.1 06:05** בתזמון רציף של 4 מסלולים · **עם מרווח 35%: ו׳ 5.2 03:38**
 
@@ -8867,22 +8867,22 @@ R12.21.3. כיול: דקות מתוכננות מול זמן בפועל לכל מ
 | # | משימה | עדיפות | מסלול | הערכה | תלוי ב- | התחלה | סיום | מצב | אימות |
 |---|---|---|---|---|---|---|---|---|---|
 | W13.E1 | מצב Vim בעורך המקור: ‏@replit/codemirror-vim (MIT) עם תנועות נכונות בשורות RTL | P2 | U | 8 ש׳ 00 דק׳ | W11.H2 | ה׳ 31.12 08:35 | ה׳ 31.12 16:35 | ⏳ #1222 · merged, held by frozen wave (12→13); partial: the real @replit/codemirror-vim run (not installed offline); npm run budget after a Vite build (Mac) · merged, held by frozen wave | Node · [#1222](https://github.com/talstilkol/lumen-md/pull/1222) |
-| W13.E2 | רשימות חכמות: 60 התנהגויות זהב (הזחה, העברת שורות, הדבקה, מספור, הדגשה חלקית) מול Obsidian 1.15.1, בשני העורכים | P1 | U | 8 ש׳ 00 דק׳ | W2.13, W1.2 | ה׳ 31.12 16:35 | ו׳ 1.1 00:35 | ⏳ #1214 · merged, held by frozen wave (12→13); partial: Milkdown ≥57/60 (WYSIWYG binding not written, no @milkdown offline); e2e/smart-lists.spec.ts on the Mac · merged, held by frozen wave | Node · [#1214](https://github.com/talstilkol/lumen-md/pull/1214) |
-| W13.E3 | נרמול אחיד בכל תיבת סינון: ניקוד, טעמים, גרשיים, מקף ותנועות לטיניות — ב-backlinks, מתאר, סימניות, פלטת פקודות ומחליף פתקים | P1 | U | 5 ש׳ 00 דק׳ | W2.11 | ו׳ 1.1 00:35 | ו׳ 1.1 05:35 | ⏳ #1203 · merged, held by frozen wave (12→13); cloud-complete; owed: a bookmarks panel does not exist yet (the gate covers it when added) · merged, held by frozen wave | Node · [#1203](https://github.com/talstilkol/lumen-md/pull/1203) |
-| W13.E4 | חיפוש בהגדרות וניווט מקלדת מלא במסך ההגדרות (כמו Obsidian 1.13), כולל הגדרות של תוספים | P1 | U | 6 ש׳ 00 דק׳ | 11.1 | ו׳ 1.1 05:35 | ו׳ 1.1 11:35 | ⏳ #1208 · merged, held by frozen wave (12→13); cloud-complete; owed: e2e/settings-search.spec.ts on the Mac; receipts + label (plugin API) · merged, held by frozen wave | Node · [#1208](https://github.com/talstilkol/lumen-md/pull/1208) |
-| W13.E5 | סמנים מרובים ובחירה מלבנית (Alt+גרירה) עם בדיקות בשורות RTL ומעורבות | P2 | U | 3 ש׳ 00 דק׳ | W11.H2 | ו׳ 1.1 11:35 | ו׳ 1.1 14:35 | ⏳ #1222 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing else in the cloud (Chromium multiCursor 15/15) · merged, held by frozen wave | Node · [#1222](https://github.com/talstilkol/lumen-md/pull/1222) |
-| W13.H1 | תזוזת סמן לוגית או חזותית (כמו Word): הגדרה, ברירת מחדל חזותית, ובדיקה על 40 תרחישי הסמן של W11.H3 | P1 | U | 8 ש׳ 00 דק׳ | W11.H3, W11.H2 | ו׳ 1.1 14:35 | ו׳ 1.1 22:35 | ⏳ #1234 · merged, held by frozen wave (12→13); cloud-complete; owed: the 3-engine bidi-editing e2e and rtl-caret table on the Mac; the owner's call on Home/End at a run boundary · merged, held by frozen wave | Node · [#1234](https://github.com/talstilkol/lumen-md/pull/1234) |
+| W13.E2 | רשימות חכמות: 60 התנהגויות זהב (הזחה, העברת שורות, הדבקה, מספור, הדגשה חלקית) מול Obsidian 1.15.1, בשני העורכים | P1 | U | 8 ש׳ 00 דק׳ | W2.13, W1.2 | ה׳ 31.12 16:35 | ו׳ 1.1 00:35 | ⏳ #1214 · merged, held by frozen wave (12→13); partial: Milkdown ≥57/60 (WYSIWYG binding not written, no @milkdown offline); e2e/smart-lists.spec.ts on the Mac · merged, held by frozen wave | דפדפן · [#1214](https://github.com/talstilkol/lumen-md/pull/1214) |
+| W13.E3 | נרמול אחיד בכל תיבת סינון: ניקוד, טעמים, גרשיים, מקף ותנועות לטיניות — ב-backlinks, מתאר, סימניות, פלטת פקודות ומחליף פתקים | P1 | U | 5 ש׳ 00 דק׳ | W2.11 | ו׳ 1.1 00:35 | ו׳ 1.1 05:35 | ⏳ #1203 · merged, held by frozen wave (12→13); cloud-complete; owed: a bookmarks panel does not exist yet (the gate covers it when added) · merged, held by frozen wave | דפדפן · [#1203](https://github.com/talstilkol/lumen-md/pull/1203) |
+| W13.E4 | חיפוש בהגדרות וניווט מקלדת מלא במסך ההגדרות (כמו Obsidian 1.13), כולל הגדרות של תוספים | P1 | U | 6 ש׳ 00 דק׳ | 11.1 | ו׳ 1.1 05:35 | ו׳ 1.1 11:35 | ⏳ #1208 · merged, held by frozen wave (12→13); cloud-complete; owed: e2e/settings-search.spec.ts on the Mac; receipts + label (plugin API) · merged, held by frozen wave | דפדפן · [#1208](https://github.com/talstilkol/lumen-md/pull/1208) |
+| W13.E5 | סמנים מרובים ובחירה מלבנית (Alt+גרירה) עם בדיקות בשורות RTL ומעורבות | P2 | U | 3 ש׳ 00 דק׳ | W11.H2 | ו׳ 1.1 11:35 | ו׳ 1.1 14:35 | ⏳ #1222 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing else in the cloud (Chromium multiCursor 15/15) · merged, held by frozen wave | דפדפן · [#1222](https://github.com/talstilkol/lumen-md/pull/1222) |
+| W13.H1 | תזוזת סמן לוגית או חזותית (כמו Word): הגדרה, ברירת מחדל חזותית, ובדיקה על 40 תרחישי הסמן של W11.H3 | P1 | U | 8 ש׳ 00 דק׳ | W11.H3, W11.H2 | ו׳ 1.1 14:35 | ו׳ 1.1 22:35 | ⏳ #1234 · merged, held by frozen wave (12→13); cloud-complete; owed: the 3-engine bidi-editing e2e and rtl-caret table on the Mac; the owner's call on Home/End at a run boundary · merged, held by frozen wave | דפדפן · [#1234](https://github.com/talstilkol/lumen-md/pull/1234) |
 | W13.H2 | שער CSS לוגי בכל הקוד, לא רק ב-.prose-lumen: סורק בלי תלות חדשה, baseline שרק יורד, ותכונות style ב-TSX | P1 | U | 4 ש׳ 00 דק׳ | 9.3 | ו׳ 1.1 22:35 | שבת 2.1 02:35 | ⏳ #1232 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing else in the cloud (check-logical-css exit 0, baseline 24) · merged, held by frozen wave | Node · [#1232](https://github.com/talstilkol/lumen-md/pull/1232) |
-| W13.H3 | שיקוף סמלים רק כשהם כיווניים: סיווג כל סמל בממשק ובדיקה חזותית ב-RTL | P1 | U | 4 ש׳ 00 דק׳ | 9.5 | שבת 2.1 02:35 | שבת 2.1 06:35 | ⏳ #1233 · merged, held by frozen wave (12→13); cloud-complete; owed: the RTL visual baselines approved on the owner's machine · merged, held by frozen wave | Node · [#1233](https://github.com/talstilkol/lumen-md/pull/1233) |
+| W13.H3 | שיקוף סמלים רק כשהם כיווניים: סיווג כל סמל בממשק ובדיקה חזותית ב-RTL | P1 | U | 4 ש׳ 00 דק׳ | 9.5 | שבת 2.1 02:35 | שבת 2.1 06:35 | ⏳ #1233 · merged, held by frozen wave (12→13); cloud-complete; owed: the RTL visual baselines approved on the owner's machine · merged, held by frozen wave | דפדפן · [#1233](https://github.com/talstilkol/lumen-md/pull/1233) |
 | W13.H4 | bdi ו-dir=auto לכל טקסט של משתמש בממשק: עץ הקבצים, לשוניות, כותרת חלון, תוצאות חיפוש, התראות ותגיות | P1 | U | 6 ש׳ 00 דק׳ | 9.1 | שבת 2.1 06:35 | שבת 2.1 12:35 | ⏳ #1235 · merged, held by frozen wave (12→13); cloud-complete; owed: hebrew-layout.spec on the Mac; the Tauri native title · merged, held by frozen wave | Node · [#1235](https://github.com/talstilkol/lumen-md/pull/1235) |
-| W13.H5 | מספור עברי לרשימות (א. ב. ג.) בתצוגה, ב-DOCX וב-PDF — הקובץ נשאר עם 1. 2. 3. | P2 | U | 5 ש׳ 00 דק׳ | W2.23, 9.8 | שבת 2.1 12:35 | שבת 2.1 17:35 | ⏳ #1236 · merged, held by frozen wave (12→13); cloud-complete; owed: the DOCX opened in Word on the Mac · merged, held by frozen wave | Node · [#1236](https://github.com/talstilkol/lumen-md/pull/1236) |
+| W13.H5 | מספור עברי לרשימות (א. ב. ג.) בתצוגה, ב-DOCX וב-PDF — הקובץ נשאר עם 1. 2. 3. | P2 | U | 5 ש׳ 00 דק׳ | W2.23, 9.8 | שבת 2.1 12:35 | שבת 2.1 17:35 | ⏳ #1236 · merged, held by frozen wave (12→13); cloud-complete; owed: the DOCX opened in Word on the Mac · merged, held by frozen wave | דפדפן · [#1236](https://github.com/talstilkol/lumen-md/pull/1236) |
 | W13.H6 | Mac: מבחן ציבורי מוקלט — 12 תרחישי עברית מול Obsidian 1.15, ‏Notion, ‏Bear ו-Apple Notes, עם וידאו, תסריט ותאריכים | P1 | U | 6 ש׳ 00 דק׳ | W11.H13, W11.H3 | שבת 2.1 17:35 | שבת 2.1 23:35 | ⏳ #1239 · merged, held by frozen wave (12→13); cloud-complete; owed: 60 screen recordings (12×5) on a Mac · merged, held by frozen wave | Node · [#1239](https://github.com/talstilkol/lumen-md/pull/1239) |
 | W13.F1 | ייבוא Roam (JSON), ‏Craft ו-Textbundle/Textpack: ממירים בהשראת Obsidian Importer ‏(MIT), עם קובצי זהב | P1 | U | 10 ש׳ 00 דק׳ | W1.26, W11.P1 | שבת 2.1 23:35 | א׳ 3.1 09:35 | ⏳ #1206 · merged, held by frozen wave (12→13); cloud-complete; owed: real Obsidian/Notion exports (W10.O9); import:diff for Keep needs jsdom (CI) · merged, held by frozen wave | Node · [#1206](https://github.com/talstilkol/lumen-md/pull/1206) |
 | W13.F2 | ייבוא Day One, ‏Apple Journal, ‏Samsung Notes, ‏Airtable (CSV/API מקומי) ו-Tomboy/Gnote | P2 | U | 10 ש׳ 00 דק׳ | W13.F1 | א׳ 3.1 09:35 | א׳ 3.1 19:35 | ⏳ #1216 · merged, held by frozen wave (12→13); partial: Samsung Notes .sdocx is not read (text/PDF shares only) and import:diff has no Samsung row; Day One has no Obsidian oracle · merged, held by frozen wave | Node · [#1216](https://github.com/talstilkol/lumen-md/pull/1216) |
-| W13.F3 | ייצוא PDF נגיש: PDF מתויג ו-PDF/UA-1 עם עברית — שפה, סדר קריאה RTL, סימניות מכותרות ו-alt לתמונות — ובדיקת veraPDF ב-Mac | P1 | U | 10 ש׳ 00 דק׳ | W2.23 | א׳ 3.1 19:35 | ב׳ 4.1 05:35 | ⏳ #1246 · merged, held by frozen wave (12→13); partial: veraPDF PDF/UA-1 run on the Mac (veraPDF not reachable here); NVDA/VoiceOver protocol (owner); Tauri WebView2 path not written · merged, held by frozen wave | Node · [#1246](https://github.com/talstilkol/lumen-md/pull/1246) |
+| W13.F3 | ייצוא PDF נגיש: PDF מתויג ו-PDF/UA-1 עם עברית — שפה, סדר קריאה RTL, סימניות מכותרות ו-alt לתמונות — ובדיקת veraPDF ב-Mac | P1 | U | 10 ש׳ 00 דק׳ | W2.23 | א׳ 3.1 19:35 | ב׳ 4.1 05:35 | ⏳ #1246 · merged, held by frozen wave (12→13); partial: veraPDF PDF/UA-1 run on the Mac (veraPDF not reachable here); NVDA/VoiceOver protocol (owner); Tauri WebView2 path not written · merged, held by frozen wave | דפדפן · [#1246](https://github.com/talstilkol/lumen-md/pull/1246) |
 | W13.F4 | EPUB נגיש: מטא-דאטה של EPUB Accessibility 1.1 (schema.org), ‏nav נכון ובדיקת Ace by DAISY | P2 | U | 5 ש׳ 00 דק׳ | W5.8 | ב׳ 4.1 05:35 | ב׳ 4.1 10:35 | ⏳ #1249 · merged, held by frozen wave (12→13); partial: Ace by DAISY run on the Mac (npm blocked here) · merged, held by frozen wave | Node · [#1249](https://github.com/talstilkol/lumen-md/pull/1249) |
 | W13.F5 | גשר Pandoc בשולחן העבודה: שימוש ב-pandoc שהמשתמש התקין (GPL, לא ארוז) לפורמטים שאין לנו | P2 | U | 6 ש׳ 00 דק׳ | W10.M3 | ב׳ 4.1 10:35 | ב׳ 4.1 16:35 | ⏳ #1253 · merged, held by frozen wave (12→13); partial: the Tauri commands pandoc_status/pandoc_convert need an isolation allow-list entry (owner), source hidden until then; real pandoc on the Mac · merged, held by frozen wave | Node · [#1253](https://github.com/talstilkol/lumen-md/pull/1253) |
-| W13.S1 | היסטוריית גרסאות ברמת Obsidian Sync: מדיניות שמירה (30 יום / שנה / לתמיד), מסך ״קבצים שנמחקו״ ושחזור המוני | P1 | S | 8 ש׳ 00 דק׳ | 3.2 | א׳ 13.12 18:20 | ב׳ 14.12 02:20 | ⏳ #1224 · merged, held by frozen wave (12→13); cloud-complete; owed: e2e/history-complete.spec.ts on the Mac; native review of 6 machine-filled locales · merged, held by frozen wave | Node · [#1224](https://github.com/talstilkol/lumen-md/pull/1224) |
+| W13.S1 | היסטוריית גרסאות ברמת Obsidian Sync: מדיניות שמירה (30 יום / שנה / לתמיד), מסך ״קבצים שנמחקו״ ושחזור המוני | P1 | S | 8 ש׳ 00 דק׳ | 3.2 | א׳ 13.12 18:20 | ב׳ 14.12 02:20 | ⏳ #1224 · merged, held by frozen wave (12→13); cloud-complete; owed: e2e/history-complete.spec.ts on the Mac; native review of 6 machine-filled locales · merged, held by frozen wave | דפדפן · [#1224](https://github.com/talstilkol/lumen-md/pull/1224) |
 | W13.S2 | ערוץ סנכרון עם יותר מאדם אחד לא מסנכרן הגדרות, תוספים, ערכות נושא, snippets וקיצורים כברירת מחדל | P1 | S | 4 ש׳ 00 דק׳ | 3.4 | ב׳ 14.12 02:20 | ב׳ 14.12 06:20 | ⏳ #1225 · merged, held by frozen wave (12→13); cloud-complete; owed: a UI listing vault plugins with an install button; receipts + label (owner, sensitive) · merged, held by frozen wave | Node · [#1225](https://github.com/talstilkol/lumen-md/pull/1225) |
 | W13.S3 | החלטה (ADR): הסכמת מפתח קבוצתית לכספות משותפות — BeeKEM/Keyhive מול MLS ‏(OpenMLS, RFC 9420) מול המפתח המשותף הנוכחי | P2 | S | 8 ש׳ 00 דק׳ | W11.S16 | ב׳ 14.12 06:20 | ב׳ 14.12 14:20 | ⏳ #1226 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing else in the cloud (ADR-005: wait, 4 triggers) · merged, held by frozen wave | Node · [#1226](https://github.com/talstilkol/lumen-md/pull/1226) |
 | W13.S4 | חבילת מוכנות לביקורת חיצונית: היקף, מודל איום לסנכרון, וקטורי בדיקה שמאומתים במימוש שני, והוראות בנייה בפקודה אחת | P1 | S | 8 ש׳ 00 דק׳ | W10.D13, W1.27 | ב׳ 14.12 20:20 | ג׳ 15.12 04:20 | ⏳ #1226 · merged, held by frozen wave (12→13); cloud-complete; owed: receipts + label (owner, sensitive) · merged, held by frozen wave | Node · [#1226](https://github.com/talstilkol/lumen-md/pull/1226) |
@@ -8894,7 +8894,7 @@ R12.21.3. כיול: דקות מתוכננות מול זמן בפועל לכל מ
 | W13.A3 | זיכרון סוכן כקובץ בכספת: עובדות שהמשתמש אישר, גלויות ונערכות, ונכנסות להקשר רק בהסכמה | P2 | A | 6 ש׳ 00 דק׳ | W7.1 | ו׳ 11.12 09:20 | ו׳ 11.12 15:20 | ⏳ #1248 · merged, held by frozen wave (12→13); cloud-complete; owed: an agent tool 'remember' calling proposeFact · merged, held by frozen wave | Node · [#1248](https://github.com/talstilkol/lumen-md/pull/1248) |
 | W13.A4 | מדדי ״הצעה ואישור״ אמיתיים: שיעור קבלה, דחייה, עריכה לפני קבלה וזמן לאישור לכל סוכן — מונים מקומיים בלבד | P1 | A | 5 ש׳ 00 דק׳ | 5.11, W4.26 | ו׳ 11.12 15:20 | ו׳ 11.12 20:20 | ⏳ #1248 · merged, held by frozen wave (12→13); cloud-complete; owed: an Edit button in the review panel; the weekly report text · merged, held by frozen wave | Node · [#1248](https://github.com/talstilkol/lumen-md/pull/1248) |
 | W13.A5 | כרטיס מודל לכל סוכן בממשק: איזה מודל, רישיון, ציון eval ותאריך המדידה — מתוך eval/results | P1 | A | 4 ש׳ 00 דק׳ | W11.I18, W11.I12 | ג׳ 15.12 04:20 | ג׳ 15.12 08:20 | ⏳ #1248 · merged, held by frozen wave (12→13); cloud-complete; owed: an entry in each agent's own menu (only the review screen and data now) · merged, held by frozen wave | Node · [#1248](https://github.com/talstilkol/lumen-md/pull/1248) |
-| W13.P1 | נעילת אפליקציה וכיסוי בתצוגת המשימות: Face ID / טביעת אצבע, ‏FLAG_SECURE לפתקים נעולים ו-snapshot מכוסה ב-iOS | P1 | S | 8 ש׳ 00 דק׳ | W10.M4 | שבת 19.12 09:20 | שבת 19.12 17:20 | ⏳ #1252 · merged, held by frozen wave (12→13); partial: native biometric in the Capacitor WebView, the iOS snapshot cover, Tauri Touch ID; device check (W11.M10); Android build · merged, held by frozen wave | Node · [#1252](https://github.com/talstilkol/lumen-md/pull/1252) |
+| W13.P1 | נעילת אפליקציה וכיסוי בתצוגת המשימות: Face ID / טביעת אצבע, ‏FLAG_SECURE לפתקים נעולים ו-snapshot מכוסה ב-iOS | P1 | S | 8 ש׳ 00 דק׳ | W10.M4 | שבת 19.12 09:20 | שבת 19.12 17:20 | ⏳ #1252 · merged, held by frozen wave (12→13); partial: native biometric in the Capacitor WebView, the iOS snapshot cover, Tauri Touch ID; device check (W11.M10); Android build · merged, held by frozen wave | דפדפן · [#1252](https://github.com/talstilkol/lumen-md/pull/1252) |
 | W13.P2 | יומן הפרטיות מכסה את ה-argon2 worker: זיהוי workers לפי תוכן (fetch/WebSocket) ולא לפי שם הקובץ | P1 | S | 2 ש׳ 00 דק׳ | W6.29 | ג׳ 15.12 13:20 | ג׳ 15.12 15:20 | ⏳ #1252 · merged, held by frozen wave (12→13); cloud-complete; owed: a scan of a real vite dist on the Mac · merged, held by frozen wave | Node · [#1252](https://github.com/talstilkol/lumen-md/pull/1252) |
 | W13.P3 | מבחן יציאה: ייצוא מלא (פתקים, קבצים מצורפים, מאפיינים, היסטוריה, הגדרות, פרופילי AI) לפורמטים פתוחים, ופתיחה בהתקנה נקייה וב-Obsidian בלי אובדן | P1 | S | 6 ש׳ 00 דק׳ | W11.P3 | ג׳ 22.12 09:35 | ג׳ 22.12 15:35 | ⏳ #1254 · merged, held by frozen wave (12→13); cloud-complete; owed: open the exported folder in real Obsidian · merged, held by frozen wave | Node · [#1254](https://github.com/talstilkol/lumen-md/pull/1254) |
 | W13.P4 | מלאי נתונים מקומי: ״מה שמור במכשיר הזה״ — פתקים, היסטוריה, מודלים, מטמונים ומפתחות — עם גודל ומחיקה לכל קטגוריה, ו-crypto-shredding לכספת מוצפנת | P1 | S | 6 ש׳ 00 דק׳ | 5.7 | ג׳ 15.12 15:20 | ג׳ 15.12 21:20 | ⏳ #1254 · merged, held by frozen wave (12→13); partial: a real-browser run of estimate()≈0, a screenshot, the Settings > Privacy entry · merged, held by frozen wave | Node · [#1254](https://github.com/talstilkol/lumen-md/pull/1254) |
@@ -8906,30 +8906,30 @@ R12.21.3. כיול: דקות מתוכננות מול זמן בפועל לכל מ
 | W13.X4 | ‏.bestpractices.json וראיות ל-OSPS Baseline 1–2: כל קריטריון ממופה לקובץ או לבדיקה בריפו | P1 | S | 4 ש׳ 00 דק׳ | W11.S4, W11.S5 | א׳ 20.12 06:20 | א׳ 20.12 10:20 | ⏳ #1228 · merged, held by frozen wave (12→13); partial: L1 is 21/24 with evidence; owner confirms AC-01.01/02.01, LICENSE in release artefacts, DCO, PVR · merged, held by frozen wave | Node · [#1228](https://github.com/talstilkol/lumen-md/pull/1228) |
 | W13.X5 | קישורי lumen:// וקבצים לא מוכרים: אישור לכל פעולה מקישור, רשימת היתר למקורות, ופתיחת סוג קובץ לא מוכר רק אחרי אישור | P1 | S | 5 ש׳ 00 דק׳ | 4.15 | ד׳ 16.12 08:20 | ד׳ 16.12 13:20 | ⏳ #1242 · merged, held by frozen wave (12→13); cloud-complete; owed: cargo check of shell.rs on the Mac; a Settings row to forget allowed sources; receipts + label (owner) · merged, held by frozen wave | Node · [#1242](https://github.com/talstilkol/lumen-md/pull/1242) |
 | W13.X6 | התקנה בלי סקריפטים: ‏npm ci --ignore-scripts כברירת מחדל עם רשימת היתר לחבילות שצריכות build, ובדיקת lockfile (מארחים, integrity, https) | P1 | S | 4 ש׳ 00 דק׳ | W8.9 | ד׳ 16.12 13:20 | ד׳ 16.12 17:20 | ⏳ #1228 · merged, held by frozen wave (12→13); cloud-complete; owed: receipts + label (owner); optional CI step supply:allowed-scripts · merged, held by frozen wave | Node · [#1228](https://github.com/talstilkol/lumen-md/pull/1228) |
-| W13.V1 | INP גם ב-WebKit: ‏Safari 26.2 תומך ב-INP ו-LCP — שער INP בשלושה מנועים, וייחוס LoAF לכל אינטראקציה איטית | P1 | D | 6 ש׳ 00 דק׳ | W6.45, W1.22 | א׳ 27.12 10:20 | א׳ 27.12 16:20 | ⏳ #1238 · merged, held by frozen wave (12→13); cloud-complete; owed: npm run perf:inp in chromium/firefox/webkit on the Mac · merged, held by frozen wave | Node · [#1238](https://github.com/talstilkol/lumen-md/pull/1238) |
+| W13.V1 | INP גם ב-WebKit: ‏Safari 26.2 תומך ב-INP ו-LCP — שער INP בשלושה מנועים, וייחוס LoAF לכל אינטראקציה איטית | P1 | D | 6 ש׳ 00 דק׳ | W6.45, W1.22 | א׳ 27.12 10:20 | א׳ 27.12 16:20 | ⏳ #1238 · merged, held by frozen wave (12→13); cloud-complete; owed: npm run perf:inp in chromium/firefox/webkit on the Mac · merged, held by frozen wave | דפדפן · [#1238](https://github.com/talstilkol/lumen-md/pull/1238) |
 | W13.V2 | דליפות זיכרון: פתיחה וסגירה של 500 פתקים, 50 החלפות כספת ו-30 דק׳ הקלדה — ה-heap חוזר ל-±10% מהבסיס | P1 | D | 6 ש׳ 00 דק׳ | W11.Q2 | א׳ 27.12 16:20 | א׳ 27.12 22:20 | ⏳ #1238 · merged, held by frozen wave (12→13); cloud-complete; owed: the app-level --url run and 30-min typing on the Mac (nightly perf-leak) · merged, held by frozen wave | Node · [#1238](https://github.com/talstilkol/lumen-md/pull/1238) |
 | W13.V3 | חיפוש עם אלפי תוצאות: תוצאה ראשונה ≤ 50ms, הזרמה ורשימה וירטואלית, ובלי קפיצות בזמן הקלדה | P1 | D | 6 ש׳ 00 דק׳ | 5.2 | א׳ 27.12 22:20 | ב׳ 28.12 04:20 | ⏳ #1237 · merged, held by frozen wave (12→13); cloud-complete; owed: perf:large-vault on a real 10k vault and e2e search-streaming.spec (CLS) on the Mac · merged, held by frozen wave | Node · [#1237](https://github.com/talstilkol/lumen-md/pull/1237) |
 | W13.V4 | Mac ומכשירים: סוללה וחום במובייל — 30 דק׳ הקלדה וגלילה, ‏Energy Log ב-Xcode ו-Battery Historian | P2 | D | 4 ש׳ 00 דק׳ | W10.M4 | ב׳ 28.12 04:20 | ב׳ 28.12 08:20 | ⏳ #1240 · merged, held by frozen wave (12→13); cloud-complete; owed: 30-min energy runs on iPhone + Pixel (mobile:check fails until measured) · merged, held by frozen wave | Node · [#1240](https://github.com/talstilkol/lumen-md/pull/1240) |
 | W13.V5 | דף ביצועים ציבורי: מגמה לכל שחרור מהקבלות החתומות — הפעלה, INP, כספת 100k ומהקשה עד ציור | P2 | D | 4 ש׳ 00 דק׳ | W11.Q2, W6.7 | ב׳ 28.12 08:20 | ב׳ 28.12 12:20 | ⏳ #1238 · merged, held by frozen wave (12→13); cloud-complete; owed: the first sealed receipts from the nightly machine · merged, held by frozen wave | Node · [#1238](https://github.com/talstilkol/lumen-md/pull/1238) |
 | W13.V6 | הפעלה בכספת עם תיקיות נסתרות גדולות (.git, ‏node_modules, ‏.trash): דילוג באינדוקס וסטטוס התקדמות בשורת המצב | P1 | D | 4 ש׳ 00 דק׳ | 4.4 | ב׳ 28.12 12:20 | ב׳ 28.12 16:20 | ⏳ #1237 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing else in the cloud · merged, held by frozen wave | Node · [#1237](https://github.com/talstilkol/lumen-md/pull/1237) |
 | W13.Y1 | בעלים: מטריצת קוראי מסך ב-Windows — ‏JAWS+Chrome, ‏NVDA+Firefox ו-Narrator+Edge — 10 צעדי המסע, פעם בשחרור | P1 | U | 4 ש׳ 00 דק׳ | W11.Q6 | ב׳ 4.1 16:35 | ב׳ 4.1 20:35 | ⏳ #1229 · merged, held by frozen wave (12→13); cloud-complete; owed: the owner's run on Windows (JAWS, NVDA, Narrator) + signed receipt · merged, held by frozen wave | נבנה בלבד · [#1229](https://github.com/talstilkol/lumen-md/pull/1229) |
-| W13.Y2 | ניגודיות מאולצת (Windows High Contrast), ‏prefers-contrast ו-prefers-reduced-motion: שער Playwright עם forcedColors ו-reducedMotion | P1 | U | 5 ש׳ 00 דק׳ | W1.23 | ב׳ 4.1 20:35 | ג׳ 5.1 01:35 | ⏳ #1229 · merged, held by frozen wave (12→13); cloud-complete; owed: e2e/a11y-modes.spec.ts on the Mac; visual baseline in forced colours · merged, held by frozen wave | Node · [#1229](https://github.com/talstilkol/lumen-md/pull/1229) |
+| W13.Y2 | ניגודיות מאולצת (Windows High Contrast), ‏prefers-contrast ו-prefers-reduced-motion: שער Playwright עם forcedColors ו-reducedMotion | P1 | U | 5 ש׳ 00 דק׳ | W1.23 | ב׳ 4.1 20:35 | ג׳ 5.1 01:35 | ⏳ #1229 · merged, held by frozen wave (12→13); cloud-complete; owed: e2e/a11y-modes.spec.ts on the Mac; visual baseline in forced colours · merged, held by frozen wave | דפדפן · [#1229](https://github.com/talstilkol/lumen-md/pull/1229) |
 | W13.Y3 | שליטה קולית: ‏label-in-name ‏(WCAG 2.5.3) לכל פקד, ובדיקה ידנית ב-Voice Control וב-Voice Access | P1 | U | 4 ש׳ 00 דק׳ | 10.1 | ג׳ 5.1 01:35 | ג׳ 5.1 05:35 | ⏳ #1229 · merged, held by frozen wave (12→13); cloud-complete; owed: e2e/a11y.spec.ts on the Mac; a manual Voice Control / Voice Access round · merged, held by frozen wave | Node · [#1229](https://github.com/talstilkol/lumen-md/pull/1229) |
 | W13.Y4 | העדפות משתמש (EN 301 549 v4.1.1): גודל טקסט של המערכת, ‏Dynamic Type ב-iOS ו-font scale של 200% ב-Android בלי חיתוך | P1 | U | 5 ש׳ 00 דק׳ | W10.M4 | ג׳ 5.1 05:35 | ג׳ 5.1 10:35 | ⏳ #1229 · merged, held by frozen wave (12→13); cloud-complete; owed: the Mac e2e; device check (W11.M10); native code compiled with Xcode/Gradle · merged, held by frozen wave | Node · [#1229](https://github.com/talstilkol/lumen-md/pull/1229) |
 | W13.Y5 | קריטריוני WCAG 2.2 החדשים כבדיקות: גודל מטרה 24px ‏(2.5.8), חלופה לגרירה ‏(2.5.7), מיקוד לא מוסתר ‏(2.4.11) ואימות נגיש ‏(3.3.8) בפתיחת E2EE | P1 | U | 6 ש׳ 00 דק׳ | W3.8 | ג׳ 5.1 10:35 | ג׳ 5.1 16:35 | ⏳ #1229 · merged, held by frozen wave (12→13); partial: the 10-surface browser scan on the Mac; drag alternatives for canvas, kanban, chapters and image resize · merged, held by frozen wave | Node · [#1229](https://github.com/talstilkol/lumen-md/pull/1229) |
 | W13.Y6 | בעלים: ביקורת נגישות עם משתמשים עם מוגבלות (עיוורים, ראייה ירודה, מוטוריקה) דרך ארגון ישראלי, ופרסום הממצאים | P2 | U | 4 ש׳ 00 דק׳ | W13.Y1 | ג׳ 5.1 16:35 | ג׳ 5.1 20:35 | ⏳ #1229 · merged, held by frozen wave (12→13); cloud-complete; owed: the owner engages an Israeli organisation for 5 sessions; findings become tasks · merged, held by frozen wave | נבנה בלבד · [#1229](https://github.com/talstilkol/lumen-md/pull/1229) |
-| W13.I1 | פסאודו-לוקליזציה: שפת en-XA (הארכה 40%, סוגריים, תווים מודגשים) ו-ar-XB (RTL מדומה) לבדיקות חיתוך ומחרוזות קשיחות | P1 | U | 4 ש׳ 00 דק׳ | 9.1 | ג׳ 5.1 20:35 | ד׳ 6.1 00:35 | ⏳ #1213 · merged, held by frozen wave (12→13); partial: e2e/i18n-pseudo.spec.ts on 20 surfaces (dev server, Mac) and fixing what it finds · merged, held by frozen wave | Node · [#1213](https://github.com/talstilkol/lumen-md/pull/1213) |
+| W13.I1 | פסאודו-לוקליזציה: שפת en-XA (הארכה 40%, סוגריים, תווים מודגשים) ו-ar-XB (RTL מדומה) לבדיקות חיתוך ומחרוזות קשיחות | P1 | U | 4 ש׳ 00 דק׳ | 9.1 | ג׳ 5.1 20:35 | ד׳ 6.1 00:35 | ⏳ #1213 · merged, held by frozen wave (12→13); partial: e2e/i18n-pseudo.spec.ts on 20 surfaces (dev server, Mac) and fixing what it finds · merged, held by frozen wave | דפדפן · [#1213](https://github.com/talstilkol/lumen-md/pull/1213) |
 | W13.I2 | צורות רבים לפי CLDR: ‏Intl.PluralRules בכל 8 השפות (ערבית 6 צורות, עברית one/two/other) ושער שמוצא מפתח בלי כל הצורות | P1 | U | 5 ש׳ 00 דק׳ | W4.18 | ד׳ 6.1 00:35 | ד׳ 6.1 05:35 | ⏳ #1213 · merged, held by frozen wave (12→13); cloud-complete; owed: convert the 289 pending count strings over time (shrink-only list) · merged, held by frozen wave | Node · [#1213](https://github.com/talstilkol/lumen-md/pull/1213) |
 | W13.I3 | מיון ועיצוב לפי אזור: ‏Intl.Collator לשמות קבצים (עברית בלי ניקוד, מספרים טבעיים), תאריכים, מספרים ויחידות בכל המסכים | P1 | U | 5 ש׳ 00 דק׳ | 9.1 | ד׳ 6.1 05:35 | ד׳ 6.1 10:35 | ⏳ #1250 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing else in the cloud · merged, held by frozen wave | Node · [#1250](https://github.com/talstilkol/lumen-md/pull/1250) |
 | W13.I4 | מילון מונחים אחיד ל-8 השפות (כספת, פתק, סנכרון, מאפיין…) ושער עקביות ב-i18n:check | P1 | U | 4 ש׳ 00 דק׳ | 9.6 | ד׳ 6.1 10:35 | ד׳ 6.1 14:35 | ⏳ #1213 · merged, held by frozen wave (12→13); cloud-complete; owed: native review of the beta-language fixes · merged, held by frozen wave | Node · [#1213](https://github.com/talstilkol/lumen-md/pull/1213) |
-| W13.I5 | ערבית כשפת RTL שנייה מלאה בממשק: ספרות הודיות-ערביות כאופציה, גופן Noto Naskh/Kufi ‏(OFL), מסך פתיחה, עזרה ותבניות בערבית | P1 | U | 8 ש׳ 00 דק׳ | W4.18, W10.E75 | ד׳ 6.1 14:35 | ד׳ 6.1 22:35 | ⏳ #1251 · merged, held by frozen wave (12→13); partial: 10 Arabic help pages (+ ar in the help bundle); e2e locale-coverage + rtl-matrix-ar on the Mac · merged, held by frozen wave | Node · [#1251](https://github.com/talstilkol/lumen-md/pull/1251) |
+| W13.I5 | ערבית כשפת RTL שנייה מלאה בממשק: ספרות הודיות-ערביות כאופציה, גופן Noto Naskh/Kufi ‏(OFL), מסך פתיחה, עזרה ותבניות בערבית | P1 | U | 8 ש׳ 00 דק׳ | W4.18, W10.E75 | ד׳ 6.1 14:35 | ד׳ 6.1 22:35 | ⏳ #1251 · merged, held by frozen wave (12→13); partial: 10 Arabic help pages (+ ar in the help bundle); e2e locale-coverage + rtl-matrix-ar on the Mac · merged, held by frozen wave | דפדפן · [#1251](https://github.com/talstilkol/lumen-md/pull/1251) |
 | W13.I6 | 7 טיוטות המכונה בעברית (academic.*): תיקון ידני וסימון ״נסקר״ — העברית היא שפת המקור | P1 | U | 1 ש׳ 00 דק׳ | 9.6 | ד׳ 6.1 22:35 | ד׳ 6.1 23:35 | ⏳ #1213 · merged, held by frozen wave (12→13); cloud-complete; owed: a native human glance at the 14 changed Hebrew strings (reviewed by Claude) · merged, held by frozen wave | Node · [#1213](https://github.com/talstilkol/lumen-md/pull/1213) |
 | W13.I7 | פרסית כשפת RTL שלישית (בטא): ספרות פרסיות, לוח שמשי בתאריכים ותרגום טיוטה מסומן | P2 | U | 6 ש׳ 00 דק׳ | W13.I1, W13.I2 | ד׳ 6.1 23:35 | ה׳ 7.1 05:35 | ⏳ #1251 · merged, held by frozen wave (12→13); partial: the RTL matrix on fa on the Mac; about 4.5k strings still English · merged, held by frozen wave | Node · [#1251](https://github.com/talstilkol/lumen-md/pull/1251) |
 | W13.D1 | מבנה Diátaxis לתיעוד: מדריכים, איך-לעשות, עיון והסבר — מפת עמודים ושער שכל עמוד מסווג | P1 | U | 6 ש׳ 00 דק׳ | W1.28 | ה׳ 7.1 05:35 | ה׳ 7.1 11:35 | ⏳ #1247 · merged, held by frozen wave (12→13); partial: docs:audit exit 0 is blocked by the 42 finished tasks without a page (same on base); docs:build (Astro) on the Mac · merged, held by frozen wave | Node · [#1247](https://github.com/talstilkol/lumen-md/pull/1247) |
 | W13.D2 | שער ״רק מה שאומת״: כל עמוד תכונה מקשר למזהה משימה, ועמוד שהמשימה שלו מתחת ל-browser מקבל באנר ״בטא — לא אומת״ | P1 | U | 4 ש׳ 00 דק׳ | W6.7 | ה׳ 7.1 11:35 | ה׳ 7.1 15:35 | ⏳ #1247 · merged, held by frozen wave (12→13); partial: docs:audit exit 0 (same 42); the banner shows only after docs:build (Mac); in-app help shows no banner · merged, held by frozen wave | Node · [#1247](https://github.com/talstilkol/lumen-md/pull/1247) |
 | W13.D3 | תיעוד API לתוספים שנוצר מהטיפוסים, עם גרסה לכל apiVersion ודוגמה רצה לכל מתודה | P1 | U | 6 ש׳ 00 דק׳ | W13.L1 | ה׳ 7.1 15:35 | ה׳ 7.1 21:35 | ⏳ #1247 · merged, held by frozen wave (12→13); cloud-complete; owed: the examples against the real QuickJS sandbox on the Mac · merged, held by frozen wave | Node · [#1247](https://github.com/talstilkol/lumen-md/pull/1247) |
 | W13.D4 | דוגמאות שרצות: כל בלוק קוד ופקודה בתיעוד נבדקים בריצה (doctest) או מסומנים ״להמחשה״ | P2 | U | 5 ש׳ 00 דק׳ | 13.1 | ה׳ 7.1 21:35 | ו׳ 8.1 02:35 | ⏳ #1247 · merged, held by frozen wave (12→13); cloud-complete; owed: 307 unmarked command blocks remain warnings · merged, held by frozen wave | Node · [#1247](https://github.com/talstilkol/lumen-md/pull/1247) |
-| W13.D5 | אתר התיעוד נגיש ו-RTL: ‏axe ו-Lighthouse a11y על 30 עמודים בשתי השפות | P2 | U | 3 ש׳ 00 דק׳ | W4.34 | ו׳ 8.1 02:35 | ו׳ 8.1 05:35 | ⏳ #1247 · merged, held by frozen wave (12→13); partial: Lighthouse ≥0.95 on the built site (docs:build + LHCI, Mac) · merged, held by frozen wave | Node · [#1247](https://github.com/talstilkol/lumen-md/pull/1247) |
+| W13.D5 | אתר התיעוד נגיש ו-RTL: ‏axe ו-Lighthouse a11y על 30 עמודים בשתי השפות | P2 | U | 3 ש׳ 00 דק׳ | W4.34 | ו׳ 8.1 02:35 | ו׳ 8.1 05:35 | ⏳ #1247 · merged, held by frozen wave (12→13); partial: Lighthouse ≥0.95 on the built site (docs:build + LHCI, Mac) · merged, held by frozen wave | דפדפן · [#1247](https://github.com/talstilkol/lumen-md/pull/1247) |
 | W13.D6 | דף ״בעיות ידועות״ שנבנה אוטומטית מ-issues עם תווית known-issue ומ-eval/failures.md | P2 | U | 3 ש׳ 00 דק׳ | 14.3 | ו׳ 8.1 05:35 | ו׳ 8.1 08:35 | ⏳ #1247 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing open with the label yet (the page says so) · merged, held by frozen wave | Node · [#1247](https://github.com/talstilkol/lumen-md/pull/1247) |
 | W13.T1 | פריסה מדורגת לעדכונים: קבוצות לפי hash של מזהה מכשיר אנונימי (5% → 25% → 100%), מתג עצירה בערוץ, וחזרה אוטומטית כשהגרסה החדשה לא עולה פעמיים | P1 | D | 8 ש׳ 00 דק׳ | W11.S2, W11.S3, 14.4 | ב׳ 28.12 16:20 | ג׳ 29.12 00:20 | ⏳ #1210 · merged, held by frozen wave (12→13); cloud-complete; owed: cargo check of the Rust glue (updates.rs/shell.rs/lib.rs) on the Mac; the failed-boot→rollback drill on a real install (W11.M11) · merged, held by frozen wave | Node · [#1210](https://github.com/talstilkol/lumen-md/pull/1210) |
 | W13.T2 | מדיניות תמיכה ומטריצת תאימות: גרסאות דפדפן ומערכת נתמכות, תקופת עדכוני אבטחה, ובדיקה שמכשילה שימוש ב-API מחוץ לטווח | P1 | D | 4 ש׳ 00 דק׳ | W13.X2 | ג׳ 29.12 00:20 | ג׳ 29.12 04:20 | ⏳ #1211 · merged, held by frozen wave (12→13); cloud-complete; owed: re-check the matrix against web-features at each minor (offline here) · merged, held by frozen wave | Node · [#1211](https://github.com/talstilkol/lumen-md/pull/1211) |
@@ -8950,54 +8950,54 @@ R12.21.3. כיול: דקות מתוכננות מול זמן בפועל לכל מ
 | W13.L1 | יציבות API לתוספים: דוח משטח API מה-.d.ts, ‏semver ומדיניות הוצאה משימוש (שתי גרסאות מינור), ושער שנכשל על שבירה בלי major | P1 | S | 8 ש׳ 00 דק׳ | 11.2 | ד׳ 16.12 17:20 | ה׳ 17.12 01:20 | ⏳ #1207 · merged, held by frozen wave (12→13); cloud-complete; owed: receipts + human-reviewed label (owner); the examples still call setText (re-sign the registry to migrate) · merged, held by frozen wave | Node · [#1207](https://github.com/talstilkol/lumen-md/pull/1207) |
 | W13.L2 | apiVersion במניפסט ושכבת תאימות: תוסף לגרסה הקודמת רץ עם אזהרות, ובדיקות לשתי הגרסאות | P1 | S | 6 ש׳ 00 דק׳ | W13.L1 | ה׳ 17.12 01:20 | ה׳ 17.12 07:20 | ⏳ #1207 · merged, held by frozen wave (12→13); cloud-complete; owed: receipts + label (owner); vitest on QuickJS 0.32 (Mac) · merged, held by frozen wave | Node · [#1207](https://github.com/talstilkol/lumen-md/pull/1207) |
 | W13.L3 | ניסוי: שכבת תאימות ל-API של Obsidian (obsidian-api, ‏MIT) ב-QuickJS — כמה מ-50 תוספי MIT פופולריים נטענים ועובדים | P2 | S | 10 ש׳ 00 דק׳ | W10.B3 | ה׳ 17.12 07:20 | ה׳ 17.12 17:20 | ⏳ #1215 · merged, held by frozen wave (12→13); partial: licences of the 71 plugins verified online (raw.githubusercontent.com refused here); re-run on QuickJS 0.32 · merged, held by frozen wave | Node · [#1215](https://github.com/talstilkol/lumen-md/pull/1215) |
-| W13.L4 | מדיניות תוספים מנוהלת: ‏policy.json לרשימת תוספים מותרים ותוספים פרטיים לצוות, משפחה או כיתה | P2 | S | 5 ש׳ 00 דק׳ | W10.B3 | ה׳ 17.12 23:20 | ו׳ 18.12 04:20 | ⏳ #1223 · merged, held by frozen wave (12→13); cloud-complete; owed: receipts + label (owner); a Settings UI to trust a policy key · merged, held by frozen wave | Node · [#1223](https://github.com/talstilkol/lumen-md/pull/1223) |
+| W13.L4 | מדיניות תוספים מנוהלת: ‏policy.json לרשימת תוספים מותרים ותוספים פרטיים לצוות, משפחה או כיתה | P2 | S | 5 ש׳ 00 דק׳ | W10.B3 | ה׳ 17.12 23:20 | ו׳ 18.12 04:20 | ⏳ #1223 · merged, held by frozen wave (12→13); cloud-complete; owed: receipts + label (owner); a screen or managed import to set the device policy and trust a policy key · merged, held by frozen wave | Node · [#1223](https://github.com/talstilkol/lumen-md/pull/1223) |
 | W13.L5 | חתימת מחבר: גרסת תוסף נחתמת ב-Sigstore (keyless) והרישום מאמת זהות GitHub לפני תג ״מחבר מאומת״ | P2 | S | 6 ש׳ 00 דק׳ | W10.B3, W11.S14 | ו׳ 18.12 04:20 | ו׳ 18.12 10:20 | ⏳ #1223 · merged, held by frozen wave (12→13); partial: the owner signs the examples (cosign + GitHub login) and re-signs the index; registry:verify red until then (18 versions) · merged, held by frozen wave | Node · [#1223](https://github.com/talstilkol/lumen-md/pull/1223) |
 | W13.L6 | תצוגה מקדימה של סריקה לכל ענף או commit של מפתח: ‏plugins:review --ref, עם הצעות, אזהרות וכשלים | P1 | S | 4 ש׳ 00 דק׳ | W11.S14 | ו׳ 18.12 12:20 | ו׳ 18.12 16:20 | ⏳ #1223 · merged, held by frozen wave (12→13); cloud-complete; owed: receipts + label (owner) · merged, held by frozen wave | Node · [#1223](https://github.com/talstilkol/lumen-md/pull/1223) |
-| W13.R1 | פרופיל קריאה לכל פתק: ‏lumen-reading ב-frontmatter (גופן, רוחב, ניקוד, עזרי קריאה, פריסה, קול ומהירות) שגובר על הגלובלי | P1 | U | 6 ש׳ 00 דק׳ | W5.6 | ו׳ 8.1 08:35 | ו׳ 8.1 14:35 | ⏳ audit r4 PARTIAL 80 · partial: the paged view (its own print frame) does not read the profile yet · merged, held by frozen wave | Node · [#1132](https://github.com/talstilkol/lumen-md/pull/1132) |
-| W13.R2 | מצב פוקוס מורחב: עמעום משפט או פסקה (כמו iA Writer) והדגשות בסגנון Hemingway — משפט ארוך, סביל, תואר פועל ומילה מסובכת — כשכבת תצוגה בלבד | P1 | U | 8 ש׳ 00 דק׳ | W13.W3 | ו׳ 8.1 14:35 | ו׳ 8.1 22:35 | ⏳ audit r4 PARTIAL 60 · cloud-complete; owed: the e2e run on the Mac · merged, held by frozen wave | Node · [#1139](https://github.com/talstilkol/lumen-md/pull/1139) |
-| W13.R3 | קורא RSVP עם חזרה: מילה אחת בכל פעם בנקודת ההכרה (מימין בעברית), חזרה של משפט בלחיצה, ועצירה על פיסוק | P2 | U | 6 ש׳ 00 דק׳ | W13.R1 | ו׳ 8.1 22:35 | שבת 9.1 04:35 | ⏳ audit r4 PARTIAL 62 · cloud-complete; owed: nothing in the cloud; the e2e on the Mac · merged, held by frozen wave | Node · [#1149](https://github.com/talstilkol/lumen-md/pull/1149) |
-| W13.R4 | עוגן קריאה (בסגנון ״bionic״, בלי שם המותג): הדגשת תחילת מילה בלטינית ובעברית — אופציה, עם ניסוי A/B בבדיקות השימושיות | P2 | U | 4 ש׳ 00 דק׳ | W13.R1 | שבת 9.1 04:35 | שבת 9.1 08:35 | ⏳ audit r4 PARTIAL 70 · cloud-complete; owed: the owner's reading study (weak evidence, experimental) · merged, held by frozen wave | Node · [#1151](https://github.com/talstilkol/lumen-md/pull/1151) |
-| W13.R5 | קורא סוחף בעברית: צביעת חלקי דיבר (שם עצם, פועל, תואר) ממודל מורפולוגיה מקומי, הברות וניקוד לתצוגה, תרגום מילה ומיקוד שורה — בהשראת Immersive Reader | P1 | U | 10 ש׳ 00 דק׳ | W5.6, 6.4 | שבת 9.1 08:35 | שבת 9.1 18:35 | ⏳ audit r4 PARTIAL 50 · partial: Hebrew POS about 86% on harder text (target 90%); speech loads on demand (F13a #1209); the e2e on the Mac · merged, held by frozen wave | Node · [#1162](https://github.com/talstilkol/lumen-md/pull/1162) |
-| W13.R6 | פריסת ספר בשני עמודים לפתקים ול-EPUB: עמודים עם CSS columns, עמוד ראשון מימין ב-RTL, ודפדוף במקלדת | P2 | U | 6 ש׳ 00 דק׳ | W12.R2, W1.14 | שבת 9.1 18:35 | א׳ 10.1 00:35 | ⏳ audit r4 PARTIAL 55 · cloud-complete; owed: the Playwright run on the Mac · merged, held by frozen wave | Node · [#1161](https://github.com/talstilkol/lumen-md/pull/1161) |
-| W13.R7 | גלילה מסונכרנת ותצוגה משולשת: מקור + תצוגה + מתאר, מעוגנים לכותרות ולבלוקים, ובחירה שעוקבת | P1 | U | 8 ש׳ 00 דק׳ | W2.13 | א׳ 10.1 00:35 | א׳ 10.1 08:35 | ⏳ audit r4 PARTIAL 60 · cloud-complete; owed: the e2e of the linked columns on the Mac (the dod's spec) · merged, held by frozen wave | Node · [#1147](https://github.com/talstilkol/lumen-md/pull/1147) |
-| W13.R8 | תצוגת השוואה: שני פתקים או שתי גרסאות זה לצד זה, ‏diff ברמת מילה שנכון ב-bidi ובעברית (תחיליות), ומעבר בין שינויים | P1 | U | 8 ש׳ 00 דק׳ | 3.2 | א׳ 10.1 08:35 | א׳ 10.1 16:35 | ⏳ audit r4 PARTIAL 75 · cloud-complete; owed: the compare view's e2e on the Mac; it is now opened by the a11y dialogs spec (F13a #1241) · merged, held by frozen wave | Node · [#1152](https://github.com/talstilkol/lumen-md/pull/1152) |
-| W13.R9 | הערות בשוליים: תצוגת sidenotes (בסגנון Tufte) להערות שוליים, תגובות והצעות — בשוליים השמאליים ב-RTL ומתחת לפסקה במובייל | P1 | U | 8 ש׳ 00 דק׳ | W1.3 | א׳ 10.1 16:35 | ב׳ 11.1 00:35 | ⏳ audit r4 PARTIAL 70 · cloud-complete; owed: the margins' e2e on the Mac; the switch is now in the Reading mode menu (F13a #1241); startup back down (F13a #1209) · merged, held by frozen wave | Node · [#1160](https://github.com/talstilkol/lumen-md/pull/1160) |
-| W13.R10 | תצוגה מעומדת והדפסה: ‏paged.js (MIT) בתוך האפליקציה — שבירות עמוד, כותרות עליונות ותחתונות והערות שוליים בתחתית | P2 | U | 6 ש׳ 00 דק׳ | W10.E18 | ב׳ 11.1 00:35 | ב׳ 11.1 06:35 | ⏳ audit r4 PARTIAL 50 · partial: the title and dod name paged.js but browser fragmentation is used (wording kept honest below); `npm run budget` needs a dist build (Mac) · merged, held by frozen wave | נבנה בלבד · [#1131](https://github.com/talstilkol/lumen-md/pull/1131) |
-| W13.R11 | ★ צורת הדף: טקסט מרכזי ומפרשים סביבו (daf-renderer, ‏MIT) לטקסטים מספריא ולכל פתק עם בלוקי commentary | P2 | U | 10 ש׳ 00 דק׳ | W5.1, W10.C24 | ב׳ 11.1 06:35 | ב׳ 11.1 16:35 | ⏳ audit r4 PARTIAL 68 · cloud-complete; owed: the daf e2e on the Mac · merged, held by frozen wave | Node · [#1135](https://github.com/talstilkol/lumen-md/pull/1135) |
-| W13.R12 | תצוגה בין-שורית ודו-לשונית: טקסטים דו-לשוניים מספריא (עברית/אנגלית) ותרגום בין השורות מעל W12.H6 | P2 | U | 6 ש׳ 00 דק׳ | W12.H6, W5.1 | ב׳ 11.1 16:35 | ב׳ 11.1 22:35 | ⏳ audit r4 PARTIAL 55 · cloud-complete; owed: the Playwright run on the Mac · merged, held by frozen wave | Node · [#1138](https://github.com/talstilkol/lumen-md/pull/1138) |
-| W13.R13 | שער מצבי קריאה: כל מצב נבדק ב-RTL וב-LTR, ‏axe, מקלדת, 0 בקשות רשת, שמירת מיקום הקריאה והקובץ לא משתנה | P1 | U | 5 ש׳ 00 דק׳ | W13.R1, W13.R2, W13.R5, W13.R7, W13.R8, W13.R9 | ב׳ 11.1 22:35 | ג׳ 12.1 03:35 | ⏳ audit r4 PARTIAL 45 · cloud-complete; owed: e2e/reading-modes.spec.ts on the Mac (Chromium, Firefox, WebKit) · merged, held by frozen wave | Node · [#1140](https://github.com/talstilkol/lumen-md/pull/1140) |
-| W13.R14 | בעלים: בדיקת קריאה עם 6 קוראים (שניים עם דיסלקציה) — זמן, הבנה והעדפה לכל מצב | P2 | U | 4 ש׳ 00 דק׳ | W13.R13 | ג׳ 12.1 03:35 | ג׳ 12.1 07:35 | ⏳ audit r4 PARTIAL 25 · cloud-complete; owed: the owner's devices pass (live and merge) · merged, held by frozen wave | Node · [#1148](https://github.com/talstilkol/lumen-md/pull/1148) |
-| W13.W1 | מנוע הצעות כתיבה אחיד: חוזה Suggestion (טווח, סוג, הסבר, ביטחון, diff), סימון בשני העורכים, קבלה או דחייה לכל קטע — ושום סוכן כתיבה לא כותב ישר לקובץ | P1 | A | 10 ש׳ 00 דק׳ | 5.11, 5.9 | ג׳ 15.12 08:20 | ג׳ 15.12 18:20 | ⏳ audit r4 PARTIAL 76 · cloud-complete; owed: that undo test with @codemirror/commands on the Mac · merged, held by frozen wave | נבנה בלבד · [#1141](https://github.com/talstilkol/lumen-md/pull/1141) |
-| W13.W2 | ערכות eval לסוכני הכתיבה: ≥ 150 פריטים לכל סוכן בעברית ו-≥ 150 באנגלית, חלק מוחזק, ו-eval:card לכל סוכן | P1 | A | 10 ש׳ 00 דק׳ | W11.I18, W6.17 | ג׳ 15.12 20:20 | ד׳ 16.12 06:20 | ⏳ audit r4 PARTIAL 30 · cloud-complete; owed: the owner's held-out/public sets (W13.W18) · merged, held by frozen wave | Node · [#1146](https://github.com/talstilkol/lumen-md/pull/1146) |
-| W13.W3 | מאמן בהירות וסגנון: משפט ארוך, סביל, שם פעולה (״ביצוע של״), מילת גידור ומילה מיותרת — כללים מקומיים ודירוג במודל קטן | P1 | A | 8 ש׳ 00 דק׳ | W13.W1, W5.3 | ד׳ 16.12 06:20 | ד׳ 16.12 14:20 | ⏳ audit r4 PARTIAL 72 · cloud-complete; owed: the style coach on real local models (W13.W17) · merged, held by frozen wave | Node · [#1142](https://github.com/talstilkol/lumen-md/pull/1142) |
-| W13.W4 | משנה טון ומשלב: רשמי / ניטרלי / ידידותי, ועברית גבוהה מול מדוברת — עם בדיקה שהמשמעות נשמרה | P1 | A | 8 ש׳ 00 דק׳ | W13.W1, W11.I12 | ד׳ 16.12 14:20 | ד׳ 16.12 22:20 | ⏳ audit r4 PARTIAL 60 · cloud-complete; owed: the tone shifter on real local models (W13.W17) · merged, held by frozen wave | Node · [#1143](https://github.com/talstilkol/lumen-md/pull/1143) |
-| W13.W5 | קיצור והרחבה: ״קצר ב-30%״, ״הפוך נקודות לפסקה״ — עם בדיקה שאף עובדה, מספר או שם לא אבדו או נוספו | P1 | A | 6 ש׳ 00 דק׳ | W13.W1 | ד׳ 16.12 22:20 | ה׳ 17.12 04:20 | ⏳ audit r4 PARTIAL 60 · cloud-complete; owed: concision on real local models (W13.W17) · merged, held by frozen wave | Node · [#1145](https://github.com/talstilkol/lumen-md/pull/1145) |
-| W13.W6 | בודק עקביות בכספת: שמות, תעתיקים, מונחים, תאריכים ומספרים לאותה ישות — מול גרף הישויות | P1 | A | 8 ש׳ 00 דק׳ | W13.W1, W12.E3 | שבת 26.12 11:20 | שבת 26.12 19:20 | ⏳ audit r4 PARTIAL 50 · partial: recall on a real vault · merged, held by frozen wave | Node · [#1153](https://github.com/talstilkol/lumen-md/pull/1153) |
-| W13.W7 | מבקר מבנה: היררכיית כותרות, פתיחה וסיכום, אורך פסקה ומשפט נושא | P2 | A | 5 ש׳ 00 דק׳ | W13.W1 | ה׳ 17.12 04:20 | ה׳ 17.12 09:20 | ⏳ audit r4 PARTIAL 74 · cloud-complete; owed: the topic-sentence judge on a real local model · merged, held by frozen wave | Node · [#1154](https://github.com/talstilkol/lumen-md/pull/1154) |
-| W13.W8 | בודק טיעון והיגיון: טענה בלי תמיכה, קפיצה לוגית וכשלים נפוצים — מקושר למפת הטיעונים | P2 | A | 6 ש׳ 00 דק׳ | W13.W1, R12.11 | שבת 26.12 19:20 | א׳ 27.12 01:20 | ⏳ audit r4 PARTIAL 80 · cloud-complete; owed: nothing material in the cloud after r4; the card is dev (synthetic) until W13.W17/W18 · merged, held by frozen wave | Node · [#1155](https://github.com/talstilkol/lumen-md/pull/1155) |
-| W13.W9 | מדד קריאות לעברית ולאנגלית: מדד עברי חדש (אורך מילה, אורך משפט, שכיחות, עמימות בלי ניקוד) מכויל על קורפוס מדורג, ו-Flesch-Kincaid לאנגלית | P1 | A | 10 ש׳ 00 דק׳ | W13.W2 | ה׳ 17.12 09:20 | ה׳ 17.12 19:20 | ⏳ audit r4 PARTIAL 50 · cloud-complete; owed: the open graded Hebrew corpus (gate 0.10) to replace the stand-in · merged, held by frozen wave | Node · [#1156](https://github.com/talstilkol/lumen-md/pull/1156) |
-| W13.W10 | Harper ‏(Apache-2.0) לדקדוק אנגלי מקומי ב-WASM, בתוך מנוע ההצעות | P1 | A | 6 ש׳ 00 דק׳ | W13.W1, 6.10 | ה׳ 17.12 19:20 | ו׳ 18.12 01:20 | ⏳ audit r4 PARTIAL 45 · cloud-complete; owed: Harper vendored and run on the Mac (a stand-in here) · merged, held by frozen wave | Node · [#1157](https://github.com/talstilkol/lumen-md/pull/1157) |
-| W13.W11 | גלאי חזרות וקלישאות: חזרה על לֶמה בחלון (עברית עם תחיליות) ורשימות קלישאות פתוחות | P2 | A | 5 ש׳ 00 דק׳ | W13.W1 | ו׳ 18.12 01:20 | ו׳ 18.12 06:20 | ⏳ audit r4 PARTIAL 70 · cloud-complete; owed: nothing else in the cloud · merged, held by frozen wave | Node · [#1133](https://github.com/talstilkol/lumen-md/pull/1133) |
-| W13.W12 | כותב כותרת, תקציר ו-TL;DR: ‏3 הצעות כותרת, תקציר 150–250 מילים ושורת סיכום — כל משפט מעוגן בפסקה בפתק | P1 | A | 6 ש׳ 00 דק׳ | W13.W1, R12.9 | ו׳ 18.12 17:20 | ו׳ 18.12 23:20 | ⏳ audit r4 PARTIAL 58 · cloud-complete; owed: the owner's review of abstracts on real notes; the dialog's buttons styled (F13a #1221) · merged, held by frozen wave | Node · [#1137](https://github.com/talstilkol/lumen-md/pull/1137) |
-| W13.W13 | ״הסבר את השינוי שלי״: סיכום בין שתי גרסאות וסימון שינויי משמעות (מספר, שלילה, שם) | P2 | A | 5 ש׳ 00 דק׳ | W13.W1, W13.R8 | א׳ 10.1 16:35 | א׳ 10.1 21:35 | ⏳ audit r4 PARTIAL 76 · cloud-complete; owed: nothing else in the cloud · merged, held by frozen wave | Node · [#1133](https://github.com/talstilkol/lumen-md/pull/1133) |
-| W13.W14 | מאמן יעדי כתיבה: יעד מילים או זמן, רמת קריאות וטון יעד לפתק, ודוח שבועי מקומי | P2 | A | 5 ש׳ 00 דק׳ | W5.8, W13.W9 | ו׳ 18.12 23:20 | שבת 19.12 04:20 | ⏳ audit r4 PARTIAL 72 · cloud-complete; owed: nothing else in the cloud · merged, held by frozen wave | Node · [#1133](https://github.com/talstilkol/lumen-md/pull/1133) |
-| W13.W15 | מילים לועזיות וחלופות עבריות: הצעות ממונחי האקדמיה ללשון העברית (בכפוף לתנאי השימוש) ומשלב | P2 | A | 5 ש׳ 00 דק׳ | W13.W1 | שבת 19.12 04:20 | שבת 19.12 09:20 | ⏳ audit r4 PARTIAL 74 · cloud-complete; owed: nothing material in the cloud after r4 · merged, held by frozen wave | Node · [#1133](https://github.com/talstilkol/lumen-md/pull/1133) |
-| W13.W16 | בחירת מודלים לסוכני הכתיבה: DictaLM 3.0 ‏1.7B, ‏Gemma 4 E2B/E4B ‏(Apache-2.0), ‏Qwen3 ומסווגים קטנים — רישיונות בשער 0.10 וטבלת ברירות מחדל לפי RAM | P1 | A | 5 ש׳ 00 דק׳ | W11.I10, 0.10 | שבת 19.12 09:20 | שבת 19.12 14:20 | ⏳ audit r4 PARTIAL 55 · cloud-complete; owed: the measured defaults (W13.W17) · merged, held by frozen wave | Node · [#1144](https://github.com/talstilkol/lumen-md/pull/1144) |
-| W13.W17 | Mac: יום מדידה לסוכני הכתיבה — כל ה-eval על מודלים אמיתיים, השהיה ו-RAM, וכרטיסי public/heldout | P1 | A | 6 ש׳ 00 דק׳ | W13.W2, W13.W16, W13.W3, W13.W4, W13.W5, W13.W6, W13.W9, W13.W10, W13.W12 | א׳ 27.12 01:20 | א׳ 27.12 07:20 | ⏳ audit r4 NOT DONE 5 · cloud-complete; owed: the Mac measurement day itself · merged, held by frozen wave | Node · [#1144](https://github.com/talstilkol/lumen-md/pull/1144) |
-| W13.W18 | בעלים: 2 מתייגים דוברי עברית (שלא כתבו את הכללים) לסט המוחזק של סוכני הכתיבה | P1 | A | 4 ש׳ 00 דק׳ | W13.W2 | שבת 19.12 14:20 | שבת 19.12 18:20 | ⏳ audit r4 NOT DONE 5 · cloud-complete; owed: the owner's held-out writing set (2 Hebrew-speaking annotators) · merged, held by frozen wave | נבנה בלבד · [#1144](https://github.com/talstilkol/lumen-md/pull/1144) |
-| W13.G1 | גרף של 100,000 צמתים: מנוע GPU ‏(cosmos.gl, ‏WebGL2) מעל 20k צמתים, ו-sigma.js מתחתיו — ≥ 30fps ופריסה ≤ 10s | P1 | U | 10 ש׳ 00 דק׳ | W1.10 | ג׳ 12.1 07:35 | ג׳ 12.1 17:35 | ⏳ audit r4 PARTIAL 68 · partial: GPU separation fixed (F13b #1217: SwiftShader probe within 25% of the CPU layout, 4/4); owed (the Mac): `npm run budget` after a dist build and the real-GPU probe · merged, held by frozen wave | נבנה בלבד · [#1164](https://github.com/talstilkol/lumen-md/pull/1164) |
-| W13.G2 | תוויות דו-כיווניות בגרף: עברית, אנגלית ומספרים בתווית אחת, כיוון לכל תווית, וקיצור בלי שבירת ניקוד | P1 | U | 5 ש׳ 00 דק׳ | W1.10 | ג׳ 12.1 17:35 | ג׳ 12.1 22:35 | ⏳ audit r4 PARTIAL 78 · cloud-complete (F13b #1217: 3D and SVG labels through prepareLabel, signed and phone numbers in isolateRuns); owed: a re-audit of the fixes before ✅ · merged, held by frozen wave | Node · [#1165](https://github.com/talstilkol/lumen-md/pull/1165) |
-| W13.G3 | מפה לא מקוונת למקומות: ‏PMTiles אזורי (ישראל) שהמשתמש מוריד, ‏MapLibre GL ‏(BSD-3), תוויות עבריות ו-0 בקשות במצב טיסה | P1 | U | 8 ש׳ 00 דק׳ | 4.11 | ג׳ 12.1 22:35 | ד׳ 13.1 06:35 | ⏳ audit r4 PARTIAL 50 · cloud-complete (F13b #1219: tiles opt-in, local first, labels whole, panel bidi); owed: e2e/offline-map.spec.ts on the Mac; privacy receipt + label (owner) · merged, held by frozen wave | Node · [#1166](https://github.com/talstilkol/lumen-md/pull/1166) |
+| W13.R1 | פרופיל קריאה לכל פתק: ‏lumen-reading ב-frontmatter (גופן, רוחב, ניקוד, עזרי קריאה, פריסה, קול ומהירות) שגובר על הגלובלי | P1 | U | 6 ש׳ 00 דק׳ | W5.6 | ו׳ 8.1 08:35 | ו׳ 8.1 14:35 | ⏳ #1132 · audit r4 PARTIAL 80 · partial: the paged view (its own print frame) does not read the profile yet · merged, held by frozen wave | Node · [#1132](https://github.com/talstilkol/lumen-md/pull/1132) |
+| W13.R2 | מצב פוקוס מורחב: עמעום משפט או פסקה (כמו iA Writer) והדגשות בסגנון Hemingway — משפט ארוך, סביל, תואר פועל ומילה מסובכת — כשכבת תצוגה בלבד | P1 | U | 8 ש׳ 00 דק׳ | W13.W3 | ו׳ 8.1 14:35 | ו׳ 8.1 22:35 | ⏳ #1139 · audit r4 PARTIAL 60 · cloud-complete; owed: the e2e run on the Mac · merged, held by frozen wave | Node · [#1139](https://github.com/talstilkol/lumen-md/pull/1139) |
+| W13.R3 | קורא RSVP עם חזרה: מילה אחת בכל פעם בנקודת ההכרה (מימין בעברית), חזרה של משפט בלחיצה, ועצירה על פיסוק | P2 | U | 6 ש׳ 00 דק׳ | W13.R1 | ו׳ 8.1 22:35 | שבת 9.1 04:35 | ⏳ #1149 · audit r4 PARTIAL 62 · cloud-complete; owed: nothing in the cloud; the e2e on the Mac · merged, held by frozen wave | Node · [#1149](https://github.com/talstilkol/lumen-md/pull/1149) |
+| W13.R4 | עוגן קריאה (בסגנון ״bionic״, בלי שם המותג): הדגשת תחילת מילה בלטינית ובעברית — אופציה, עם ניסוי A/B בבדיקות השימושיות | P2 | U | 4 ש׳ 00 דק׳ | W13.R1 | שבת 9.1 04:35 | שבת 9.1 08:35 | ⏳ #1151 · audit r4 PARTIAL 70 · cloud-complete; owed: the owner's reading study (weak evidence, experimental) · merged, held by frozen wave | Node · [#1151](https://github.com/talstilkol/lumen-md/pull/1151) |
+| W13.R5 | קורא סוחף בעברית: צביעת חלקי דיבר (שם עצם, פועל, תואר) ממודל מורפולוגיה מקומי, הברות וניקוד לתצוגה, תרגום מילה ומיקוד שורה — בהשראת Immersive Reader | P1 | U | 10 ש׳ 00 דק׳ | W5.6, 6.4 | שבת 9.1 08:35 | שבת 9.1 18:35 | ⏳ #1162 · audit r4 PARTIAL 50 · partial: Hebrew POS about 86% on harder text (target 90%); speech loads on demand (F13a #1209); the e2e on the Mac · merged, held by frozen wave | Node · [#1162](https://github.com/talstilkol/lumen-md/pull/1162) |
+| W13.R6 | פריסת ספר בשני עמודים לפתקים ול-EPUB: עמודים עם CSS columns, עמוד ראשון מימין ב-RTL, ודפדוף במקלדת | P2 | U | 6 ש׳ 00 דק׳ | W12.R2, W1.14 | שבת 9.1 18:35 | א׳ 10.1 00:35 | ⏳ #1161 · audit r4 PARTIAL 55 · cloud-complete; owed: the Playwright run on the Mac · merged, held by frozen wave | Node · [#1161](https://github.com/talstilkol/lumen-md/pull/1161) |
+| W13.R7 | גלילה מסונכרנת ותצוגה משולשת: מקור + תצוגה + מתאר, מעוגנים לכותרות ולבלוקים, ובחירה שעוקבת | P1 | U | 8 ש׳ 00 דק׳ | W2.13 | א׳ 10.1 00:35 | א׳ 10.1 08:35 | ⏳ #1147 · audit r4 PARTIAL 60 · cloud-complete; owed: the e2e of the linked columns on the Mac (the dod's spec) · merged, held by frozen wave | Node · [#1147](https://github.com/talstilkol/lumen-md/pull/1147) |
+| W13.R8 | תצוגת השוואה: שני פתקים או שתי גרסאות זה לצד זה, ‏diff ברמת מילה שנכון ב-bidi ובעברית (תחיליות), ומעבר בין שינויים | P1 | U | 8 ש׳ 00 דק׳ | 3.2 | א׳ 10.1 08:35 | א׳ 10.1 16:35 | ⏳ #1152 · audit r4 PARTIAL 75 · cloud-complete; owed: the compare view's e2e on the Mac; it is now opened by the a11y dialogs spec (F13a #1241) · merged, held by frozen wave | Node · [#1152](https://github.com/talstilkol/lumen-md/pull/1152) |
+| W13.R9 | הערות בשוליים: תצוגת sidenotes (בסגנון Tufte) להערות שוליים, תגובות והצעות — בשוליים השמאליים ב-RTL ומתחת לפסקה במובייל | P1 | U | 8 ש׳ 00 דק׳ | W1.3 | א׳ 10.1 16:35 | ב׳ 11.1 00:35 | ⏳ #1160 · audit r4 PARTIAL 70 · cloud-complete; owed: the margins' e2e on the Mac; the switch is now in the Reading mode menu (F13a #1241); startup back down (F13a #1209) · merged, held by frozen wave | Node · [#1160](https://github.com/talstilkol/lumen-md/pull/1160) |
+| W13.R10 | תצוגה מעומדת והדפסה: ‏paged.js (MIT) בתוך האפליקציה — שבירות עמוד, כותרות עליונות ותחתונות והערות שוליים בתחתית | P2 | U | 6 ש׳ 00 דק׳ | W10.E18 | ב׳ 11.1 00:35 | ב׳ 11.1 06:35 | ⏳ #1131 · audit r4 PARTIAL 50 · partial: the title and dod name paged.js but browser fragmentation is used (wording kept honest below); `npm run budget` needs a dist build (Mac) · merged, held by frozen wave | נבנה בלבד · [#1131](https://github.com/talstilkol/lumen-md/pull/1131) |
+| W13.R11 | ★ צורת הדף: טקסט מרכזי ומפרשים סביבו (daf-renderer, ‏MIT) לטקסטים מספריא ולכל פתק עם בלוקי commentary | P2 | U | 10 ש׳ 00 דק׳ | W5.1, W10.C24 | ב׳ 11.1 06:35 | ב׳ 11.1 16:35 | ⏳ #1135 · audit r4 PARTIAL 68 · cloud-complete; owed: the daf e2e on the Mac · merged, held by frozen wave | Node · [#1135](https://github.com/talstilkol/lumen-md/pull/1135) |
+| W13.R12 | תצוגה בין-שורית ודו-לשונית: טקסטים דו-לשוניים מספריא (עברית/אנגלית) ותרגום בין השורות מעל W12.H6 | P2 | U | 6 ש׳ 00 דק׳ | W12.H6, W5.1 | ב׳ 11.1 16:35 | ב׳ 11.1 22:35 | ⏳ #1138 · audit r4 PARTIAL 55 · cloud-complete; owed: the Playwright run on the Mac · merged, held by frozen wave | Node · [#1138](https://github.com/talstilkol/lumen-md/pull/1138) |
+| W13.R13 | שער מצבי קריאה: כל מצב נבדק ב-RTL וב-LTR, ‏axe, מקלדת, 0 בקשות רשת, שמירת מיקום הקריאה והקובץ לא משתנה | P1 | U | 5 ש׳ 00 דק׳ | W13.R1, W13.R2, W13.R5, W13.R7, W13.R8, W13.R9 | ב׳ 11.1 22:35 | ג׳ 12.1 03:35 | ⏳ #1140 · audit r4 PARTIAL 45 · cloud-complete; owed: e2e/reading-modes.spec.ts on the Mac (Chromium, Firefox, WebKit) · merged, held by frozen wave | Node · [#1140](https://github.com/talstilkol/lumen-md/pull/1140) |
+| W13.R14 | בעלים: בדיקת קריאה עם 6 קוראים (שניים עם דיסלקציה) — זמן, הבנה והעדפה לכל מצב | P2 | U | 4 ש׳ 00 דק׳ | W13.R13 | ג׳ 12.1 03:35 | ג׳ 12.1 07:35 | ⏳ #1148 · audit r4 PARTIAL 25 · cloud-complete; owed: the owner's devices pass (live and merge) · merged, held by frozen wave | Node · [#1148](https://github.com/talstilkol/lumen-md/pull/1148) |
+| W13.W1 | מנוע הצעות כתיבה אחיד: חוזה Suggestion (טווח, סוג, הסבר, ביטחון, diff), סימון בשני העורכים, קבלה או דחייה לכל קטע — ושום סוכן כתיבה לא כותב ישר לקובץ | P1 | A | 10 ש׳ 00 דק׳ | 5.11, 5.9 | ג׳ 15.12 08:20 | ג׳ 15.12 18:20 | ⏳ #1141 · audit r4 PARTIAL 76 · cloud-complete; owed: that undo test with @codemirror/commands on the Mac · merged, held by frozen wave | נבנה בלבד · [#1141](https://github.com/talstilkol/lumen-md/pull/1141) |
+| W13.W2 | ערכות eval לסוכני הכתיבה: ≥ 150 פריטים לכל סוכן בעברית ו-≥ 150 באנגלית, חלק מוחזק, ו-eval:card לכל סוכן | P1 | A | 10 ש׳ 00 דק׳ | W11.I18, W6.17 | ג׳ 15.12 20:20 | ד׳ 16.12 06:20 | ⏳ #1146 · audit r4 PARTIAL 30 · cloud-complete; owed: the owner's held-out/public sets (W13.W18) · merged, held by frozen wave | Node · [#1146](https://github.com/talstilkol/lumen-md/pull/1146) |
+| W13.W3 | מאמן בהירות וסגנון: משפט ארוך, סביל, שם פעולה (״ביצוע של״), מילת גידור ומילה מיותרת — כללים מקומיים ודירוג במודל קטן | P1 | A | 8 ש׳ 00 דק׳ | W13.W1, W5.3 | ד׳ 16.12 06:20 | ד׳ 16.12 14:20 | ⏳ #1142 · audit r4 PARTIAL 72 · cloud-complete; owed: the style coach on real local models (W13.W17) · merged, held by frozen wave | Node · [#1142](https://github.com/talstilkol/lumen-md/pull/1142) |
+| W13.W4 | משנה טון ומשלב: רשמי / ניטרלי / ידידותי, ועברית גבוהה מול מדוברת — עם בדיקה שהמשמעות נשמרה | P1 | A | 8 ש׳ 00 דק׳ | W13.W1, W11.I12 | ד׳ 16.12 14:20 | ד׳ 16.12 22:20 | ⏳ #1143 · audit r4 PARTIAL 60 · cloud-complete; owed: the tone shifter on real local models (W13.W17) · merged, held by frozen wave | Node · [#1143](https://github.com/talstilkol/lumen-md/pull/1143) |
+| W13.W5 | קיצור והרחבה: ״קצר ב-30%״, ״הפוך נקודות לפסקה״ — עם בדיקה שאף עובדה, מספר או שם לא אבדו או נוספו | P1 | A | 6 ש׳ 00 דק׳ | W13.W1 | ד׳ 16.12 22:20 | ה׳ 17.12 04:20 | ⏳ #1145 · audit r4 PARTIAL 60 · cloud-complete; owed: concision on real local models (W13.W17) · merged, held by frozen wave | Node · [#1145](https://github.com/talstilkol/lumen-md/pull/1145) |
+| W13.W6 | בודק עקביות בכספת: שמות, תעתיקים, מונחים, תאריכים ומספרים לאותה ישות — מול גרף הישויות | P1 | A | 8 ש׳ 00 דק׳ | W13.W1, W12.E3 | שבת 26.12 11:20 | שבת 26.12 19:20 | ⏳ #1153 · audit r4 PARTIAL 50 · partial: recall on a real vault · merged, held by frozen wave | Node · [#1153](https://github.com/talstilkol/lumen-md/pull/1153) |
+| W13.W7 | מבקר מבנה: היררכיית כותרות, פתיחה וסיכום, אורך פסקה ומשפט נושא | P2 | A | 5 ש׳ 00 דק׳ | W13.W1 | ה׳ 17.12 04:20 | ה׳ 17.12 09:20 | ⏳ #1154 · audit r4 PARTIAL 74 · cloud-complete; owed: the topic-sentence judge on a real local model · merged, held by frozen wave | Node · [#1154](https://github.com/talstilkol/lumen-md/pull/1154) |
+| W13.W8 | בודק טיעון והיגיון: טענה בלי תמיכה, קפיצה לוגית וכשלים נפוצים — מקושר למפת הטיעונים | P2 | A | 6 ש׳ 00 דק׳ | W13.W1, R12.11 | שבת 26.12 19:20 | א׳ 27.12 01:20 | ⏳ #1155 · audit r4 PARTIAL 80 · cloud-complete; owed: nothing material in the cloud after r4; the card is dev (synthetic) until W13.W17/W18 · merged, held by frozen wave | Node · [#1155](https://github.com/talstilkol/lumen-md/pull/1155) |
+| W13.W9 | מדד קריאות לעברית ולאנגלית: מדד עברי חדש (אורך מילה, אורך משפט, שכיחות, עמימות בלי ניקוד) מכויל על קורפוס מדורג, ו-Flesch-Kincaid לאנגלית | P1 | A | 10 ש׳ 00 דק׳ | W13.W2 | ה׳ 17.12 09:20 | ה׳ 17.12 19:20 | ⏳ #1156 · audit r4 PARTIAL 50 · cloud-complete; owed: the open graded Hebrew corpus (gate 0.10) to replace the stand-in · merged, held by frozen wave | Node · [#1156](https://github.com/talstilkol/lumen-md/pull/1156) |
+| W13.W10 | Harper ‏(Apache-2.0) לדקדוק אנגלי מקומי ב-WASM, בתוך מנוע ההצעות | P1 | A | 6 ש׳ 00 דק׳ | W13.W1, 6.10 | ה׳ 17.12 19:20 | ו׳ 18.12 01:20 | ⏳ #1157 · audit r4 PARTIAL 45 · cloud-complete; owed: Harper vendored and run on the Mac (a stand-in here) · merged, held by frozen wave | Node · [#1157](https://github.com/talstilkol/lumen-md/pull/1157) |
+| W13.W11 | גלאי חזרות וקלישאות: חזרה על לֶמה בחלון (עברית עם תחיליות) ורשימות קלישאות פתוחות | P2 | A | 5 ש׳ 00 דק׳ | W13.W1 | ו׳ 18.12 01:20 | ו׳ 18.12 06:20 | ⏳ #1133 · audit r4 PARTIAL 70 · cloud-complete; owed: nothing else in the cloud · merged, held by frozen wave | Node · [#1133](https://github.com/talstilkol/lumen-md/pull/1133) |
+| W13.W12 | כותב כותרת, תקציר ו-TL;DR: ‏3 הצעות כותרת, תקציר 150–250 מילים ושורת סיכום — כל משפט מעוגן בפסקה בפתק | P1 | A | 6 ש׳ 00 דק׳ | W13.W1, R12.9 | ו׳ 18.12 17:20 | ו׳ 18.12 23:20 | ⏳ #1137 · audit r4 PARTIAL 58 · cloud-complete; owed: the owner's review of abstracts on real notes; the dialog's buttons styled (F13a #1221) · merged, held by frozen wave | Node · [#1137](https://github.com/talstilkol/lumen-md/pull/1137) |
+| W13.W13 | ״הסבר את השינוי שלי״: סיכום בין שתי גרסאות וסימון שינויי משמעות (מספר, שלילה, שם) | P2 | A | 5 ש׳ 00 דק׳ | W13.W1, W13.R8 | א׳ 10.1 16:35 | א׳ 10.1 21:35 | ⏳ #1133 · audit r4 PARTIAL 76 · cloud-complete; owed: nothing else in the cloud · merged, held by frozen wave | Node · [#1133](https://github.com/talstilkol/lumen-md/pull/1133) |
+| W13.W14 | מאמן יעדי כתיבה: יעד מילים או זמן, רמת קריאות וטון יעד לפתק, ודוח שבועי מקומי | P2 | A | 5 ש׳ 00 דק׳ | W5.8, W13.W9 | ו׳ 18.12 23:20 | שבת 19.12 04:20 | ⏳ #1133 · audit r4 PARTIAL 72 · cloud-complete; owed: nothing else in the cloud · merged, held by frozen wave | Node · [#1133](https://github.com/talstilkol/lumen-md/pull/1133) |
+| W13.W15 | מילים לועזיות וחלופות עבריות: הצעות ממונחי האקדמיה ללשון העברית (בכפוף לתנאי השימוש) ומשלב | P2 | A | 5 ש׳ 00 דק׳ | W13.W1 | שבת 19.12 04:20 | שבת 19.12 09:20 | ⏳ #1133 · audit r4 PARTIAL 74 · cloud-complete; owed: nothing material in the cloud after r4 · merged, held by frozen wave | Node · [#1133](https://github.com/talstilkol/lumen-md/pull/1133) |
+| W13.W16 | בחירת מודלים לסוכני הכתיבה: DictaLM 3.0 ‏1.7B, ‏Gemma 4 E2B/E4B ‏(Apache-2.0), ‏Qwen3 ומסווגים קטנים — רישיונות בשער 0.10 וטבלת ברירות מחדל לפי RAM | P1 | A | 5 ש׳ 00 דק׳ | W11.I10, 0.10 | שבת 19.12 09:20 | שבת 19.12 14:20 | ⏳ #1144 · audit r4 PARTIAL 55 · cloud-complete; owed: the measured defaults (W13.W17) · merged, held by frozen wave | Node · [#1144](https://github.com/talstilkol/lumen-md/pull/1144) |
+| W13.W17 | Mac: יום מדידה לסוכני הכתיבה — כל ה-eval על מודלים אמיתיים, השהיה ו-RAM, וכרטיסי public/heldout | P1 | A | 6 ש׳ 00 דק׳ | W13.W2, W13.W16, W13.W3, W13.W4, W13.W5, W13.W6, W13.W9, W13.W10, W13.W12 | א׳ 27.12 01:20 | א׳ 27.12 07:20 | ⏳ #1144 · audit r4 NOT DONE 5 · cloud-complete; owed: the Mac measurement day itself · merged, held by frozen wave | Node · [#1144](https://github.com/talstilkol/lumen-md/pull/1144) |
+| W13.W18 | בעלים: 2 מתייגים דוברי עברית (שלא כתבו את הכללים) לסט המוחזק של סוכני הכתיבה | P1 | A | 4 ש׳ 00 דק׳ | W13.W2 | שבת 19.12 14:20 | שבת 19.12 18:20 | ⏳ #1144 · audit r4 NOT DONE 5 · cloud-complete; owed: the owner's held-out writing set (2 Hebrew-speaking annotators) · merged, held by frozen wave | נבנה בלבד · [#1144](https://github.com/talstilkol/lumen-md/pull/1144) |
+| W13.G1 | גרף של 100,000 צמתים: מנוע GPU ‏(cosmos.gl, ‏WebGL2) מעל 20k צמתים, ו-sigma.js מתחתיו — ≥ 30fps ופריסה ≤ 10s | P1 | U | 10 ש׳ 00 דק׳ | W1.10 | ג׳ 12.1 07:35 | ג׳ 12.1 17:35 | ⏳ #1164 · audit r4 PARTIAL 68 · partial: GPU separation fixed (F13b #1217); owed (the Mac): `npm run budget` after a dist build and the real-GPU probe · merged, held by frozen wave | דפדפן · [#1164](https://github.com/talstilkol/lumen-md/pull/1164) |
+| W13.G2 | תוויות דו-כיווניות בגרף: עברית, אנגלית ומספרים בתווית אחת, כיוון לכל תווית, וקיצור בלי שבירת ניקוד | P1 | U | 5 ש׳ 00 דק׳ | W1.10 | ג׳ 12.1 17:35 | ג׳ 12.1 22:35 | ⏳ #1165 · audit r4 PARTIAL 78 · cloud-complete (F13b #1217: 3D and SVG labels through prepareLabel, signed and phone numbers in isolateRuns); owed: a re-audit of the fixes before ✅ · merged, held by frozen wave | דפדפן · [#1165](https://github.com/talstilkol/lumen-md/pull/1165) |
+| W13.G3 | מפה לא מקוונת למקומות: ‏PMTiles אזורי (ישראל) שהמשתמש מוריד, ‏MapLibre GL ‏(BSD-3), תוויות עבריות ו-0 בקשות במצב טיסה | P1 | U | 8 ש׳ 00 דק׳ | 4.11 | ג׳ 12.1 22:35 | ד׳ 13.1 06:35 | ⏳ #1166 · audit r4 PARTIAL 50 · cloud-complete (F13b #1219: tiles opt-in, local first, labels whole, panel bidi); owed: e2e/offline-map.spec.ts on the Mac; privacy receipt + label (owner) · merged, held by frozen wave | דפדפן · [#1166](https://github.com/talstilkol/lumen-md/pull/1166) |
 | W13.G4 | מוצא מסלול בין שתי ישויות: ‏k מסלולים קצרים, הסבר כשרשרת ציטוטים וסינון לפי סוג יחס | P1 | U | בוצע (הוערך 6 ש׳ 00 דק׳) | W12.E7 | — | — | ✅ #1167 · merged, held by frozen wave | דפדפן · [#1167](https://github.com/talstilkol/lumen-md/pull/1167) |
-| W13.G5 | גאנט וציר זמן של ישויות: טווחים (התחלה–סוף), תלויות ו-RTL (ימין = מוקדם), מעל ציר הזמן של R12.7 | P2 | U | 6 ש׳ 00 דק׳ | R12.7 | ד׳ 13.1 06:35 | ד׳ 13.1 12:35 | ⏳ audit r4 PARTIAL 80 · cloud-complete (F13b #1220: the task Gantt in the UI with time zoom); owed: the Mac dod run · merged, held by frozen wave | Node · [#1168](https://github.com/talstilkol/lumen-md/pull/1168) |
-| W13.G6 | כרטיס ישות (infobox) בריחוף ובהטמעה: שדות, תמונה וקשרים מרכזיים, כמו בוויקיפדיה | P2 | U | 5 ש׳ 00 דק׳ | W12.E6 | ד׳ 13.1 12:35 | ד׳ 13.1 17:35 | ⏳ audit r4 PARTIAL 82 · cloud-complete (F13b #1220: localised dates and numbers, named inverse relations); owed: native review of the 20 inverse names (7 languages) · merged, held by frozen wave | Node · [#1169](https://github.com/talstilkol/lumen-md/pull/1169) |
-| W13.G7 | עץ משפחה: יחסי הורה ובן זוג לישויות ״אדם״, ייבוא וייצוא GEDCOM 7 ותצוגת topola ‏(Apache-2.0) ב-RTL | P2 | U | 8 ש׳ 00 דק׳ | W12.T1 | ד׳ 13.1 17:35 | ה׳ 14.1 01:35 | ⏳ audit r4 PARTIAL 62 · cloud-complete (F13b #1218 GEDCOM round trip + review 13 M5 linear import; #1217 GEXF newline); owed: the external GEDCOM 7 validator (Mac/owner) · merged, held by frozen wave | Node · [#1170](https://github.com/talstilkol/lumen-md/pull/1170) |
-| W13.G8 | אשכולות ופערים: מעטפות לקהילות (Leiden), תוויות לפי מונחים מובילים, והצעת קישורים בין אשכולות רחוקים (בהשראת InfraNodus) דרך מסך האישור | P2 | U | 8 ש׳ 00 דק׳ | R12.8 | ה׳ 14.1 01:35 | ה׳ 14.1 09:35 | ⏳ audit r4 PARTIAL 75 · cloud-complete (F13b #1217: embeddings through the vectors hook with TF-IDF fallback, ClusterGaps arrow and focus, the worker); owed: 10k-note timing in a real browser worker · merged, held by frozen wave | Node · [#1163](https://github.com/talstilkol/lumen-md/pull/1163) |
+| W13.G5 | גאנט וציר זמן של ישויות: טווחים (התחלה–סוף), תלויות ו-RTL (ימין = מוקדם), מעל ציר הזמן של R12.7 | P2 | U | 6 ש׳ 00 דק׳ | R12.7 | ד׳ 13.1 06:35 | ד׳ 13.1 12:35 | ⏳ #1168 · audit r4 PARTIAL 80 · cloud-complete (F13b #1220: the task Gantt in the UI with time zoom); owed: the Mac dod run · merged, held by frozen wave | Node · [#1168](https://github.com/talstilkol/lumen-md/pull/1168) |
+| W13.G6 | כרטיס ישות (infobox) בריחוף ובהטמעה: שדות, תמונה וקשרים מרכזיים, כמו בוויקיפדיה | P2 | U | 5 ש׳ 00 דק׳ | W12.E6 | ד׳ 13.1 12:35 | ד׳ 13.1 17:35 | ⏳ #1169 · audit r4 PARTIAL 82 · cloud-complete (F13b #1220: localised dates and numbers, named inverse relations); owed: native review of the 20 inverse names (7 languages) · merged, held by frozen wave | Node · [#1169](https://github.com/talstilkol/lumen-md/pull/1169) |
+| W13.G7 | עץ משפחה: יחסי הורה ובן זוג לישויות ״אדם״, ייבוא וייצוא GEDCOM 7 ותצוגת topola ‏(Apache-2.0) ב-RTL | P2 | U | 8 ש׳ 00 דק׳ | W12.T1 | ד׳ 13.1 17:35 | ה׳ 14.1 01:35 | ⏳ #1170 · audit r4 PARTIAL 62 · cloud-complete (F13b #1218 GEDCOM round trip + review 13 M5 linear import; #1217 GEXF newline); owed: the external GEDCOM 7 validator (Mac/owner) · merged, held by frozen wave | Node · [#1170](https://github.com/talstilkol/lumen-md/pull/1170) |
+| W13.G8 | אשכולות ופערים: מעטפות לקהילות (Leiden), תוויות לפי מונחים מובילים, והצעת קישורים בין אשכולות רחוקים (בהשראת InfraNodus) דרך מסך האישור | P2 | U | 8 ש׳ 00 דק׳ | R12.8 | ה׳ 14.1 01:35 | ה׳ 14.1 09:35 | ⏳ #1163 · audit r4 PARTIAL 75 · cloud-complete (F13b #1217: vectors hook + TF-IDF fallback, ClusterGaps arrow/focus, worker); owed: 10k-note timing in a real browser worker · merged, held by frozen wave | Node · [#1163](https://github.com/talstilkol/lumen-md/pull/1163) |
 | W13.G9 | תצוגות שמורות (perspectives): צבע, גודל ומסננים לכל סוג ישות, ו-Base או שאילתה → גרף | P2 | U | בוצע (הוערך 5 ש׳ 00 דק׳) | W12.E7 | — | — | ✅ #1150 · merged, held by frozen wave | דפדפן · [#1150](https://github.com/talstilkol/lumen-md/pull/1150) |
-| W13.G10 | גרף תלת-ממדי אופציונלי (3d-force-graph, ‏MIT) בטעינה עצלה, כבוי כברירת מחדל | P2 | U | 5 ש׳ 00 דק׳ | W13.G1 | ה׳ 14.1 09:35 | ה׳ 14.1 14:35 | ⏳ audit r4 PARTIAL 62 · partial: the 3D view's labels fixed (F13b #1217); owed: its run on a real GPU (Mac) · merged, held by frozen wave | Node · [#1159](https://github.com/talstilkol/lumen-md/pull/1159) |
-| W13.G11 | חלופה לא-חזותית לגרף: סיכום טקסטואלי (״12 קשרים, 3 אשכולות״), ניווט שכנים בקורא מסך ומסע Guidepup | P1 | U | 6 ש׳ 00 דק׳ | W10.E60, W12.E7 | ה׳ 14.1 14:35 | ה׳ 14.1 20:35 | ⏳ audit r4 PARTIAL 85 · cloud-complete; owed: `test:sr` needs @playwright/test (Mac) · merged, held by frozen wave | נבנה בלבד · [#1134](https://github.com/talstilkol/lumen-md/pull/1134) |
-| W13.G12 | ייצוא תצוגת גרף: ‏SVG/PNG עם תוויות עבריות ו-GEXF ל-Gephi | P2 | U | 4 ש׳ 00 דק׳ | W12.E8 | ה׳ 14.1 20:35 | ו׳ 15.1 00:35 | ⏳ audit r4 PARTIAL 60 · partial: the export menu is a menu button, labels and GEXF fixed (F13b #1217); owed: the owner's check of exported images; a screenshot of the menu with the real CSS · merged, held by frozen wave | Node · [#1136](https://github.com/talstilkol/lumen-md/pull/1136) |
-| W13.G13 | Mac: יום ביצועים לגרף — ‏100k צמתים ו-500k קשתות ב-3 דפדפנים ו-GPU משולב, ומפה במצב טיסה | P1 | U | 4 ש׳ 00 דק׳ | W13.G1, W13.G3 | ו׳ 15.1 00:35 | ו׳ 15.1 04:35 | ⏳ audit r4 PARTIAL 40 · cloud-complete; owed: the perf run on the Mac (github-slugger and idb-keyval are not in the cloud overlays) · merged, held by frozen wave | נבנה בלבד · [#1171](https://github.com/talstilkol/lumen-md/pull/1171) |
+| W13.G10 | גרף תלת-ממדי אופציונלי (3d-force-graph, ‏MIT) בטעינה עצלה, כבוי כברירת מחדל | P2 | U | 5 ש׳ 00 דק׳ | W13.G1 | ה׳ 14.1 09:35 | ה׳ 14.1 14:35 | ⏳ #1159 · audit r4 PARTIAL 62 · partial: the 3D view's labels fixed (F13b #1217); owed: its run on a real GPU (Mac) · merged, held by frozen wave | Node · [#1159](https://github.com/talstilkol/lumen-md/pull/1159) |
+| W13.G11 | חלופה לא-חזותית לגרף: סיכום טקסטואלי (״12 קשרים, 3 אשכולות״), ניווט שכנים בקורא מסך ומסע Guidepup | P1 | U | 6 ש׳ 00 דק׳ | W10.E60, W12.E7 | ה׳ 14.1 14:35 | ה׳ 14.1 20:35 | ⏳ #1134 · audit r4 PARTIAL 85 · cloud-complete; owed: `test:sr` needs @playwright/test (Mac) · merged, held by frozen wave | נבנה בלבד · [#1134](https://github.com/talstilkol/lumen-md/pull/1134) |
+| W13.G12 | ייצוא תצוגת גרף: ‏SVG/PNG עם תוויות עבריות ו-GEXF ל-Gephi | P2 | U | 4 ש׳ 00 דק׳ | W12.E8 | ה׳ 14.1 20:35 | ו׳ 15.1 00:35 | ⏳ #1136 · audit r4 PARTIAL 60 · partial: the export menu is a menu button, labels and GEXF fixed (F13b #1217); owed: the owner's check of exported images; a screenshot of the menu with the real CSS · merged, held by frozen wave | Node · [#1136](https://github.com/talstilkol/lumen-md/pull/1136) |
+| W13.G13 | Mac: יום ביצועים לגרף — ‏100k צמתים ו-500k קשתות ב-3 דפדפנים ו-GPU משולב, ומפה במצב טיסה | P1 | U | 4 ש׳ 00 דק׳ | W13.G1, W13.G3 | ו׳ 15.1 00:35 | ו׳ 15.1 04:35 | ⏳ #1171 · audit r4 PARTIAL 40 · cloud-complete; owed: the perf run on the Mac (github-slugger and idb-keyval are not in the cloud overlays) · merged, held by frozen wave | נבנה בלבד · [#1171](https://github.com/talstilkol/lumen-md/pull/1171) |
 
 **W13.E1 · מצב Vim בעורך המקור: ‏@replit/codemirror-vim (MIT) עם תנועות נכונות בשורות RTL** — בלי ענף · ממשק, עברית וידע · 8 ש׳ 00 דק׳ · מקור: https://github.com/replit/codemirror-vim · https://obsidian.md/changelog/2026-05-28-desktop-v1.13.0/
 
@@ -9008,7 +9008,7 @@ W13.E1.4. Vim גם בניווט ההגדרות (כמו Obsidian 1.13) דרך א�
 
 **קבלה:** 30 בדיקות תנועה, 10 מהן בשורות עבריות ומעורבות, עוברות · chunk ההפעלה לא גדל (Vim נטען רק כשמופעל) · Esc עם קריאת AI פעילה מבטל אותה ולא יוצא ממצב insert (בדיקה)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L7 #1222): vimMode.test.ts 38/38 (30 motions, 16 Hebrew/mixed; Esc-order 2 fail without aiAbort mark; lazy-chunk structure check), vimSettings.test.ts 2/2; startup 219,216 B gz
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L7 #1222): vimMode.test.ts 38/38 (30 motions, 16 Hebrew/mixed; Esc-order 2 fail without aiAbort mark; lazy-chunk structure check), vimSettings.test.ts 2/2; startup 219,216 B gz · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.E2 · רשימות חכמות: 60 התנהגויות זהב (הזחה, העברת שורות, הדבקה, מספור, הדגשה חלקית) מול Obsidian 1.15.1, בשני העורכים** — בלי ענף · ממשק, עברית וידע · 8 ש׳ 00 דק׳ · מקור: https://obsidian.md/changelog/2026-11-03-desktop-v1.15.1/ · https://obsidian.md/changelog/2026-09-02-desktop-v1.14.0/
 
@@ -9069,7 +9069,7 @@ W13.H2.3. חיבור ל-npm run hygiene
 
 **קבלה:** הוספת margin-left לקובץ חדש מכשילה את השער · המספר ב-baseline נרשם וכל PR שמוריד אותו מעדכן אותו
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1232): dod green: check-logical-css exit 0 (2055 files, baseline 24); logicalCss.test.ts 28/28; planted margin-left exits 1; fails without lib
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1232): dod green: check-logical-css exit 0 (2055 files, baseline 24); logicalCss.test.ts 28/28; planted margin-left exits 1; fails without lib · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.H3 · שיקוף סמלים רק כשהם כיווניים: סיווג כל סמל בממשק ובדיקה חזותית ב-RTL** — בלי ענף · ממשק, עברית וידע · 4 ש׳ 00 דק׳ · מקור: https://m2.material.io/design/usability/bidirectionality.html · https://obsidian.md/changelog/2026-09-02-desktop-v1.14.0/
 
@@ -9089,7 +9089,7 @@ W13.H4.3. שער שמרנדר כל רכיב עם ״פתק (2).md״, ‏״README.
 
 **קבלה:** השער מכסה ≥ 25 משטחים · סוגריים לא מתהפכים ושם קובץ אנגלי בממשק עברי נשאר קריא (baseline חזותי)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1235): userTextIsolation.test.ts 40/40 (31 surfaces; 18 fail at base); file-tree rows rendered he/en; shot /tmp/claude-0/-home-claude/db859785-2ec7-51e3-b6ba-0edfee54cc7b/scratchpad/g4w/L8shots/h4-user-text.png
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1235): userTextIsolation.test.ts 40/40 (31 surfaces; 18 fail at base); file-tree rows rendered he/en; shot /tmp/claude-0/-home-claude/db859785-2ec7-51e3-b6ba-0edfee54cc7b/scratchpad/g4w/L8shots/h4-user-text.png · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.H5 · מספור עברי לרשימות (א. ב. ג.) בתצוגה, ב-DOCX וב-PDF — הקובץ נשאר עם 1. 2. 3.** — בלי ענף · ממשק, עברית וידע · 5 ש׳ 00 דק׳ · מקור: https://www.w3.org/TR/css-counter-styles-3/#hebrew · http://officeopenxml.com/WPnumbering-numFmt.php
 
@@ -9109,7 +9109,7 @@ W13.H6.3. הדף של W11.H13 מציג את הסרטונים ואת הטבלה; 
 
 **קבלה:** 12 תרחישים × 5 אפליקציות מתועדים בגרסה ובתאריך · כל טענה בדף מקושרת לסרטון
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1239): rtlBenchmark.test.ts 8/8; script docs/rtl-benchmark.md; ledger + page section + docs:audit check
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1239): rtlBenchmark.test.ts 8/8; script docs/rtl-benchmark.md; ledger + page section + docs:audit check · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.F1 · ייבוא Roam (JSON), ‏Craft ו-Textbundle/Textpack: ממירים בהשראת Obsidian Importer ‏(MIT), עם קובצי זהב** — בלי ענף · ממשק, עברית וידע · 10 ש׳ 00 דק׳ · מקור: https://obsidian.md/help/import · https://github.com/obsidianmd/obsidian-importer
 
@@ -9120,7 +9120,7 @@ W13.F1.4. הדוח של W1.26 (מה יובא ומה לא) לכל אחד
 
 **קבלה:** 3 ייצואי זהב: 0 קבצים מצורפים אבודים, ≥ 98% קישורים פנימיים · npm run import:diff משווה ל-Obsidian Importer על אותם קבצים
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L1 #1206): importRoam 17/17, importCraft 7/7, importTextbundle 9/9 (all load-error without); npm run import:diff (no args) PASS: keep, roam×3, textbundle, craft rows vs Obsidian Importer 3.2.0 recorded outputs; golden Hebrew Roam/Craft/TextBundle: 0 attachments lost, 100% links resolved; 10k-page Roam <10s; dod green; shots g4w/L1/f1-wizard-{he,en}.png (axe 0)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L1 #1206): importRoam 17/17, importCraft 7/7, importTextbundle 9/9 (all load-error without); npm run import:diff (no args) PASS: keep, roam×3, textbundle, craft rows vs Obsidian Importer 3.2.0 recorded outputs; golden Hebrew Roam/Craft/TextBundle: 0 attachments lost, 100% links resolved; 10k-page Roam <10s; dod green; shots g4w/L1/f1-wizard-{he,en}.png (axe 0) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.F2 · ייבוא Day One, ‏Apple Journal, ‏Samsung Notes, ‏Airtable (CSV/API מקומי) ו-Tomboy/Gnote** — בלי ענף · ממשק, עברית וידע · 10 ש׳ 00 דק׳ · מקור: https://obsidian.md/help/import
 
@@ -9130,7 +9130,7 @@ W13.F2.3. כל ממיר עם קובץ זהב ציבורי או סינתטי מת
 
 **קבלה:** 5 ממירים עם בדיקות · import:diff מכסה את מה שגם Obsidian Importer מכסה
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L1 #1216): importDayOne 7/7, importJournal 10/10, importAirtable 7/7 (load-error without); import:diff rows tomboy 16/16 headings, apple-journal, airtable-api, airtable-csv×3 all PASS; golden Hebrew for all 5; dod green; shot g4w/L1/f2-wizard-he.png
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L1 #1216): importDayOne 7/7, importJournal 10/10, importAirtable 7/7 (load-error without); import:diff rows tomboy 16/16 headings, apple-journal, airtable-api, airtable-csv×3 all PASS; golden Hebrew for all 5; dod green; shot g4w/L1/f2-wizard-he.png · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.F3 · ייצוא PDF נגיש: PDF מתויג ו-PDF/UA-1 עם עברית — שפה, סדר קריאה RTL, סימניות מכותרות ו-alt לתמונות — ובדיקת veraPDF ב-Mac** — בלי ענף · ממשק, עברית וידע · 10 ש׳ 00 דק׳ · מקור: https://typst.app/blog/2025/accessible-pdf · https://quarto.org/docs/blog/posts/2026-03-05-pdf-accessibility-and-standards · https://chromedevtools.github.io/devtools-protocol/tot/Page/#method-printToPDF
 
@@ -9151,7 +9151,7 @@ W13.F4.3. Ace by DAISY (MIT) רץ ב-Mac על 3 ספרי זהב
 
 **קבלה:** Ace: ‏0 הפרות serious/critical · epubcheck נשאר 0 שגיאות (W5.8)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L1 #1249): epubA11yMeta 11/11 (load-error without); 3 golden EPUBs: epubcheck 5.3.0 0 fatal/0 error/0 warning; axe-core 4.10.2 (Ace engine) 0 serious/critical; metadata present
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L1 #1249): epubA11yMeta 11/11 (load-error without); 3 golden EPUBs: epubcheck 5.3.0 0 fatal/0 error/0 warning; axe-core 4.10.2 (Ace engine) 0 serious/critical; metadata present · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.F5 · גשר Pandoc בשולחן העבודה: שימוש ב-pandoc שהמשתמש התקין (GPL, לא ארוז) לפורמטים שאין לנו** — בלי ענף · ממשק, עברית וידע · 6 ש׳ 00 דק׳ · מקור: https://pandoc.org/MANUAL.html · https://hackage.haskell.org/package/pandoc-3.8/changelog
 
@@ -9161,7 +9161,7 @@ W13.F5.3. בלי pandoc התפריט מוסתר; 0 קוד GPL בחבילה (שע
 
 **קבלה:** 5 פורמטים (DocBook, ‏MediaWiki, ‏Jira, ‏OPML, ‏txt2tags) מיובאים בבדיקה עם pandoc מדומה · npm run licenses ירוק
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L1 #1253): pandocBridge 8/8 (load-error without); rustc --test pandoc.rs 7/7 vs fake pandoc (fixed argv, 5 formats, refusals, timeout); rust-std 9/9; npm run licenses exit 0; dod green
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L1 #1253): pandocBridge 8/8 (load-error without); rustc --test pandoc.rs 7/7 vs fake pandoc (fixed argv, 5 formats, refusals, timeout); rust-std 9/9; npm run licenses exit 0; dod green · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.S1 · היסטוריית גרסאות ברמת Obsidian Sync: מדיניות שמירה (30 יום / שנה / לתמיד), מסך ״קבצים שנמחקו״ ושחזור המוני** — בלי ענף · נתונים ואבטחה · 8 ש׳ 00 דק׳ · מקור: https://obsidian.md/help/Obsidian%2BSync/Version%2Bhistory
 
@@ -9181,7 +9181,7 @@ W13.S2.3. הגדרות שהגיעו עם כספת נשמרות כ-.bak ולא נ
 
 **קבלה:** בדיקה: תוסף שנשתל בכספת משותפת לא רץ · הגדרות שמגיעות מהשותף לא משנות את המקומיות
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1225): sharedVaultIsolation.test.ts 8/8 (dod.mjs green); mutants: quarantine hook removed → 2 red, exclusion removed → 4 red; roleVaultUi 13/13, e2eeMutants 18/18
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1225): sharedVaultIsolation.test.ts 8/8 (dod.mjs green); mutants: quarantine hook removed → 2 red, exclusion removed → 4 red; roleVaultUi 13/13, e2eeMutants 18/18 · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.S3 · החלטה (ADR): הסכמת מפתח קבוצתית לכספות משותפות — BeeKEM/Keyhive מול MLS ‏(OpenMLS, RFC 9420) מול המפתח המשותף הנוכחי** — בלי ענף · נתונים ואבטחה · 8 ש׳ 00 דק׳ · מקור: https://eprint.iacr.org/2026/1434 · https://www.inkandswitch.com/project/keyhive/ · https://www.rfc-editor.org/rfc/rfc9420
 
@@ -9191,7 +9191,7 @@ W13.S3.3. docs/adr/00xx-group-keys.md עם ההחלטה ומה יפתח אותה
 
 **קבלה:** ADR מתפרסם עם מספרים מאב הטיפוס · החלטה אחת: מאמצים / ממתינים / לא — עם תנאי חזרה
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1226): docs/adr/005-group-keys.md (decision: wait; 4 triggers); proto.mjs numbers; adrGroupKeys.test.ts 5/5; changed number → red; ADR missing → 4 red
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1226): docs/adr/005-group-keys.md (decision: wait; 4 triggers); proto.mjs numbers; adrGroupKeys.test.ts 5/5; changed number → red; ADR missing → 4 red · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.S4 · חבילת מוכנות לביקורת חיצונית: היקף, מודל איום לסנכרון, וקטורי בדיקה שמאומתים במימוש שני, והוראות בנייה בפקודה אחת** — בלי ענף · נתונים ואבטחה · 8 ש׳ 00 דק׳ · מקור: https://obsidian.md/blog/cure53-tob-sync-audits/ · https://trailofbits.com/library/standard-notes/
 
@@ -9201,7 +9201,7 @@ W13.S4.3. שאלון היקף לפי מה ש-Cure53 ו-Trail of Bits ביקרו 
 
 **קבלה:** החבילה נבנית בפקודה אחת ו-hash שלה יציב · 100% מהווקטורים עוברים במימוש השני
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1226): node scripts/sync-protocol/audit-pack.mjs --check green (dod.mjs green, 8 s): stable SHA-256 twice, 51/51 vectors in ref-impl.mjs (node:crypto + own RFC 9106 Argon2id, passes RFC vector), tampered vector refused, 120 in-scope files hashed
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1226): node scripts/sync-protocol/audit-pack.mjs --check green (dod.mjs green, 8 s): stable SHA-256 twice, 51/51 vectors in ref-impl.mjs (node:crypto + own RFC 9106 Argon2id, passes RFC vector), tampered vector refused, 120 in-scope files hashed · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.S5 · בעלים: מסלולי מימון לביקורת — הגשה לקריאה הבאה של NLnet NGI Zero (עד 50 אלף אירו, כולל ביקורת אבטחה) ול-OSTIF, עם חבילת W13.S4** — בלי ענף · נתונים ואבטחה · 3 ש׳ 00 דק׳ · מקור: https://nlnet.nl/commonsfund · https://ostif.org/
 
@@ -9221,7 +9221,7 @@ W13.S6.3. כבוי כברירת מחדל ובמצב טיסה
 
 **קבלה:** הממסר רואה רק בייטים מוצפנים (בדיקה) · e2e בשני דפדפנים מול ממסר מקומי
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1227): vaultPresence.test.ts 8/8 (dod.mjs green): relay bytes hold no name/path, TTL 30 s, departure, wrong key, off/airplane/no-name send nothing; mutants (TTL, off switch) → red; screenshots g4w/L3h/presence-he.png, presence-en.png (axe 0); startup 217,547 B
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1227): vaultPresence.test.ts 8/8 (dod.mjs green): relay bytes hold no name/path, TTL 30 s, departure, wrong key, off/airplane/no-name send nothing; mutants (TTL, off switch) → red; screenshots g4w/L3h/presence-he.png, presence-en.png (axe 0); startup 217,547 B · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.S7 · Mac ומכשירים: תרגיל סנכרון אמיתי בין 3 מכשירים (Mac, ‏iPhone, ‏Android) — 1,000 עריכות, ניתוק, קונפליקט ושחזור** — בלי ענף · נתונים ואבטחה · 4 ש׳ 00 דק׳ · מקור: https://obsidian.md/sync
 
@@ -9231,7 +9231,7 @@ W13.S7.3. השוואת hash של הכספת בסוף בשלושת המכשירי
 
 **קבלה:** 0 אובדן; hash זהה בשלושה · כל קונפליקט נפתר לפי sync.conflictMode (W11.S6)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1227): scripts/drill/sync-3-devices.md + vault-hash.mjs; simulated drill sync3Devices.test.ts 1/1 (1,000 edits, 0 lost, 259 conflicts per mode, same hash on 3); drill:data-safety --report judges simulated and --real reports (lossy resolver → red; bad counters → exit 1)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1227): scripts/drill/sync-3-devices.md + vault-hash.mjs; simulated drill sync3Devices.test.ts 1/1 (1,000 edits, 0 lost, 259 conflicts per mode, same hash on 3); drill:data-safety --report judges simulated and --real reports (lossy resolver → red; bad counters → exit 1) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.A1 · לקוח MCP: הרשאה לפי מפרט 2026-07-28 — אימות iss ‏(RFC 9207), ‏CIMD במקום רישום דינמי, ‏application_type ו-PKCE** — בלי ענף · AI וסוכנים · 6 ש׳ 00 דק׳ · מקור: https://blog.modelcontextprotocol.io/posts/2026-07-28/ · https://www.rfc-editor.org/rfc/rfc9207
 
@@ -9241,7 +9241,7 @@ W13.A1.3. בדיקות מול שרת הרשאה מדומה עם iss שגוי
 
 **קבלה:** iss שגוי נדחה · אין קריאה ל-DCR כשהשרת מפרסם CIMD
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1245): mcpOauth2026.test.ts 7/7 vs mock AS (wrong iss refused before token call, mix-up refused, no DCR when CIMD, issuer-bound DCR id, loopback redirect + application_type native, PKCE+resource); mutations: no-CIMD -4, no-iss -1; mcpClient 18/18 unchanged
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1245): mcpOauth2026.test.ts 7/7 vs mock AS (wrong iss refused before token call, mix-up refused, no DCR when CIMD, issuer-bound DCR id, loopback redirect + application_type native, PKCE+resource); mutations: no-CIMD -4, no-iss -1; mcpClient 18/18 unchanged · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.A2 · הרחבות MCP בלקוח: ‏Tasks ‏(tasks/get, ‏tasks/update, ‏subscriptions/listen) ומטמון רשימות לפי ttlMs ו-cacheScope** — בלי ענף · AI וסוכנים · 5 ש׳ 00 דק׳ · מקור: https://blog.modelcontextprotocol.io/posts/2026-07-28/
 
@@ -9251,7 +9251,7 @@ W13.A2.3. בדיקות מול שרת מדומה
 
 **קבלה:** משימה שמסתיימת אחרי 3 סקרים מוצגת ונסגרת · רשימה לא נקראת שוב לפני ttlMs
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1245): mcpTasksCache.test.ts 9/9 (task done after 3 polls shown then closed, cancel → tasks/cancel, input_required once per key via tasks/update, TTL, listen; list not refetched before ttlMs, per-vault unless shared, list_changed); screenshot /tmp/claude-0/-home-claude/db859785-2ec7-51e3-b6ba-0edfee54cc7b/scratchpad/g4w/L6h/servertasks-he.png axe 0
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1245): mcpTasksCache.test.ts 9/9 (task done after 3 polls shown then closed, cancel → tasks/cancel, input_required once per key via tasks/update, TTL, listen; list not refetched before ttlMs, per-vault unless shared, list_changed); screenshot /tmp/claude-0/-home-claude/db859785-2ec7-51e3-b6ba-0edfee54cc7b/scratchpad/g4w/L6h/servertasks-he.png axe 0 · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.A3 · זיכרון סוכן כקובץ בכספת: עובדות שהמשתמש אישר, גלויות ונערכות, ונכנסות להקשר רק בהסכמה** — בלי ענף · AI וסוכנים · 6 ש׳ 00 דק׳ · מקור: https://www.notion.com/releases/2025-09-18
 
@@ -9261,7 +9261,7 @@ W13.A3.3. מחיקה = מחיקת שורה בקובץ
 
 **קבלה:** שום עובדה לא נכתבת בלי אישור (בדיקה) · סוכן שלא הורשה לא מקבל את הזיכרון בהקשר
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1248): agentMemoryFile.test.ts 7/7 (nothing written without approval, unallowed agent gets nothing and file unread, reads logged w/o facts, forget = delete line); mutation no-access-check -2; screenshot /tmp/claude-0/-home-claude/db859785-2ec7-51e3-b6ba-0edfee54cc7b/scratchpad/g4w/L6h/trust-he.png
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1248): agentMemoryFile.test.ts 7/7 (nothing written without approval, unallowed agent gets nothing and file unread, reads logged w/o facts, forget = delete line); mutation no-access-check -2; screenshot /tmp/claude-0/-home-claude/db859785-2ec7-51e3-b6ba-0edfee54cc7b/scratchpad/g4w/L6h/trust-he.png · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.A4 · מדדי ״הצעה ואישור״ אמיתיים: שיעור קבלה, דחייה, עריכה לפני קבלה וזמן לאישור לכל סוכן — מונים מקומיים בלבד** — בלי ענף · AI וסוכנים · 5 ש׳ 00 דק׳ · מקור: https://www.notion.com/product/ai
 
@@ -9271,7 +9271,7 @@ W13.A4.3. סוכן עם שיעור קבלה < 30% מסומן לבדיקה ב-eva
 
 **קבלה:** המונים לא יוצאים מהמכשיר בלי הסכמה (יומן הפרטיות) · הדוח מציג את 14 הסוכנים
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1248): suggestionOutcomes.test.ts 10/10 (accept/reject/edit/cancel + time from staging, report lists all 15 eval agents, <30% flagged, consent-gated share, no network code); mutation -1; screenshots trust-he(.png|-dark.png) axe 0
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1248): suggestionOutcomes.test.ts 10/10 (accept/reject/edit/cancel + time from staging, report lists all 15 eval agents, <30% flagged, consent-gated share, no network code); mutation -1; screenshots trust-he(.png|-dark.png) axe 0 · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.A5 · כרטיס מודל לכל סוכן בממשק: איזה מודל, רישיון, ציון eval ותאריך המדידה — מתוך eval/results** — בלי ענף · AI וסוכנים · 4 ש׳ 00 דק׳ · מקור: https://huggingface.co/docs/hub/model-cards
 
@@ -9281,7 +9281,7 @@ W13.A5.3. קישור לעמוד המדד הציבורי (W11.H13)
 
 **קבלה:** 0 מספרים בכרטיס בלי כרטיס eval (בדיקה) · הכרטיס בעברית ובאנגלית
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1248): modelCardUi.test.ts 7/7 (data only from complete eval cards, 0 numbers without card, numbers equal card, licence lookup, en+he, toggle); mutation -1
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1248): modelCardUi.test.ts 7/7 (data only from complete eval cards, 0 numbers without card, numbers equal card, licence lookup, en+he, toggle); mutation -1 · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.P1 · נעילת אפליקציה וכיסוי בתצוגת המשימות: Face ID / טביעת אצבע, ‏FLAG_SECURE לפתקים נעולים ו-snapshot מכוסה ב-iOS** — בלי ענף · נתונים ואבטחה · 8 ש׳ 00 דק׳ · מקור: https://developer.android.com/reference/android/view/WindowManager.LayoutParams#FLAG_SECURE · https://standardnotes.com/help/security
 
@@ -9300,7 +9300,7 @@ W13.P2.2. בדיקה עם worker מזויף בשם argon2.worker.js שקורא �
 
 **קבלה:** הבדיקה נכשלת על ה-worker המזויף · הריצה על הבנייה נקייה
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1252): privacyLedgerWorkers.test.ts 5/5 (fails on base); npm run privacy:ledger exit 0 (24 worker sources by content, argon2Worker found+fixed; base was red on 2 notes, fixed); esbuild-bundled 12 workers scanned: 0 gaps
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1252): privacyLedgerWorkers.test.ts 5/5 (fails on base); npm run privacy:ledger exit 0 (24 worker sources by content, argon2Worker found+fixed; base was red on 2 notes, fixed); esbuild-bundled 12 workers scanned: 0 gaps · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.P3 · מבחן יציאה: ייצוא מלא (פתקים, קבצים מצורפים, מאפיינים, היסטוריה, הגדרות, פרופילי AI) לפורמטים פתוחים, ופתיחה בהתקנה נקייה וב-Obsidian בלי אובדן** — בלי ענף · נתונים ואבטחה · 6 ש׳ 00 דק׳ · מקור: https://www.inkandswitch.com/local-first-software/
 
@@ -9310,7 +9310,7 @@ W13.P3.3. פתיחת אותה תיקייה ב-Obsidian: רשימת מה שלא �
 
 **קבלה:** round trip על כספת הזהב: 0 הבדלים · הדוח מפרט כל פריט שאינו Markdown רגיל
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1254): exitTest.test.ts 4/4 (fails on base): golden vault round trip 0 differences, re-export byte-identical, report lists .base/chart/CriticMarkup
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1254): exitTest.test.ts 4/4 (fails on base): golden vault round trip 0 differences, re-export byte-identical, report lists .base/chart/CriticMarkup · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.P4 · מלאי נתונים מקומי: ״מה שמור במכשיר הזה״ — פתקים, היסטוריה, מודלים, מטמונים ומפתחות — עם גודל ומחיקה לכל קטגוריה, ו-crypto-shredding לכספת מוצפנת** — בלי ענף · נתונים ואבטחה · 6 ש׳ 00 דק׳ · מקור: https://gdpr-info.eu/art-17-gdpr/
 
@@ -9320,7 +9320,7 @@ W13.P4.3. ייצוא הדוח כ-JSON
 
 **קבלה:** אחרי ״מחק הכול״: ‏navigator.storage.estimate() קרוב ל-0 (בדיקה) · מפתח שהושמד → אין פענוח של עותק ישן
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1254): localDataInventory.test.ts 5/5 (fails on base): inventory, per-category wipe, estimate 0 after delete-all (fakes), crypto-shred AES-GCM
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1254): localDataInventory.test.ts 5/5 (fails on base): inventory, per-category wipe, estimate 0 after delete-all (fakes), crypto-shred AES-GCM · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.P5 · הגיינת לוח: ניקוי אוטומטי של סודות שהועתקו (מפתח שחזור, סיסמה) אחרי 60 שניות, ובלי הדבקה שקטה בטלפון** — בלי ענף · נתונים ואבטחה · 3 ש׳ 00 דק׳ · מקור: https://developer.android.com/develop/ui/views/touch-and-input/copy-paste#SensitiveContent
 
@@ -9330,7 +9330,7 @@ W13.P5.3. אף הדבקה בלי פעולה של המשתמש
 
 **קבלה:** בדיקה: הלוח מתנקה אחרי 60 שניות · הסימון כרגיש מופיע ב-Android (בדיקת מכשיר ב-W11.M10)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1252): clipboardHygiene.test.ts 8/8 (fails on base): 60 s clear if unchanged, newer copy kept, native EXTRA_IS_SENSITIVE, no silent paste
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1252): clipboardHygiene.test.ts 8/8 (fails on base): 60 s clear if unchanged, newer copy kept, native EXTRA_IS_SENSITIVE, no silent paste · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.P6 · Mac: מסע local-only מלא ב-3 דפדפנים (e2e/local-only-journey.spec.ts) — ‏0 בקשות חיצוניות, עם יומן הרשת בקבלה** — בלי ענף · נתונים ואבטחה · 2 ש׳ 00 דק׳ · מקור: w13/research.md §P
 
@@ -9378,7 +9378,7 @@ W13.X4.3. פערים לרמה 2 הופכים למשימות
 
 **קבלה:** 100% מקריטריוני רמה 1 עם ראיה · הבדיקה נכשלת כשראיה נמחקת
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L2 #1228): ospsBaseline.test 5/5 (deleted evidence → fails); L1 21/24 met with evidence, 2 owner, 1 gap (LICENSE in release artefacts); L2 gaps DCO, PVR
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L2 #1228): ospsBaseline.test 5/5 (deleted evidence → fails); L1 21/24 met with evidence, 2 owner, 1 gap (LICENSE in release artefacts); L2 gaps DCO, PVR · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.X5 · קישורי lumen:// וקבצים לא מוכרים: אישור לכל פעולה מקישור, רשימת היתר למקורות, ופתיחת סוג קובץ לא מוכר רק אחרי אישור** — בלי ענף · נתונים ואבטחה · 5 ש׳ 00 דק׳ · מקור: https://obsidian.md/changelog/2026-05-28-desktop-v1.13.0/ · https://obsidian.md/changelog/2026-11-03-desktop-v1.15.1/
 
@@ -9388,7 +9388,7 @@ W13.X5.3. יומן ביומן הפרטיות
 
 **קבלה:** e2e: ‏lumen://new מאתר זר לא כותב בלי אישור · ההיתר לא עובר בסנכרון (בדיקה)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L2 #1242): uriConfirm.test 13/13 (base shell.ts → 2 fail); desktop new/capture/open-from-link refused write nothing; mobile capture?text; clip deep/#clip; allow list not exported/imported/synced; ledger; dialog screens link-*.png axe 0
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L2 #1242): uriConfirm.test 13/13 (base shell.ts → 2 fail); desktop new/capture/open-from-link refused write nothing; mobile capture?text; clip deep/#clip; allow list not exported/imported/synced; ledger; dialog screens link-*.png axe 0 · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.X6 · התקנה בלי סקריפטים: ‏npm ci --ignore-scripts כברירת מחדל עם רשימת היתר לחבילות שצריכות build, ובדיקת lockfile (מארחים, integrity, https)** — בלי ענף · נתונים ואבטחה · 4 ש׳ 00 דק׳ · מקור: https://docs.npmjs.com/cli/v11/using-npm/config#ignore-scripts · https://github.com/lirantal/lockfile-lint
 
@@ -9398,7 +9398,7 @@ W13.X6.3. חיבור ל-ci:local ול-lockfile:drift
 
 **קבלה:** חבילה עם postinstall שלא ברשימה לא מריצה אותו (בדיקה) · lock עם מארח זר נכשל
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L2 #1228): lockfile-check exit 0 (2139 pkgs, 5 lockfiles); lockfileCheck.test 7/7 incl. real offline npm: postinstall runs without .npmrc, not with it; ci:local step lockfile; lockfile:drift runs it
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L2 #1228): lockfile-check exit 0 (2139 pkgs, 5 lockfiles); lockfileCheck.test 7/7 incl. real offline npm: postinstall runs without .npmrc, not with it; ci:local step lockfile; lockfile:drift runs it · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.V1 · INP גם ב-WebKit: ‏Safari 26.2 תומך ב-INP ו-LCP — שער INP בשלושה מנועים, וייחוס LoAF לכל אינטראקציה איטית** — בלי ענף · תשתית וביצועים · 6 ש׳ 00 דק׳ · מקור: https://web.dev/blog/lcp-and-inp-are-now-baseline-newly-available · https://developer.chrome.com/docs/web-platform/long-animation-frames
 
@@ -9418,7 +9418,7 @@ W13.V2.3. שער בריצת הלילה
 
 **קבלה:** heap אחרי GC ≤ בסיס + 10% · 0 צמתי DOM מנותקים אחרי סגירת 500 פתקים
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1238): dod green: leak.mjs --notes 500 exit 0 (index 2.9%, vault 0.3% 0 alive, yjs 2.5% 0 alive; --browser CodeMirror 6.7%, 0 detached, DOM 12→12); --plant-leak exits 1 (50/500 alive, 10,400 detached); leakGate.test.ts 5/5; /tmp/claude-0/-home-claude/db859785-2ec7-51e3-b6ba-0edfee54cc7b/scratchpad/g4w/L8shots/v2-leak.json
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1238): dod green: leak.mjs --notes 500 exit 0 (index 2.9%, vault 0.3% 0 alive, yjs 2.5% 0 alive; --browser CodeMirror 6.7%, 0 detached, DOM 12→12); --plant-leak exits 1 (50/500 alive, 10,400 detached); leakGate.test.ts 5/5; /tmp/claude-0/-home-claude/db859785-2ec7-51e3-b6ba-0edfee54cc7b/scratchpad/g4w/L8shots/v2-leak.json · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.V3 · חיפוש עם אלפי תוצאות: תוצאה ראשונה ≤ 50ms, הזרמה ורשימה וירטואלית, ובלי קפיצות בזמן הקלדה** — בלי ענף · תשתית וביצועים · 6 ש׳ 00 דק׳ · מקור: https://obsidian.md/changelog/2026-11-03-desktop-v1.15.1/
 
@@ -9428,7 +9428,7 @@ W13.V3.3. מדידה על כספת 10k עם שאילתה שמתאימה ל-5,000
 
 **קבלה:** תוצאה ראשונה ≤ 50ms p95, כל ה-5,000 ≤ 1s · CLS של רשימת התוצאות 0 בזמן הקלדה
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1237): searchStreaming.test.ts 10/10: 10k notes/5k matches first page p95 21 ms, all p95 613 ms (process CPU; box load 10/2 cores); paging = whole ranking; virtual list rows fixed, append moves nothing
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1237): searchStreaming.test.ts 10/10: 10k notes/5k matches first page p95 21 ms, all p95 613 ms (process CPU; box load 10/2 cores); paging = whole ranking; virtual list rows fixed, append moves nothing · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.V4 · Mac ומכשירים: סוללה וחום במובייל — 30 דק׳ הקלדה וגלילה, ‏Energy Log ב-Xcode ו-Battery Historian** — בלי ענף · תשתית וביצועים · 4 ש׳ 00 דק׳ · מקור: https://developer.apple.com/documentation/xcode/improving-your-app-s-performance
 
@@ -9437,7 +9437,7 @@ W13.V4.2. דוח ב-docs/perf/mobile-energy.md
 
 **קבלה:** צריכה ≤ אפליקציית הערות מערכת × 1.5 באותו תסריט · אין wakelock או טיימר שרץ ברקע (בדיקה)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1240): backgroundTimers.test.ts 4/4 (no wake lock, every background timer listed); mobileEnergy.test.ts 4/4; mobile:check fails until measured
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1240): backgroundTimers.test.ts 4/4 (no wake lock, every background timer listed); mobileEnergy.test.ts 4/4; mobile:check fails until measured · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.V5 · דף ביצועים ציבורי: מגמה לכל שחרור מהקבלות החתומות — הפעלה, INP, כספת 100k ומהקשה עד ציור** — בלי ענף · תשתית וביצועים · 4 ש׳ 00 דק׳ · מקור: https://obsidian.md/changelog/
 
@@ -9446,7 +9446,7 @@ W13.V5.2. השוואה ל-Obsidian רק במה שנמדד על אותה מכונ
 
 **קבלה:** 0 מספרים בלי קבלה · הדף נבנה בשתי השפות
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1238): dod green: perfPage.test.ts 6/6 (tampered/other-key/unsealed left out; both languages; Obsidian only same machine); docs/perf/index{,.he}.md generated
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1238): dod green: perfPage.test.ts 6/6 (tampered/other-key/unsealed left out; both languages; Obsidian only same machine); docs/perf/index{,.he}.md generated · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.V6 · הפעלה בכספת עם תיקיות נסתרות גדולות (.git, ‏node_modules, ‏.trash): דילוג באינדוקס וסטטוס התקדמות בשורת המצב** — בלי ענף · תשתית וביצועים · 4 ש׳ 00 דק׳ · מקור: https://obsidian.md/changelog/2026-11-03-mobile-v1.15.1/
 
@@ -9456,7 +9456,7 @@ W13.V6.3. שורת מצב: ״מאנדקס 3,200/10,000״ ומעטפת זמינה
 
 **קבלה:** כספת עם ‎.git של 200k קבצים נפתחת באותו זמן כמו בלעדיו (± 10%) · הסטטוס מופיע ונעלם
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1237): dod green: hiddenFolderIndex.test.ts 12/12 (200k-file .git = same listing work; watcher/observer/Rust skip; status appears and goes); rustc --test 24/24 (new test fails without)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L8 #1237): dod green: hiddenFolderIndex.test.ts 12/12 (200k-file .git = same listing work; watcher/observer/Rust skip; status appears and goes); rustc --test 24/24 (new test fails without) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.Y1 · בעלים: מטריצת קוראי מסך ב-Windows — ‏JAWS+Chrome, ‏NVDA+Firefox ו-Narrator+Edge — 10 צעדי המסע, פעם בשחרור** — בלי ענף · ממשק, עברית וידע · 4 ש׳ 00 דק׳ · מקור: https://webaim.org/projects/screenreadersurvey10/
 
@@ -9486,7 +9486,7 @@ W13.Y3.3. פרוטוקול ידני: 10 פעולות ב-Voice Control (macOS) ו
 
 **קבלה:** 0 הפרות 2.5.3 ב-axe ובבדיקה שלנו · הפרוטוקול מתועד
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1229): labelInName.test.ts 5/5 (all JSX with aria-label + text, en + he; found 8 controls at base → fixed); DOM check in e2e/a11y.spec.ts; docs/a11y/voice-control-protocol.md
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1229): labelInName.test.ts 5/5 (all JSX with aria-label + text, en + he; found 8 controls at base → fixed); DOM check in e2e/a11y.spec.ts; docs/a11y/voice-control-protocol.md · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.Y4 · העדפות משתמש (EN 301 549 v4.1.1): גודל טקסט של המערכת, ‏Dynamic Type ב-iOS ו-font scale של 200% ב-Android בלי חיתוך** — בלי ענף · ממשק, עברית וידע · 5 ש׳ 00 דק׳ · מקור: https://www.deque.com/blog/en-301-549-v4-1-1-is-final-what-changed-what-it-means-and-what-you-should-do/
 
@@ -9496,7 +9496,7 @@ W13.Y4.3. e2e עם font-size 200% על 10 משטחים: 0 חיתוך ו-0 גלי
 
 **קבלה:** 10/10 משטחים עוברים ב-200% · בדיקה במכשיר ב-W11.M10
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1229): systemTextSize.test.ts 6/6 (fails at base); native getTextScale on iOS (UIFontMetrics) and Android (fontScale); harness at zoom 2: 0 horizontal scroll; e2e/a11y-text-size.spec.ts (10 surfaces)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1229): systemTextSize.test.ts 6/6 (fails at base); native getTextScale on iOS (UIFontMetrics) and Android (fontScale); harness at zoom 2: 0 horizontal scroll; e2e/a11y-text-size.spec.ts (10 surfaces) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.Y5 · קריטריוני WCAG 2.2 החדשים כבדיקות: גודל מטרה 24px ‏(2.5.8), חלופה לגרירה ‏(2.5.7), מיקוד לא מוסתר ‏(2.4.11) ואימות נגיש ‏(3.3.8) בפתיחת E2EE** — בלי ענף · ממשק, עברית וידע · 6 ש׳ 00 דק׳ · מקור: https://www.w3.org/TR/WCAG22/#new-features-in-wcag-2-2
 
@@ -9506,7 +9506,7 @@ W13.Y5.3. פסקת מיקוד מול סרגלים דביקים; הדבקה מו�
 
 **קבלה:** 0 הפרות בארבעת הקריטריונים ב-10 משטחים · ה-ACR מתעדכן מהתוצאות
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1229): wcag22New.test.ts 14/14 (dod row green) + acr:check green; fixes: toast dismiss 24 px (found by the scan), tab menu + Alt+Shift+arrows, sidebar click widths, toasts move from focus, unlock autocomplete; ACR: 2.5.3 & 2.4.11 supports, 2.5.7 & 2.5.8 partial
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L3 #1229): wcag22New.test.ts 14/14 (dod row green) + acr:check green; fixes: toast dismiss 24 px (found by the scan), tab menu + Alt+Shift+arrows, sidebar click widths, toasts move from focus, unlock autocomplete; ACR: 2.5.3 & 2.4.11 supports, 2.5.7 & 2.5.8 partial · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.Y6 · בעלים: ביקורת נגישות עם משתמשים עם מוגבלות (עיוורים, ראייה ירודה, מוטוריקה) דרך ארגון ישראלי, ופרסום הממצאים** — בלי ענף · ממשק, עברית וידע · 4 ש׳ 00 דק׳ · מקור: https://www.w3.org/WAI/test-evaluate/involving-users/
 
@@ -9535,7 +9535,7 @@ W13.I2.3. ערבית: zero/one/two/few/many/other
 
 **קבלה:** 0 מפתחות עם צורה חסרה · ״2 פתקים״ בעברית ו״ملاحظتان״ בערבית בבדיקה
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1213): pluralForms.test.ts 12/12 (fails on base); i18n:check incl. new i18n-plurals gate exit 0; 30 plural keys x all CLDR categories in 8 langs; 289 count strings in a shrink-only pending list
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1213): pluralForms.test.ts 12/12 (fails on base); i18n:check incl. new i18n-plurals gate exit 0; 30 plural keys x all CLDR categories in 8 langs; 289 count strings in a shrink-only pending list · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.I3 · מיון ועיצוב לפי אזור: ‏Intl.Collator לשמות קבצים (עברית בלי ניקוד, מספרים טבעיים), תאריכים, מספרים ויחידות בכל המסכים** — בלי ענף · ממשק, עברית וידע · 5 ש׳ 00 דק׳ · מקור: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/Collator
 
@@ -9545,7 +9545,7 @@ W13.I3.3. בדיקה שמוצאת toLocaleString() בלי locale ו-localeCompar
 
 **קבלה:** ״פתק 2״ לפני ״פתק 10״, ״שָׁלוֹם״ ליד ״שלום״ · 0 קריאות בלי locale
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1250): localeCollation.test.ts 13/13 (fails on base: 106 calls); TS-AST scan 0 locale-less calls in src; 283 importing test files: same failures as base
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1250): localeCollation.test.ts 13/13 (fails on base: 106 calls); TS-AST scan 0 locale-less calls in src; 283 importing test files: same failures as base · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.I4 · מילון מונחים אחיד ל-8 השפות (כספת, פתק, סנכרון, מאפיין…) ושער עקביות ב-i18n:check** — בלי ענף · ממשק, עברית וידע · 4 ש׳ 00 דק׳ · מקור: https://docs.weblate.org/en/latest/user/glossary.html
 
@@ -9555,7 +9555,7 @@ W13.I4.3. סוכן הטיוטות (9.6) מקבל את המילון בפרומפ�
 
 **קבלה:** 0 סטיות מהמילון · המילון מוצג בדף ״עזרו לתרגם״
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1213): glossaryConsistency.test.ts 8/8 (fails on base); i18n:check glossary 0 deviations (5737 checked); table on Help translate page en+he; draft agent prompt carries terms
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1213): glossaryConsistency.test.ts 8/8 (fails on base); i18n:check glossary 0 deviations (5737 checked); table on Help translate page en+he; draft agent prompt carries terms · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.I5 · ערבית כשפת RTL שנייה מלאה בממשק: ספרות הודיות-ערביות כאופציה, גופן Noto Naskh/Kufi ‏(OFL), מסך פתיחה, עזרה ותבניות בערבית** — בלי ענף · ממשק, עברית וידע · 8 ש׳ 00 דק׳ · מקור: https://tbreak.com/notion-launches-full-arabic-support/ · https://www.notion.com/help/change-your-language
 
@@ -9575,7 +9575,7 @@ W13.I6.2. i18n:review מסמן אותן ״נסקר״
 
 **קבלה:** 0 טיוטות מכונה בעברית · i18n:review ירוק
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1213): i18n:review exit 0 with new he-draft error kind; 123 Hebrew drafts reviewed (14 fixed) and approved; i18nReview 7/7 (2 new tests fail on base)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1213): i18n:review exit 0 with new he-draft error kind; 123 Hebrew drafts reviewed (14 fixed) and approved; i18nReview 7/7 (2 new tests fail on base) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.I7 · פרסית כשפת RTL שלישית (בטא): ספרות פרסיות, לוח שמשי בתאריכים ותרגום טיוטה מסומן** — בלי ענף · ממשק, עברית וידע · 6 ש׳ 00 דק׳ · מקור: https://translated.com/resources/rtl-localization-beyond-arabic-hebrew-urdu-farsi
 
@@ -9585,7 +9585,7 @@ W13.I7.3. מטריצת RTL על fa
 
 **קבלה:** מטריצת RTL ירוקה ב-fa · השפה מסומנת בטא בבורר
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1251): persianLocale.test.ts 7/7; fa in picker as beta, rtl, fa-IR persian calendar (۲۶ آبان ۱۴۰۵), Persian digits; 155 activation strings drafted + listed for review; rtl-matrix-fa.spec.ts written
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L5 #1251): persianLocale.test.ts 7/7; fa in picker as beta, rtl, fa-IR persian calendar (۲۶ آبان ۱۴۰۵), Persian digits; 155 activation strings drafted + listed for review; rtl-matrix-fa.spec.ts written · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.D1 · מבנה Diátaxis לתיעוד: מדריכים, איך-לעשות, עיון והסבר — מפת עמודים ושער שכל עמוד מסווג** — בלי ענף · ממשק, עברית וידע · 6 ש׳ 00 דק׳ · מקור: https://diataxis.fr/
 
@@ -9595,7 +9595,7 @@ W13.D1.3. שער ב-docs:audit: עמוד בלי סוג נכשל; עמוד ״מד
 
 **קבלה:** 100% מהעמודים מסווגים · 3 מדריכי התחלה (Tutorial) בעברית
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L7 #1247): 548 pages typed; 3 Hebrew+English tutorials; By-kind nav + 4 hubs per language; docs-audit page checks green; docsVerifiedBanner.test.ts gate tests
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L7 #1247): 548 pages typed; 3 Hebrew+English tutorials; By-kind nav + 4 hubs per language; docs-audit page checks green; docsVerifiedBanner.test.ts gate tests · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.D2 · שער ״רק מה שאומת״: כל עמוד תכונה מקשר למזהה משימה, ועמוד שהמשימה שלו מתחת ל-browser מקבל באנר ״בטא — לא אומת״** — בלי ענף · ממשק, עברית וידע · 4 ש׳ 00 דק׳ · מקור: w13/research.md §D
 
@@ -9605,7 +9605,7 @@ W13.D2.3. עמוד בלי מזהה נכשל ב-docs:audit
 
 **קבלה:** באנר מופיע על עמוד של משימה ב-built · 0 עמודי תכונה בלי מזהה
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L7 #1247): docsVerifiedBanner.test.ts 12/12 (banner on real built-level page, Hebrew, none when browser-verified); 0 feature pages without id (6 untracked with reason)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L7 #1247): docsVerifiedBanner.test.ts 12/12 (banner on real built-level page, Hebrew, none when browser-verified); 0 feature pages without id (6 untracked with reason) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.D3 · תיעוד API לתוספים שנוצר מהטיפוסים, עם גרסה לכל apiVersion ודוגמה רצה לכל מתודה** — בלי ענף · ממשק, עברית וידע · 6 ש׳ 00 דק׳ · מקור: https://docs.obsidian.md/ · https://typedoc.org/
 
@@ -9615,7 +9615,7 @@ W13.D3.3. לכל מתודה דוגמה שרצה בבדיקה (W13.D4)
 
 **קבלה:** 100% מהמתודות הציבוריות מתועדות · בניית התיעוד נכשלת על מתודה בלי תיעוד
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L7 #1247): pluginApiDocs.test.ts 34/34 (28 members = METHOD_CAPABILITY, build fails on undocumented, per-apiVersion pages with deprecation, every example runs); dod green
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L7 #1247): pluginApiDocs.test.ts 34/34 (28 members = METHOD_CAPABILITY, build fails on undocumented, per-apiVersion pages with deprecation, every example runs); dod green · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.D4 · דוגמאות שרצות: כל בלוק קוד ופקודה בתיעוד נבדקים בריצה (doctest) או מסומנים ״להמחשה״** — בלי ענף · ממשק, עברית וידע · 5 ש׳ 00 דק׳ · מקור: https://docs.python.org/3/library/doctest.html
 
@@ -9624,7 +9624,7 @@ W13.D4.2. בלוק בלי סימון ובלי ריצה → אזהרה; עם run 
 
 **קבלה:** 100% מבלוקי run עוברים · הדוח ב-docs:audit
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L7 #1247): node scripts/docs-doctest.mjs exit 0, 4/4 run blocks; summary inside docs:audit; fails on empty
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L7 #1247): node scripts/docs-doctest.mjs exit 0, 4/4 run blocks; summary inside docs:audit; fails on empty · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.D5 · אתר התיעוד נגיש ו-RTL: ‏axe ו-Lighthouse a11y על 30 עמודים בשתי השפות** — בלי ענף · ממשק, עברית וידע · 3 ש׳ 00 דק׳ · מקור: https://www.w3.org/WAI/WCAG22/quickref/
 
@@ -9642,7 +9642,7 @@ W13.D6.2. עמוד בעברית ובאנגלית עם עקיפה לכל בעיה
 
 **קבלה:** הדף נבנה בלי רשת מקובץ שמור (dry-run) · issue עם התווית מופיע
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L7 #1247): knownIssuesPage.test.ts 5/5 (offline from cache, label filter, workaround parsing he/en, failures.md); dod green
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L7 #1247): knownIssuesPage.test.ts 5/5 (offline from cache, label filter, workaround parsing he/en, failures.md); dod green · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.T1 · פריסה מדורגת לעדכונים: קבוצות לפי hash של מזהה מכשיר אנונימי (5% → 25% → 100%), מתג עצירה בערוץ, וחזרה אוטומטית כשהגרסה החדשה לא עולה פעמיים** — בלי ענף · תשתית וביצועים · 8 ש׳ 00 דק׳ · מקור: https://support.google.com/googleplay/android-developer/answer/6346149 · https://v2.tauri.app/plugin/updater/
 
@@ -9652,7 +9652,7 @@ W13.T1.3. boot sentinel: שתי עליות כושלות → חזרה לגרסה 
 
 **קבלה:** בדיקה: ‏5% מ-10,000 מזהים מדומים ±1% · עלייה כושלת פעמיים → הגרסה הקודמת עולה (בדיקה ותרגיל ב-W11.M11)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1210): stagedRollout.test.ts 16/16 (5% of 10k ids within ±1% for 3 salts; 25%; monotonic; halt; malformed holds) + bootSentinel.test.ts 5/5; rustc --test rollout.rs 5/5 (SHA-256 KATs, shared vectors) + boot_sentinel.rs 8/8 (keep+restore .app folder and AppImage in temp dirs); fails-without checked (threshold, halt); dod green
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1210): stagedRollout.test.ts 16/16 (5% of 10k ids within ±1% for 3 salts; 25%; monotonic; halt; malformed holds) + bootSentinel.test.ts 5/5; rustc --test rollout.rs 5/5 (SHA-256 KATs, shared vectors) + boot_sentinel.rs 8/8 (keep+restore .app folder and AppImage in temp dirs); fails-without checked (threshold, halt); dod green · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.T2 · מדיניות תמיכה ומטריצת תאימות: גרסאות דפדפן ומערכת נתמכות, תקופת עדכוני אבטחה, ובדיקה שמכשילה שימוש ב-API מחוץ לטווח** — בלי ענף · תשתית וביצועים · 4 ש׳ 00 דק׳ · מקור: https://web-platform-dx.github.io/web-features/ · https://www.matheson.com/insights/the-eu-cyber-resilience-act-recap-reporting-obligations/
 
@@ -9662,7 +9662,7 @@ W13.T2.3. האפליקציה מציגה ״הדפדפן שלך מחוץ לתמי�
 
 **קבלה:** הבדיקה נכשלת על API חדש מדי בלי בדיקת יכולת · המדיניות בשתי השפות
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1211): supportPolicy.test.ts 14/14 (too-new API without detection fails; with detection passes; empty matrix fails; repo passes: 0 unguarded uses in 2,034 files); dod green; shots support-he.png, support-en-dark.png (axe clean)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1211): supportPolicy.test.ts 14/14 (too-new API without detection fails; with detection passes; empty matrix fails; repo passes: 0 unguarded uses in 2,034 files); dod green; shots support-he.png, support-en-dark.png (axe clean) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.T3 · SLSA 1.2 מסלול מקור: רמה 2 (היסטוריה ו-provenance של מקור) ו-VSA לכל ראש רכבת** — בלי ענף · תשתית וביצועים · 5 ש׳ 00 דק׳ · מקור: https://slsa.dev/spec/v1.2/whats-new · https://slsa.dev/spec/v1.2/source-requirements
 
@@ -9671,7 +9671,7 @@ W13.T3.2. אימות בצד הצרכן ב-release:verify
 
 **קבלה:** VSA לכל ראש רכבת · release:verify נכשל בלי VSA
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1212): releaseSource.test.ts 14/14 (CLI e2e: OK with VSA+tag; exit 1 without VSA / wrong commit / untrusted key); releaseRun 19/19; finding: server rulesets are [] → all 13 train heads level 1 (TEST key run in $S/g4w/L4/source-vsa-trains.txt)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1212): releaseSource.test.ts 14/14 (CLI e2e: OK with VSA+tag; exit 1 without VSA / wrong commit / untrusted key); releaseRun 19/19; finding: server rulesets are [] → all 13 train heads level 1 (TEST key run in $S/g4w/L4/source-vsa-trains.txt) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.T4 · תגיות שחרור חתומות (SSH או gitsign) ובדיקה ב-release:verify** — בלי ענף · תשתית וביצועים · 3 ש׳ 00 דק׳ · מקור: https://git-scm.com/docs/git-verify-tag · https://docs.sigstore.dev/cosign/signing/gitsign/
 
@@ -9680,7 +9680,7 @@ W13.T4.2. release:verify בודק git verify-tag
 
 **קבלה:** תג לא חתום נכשל · allowed_signers מתועד
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1212): releaseSource.test.ts (unsigned tag fails; foreign signer fails; tag on other commit fails; SSHSIG verified against a real ssh-keygen signature from repo history); allowed_signers documented in file + RELEASE.md
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1212): releaseSource.test.ts (unsigned tag fails; foreign signer fails; tag on other commit fails; SSHSIG verified against a real ssh-keygen signature from repo history); allowed_signers documented in file + RELEASE.md · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.T5 · מצב בטוח אחרי פתיחה כושלת: זיהוי לולאת קריסה בעלייה, פתיחה בלי תוספים וסוכנים, והצעה לשחזר** — בלי ענף · תשתית וביצועים · 5 ש׳ 00 דק׳ · מקור: https://obsidian.md/changelog/2026-11-03-mobile-v1.15.1/ · https://obsidian.md/changelog/2026-05-28-desktop-v1.13.0/
 
@@ -9690,7 +9690,7 @@ W13.T5.3. יציאה ממצב בטוח בלי להפעיל מחדש את כל ה
 
 **קבלה:** בדיקה: תוסף שמקריס בעלייה → העלייה הבאה במצב בטוח · e2e של יציאה ממצב בטוח
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1210): safeModeBoot.test.ts 16/16 (plugin that crashes at boot → next boot safe mode; startPlugin refuses; runAgent errorCode safe-mode; exit without restart; storage blocked); fails-without checked (guards); dod green; shots safe-*-he.png, safe-choose-en-dark.png (axe clean, focus to editor)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1210): safeModeBoot.test.ts 16/16 (plugin that crashes at boot → next boot safe mode; startPlugin refuses; runAgent errorCode safe-mode; exit without restart; storage blocked); fails-without checked (guards); dod green; shots safe-*-he.png, safe-choose-en-dark.png (axe clean, focus to editor) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.M1 · Android 16: מסך מלא עם SystemBars של Capacitor 8, חזרה חזויה (predictive back) ופריסה מסתגלת לטאבלט ולמתקפל בלי נעילת כיוון** — בלי ענף · תשתית וביצועים · 8 ש׳ 00 דק׳ · מקור: https://android-developers.googleblog.com/2025/01/orientation-and-resizability-changes-in-android-16.html · https://ionic.io/blog/announcing-capacitor-8
 
@@ -9701,7 +9701,7 @@ W13.M1.4. בדיקת מניפסט ובדיקה חזותית ב-3 גדלים
 
 **קבלה:** המניפסט עובר בדיקה (אין נעילה, back callback פעיל) · baseline חזותי בטלפון, מתקפל וטאבלט (Mac)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1230): androidAdaptive.test.ts 13/13 (manifest/config/CSS checks + fail cases, window classes, back controller); mobile:check new Android 16 section all ✓ here
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1230): androidAdaptive.test.ts 13/13 (manifest/config/CSS checks + fail cases, window classes, back controller); mobile:check new Android 16 section all ✓ here · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.M2 · Live Activity ו-Dynamic Island בזמן לכידה והקלטה (כמו Obsidian 1.14)** — בלי ענף · תשתית וביצועים · 5 ש׳ 00 דק׳ · מקור: https://obsidian.md/changelog/2026-09-02-mobile-v1.14.0/
 
@@ -9710,7 +9710,7 @@ W13.M2.2. סיום אוטומטי כשהלכידה נשמרת; כפתור עצי
 
 **קבלה:** היעד מתקמפל ב-Xcode (W10.M4) · בדיקה ידנית ב-iPhone (W11.M10)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1230): liveActivityBridge.test.ts 10/10; dod green
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1230): liveActivityBridge.test.ts 10/10; dod green · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.M3 · Spotlight ו-Siri ברמת הישות: ‏AppEntity לפתקים, ‏IndexedEntity ו-interactive snippet של iOS 26** — בלי ענף · תשתית וביצועים · 6 ש׳ 00 דק׳ · מקור: https://blakecrosley.com/blog/app-intents-2-ios-26-additions · https://developer.apple.com/videos/play/wwdc2025/275/
 
@@ -9720,7 +9720,7 @@ W13.M3.3. Android: ‏App Shortcuts דינמיים לפתקים האחרונים
 
 **קבלה:** פתק נמצא ב-Spotlight ונפתח (בדיקה ידנית) · פתק נעול לא מאונדקס (בדיקה)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1230): spotlightIndex.test.ts 14/14 (locked never indexed; diff; 10k notes); dod green
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1230): spotlightIndex.test.ts 14/14 (locked never indexed; diff; 10k notes); dod green · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.M4 · סורק מסמכים מהמצלמה: VisionKit ב-iOS ו-ML Kit Document Scanner ב-Android, ו-OCR מקומי לפתק** — בלי ענף · תשתית וביצועים · 6 ש׳ 00 דק׳ · מקור: https://developer.apple.com/documentation/visionkit/vndocumentcameraviewcontroller · https://developers.google.com/ml-kit/vision/doc-scanner
 
@@ -9730,7 +9730,7 @@ W13.M4.3. בלי Play services → העלאת תמונה רגילה
 
 **קבלה:** בדיקה עם תמונות סרוקות: CER עברי לפי שער ה-OCR · בדיקה במכשיר (W11.M10)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1230): docScanner.test.ts 10/10 (pipeline CER 0 vs OCR output on Hebrew/mixed pages; fallbacks; ledger); dod green
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1230): docScanner.test.ts 10/10 (pipeline CER 0 vs OCR output on Hebrew/mixed pages; fallbacks; ledger); dod green · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.M5 · iPad: קיצורי מקלדת עם UIKeyCommand (מסך ⌘), תמיכה בסמן, ו-Stage Manager עם כמה חלונות** — בלי ענף · תשתית וביצועים · 5 ש׳ 00 דק׳ · מקור: https://developer.apple.com/documentation/uikit/uikeycommand
 
@@ -9739,7 +9739,7 @@ W13.M5.2. UIPointerInteraction בפקדים; ‏UIScene לכמה חלונות
 
 **קבלה:** 20 קיצורים מוצגים ב-⌘ · שני חלונות עם שני פתקים (בדיקה ידנית)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1230): ipadKeyCommands.test.ts 10/10 (20 commands en+he, generated Swift in sync, key round-trip, scene manifest, pbxproj); dod green
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1230): ipadKeyCommands.test.ts 10/10 (20 commands en+he, generated Swift in sync, key round-trip, scene manifest, pbxproj); dod green · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.M6 · מסך הכספות במובייל: מיקום, מספר קבצים, מצב סנכרון ותוספים לפני פתיחה, ופעולות שינוי שם, העברה ומחיקה** — בלי ענף · תשתית וביצועים · 5 ש׳ 00 דק׳ · מקור: https://obsidian.md/changelog/2026-11-03-mobile-v1.15.1/
 
@@ -9749,7 +9749,7 @@ W13.M6.3. כספת שלא נפתחה בפעם הקודמת מסומנת
 
 **קבלה:** e2e מובייל ב-RTL · מחיקה עוברת לסל ושחזור עובד
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1231): vaultPicker.test.ts 13/13 (delete→trash→restore, failed-open mark, keyboard, focus); shots vaults-he-phone.png, vaults-he-menu-dark.png, vaults-en-phone.png (axe clean)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L4 #1231): vaultPicker.test.ts 13/13 (delete→trash→restore, failed-open mark, keyboard, focus); shots vaults-he-phone.png, vaults-he-menu-dark.png, vaults-en-phone.png (axe clean) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.K1 · CLI שמדבר עם האפליקציה הפתוחה (IPC): ‏move עם עדכון קישורים, ‏property:set, ‏tags:rename, ‏backlinks, ‏orphans, ‏unresolved — בלי eval** — בלי ענף · תשתית וביצועים · 10 ש׳ 00 דק׳ · מקור: https://dev.to/shimo4228/obsidians-official-cli-is-here-no-more-hacking-your-vault-from-the-back-door-3123 · https://obsidian.md/changelog/2026-02-27-desktop-v1.12.4/
 
@@ -9760,7 +9760,7 @@ W13.K1.4. מצב JSON לכל פקודה, ‏lumen help <cmd> בעברית ובא
 
 **קבלה:** move משנה קישורים בכל הכספת (בדיקה על כספת הזהב) · 40/40 פקודות עם בדיקה
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1205): cliIpc.test.ts 61/61 (40/40 commands, socket/token 0600, eval refused, app-closed paths, --yes gate, TTY approve, conflicts, 10k notes); gold vault (hand-edited) byte-for-byte; mutations: no-rewrite -4, no-token -1, no-allowYes -1; root+mcp-server tsc clean
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1205): cliIpc.test.ts 61/61 (40/40 commands, socket/token 0600, eval refused, app-closed paths, --yes gate, TTY approve, conflicts, 10k notes); gold vault (hand-edited) byte-for-byte; mutations: no-rewrite -4, no-token -1, no-allowYes -1; root+mcp-server tsc clean · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.K2 · Quick Look ב-macOS ו-Preview Handler ב-Windows ל-.md, ‏.base ו-.excalidraw** — בלי ענף · תשתית וביצועים · 8 ש׳ 00 דק׳ · מקור: https://developer.apple.com/documentation/quicklook
 
@@ -9770,7 +9770,7 @@ W13.K2.3. תמונות ממוזערות ל-.excalidraw
 
 **קבלה:** רווח ב-Finder מציג פתק עברי נכון (בדיקה ידנית) · Explorer מציג תצוגה מקדימה
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1244): preview crate rustc --test 7/7 (RTL/niqqud, CSP none, no fetch, SVG, base, C ABI); quickLookBundle.test.ts 4/4; screenshots /tmp/claude-0/-home-claude/db859785-2ec7-51e3-b6ba-0edfee54cc7b/scratchpad/g4w/L6h/quicklook-he.png, quicklook-he-dark.png (0 network requests)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1244): preview crate rustc --test 7/7 (RTL/niqqud, CSP none, no fetch, SVG, base, C ABI); quickLookBundle.test.ts 4/4; screenshots /tmp/claude-0/-home-claude/db859785-2ec7-51e3-b6ba-0edfee54cc7b/scratchpad/g4w/L6h/quicklook-he.png, quicklook-he-dark.png (0 network requests) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.K3 · חיפוש המערכת: Core Spotlight ב-macOS ו-Windows Search לפתקים, בהסכמה ועם ביטול** — בלי ענף · תשתית וביצועים · 6 ש׳ 00 דק׳ · מקור: https://developer.apple.com/documentation/corespotlight
 
@@ -9779,7 +9779,7 @@ W13.K3.2. ביטול מוחק את האינדקס
 
 **קבלה:** פתק נמצא ב-Spotlight ונפתח בכספת הנכונה · ביטול מנקה (בדיקה)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1244): osSearchIndex.test.ts 10/10 (off by default, consent, locked/age/private excluded, vault in deep link, revoke clears domain, incremental, 10k in batches of 200); mutations: no-lock -1, no-clear -3
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1244): osSearchIndex.test.ts 10/10 (off by default, consent, locked/age/private excluded, vault in deep link, revoke clears domain, incremental, 10k in batches of 200); mutations: no-lock -1, no-clear -3 · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.K4 · Mac: בניות ARM64 ל-Windows ול-Linux ו-universal ל-macOS, ובדיקת התקנה בכל אחת** — בלי ענף · תשתית וביצועים · 4 ש׳ 00 דק׳ · מקור: https://v2.tauri.app/distribute/
 
@@ -9788,7 +9788,7 @@ W13.K4.2. SHA256SUMS ודף ההורדות (W10.E61)
 
 **קבלה:** שלוש הבניות מותקנות ונפתחות (Windows on ARM במכונה וירטואלית) · SHA256SUMS חתום
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1244): desktopTargets.test.ts 7/7 (targets per OS, rustup targets, non-colliding names, universal → both darwin platforms in latest.json, binary CPU from Mach-O/PE/ELF header); updaterManifestSig 18/18, desktopRelease 9/9, releaseRun 19/19
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1244): desktopTargets.test.ts 7/7 (targets per OS, rustup targets, non-colliding names, universal → both darwin platforms in latest.json, binary CPU from Mach-O/PE/ELF header); updaterManifestSig 18/18, desktopRelease 9/9, releaseRun 19/19 · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.K5 · תפריטים מקוריים מתורגמים ומשוקפים ב-RTL, ו-Services ב-macOS ״פתק חדש מהבחירה״** — בלי ענף · תשתית וביצועים · 5 ש׳ 00 דק׳ · מקור: https://developer.apple.com/documentation/appkit/nsservices
 
@@ -9797,7 +9797,7 @@ W13.K5.2. NSServices: ״הוסף ל-Lumen״ מכל אפליקציה
 
 **קבלה:** כל פריטי התפריט מתורגמים (בדיקה) · Services עובד (בדיקה ידנית)
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1244): nativeMenuI18n.test.ts 10/10 (all items en+he, 6 locales listed for review, same order/ids/shortcuts, rtl flag, sent via existing tray_set_menu); desktop crate appmenu rustc tests 5 new (17 total)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L6 #1244): nativeMenuI18n.test.ts 10/10 (all items en+he, 6 locales listed for review, same order/ids/shortcuts, rtl flag, sent via existing tray_set_menu); desktop crate appmenu rustc tests 5 new (17 total) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.L1 · יציבות API לתוספים: דוח משטח API מה-.d.ts, ‏semver ומדיניות הוצאה משימוש (שתי גרסאות מינור), ושער שנכשל על שבירה בלי major** — בלי ענף · נתונים ואבטחה · 8 ש׳ 00 דק׳ · מקור: https://obsidian.md/changelog/2026-11-03-desktop-v1.15.1/ · https://api-extractor.com/
 
@@ -9808,7 +9808,7 @@ W13.L1.4. חוזה משתני CSS לערכות נושא כחלק מה-API
 
 **קבלה:** הסרת מתודה בלי major מכשילה · הדוח מתעדכן בכל שינוי API
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L2 #1207): plugin-api-report --check exit 0 (API 1.1.0, 126 entries, 1 deprecated); pluginApiReport.test 11/11 (v4; bump rule off → 4 fail); deprecation warns once in QuickJS (pluginApiVersion); theme vars contract checked vs :root/.dark; ci:local step plugin-api
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L2 #1207): plugin-api-report --check exit 0 (API 1.1.0, 126 entries, 1 deprecated); pluginApiReport.test 11/11 (v4; bump rule off → 4 fail); deprecation warns once in QuickJS (pluginApiVersion); theme vars contract checked vs :root/.dark; ci:local step plugin-api · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.L2 · apiVersion במניפסט ושכבת תאימות: תוסף לגרסה הקודמת רץ עם אזהרות, ובדיקות לשתי הגרסאות** — בלי ענף · נתונים ואבטחה · 6 ש׳ 00 דק׳ · מקור: https://code.visualstudio.com/api/references/extension-manifest
 
@@ -9847,7 +9847,7 @@ W13.L5.3. תג ״מחבר מאומת״ בגלריה
 
 **קבלה:** חתימה מזהות אחרת נדחית · הרישום החתום של W10.B3 נשאר שכבה שנייה
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L2 #1223): pluginAuthorSign.test 7/7 (real sigstore-js vs offline Sigstore root; identity check removed → 1 fail); registry:verify now requires author sig: 18 versions fail 'no author signature' (honest red)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L2 #1223): pluginAuthorSign.test 7/7 (real sigstore-js vs offline Sigstore root; identity check removed → 1 fail); registry:verify now requires author sig: 18 versions fail 'no author signature' (honest red) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.L6 · תצוגה מקדימה של סריקה לכל ענף או commit של מפתח: ‏plugins:review --ref, עם הצעות, אזהרות וכשלים** — בלי ענף · נתונים ואבטחה · 4 ש׳ 00 דק׳ · מקור: https://obsidian.md/blog/future-of-plugins/ · https://alternativeto.net/news/2026/5/obsidian-launches-community-hub-with-automated-plugin-reviews-and-enhanced-safety/
 
@@ -9856,7 +9856,7 @@ W13.L6.2. פלט JSON ו-Markdown בשלוש דרגות, כמו לוח המפת�
 
 **קבלה:** ref עם eval מקבל כשל · ref נקי מקבל כרטיס
 
-**פירוט הסטטוס:** INT9 17.11 (g4 lane L2 #1223): plugins:review -- --ref fixtures/plugins/good exit 0 (dod green); pluginReviewRef.test 4/4 (git sha pass/fail, branch, bad refs exit 2)
+**פירוט הסטטוס:** INT9 17.11 (g4 lane L2 #1223): plugins:review -- --ref fixtures/plugins/good exit 0 (dod green); pluginReviewRef.test 4/4 (git sha pass/fail, branch, bad refs exit 2) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.R1 · פרופיל קריאה לכל פתק: ‏lumen-reading ב-frontmatter (גופן, רוחב, ניקוד, עזרי קריאה, פריסה, קול ומהירות) שגובר על הגלובלי** — בלי ענף · ממשק, עברית וידע · 6 ש׳ 00 דק׳ · מקור: https://support.microsoft.com/en-us/topic/47f298d6-d92c-4c35-8586-5eb81e32a76e
 
@@ -9866,7 +9866,7 @@ W13.R1.3. תפריט ״מצב קריאה״ אחד בסרגל, עם ״שמור ל
 
 **קבלה:** פרופיל לפתק גובר על הגלובלי (בדיקה) · הקובץ לא משתנה כשבוחרים ״מקומי בלבד״ (hash)
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1241: the menu offers spread and sidenotes; daf, bilingual and compare read the profile; the tautological sha test replaced; readingModeMenu.test is in the dod, pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1241: the menu offers spread and sidenotes; daf, bilingual and compare read the profile; the tautological sha test replaced; readingModeMenu.test is in the dod, pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.R2 · מצב פוקוס מורחב: עמעום משפט או פסקה (כמו iA Writer) והדגשות בסגנון Hemingway — משפט ארוך, סביל, תואר פועל ומילה מסובכת — כשכבת תצוגה בלבד** — בלי ענף · ממשק, עברית וידע · 8 ש׳ 00 דק׳ · מקור: https://ia.net/writer/support/editor/focus-mode · https://hemingwayapp.com/help/docs/readability
 
@@ -9876,7 +9876,7 @@ W13.R2.3. ב-RTL המקרא בצד ימין; צבעים עם ניגודיות AA
 
 **קבלה:** הקובץ לא משתנה (hash) · axe נקי; e2e בעברית ובאנגלית
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1241: Hemingway linear on long notes (7.7 s -> 0.26 s on 960k chars), focus span from a window, -ed adjectives and nif'al passives, pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1241: Hemingway linear on long notes (7.7 s -> 0.26 s on 960k chars), focus span from a window, -ed adjectives and nif'al passives, pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.R3 · קורא RSVP עם חזרה: מילה אחת בכל פעם בנקודת ההכרה (מימין בעברית), חזרה של משפט בלחיצה, ועצירה על פיסוק** — בלי ענף · ממשק, עברית וידע · 6 ש׳ 00 דק׳ · מקור: https://www.psychologicalscience.org/news/releases/speed-reading-apps-may-impair-reading-comprehension-by-limiting-ability-to-backtrack.html
 
@@ -9886,7 +9886,7 @@ W13.R3.3. מקלדת: רווח עצירה, חצים קדימה ואחורה לפ
 
 **קבלה:** בדיקות ORP על 50 מילים עבריות ו-50 אנגליות · מסומן ״ניסיוני״ עם קישור למחקר
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1241: RSVP root attribute, arrows by paragraph direction, the Hebrew prefix keeps root letters, pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1241: RSVP root attribute, arrows by paragraph direction, the Hebrew prefix keeps root letters, pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.R4 · עוגן קריאה (בסגנון ״bionic״, בלי שם המותג): הדגשת תחילת מילה בלטינית ובעברית — אופציה, עם ניסוי A/B בבדיקות השימושיות** — בלי ענף · ממשק, עברית וידע · 4 ש׳ 00 דק׳ · מקור: https://okmiku.com/blog/bionic-reading-focus-aid · https://hackaday.com/2022/07/23/hack-your-brain-bionic-reading-panacea-or-placebo
 
@@ -9896,7 +9896,7 @@ W13.R4.3. מדידה ב-W13.R14: זמן קריאה והבנה עם ובלי
 
 **קבלה:** 0 שבירות ניקוד בתצוגה (בדיקה חזותית) · תוצאת A/B מתועדת
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1241: the anchor observer is scoped to the reading roots, pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1241: the anchor observer is scoped to the reading roots, pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.R5 · קורא סוחף בעברית: צביעת חלקי דיבר (שם עצם, פועל, תואר) ממודל מורפולוגיה מקומי, הברות וניקוד לתצוגה, תרגום מילה ומיקוד שורה — בהשראת Immersive Reader** — בלי ענף · ממשק, עברית וידע · 10 ש׳ 00 דק׳ · מקור: https://support.microsoft.com/en-us/topic/47f298d6-d92c-4c35-8586-5eb81e32a76e · https://www.microsoft.com/en-us/education/blog/2023/06/how-to-enhance-reading-instruction-a-guide-to-immersive-reader-for-educators/
 
@@ -9907,6 +9907,8 @@ W13.R5.4. מיקוד שורה 1/3/5 קיים (readingAids.ts) — אותו פר�
 
 **קבלה:** דיוק חלקי דיבר ≥ 90% על 300 מילים מתויגות (סט מוחזק) · 0 בקשות רשת; הקובץ לא משתנה
 
+**פירוט הסטטוס:** level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
+
 **W13.R6 · פריסת ספר בשני עמודים לפתקים ול-EPUB: עמודים עם CSS columns, עמוד ראשון מימין ב-RTL, ודפדוף במקלדת** — בלי ענף · ממשק, עברית וידע · 6 ש׳ 00 דק׳ · מקור: https://www.w3.org/TR/css-multicol-1/
 
 W13.R6.1. מצב spread לתצוגת פתק ולקורא ה-EPUB, עם אותו מתג כמו ב-PDF (W12.R2)
@@ -9915,7 +9917,7 @@ W13.R6.3. שמירת מיקום הקריאה (progress.ts)
 
 **קבלה:** e2e בעברית ובאנגלית: סדר נכון · מיקום הקריאה נשמר במעבר בין מצבים
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1209/#1241: the place is kept by path, never in the file; Space/Enter on the bar's buttons, pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1209/#1241: the place is kept by path, never in the file; Space/Enter on the bar's buttons, pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.R7 · גלילה מסונכרנת ותצוגה משולשת: מקור + תצוגה + מתאר, מעוגנים לכותרות ולבלוקים, ובחירה שעוקבת** — בלי ענף · ממשק, עברית וידע · 8 ש׳ 00 דק׳ · מקור: https://code.visualstudio.com/docs/languages/markdown#_markdown-preview
 
@@ -9924,6 +9926,8 @@ W13.R7.2. פריסה מוכנה ״שלושה טורים״; כל זוג חלונ�
 W13.R7.3. ב-RTL סדר הטורים משתקף; מקלדת למעבר בין טורים
 
 **קבלה:** גלילה בפתק של 2MB: סטייה ≤ שורה אחת · e2e ב-RTL וב-LTR
+
+**פירוט הסטטוס:** level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.R8 · תצוגת השוואה: שני פתקים או שתי גרסאות זה לצד זה, ‏diff ברמת מילה שנכון ב-bidi ובעברית (תחיליות), ומעבר בין שינויים** — בלי ענף · ממשק, עברית וידע · 8 ש׳ 00 דק׳ · מקור: https://support.microsoft.com/en-us/office/compare-and-merge-two-versions-of-a-document-f5059749-a797-4db7-a8fb-b3b27eb8b87e
 
@@ -9934,6 +9938,8 @@ W13.R8.4. F7/Shift+F7 לשינוי הבא/הקודם; הכרזה לקורא מס
 
 **קבלה:** 50 זוגות זהב בעברית ובאנגלית: diff תקין · axe נקי
 
+**פירוט הסטטוס:** level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
+
 **W13.R9 · הערות בשוליים: תצוגת sidenotes (בסגנון Tufte) להערות שוליים, תגובות והצעות — בשוליים השמאליים ב-RTL ומתחת לפסקה במובייל** — בלי ענף · ממשק, עברית וידע · 8 ש׳ 00 דק׳ · מקור: https://edwardtufte.github.io/tufte-css/ · https://quarto.org/docs/authoring/article-layout.html
 
 W13.R9.1. מצב קריאה ״שוליים״: הערות שוליים, תגובות (commentDecorations.ts) והצעות (suggesting.ts) מוצגות ליד השורה
@@ -9941,6 +9947,8 @@ W13.R9.2. התנגשות בין הערות נפתרת בדחיפה; קו מחב�
 W13.R9.3. ב-RTL השוליים בצד שמאל; מתחת ל-700px — מתחת לפסקה
 
 **קבלה:** 30 פתקי זהב: אף הערה לא מכסה אחרת · axe נקי וניווט מקלדת בין הערה לעוגן
+
+**פירוט הסטטוס:** level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.R10 · תצוגה מעומדת והדפסה: ‏paged.js (MIT) בתוך האפליקציה — שבירות עמוד, כותרות עליונות ותחתונות והערות שוליים בתחתית** — בלי ענף · ממשק, עברית וידע · 6 ש׳ 00 דק׳ · מקור: https://pagedjs.org/
 
@@ -9961,7 +9969,7 @@ W13.R11.4. חלופה נגישה: אותו תוכן כמקטעים לינארי�
 
 **קבלה:** דף גמרא לדוגמה מתרנדר עם רש״י ותוספות בצדדים הנכונים · החלופה הלינארית עוברת axe
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1241: the daf has its "?" and its linear text reads the profile, pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1241: the daf has its "?" and its linear text reads the profile, pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.R12 · תצוגה בין-שורית ודו-לשונית: טקסטים דו-לשוניים מספריא (עברית/אנגלית) ותרגום בין השורות מעל W12.H6** — בלי ענף · ממשק, עברית וידע · 6 ש׳ 00 דק׳ · מקור: https://developers.sefaria.org/
 
@@ -9971,7 +9979,7 @@ W13.R12.3. החלפה בין טורים, שורות ו״מקור בלבד״
 
 **קבלה:** e2e על פרק תנ״ך דו-לשוני · יישור לפי פסוק ב-100%
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1221 (buttons styled) and #1241 (profile), pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1221 (buttons styled) and #1241 (profile), pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.R13 · שער מצבי קריאה: כל מצב נבדק ב-RTL וב-LTR, ‏axe, מקלדת, 0 בקשות רשת, שמירת מיקום הקריאה והקובץ לא משתנה** — בלי ענף · ממשק, עברית וידע · 5 ש׳ 00 דק׳ · מקור: https://www.w3.org/WAI/WCAG22/quickref/
 
@@ -9981,7 +9989,7 @@ W13.R13.3. מצב חדש בלי רישום בשער → כשל
 
 **קבלה:** כל המצבים עוברים בשני הכיוונים · השער נכשל כשמצב חדש לא נרשם
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1241: a DOM-level check mounts each mode it can (readingModesDom.test), pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1241: a DOM-level check mounts each mode it can (readingModesDom.test), pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.R14 · בעלים: בדיקת קריאה עם 6 קוראים (שניים עם דיסלקציה) — זמן, הבנה והעדפה לכל מצב** — בלי ענף · ממשק, עברית וידע · 4 ש׳ 00 דק׳ · מקור: https://www.w3.org/WAI/test-evaluate/involving-users/
 
@@ -9989,6 +9997,8 @@ W13.R14.1. תסריט קבוע: אותו טקסט בכל מצב; שאלות הב
 W13.R14.2. התוצאות נכנסות ל-eval/results/reading
 
 **קבלה:** 6 סשנים · החלטה לכל מצב ניסיוני (R3, ‏R4): נשאר או יוצא
+
+**פירוט הסטטוס:** level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.W1 · מנוע הצעות כתיבה אחיד: חוזה Suggestion (טווח, סוג, הסבר, ביטחון, diff), סימון בשני העורכים, קבלה או דחייה לכל קטע — ושום סוכן כתיבה לא כותב ישר לקובץ** — בלי ענף · AI וסוכנים · 10 ש׳ 00 דק׳ · מקור: https://www.grammarly.com/ · https://support.apple.com/guide/iphone/use-writing-tools-iphe2d8a4d0f/ios
 
@@ -10009,7 +10019,7 @@ W13.W2.3. eval:card לכל סוכן; ✅ רק על public או heldout (W11.I18)
 
 **קבלה:** כרטיס לכל אחד מ-12 הסוכנים · הסט המוחזק מוצפן כמו W6.17
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1204: eval:card's writing suite fails on a folder without a manifest, --check is real, a card's dataset must exist, pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1204: eval:card's writing suite fails on a folder without a manifest, --check is real, a card's dataset must exist, pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.W3 · מאמן בהירות וסגנון: משפט ארוך, סביל, שם פעולה (״ביצוע של״), מילת גידור ומילה מיותרת — כללים מקומיים ודירוג במודל קטן** — בלי ענף · AI וסוכנים · 8 ש׳ 00 דק׳ · מקור: https://hemingwayapp.com/help/docs/readability · https://prowritingaid.com/
 
@@ -10019,6 +10029,8 @@ W13.W3.3. רמות: יומיומי / מקצועי / אקדמי (כמו W5.3)
 
 **קבלה:** precision ≥ 0.85 ו-recall ≥ 0.6 על הסט המוחזק בשתי השפות · השהיה ≤ 150ms לפסקה בלי מודל, ≤ 600ms עם
 
+**פירוט הסטטוס:** level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
+
 **W13.W4 · משנה טון ומשלב: רשמי / ניטרלי / ידידותי, ועברית גבוהה מול מדוברת — עם בדיקה שהמשמעות נשמרה** — בלי ענף · AI וסוכנים · 8 ש׳ 00 דק׳ · מקור: https://www.tomsguide.com/ai/grammarly-just-added-9-ai-agents-heres-how-they-can-help-your-writing
 
 W13.W4.1. פרומפט לכל טון ומשלב, עם פרופיל הסגנון (styleProfiles.ts) כאפשרות
@@ -10026,6 +10038,8 @@ W13.W4.2. בדיקת שמירת משמעות: ישויות, מספרים ושל�
 W13.W4.3. הצעה ל-3 גרסאות; diff מול המקור
 
 **קבלה:** שמירת עובדות 100% על 150 פריטים (מספרים, שמות, שלילה) · העדפת מתייג ≥ 70% מול המקור בטון המבוקש
+
+**פירוט הסטטוס:** level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.W5 · קיצור והרחבה: ״קצר ב-30%״, ״הפוך נקודות לפסקה״ — עם בדיקה שאף עובדה, מספר או שם לא אבדו או נוספו** — בלי ענף · AI וסוכנים · 6 ש׳ 00 דק׳ · מקור: https://support.apple.com/guide/iphone/use-writing-tools-iphe2d8a4d0f/ios
 
@@ -10035,6 +10049,8 @@ W13.W5.3. הרחבה מסומנת כ-AI (5.9)
 
 **קבלה:** ≥ 95% בטווח האורך · 0 ישויות או מספרים שהומצאו בסט
 
+**פירוט הסטטוס:** level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
+
 **W13.W6 · בודק עקביות בכספת: שמות, תעתיקים, מונחים, תאריכים ומספרים לאותה ישות — מול גרף הישויות** — בלי ענף · AI וסוכנים · 8 ש׳ 00 דק׳ · מקור: https://prowritingaid.com/features
 
 W13.W6.1. איחוד ישויות (W12.E3) מוצא גרסאות של אותו שם (״חנוכה/חנוכּה/Hanukkah״, ״דוא״ל/אימייל״)
@@ -10043,7 +10059,7 @@ W13.W6.3. מילון מונחים של המשתמש (כמו W13.I4) כקובץ �
 
 **קבלה:** על כספת סינתטית עם 50 סתירות שתולות: recall ≥ 0.8, precision ≥ 0.8 · כל הצעה עם שני קישורי פסקה
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1221: a hyphen or maqaf against a space is a variant (Tel Aviv / Tel-Aviv, בן גוריון / בן־גוריון), pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1221: a hyphen or maqaf against a space is a variant (Tel Aviv / Tel-Aviv, בן גוריון / בן־גוריון), pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.W7 · מבקר מבנה: היררכיית כותרות, פתיחה וסיכום, אורך פסקה ומשפט נושא** — בלי ענף · AI וסוכנים · 5 ש׳ 00 דק׳ · מקור: https://www.tomsguide.com/ai/grammarly-just-added-9-ai-agents-heres-how-they-can-help-your-writing
 
@@ -10053,6 +10069,8 @@ W13.W7.3. הצעות כהערות, לא כשכתוב
 
 **קבלה:** precision ≥ 0.8 על הסט · 0 שכתובים אוטומטיים
 
+**פירוט הסטטוס:** level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
+
 **W13.W8 · בודק טיעון והיגיון: טענה בלי תמיכה, קפיצה לוגית וכשלים נפוצים — מקושר למפת הטיעונים** — בלי ענף · AI וסוכנים · 6 ש׳ 00 דק׳ · מקור: https://www.tomsguide.com/ai/grammarly-just-added-9-ai-agents-heres-how-they-can-help-your-writing
 
 W13.W8.1. חילוץ טענות (R12.11) ובדיקה אם לכל טענה יש מקור בכספת או בפתק
@@ -10060,6 +10078,8 @@ W13.W8.2. רשימת כשלים מתויגת (הכללה, איש קש, מדרו�
 W13.W8.3. תצוגה במפת הטיעונים (W12.V4) כשהיא קיימת
 
 **קבלה:** precision ≥ 0.7 על 150 טיעונים מתויגים · כל הצעה מסבירה למה
+
+**פירוט הסטטוס:** level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.W9 · מדד קריאות לעברית ולאנגלית: מדד עברי חדש (אורך מילה, אורך משפט, שכיחות, עמימות בלי ניקוד) מכויל על קורפוס מדורג, ו-Flesch-Kincaid לאנגלית** — בלי ענף · AI וסוכנים · 10 ש׳ 00 דק׳ · מקור: https://link.springer.com/article/10.1007/s10209-024-01167-2
 
@@ -10069,7 +10089,7 @@ W13.W9.3. פלט: רמה (כיתה / קל-בינוני-קשה) ומה מעלה �
 
 **קבלה:** Spearman ≥ 0.7 מול הדירוג בסט מוחזק · Flesch-Kincaid זהה לספרייה מוכרת ב-±0.1 על 50 טקסטים
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1221: one syllable counter (82/83 on a word list; was 50/83), the goals dialog labels each scale, pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1221: one syllable counter (82/83 on a word list; was 50/83), the goals dialog labels each scale, pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.W10 · Harper ‏(Apache-2.0) לדקדוק אנגלי מקומי ב-WASM, בתוך מנוע ההצעות** — בלי ענף · AI וסוכנים · 6 ש׳ 00 דק׳ · מקור: https://github.com/elijah-potter/harper · https://writewithharper.com/
 
@@ -10079,6 +10099,8 @@ W13.W10.3. השוואה ל-LanguageTool (אם הוגדר שרת מקומי) על
 
 **קבלה:** השהיה ≤ 50ms לפסקה · recall ≥ 0.7 על הסט האנגלי
 
+**פירוט הסטטוס:** level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
+
 **W13.W11 · גלאי חזרות וקלישאות: חזרה על לֶמה בחלון (עברית עם תחיליות) ורשימות קלישאות פתוחות** — בלי ענף · AI וסוכנים · 5 ש׳ 00 דק׳ · מקור: https://prowritingaid.com/features
 
 W13.W11.1. למטיזציה (W11.H12 כשקיים, אחרת hebrewMorph.ts) וחלון של 50 מילים
@@ -10086,7 +10108,7 @@ W13.W11.2. רשימת קלישאות עבריות שנאספה ידנית (CC0) 
 
 **קבלה:** precision ≥ 0.85 · 0 התראות על מילות פונקציה
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1221: the checks dialog's buttons styled, pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1221: the checks dialog's buttons styled, pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.W12 · כותב כותרת, תקציר ו-TL;DR: ‏3 הצעות כותרת, תקציר 150–250 מילים ושורת סיכום — כל משפט מעוגן בפסקה בפתק** — בלי ענף · AI וסוכנים · 6 ש׳ 00 דק׳ · מקור: https://www.notion.com/product/ai
 
@@ -10096,6 +10118,8 @@ W13.W12.3. כותרות: 3 הצעות באורכים שונים
 
 **קבלה:** 100% מהמשפטים מעוגנים · העדפת מתייג ≥ 60% מול סיכום הבסיס
 
+**פירוט הסטטוס:** level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
+
 **W13.W13 · ״הסבר את השינוי שלי״: סיכום בין שתי גרסאות וסימון שינויי משמעות (מספר, שלילה, שם)** — בלי ענף · AI וסוכנים · 5 ש׳ 00 דק׳ · מקור: https://docs.github.com/en/copilot
 
 W13.W13.1. קלט: ה-diff של W13.R8; פלט: 3–5 שורות ורשימת שינויי משמעות
@@ -10103,7 +10127,7 @@ W13.W13.2. שינוי משמעות מזוהה בכלל (מספרים, ״לא״, 
 
 **קבלה:** 100% שינויי מספר ושלילה מזוהים בסט · הסיכום לא מזכיר שינוי שלא קרה (בדיקת עיגון)
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1221: 3 -> three is not a number change; the he "(אין)" string replaced, pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1221: 3 -> three is not a number change; the he "(אין)" string replaced, pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.W14 · מאמן יעדי כתיבה: יעד מילים או זמן, רמת קריאות וטון יעד לפתק, ודוח שבועי מקומי** — בלי ענף · AI וסוכנים · 5 ש׳ 00 דק׳ · מקור: https://ulysses.app/tutorials/goals
 
@@ -10113,7 +10137,7 @@ W13.W14.3. רק מקומי; בלי השוואה למשתמשים אחרים
 
 **קבלה:** המונה תואם לספירת W5.8 · 0 בקשות רשת
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1221: the readability scale is labelled, pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1221: the readability scale is labelled, pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.W15 · מילים לועזיות וחלופות עבריות: הצעות ממונחי האקדמיה ללשון העברית (בכפוף לתנאי השימוש) ומשלב** — בלי ענף · AI וסוכנים · 5 ש׳ 00 דק׳ · מקור: https://hebrew-academy.org.il/keyword/מונחים/
 
@@ -10123,6 +10147,8 @@ W13.W15.3. המשתמש יכול לכבות לכל מונח
 
 **קבלה:** 0 הצעות במשלב יומיומי (ברירת מחדל) · מקור ורישיון המילון מתועדים
 
+**פירוט הסטטוס:** level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
+
 **W13.W16 · בחירת מודלים לסוכני הכתיבה: DictaLM 3.0 ‏1.7B, ‏Gemma 4 E2B/E4B ‏(Apache-2.0), ‏Qwen3 ומסווגים קטנים — רישיונות בשער 0.10 וטבלת ברירות מחדל לפי RAM** — בלי ענף · AI וסוכנים · 5 ש׳ 00 דק׳ · מקור: https://blog.google/innovation-and-ai/technology/developers-tools/gemma-4/ · https://arxiv.org/abs/2602.02104
 
 W13.W16.1. רשומות בקטלוג (modelCatalog.ts) לכל מודל עם רישיון ו-sha256: ‏Gemma 4 (Apache-2.0, ‏2.4.2026), ‏DictaLM 3.0 (1.7B על Qwen3; רישיון לפי כרטיס המודל), ‏Qwen3; ‏Harper ו-Hspell/nspell כמנועי כללים
@@ -10131,7 +10157,7 @@ W13.W16.3. ברירת מחדל לכל סוכן לפי RAM מ-eval (W11.I12)
 
 **קבלה:** שער הרישיונות ירוק · טבלה לכל סוכן: מודל, רישיון, ציון
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1209: modelDefaults is used by the app (the no-model error names the default), pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1209: modelDefaults is used by the app (the no-model error names the default), pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.W17 · Mac: יום מדידה לסוכני הכתיבה — כל ה-eval על מודלים אמיתיים, השהיה ו-RAM, וכרטיסי public/heldout** — בלי ענף · AI וסוכנים · 6 ש׳ 00 דק׳ · מקור: W11.M4
 
@@ -10141,7 +10167,7 @@ W13.W17.3. ברירות המחדל מתעדכנות מהמספרים
 
 **קבלה:** כרטיס heldout לכל סוכן P1 · ברירות מחדל עם מספרים
 
-**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1204: its dod now fails with 0 measured reports (`--measured`), pending merge.
+**פירוט הסטטוס:** F13a 17.11 (audit r4): fixed in F13a #1204: its dod now fails with 0 measured reports (`--measured`), pending merge. · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.W18 · בעלים: 2 מתייגים דוברי עברית (שלא כתבו את הכללים) לסט המוחזק של סוכני הכתיבה** — בלי ענף · AI וסוכנים · 4 ש׳ 00 דק׳ · מקור: W6.17 · W10.B8
 
@@ -10198,7 +10224,7 @@ W13.G5.3. טבלה חלופית (W12.V7)
 
 **קבלה:** 500 פריטים מתרנדרים ≤ 300ms · axe נקי
 
-**פירוט הסטטוס:** INT9 17.11: F13b #1220: ganttZoom.test.tsx 5/5; view test red with old GanttView, block test red with old TasksBlock
+**פירוט הסטטוס:** INT9 17.11: F13b #1220: ganttZoom.test.tsx 5/5; view test red with old GanttView, block test red with old TasksBlock · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.G6 · כרטיס ישות (infobox) בריחוף ובהטמעה: שדות, תמונה וקשרים מרכזיים, כמו בוויקיפדיה** — בלי ענף · ממשק, עברית וידע · 5 ש׳ 00 דק׳ · מקור: https://tana.inc/ · https://capacities.io/
 
@@ -10208,7 +10234,7 @@ W13.G6.3. ב-RTL הכרטיס בצד ימין
 
 **קבלה:** infobox ל-3 סוגים (אדם, מקום, ארגון) · axe נקי
 
-**פירוט הסטטוס:** INT9 17.11: F13b #1220: entityInfobox 15→19, 3 red with old EntityInfobox
+**פירוט הסטטוס:** INT9 17.11: F13b #1220: entityInfobox 15→19, 3 red with old EntityInfobox · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.G7 · עץ משפחה: יחסי הורה ובן זוג לישויות ״אדם״, ייבוא וייצוא GEDCOM 7 ותצוגת topola ‏(Apache-2.0) ב-RTL** — בלי ענף · ממשק, עברית וידע · 8 ש׳ 00 דק׳ · מקור: https://www.github.com/PeWu/topola · https://gedcom.io/specifications/FamilySearchGEDCOMv7.html
 
@@ -10218,7 +10244,7 @@ W13.G7.3. ייצוא GEDCOM 7 שנבדק בכלי חיצוני
 
 **קבלה:** ייבוא קובץ GEDCOM לדוגמה: 0 אנשים אבודים · round trip שומר את הקשרים
 
-**פירוט הסטטוס:** INT9 17.11: F13b #1218: familyTree 8→14 (old gedcom.ts 7 fail); 10k families 252 s → ~4 s; CONT injection test red on old
+**פירוט הסטטוס:** INT9 17.11: F13b #1218: familyTree 8→14 (old gedcom.ts 7 fail); 10k families 252 s → ~4 s; CONT injection test red on old · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.G8 · אשכולות ופערים: מעטפות לקהילות (Leiden), תוויות לפי מונחים מובילים, והצעת קישורים בין אשכולות רחוקים (בהשראת InfraNodus) דרך מסך האישור** — בלי ענף · ממשק, עברית וידע · 8 ש׳ 00 דק׳ · מקור: https://infranodus.com/docs/network-analysis · https://infranodus.com/about/how-it-works
 
@@ -10228,7 +10254,7 @@ W13.G8.3. כל הצעה עוברת את מסך האישור
 
 **קבלה:** על כספת 10k: מודולריות מדווחת ו-10 הצעות פער · 0 קישורים בלי אישור
 
-**פירוט הסטטוס:** INT9 17.11: F13b #1217: clusterGaps 3+5 red with the old code; worker client round trip with a stand-in Worker
+**פירוט הסטטוס:** INT9 17.11: F13b #1217: clusterGaps 3+5 red with the old code; worker client round trip with a stand-in Worker · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.G9 · תצוגות שמורות (perspectives): צבע, גודל ומסננים לכל סוג ישות, ו-Base או שאילתה → גרף** — בלי ענף · ממשק, עברית וידע · בוצע (הוערך 5 ש׳ 00 דק׳) · מקור: https://neo4j.com/docs/bloom-user-guide/current/bloom-perspectives/
 
@@ -10245,7 +10271,7 @@ W13.G10.2. אותם מסננים ואותו מודל; עם reduced-motion — כ
 
 **קבלה:** budget לא גדל · תלת-ממד לא נפתח עם prefers-reduced-motion
 
-**פירוט הסטטוס:** INT9 17.11: F13b #1217: graph3d 7→8 (new test red with old Graph3DView)
+**פירוט הסטטוס:** INT9 17.11: F13b #1217: graph3d 7→8 (new test red with old Graph3DView) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.G11 · חלופה לא-חזותית לגרף: סיכום טקסטואלי (״12 קשרים, 3 אשכולות״), ניווט שכנים בקורא מסך ומסע Guidepup** — בלי ענף · ממשק, עברית וידע · 6 ש׳ 00 דק׳ · מקור: https://www.w3.org/WAI/tutorials/images/complex/ · https://www.w3.org/WAI/ARIA/apg/patterns/treeview/
 
@@ -10262,7 +10288,7 @@ W13.G12.2. GEXF 1.3 עם מאפיינים; נפתח ב-Gephi Lite
 
 **קבלה:** SVG עם 500 צמתים נפתח בדפדפן נכון · GEXF עובר אימות סכמה
 
-**פירוט הסטטוס:** INT9 17.11: F13b #1217: keyboard test (ArrowDown opens/moves, never downloads; 3 red with old menu); GEXF lone surrogates/\n/\t/Infinity tests red on old writer
+**פירוט הסטטוס:** INT9 17.11: F13b #1217: keyboard test (ArrowDown opens/moves, never downloads; 3 red with old menu); GEXF lone surrogates/\n/\t/Infinity tests red on old writer · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)
 
 **W13.G13 · Mac: יום ביצועים לגרף — ‏100k צמתים ו-500k קשתות ב-3 דפדפנים ו-GPU משולב, ומפה במצב טיסה** — בלי ענף · ממשק, עברית וידע · 4 ש׳ 00 דק׳ · מקור: W12.M1
 
