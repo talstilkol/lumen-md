@@ -1,7 +1,7 @@
 {
  "about": "W10.F7: a decision for every open PR whose head is not in the train (npm run train:missing). in = a task or train brings it; rejected = it will not go in, and why; replaced = what carries it instead. A decision is about one head: a PR that moves needs a new one.",
  "train": "verify/train-7",
- "trainHead": "53a430526dcd2cc9fed17ebaaedc981c9d9f1276",
+ "trainHead": "91810ed48a819199840f8fdfce75f9af2274e4e8",
  "decided": "2026-11-17",
  "note": "Integrator INT6b (17.11): lane FA (#1110 #1111 #1116-#1119 #1127-#1130) and lane F11 (#1120-#1126) are merged into verify/train-7 from 78da492534; their heads are in the train. No other open PR was undecided against this head. trainHead is the integration head this file was checked against (before this commit): review 11 L13 asks the file to name the train head itself, which a commit of this file cannot do, so train:missing reports that line as stale after the push until the rule reads trainHead as an ancestor.",
  "decisions": [
@@ -711,7 +711,7 @@
   },
   {
    "pr": 1147,
-   "head": "cd39d204b923ed0b9639b0d5760e43e57363e7eb",
+   "head": "a26a6c5a5a5797e2956f665b681227ca37ab3377",
    "decision": "in",
    "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
    "via": "W13.R7"
@@ -746,7 +746,7 @@
   },
   {
    "pr": 1152,
-   "head": "315670382d717e8162db648f0d6659e2e70f89e2",
+   "head": "8bee936522e284bfdf2993ebf272989d8596ccb3",
    "decision": "in",
    "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
    "via": "W13.R8"
@@ -799,6 +799,90 @@
    "decision": "in",
    "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
    "via": "W13.G10"
+  },
+  {
+   "pr": 1160,
+   "head": "51594ff7839d90aff4e4ef72de073aceb44eb671",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "via": "W13.R9"
+  },
+  {
+   "pr": 1161,
+   "head": "b1384065db7038ead6f2d690513506caccd4056a",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "via": "W13.R6"
+  },
+  {
+   "pr": 1162,
+   "head": "52ca0026e9cf7a60aac69d69156563728ea405a8",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "via": "W13.R5"
+  },
+  {
+   "pr": 1163,
+   "head": "5ee50779dcd5df8a13543994987cfeeb37f95d95",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "via": "W13.G8"
+  },
+  {
+   "pr": 1164,
+   "head": "4f26ad69e618c825a3ad68f32b83af3a1ff71141",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "via": "W13.G1"
+  },
+  {
+   "pr": 1165,
+   "head": "b740685007dd7537d9371f43baa931706d9030a5",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "via": "W13.G2"
+  },
+  {
+   "pr": 1166,
+   "head": "e15b05ef9c46e454f89a743eaee9559065df325f",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "via": "W13.G3"
+  },
+  {
+   "pr": 1167,
+   "head": "cf0dae0d1e4299e58384d46dacb631517480ee93",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "via": "W13.G4"
+  },
+  {
+   "pr": 1168,
+   "head": "d6e7b275118cbaf254661afc8743b15f0bd98e6b",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "via": "W13.G5"
+  },
+  {
+   "pr": 1169,
+   "head": "7c060d4e0770dd380548e1912d858164a610e28e",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "via": "W13.G6"
+  },
+  {
+   "pr": 1170,
+   "head": "33038fb18d4c19d23c6216b72c4b6469973baee9",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "via": "W13.G7"
+  },
+  {
+   "pr": 1171,
+   "head": "5749ac0739ce311c90391c20186495f8b241c769",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "via": "W13.G13"
   }
  ]
 }
