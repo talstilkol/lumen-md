@@ -133,4 +133,3 @@ describe("latency without a model (W13.W3)", () => {
     expect(ms).toBeLessThan(3000);
   });
 });
-});
