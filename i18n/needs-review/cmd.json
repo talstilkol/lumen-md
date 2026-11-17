@@ -31,6 +31,22 @@
     "ru": "1b01jxe",
     "zh-CN": "1b01jxe"
   },
+  "cmd.reading.bookSpread": {
+    "ar": "170n10c",
+    "de": "170n10c",
+    "fr": "170n10c",
+    "ja": "170n10c",
+    "ru": "170n10c",
+    "zh-CN": "170n10c"
+  },
+  "cmd.reading.bookSpread.hint": {
+    "ar": "8suv94",
+    "de": "8suv94",
+    "fr": "8suv94",
+    "ja": "8suv94",
+    "ru": "8suv94",
+    "zh-CN": "8suv94"
+  },
   "cmd.reading.sidenotes": {
     "ar": "zylsvh",
     "de": "zylsvh",

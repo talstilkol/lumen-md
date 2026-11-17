@@ -37,5 +37,14 @@
   "readingViews.sidenotes.suggestInsert": "Suggested insertion",
   "readingViews.sidenotes.suggestReplace": "Suggested replacement",
   "readingViews.sidenotes.title": "Side notes",
+  "readingViews.spread.close": "Back to scrolling",
+  "readingViews.spread.first": "First page",
+  "readingViews.spread.last": "Last page",
+  "readingViews.spread.next": "Next pages",
+  "readingViews.spread.page": "Page {a} of {n}",
+  "readingViews.spread.pages": "Pages {a}–{b} of {n}",
+  "readingViews.spread.prev": "Previous pages",
+  "readingViews.spread.scroll": "Scrolling",
+  "readingViews.spread.toolbar": "Book pages",
   "readingViews.triple.on": "Three columns: source, preview and outline, scroll linked"
 }

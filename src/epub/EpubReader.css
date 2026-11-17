@@ -136,3 +136,12 @@
 .epub-error {
   color: #c62828;
 }
+
+/* W13.R6: two-page spreads. The chapter flows in columns inside .epub-pages (src/reading/spreadFlow.ts). */
+.epub-reader:not([data-layout="scroll"]) .epub-scroll { overflow: hidden; display: flex; flex-direction: column; padding-bottom: 8px; }
+.epub-reader:not([data-layout="scroll"]) .epub-pages { flex: 1; min-height: 0; overflow: hidden; }
+.epub-reader:not([data-layout="scroll"]) .epub-chapter { max-width: none; margin: 0; transition: transform 0.18s ease-out; }
+.epub-reader:not([data-layout="scroll"]) .epub-chapter > * { break-inside: avoid-column; }
+.epub-reader:not([data-layout="scroll"]) .epub-chapter > p { break-inside: auto; orphans: 2; widows: 2; }
+.epub-reader:not([data-layout="scroll"]) .epub-chapter img { max-height: 60vh; }
+@media (prefers-reduced-motion: reduce) { .epub-reader .epub-chapter { transition: none; } }

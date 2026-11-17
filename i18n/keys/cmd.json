@@ -1936,6 +1936,16 @@
       "vars": []
     },
     {
+      "key": "cmd.reading.bookSpread",
+      "en": "Reading: book pages (two-page spread)",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.bookSpread.hint",
+      "en": "Turn pages like a book: page 1 on the right in Hebrew, ← for the next pages there; PageDown, Space",
+      "vars": []
+    },
+    {
       "key": "cmd.reading.mode",
       "en": "Reading mode",
       "vars": []

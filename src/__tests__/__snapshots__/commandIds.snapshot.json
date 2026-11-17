@@ -2283,6 +2283,13 @@
       "icon": "Columns2"
     },
     {
+      "id": "reading.bookSpread",
+      "label": "Reading: book pages (two-page spread)",
+      "group": "View",
+      "hint": "Turn pages like a book: page 1 on the right in Hebrew, ← for the next pages there; PageDown, Space",
+      "icon": "Columns2"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -4726,6 +4733,13 @@
       "icon": "Columns2"
     },
     {
+      "id": "reading.bookSpread",
+      "label": "Reading: book pages (two-page spread)",
+      "group": "View",
+      "hint": "Turn pages like a book: page 1 on the right in Hebrew, ← for the next pages there; PageDown, Space",
+      "icon": "Columns2"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -5076,6 +5090,7 @@
     "view.columnNext",
     "view.columnPrev",
     "reading.sidenotes",
+    "reading.bookSpread",
     "types.page",
     "types.studio"
   ]

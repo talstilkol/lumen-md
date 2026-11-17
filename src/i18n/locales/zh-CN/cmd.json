@@ -383,6 +383,8 @@
   "cmd.privacy.imageHosts.hint": "你选择了“始终允许”的网站——撤销一个或全部",
   "cmd.reading.aids": "阅读辅助…",
   "cmd.reading.aids.hint": "用于阅读的元音符号（尼库德）、适合阅读障碍者的排版，以及高亮当前单词的朗读",
+  "cmd.reading.bookSpread": "阅读：书页（双页）",
+  "cmd.reading.bookSpread.hint": "像书一样翻页：希伯来文第 1 页在右，← 翻到下一页；PageDown、空格",
   "cmd.reading.mode": "阅读模式",
   "cmd.reading.newFromCapture": "阅读清单：从捕获的网页新建资料…",
   "cmd.reading.newFromCapture.hint": "当前打开的剪藏网页，或你输入的链接",

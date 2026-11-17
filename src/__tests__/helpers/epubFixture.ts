@@ -13,6 +13,8 @@ export interface FixtureOpts {
   version?: 2 | 3;
   hebrew?: boolean;
   deflate?: boolean;
+  /** Extra paragraphs per chapter (a long chapter that fills several pages, plan W13.R6). */
+  paragraphs?: number;
 }
 
 export async function makeEpub(o: FixtureOpts = {}): Promise<Uint8Array> {
@@ -33,6 +35,7 @@ export async function makeEpub(o: FixtureOpts = {}): Promise<Uint8Array> {
 <head><title>${ch[i][0]}</title><link rel="stylesheet" href="../css/book.css"/><link rel="stylesheet" href="https://cdn.example.com/x.css"/><script>window.__epubScript = 1</script></head>
 <body><h1 id="top">${ch[i][0]}</h1><p onclick="window.__epubClick = 1">${ch[i][1]}</p>
 <p><img src="../img/dot.png" alt="dot"/><img src="https://example.com/track.png" alt="remote"/></p>
+${Array.from({ length: o.paragraphs ?? 0 }, (_, k) => `<p>${he ? `פסקה ${k + 1} של הפרק: טקסט ארוך מספיק כדי למלא חלק מעמוד בספר, כדי שיהיו עמודים לדפדף ביניהם.` : `Paragraph ${k + 1} of the chapter: text long enough to fill part of a book page, so there are pages to turn.`}</p>`).join("\n")}
 <p><a href="${i === 0 ? "ch2.xhtml#top" : "ch1.xhtml"}">${i === 0 ? "next" : "back"}</a> <a href="https://example.com/">out</a></p></body></html>`;
   const opf = `<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://www.idpf.org/2007/opf" version="${v3 ? "3.0" : "2.0"}" unique-identifier="id">

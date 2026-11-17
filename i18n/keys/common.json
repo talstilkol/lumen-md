@@ -15680,6 +15680,58 @@
       "vars": []
     },
     {
+      "key": "readingViews.spread.close",
+      "en": "Back to scrolling",
+      "vars": []
+    },
+    {
+      "key": "readingViews.spread.first",
+      "en": "First page",
+      "vars": []
+    },
+    {
+      "key": "readingViews.spread.last",
+      "en": "Last page",
+      "vars": []
+    },
+    {
+      "key": "readingViews.spread.next",
+      "en": "Next pages",
+      "vars": []
+    },
+    {
+      "key": "readingViews.spread.page",
+      "en": "Page {a} of {n}",
+      "vars": [
+        "a",
+        "n"
+      ]
+    },
+    {
+      "key": "readingViews.spread.pages",
+      "en": "Pages {a}–{b} of {n}",
+      "vars": [
+        "a",
+        "b",
+        "n"
+      ]
+    },
+    {
+      "key": "readingViews.spread.prev",
+      "en": "Previous pages",
+      "vars": []
+    },
+    {
+      "key": "readingViews.spread.scroll",
+      "en": "Scrolling",
+      "vars": []
+    },
+    {
+      "key": "readingViews.spread.toolbar",
+      "en": "Book pages",
+      "vars": []
+    },
+    {
       "key": "readingViews.triple.on",
       "en": "Three columns: source, preview and outline, scroll linked",
       "vars": []

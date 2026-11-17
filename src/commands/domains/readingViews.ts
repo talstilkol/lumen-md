@@ -1,12 +1,14 @@
 /**
  * Reading views in the palette (plan W13.R6–R9): the linked three-column
- * view and the keyboard between columns (R7), the margins mode (R9). The
- * bodies load on use.
+ * view and the keyboard between columns (R7), the margins mode (R9), book
+ * pages (R6). The bodies load on use.
  */
 import { t } from "../../i18n";
 import type { Command } from "../../ui/CommandPalette";
 import { cmdIcons } from "../../ui/cmdIcons";
 import type { CommandContext } from "./context";
+import { useAppStore } from "../../store/useStore";
+import { BOOK_SPREAD_TOGGLE } from "../../reading/noteSpreadHook";
 
 export function buildReadingViewCommands(_ctx: CommandContext): Command[] {
   const group = t("group.view");
@@ -40,6 +42,19 @@ export function buildReadingViewCommands(_ctx: CommandContext): Command[] {
       icon: cmdIcons.Columns2,
       group,
       action: () => import("../../reading/sidenotes").then((m) => m.toggleSidenotes()),
+    },
+    {
+      id: "reading.bookSpread",
+      label: t("cmd.reading.bookSpread"),
+      hint: t("cmd.reading.bookSpread.hint"),
+      icon: cmdIcons.Columns2,
+      group,
+      action: () => {
+        // The pages are the preview's: show it first when only an editor is on screen.
+        const { mode, setMode } = useAppStore.getState();
+        if (mode === "source" || mode === "wysiwyg") setMode("preview");
+        setTimeout(() => window.dispatchEvent(new CustomEvent(BOOK_SPREAD_TOGGLE)), mode === "source" || mode === "wysiwyg" ? 300 : 0);
+      },
     },
   ];
 }
