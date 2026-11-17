@@ -25,7 +25,8 @@ import { useAppStore } from "../store/useStore";
 import { serializeJsonCanvas, jsonCanvasToExcalidraw } from "../canvas/jsonCanvas";
 import { serializeExcalidrawFile } from "../canvas/excalidrawFile";
 import { VizFrame } from "./VizFrame";
-import { isolate, type Dir } from "./bidi";
+import { type Dir } from "./bidi";
+import { prepareLabel } from "../graph/labels";
 import {
   ARGUMENT_RELATIONS,
   argumentBoxes,
@@ -74,7 +75,12 @@ export function relationLabels(): Record<ArgumentRelation, string> {
 /** W13.W8: the argument checker's findings per claim note, for a badge on the map and a line in the list. */
 export type MapFindings = ReadonlyMap<string, { count: number; kinds: string[] }>;
 
-function MapPicture({ g, dir, unsupported, findings }: { g: ArgumentGraph; dir: Dir; unsupported: ReadonlySet<string>; findings?: MapFindings }) {
+/** A note's name for the map and the list: its own direction, other-direction runs isolated ("C++" stays "C++" in a Hebrew label), shortened by grapheme so niqqud stays on its letter (src/graph/labels.ts). */
+function noteLabel(label: string, dir: Dir, max = 200) {
+  return prepareLabel(label, { maxGraphemes: max, fallback: dir });
+}
+
+function MapPicture({ g, dir, unsupported, findings, active }: { g: ArgumentGraph; dir: Dir; unsupported: ReadonlySet<string>; findings?: MapFindings; active?: string | null }) {
   const lo = useMemo(() => layoutArgument(g), [g]);
   const boxes = useMemo(() => argumentBoxes(lo, dir), [lo, dir]);
   const width = Math.max(NODE_W, ...[...boxes.values()].map((b) => b.x + NODE_W));
@@ -103,11 +109,15 @@ function MapPicture({ g, dir, unsupported, findings }: { g: ArgumentGraph; dir: 
       {g.nodes.map((n) => {
         const b = boxes.get(n.id)!;
         const flagged = unsupported.has(n.id);
+        const lab = noteLabel(n.label, dir, 28);
+        const isActive = active === n.id;
         return (
-          <g key={n.id} transform={`translate(${b.x},${b.y})`} data-node={n.id} data-kind={kindOf.get(n.id)}>
+          <g key={n.id} transform={`translate(${b.x},${b.y})`} data-node={n.id} data-kind={kindOf.get(n.id)} data-active={isActive ? "" : undefined}>
+            {/* The keyboard's place on the map: the frame announces it, this shows it. */}
+            {isActive && <rect x={-4} y={-4} width={NODE_W + 8} height={NODE_H + 8} rx={11} fill="none" stroke="hsl(var(--accent))" strokeWidth={3} data-active-ring="" />}
             <rect width={NODE_W} height={NODE_H} rx={8} fill="hsl(var(--bg))" stroke={flagged ? "hsl(0 70% 50%)" : "hsl(var(--border))"} strokeWidth={flagged ? 3 : 1} strokeDasharray={n.kind === "source" ? "4 3" : undefined} />
-            <text x={NODE_W / 2} y={NODE_H / 2} textAnchor="middle" dominantBaseline="middle" fontSize={13} fill="hsl(var(--fg))" direction={dir}>
-              {isolate(n.label.length > 28 ? `${n.label.slice(0, 27)}…` : n.label)}
+            <text x={NODE_W / 2} y={NODE_H / 2} textAnchor="middle" dominantBaseline="middle" fontSize={13} fill="hsl(var(--fg))" direction={lab.dir}>
+              {lab.text}
             </text>
             {flagged && (
               <text x={NODE_W / 2} y={NODE_H - 8} textAnchor="middle" fontSize={10} fill="hsl(0 70% 45%)" direction={dir}>
@@ -130,8 +140,8 @@ function MapPicture({ g, dir, unsupported, findings }: { g: ArgumentGraph; dir: 
 }
 
 /** The alternative: each claim with the notes that support, contradict or qualify it. */
-function MapList({ g, unsupported, findings, onOpen, id, hidden }: { g: ArgumentGraph; unsupported: ReadonlySet<string>; findings?: MapFindings; onOpen: (path: string) => void; id: string; hidden: boolean }) {
-  const label = new Map(g.nodes.map((n) => [n.id, n.label]));
+function MapList({ g, dir, unsupported, findings, onOpen, id, hidden }: { g: ArgumentGraph; dir: Dir; unsupported: ReadonlySet<string>; findings?: MapFindings; onOpen: (path: string) => void; id: string; hidden: boolean }) {
+  const label = new Map(g.nodes.map((n) => [n.id, noteLabel(n.label, dir)]));
   const claims = g.nodes.filter((n) => n.kind !== "source");
   const sourcesOnly = g.nodes.filter((n) => n.kind === "source" && !g.edges.some((e) => e.from === n.id));
   return (
@@ -139,8 +149,8 @@ function MapList({ g, unsupported, findings, onOpen, id, hidden }: { g: Argument
       <ul>
         {claims.map((c) => (
           <li key={c.id} data-claim={c.id}>
-            <button type="button" className="lumen-viz-arg-link" onClick={() => onOpen(c.id)} dir="auto">
-              {c.label}
+            <button type="button" className="lumen-viz-arg-link" onClick={() => onOpen(c.id)} dir={label.get(c.id)!.dir}>
+              {label.get(c.id)!.text}
             </button>{" "}
             <span className="lumen-viz-note">{c.kind === "conclusion" ? t("viz.arg.conclusion") : t("viz.arg.claim")}</span>
             {unsupported.has(c.id) && <strong className="lumen-viz-claim-missing"> · {t("viz.arg.noSource")}</strong>}
@@ -151,8 +161,8 @@ function MapList({ g, unsupported, findings, onOpen, id, hidden }: { g: Argument
                 .map((e) => (
                   <li key={`${e.from}-${e.relation}`} data-relation={e.relation}>
                     {t(`viz.arg.by.${e.relation}`)}:{" "}
-                    <button type="button" className="lumen-viz-arg-link" onClick={() => onOpen(e.from)} dir="auto">
-                      {label.get(e.from)}
+                    <button type="button" className="lumen-viz-arg-link" onClick={() => onOpen(e.from)} dir={label.get(e.from)!.dir}>
+                      {label.get(e.from)!.text}
                     </button>
                   </li>
                 ))}
@@ -160,7 +170,7 @@ function MapList({ g, unsupported, findings, onOpen, id, hidden }: { g: Argument
           </li>
         ))}
       </ul>
-      {sourcesOnly.length > 0 && <p className="lumen-viz-note">{t("viz.arg.unused", { names: sourcesOnly.map((s) => s.label).join(", ") })}</p>}
+      {sourcesOnly.length > 0 && <p className="lumen-viz-note">{t("viz.arg.unused", { names: sourcesOnly.map((s) => label.get(s.id)!.text).join(", ") })}</p>}
     </div>
   );
 }
@@ -176,6 +186,7 @@ async function openNote(path: string) {
 export function ArgumentMapView({ g, dir, title, onOpen, onSave, findings }: { g: ArgumentGraph; dir: Dir; title: string; onOpen: (path: string) => void; onSave?: () => void; findings?: MapFindings }) {
   const unsupported = useMemo(() => unsupportedClaims(g), [g]);
   const order = useMemo(() => readingOrder(layoutArgument(g)), [g]);
+  const [active, setActive] = useState<string | null>(null);
   const byId = new Map(g.nodes.map((n) => [n.id, n]));
   const points = order.map((id) => {
     const n = byId.get(id)!;
@@ -200,10 +211,11 @@ export function ArgumentMapView({ g, dir, title, onOpen, onSave, findings }: { g
         kind="argument-map"
         points={points}
         onActivate={(i) => onOpen(order[i])}
+        onPoint={(i) => setActive(i === null ? null : order[i])}
         showAlternativeLabel={t("viz.arg.showList")}
         showPictureLabel={t("viz.arg.showMap")}
-        picture={<MapPicture g={g} dir={dir} unsupported={unsupported} findings={findings} />}
-        alternative={(id, hidden) => <MapList g={g} unsupported={unsupported} findings={findings} onOpen={onOpen} id={id} hidden={hidden} />}
+        picture={<MapPicture g={g} dir={dir} unsupported={unsupported} findings={findings} active={active} />}
+        alternative={(id, hidden) => <MapList g={g} dir={dir} unsupported={unsupported} findings={findings} onOpen={onOpen} id={id} hidden={hidden} />}
       />
     </div>
   );
