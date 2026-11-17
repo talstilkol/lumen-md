@@ -30,7 +30,8 @@ export default defineConfig({
       // the root locale; Hebrew pages fall back to English until translated.
       locales: {
         root: { label: "English", lang: "en" },
-        he: { label: "עברית", lang: "he" },
+        // W13.D5: said outright, so the sidebar and the table of contents mirror on every Hebrew page.
+        he: { label: "עברית", lang: "he", dir: "rtl" },
       },
       sidebar: [
         // W13.D1: the four Diátaxis kinds first — written by `node scripts/docs-meta.mjs --index`.

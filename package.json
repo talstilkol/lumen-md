@@ -137,6 +137,7 @@
     "docs:doctest": "node scripts/docs-doctest.mjs",
     "docs:known-issues": "node scripts/known-issues.mjs",
     "docs:meta": "node scripts/docs-meta.mjs",
+    "docs:a11y": "node scripts/docs-a11y-content.mjs",
     "bench:fim": "node --experimental-strip-types scripts/bench-fim.mjs",
     "models:day": "node scripts/models-day.mjs",
     "mac:pack": "node scripts/mac-pack/run-all.mjs",
