@@ -2128,6 +2128,7 @@
   "importWizard.how.notion": "В Notion: Settings → Export → Markdown & CSV (или HTML), с подстраницами. Выберите .zip как есть. Каждая база данных станет файлом .base с теми же столбцами.",
   "importWizard.how.obsidian": "Выберите папку хранилища или её .zip. Собственные настройки Obsidian (.obsidian) не переносятся.",
   "importWizard.how.onenote": "В OneNote для Windows: Файл → Экспорт → Страница или Раздел → Веб-страница в одном файле (.mht). Выберите один или несколько файлов .mht.",
+  "importWizard.how.pandoc": "Converted by the Pandoc installed on this computer (DocBook, MediaWiki, Jira, OPML, txt2tags, DokuWiki, Textile and more). Pick the files; nothing leaves the computer.",
   "importWizard.importing": "Импортирую…",
   "importWizard.intro": "Перенесите заметки из другого приложения. Всё попадёт в новую папку: ничего из того, что у вас уже есть, не изменится, а один щелчок отменит импорт.",
   "importWizard.lost": "Вложений из экспорта нет в хранилище: {n}.",

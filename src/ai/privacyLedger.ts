@@ -443,6 +443,14 @@ export function addSpeechVoiceBytes(id: number, bytes: number): boolean {
   return true;
 }
 
+/**
+ * A program the user installed, run on this device by Lumen (plan W13.F5: Pandoc, sandboxed, no network):
+ * listed so the ledger shows every process Lumen starts, not only its requests.
+ */
+export function recordLocalProcess(name: string, reason: string, bytesOut: number): void {
+  record({ host: `on-device: ${name}`, method: "PROCESS", bytesOut, bytesIn: null, category: "local-ai", reason, policy: getAiPolicy(), decision: "allowed" });
+}
+
 /** A prompt to a model built into the browser (Chrome's, plan W7.14): it runs on this device and sends nothing. */
 export function recordOnDeviceModel(name: string): void {
   record({ host: `on-device: ${name}`, method: "PROMPT", bytesOut: 0, bytesIn: null, category: "local-ai", reason: "Runs on this device; nothing is sent", policy: getAiPolicy(), decision: "allowed" });

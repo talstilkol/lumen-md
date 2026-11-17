@@ -15,7 +15,7 @@ import { claimPath } from "./names";
 import { emptyVault, type ConvertedVault, type ImportSourceId } from "./types";
 
 /** Every source the wizard offers, in the order it shows them. */
-export const IMPORT_SOURCES: readonly ImportSourceId[] = ["obsidian", "notion", "evernote", "bear", "appleNotes", "keep", "logseq", "onenote", "lumen"];
+export const IMPORT_SOURCES: readonly ImportSourceId[] = ["obsidian", "notion", "evernote", "bear", "appleNotes", "keep", "logseq", "onenote", "pandoc", "lumen"];
 
 /** Brand names stay as they are in every language. */
 export const SOURCE_NAMES: Record<ImportSourceId, string> = {
@@ -27,6 +27,7 @@ export const SOURCE_NAMES: Record<ImportSourceId, string> = {
   keep: "Google Keep",
   logseq: "Logseq",
   onenote: "OneNote",
+  pandoc: "Pandoc",
   lumen: "Lumen",
 };
 
@@ -40,6 +41,8 @@ export const SOURCE_ACCEPT: Record<ImportSourceId, string> = {
   keep: ".zip,.json",
   logseq: ".zip",
   onenote: ".mht,.mhtml,.zip",
+  // W13.F5: what the user's Pandoc reads and Lumen does not (src/storage/import/pandocBridge.ts).
+  pandoc: ".dbk,.docbook,.xml,.wiki,.mediawiki,.jira,.opml,.t2t,.dokuwiki,.textile,.creole,.twiki,.tikiwiki,.vimwiki,.muse,.fb2,.man,.1,.haddock,.pod,.zip",
   lumen: ".zip",
 };
 

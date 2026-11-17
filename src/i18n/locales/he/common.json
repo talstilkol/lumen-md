@@ -2128,6 +2128,7 @@
   "importWizard.how.notion": "ב-Notion: הגדרות ← ייצוא ← Markdown & CSV (או HTML), כולל דפי משנה. בחרו את קובץ ה-‎.zip כמו שהגיע. כל מסד נתונים הופך לקובץ ‎.base עם אותן עמודות.",
   "importWizard.how.obsidian": "בחרו את תיקיית הכספת או קובץ ‎.zip שלה. ההגדרות של Obsidian עצמה (‎.obsidian) לא מיובאות.",
   "importWizard.how.onenote": "ב-OneNote ל-Windows: קובץ ← ייצוא ← עמוד או מקטע ← דף אינטרנט בקובץ יחיד (‎.mht). בחרו קובץ ‎.mht אחד או יותר.",
+  "importWizard.how.pandoc": "מומר על ידי Pandoc שמותקן במחשב הזה (DocBook, ‏MediaWiki, ‏Jira, ‏OPML, ‏txt2tags, ‏DokuWiki, ‏Textile ועוד). בחרו את הקבצים; שום דבר לא יוצא מהמחשב.",
   "importWizard.importing": "מייבא…",
   "importWizard.intro": "הביאו את הפתקים מאפליקציה אחרת. הכול נכנס לתיקייה חדשה: שום דבר שכבר יש לכם לא משתנה, ולחיצה אחת מבטלת את הייבוא.",
   "importWizard.lost": "{n} קבצים מצורפים מהייצוא לא נמצאים בכספת.",

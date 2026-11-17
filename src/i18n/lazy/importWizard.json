@@ -70,5 +70,6 @@
   "importWizard.onenote.clientIdSave": "Use this app",
   "importWizard.onenote.clientIdHint": "To import straight from your OneNote account, register a free app in Microsoft Entra and paste its client ID here. It is kept in this browser only.",
   "importWizard.onenote.clientIdInvalid": "That is not a client ID. It looks like 00000000-0000-0000-0000-000000000000.",
-  "importWizard.onenote.noClientId": "no Microsoft app client ID is set"
+  "importWizard.onenote.noClientId": "no Microsoft app client ID is set",
+  "importWizard.how.pandoc": "Converted by the Pandoc installed on this computer (DocBook, MediaWiki, Jira, OPML, txt2tags, DokuWiki, Textile and more). Pick the files; nothing leaves the computer."
 }

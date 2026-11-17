@@ -11762,6 +11762,11 @@
       "vars": []
     },
     {
+      "key": "importWizard.how.pandoc",
+      "en": "Converted by the Pandoc installed on this computer (DocBook, MediaWiki, Jira, OPML, txt2tags, DokuWiki, Textile and more). Pick the files; nothing leaves the computer.",
+      "vars": []
+    },
+    {
       "key": "importWizard.importing",
       "en": "Importing…",
       "vars": []

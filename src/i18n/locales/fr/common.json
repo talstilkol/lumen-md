@@ -2128,6 +2128,7 @@
   "importWizard.how.notion": "Dans Notion : Paramètres → Exporter → Markdown & CSV (ou HTML), avec les sous-pages. Choisissez le .zip tel quel. Chaque base de données devient un fichier .base avec les mêmes colonnes.",
   "importWizard.how.obsidian": "Choisissez le dossier du coffre, ou son .zip. Les réglages d’Obsidian (.obsidian) ne sont pas importés.",
   "importWizard.how.onenote": "Dans OneNote pour Windows : Fichier → Exporter → Page ou Section → Page web à fichier unique (.mht). Choisissez un ou plusieurs fichiers .mht.",
+  "importWizard.how.pandoc": "Converted by the Pandoc installed on this computer (DocBook, MediaWiki, Jira, OPML, txt2tags, DokuWiki, Textile and more). Pick the files; nothing leaves the computer.",
   "importWizard.importing": "Import en cours…",
   "importWizard.intro": "Apportez vos notes depuis une autre application. Tout va dans un nouveau dossier : rien de ce que vous avez déjà ne change, et un clic annule l’import.",
   "importWizard.lost": "{n} pièces jointes de l’export ne sont pas dans le coffre.",

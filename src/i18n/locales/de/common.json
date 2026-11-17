@@ -2128,6 +2128,7 @@
   "importWizard.how.notion": "In Notion: Einstellungen → Exportieren → Markdown & CSV (oder HTML), mit Unterseiten. Wählen Sie das .zip, wie es kam. Jede Datenbank wird eine .base-Datei mit denselben Spalten.",
   "importWizard.how.obsidian": "Wählen Sie den Vault-Ordner oder ein .zip davon. Die Einstellungen von Obsidian (.obsidian) werden ausgelassen.",
   "importWizard.how.onenote": "In OneNote für Windows: Datei → Exportieren → Seite oder Abschnitt → Webseite in einer Datei (.mht). Wählen Sie eine oder mehrere .mht-Dateien.",
+  "importWizard.how.pandoc": "Converted by the Pandoc installed on this computer (DocBook, MediaWiki, Jira, OPML, txt2tags, DokuWiki, Textile and more). Pick the files; nothing leaves the computer.",
   "importWizard.importing": "Importiere…",
   "importWizard.intro": "Bringen Sie Ihre Notizen aus einer anderen App mit. Alles landet in einem neuen Ordner: Nichts Vorhandenes wird verändert, und ein Klick macht den Import rückgängig.",
   "importWizard.lost": "{n} Anhänge des Exports fehlen im Vault.",

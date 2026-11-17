@@ -2128,6 +2128,7 @@
   "importWizard.how.notion": "在 Notion 中：设置 → 导出 → Markdown & CSV（或 HTML），包含子页面。按原样选择 .zip。每个数据库都会变成列相同的 .base 文件。",
   "importWizard.how.obsidian": "选择库文件夹或其 .zip。Obsidian 自身的设置（.obsidian）不会导入。",
   "importWizard.how.onenote": "在 Windows 版 OneNote 中：文件 → 导出 → 页面或分区 → 单个文件网页（.mht）。选择一个或多个 .mht 文件。",
+  "importWizard.how.pandoc": "Converted by the Pandoc installed on this computer (DocBook, MediaWiki, Jira, OPML, txt2tags, DokuWiki, Textile and more). Pick the files; nothing leaves the computer.",
   "importWizard.importing": "正在导入…",
   "importWizard.intro": "从其他应用带入你的笔记。所有内容都会放进一个新文件夹：已有内容不会改变，一键即可撤销导入。",
   "importWizard.lost": "导出中有 {n} 个附件不在库中。",

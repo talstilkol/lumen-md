@@ -12,6 +12,7 @@
 export const STD_CRATES = [
   ["mcp-stdio", "src-tauri/mcp-stdio/src/lib.rs"],
   ["tectonic", "src-tauri/src/tectonic.rs"],
+  ["pandoc", "src-tauri/src/pandoc.rs"],
   ["vault-nesting", "src-tauri/vault/src/nesting.rs"],
   ["update-guard", "src-tauri/src/update_guard.rs"],
   ["whisper-core", "src-tauri/src/whisper_core.rs"],

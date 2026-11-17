@@ -2128,6 +2128,7 @@
   "importWizard.how.notion": "في Notion: الإعدادات ← تصدير ← Markdown & CSV (أو HTML) مع الصفحات الفرعية. اختر ملف ‎.zip كما وصل. تصبح كل قاعدة بيانات ملف ‎.base بالأعمدة نفسها.",
   "importWizard.how.obsidian": "اختر مجلد الخزنة أو ملف ‎.zip له. إعدادات Obsidian نفسها (‎.obsidian) لا تُستورد.",
   "importWizard.how.onenote": "في OneNote لنظام Windows: ملف ← تصدير ← صفحة أو مقطع ← صفحة ويب ذات ملف واحد (‎.mht). اختر ملف ‎.mht واحداً أو أكثر.",
+  "importWizard.how.pandoc": "Converted by the Pandoc installed on this computer (DocBook, MediaWiki, Jira, OPML, txt2tags, DokuWiki, Textile and more). Pick the files; nothing leaves the computer.",
   "importWizard.importing": "جارٍ الاستيراد…",
   "importWizard.intro": "انقل ملاحظاتك من تطبيق آخر. يذهب كل شيء إلى مجلد جديد: لا يتغير شيء مما لديك، ونقرة واحدة تلغي الاستيراد.",
   "importWizard.lost": "{n} من مرفقات التصدير ليست في الخزنة.",

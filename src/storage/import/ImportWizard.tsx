@@ -56,6 +56,16 @@ function Issues<T>({ title, items, line, testId }: { title: string; items: T[]; 
 
 export function ImportWizard({ open, onClose, initialSource, firstRun = false }: Props) {
   const [source, setSource] = useState<ImportSourceId>(initialSource ?? "obsidian");
+  // W13.F5: Pandoc is offered only when the desktop finds one installed (never in the browser).
+  const [pandocReady, setPandocReady] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    let live = true;
+    void import("./pandocBridge").then((m) => m.pandocStatus()).then((st) => live && setPandocReady(st.kind === "ready"));
+    return () => {
+      live = false;
+    };
+  }, [open]);
   // W12.T7: a Notion database becomes a type as well as a .base.
   const [notionTypes, setNotionTypes] = useState(true);
   const [step, setStep] = useState<Step>({ kind: "source" });
@@ -195,7 +205,7 @@ export function ImportWizard({ open, onClose, initialSource, firstRun = false }:
             <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
               <legend style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>{t("importWizard.chooseSource")}</legend>
               <div role="radiogroup" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 6 }}>
-                {IMPORT_SOURCES.map((s) => (
+                {IMPORT_SOURCES.filter((s) => s !== "pandoc" || pandocReady).map((s) => (
                   <button
                     key={s}
                     type="button"
