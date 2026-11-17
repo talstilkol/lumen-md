@@ -25,9 +25,15 @@ import "./graphViewStrings";
 import "./graph/clusterGapsStrings";
 import type { ClusterAnalysis } from "../graph/clusterGaps";
 import { convexHull } from "../graph/hull";
+import "./graph/graphAltStrings";
+import { GraphSummary } from "./graph/GraphSummary";
+import type { AltGraph } from "../graph/textAlt";
 
 // W13.G8: clusters and structural gaps, loaded when asked for.
 const ClusterGapsPanel = lazy(() => import("./graph/ClusterGapsPanel"));
+
+// W13.G11: the note graph as a list you walk, loaded when asked for.
+const GraphListView = lazy(() => import("./graph/GraphListView").then((m) => ({ default: m.GraphListView })));
 
 const ENGINE_KEY = "lumen.graph.engine";
 const ENGINES: readonly GraphEnginePref[] = ["auto", "gpu", "standard", "list"];
@@ -57,6 +63,7 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
   const [laying, setLaying] = useState(false);
   // The text alternative (W10.E60): the same nodes and links as a table.
   const [asTable, setAsTable] = useState(initialTable);
+  const [asList, setAsList] = useState(false);
   // The ready marker (plan W7.25): the layout of the graph on screen has finished (or failed).
   const [laidOut, setLaidOut] = useState<object | null>(null);
 
@@ -118,6 +125,15 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
     [analysis, positions, graph, sub],
   );
 
+  // W13.G11: the same nodes and links for the summary sentence and the list.
+  const alt: AltGraph | null = useMemo(() => {
+    if (!graph || !sub) return null;
+    const nodes = Array.from(sub.nodes, (i: number) => ({ id: graph.paths[i], label: graph.labels[i] }));
+    const edges: AltGraph["edges"][number][] = [];
+    for (let e = 0; e < sub.edges.length; e += 2) edges.push({ source: nodes[sub.edges[e]].id, target: nodes[sub.edges[e + 1]].id });
+    return { nodes, edges };
+  }, [graph, sub]);
+
   // Lay out in the worker; draw every few steps while it settles.
   useEffect(() => {
     if (!sub) return;
@@ -157,6 +173,14 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
   const open = async (k: number) => {
     if (!graph || !sub) return;
     const path = graph.paths[sub.nodes[k]];
+    try {
+      onOpenFile(path, await readWorkspaceFile(path));
+    } catch (err) {
+      log.warn("graph view: failed to open file", path, err);
+    }
+  };
+
+  const openPath = async (path: string) => {
     try {
       onOpenFile(path, await readWorkspaceFile(path));
     } catch (err) {
@@ -228,8 +252,11 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
         <button type="button" className="icon-btn" aria-pressed={gapsOpen} onClick={() => setGapsOpen((v) => !v)} data-testid="graph-clusters" style={{ inlineSize: "auto", paddingInline: 8, fontSize: 12 }}>
           {t("graphClusters.toggle")}
         </button>
-        <button type="button" className="icon-btn" aria-pressed={tableView} disabled={engineKind === "list"} onClick={() => setAsTable((v) => !v)} data-testid="graph-as-table" style={{ inlineSize: "auto", paddingInline: 8, fontSize: 12 }}>
+        <button type="button" className="icon-btn" aria-pressed={tableView} disabled={engineKind === "list"} onClick={() => (setAsTable((v) => !v), setAsList(false))} data-testid="graph-as-table" style={{ inlineSize: "auto", paddingInline: 8, fontSize: 12 }}>
           {t("graph.table.toggle")}
+        </button>
+        <button type="button" className="icon-btn" aria-pressed={asList} onClick={() => (setAsList((v) => !v), setAsTable(false))} data-testid="graph-as-list" style={{ inlineSize: "auto", paddingInline: 8, fontSize: 12 }}>
+          {t("graphAlt.mode.list")}
         </button>
         {groups && groupBy !== "none" && (
           <ul aria-label={t("graph.groups")} style={{ display: "flex", flexWrap: "wrap", gap: 8, listStyle: "none", margin: 0, padding: 0 }}>
@@ -241,8 +268,9 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
             ))}
           </ul>
         )}
+        {alt && <GraphSummary graph={alt} />}
       </div>
-      <div style={{ flex: 1, minBlockSize: 0, position: "relative" }}>
+      <div style={{ flex: 1, minBlockSize: 0, position: "relative", overflow: asList ? "auto" : undefined }}>
         {sub && engineKind === "list" && choice.reason !== "pref" && (
           <p role="status" data-testid="graph-engine-note" style={{ margin: 0, padding: "6px 12px", fontSize: 12, color: "hsl(var(--fg-muted))" }}>
             {t("graph.engine.noGpu", { nodes: String(sub.nodes.length) })}
@@ -260,8 +288,13 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
             />
           </Suspense>
         )}
-        {sub && tableView && <GraphTable labels={labels} neighbors={(i) => adjacency[i] ?? []} onOpen={(k) => void open(k)} />}
-        {sub && style && !tableView && (
+        {alt && asList && (
+          <Suspense fallback={null}>
+            <GraphListView graph={alt} relationLabel={(_, d) => t(d === "out" ? "graphAlt.list.linksTo" : "graphAlt.list.linkedFrom")} onOpen={(path) => void openPath(path)} />
+          </Suspense>
+        )}
+        {sub && tableView && !asList && <GraphTable labels={labels} neighbors={(i) => adjacency[i] ?? []} onOpen={(k) => void open(k)} />}
+        {sub && style && !tableView && !asList && (
           <GraphCanvas
             labels={labels}
             edges={sub.edges}
