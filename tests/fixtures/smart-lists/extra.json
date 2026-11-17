@@ -1,0 +1,15 @@
+[
+  {"id": "enter.blockquote", "source": "commonmark", "op": "enter", "before": "> - a‸", "after": "> - a\n> - ‸"},
+  {"id": "enter.star", "source": "commonmark", "op": "enter", "before": "* a‸", "after": "* a\n* ‸"},
+  {"id": "enter.paren", "source": "commonmark", "op": "enter", "before": "1) a‸", "after": "1) a\n2) ‸"},
+  {"id": "enter.start-number", "source": "commonmark", "op": "enter", "before": "5. a‸", "after": "5. a\n6. ‸"},
+  {"id": "enter.nested-keeps-level", "source": "commonmark", "op": "enter", "before": "- a\n  - b‸", "after": "- a\n  - b\n  - ‸"},
+  {"id": "enter.thematic-break", "source": "commonmark", "op": "enter", "before": "- - -‸", "after": null},
+  {"id": "shift-enter.task", "source": "obsidian-1.14.0", "op": "shiftEnter", "before": "- [ ] a‸", "after": "- [ ] a\n      ‸"},
+  {"id": "tab.ordered-continues-sublist", "source": "obsidian-1.14.0", "op": "tab", "before": "1. a\n   1. x\n2. ‸b", "after": "1. a\n   1. x\n   2. ‸b"},
+  {"id": "tab.wide-number", "source": "commonmark", "op": "tab", "before": "10. a\n11. ‸b", "after": "10. a\n    1. ‸b"},
+  {"id": "tab.blockquote", "source": "commonmark", "op": "tab", "before": "> - a\n> - ‸b", "after": "> - a\n>   - ‸b"},
+  {"id": "shift-tab.ordered", "source": "obsidian-1.14.0", "op": "shiftTab", "before": "1. a\n   1. ‸b\n2. c", "after": "1. a\n2. ‸b\n3. c"},
+  {"id": "shift-tab.top-level", "source": "commonmark", "op": "shiftTab", "before": "- ‸a", "after": "- ‸a"},
+  {"id": "move.last-child-stays", "source": "obsidian-1.15.1", "op": "moveDown", "before": "- p\n  - ‸x\n- q", "after": "- p\n  - ‸x\n- q"}
+]

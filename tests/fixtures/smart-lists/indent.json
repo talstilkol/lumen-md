@@ -1,0 +1,11 @@
+[
+  {"id": "tab.under-previous", "source": "commonmark", "op": "tab", "before": "- a\n- ‸b", "after": "- a\n  - ‸b"},
+  {"id": "tab.first-item-stays", "source": "obsidian-1.15.1", "op": "tab", "before": "- ‸a\n- b", "after": "- ‸a\n- b"},
+  {"id": "tab.one-level-only", "source": "obsidian-1.15.1", "op": "tab", "before": "- a\n  - b\n  - ‸c", "after": "- a\n  - b\n    - ‸c"},
+  {"id": "tab.no-over-indent", "source": "obsidian-1.15.1", "op": "tab", "before": "- a\n  - b\n    - ‸c", "after": "- a\n  - b\n    - ‸c"},
+  {"id": "tab.children-follow", "source": "obsidian-1.15.1", "op": "tab", "before": "- a\n- ‸b\n  - c", "after": "- a\n  - ‸b\n    - c"},
+  {"id": "tab.ordered-restarts", "source": "obsidian-1.14.0", "op": "tab", "before": "1. a\n2. ‸b\n3. c", "after": "1. a\n   1. ‸b\n2. c"},
+  {"id": "tab.selection", "source": "obsidian-1.15.1", "op": "tab", "before": "- a\n- ⟦b\n- c⟧", "after": "- a\n  - ⟦b\n  - c⟧"},
+  {"id": "shift-tab.outdent", "source": "commonmark", "op": "shiftTab", "before": "- a\n  - ‸b", "after": "- a\n- ‸b"},
+  {"id": "shift-tab.later-siblings-become-children", "source": "obsidian-1.15.1", "op": "shiftTab", "before": "- a\n  - ‸b\n  - c", "after": "- a\n- ‸b\n  - c"}
+]

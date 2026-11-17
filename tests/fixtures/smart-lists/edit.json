@@ -1,0 +1,15 @@
+[
+  { "id": "backspace.marker", "source": "obsidian-1.14.0", "op": "backspace", "before": "- ‸a", "after": "‸a" },
+  { "id": "backspace.nested-keeps-indent", "source": "obsidian-1.14.0", "op": "backspace", "before": "  - ‸a", "after": "  ‸a" },
+  { "id": "backspace.task", "source": "obsidian-1.14.0", "op": "backspace", "before": "- [ ] ‸a", "after": "‸a" },
+  { "id": "task.add", "source": "obsidian-1.14.0", "op": "toggleTask", "before": "- a‸", "after": "- [ ] a‸" },
+  { "id": "task.check", "source": "obsidian-1.14.0", "op": "toggleTask", "before": "- [ ] a‸", "after": "- [x] a‸" },
+  { "id": "task.remove", "source": "obsidian-1.14.0", "op": "toggleTask", "before": "- [x] a‸", "after": "- a‸" },
+  { "id": "bold.partial-inside-unbolds", "source": "obsidian-1.14.0", "op": "toggleBold", "before": "**hello ⟦world⟧**", "after": "**hello** ⟦world⟧" },
+  { "id": "bold.across-edge-merges", "source": "obsidian-1.14.0", "op": "toggleBold", "before": "**hel⟦lo** wor⟧ld", "after": "**⟦hello wor⟧**ld" },
+  { "id": "bold.caret-word", "source": "obsidian-1.14.0", "op": "toggleBold", "before": "hel‸lo world", "after": "**hel‸lo** world" },
+  { "id": "bold.exact-unbolds", "source": "obsidian-1.14.0", "op": "toggleBold", "before": "**⟦bold⟧**", "after": "⟦bold⟧" },
+  { "id": "paste.no-double-marker", "source": "obsidian-1.14.0", "op": "paste", "arg": "- foo", "before": "- ‸", "after": "- foo‸" },
+  { "id": "paste.rebases-levels", "source": "obsidian-1.14.0", "op": "paste", "arg": "- x\n  - y", "before": "- a\n  - ‸", "after": "- a\n  - x\n    - y‸" },
+  { "id": "paste.into-text", "source": "obsidian-1.14.0", "op": "paste", "arg": "- c", "before": "- ab‸", "after": "- abc‸" }
+]
