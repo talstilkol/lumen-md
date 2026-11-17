@@ -1,6 +1,7 @@
 {
   "calendar.conflict.both": "Keep both",
   "calendar.conflict.deleted": "(deleted)",
+  "calendar.conflict.differs": "differs",
   "calendar.conflict.done": "Done",
   "calendar.conflict.due": "Due {date}",
   "calendar.conflict.here": "In Lumen",
