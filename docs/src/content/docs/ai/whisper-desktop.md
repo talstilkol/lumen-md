@@ -1,6 +1,8 @@
 ---
 title: Hebrew Whisper on the desktop
 description: Transcribe long Hebrew recordings on your computer with ivrit.ai's Whisper in whisper.cpp — one sentence per line, each time a link into the audio.
+type: how-to
+tasks: ["W1.17"]
 ---
 
 **Command palette → 🎙 Transcribe an audio file (with timestamps).** Pick an

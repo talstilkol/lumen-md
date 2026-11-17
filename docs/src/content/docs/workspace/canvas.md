@@ -1,6 +1,8 @@
 ---
 title: Canvas (Excalidraw)
 description: The whiteboard — on Excalidraw, saved as open .excalidraw files in your vault, fully on your device — and what happens to your old tldraw canvases.
+type: how-to
+tasks: ["4.19"]
 ---
 
 The canvas (`🎨 Canvas / Whiteboard`, `⌘K`) is

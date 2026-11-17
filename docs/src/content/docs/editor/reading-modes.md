@@ -1,6 +1,8 @@
 ---
 title: Reading modes and the reading profile
 description: One menu for every reading mode, and a reading profile per note — font, width, niqqud, aids, layout, voice and speed — kept in the note's frontmatter or on this device only.
+type: reference
+tasks: ["W13.R5", "W13.R4", "W13.R3", "W13.R2", "W13.R1"]
 ---
 
 **View → Reading mode…** (or *Reading mode…* in the command palette) opens

@@ -1,6 +1,7 @@
 ---
 title: קומפילציה של הקוד ה-native בלי רשת
 description: איך הקוד של Lumen ב-Rust, ב-Java וב-Swift מקומפל בלי crates.io, בלי Android SDK ובלי Xcode — מה הבדיקה מוכיחה, מה לא, ומה עדיין דורש Mac.
+type: how-to
 ---
 
 ל-Lumen יש קוד native לצד אפליקציית הרשת: מעטפת שולחן העבודה של Tauri

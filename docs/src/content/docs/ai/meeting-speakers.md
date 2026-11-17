@@ -1,6 +1,8 @@
 ---
 title: Meeting transcripts with speakers
 description: Transcribe a meeting recording on this device with who said what, name each speaker once, and get the meeting notes on top.
+type: how-to
+tasks: ["W10.B7", "W2.7"]
 ---
 
 `⌘K → "🎙 Transcribe a meeting recording (who said what)…"` takes an audio

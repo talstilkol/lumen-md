@@ -1,6 +1,8 @@
 ---
 title: External agents (ACP)
 description: Host Claude Code, Codex or OpenCode on the desktop over the Agent Client Protocol. Every write they make waits in the same review queue as Lumen's own agents.
+type: reference
+tasks: ["W11.I23"]
 ---
 
 On the desktop, Lumen can run an external coding agent on your vault over the [Agent Client Protocol](https://agentclientprotocol.com) (ACP, version 1). Three are supported: Claude Code, Codex and OpenCode.

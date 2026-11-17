@@ -1,6 +1,7 @@
 ---
 title: Nightly redaction fuzz
 description: Every night the second host feeds 20,000 generated notes to the preview and the export, and any passage the preview shades but the export keeps becomes a permanent test.
+type: how-to
 ---
 
 Journalist mode promises that a `<redact>` passage the preview shades is gone

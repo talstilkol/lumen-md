@@ -1,6 +1,8 @@
 ---
 title: Reading list
 description: Sources (books, articles, sites) with a reading status, progress that the PDF and EPUB readers keep up to date, and a kanban by status.
+type: how-to
+tasks: ["W12.E7", "W12.X3", "W12.X2"]
 ---
 
 A **source** is a note about something you read: a book, an article or a

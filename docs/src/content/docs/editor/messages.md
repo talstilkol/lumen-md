@@ -1,6 +1,8 @@
 ---
 title: Messages, empty states and undo
 description: How Lumen talks when something fails, when a panel is empty, and before it deletes anything — and the guide for writing those messages.
+type: how-to
+tasks: ["W3.2"]
 ---
 
 Lumen holds three promises about the moments people notice most:

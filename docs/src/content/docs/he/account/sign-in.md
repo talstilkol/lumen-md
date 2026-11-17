@@ -1,6 +1,8 @@
 ---
 title: התחברות
 description: מה אומר כל מצב התחברות ואיך לתקן את השגיאות הנפוצות.
+type: how-to
+untracked: "shipped before the plan (the organization release); no plan task covers it"
 ---
 
 ההתחברות אופציונלית — Lumen עובדת במלואה בלי רשת ובלי חשבון. חשבון פותח

@@ -1,6 +1,8 @@
 ---
 title: Organize the vault
 description: Missing links, tags, duplicates to merge and maps of content for your whole vault — each one a change you approve, with its confidence, reason and a quote.
+type: how-to
+tasks: ["W2.1"]
 ---
 
 **⌘K → AI: Organize the vault** reads every note and suggests:

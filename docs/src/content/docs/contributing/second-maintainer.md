@@ -1,6 +1,7 @@
 ---
 title: Second maintainer
 description: Onboarding for Lumen's second maintainer — access, the local checks, how to review a sensitive change and add the human-reviewed label, security reports, and what only the owner holds today.
+type: how-to
 ---
 
 Lumen has one human maintainer (Tal) and AI agents that open most pull

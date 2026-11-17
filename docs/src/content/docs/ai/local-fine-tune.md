@@ -1,6 +1,8 @@
 ---
 title: Train a model on your style, on this machine
 description: A LoRA adapter trained on your own notes on a Mac or NVIDIA computer and used in Ollama. Nothing is uploaded.
+type: how-to
+tasks: ["6.12"]
 ---
 
 `⌘K → AI fine-tune settings…` now offers the **local route first**. Lumen

@@ -1,6 +1,7 @@
 ---
 title: בנייה native במארחים חינמיים
 description: איך אפליקציית שולחן העבודה, ה-AAB ל-Android וה-IPA ל-iOS מקומפלים באמת בלי GitHub Actions — סקריפט Linux למארח השני, הדקות החינמיות של Codemagic ב-macOS, והרצת robo ב-Firebase Test Lab או ב-BrowserStack.
+type: how-to
 ---
 
 תוכנית W6.24. הקוד ה-native ‏(Rust ב-`src-tauri/`, ‏Java ב-`android/`, ‏Swift

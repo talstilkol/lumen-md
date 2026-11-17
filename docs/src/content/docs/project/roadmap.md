@@ -1,6 +1,7 @@
 ---
 title: Public roadmap
 description: The roadmap page at /roadmap — generated from plan/plan.json, titles and status only, and checked in CI so it cannot drift.
+type: explanation
 ---
 
 Every Lumen deployment serves an open roadmap at `/roadmap.html` (and at

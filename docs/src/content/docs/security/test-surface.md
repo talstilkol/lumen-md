@@ -1,6 +1,7 @@
 ---
 title: The e2e test surface
 description: window.__lumen.agentReview exists only in development and tests.
+type: how-to
 ---
 
 The end-to-end tests drive a few app functions through `window.__lumen`.

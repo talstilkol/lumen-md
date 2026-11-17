@@ -1,6 +1,7 @@
 ---
 title: Pricing
 description: Lumen is free and MIT-licensed forever, with no account. The only paid things are optional — an encrypted sync relay at $4 a month and a one-time supporter payment — and the free tier never shrinks.
+type: explanation
 ---
 
 ## The app: free, forever

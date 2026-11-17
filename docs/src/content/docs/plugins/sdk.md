@@ -1,6 +1,8 @@
 ---
 title: Plugin SDK
 description: Build your own Lumen plugin in 60 seconds with create-lumen-plugin.
+type: reference
+tasks: ["W3.10"]
 ---
 
 Lumen plugins are tiny ESM modules that register custom blocks, commands,

@@ -1,6 +1,8 @@
 ---
 title: Writing a book
 description: Chapters as notes in order, word goals per chapter and per book, today's words and a streak, and the book assembled into a Hebrew EPUB 3 and a print-ready PDF.
+type: how-to
+tasks: ["W5.8"]
 ---
 
 A book in Lumen is a folder of notes, one per chapter, and an **index

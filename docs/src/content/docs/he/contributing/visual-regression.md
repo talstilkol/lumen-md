@@ -1,6 +1,7 @@
 ---
 title: רגרסיה חזותית
 description: npm run test:visual משווה עשרה מסכים בעברית ובאנגלית, בהיר וכהה, מול תמונות הבסיס שלהם — מקומית, בלי CI.
+type: how-to
 ---
 
 `npm run test:visual` מצלם 40 צילומי מסך — עשרה מסכים, באנגלית (LTR)

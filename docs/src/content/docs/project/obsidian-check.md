@@ -1,6 +1,7 @@
 ---
 title: Checking Lumen against Obsidian
 description: The owner's checklist for opening a vault Lumen saved in the real Obsidian (1.15 or later) and comparing every Bases view, row by row.
+type: reference
 ---
 
 Lumen's tests read real vaults: ten public ones, pinned to a commit, with

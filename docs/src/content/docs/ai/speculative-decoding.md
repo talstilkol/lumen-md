@@ -1,6 +1,8 @@
 ---
 title: Speculative decoding in Ollama
 description: Ollama 0.34 speeds up some models by guessing several tokens at once. Lumen measures it per model, keeps it only where it helps, and turns it off for reproducible evals.
+type: how-to
+tasks: ["W7.15"]
 ---
 
 From version 0.34, Ollama turns on **speculative decoding** by default for the

@@ -1,6 +1,8 @@
 ---
 title: Obsidian Bases (קובצי ‎.base)
 description: פתיחה, הטמעה ועריכה של קובצי Bases של Obsidian — מה נתמך, מה לא, ואיך נבדק סט הזהב.
+type: how-to
+tasks: ["W12.V1", "W4.30", "W1.12"]
 ---
 
 כספת שמגיעה מ-Obsidian שומרת את ה-**Bases** שלה: קובצי `.base` ‏(YAML)

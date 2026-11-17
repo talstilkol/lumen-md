@@ -1,6 +1,7 @@
 ---
 title: אירוח עצמי עם Docker
 description: להריץ את Lumen על התשתית שלכם עם חבילת ה-docker-compose.
+type: how-to
 ---
 
 > ‏Lumen היא עורך **מקומי קודם** — כברירת מחדל הכול רץ בתוך הדפדפן, בלי

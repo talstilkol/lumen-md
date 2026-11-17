@@ -1,6 +1,8 @@
 ---
 title: Version history and undoing a delete
 description: Every note keeps its earlier versions, shared sessions included, in little space; a delete is undone with Ctrl+Z or from the trash; and the history panel shows whether the browser may clear your storage.
+type: reference
+tasks: ["3.1", "3.2"]
 ---
 
 Lumen keeps what you wrote. Each note has a history of versions you can

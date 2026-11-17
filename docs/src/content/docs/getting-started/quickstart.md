@@ -1,6 +1,7 @@
 ---
 title: Quickstart
 description: Get to your first beautiful Lumen document in 60 seconds.
+type: how-to
 ---
 
 ## 1. Open Lumen

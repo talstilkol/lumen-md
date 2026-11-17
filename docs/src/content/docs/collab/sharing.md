@@ -1,6 +1,8 @@
 ---
 title: Sharing, roles and comment threads
 description: Share a note to view, comment or edit with a link that expires; revoke it; comment threads with mentions.
+type: how-to
+tasks: ["W1.19"]
 ---
 
 With a [persistent collab server](/collab/webrtc/), a note in a

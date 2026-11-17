@@ -1,6 +1,8 @@
 ---
 title: Search operators and #tags
 description: Narrow a search with tag:, path:, "phrases", /regex/ and -exclusions; tags written in the text count like front-matter tags.
+type: how-to
+tasks: ["11.3"]
 ---
 
 The search dialog (`⇧⌘F`) and the agents' `search_workspace` tool read the

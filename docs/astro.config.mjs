@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import rehypeHebrewSearch from "./src/plugins/rehype-hebrew-search.mjs";
+import remarkVerifiedBanner from "./src/plugins/remark-verified-banner.mjs";
 
 // Lumen's user docs. Hosted at docs.lumen.app — point your CNAME there.
 //
@@ -10,7 +11,8 @@ import rehypeHebrewSearch from "./src/plugins/rehype-hebrew-search.mjs";
 export default defineConfig({
   site: "https://docs.lumen.app",
   // Search finds Hebrew words with and without their prefixes (plan W1.28).
-  markdown: { rehypePlugins: [rehypeHebrewSearch] },
+  // W13.D2: a page whose tasks are not verified in a browser yet opens with a beta notice.
+  markdown: { rehypePlugins: [rehypeHebrewSearch], remarkPlugins: [remarkVerifiedBanner] },
   integrations: [
     starlight({
       title: "Lumen Docs",
@@ -31,11 +33,25 @@ export default defineConfig({
         he: { label: "עברית", lang: "he" },
       },
       sidebar: [
+        // W13.D1: the four Diátaxis kinds first — written by `node scripts/docs-meta.mjs --index`.
+        {
+          label: "By kind",
+          translations: { he: "לפי סוג" },
+          items: [
+            { label: "Tutorials", slug: "tutorials", translations: { he: "מדריכים" } },
+            { label: "How-to guides", slug: "how-to", translations: { he: "איך עושים" } },
+            { label: "Reference", slug: "reference", translations: { he: "עיון" } },
+            { label: "Explanation", slug: "explanation", translations: { he: "הסבר" } },
+          ],
+        },
         {
           label: "Getting Started",
           items: [
             { label: "Welcome to Lumen", slug: "getting-started/welcome" },
             { label: "Quickstart", slug: "getting-started/quickstart" },
+            { label: "Tutorial: your first Hebrew note", slug: "getting-started/first-note", translations: { he: "מדריך: הפתק העברי הראשון" } },
+            { label: "Tutorial: find anything", slug: "getting-started/find-anything", translations: { he: "מדריך: למצוא כל דבר" } },
+            { label: "Tutorial: link two notes", slug: "getting-started/link-notes", translations: { he: "מדריך: לקשר שני פתקים" } },
             { label: "What's new", slug: "getting-started/whats-new", translations: { he: "מה חדש" } },
             { label: "Desktop app updates", slug: "getting-started/desktop-updates" },
             { label: "Install Lumen", slug: "getting-started/install", translations: { he: "התקנת Lumen" } },

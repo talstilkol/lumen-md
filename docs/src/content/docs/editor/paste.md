@@ -1,6 +1,8 @@
 ---
 title: Pasting from Word, Google Docs and the web
 description: Paste from Word, Google Docs, Wikipedia, news sites or Gmail, in Hebrew or English, and get clean Markdown that keeps the structure and drops the styling.
+type: how-to
+tasks: ["W10.B5", "W6.38", "W1.4"]
 ---
 
 Most text reaches a note by pasting. Lumen turns what the clipboard holds

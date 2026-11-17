@@ -1,6 +1,8 @@
 ---
 title: Yiddish and Ladino
 description: Write Yiddish in YIVO spelling and Ladino in Latin or Hebrew letters — language tags, direction, spelling, and transliteration both ways, on this device.
+type: how-to
+tasks: ["W7.9"]
 ---
 
 Lumen knows two more Jewish languages besides Hebrew: **Yiddish** and **Ladino**

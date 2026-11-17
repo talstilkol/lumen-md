@@ -1,6 +1,8 @@
 ---
 title: ציטוטים עם ‎[@key]
 description: ציטוט מספריית BibTeX,‏ CSL-JSON או Zotero בתחביר של pandoc ‏‎[@key, p. 10]‎, ב־APA,‏ Chicago,‏ MLA או APA הישראלי, עם רשימת מקורות בתצוגה, ב־DOCX וב־PDF.
+type: reference
+tasks: ["W5.23", "W10.E38", "6.13", "W2.16"]
 ---
 
 ## ציטוט בשתי הקשות

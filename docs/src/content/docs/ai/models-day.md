@@ -1,6 +1,8 @@
 ---
 title: Real models day
 description: One command that runs every real-model eval on a machine with Ollama and a GPU, resumes after a stop, and writes one sealed report.
+type: reference
+tasks: ["W6.17", "W4.6"]
 ---
 
 Most of Lumen's AI checks run against a **fake Ollama** in tests: they prove

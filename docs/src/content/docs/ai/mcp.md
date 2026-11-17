@@ -1,6 +1,8 @@
 ---
 title: MCP and the lumen CLI
 description: Let Claude Desktop, Claude Code or your IDE search and read your vault — off by default, with scopes per client, and every change waits for your approval.
+type: reference
+tasks: ["W13.X1", "W12.T4", "W11.I7", "W11.I8", "W7.18", "W8.1"]
 ---
 
 Lumen's vault can be used from outside the app in two ways:

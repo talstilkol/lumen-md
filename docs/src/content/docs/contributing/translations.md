@@ -1,6 +1,7 @@
 ---
 title: Languages in beta, and how to help
 description: English and Hebrew are Lumen's full languages; the other six were translated by machine and are marked Beta (machine translation, awaiting native review). How to report a translation issue from inside the app.
+type: how-to
 ---
 
 Lumen ships two **full** languages: **English**, the source, and **Hebrew**, written by
@@ -78,3 +79,9 @@ mark goes away.
 
 Arabic is Israel's second right-to-left language, so its review also covers the RTL checks
 (the RTL matrix, plan 9.5, runs in Arabic too).
+
+Check that the locale files are laid out as the tools expect (this example runs in the docs check):
+
+```sh run
+node scripts/i18n-split.mjs --check   # expect: i18n layout is current
+```

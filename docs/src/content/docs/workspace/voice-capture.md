@@ -1,6 +1,8 @@
 ---
 title: Voice notes into the inbox
 description: Record a voice note from the capture box; it is transcribed on this device and added to inbox.md, with the recording attached if you want.
+type: how-to
+tasks: ["W1.13"]
 ---
 
 In the quick-capture box (⌥⌘N, or the installed app's **Quick capture**

@@ -1,6 +1,7 @@
 ---
 title: A privacy report you can prove
 description: Export the privacy ledger as a signed report, check it with a script, and see the results of the outside audit for every version.
+type: explanation
 ---
 
 "Private" is a claim. Lumen lets you check it. The privacy ledger lists

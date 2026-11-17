@@ -1,6 +1,8 @@
 ---
 title: The public server
 description: A free live-share server for everyone that stores only encrypted rooms, deletes idle rooms after 90 days and keeps no IP addresses in its logs.
+type: how-to
+tasks: ["W12.H1", "W12.H3", "W6.23", "W4.8"]
 ---
 
 Live sharing works without any server: browsers connect to each other

@@ -1,6 +1,8 @@
 ---
 title: DictaLM 3.0 (Hebrew)
 description: Dicta's Hebrew–English model in the local model catalogue — what is verified, what waits for a check, and when it may become the default.
+type: how-to
+tasks: ["W2.4"]
 ---
 
 [DictaLM 3.0](https://arxiv.org/abs/2602.02104) is Dicta's open Hebrew–English

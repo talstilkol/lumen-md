@@ -1,6 +1,8 @@
 ---
 title: Models day on a free cloud GPU
 description: One command runs the real models day, held-out sets included, on a free Kaggle GPU and brings back the signed report. Tal's Mac is only the backup.
+type: how-to
+tasks: ["W6.19", "W6.18"]
 ---
 
 The [real models day](/ai/models-day/) needs a GPU. Until now that meant

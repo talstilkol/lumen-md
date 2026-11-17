@@ -1,6 +1,8 @@
 ---
 title: Templates
 description: Start a note from a template — the built-in ones, the gallery, and the ones you install — and where an installed template lives.
+type: how-to
+tasks: ["W3.6"]
 ---
 
 ## Start from a template

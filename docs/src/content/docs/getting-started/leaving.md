@@ -1,6 +1,7 @@
 ---
 title: Leaving Evernote or Notion?
 description: How to take your notes out of Evernote, Notion, Apple Notes, Google Keep, OneNote or Obsidian, and bring them into Lumen in one step, with one click to take it back.
+type: how-to
 ---
 
 Lumen keeps your notes as plain Markdown files on your device. Bringing them

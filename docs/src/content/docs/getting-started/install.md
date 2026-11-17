@@ -1,6 +1,7 @@
 ---
 title: Install Lumen
 description: Lumen in the browser, as an installed web app, on the desktop (macOS, Windows, Linux) and on iOS / Android — and what each one stores where.
+type: how-to
 ---
 
 Lumen is the same app on every platform. The only differences are where

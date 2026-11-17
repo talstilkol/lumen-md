@@ -1,6 +1,7 @@
 ---
 title: Allowed image hosts
 description: See which sites may always load images in your notes, and revoke one or all of them.
+type: how-to
 ---
 
 An image from another site tells that site you opened the note. So Lumen

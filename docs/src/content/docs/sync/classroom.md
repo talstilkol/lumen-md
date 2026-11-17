@@ -1,6 +1,8 @@
 ---
 title: Private classroom
 description: A teacher hands out a template, students hand in sealed work, and the teacher's comments come back. Only the teacher reads a student's work, and the server reads nothing.
+type: how-to
+tasks: ["W5.21"]
 ---
 
 Run **Private classroom…** from the command palette.

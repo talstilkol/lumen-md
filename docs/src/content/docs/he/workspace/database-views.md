@@ -1,6 +1,8 @@
 ---
 title: תצוגות מסד נתונים
 description: טבלה / Kanban / גלריה / לוח שנה בסגנון Notion מעל ה-front matter ב-YAML שלכם.
+type: how-to
+tasks: ["W7.4", "4.11", "4.10"]
 ---
 
 הבלוק `database` הופך כל תיקייה של פתקי Markdown (עם front matter עקבי ב-YAML)

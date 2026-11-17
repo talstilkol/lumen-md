@@ -1,6 +1,7 @@
 ---
 title: Visual regression
 description: npm run test:visual compares ten surfaces in English and Hebrew, light and dark, with their pixel baselines — locally, no CI needed.
+type: how-to
 ---
 
 `npm run test:visual` takes 40 screenshots — ten surfaces, in English (LTR)

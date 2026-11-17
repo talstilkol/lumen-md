@@ -1,6 +1,8 @@
 ---
 title: ציטוטים (BibTeX)
 description: בלוק ```bibtex הופך לרשימת מקורות ב-APA 7, ‏Chicago (מחבר-תאריך) או MLA 9 — באנגלית או בעברית, בלי לשלוח דבר.
+type: reference
+tasks: ["W2.16"]
 ---
 
 מדביקים BibTeX בבלוק ` ```bibtex ` (או ` ```bib `) ו-Lumen מציג רשימת

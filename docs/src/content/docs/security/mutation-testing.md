@@ -1,6 +1,7 @@
 ---
 title: Mutation testing
 description: How Lumen checks that the tests of its security-critical code, such as encryption, the keyring, sync merges and the privacy ledger, really catch bugs.
+type: how-to
 ---
 
 Coverage tells you which lines ran, not whether a test would notice if they

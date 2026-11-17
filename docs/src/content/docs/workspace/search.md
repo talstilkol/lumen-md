@@ -1,6 +1,8 @@
 ---
 title: Workspace search (BM25 + Smart)
 description: Fast keyword search by default, semantic embeddings on demand.
+type: how-to
+tasks: ["W12.A1", "W12.A2", "W10.B6", "W10.F16", "W7.13", "W9.7"]
 ---
 
 `⌘K → Search workspace…` opens the workspace search dialog (the palette

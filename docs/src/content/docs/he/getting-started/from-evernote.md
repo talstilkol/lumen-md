@@ -1,6 +1,7 @@
 ---
 title: מעבר מ-Evernote
 description: מוציאים את המחברות מ-Evernote ומביאים אותן ל-Lumen כ-Markdown, עם התמונות והקבצים המצורפים.
+type: how-to
 ---
 
 ‏Evernote שומרת פתקים בפורמט משלה (ENML), ולכן הם מומרים בדרך פנימה.

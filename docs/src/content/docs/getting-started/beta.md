@@ -1,6 +1,7 @@
 ---
 title: Beta channel and feature flags
 description: Try new features before everyone else, on the web or in the desktop app, and turn any beta feature on or off on your own device.
+type: how-to
 ---
 
 New features reach a **beta** first, then a stable release after testing.

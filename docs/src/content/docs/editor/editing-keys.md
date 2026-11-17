@@ -1,6 +1,8 @@
 ---
 title: Lists, cursors and Vim
 description: Smart lists, several cursors and column selection, and Vim mode — in the source editor, in Hebrew and in English.
+type: reference
+tasks: ["W13.E1", "W13.E2", "W13.E5"]
 ---
 
 ## Smart lists

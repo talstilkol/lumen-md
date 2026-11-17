@@ -1,6 +1,7 @@
 ---
 title: Monitoring and web vitals
 description: Error reports are off by default and sent only with your consent; web vitals never leave your device.
+type: how-to
 ---
 
 Lumen measures how fast it is on your device, and can send crash reports

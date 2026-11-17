@@ -1,6 +1,8 @@
 ---
 title: Graph and local graph
 description: The knowledge graph of the whole vault — 10,000 notes and 50,000 links — and the local graph of the open note, with filters, colour groups and full keyboard use.
+type: how-to
+tasks: ["W12.V8", "W12.V3", "W1.10"]
 ---
 
 ## The graph

@@ -1,6 +1,8 @@
 ---
 title: סוכנים חיצוניים (ACP)
 description: הרצת Claude Code, ‏Codex או OpenCode בשולחן העבודה דרך Agent Client Protocol. כל כתיבה שלהם מחכה באותו תור אישורים כמו הסוכנים של Lumen.
+type: reference
+tasks: ["W11.I23"]
 ---
 
 בשולחן העבודה Lumen יכול להריץ על הכספת סוכן קוד חיצוני דרך [Agent Client Protocol](https://agentclientprotocol.com) ‏(ACP, גרסה 1). נתמכים שלושה: Claude Code, ‏Codex ו-OpenCode.

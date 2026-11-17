@@ -1,6 +1,8 @@
 ---
 title: "Text formats: what survives a round trip"
 description: Measured results for Markdown → Org, AsciiDoc, LaTeX, OPML, RST and Jupyter → Markdown on the 652 CommonMark spec examples and 50 Hebrew notes.
+type: how-to
+tasks: ["W1.2"]
 ---
 
 Lumen exports a note to Org-mode, AsciiDoc, LaTeX, OPML, reStructuredText and

@@ -1,6 +1,7 @@
 ---
 title: בדיקת ה־PR
 description: הפקודה npm run pr:check היא שער ה־PR המקומי שמחליף את Danger.js ואת size-limit. היא מדווחת על גודל החבילה מול הבסיס, על סעיפי תיאור ה־PR, על [skip ci] בקומיטים, על קריאות רשת לא רשומות, על רישיונות ועל כלל הדומיין.
+type: how-to
 ---
 
 לומן לא מריץ GitHub Actions על pull requests. ‏Danger.js ו־size-limit צריכים

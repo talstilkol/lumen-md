@@ -1,6 +1,8 @@
 ---
 title: PDF reader and highlights
 description: Read PDFs in the vault, highlight text (Hebrew included), and keep every highlight as a W3C Web Annotation in a Markdown note that links back to the page.
+type: reference
+tasks: ["W12.R2", "W10.E64", "4.14", "W10.F8", "W8.4", "W6.47"]
 ---
 
 Lumen opens a PDF from your vault in a reader of its own. You can select

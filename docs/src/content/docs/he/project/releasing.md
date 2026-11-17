@@ -1,6 +1,7 @@
 ---
 title: שחרור גרסה
 description: פקודה מקומית אחת בונה, חותמת ובודקת שחרור, ועם ‎--publish מעלה אותו ל-GitHub Releases עם עדכוני שולחן עבודה חתומים. בלי GitHub Actions.
+type: how-to
 ---
 
 שחרור הוא פקודה אחת במחשב של מי שמשחרר. לא צריך GitHub Actions.

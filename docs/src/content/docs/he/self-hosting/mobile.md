@@ -1,6 +1,7 @@
 ---
 title: בניית Android ו-iOS
 description: איך ה-APK ל-Android וה-IPA ל-iOS נבנים בכל pull request, מה לא חתום עד שיש חשבונות בחנויות, ואילו secrets חותמים עליהם.
+type: how-to
 ---
 
 האפליקציות של Lumen לנייד הן אותו build של הווב עטוף ב-Capacitor: `android/`

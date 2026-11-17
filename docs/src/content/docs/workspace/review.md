@@ -1,6 +1,8 @@
 ---
 title: Daily review (spaced repetition)
 description: Review your highlights and question::answer cards a few minutes a day, scheduled by FSRS, with everything kept in the vault.
+type: how-to
+tasks: ["W10.E46"]
 ---
 
 **Command palette → Daily review** shows today's cards, 5–10 at a time. Each

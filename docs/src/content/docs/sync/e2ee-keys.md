@@ -1,6 +1,8 @@
 ---
 title: Keys, rotation and revocation
 description: Argon2id, age interop, key rotation without re-uploading, removing a lost device, and the public protocol spec.
+type: how-to
+tasks: ["W11.S8", "W11.S10", "W11.S9", "W8.5", "W1.7"]
 ---
 
 The [encrypted sync](/sync/e2ee/) has four more parts since plan W1.7.

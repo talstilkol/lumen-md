@@ -1,6 +1,8 @@
 ---
 title: Choosing the Hebrew search model
 description: How Lumen picks the model behind semantic search and suggested links. It runs a competition on a hard Hebrew question set, and the default changes only for a clear, measured gain.
+type: how-to
+tasks: ["W7.13", "W10.E53"]
 ---
 
 Semantic search and suggested links depend on an *embedding model*. In 2026

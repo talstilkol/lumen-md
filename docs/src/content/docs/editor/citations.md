@@ -1,6 +1,8 @@
 ---
 title: Citations with [@key]
 description: Cite from your BibTeX, CSL-JSON or Zotero library with pandoc's [@key, p. 10], in APA, Chicago, MLA or the Israeli APA, with a reference list in the preview, DOCX and PDF.
+type: reference
+tasks: ["W5.23", "W10.E38", "6.13", "W2.16"]
 ---
 
 ## Cite in two keystrokes

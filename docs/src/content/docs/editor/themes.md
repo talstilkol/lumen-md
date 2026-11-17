@@ -1,6 +1,8 @@
 ---
 title: Themes and CSS snippets
 description: Five built-in themes, among them one for Hebrew reading, theme files on the documented tokens, and CSS snippets from the vault that can never reach the network.
+type: how-to
+tasks: ["W1.21"]
 ---
 
 **Settings → Theme** (command palette: *Theme settings*) changes how Lumen

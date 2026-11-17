@@ -1,6 +1,8 @@
 ---
 title: Encrypted live sharing
 description: Share a note live through a server that stores and relays only ciphertext, names and cursors included.
+type: how-to
+tasks: ["W2.20"]
 ---
 
 A note you share from Lumen goes through the collab server end-to-end

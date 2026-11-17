@@ -1,6 +1,8 @@
 ---
 title: Family and classroom vaults (roles)
 description: One encrypted vault shared by a family or a class, with reader, writer and admin roles, and no accounts. The relay accepts a change only with a writer's signature.
+type: how-to
+tasks: ["W6.22"]
 ---
 
 **Status: not audited, and experimental.** The screens are behind the end-to-end encryption flag, which is off by default and marked "not audited" (plan W12.S4). Every screen shows that notice.

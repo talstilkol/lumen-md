@@ -1,6 +1,7 @@
 ---
 title: Budgets that only go down
 description: The bundle budgets and the performance gate's FCP and LCP limits are lowered after every train to what the train measured plus 2 %, and never raised. Exceptions carry an expiry date and fail once it has passed.
+type: how-to
 ---
 
 Lumen's size and speed limits only move one way: down (plan W6.26).

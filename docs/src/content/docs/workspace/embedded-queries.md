@@ -1,6 +1,8 @@
 ---
 title: Embedded queries and saved searches
 description: A ```query block lists the notes that match a search, a ```dataview block runs common Obsidian Dataview queries, and saved searches sit in the sidebar. All of them update as the vault changes.
+type: how-to
+tasks: ["W2.12", "W12.V6", "W12.V1", "W12.A4"]
 ---
 
 ## ```query blocks

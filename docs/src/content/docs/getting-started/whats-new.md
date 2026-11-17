@@ -1,6 +1,7 @@
 ---
 title: What's new
 description: After an update, Lumen shows that version's release notes once, in your interface language.
+type: reference
 ---
 
 When Lumen updates, the next time you open it you see **What's new**: that

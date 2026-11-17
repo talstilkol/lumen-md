@@ -1,6 +1,7 @@
 ---
 title: Vault encryption at rest
 description: Encrypt the whole vault where it is stored — OPFS, a real folder or the desktop folder — with a passphrase, a recovery key and auto-lock.
+type: how-to
 ---
 
 Optional. **Command palette → Vault encryption…** encrypts every note and

@@ -1,6 +1,8 @@
 ---
 title: End-to-end encryption for collab
 description: Add a room password and no relay, signaling server or sync server can read your document.
+type: how-to
+tasks: ["3.6"]
 ---
 
 Lumen's WebRTC mesh is unencrypted by default: peers sync the Yjs

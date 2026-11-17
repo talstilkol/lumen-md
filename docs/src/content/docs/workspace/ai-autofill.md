@@ -1,6 +1,8 @@
 ---
 title: Fill properties with AI — with approval
 description: A model proposes the missing properties of a folder's notes; every proposal waits in an approval queue, and nothing is written until you approve it.
+type: reference
+tasks: ["5.10"]
 ---
 
 `⌘K → "AI: Fill Properties for Notes…"` asks for a folder (empty for the

@@ -1,6 +1,7 @@
 ---
 title: ריצות לילה וקבלות
 description: npm run nightly מריץ את ציד ה-flakes, בדיקות הביצועים, מיון הביקורות ובריאות התלויות השבועית על המחשב שלך, וכותב לכל אחד דוח חתום, בלי GitHub Actions.
+type: how-to
 ---
 
 Lumen לא משתמש ב-GitHub Actions, ולכן הריצות המתוזמנות (משימה 0.11)

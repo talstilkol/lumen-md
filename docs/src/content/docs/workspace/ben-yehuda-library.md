@@ -1,6 +1,8 @@
 ---
 title: Ben-Yehuda library (offline)
 description: Download the public-domain works of Project Ben-Yehuda once, then search, read, quote and highlight Hebrew literature with no network.
+type: how-to
+tasks: ["W7.7"]
 ---
 
 [Project Ben-Yehuda](https://benyehuda.org) is a volunteer library of Hebrew

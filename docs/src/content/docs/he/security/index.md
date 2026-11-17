@@ -1,6 +1,7 @@
 ---
 title: אבטחה
 description: מצב האבטחה של Lumen בפומבי: ביקורת חיצונית (עוד אין), מודל האיום, fuzzing, מקור הגרסאות, כל ממצא פתוח, וכרטיס ניקוד עם תווית פרטיות לכל תוסף.
+type: reference
 ---
 
 <!-- Written by scripts/security-page.mjs from security/findings.json and the plugin scorecards. Do not edit by hand. -->

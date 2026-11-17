@@ -1,6 +1,8 @@
 ---
 title: Entity graph
 description: People, places, organisations, events, laws, sources and concepts found in your notes, each relation backed by an exact quote from a paragraph, reviewed by you before anything is written.
+type: how-to
+tasks: ["W12.X3", "W12.E7", "W12.V2", "R12.8", "W12.E10"]
 ---
 
 ## What it is

@@ -1,6 +1,8 @@
 ---
 title: Local translation
 description: Translate a document on this device, in three layers — Chrome's built-in translator, Opus-MT for Hebrew ⇄ English, M2M100 for the rest — with code and links kept exactly.
+type: how-to
+tasks: ["W12.H6"]
 ---
 
 `⌘K → AI: Translate Document` translates the whole note into the language

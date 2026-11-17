@@ -1,6 +1,8 @@
 ---
 title: AI cost — usage meter and answer cache
 description: See what your AI requests cost, and avoid paying twice for the same answer.
+type: how-to
+untracked: "shipped before the plan (Plan D: D3, D4); no plan task covers it"
 ---
 
 Lumen calls the AI provider you choose with your own API key. Two

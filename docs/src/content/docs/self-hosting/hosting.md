@@ -1,6 +1,7 @@
 ---
 title: Where Lumen runs
 description: What works on which host — Cloudflare Pages, Netlify, Vercel and the Docker image — and how each one is configured.
+type: how-to
 ---
 
 Lumen is a static app: `npm run build` produces `dist/`, and any host that

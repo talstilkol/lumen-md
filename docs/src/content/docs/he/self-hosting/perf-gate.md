@@ -1,6 +1,7 @@
 ---
 title: שער הביצועים
 description: הפקודה npm run perf:gate מודדת FCP,‏ LCP,‏ TBT,‏ TTI ו־CLS של בניית production ב־Chromium, במחשב ובטלפון מואט, ונכשלת לפי ספי השגיאה, בלי GitHub Actions.
+type: how-to
 ---
 
 השער (תוכנית 8.3) בודק שבנייה נטענת מהר מספיק לפני שהיא יוצאת. הוא רץ

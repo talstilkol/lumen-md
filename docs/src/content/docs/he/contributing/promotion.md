@@ -1,6 +1,7 @@
 ---
 title: לפני main, ‏WebKit ו-Safari
 description: ‏npm run promote:check מסרב לקדם את main לקומיט שאין לו קבלת WebKit חתומה וקבלת Safari חתומה. ‏WebKit רץ במפעל האימות, ו-Safari אמיתי רץ בתוכנית הקוד הפתוח של BrowserStack.
+type: how-to
 ---
 
 הפלטפורמה שאיבדה פתקים בתרגיל בטיחות הנתונים (#470: ‏376 פתקים בנתיב

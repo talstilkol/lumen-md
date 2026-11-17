@@ -1,6 +1,8 @@
 ---
 title: Search reranking — measured
 description: What the search reranker adds on Lumen's retrieval golden set, the decision that follows, and how to measure the model yourself.
+type: how-to
+tasks: ["W10.B18", "R12.16", "W7.13"]
 ---
 
 Search ranks with BM25 (and, in smart search, embeddings). A **reranker**

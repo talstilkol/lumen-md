@@ -1,6 +1,8 @@
 ---
 title: Live canvas
 description: Draw on one canvas together during a collab session — edits and pointers appear as they happen, over the same encrypted room as the note.
+type: how-to
+tasks: ["W6.48"]
 ---
 
 When you share a note in a live session, the canvas you open is shared too.

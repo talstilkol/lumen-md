@@ -1,6 +1,8 @@
 ---
 title: Encrypted share link
 description: Share a read-only copy of one note as a link that carries the note itself, encrypted. No server, no account.
+type: how-to
+tasks: ["W5.10"]
 ---
 
 **Share as encrypted link** (command palette) turns the open note into a link. The note

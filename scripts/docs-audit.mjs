@@ -34,6 +34,7 @@
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { checkPages, pages, planTaskMap } from "./lib/docsMeta.mjs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -117,6 +118,20 @@ export function audit({ tasks, prs, filesOf, mapped = {}, inRef = () => true }) 
 /** One line per task, for the console. */
 export const formatFinding = (f) => `${f.id} ${f.title} — ${f.prs.map((n) => `#${n}`).join(", ")} changed ${f.ui.length} user-facing file${f.ui.length === 1 ? "" : "s"} (${f.ui.slice(0, 3).join(", ")}${f.ui.length > 3 ? ", …" : ""}) and wrote no page: write it, or name it in docs/required-pages.json "tasks"`;
 
+/**
+ * W13.D1 / W13.D2: every page has its Diátaxis type (a tutorial has numbered
+ * steps), every feature page names its plan task(s), Hebrew twins agree.
+ * Runs from the files alone, before the GitHub part. Returns the problems.
+ */
+export function pageChecks(root, plan) {
+  const docs = join(root, "docs/src/content/docs");
+  const found = checkPages(pages(docs), (rel) => readFileSync(join(docs, rel), "utf8"), new Set(planTaskMap(plan).keys()));
+  for (const f of found) console.error(`docs/src/content/docs/${f.page}: ${f.problem}`);
+  if (found.length) console.error(`✗ docs-audit: ${found.length} page problem(s) (Diátaxis type, task ids)`);
+  else process.stdout.write(`✓ docs-audit: every page has a Diátaxis type; every feature page maps to a task\n`);
+  return found.length;
+}
+
 function main(argv) {
   const opt = (n) => (argv.includes(n) ? argv[argv.indexOf(n) + 1] : undefined);
   const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -125,6 +140,17 @@ function main(argv) {
   const gh = (path) => JSON.parse(execFileSync("gh", ["api", path], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }));
   const plan = JSON.parse(opt("--plan-ref") ? git("show", `${opt("--plan-ref")}:plan/plan.json`) : readFileSync(opt("--plan") ?? join(ROOT, "plan/plan.json"), "utf8"));
   const required = JSON.parse(readFileSync(join(ROOT, "docs/required-pages.json"), "utf8"));
+  const pageProblems = pageChecks(ROOT, plan);
+  // W13.D4: the runnable examples' report (scripts/docs-doctest.mjs), part of the audit.
+  let doctestFailed = 0;
+  if (!argv.includes("--no-doctest")) {
+    try {
+      process.stdout.write(execFileSync("node", [join(ROOT, "scripts/docs-doctest.mjs"), "--summary"], { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }));
+    } catch (e) {
+      doctestFailed = 1;
+      console.error(String(e.stdout ?? "") + String(e.stderr ?? ""));
+    }
+  }
   let prs;
   if (opt("--prs")) prs = readFileSync(opt("--prs"), "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l));
   else {
@@ -164,7 +190,7 @@ function main(argv) {
     console.error(found.map(formatFinding).join("\n"));
     console.error(`\n✗ docs-audit: ${found.length} finished task(s) without a docs page`);
   } else process.stdout.write("✓ docs-audit: every finished task that changed what a user sees has a docs page\n");
-  return found.length ? 1 : 0;
+  return found.length || pageProblems || doctestFailed ? 1 : 0;
 }
 
 if (import.meta.url.startsWith("file:") && process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) process.exitCode = main(process.argv.slice(2));

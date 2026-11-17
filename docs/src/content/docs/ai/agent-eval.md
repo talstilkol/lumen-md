@@ -1,6 +1,8 @@
 ---
 title: Agent eval
 description: Every one of the 14 agents against fixed Hebrew and English cases, scored with deterministic checks, with a local HTML report.
+type: reference
+tasks: ["W10.E12", "7.3"]
 ---
 
 The agent eval runs fixed cases through the **real agent runtime**: the

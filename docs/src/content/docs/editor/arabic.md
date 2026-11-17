@@ -1,6 +1,8 @@
 ---
 title: Arabic (beta)
 description: Write Arabic next to Hebrew and English in one note. Each line takes its own direction, tashkeel can be hidden or removed, search ignores it, and Arabic spelling runs on this device.
+type: how-to
+tasks: ["W5.17"]
 ---
 
 Lumen treats Arabic the way it treats Hebrew. Arabic is still marked

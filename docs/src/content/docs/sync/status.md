@@ -1,6 +1,8 @@
 ---
 title: Sync status, selective sync and time left
 description: See what the encrypted sync is doing for every file, choose what each device syncs, and how long a round will take.
+type: reference
+tasks: ["W1.8"]
 ---
 
 The encrypted sync (see [Encrypted sync](/sync/e2ee/)) shows its work.

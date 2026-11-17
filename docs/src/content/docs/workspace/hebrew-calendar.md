@@ -1,6 +1,8 @@
 ---
 title: Daily notes and the Hebrew calendar
 description: The calendar's holidays, fasts and weekly Torah portion, for Israel or the diaspora, and the {{holiday}} and {{parasha}} placeholders of the daily note.
+type: how-to
+tasks: ["4.12"]
 ---
 
 **Show / hide the calendar** (command palette) shows a month under the file tree. A day with a daily

@@ -1,6 +1,8 @@
 ---
 title: Government data (data.gov.il, CBS)
 description: Put a table or a chart of open government data in a note. The rows are kept as a CSV in your vault, the attribution is written for you, and a refresh shows what changed.
+type: how-to
+tasks: ["W7.6"]
 ---
 
 Lumen can bring two kinds of open Israeli data into a note:

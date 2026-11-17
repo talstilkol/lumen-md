@@ -1,6 +1,7 @@
 ---
 title: The beta programme
 description: Join the beta from inside Lumen, send feedback as a prefilled GitHub issue, and — only if you ask — a weekly report of counts. Nothing leaves without your click.
+type: how-to
 ---
 
 The beta programme gives you new features first, and gives the project

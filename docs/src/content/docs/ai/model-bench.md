@@ -1,6 +1,8 @@
 ---
 title: Measuring the local models
 description: npm run bench:models runs every local engine on its golden set in a real browser, with WebGPU, and writes time, memory and quality into models/registry.json.
+type: reference
+tasks: ["7.8"]
 ---
 
 Lumen's local engines are measured where they run: in a browser, through

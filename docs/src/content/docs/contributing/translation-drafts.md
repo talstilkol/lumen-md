@@ -1,6 +1,7 @@
 ---
 title: Translation drafts
 description: npm run i18n:draft drafts new UI strings in all seven languages with a local model; drafts stay "needs review" until a person approves them.
+type: how-to
 ---
 
 Lumen's interface is in eight languages. When you add an English string,

@@ -1,6 +1,8 @@
 ---
 title: Print and PDF
 description: Print a note or save it as a PDF the way a word processor would, with page numbers (Hebrew numerals too), a header and footer, a table of contents, clean page breaks and embedded fonts.
+type: reference
+tasks: ["W10.E18", "W2.23"]
 ---
 
 **Print / Save as PDF…** (in the File menu and the command palette) opens the system print dialog. Choose "Save

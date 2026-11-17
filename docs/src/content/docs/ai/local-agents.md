@@ -1,6 +1,8 @@
 ---
 title: Local agents
 description: Every AI command runs through one local agent runtime — the model proposes, tools execute, validators decide, and an improvement agent steps in when there is no answer.
+type: reference
+tasks: ["R12.18", "W10.E66", "W10.E33", "7.2", "W1.33", "5.6"]
 ---
 
 Lumen's AI commands are **agents**: a definition of what to ask the

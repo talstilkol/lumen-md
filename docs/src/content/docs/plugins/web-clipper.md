@@ -1,6 +1,8 @@
 ---
 title: Web Clipper
 description: Save a web page as a clean Markdown note, from inside Lumen or with the browser extension, which hands the clip to the app. No clip server.
+type: reference
+tasks: ["W10.E67", "4.15", "W2.14"]
 ---
 
 ## Clip from inside Lumen

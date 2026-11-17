@@ -1,6 +1,8 @@
 ---
 title: Airplane mode and the network monitor
 description: One switch that stops every network request Lumen can make, a live list of every attempt with where in the code it came from, and a certificate of the time it was on.
+type: reference
+tasks: ["W10.C11", "W5.9"]
 ---
 
 **Airplane mode (no network)** in the command palette stops every request Lumen could

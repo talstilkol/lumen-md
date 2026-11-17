@@ -1,6 +1,8 @@
 ---
 title: Hebrew and right-to-left
 description: Writing in Hebrew (and Arabic) in Lumen — direction per line, the interface in Hebrew, search that ignores niqqud and prefixes, spelling on this device, and exports that keep the direction.
+type: how-to
+tasks: ["9.2"]
 ---
 
 Lumen is built for notes that mix Hebrew and English.

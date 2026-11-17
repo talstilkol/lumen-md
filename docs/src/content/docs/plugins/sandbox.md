@@ -1,6 +1,8 @@
 ---
 title: Plugin sandbox and permissions
 description: How Lumen runs plugins with no access by default — QuickJS for logic, UI as data, a capability list the user grants.
+type: how-to
+tasks: ["11.2"]
 ---
 
 Lumen runs every plugin with **no access by default**. A plugin gets only

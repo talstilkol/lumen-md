@@ -1,6 +1,8 @@
 ---
 title: עלות ה-AI — מד שימוש ומטמון תשובות
 description: לראות כמה עולות בקשות ה-AI, ולא לשלם פעמיים על אותה תשובה.
+type: how-to
+untracked: "shipped before the plan (Plan D: D3, D4); no plan task covers it"
 ---
 
 Lumen קוראת לספק ה-AI שבחרתם עם מפתח ה-API שלכם. שתי תכונות שומרות את החשבון

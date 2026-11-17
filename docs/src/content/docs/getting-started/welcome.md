@@ -1,6 +1,7 @@
 ---
 title: Welcome to Lumen
 description: Why we built Lumen, and what makes it different from Obsidian, Notion, Typora, Bear.
+type: how-to
 ---
 
 ## Where Lumen fits

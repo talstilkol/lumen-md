@@ -1,6 +1,8 @@
 ---
 title: Where models download from
 description: Every model file comes from Hugging Face, Lumen's mirror or your own copy, and is checked against its sha256 whichever source served it.
+type: reference
+tasks: ["W6.33", "W4.14"]
 ---
 
 The models that run in your browser (dictation, Whisper, embeddings, the

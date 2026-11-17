@@ -1,6 +1,8 @@
 ---
 title: Export and import
 description: Take the whole vault out as a .zip or a folder, bring in an Obsidian vault or a Notion export, and convert single files to and from many formats.
+type: how-to
+tasks: ["W12.F3", "W10.B5", "W6.38"]
 ---
 
 Your notes are plain Markdown, and they can always leave Lumen.

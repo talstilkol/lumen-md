@@ -1,6 +1,7 @@
 ---
 title: התקנת Lumen
 description: Lumen בדפדפן, כאפליקציית רשת מותקנת, בשולחן העבודה (macOS, ‏Windows, ‏Linux) וב-iOS / Android — ומה כל אחת שומרת ואיפה.
+type: how-to
 ---
 
 Lumen היא אותה אפליקציה בכל פלטפורמה. ההבדל היחיד הוא איפה הפתקים נשמרים

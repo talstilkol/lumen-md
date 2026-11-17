@@ -1,6 +1,8 @@
 ---
 title: Typst export (Hebrew)
 description: Export a note as Typst source that typesets Hebrew right to left, and compile it to PDF with typst.
+type: how-to
+tasks: ["W12.F2"]
 ---
 
 [Typst](https://typst.app) is a modern typesetting language, an alternative

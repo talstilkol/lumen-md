@@ -1,6 +1,8 @@
 ---
 title: Image search by description
 description: Find an image in your notes by describing it, in Hebrew or English, on this device.
+type: how-to
+tasks: ["6.7"]
 ---
 
 Open the search dialog (`⌘⇧F`), switch to **Images** and describe the

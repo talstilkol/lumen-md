@@ -1,6 +1,8 @@
 ---
 title: Legal citations (Israel)
 description: Rulings, laws, bills, books and articles by the Israeli uniform citation rules, and a citation from a case number in the note.
+type: how-to
+tasks: ["W5.2"]
 ---
 
 Lumen writes legal citations by **כללי האזכור האחיד בכתיבה המשפטית**, the third edition

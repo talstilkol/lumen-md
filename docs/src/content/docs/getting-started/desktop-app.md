@@ -1,6 +1,7 @@
 ---
 title: The desktop app
 description: Windows, tabs you drag between them, the tray with quick capture, opening .md files from Finder or Explorer, and lumen:// links.
+type: how-to
 ---
 
 The desktop app (macOS, Windows, Linux) works like a native one.

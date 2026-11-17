@@ -1,6 +1,7 @@
 ---
 title: "Journalist mode: redaction and locked notes"
 description: Text you redact is removed from every export, not covered. A note can be locked with a password of its own.
+type: reference
 ---
 
 Reporters, lawyers and researchers keep notes about people who must not be

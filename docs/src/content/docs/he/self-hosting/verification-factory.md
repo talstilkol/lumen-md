@@ -1,6 +1,7 @@
 ---
 title: מפעל האימות
 description: מכונה שנייה בחינם שמריצה כל לילה את כל הבדיקות של כל ראש verify/*‏ ב-Chromium, ‏Firefox ו-WebKit, חותמת קבלה לכל קומיט ומדווחת ל-GitHub כ-commit status, בלי GitHub Actions.
+type: how-to
 ---
 
 Lumen לא משתמש ב-GitHub Actions. עד עכשיו כל בדיקה אמיתית הייתה תלויה

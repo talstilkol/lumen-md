@@ -1,6 +1,8 @@
 ---
 title: Image descriptions on this device
 description: Alt text for pasted and attached images — OCR, a local vision model, or a captioning model in the browser. Nothing is sent to the cloud.
+type: how-to
+tasks: ["6.6"]
 ---
 
 An image with no alt text, or with only its file name (`IMG_1234`,

@@ -1,6 +1,8 @@
 ---
 title: Editor modes
 description: Source / Split / Preview / WYSIWYG — pick the one that fits the task.
+type: how-to
+tasks: ["0.18"]
 ---
 
 Lumen has four editor surfaces. Switch with `⌘1` / `⌘2` / `⌘3` / `⌘4`.

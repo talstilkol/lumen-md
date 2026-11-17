@@ -1,6 +1,8 @@
 ---
 title: Publish to your own site
 description: Turn the notes you pick into a website with navigation, search and right-to-left pages, on your own GitHub Pages or as a .zip for any static host.
+type: how-to
+tasks: ["W12.S5", "4.18"]
 ---
 
 `⌘K → Publish site…` turns the notes you pick into a static website that

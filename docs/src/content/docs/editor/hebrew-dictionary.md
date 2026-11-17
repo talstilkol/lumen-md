@@ -1,6 +1,8 @@
 ---
 title: Hebrew dictionary and synonyms
 description: Definitions, synonyms and the niqqud of a word, from Hebrew Wiktionary, offline inside the editor.
+type: how-to
+tasks: ["W5.26"]
 ---
 
 Right-click a Hebrew word in the editor to see its **synonyms**, its **definition** or its

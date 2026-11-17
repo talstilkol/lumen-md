@@ -1,6 +1,8 @@
 ---
 title: Automatic merging
 description: When the same note changed in two places, Lumen merges the two edits itself and asks only when both changed the same words — the same way for encrypted sync, git and edits made outside Lumen.
+type: how-to
+tasks: ["W1.9", "W11.S7", "W11.S6"]
 ---
 
 A note can change in two places at once: on your laptop and your phone

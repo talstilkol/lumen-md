@@ -1,6 +1,7 @@
 ---
 title: Lumen, Obsidian, Notion and Google Docs
 description: An honest comparison for people who write in Hebrew: what each one does, with a source for every claim, and what Lumen still lacks.
+type: explanation
 ---
 
 Each one is good at something. This page says what each does on five points that matter when you write in Hebrew, and every claim links to where it can be checked. Claims about the other products come from their own pages.

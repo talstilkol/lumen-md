@@ -1,6 +1,8 @@
 ---
 title: Plugin API
 description: The lumen object a sandboxed plugin gets — every method, the capability it needs, its limits, and the UI elements.
+type: reference
+tasks: ["W6.46"]
 ---
 
 A plugin's `main` is an ES module that runs in the sandbox (see

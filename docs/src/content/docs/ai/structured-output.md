@@ -1,6 +1,8 @@
 ---
 title: Structured output and Chrome's built-in model
 description: How Lumen's local AI returns JSON that always matches what the feature asked for, on Ollama, the in-browser model or Chrome's built-in model — and when the built-in model is used with no download.
+type: how-to
+tasks: ["W7.14"]
 ---
 
 Many AI features need an answer of a fixed shape: a category, a list of tags,

@@ -1,6 +1,8 @@
 ---
 title: Import highlights (Kindle, Kobo, Readwise, Zotero)
 description: Bring your highlights from Kindle, Kobo, Readwise and Zotero into the vault, one note per book, with no duplicates when you import again.
+type: how-to
+tasks: ["W2.15"]
 ---
 
 Run `⌘K → "Import highlights (Kindle, Kobo, Readwise, Zotero)…"`, pick

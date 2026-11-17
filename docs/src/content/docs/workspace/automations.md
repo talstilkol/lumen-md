@@ -1,6 +1,8 @@
 ---
 title: Automations (when… then…)
 description: Simple rules that file, tag and log your notes on this device — with a dry run that changes nothing, a log of every run, and undo.
+type: reference
+tasks: ["W12.U2", "W10.E15", "W5.24", "W6.46"]
 ---
 
 An automation is a rule: **when** something happens to a note, **then**

@@ -3,6 +3,8 @@ title: Accessibility statement
 description: How accessible Lumen is — the standard it follows (Israeli Standard 5568, WCAG), what works, known gaps, and how to report a barrier.
 appVersion: 0.1.0
 reviewed: 2026-11-15
+type: explanation
+tasks: ["W11.Q7", "W6.30", "W3.8"]
 ---
 
 This statement covers the Lumen app (web, desktop and mobile builds) at
