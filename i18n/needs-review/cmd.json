@@ -1005,5 +1005,23 @@
     "ru": "f4bxa5",
     "zh-CN": "f4bxa5",
     "fa": "f4bxa5"
+  },
+  "cmd.automations.manage": {
+    "ar": "dgo1th",
+    "de": "dgo1th",
+    "fa": "dgo1th",
+    "fr": "dgo1th",
+    "ja": "dgo1th",
+    "ru": "dgo1th",
+    "zh-CN": "dgo1th"
+  },
+  "cmd.automations.manage.hint": {
+    "ar": "15ufjs1",
+    "de": "15ufjs1",
+    "fa": "15ufjs1",
+    "fr": "15ufjs1",
+    "ja": "15ufjs1",
+    "ru": "15ufjs1",
+    "zh-CN": "15ufjs1"
   }
 }

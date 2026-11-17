@@ -1,0 +1,212 @@
+/* The automations manager (plan W5.24). Logical properties: the same rules in RTL and LTR. */
+.automations-panel {
+  color: hsl(var(--fg));
+  max-width: 760px;
+  width: min(760px, 94vw);
+  max-height: 88vh;
+}
+.automations-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.automations-h2 {
+  font-size: 16px;
+  margin: 0;
+}
+.automations-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.automations-intro {
+  margin: 0;
+  max-height: none;
+  overflow: visible;
+}
+.automations-body {
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-inline-end: 4px;
+}
+.automations-body:focus-visible,
+.automations-diff:focus-visible,
+.automations-h3:focus-visible,
+.automations-status:focus-visible {
+  outline: 2px solid hsl(var(--accent));
+  outline-offset: 2px;
+}
+.automations-h3 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: hsl(var(--fg));
+}
+.automations-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.automations-rule,
+.automations-run,
+.automations-change {
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: hsl(var(--bg-subtle));
+}
+.automations-rule {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  align-items: start;
+}
+/* An off rule reads quieter, in a colour that still meets 4.5:1 (no opacity). */
+.automations-rule[data-enabled="false"] .automations-desc,
+.automations-rule[data-enabled="false"] .automations-name {
+  color: hsl(var(--fg-muted));
+}
+.automations-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: hsl(var(--fg));
+  cursor: pointer;
+}
+.automations-switch input {
+  inline-size: 16px;
+  block-size: 16px;
+  accent-color: hsl(var(--accent));
+}
+.automations-desc {
+  grid-column: 1;
+  font-size: 12.5px;
+  color: hsl(var(--fg));
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.automations-kw {
+  font-weight: 600;
+  color: hsl(var(--fg-muted));
+}
+.automations-row-actions {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+.automations-small {
+  padding: 3px 10px;
+  font-size: 12px;
+}
+.automations-danger {
+  color: hsl(var(--danger));
+}
+.automations-muted {
+  color: hsl(var(--fg-muted));
+  font-size: 12px;
+  margin: 0;
+}
+.automations-error {
+  margin: 0;
+  color: hsl(var(--danger));
+  font-size: 13px;
+}
+.automations-status {
+  margin: 0;
+  min-height: 1em;
+  font-size: 12.5px;
+  color: hsl(var(--fg));
+}
+.automations-dry {
+  border-inline-start: 3px solid hsl(var(--accent));
+  padding-inline-start: 10px;
+  display: grid;
+  gap: 8px;
+}
+.automations-safe {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: hsl(var(--fg));
+}
+.automations-change-head {
+  font-size: 12.5px;
+  margin-block-end: 4px;
+  overflow-wrap: anywhere;
+}
+.automations-diff {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: 6px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--bg));
+  max-height: 220px;
+  overflow: auto;
+}
+.automations-line {
+  display: flex;
+  gap: 6px;
+  padding-inline: 6px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.automations-sign {
+  flex: none;
+  inline-size: 1ch;
+  font-weight: 700;
+}
+.automations-add {
+  background: hsl(142 70% 40% / 0.14);
+}
+.automations-del {
+  background: hsl(0 80% 50% / 0.12);
+  text-decoration: line-through;
+  text-decoration-color: hsl(0 60% 45% / 0.6);
+}
+.automations-gap {
+  padding-inline: 6px;
+  color: hsl(var(--fg-muted));
+}
+.automations-run {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12.5px;
+}
+.automations-run-main {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.automations-badge {
+  font-size: 11.5px;
+  border: 1px solid hsl(var(--border-strong));
+  border-radius: 999px;
+  padding: 1px 8px;
+  color: hsl(var(--fg-muted));
+  white-space: nowrap;
+}
+@media (max-width: 520px) {
+  .automations-rule {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .automations-row-actions {
+    grid-column: 1;
+    grid-row: auto;
+    justify-content: flex-start;
+  }
+}

@@ -107,6 +107,8 @@
   "cmd.audit.open.hint": "افحص كل تعديل مسجّل؛ صدّر CSV لأغراض الامتثال",
   "cmd.automations.dryRun": "الأتمتة: تشغيل تجريبي على هذه الملاحظة",
   "cmd.automations.dryRun.hint": "ما الذي ستغيره القواعد في هذه الملاحظة — لا يُكتب شيء",
+  "cmd.automations.manage": "Automations: manage rules, dry run and run log…",
+  "cmd.automations.manage.hint": "Every rule with an on/off switch, a dry run that shows the lines it would write, and undo for each run",
   "cmd.automations.new": "الأتمتة: قاعدة جديدة (عندما… إذن…)…",
   "cmd.automations.new.hint": "قاعدة ببضعة اختيارات: إنشاء ملاحظة أو إضافة وسم أو تغيير خاصية أو يوميًا ← نقل أو وسم أو قالب أو سطر في الملاحظة اليومية",
   "cmd.automations.undo": "الأتمتة: تراجع عن آخر تشغيل",

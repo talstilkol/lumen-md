@@ -65,6 +65,7 @@
   "cmd.arabic.toggleTashkeel": "Hide or show Arabic tashkeel",
   "cmd.audit.open": "Audit log…",
   "cmd.automations.dryRun": "Automations: dry run on this note",
+  "cmd.automations.manage": "Automations: manage rules, dry run and run log…",
   "cmd.automations.new": "Automations: new rule (when… then…)…",
   "cmd.automations.undo": "Automations: undo the last run",
   "cmd.beta": "Help: Beta programme",

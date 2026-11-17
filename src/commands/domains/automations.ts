@@ -15,6 +15,17 @@ export function buildAutomationCommands({ liveDoc }: CommandContext): Command[] 
   const group = t("group.tools");
   return [
     {
+      id: "automations.manage",
+      label: t("cmd.automations.manage"),
+      hint: t("cmd.automations.manage.hint"),
+      icon: cmdIcons.Workflow,
+      group,
+      action: async () => {
+        const doc = liveDoc();
+        await (await actions()).manageAutomations(doc);
+      },
+    },
+    {
       id: "automations.new",
       label: t("cmd.automations.new"),
       hint: t("cmd.automations.new.hint"),

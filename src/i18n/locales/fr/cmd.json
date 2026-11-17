@@ -107,6 +107,8 @@
   "cmd.audit.open.hint": "Consulter chaque modification enregistrée ; exporter en CSV pour la conformité",
   "cmd.automations.dryRun": "Automatisations : essai à blanc sur cette note",
   "cmd.automations.dryRun.hint": "Ce que les règles changeraient dans cette note — rien n’est écrit",
+  "cmd.automations.manage": "Automations: manage rules, dry run and run log…",
+  "cmd.automations.manage.hint": "Every rule with an on/off switch, a dry run that shows the lines it would write, and undo for each run",
   "cmd.automations.new": "Automatisations : nouvelle règle (quand… alors…)…",
   "cmd.automations.new.hint": "Une règle en quelques choix : note créée, tag ajouté, propriété modifiée ou chaque jour → déplacer, taguer, modèle ou ligne dans la note du jour",
   "cmd.automations.undo": "Automatisations : annuler la dernière exécution",
