@@ -36,6 +36,7 @@
   "toast.dictate.stoppedLocalOnly": "Dictée arrêtée : la politique d'IA est maintenant « Local seulement », et le service vocal du navigateur envoie l'audio à l'extérieur",
   "toast.dictate.webSpeechActive": "Dictée via le service vocal du navigateur — l'audio est envoyé à son fournisseur",
   "toast.digest.readFailed": "Résumé non enregistré : {count} notes modifiées n’ont pas pu être lues. Réessayez.",
+  "toast.digits": "Les nombres s’écrivent maintenant ainsi : {sample}",
   "toast.dismiss": "Ignorer",
   "toast.documentDecrypted": "🔓 Document déchiffré",
   "toast.documentEncrypted": "🔒 Document chiffré",

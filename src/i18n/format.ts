@@ -36,11 +36,16 @@ export function onDateCalendarChange(fn: () => void): () => void {
   return () => listeners.delete(fn);
 }
 
-/** The BCP 47 tag for dates: the UI language, the digits and the calendar. */
+/** The calendar a language writes dates in by default: Persian dates are solar Hijri (W13.I7). */
+const DEFAULT_CALENDAR: Record<string, string> = { fa: "persian" };
+
+/** The BCP 47 tag for dates: the UI language (fa-IR for Persian), the digits and the calendar. */
 export function dateLocale(): string {
-  const base = numberLocale();
-  if (dateCalendar() !== "hebrew") return base;
-  return base.includes("-u-") ? `${base}-ca-hebrew` : `${base}-u-ca-hebrew`;
+  let base = numberLocale();
+  if (getLocale() === "fa") base = base.replace(/^fa(?=-|$)/, "fa-IR");
+  const ca = dateCalendar() === "hebrew" ? "hebrew" : DEFAULT_CALENDAR[getLocale()];
+  if (!ca) return base;
+  return base.includes("-u-") ? `${base}-ca-${ca}` : `${base}-u-ca-${ca}`;
 }
 
 const cache = new Map<string, Intl.DateTimeFormat>();

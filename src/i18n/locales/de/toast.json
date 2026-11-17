@@ -36,6 +36,7 @@
   "toast.dictate.stoppedLocalOnly": "Diktat gestoppt: Die KI-Richtlinie ist jetzt „Nur lokal“, und der Sprachdienst des Browsers sendet Audio nach außen",
   "toast.dictate.webSpeechActive": "Diktat über den Sprachdienst des Browsers — das Audio wird an dessen Anbieter gesendet",
   "toast.digest.readFailed": "Zusammenfassung nicht gespeichert: {count} geänderte Notizen konnten nicht gelesen werden. Bitte erneut versuchen.",
+  "toast.digits": "Zahlen sehen jetzt so aus: {sample}",
   "toast.dismiss": "Schließen",
   "toast.documentDecrypted": "🔓 Dokument entschlüsselt",
   "toast.documentEncrypted": "🔒 Dokument verschlüsselt",

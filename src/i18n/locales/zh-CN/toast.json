@@ -36,6 +36,7 @@
   "toast.dictate.stoppedLocalOnly": "听写已停止：AI 策略现在是仅本地，而浏览器语音服务会把音频发送出去",
   "toast.dictate.webSpeechActive": "正在通过浏览器语音服务听写 — 音频会发送给其提供方",
   "toast.digest.readFailed": "摘要未保存：有 {count} 篇已更改的笔记无法读取。请重试。",
+  "toast.digits": "数字现在显示为：{sample}",
   "toast.dismiss": "关闭",
   "toast.documentDecrypted": "🔓 文档已解密",
   "toast.documentEncrypted": "🔒 文档已加密",

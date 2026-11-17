@@ -10,6 +10,7 @@ import { platformKeys } from "../lib/platformKeys";
 import { detectLocale, systemLanguages } from "./detect";
 import { isFullLocale } from "./review";
 import { resolvePlural } from "./plural";
+import { numeralsTag } from "./numerals";
 
 // β.4 — `Locale` includes the 6 deferred locales so the type is stable
 // across the rest of the codebase. Bundles for ar / ru / fr / de / ja /
@@ -24,7 +25,8 @@ export type Locale =
   | "fr"
   | "de"
   | "ja"
-  | "zh-CN";
+  | "zh-CN"
+  | "fa";
 
 export const SUPPORTED_LOCALES: { code: Locale; label: string; dir: "ltr" | "rtl" }[] = [
   { code: "en", label: "English", dir: "ltr" },
@@ -35,6 +37,8 @@ export const SUPPORTED_LOCALES: { code: Locale; label: string; dir: "ltr" | "rtl
   { code: "de", label: "Deutsch", dir: "ltr" },
   { code: "ja", label: "日本語", dir: "ltr" },
   { code: "zh-CN", label: "简体中文", dir: "ltr" },
+  // W13.I7: Persian, the third right-to-left language — beta (./review.ts).
+  { code: "fa", label: "فارسی", dir: "rtl" },
 ];
 
 /**
@@ -140,6 +144,8 @@ export function applyLocale(locale: Locale): void {
   if (!SYNCHRONOUS_LOCALES.has(locale) && !(locale in BUNDLES)) {
     void loadLocale(locale);
   }
+  // W13.I5 / W13.I7: the Naskh face, no-kashida justification, the welcome note and templates.
+  if (locale === "ar" || locale === "fa") void rtlExtras(locale);
 }
 
 /**
@@ -173,10 +179,9 @@ export function uiStringValues(): Set<string> {
 
 /**
  * The BCP 47 tag numbers are written with: the UI language, plus the digits
- * the user chose (W13.I5: `-u-nu-arab` for Arabic-Indic digits). The
- * numerals module sets it; plain locale until then.
+ * the user chose (W13.I5: `-u-nu-arab` for Arabic-Indic digits, ./numerals.ts).
  */
-let numberTag: () => string = () => activeLocale;
+let numberTag: () => string = () => numeralsTag(activeLocale);
 export function setNumberLocale(tag: () => string): void {
   numberTag = tag;
 }
@@ -256,6 +261,11 @@ export function installBundle(code: string, strings: Strings, dir: "ltr" | "rtl"
   EXTRA_DIR[code] = dir;
 }
 
+/** The Arabic / Persian extras (./rtlExtras.ts), in their own lazy chunk. */
+function rtlExtras(locale: string): Promise<void> {
+  return import("./rtlExtras").then((m) => m.applyRtlExtras(locale)).catch(() => undefined);
+}
+
 /** True when `locale`'s strings are in memory (so `t()` can use them). */
 export function isLocaleLoaded(locale: Locale): boolean {
   return locale in BUNDLES;
@@ -290,6 +300,8 @@ export async function initLocale(storageKey = "lumen-md"): Promise<Locale> {
     // The chunk couldn't be fetched (offline, missing): don't apply e.g.
     // `lang="he"` + RTL over English strings — fall back to English.
     if (!isLocaleLoaded(locale)) locale = "en";
+    // The welcome note of the first render is in the language too.
+    if (locale === "ar" || locale === "fa") await rtlExtras(locale);
   }
   applyLocale(locale);
   return locale;

@@ -44,11 +44,11 @@ describe("translation review checks", () => {
   });
 });
 
-describe("the seven locales (acceptance: 0 missing variables)", () => {
+describe("the eight locales (acceptance: 0 missing variables)", () => {
   it("every placeholder of the English is in every translation, and no other", async () => {
     const result = (await review(ROOT)) as { findings: Finding[]; stats: Record<string, unknown> };
     const errors = result.findings.filter((f) => f.level === "error").map((f) => `${f.locale} ${f.key} ${f.kind} ${f.detail}`);
-    expect(LOCALES).toHaveLength(7);
+    expect(LOCALES).toHaveLength(8);
     expect(errors).toEqual([]);
     expect(formatReport(result)).toContain("Missing variables: **0** · extra variables: **0**");
   });

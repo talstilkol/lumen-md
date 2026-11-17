@@ -28,7 +28,7 @@ import { DayTimeline } from "./DayTimeline";
 const MARKED = new Set<Holiday["kind"]>(["major", "modern", "fast", "minor"]);
 
 /** Monday = 1 … Sunday = 7, as Intl.Locale weekInfo has it. */
-const FIRST_DAY_FALLBACK: Record<string, number> = { he: 7, ar: 6, en: 7, ja: 7, ru: 1, fr: 1, de: 1, "zh-CN": 1, zh: 1 };
+const FIRST_DAY_FALLBACK: Record<string, number> = { he: 7, ar: 6, en: 7, ja: 7, ru: 1, fr: 1, de: 1, "zh-CN": 1, zh: 1, fa: 6 };
 
 export function firstDayOfWeek(locale: string): number {
   try {

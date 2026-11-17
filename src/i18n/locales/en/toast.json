@@ -11,6 +11,7 @@
   "toast.chartInserted": "✅ Chart inserted",
   "toast.checkingGrammar": "📝 Checking grammar…",
   "toast.completed": "✅ {name} completed",
+  "toast.digits": "Numbers now look like this: {sample}",
   "toast.dismiss": "Dismiss",
   "toast.documentRefactoredSuccessfully": "Document refactored successfully!",
   "toast.documentTooShortForOutline": "Document too short for outline generation",

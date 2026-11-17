@@ -14,8 +14,8 @@ import {
 } from "../i18n";
 
 describe("SUPPORTED_LOCALES", () => {
-  it("contains exactly 8 locales", () => {
-    expect(SUPPORTED_LOCALES.length).toBe(8);
+  it("contains exactly 9 locales (W13.I7: Persian)", () => {
+    expect(SUPPORTED_LOCALES.length).toBe(9);
   });
 
   it("includes English as LTR", () => {
@@ -42,10 +42,10 @@ describe("SUPPORTED_LOCALES", () => {
     }
   });
 
-  it("has exactly 2 RTL locales (he and ar)", () => {
+  it("has exactly 3 RTL locales (he, ar and fa)", () => {
     const rtl = SUPPORTED_LOCALES.filter((l) => l.dir === "rtl");
-    expect(rtl.length).toBe(2);
-    expect(rtl.map((l) => l.code).sort()).toEqual(["ar", "he"]);
+    expect(rtl.length).toBe(3);
+    expect(rtl.map((l) => l.code).sort()).toEqual(["ar", "fa", "he"]);
   });
 });
 

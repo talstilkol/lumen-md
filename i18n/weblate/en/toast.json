@@ -36,6 +36,7 @@
   "toast.dictate.stoppedLocalOnly": "Dictation stopped: the AI policy is now local-only, and the browser's speech service sends audio out",
   "toast.dictate.webSpeechActive": "Dictating through the browser's speech service — the audio is sent to its provider",
   "toast.digest.readFailed": "Digest not saved: {count} changed notes couldn't be read. Try again.",
+  "toast.digits": "Numbers now look like this: {sample}",
   "toast.dismiss": "Dismiss",
   "toast.documentDecrypted": "🔓 Document decrypted",
   "toast.documentEncrypted": "🔒 Document encrypted",

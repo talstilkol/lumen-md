@@ -34,6 +34,8 @@ export const LOCALE_REVIEW: Readonly<Record<Locale, ReviewStatus>> = {
   de: "beta",
   ja: "beta",
   "zh-CN": "beta",
+  // W13.I7: the activation strings drafted, the rest in English until translated.
+  fa: "beta",
 };
 
 export const isBetaLocale = (code: string): boolean => LOCALE_REVIEW[code as Locale] === "beta";

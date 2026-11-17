@@ -13,6 +13,7 @@ import { relativeTime } from "../../lib/relativeTime";
 import { openTemplateDoc } from "../openDoc";
 import type { CommandContext } from "./context";
 import { explainError } from "../../lib/userError";
+import { localizedTemplate } from "../../welcomeDoc";
 
 /** Recently opened files (the last 8): reopen one, or drop it from the list. */
 export function buildRecentCommands({ recents, setRecents, handleReopenRecent }: CommandContext): Command[] {
@@ -175,7 +176,8 @@ export function buildTemplateCommands({ installedTemplates }: CommandContext): C
       action: () =>
         void import("../../editor/templates")
           .then(({ TEMPLATES }) => {
-            const full = TEMPLATES.find((x) => x.id === tpl.id);
+            // W13.I5: the language's own version when it has one (Arabic), else the English.
+            const full = localizedTemplate(tpl.id) ?? TEMPLATES.find((x) => x.id === tpl.id);
             if (full) openTemplateDoc(full.name, full.content);
           })
           // A chunk that fails to load (offline after a deploy, a stale cache) says so instead of doing nothing (R8-L6).

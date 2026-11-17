@@ -2878,6 +2878,21 @@
       "vars": []
     },
     {
+      "key": "cmd.view.digits.hint",
+      "en": "Numbers and dates in the interface; your notes are not changed",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.digits.latin",
+      "en": "Digits: use Latin digits (0123)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.digits.native",
+      "en": "Digits: use the language's own (٠١٢٣ / ۰۱۲۳)",
+      "vars": []
+    },
+    {
       "key": "cmd.view.findReplace",
       "en": "Find & Replace",
       "vars": []

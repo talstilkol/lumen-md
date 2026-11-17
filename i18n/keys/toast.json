@@ -226,6 +226,13 @@
       ]
     },
     {
+      "key": "toast.digits",
+      "en": "Numbers now look like this: {sample}",
+      "vars": [
+        "sample"
+      ]
+    },
+    {
       "key": "toast.dismiss",
       "en": "Dismiss",
       "vars": []

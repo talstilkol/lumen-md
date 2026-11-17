@@ -23,6 +23,6 @@
     "enable_review": true,
     "addons": ["weblate.cleanup.generic", "weblate.cleanup.blank"]
   },
-  "languages": ["ar", "ru", "fr", "de", "ja", "zh-CN"],
+  "languages": ["ar", "ru", "fr", "de", "ja", "zh-CN", "fa"],
   "first": "ar"
 }

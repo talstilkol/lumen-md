@@ -135,5 +135,14 @@
   "backlinks.title": {
     "ar": "1mppi0b",
     "fr": "1mppi0b"
+  },
+  "vault.folder.reconnect": {
+    "fa": "12uxzei"
+  },
+  "vault.folder.reconnectBody": {
+    "fa": "yzx02w"
+  },
+  "vault.folder.restoring": {
+    "fa": "1vhydj6"
   }
 }

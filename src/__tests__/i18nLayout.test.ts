@@ -20,7 +20,7 @@ import {
 
 describe("i18n layout", () => {
   it("has a folder per language and no old single-file bundles", () => {
-    expect(listLocales()).toEqual(["ar", "de", "en", "fr", "he", "ja", "ru", "zh-CN"]);
+    expect(listLocales()).toEqual(["ar", "de", "en", "fa", "fr", "he", "ja", "ru", "zh-CN"]);
     expect(readdirSync(LOCALES_DIR).filter((n) => n.endsWith(".json"))).toEqual([]);
     expect(existsSync(join(ROOT, "i18n", "keys.json"))).toBe(false);
     expect(readFileSync(join(ROOT, "src", "i18n", "index.ts"), "utf8")).not.toMatch(/const en:\s*Strings\s*=\s*\{/);

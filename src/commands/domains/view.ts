@@ -3,7 +3,8 @@ import { localeOptionLabel } from "../../i18n/localeLabel";
 import { cmdIcons } from "../../ui/cmdIcons";
 import type { Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
-import { t, SUPPORTED_LOCALES } from "../../i18n";
+import { formatNumber, getLocale, t, SUPPORTED_LOCALES } from "../../i18n";
+import { NATIVE_DIGITS, numerals, setNumerals } from "../../i18n/numerals";
 import type { CommandContext } from "./context";
 import { EXCALIDRAW_CANVAS_ENABLED } from "../../canvas/engine";
 import { log } from "../../lib/logger";
@@ -381,6 +382,25 @@ export function buildLanguageCommands({ rtl, toggleRtl, setLocale }: CommandCont
         showAiToast(t(next === "hebrew" ? "toast.hebrewDates.on" : "toast.hebrewDates.off", { today: formatDate(Date.now(), { dateStyle: "long" }) }), "info");
       },
     },
+    // W13.I5 / W13.I7: an Arabic or Persian UI chooses its digits: Latin (0123) or its own (٠١٢٣ / ۰۱۲۳).
+    ...(NATIVE_DIGITS[getLocale()]
+      ? [
+          {
+            id: "view.digits",
+            label: numerals(getLocale()) === "native" ? t("cmd.view.digits.latin") : t("cmd.view.digits.native"),
+            hint: t("cmd.view.digits.hint"),
+            icon: cmdIcons.PanelRightOpen,
+            group: t("group.view"),
+            action: () => {
+              const locale = getLocale();
+              setNumerals(locale, numerals(locale) === "native" ? "latn" : "native");
+              // Re-render in the same language so every number on screen is written again.
+              setLocale(locale);
+              showAiToast(t("toast.digits", { sample: formatNumber(1234567.5) }), "info");
+            },
+          },
+        ]
+      : []),
     ...SUPPORTED_LOCALES.map((l) => ({
       id: `lang.${l.code}`,
       // Plan W4.18 / launch P0 #16: a language no native speaker has reviewed says "Beta (machine translation, awaiting native review)".

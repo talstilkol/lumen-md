@@ -28,7 +28,7 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const LOCALES = ["ar", "de", "fr", "he", "ja", "ru", "zh-CN"];
+export const LOCALES = ["ar", "de", "fa", "fr", "he", "ja", "ru", "zh-CN"];
 const CJK = new Set(["ja", "zh-CN"]);
 
 /** `{name}` placeholders (the `{{name}}` form counts as `name` too). */

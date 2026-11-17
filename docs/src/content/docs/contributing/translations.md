@@ -1,10 +1,10 @@
 ---
 title: Languages in beta, and how to help
-description: English and Hebrew are Lumen's full languages; the other six were translated by machine and are marked Beta (machine translation, awaiting native review). How to report a translation issue from inside the app.
+description: English and Hebrew are Lumen's full languages; the other seven were translated by machine and are marked Beta (machine translation, awaiting native review). How to report a translation issue from inside the app.
 ---
 
 Lumen ships two **full** languages: **English**, the source, and **Hebrew**, written by
-native speakers. The interface is also available in six more languages, but they were
+native speakers. The interface is also available in seven more languages, but they were
 translated by machine (plan 9.1) and no native speaker has reviewed them yet. Lumen marks
 each of them **Beta (machine translation, awaiting native review)**, and you should expect
 wrong or awkward wording in them:
@@ -24,6 +24,9 @@ listed (plan W13.I6). Today there are none.
 | Deutsch (German) | beta |
 | 日本語 (Japanese) | beta |
 | 简体中文 (Simplified Chinese) | beta |
+| فارسی (Persian) | beta |
+
+Persian is new: the first-run screens, the menus, the toolbar and the tour are drafted in Persian, with Persian digits and solar Hijri dates; the rest of the interface shows English until it is translated.
 
 Where you pick a language, a beta language says so, in the language you are using:
 

@@ -22,6 +22,8 @@ const LOCALES = [
   { code: "ja", label: "日本語", dir: "ltr" },
   { code: "ru", label: "Русский", dir: "ltr" },
   { code: "zh-CN", label: "简体中文", dir: "ltr" },
+  // W13.I7: Persian, beta, right to left.
+  { code: "fa", label: "فارسی", dir: "rtl" },
 ] as const;
 
 test.beforeEach(async ({ page }) => {
@@ -104,6 +106,14 @@ for (const locale of LOCALES) {
     // 5 toolbar menus should still render (text content varies per locale).
     const menus = await page.locator("header button").count();
     expect(menus).toBeGreaterThanOrEqual(5);
+    // W13.I5: in Arabic (and Persian) the menus are in the language, the Naskh face is declared
+    // (own origin, Arabic script only) and numbers use the chosen digits.
+    if (locale.code === "ar" || locale.code === "fa") {
+      await expect(page.locator("header")).toContainText(locale.code === "ar" ? "ملف" : "فایل");
+      const face = await page.evaluate(() => document.getElementById("lumen-rtl-extras")?.textContent ?? "");
+      expect(face).toContain("Lumen Noto Naskh Arabic");
+      expect(face).not.toMatch(/https?:\/\//);
+    }
 
     // No JS exceptions and no unexpected console.errors from the locale flip.
     expect(pageErrors).toEqual([]);
