@@ -66,5 +66,18 @@
   "pluginTrust.policy.notAllowed": "{id} {version} is not on the allow list of the plugin policy “{name}”.",
   "pluginTrust.policy.registry": "The plugin policy “{name}” allows plugins only from its own registries.",
   "pluginTrust.policy.invalid": "Plugins cannot be installed until whoever manages this vault fixes its plugin policy:",
-  "pluginTrust.verifiedAuthor": "Verified author: @{github} (signed with Sigstore)"
+  "pluginTrust.verifiedAuthor": "Verified author: @{github} (signed with Sigstore)",
+  "pluginTrust.vault.title": "Plugins found in this vault",
+  "pluginTrust.vault.about": "Plugin folders in .lumen/plugins or .obsidian/plugins (from a sync, an import or a copy). Nothing here runs: a plugin runs only after you review its permissions and install it, and again after any change to its files.",
+  "pluginTrust.vault.none": "No plugin folders in this vault.",
+  "pluginTrust.vault.loadFailed": "Could not read the vault's plugin folders.",
+  "pluginTrust.vault.notApproved": "not installed: it does not run",
+  "pluginTrust.vault.changed": "changed since you installed it: it does not run until you review it again",
+  "pluginTrust.vault.approved": "installed for exactly these files",
+  "pluginTrust.vault.asks": "Asks for: {list}",
+  "pluginTrust.vault.invalid": "Not a Lumen plugin (its manifest cannot be read): it cannot be installed.",
+  "pluginTrust.vault.review": "Review and install {name}",
+  "pluginTrust.vault.revoke": "Withdraw approval",
+  "pluginTrust.vault.revoked": "{name} will not run until you install it again.",
+  "pluginTrust.vault.failed": "{name} was not installed: {error}"
 }
