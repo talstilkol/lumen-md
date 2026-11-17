@@ -62,16 +62,24 @@ describe("the iOS project (W10.C7)", () => {
     const inTargets = new Set([...sourcesOf("App"), ...sourcesOf("LumenWidgets"), ...sourcesOf("LumenShare")]);
     const all = swiftFiles(join(ROOT, "ios/App"));
     expect(all.filter((f) => !inTargets.has(f))).toEqual([]);
+    // W13.M2–M5 (#1230): the document camera, the Live Activity, the Spotlight entity, the iPad scenes and key commands.
     expect(sourcesOf("App").sort()).toEqual([
       "ios/App/App/AppDelegate.swift",
+      "ios/App/App/DocScanner.swift",
+      "ios/App/App/KeyCommands.swift",
+      "ios/App/App/KeyCommandsData.swift",
       "ios/App/App/LanDiscovery.swift",
+      "ios/App/App/LiveCapture.swift",
       "ios/App/App/LumenIntents.swift",
       "ios/App/App/LumenNative.swift",
       "ios/App/App/NativeCapture.swift",
+      "ios/App/App/NoteEntity.swift",
+      "ios/App/App/SceneDelegate.swift",
       "ios/App/App/iCloudSync.swift",
+      "ios/App/Shared/CaptureActivity.swift",
       "ios/App/Shared/CaptureQueue.swift",
     ]);
-    expect(sourcesOf("LumenWidgets").sort()).toEqual(["ios/App/LumenWidgets/LumenControls.swift", "ios/App/LumenWidgets/LumenWidgets.swift"]);
+    expect(sourcesOf("LumenWidgets").sort()).toEqual(["ios/App/LumenWidgets/CaptureLiveActivity.swift", "ios/App/LumenWidgets/LumenControls.swift", "ios/App/LumenWidgets/LumenWidgets.swift", "ios/App/Shared/CaptureActivity.swift"]);
     expect(sourcesOf("LumenShare").sort()).toEqual(["ios/App/LumenShare/ShareViewController.swift", "ios/App/Shared/CaptureQueue.swift"]);
     // The old, unbuilt ShareExtension (SLComposeServiceViewController) is gone.
     expect(() => statSync(join(ROOT, "ios/ShareExtension"))).toThrow();

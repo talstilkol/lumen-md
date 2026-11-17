@@ -56,7 +56,7 @@ export function SetGraphDialog({ title, rows, paths, onClose, onOpen, vault, loa
   }, [paths, loadGraph]);
 
   const all = useMemo(() => (rows ? baseToGraph(rows, { outside }) : queried), [rows, outside, queried]);
-  const kinds = useMemo(() => [...new Set(all?.nodes.map((n) => n.kind) ?? [])].sort((a, b) => (a === OUTSIDE_KIND ? 1 : b === OUTSIDE_KIND ? -1 : compareNames(a, b))), [all]);
+  const kinds = useMemo(() => [...new Set(all?.nodes.map((n) => n.kind) ?? [])].sort((a, b) => (a === OUTSIDE_KIND ? 1 : b === OUTSIDE_KIND ? -1 : compareNames(String(a), String(b)))), [all]);
   const graph = useMemo(() => {
     if (!all) return null;
     const nodes = all.nodes.filter((n) => !hidden.has(n.kind));
