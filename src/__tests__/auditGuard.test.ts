@@ -24,7 +24,9 @@ const promote = (id: string, evidence: Record<string, unknown> = EVIDENCE) => {
   t.evidence = { ...evidence };
   return plan;
 };
-const partialId = () => Object.entries(realLedger().audits.at(-1).verdicts).find(([, v]) => v === "PARTIAL")![0];
+/** A task whose deciding (latest) verdict is PARTIAL, and the audit that gave it (the last audit may hold only DONE rows, as r5 does). */
+const partial = () => [...latestVerdicts(realLedger())].find(([, v]) => v.verdict === "PARTIAL")!;
+const partialId = () => partial()[0];
 
 describe("W10.B12 audit guard", () => {
   it("the plan and its ledger as they are pass; the ledger is the r2 audit, 818 verdicts", () => {
@@ -39,7 +41,7 @@ describe("W10.B12 audit guard", () => {
 
   it("a ✅ on a task the audit called PARTIAL fails, even with evidence that claims DONE", () => {
     const id = partialId();
-    const name = realLedger().audits.at(-1).name;
+    const name = partial()[1].audit;
     const problems = auditGuard(promote(id), realLedger());
     expect(problems).toContain(`${id}: ✅ but the audit "${name}" called it PARTIAL — back to ⏳`);
     expect(problems).toContain(`${id}: its evidence says "DONE", the audit "${name}" says "PARTIAL"`);

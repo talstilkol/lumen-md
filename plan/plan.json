@@ -8123,7 +8123,7 @@
      "status": "⏳ #398 · ביקורת 14.11: חלקי — DIARIZATION_MODELS כולו null; ‏DER מבדיקה מזויפת · (על #353 + #383; זיהוי דוברים pyannote 3.1 ב-ONNX מאחורי seam — לא מוריד כלום עד הצמדה; שינוי שם דובר בכל הפתק)…",
      "verified": "built",
      "pr": 398,
-     "notes": "⏳ #398 (על #353 + #383; זיהוי דוברים pyannote 3.1 ב-ONNX מאחורי seam — לא מוריד כלום עד הצמדה; שינוי שם דובר בכל הפתק; diarize 17/17 (DER < 5% על פגישה סינתטית); ✅* — בעלים: הצמדת המודלים ו-5 פגישות זהב (DER ≤ 20%); לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "notes": "⏳ #398 (על #353 + #383; זיהוי דוברים pyannote 3.1 ב-ONNX מאחורי seam — לא מוריד כלום עד הצמדה; שינוי שם דובר בכל הפתק; diarize 17/17 (DER לא נמדד: הבדיקה על פגישה סינתטית מזויפת, W10.B7); בעלים: הצמדת המודלים ו-5 פגישות זהב (DER ≤ 20%); לא נבדק ב-Sandbox (חסום עד 1.12))",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -33245,10 +33245,33 @@
      "research": [
       "w13/research.md §E"
      ],
-     "status": "⏳ #1222 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing else in the cloud (Chromium multiCursor 15/15)",
+     "status": "✅ #1222",
      "verified": "browser",
      "pr": 1222,
-     "notes": "INT9 17.11 (g4 lane L7 #1222): multiCursor.test.ts 15/15 in Chromium (6 Hebrew incl. Alt+drag rectangle over Hebrew table both directions); 3 fail without rectangularSelection; node 12/12 + 3 skips with reason; dod green; keymap both-layouts 59/59"
+     "notes": "INT9 17.11 (g4 lane L7 #1222): multiCursor.test.ts 15/15 in Chromium (6 Hebrew incl. Alt+drag rectangle over Hebrew table both directions); 3 fail without rectangularSelection; node 12/12 + 3 skips with reason; dod green; keymap both-layouts 59/59 · F15 17.11: ✅ on audit r5 17.11 (review14/verdicts.tsv, 6c942c49c8); ledger row appended (plan/audit-verdicts.json); stays on plan/merged-while-frozen.json.",
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "audit r5 17.11 (review14/verdicts.tsv, 6c942c49c8)",
+      "verdict": "DONE",
+      "who": "cloud-code",
+      "missing": "Nothing material in the cloud (audit r5 DONE with proof)."
+     },
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 1222,
+      "sha": "6c942c49c8",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/multiCursor.test.ts",
+        "pass": 12,
+        "total": 12,
+        "ranOn": "verify/train-7 6c942c49c8 (offline shim v4, lane F15)"
+       }
+      ],
+      "audit": "audit r5 17.11 (review14/verdicts.tsv, 6c942c49c8)",
+      "at": "2026-11-17",
+      "browser": "Chromium with the app's compiled CSS, he + en, keyboard only, axe over the page (review14/e5-he.png, e5-en.png)"
+     }
     },
     {
      "id": "W13.H1",
@@ -33324,10 +33347,17 @@
       "w13/research.md §H"
      ],
      "files": "scripts/check-logical-css.mjs (חדש)",
-     "status": "⏳ #1232 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing else in the cloud (check-logical-css exit 0, baseline 24)",
+     "status": "⏳ #1232 · audit r5 DONE · cloud-complete; owed: logicalCss.test.ts's 5 cases that parse CSS, where postcss is installed (it is stubbed in every offline overlay here: 23/28; check-logical-css exit 0)",
      "verified": "node",
      "pr": 1232,
-     "notes": "INT9 17.11 (g4 lane L8 #1232): dod green: check-logical-css exit 0 (2055 files, baseline 24); logicalCss.test.ts 28/28; planted margin-left exits 1; fails without lib · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)"
+     "notes": "INT9 17.11 (g4 lane L8 #1232): dod green: check-logical-css exit 0 (2055 files, baseline 24); logicalCss.test.ts 28/28; planted margin-left exits 1; fails without lib · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11) · F15 17.11: audit r5 called it DONE (ledger row appended), but its dod is not all green here (postcss stubbed), so it stays ⏳ until the 5 postcss cases run (claimGuard: no ✅ with a red check).",
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "audit r5 17.11 (review14/verdicts.tsv, 6c942c49c8)",
+      "verdict": "DONE",
+      "who": "cloud-code",
+      "missing": "Nothing material in the cloud (audit r5 DONE with proof). logicalCss.test.ts: the 5 cases that parse CSS need postcss, which this offline overlay stubs (23/28 here; 28/28 where postcss is installed, as on the lane's run)"
+     }
     },
     {
      "id": "W13.H3",
@@ -33738,10 +33768,10 @@
      "research": [
       "w13/research.md §S"
      ],
-     "status": "⏳ #1225 · merged, held by frozen wave (12→13); cloud-complete; owed: a UI listing vault plugins with an install button; receipts + label (owner, sensitive)",
+     "status": "⏳ #1225 · partial: review 14 M3 fixes pending merge (F15)",
      "verified": "node",
      "pr": 1225,
-     "notes": "INT9 17.11 (g4 lane L3 #1225): sharedVaultIsolation.test.ts 8/8 (dod.mjs green); mutants: quarantine hook removed → 2 red, exclusion removed → 4 red; roleVaultUi 13/13, e2eeMutants 18/18 · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)"
+     "notes": "INT9 17.11 (g4 lane L3 #1225): sharedVaultIsolation.test.ts 8/8 (dod.mjs green); mutants: quarantine hook removed → 2 red, exclusion removed → 4 red; roleVaultUi 13/13, e2eeMutants 18/18 · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11) · F15 17.11: review 14 M3: Win32 trailing dots/spaces, plugin-policy and clip-templates, and the .lumen/ allow-list, F15 fix/f15-sec, pending merge. The status before: ⏳ #1225 · merged, held by frozen wave (12→13); cloud-complete; owed: a UI listing vault plugins with an install button; receipts + label (owner, sensitive)"
     },
     {
      "id": "W13.S3",
@@ -33774,10 +33804,17 @@
      "research": [
       "w13/research.md §S"
      ],
-     "status": "⏳ #1226 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing else in the cloud (ADR-005: wait, 4 triggers)",
+     "status": "⏳ #1226 · audit r5 DONE · cloud-complete; owed: a browser-level run (W10.G8): its dod reads files with node:fs and does not load in Chromium here",
      "verified": "node",
      "pr": 1226,
-     "notes": "INT9 17.11 (g4 lane L3 #1226): docs/adr/005-group-keys.md (decision: wait; 4 triggers); proto.mjs numbers; adrGroupKeys.test.ts 5/5; changed number → red; ADR missing → 4 red · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)"
+     "notes": "INT9 17.11 (g4 lane L3 #1226): docs/adr/005-group-keys.md (decision: wait; 4 triggers); proto.mjs numbers; adrGroupKeys.test.ts 5/5; changed number → red; ADR missing → 4 red · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11) · F15 17.11: audit r5 called it DONE (ledger row appended), but ✅ needs a browser-level check (W10.G8) that this dod cannot give here, so it stays ⏳.",
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "audit r5 17.11 (review14/verdicts.tsv, 6c942c49c8)",
+      "verdict": "DONE",
+      "who": "cloud-code",
+      "missing": "Nothing material in the cloud (audit r5 DONE with proof). docs/adr/005-group-keys.md: decision wait, with its four triggers"
+     }
     },
     {
      "id": "W13.S4",
@@ -33958,10 +33995,10 @@
      "research": [
       "w13/research.md §A"
      ],
-     "status": "⏳ #1245 · merged, held by frozen wave (12→13); cloud-complete; owed: wiring into a remote-server UI flow (system browser + loopback listener) when remote servers get an auth screen",
+     "status": "⏳ #1245 · partial: https endpoints + loopback listener in F15 (pending); command and UI owed",
      "verified": "node",
      "pr": 1245,
-     "notes": "INT9 17.11 (g4 lane L6 #1245): mcpOauth2026.test.ts 7/7 vs mock AS (wrong iss refused before token call, mix-up refused, no DCR when CIMD, issuer-bound DCR id, loopback redirect + application_type native, PKCE+resource); mutations: no-CIMD -4, no-iss -1; mcpClient 18/18 unchanged · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)"
+     "notes": "INT9 17.11 (g4 lane L6 #1245): mcpOauth2026.test.ts 7/7 vs mock AS (wrong iss refused before token call, mix-up refused, no DCR when CIMD, issuer-bound DCR id, loopback redirect + application_type native, PKCE+resource); mutations: no-CIMD -4, no-iss -1; mcpClient 18/18 unchanged · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11) · F15 17.11: review 14 Low 1: endpoints https-only and the Rust loopback listener in F15 fix/f15-sec, pending merge; its Tauri command (isolation allow-list, owner) and the sign-in UI (F14) are owed. The status before: ⏳ #1245 · merged, held by frozen wave (12→13); cloud-complete; owed: wiring into a remote-server UI flow (system browser + loopback listener) when remote servers get an auth screen"
     },
     {
      "id": "W13.A2",
@@ -34217,7 +34254,7 @@
      "status": "⏳ #1254 · merged, held by frozen wave (12→13); cloud-complete; owed: open the exported folder in real Obsidian",
      "verified": "node",
      "pr": 1254,
-     "notes": "INT9 17.11 (g4 lane L5 #1254): exitTest.test.ts 4/4 (fails on base): golden vault round trip 0 differences, re-export byte-identical, report lists .base/chart/CriticMarkup · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)"
+     "notes": "INT9 17.11 (g4 lane L5 #1254): exitTest.test.ts 4/4 (fails on base): golden vault round trip 0 differences, re-export byte-identical, report lists .base/chart/CriticMarkup · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11) · F15 17.11: review 14 H1: exit-package fallbacks now reported, F15 fix/f15-gates, pending merge."
     },
     {
      "id": "W13.P4",
@@ -34549,10 +34586,10 @@
      "research": [
       "w13/research.md §X"
      ],
-     "status": "⏳ #1242 · merged, held by frozen wave (12→13); cloud-complete; owed: cargo check of shell.rs on the Mac; a Settings row to forget allowed sources; receipts + label (owner)",
+     "status": "⏳ #1242 · partial: review 14 M5 fixes pending merge (F15)",
      "verified": "node",
      "pr": 1242,
-     "notes": "INT9 17.11 (g4 lane L2 #1242): uriConfirm.test 13/13 (base shell.ts → 2 fail); desktop new/capture/open-from-link refused write nothing; mobile capture?text; clip deep/#clip; allow list not exported/imported/synced; ledger; dialog screens link-*.png axe 0 · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)"
+     "notes": "INT9 17.11 (g4 lane L2 #1242): uriConfirm.test 13/13 (base shell.ts → 2 fail); desktop new/capture/open-from-link refused write nothing; mobile capture?text; clip deep/#clip; allow list not exported/imported/synced; ledger; dialog screens link-*.png axe 0 · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11) · F15 17.11: review 14 M5: 'always' dropped for deep-link clips and bidi controls stripped in the preview, F15 fix/f15-sec, pending merge. The status before: ⏳ #1242 · merged, held by frozen wave (12→13); cloud-complete; owed: cargo check of shell.rs on the Mac; a Settings row to forget allowed sources; receipts + label (owner)"
     },
     {
      "id": "W13.X6",
@@ -34662,10 +34699,10 @@
       "w13/research.md §V"
      ],
      "files": "scripts/perf/leak.mjs (חדש)",
-     "status": "⏳ #1238 · merged, held by frozen wave (12→13); cloud-complete; owed: the app-level --url run and 30-min typing on the Mac (nightly perf-leak)",
+     "status": "⏳ #1238 · partial: not reproducible in the cloud (yjs in no overlay)",
      "verified": "node",
      "pr": 1238,
-     "notes": "INT9 17.11 (g4 lane L8 #1238): dod green: leak.mjs --notes 500 exit 0 (index 2.9%, vault 0.3% 0 alive, yjs 2.5% 0 alive; --browser CodeMirror 6.7%, 0 detached, DOM 12→12); --plant-leak exits 1 (50/500 alive, 10,400 detached); leakGate.test.ts 5/5; /tmp/claude-0/-home-claude/db859785-2ec7-51e3-b6ba-0edfee54cc7b/scratchpad/g4w/L8shots/v2-leak.json · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)"
+     "notes": "INT9 17.11 (g4 lane L8 #1238): dod green: leak.mjs --notes 500 exit 0 (index 2.9%, vault 0.3% 0 alive, yjs 2.5% 0 alive; --browser CodeMirror 6.7%, 0 detached, DOM 12→12); --plant-leak exits 1 (50/500 alive, 10,400 detached); leakGate.test.ts 5/5; /tmp/claude-0/-home-claude/db859785-2ec7-51e3-b6ba-0edfee54cc7b/scratchpad/g4w/L8shots/v2-leak.json · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11) · F15 17.11: audit r5 not DONE: the leak run is not reproducible here (yjs is in no node_modules overlay). The status before: ⏳ #1238 · merged, held by frozen wave (12→13); cloud-complete; owed: the app-level --url run and 30-min typing on the Mac (nightly perf-leak)"
     },
     {
      "id": "W13.V3",
@@ -34771,10 +34808,10 @@
      "research": [
       "w13/research.md §V"
      ],
-     "status": "⏳ #1238 · merged, held by frozen wave (12→13); cloud-complete; owed: the first sealed receipts from the nightly machine",
+     "status": "⏳ #1238 · partial: the page has no numbers yet",
      "verified": "node",
      "pr": 1238,
-     "notes": "INT9 17.11 (g4 lane L8 #1238): dod green: perfPage.test.ts 6/6 (tampered/other-key/unsealed left out; both languages; Obsidian only same machine); docs/perf/index{,.he}.md generated · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)"
+     "notes": "INT9 17.11 (g4 lane L8 #1238): dod green: perfPage.test.ts 6/6 (tampered/other-key/unsealed left out; both languages; Obsidian only same machine); docs/perf/index{,.he}.md generated · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11) · F15 17.11: audit r5 not DONE: the perf page has no numbers yet (no sealed receipt). The status before: ⏳ #1238 · merged, held by frozen wave (12→13); cloud-complete; owed: the first sealed receipts from the nightly machine"
     },
     {
      "id": "W13.V6",
@@ -34807,10 +34844,39 @@
      "research": [
       "w13/research.md §V"
      ],
-     "status": "⏳ #1237 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing else in the cloud",
-     "verified": "node",
+     "status": "✅ #1237",
+     "verified": "browser",
      "pr": 1237,
-     "notes": "INT9 17.11 (g4 lane L8 #1237): dod green: hiddenFolderIndex.test.ts 12/12 (200k-file .git = same listing work; watcher/observer/Rust skip; status appears and goes); rustc --test 24/24 (new test fails without) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)"
+     "notes": "INT9 17.11 (g4 lane L8 #1237): dod green: hiddenFolderIndex.test.ts 12/12 (200k-file .git = same listing work; watcher/observer/Rust skip; status appears and goes); rustc --test 24/24 (new test fails without) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11) · F15 17.11: ✅ on audit r5 17.11 (review14/verdicts.tsv, 6c942c49c8); ledger row appended (plan/audit-verdicts.json); stays on plan/merged-while-frozen.json. hiddenFolderIndex.test.ts ran in headless Chromium 12/12 (vitest ב-Chromium 12/12, offline shim v4 browser runner).",
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "audit r5 17.11 (review14/verdicts.tsv, 6c942c49c8)",
+      "verdict": "DONE",
+      "who": "cloud-code",
+      "missing": "Nothing material in the cloud (audit r5 DONE with proof)."
+     },
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 1237,
+      "sha": "6c942c49c8",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/hiddenFolderIndex.test.ts",
+        "pass": 12,
+        "total": 12,
+        "ranOn": "verify/train-7 6c942c49c8 (offline shim v4, lane F15)"
+       },
+       {
+        "cmd": "npx vitest run src/__tests__/hiddenFolderIndex.test.ts",
+        "pass": 12,
+        "total": 12,
+        "ranOn": "verify/train-7 6c942c49c8 in headless Chromium (offline shim v4 browser runner, lane F15)"
+       }
+      ],
+      "audit": "audit r5 17.11 (review14/verdicts.tsv, 6c942c49c8)",
+      "at": "2026-11-17",
+      "browser": "Chromium, he + en (review14/v6-*.png)"
+     }
     },
     {
      "id": "W13.Y1",
@@ -35141,10 +35207,17 @@
      "research": [
       "w13/research.md §I"
      ],
-     "status": "⏳ #1250 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing else in the cloud",
+     "status": "⏳ #1250 · audit r5 DONE · cloud-complete; owed: a browser-level run (W10.G8): its dod reads files with node:fs and does not load in Chromium here",
      "verified": "node",
      "pr": 1250,
-     "notes": "INT9 17.11 (g4 lane L5 #1250): localeCollation.test.ts 13/13 (fails on base: 106 calls); TS-AST scan 0 locale-less calls in src; 283 importing test files: same failures as base · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)"
+     "notes": "INT9 17.11 (g4 lane L5 #1250): localeCollation.test.ts 13/13 (fails on base: 106 calls); TS-AST scan 0 locale-less calls in src; 283 importing test files: same failures as base · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11) · F15 17.11: audit r5 called it DONE (ledger row appended), but ✅ needs a browser-level check (W10.G8) that this dod cannot give here, so it stays ⏳.",
+     "auditVerdict": {
+      "at": "2026-11-17",
+      "by": "audit r5 17.11 (review14/verdicts.tsv, 6c942c49c8)",
+      "verdict": "DONE",
+      "who": "cloud-code",
+      "missing": "Nothing material in the cloud (audit r5 DONE with proof)."
+     }
     },
     {
      "id": "W13.I4",
@@ -35255,10 +35328,10 @@
      "research": [
       "w13/research.md §I"
      ],
-     "status": "⏳ #1213 · merged, held by frozen wave (12→13); cloud-complete; owed: a native human glance at the 14 changed Hebrew strings (reviewed by Claude)",
+     "status": "⏳ #1213 · partial: green only through a model's approval; native review owed",
      "verified": "node",
      "pr": 1213,
-     "notes": "INT9 17.11 (g4 lane L5 #1213): i18n:review exit 0 with new he-draft error kind; 123 Hebrew drafts reviewed (14 fixed) and approved; i18nReview 7/7 (2 new tests fail on base) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)"
+     "notes": "INT9 17.11 (g4 lane L5 #1213): i18n:review exit 0 with new he-draft error kind; 123 Hebrew drafts reviewed (14 fixed) and approved; i18nReview 7/7 (2 new tests fail on base) · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11) · F15 17.11: audit r5 not DONE: i18n:review went green because a model approved 324 Hebrew drafts; F15 fix/f15-i18n lists them in i18n/model-reviewed.json and i18n:review reports them (M2), pending merge. The status before: ⏳ #1213 · merged, held by frozen wave (12→13); cloud-complete; owed: a native human glance at the 14 changed Hebrew strings (reviewed by Claude)"
     },
     {
      "id": "W13.I7",
@@ -35438,10 +35511,10 @@
       "w13/research.md §D"
      ],
      "files": "scripts/docs-doctest.mjs (חדש)",
-     "status": "⏳ #1247 · merged, held by frozen wave (12→13); cloud-complete; owed: 307 unmarked command blocks remain warnings",
+     "status": "⏳ #1247 · partial: the dod is vacuous, 309 command blocks unmarked",
      "verified": "node",
      "pr": 1247,
-     "notes": "INT9 17.11 (g4 lane L7 #1247): node scripts/docs-doctest.mjs exit 0, 4/4 run blocks; summary inside docs:audit; fails on empty · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)"
+     "notes": "INT9 17.11 (g4 lane L7 #1247): node scripts/docs-doctest.mjs exit 0, 4/4 run blocks; summary inside docs:audit; fails on empty · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11) · F15 17.11: audit r5 not DONE: a vacuous dod (309 command blocks are unmarked and only warn). The status before: ⏳ #1247 · merged, held by frozen wave (12→13); cloud-complete; owed: 307 unmarked command blocks remain warnings"
     },
     {
      "id": "W13.D5",
@@ -35508,10 +35581,10 @@
      "research": [
       "w13/research.md §D"
      ],
-     "status": "⏳ #1247 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing open with the label yet (the page says so)",
+     "status": "⏳ #1247 · partial: claimed every measured agent passes, none measured",
      "verified": "node",
      "pr": 1247,
-     "notes": "INT9 17.11 (g4 lane L7 #1247): knownIssuesPage.test.ts 5/5 (offline from cache, label filter, workaround parsing he/en, failures.md); dod green · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11)"
+     "notes": "INT9 17.11 (g4 lane L7 #1247): knownIssuesPage.test.ts 5/5 (offline from cache, label filter, workaround parsing he/en, failures.md); dod green · level node: its vitest files ran green in plain-Node through the offline shim v4 (INT9 17.11) · F15 17.11: audit r5 not DONE: the page said every measured agent passes while nothing is measured; fixed in F15 fix/f15-lows (Low 5), pending merge. The status before: ⏳ #1247 · merged, held by frozen wave (12→13); cloud-complete; owed: nothing open with the label yet (the page says so)"
     },
     {
      "id": "W13.T1",
@@ -37857,16 +37930,31 @@
      ],
      "auditVerdict": {
       "at": "2026-11-17",
-      "by": "ביקורת r4 17.11 (audit4/A1-A3-verdicts.tsv, 53dd679c5e)",
-      "verdict": "PARTIAL",
-      "score": 78,
+      "by": "audit r5 17.11 (review14/verdicts.tsv, 6c942c49c8)",
+      "verdict": "DONE",
       "who": "cloud-code",
-      "missing": "Owed (F13b): 3D and SVG labels through prepareLabel; signed and phone numbers in isolateRuns."
+      "missing": "Nothing material in the cloud (audit r5 DONE with proof)."
      },
-     "status": "⏳ #1165 · audit r4 PARTIAL 78 · cloud-complete (F13b #1217: 3D and SVG labels through prepareLabel, signed and phone numbers in isolateRuns); owed: a re-audit of the fixes before ✅",
+     "status": "✅ #1165",
      "verified": "browser",
      "pr": 1165,
-     "notes": "INT9 17.11: F13b #1217: graph3d 7→8, graphExportImage 10→15, graphBidiLabels Chromium 77→89 (12 red without the fix), visual 6/6 (was 0/6)"
+     "notes": "INT9 17.11: F13b #1217: graph3d 7→8, graphExportImage 10→15, graphBidiLabels Chromium 77→89 (12 red without the fix), visual 6/6 (was 0/6) · F15 17.11: ✅ on audit r5 17.11 (review14/verdicts.tsv, 6c942c49c8); ledger row appended (plan/audit-verdicts.json); stays on plan/merged-while-frozen.json.",
+     "evidence": {
+      "verdict": "DONE",
+      "pr": 1165,
+      "sha": "6c942c49c8",
+      "checks": [
+       {
+        "cmd": "npx vitest run src/__tests__/graphBidiLabels.test.ts",
+        "pass": 52,
+        "total": 52,
+        "ranOn": "verify/train-7 6c942c49c8 (offline shim v4, lane F15)"
+       }
+      ],
+      "audit": "audit r5 17.11 (review14/verdicts.tsv, 6c942c49c8)",
+      "at": "2026-11-17",
+      "browser": "Chromium with the app's compiled CSS, he + en, canvas and DOM labels compared (review14/g2*.png)"
+     }
     },
     {
      "id": "W13.G3",
