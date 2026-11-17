@@ -260,6 +260,7 @@ export default defineConfig({
             { label: "Developing a plugin", slug: "plugins/develop", translations: { he: "פיתוח תוסף" } },
             { label: "Sandbox and permissions", slug: "plugins/sandbox" },
             { label: "Plugin API", slug: "plugins/api" },
+            { label: "API reference (apiVersion 1)", slug: "plugins/api-v1", translations: { he: "עיון ב-API (גרסה 1)" } },
             { label: "Permissions and safety scan", slug: "plugins/permissions" },
             { label: "Plugin gallery", slug: "plugins/gallery" },
             { label: "Plugin registry and the built-in ten", slug: "plugins/registry", translations: { he: "רישום התוספים ועשרת התוספים" } },
@@ -368,6 +369,7 @@ export default defineConfig({
           translations: { he: "הפרויקט" },
           items: [
             { label: "Public roadmap", slug: "project/roadmap", translations: { he: "מפת דרכים ציבורית" } },
+            { label: "Known issues", slug: "project/known-issues", translations: { he: "בעיות ידועות" } },
             { label: "Usability tests with Hebrew speakers", slug: "project/usability", translations: { he: "בדיקות שימושיות עם דוברי עברית" } },
             { label: "Performance gate", slug: "self-hosting/perf-gate", translations: { he: "שער הביצועים" } },
           ],

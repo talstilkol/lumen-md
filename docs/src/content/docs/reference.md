@@ -6,7 +6,7 @@ type: reference
 
 The facts: every key, setting, format, command and API, to look up.
 
-58 pages.
+60 pages.
 
 ## AI
 
@@ -57,6 +57,7 @@ The facts: every key, setting, format, command and API, to look up.
 
 ## Plugins
 
+- [Plugin API reference — apiVersion 1](/plugins/api-v1/) — Every method of the lumen object in apiVersion 1, generated from the types, with its capability and a tested example.
 - [Plugin API](/plugins/api/) — The lumen object a sandboxed plugin gets — every method, the capability it needs, its limits, and the UI elements.
 - [Permissions and safety scan](/plugins/permissions/) — Before a sandboxed plugin installs, Lumen shows every permission it asks for in plain language; every version in the registry is scanned, and a version that fails is not shown.
 - [Plugin SDK](/plugins/sdk/) — Build your own Lumen plugin in 60 seconds with create-lumen-plugin.
@@ -64,6 +65,7 @@ The facts: every key, setting, format, command and API, to look up.
 
 ## Project
 
+- [Known issues](/project/known-issues/) — What does not work yet, and how to get around it — built from the issues labelled known-issue and the AI evaluation's failures.
 - [Checking Lumen against Obsidian](/project/obsidian-check/) — The owner's checklist for opening a vault Lumen saved in the real Obsidian (1.15 or later) and comparing every Bases view, row by row.
 
 ## Security and privacy

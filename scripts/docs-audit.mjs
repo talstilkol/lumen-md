@@ -151,6 +151,14 @@ function main(argv) {
       console.error(String(e.stdout ?? "") + String(e.stderr ?? ""));
     }
   }
+  // W13.D3: the plugin API reference is generated from the types; an undocumented method fails here too.
+  let apiFailed = 0;
+  try {
+    process.stdout.write(execFileSync("node", [join(ROOT, "scripts/plugin-api-docs.mjs"), "--check"], { cwd: ROOT, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }));
+  } catch (e) {
+    apiFailed = 1;
+    console.error(String(e.stdout ?? "") + String(e.stderr ?? ""));
+  }
   let prs;
   if (opt("--prs")) prs = readFileSync(opt("--prs"), "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l));
   else {
@@ -190,7 +198,7 @@ function main(argv) {
     console.error(found.map(formatFinding).join("\n"));
     console.error(`\n✗ docs-audit: ${found.length} finished task(s) without a docs page`);
   } else process.stdout.write("✓ docs-audit: every finished task that changed what a user sees has a docs page\n");
-  return found.length || pageProblems || doctestFailed ? 1 : 0;
+  return found.length || pageProblems || doctestFailed || apiFailed ? 1 : 0;
 }
 
 if (import.meta.url.startsWith("file:") && process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) process.exitCode = main(process.argv.slice(2));
