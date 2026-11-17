@@ -16,6 +16,7 @@ import { HelpButton } from "../../ui/HelpButton";
 import { explainError } from "../../lib/userError";
 import { Modal } from "../../ui/Modal";
 import { oneNoteConfig } from "./onenoteGraph";
+import { loadDeployedClientId, oneNoteClientId, setUserClientId } from "./onenoteClientId";
 import { prepareOneNoteGraphImport, startOneNoteSignIn, takeOneNoteHandoff } from "./onenoteSignIn";
 import { markActivation } from "../../metrics/count";
 import { runSampleSearch, sampleSearchQuery } from "../../onboarding/importFirst";
@@ -62,8 +63,29 @@ export function ImportWizard({ open, onClose, initialSource, firstRun = false }:
   const [savedReport, setSavedReport] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const folderRef = useRef<HTMLInputElement | null>(null);
-  // Plan W10.E49: offered only when the deployment has a Microsoft app registration.
-  const oneNote = oneNoteConfig();
+  // Plan W10.E49 / W4.19: offered once there is a Microsoft app client id — the user's own, or the
+  // deployment's runtime config (/lumen-runtime.json), read on open; never a build variable.
+  const [clientId, setClientId] = useState(() => oneNoteClientId());
+  const [idDraft, setIdDraft] = useState("");
+  useEffect(() => {
+    if (!open || clientId) return;
+    let live = true;
+    void loadDeployedClientId().then(() => {
+      if (live) setClientId(oneNoteClientId());
+    });
+    return () => {
+      live = false;
+    };
+  }, [open, clientId]);
+  const oneNote = clientId ? oneNoteConfig() : null;
+  const saveClientId = () => {
+    if (!setUserClientId(idDraft)) {
+      setError(t("importWizard.onenote.clientIdInvalid"));
+      return;
+    }
+    setError(null);
+    setClientId(oneNoteClientId());
+  };
 
   const prepare = useCallback(async (picked: Map<string, Uint8Array>, name: string, as: ImportSourceId) => {
     setError(null);
@@ -90,7 +112,7 @@ export function ImportWizard({ open, onClose, initialSource, firstRun = false }:
     setSource("onenote");
     const cfg = oneNoteConfig();
     if ("error" in handoff || !cfg) {
-      setError(t("importWizard.onenote.failed", { error: "error" in handoff ? handoff.error : "VITE_ONENOTE_CLIENT_ID" }));
+      setError(t("importWizard.onenote.failed", { error: "error" in handoff ? handoff.error : t("importWizard.onenote.noClientId") }));
       return;
     }
     setError(null);
@@ -231,6 +253,26 @@ export function ImportWizard({ open, onClose, initialSource, firstRun = false }:
                   {t("importWizard.onenote.signIn")}
                 </button>
                 <span style={muted}>{t("importWizard.onenote.signInNote")}</span>
+              </div>
+            )}
+            {source === "onenote" && !oneNote && (
+              <div data-testid="import-onenote-clientid" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <label style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  {t("importWizard.onenote.clientIdLabel")}
+                  <input
+                    data-testid="import-onenote-clientid-input"
+                    dir="ltr"
+                    spellCheck={false}
+                    autoComplete="off"
+                    value={idDraft}
+                    onChange={(e) => setIdDraft(e.currentTarget.value)}
+                    style={{ minWidth: "22em", fontFamily: "var(--font-mono, monospace)" }}
+                  />
+                </label>
+                <button type="button" style={btn} data-testid="import-onenote-clientid-save" onClick={saveClientId}>
+                  {t("importWizard.onenote.clientIdSave")}
+                </button>
+                <span style={muted}>{t("importWizard.onenote.clientIdHint")}</span>
               </div>
             )}
           </>

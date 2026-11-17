@@ -11,15 +11,16 @@ import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from 
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { installFakeOpfs } from "./helpers/fakeOpfs";
 
-const env = vi.hoisted(() => ({ clientId: undefined as string | undefined }));
-vi.mock("../lib/publicEnv", () => ({ publicEnv: (name: string) => (name === "VITE_ONENOTE_CLIENT_ID" ? env.clientId : undefined) }));
 
 import { codeChallenge, type OneNoteTokens } from "../storage/import/onenoteGraph";
 import { PENDING_KEY, navigation, finishOneNoteSignIn, giveOneNoteError, giveOneNoteTokens, prepareOneNoteGraphImport, startOneNoteSignIn, takeOneNoteHandoff, tokenSource } from "../storage/import/onenoteSignIn";
 import { oneNoteReturn } from "../storage/import/onenoteReturn";
 import { ImportWizard } from "../storage/import/ImportWizard";
+import { __resetOneNoteClientId, CLIENT_ID_KEY } from "../storage/import/onenoteClientId";
 
 const CLIENT = "00000000-1111-2222-3333-444444444444";
+/** W4.19: the client id is a runtime setting (here: the user's own app), not a build variable. */
+const useClientId = () => localStorage.setItem(CLIENT_ID_KEY, CLIENT);
 const cfg = { clientId: CLIENT, redirectUri: "https://lumen-md.vercel.app/oauth/onenote", tenant: "common" };
 
 function memStorage() {
@@ -65,7 +66,9 @@ beforeEach(() => {
   installFakeOpfs();
   localStorage.clear();
   sessionStorage.clear();
-  env.clientId = undefined;
+  __resetOneNoteClientId();
+  // No /lumen-runtime.json on this "deployment" unless a test serves one.
+  vi.stubGlobal("fetch", vi.fn(async () => new Response("", { status: 404 })));
   takeOneNoteHandoff();
 });
 afterEach(() => {
@@ -158,7 +161,7 @@ describe("into the wizard's review step", () => {
   });
 
   it("the redirect page takes the code out of the address bar and hands the tokens over in memory", async () => {
-    env.clientId = CLIENT;
+    useClientId();
     let went = "";
     await startOneNoteSignIn({ ...cfg, redirectUri: `${location.origin}/oauth/onenote` }, { assign: (u) => (went = u) });
     const state = new URL(went).searchParams.get("state")!;
@@ -177,7 +180,7 @@ describe("into the wizard's review step", () => {
   it("without a client id on the deployment the redirect hands over the reason instead", async () => {
     history.replaceState(null, "", "/oauth/onenote?code=C&state=S");
     expect(await oneNoteReturn(Promise.resolve(), { openWizard: () => undefined })).toBe("error");
-    expect(takeOneNoteHandoff()).toEqual({ error: expect.stringContaining("VITE_ONENOTE_CLIENT_ID") });
+    expect(takeOneNoteHandoff()).toEqual({ error: expect.stringContaining("no Microsoft app client id") });
   });
 
   it("another path is left alone", async () => {
@@ -188,12 +191,12 @@ describe("into the wizard's review step", () => {
 });
 
 describe("the wizard", () => {
-  it("offers the sign-in for OneNote only when the deployment has a client id", async () => {
+  it("offers the sign-in for OneNote only when there is a client id", async () => {
     render(<ImportWizard open onClose={() => undefined} />);
     fireEvent.click(screen.getByTestId("import-source-onenote"));
     expect(screen.queryByTestId("import-onenote-signin")).toBeNull();
     cleanup();
-    env.clientId = CLIENT;
+    useClientId();
     render(<ImportWizard open onClose={() => undefined} />);
     expect(screen.queryByTestId("import-onenote-signin")).toBeNull();
     fireEvent.click(screen.getByTestId("import-source-onenote"));
@@ -209,7 +212,7 @@ describe("the wizard", () => {
   });
 
   it("opened after the redirect, it reads OneNote and shows the review step", async () => {
-    env.clientId = CLIENT;
+    useClientId();
     vi.stubGlobal("fetch", graph([]));
     giveOneNoteTokens({ accessToken: "AT-1", refreshToken: null, expiresAt: Number.MAX_SAFE_INTEGER });
     render(<ImportWizard open onClose={() => undefined} />);
@@ -220,7 +223,7 @@ describe("the wizard", () => {
   });
 
   it("opened after a failed sign-in, it says why", () => {
-    env.clientId = CLIENT;
+    useClientId();
     giveOneNoteError("The user declined");
     render(<ImportWizard open onClose={() => undefined} />);
     expect(screen.getByTestId("import-error").textContent).toContain("The user declined");

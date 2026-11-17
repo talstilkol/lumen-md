@@ -9876,11 +9876,36 @@
       "vars": []
     },
     {
+      "key": "importWizard.onenote.clientIdHint",
+      "en": "To import straight from your OneNote account, register a free app in Microsoft Entra and paste its client ID here. It is kept in this browser only.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.onenote.clientIdInvalid",
+      "en": "That is not a client ID. It looks like 00000000-0000-0000-0000-000000000000.",
+      "vars": []
+    },
+    {
+      "key": "importWizard.onenote.clientIdLabel",
+      "en": "Microsoft app (client) ID",
+      "vars": []
+    },
+    {
+      "key": "importWizard.onenote.clientIdSave",
+      "en": "Use this app",
+      "vars": []
+    },
+    {
       "key": "importWizard.onenote.failed",
       "en": "The OneNote sign-in did not finish: {error}",
       "vars": [
         "error"
       ]
+    },
+    {
+      "key": "importWizard.onenote.noClientId",
+      "en": "no Microsoft app client ID is set",
+      "vars": []
     },
     {
       "key": "importWizard.onenote.pages",
