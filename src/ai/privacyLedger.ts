@@ -66,7 +66,7 @@ export class PrivacyBlockedError extends Error {
 }
 
 interface Rule {
-  test: (host: string, path: string) => boolean;
+  test: (host: string, path: string, query: URLSearchParams) => boolean;
   category: LedgerCategory;
   reason: string;
 }
@@ -97,7 +97,8 @@ const RULES: Rule[] = [
   // a local-only policy blocks it like the research service. W6.47: it also
   // writes — only the PDF highlights the user sends and confirms.
   { test: (h) => h === "api.zotero.org", category: "research", reason: "Zotero Web API (your library; writes only the PDF highlights you send)" },
-  // Plan W12.X3: the citation graph's optional reference lookup, off by default; only DOIs go out.
+  // D1 §6 / review 12 L4: cite-from-DOI (doiOpenAlex.ts) first; then W12.X3, the citation graph's optional reference lookup (select=referenced_works), off by default; only DOIs go out.
+  { test: (h, p, q) => h === "api.openalex.org" && p.startsWith("/works/doi:") && q.get("select") !== "referenced_works", category: "research", reason: "OpenAlex: cite from a DOI (the DOI you approved only, when you turn it on)" },
   { test: (h) => h === "api.openalex.org", category: "research", reason: "OpenAlex: the references of a DOI (citation graph, only when you turn it on)" },
   // W10.E38 (plan 6.13): a DOI the user looked up and approved, and nothing else.
   { test: (h) => h === "api.crossref.org", category: "research", reason: "CrossRef DOI lookup: the DOI you asked for only" },
@@ -250,7 +251,7 @@ export function classify(url: string): { host: string; category: LedgerCategory;
   // why: the error tracker named by the build's DSN, wherever it is hosted (Sentry, a self-hosted GlitchTip, even this origin)
   const tracker = monitoringEndpoint();
   if (tracker && u.href.startsWith(tracker)) return { host, category: "monitoring", reason: MONITORING_REASON };
-  for (const r of RULES) if (r.test(host, u.pathname)) return { host, category: r.category, reason: r.reason };
+  for (const r of RULES) if (r.test(host, u.pathname, u.searchParams)) return { host, category: r.category, reason: r.reason };
   let ollamaHost = "";
   try {
     ollamaHost = new URL(getBaseUrl()).host.toLowerCase();

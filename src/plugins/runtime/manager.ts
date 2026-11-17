@@ -293,7 +293,18 @@ export interface StartOptions {
   services?: HostServices;
 }
 
+/** Thrown when the installed copy of this version was disabled (its registry took it down): it is never started. */
+export class PluginDisabledError extends Error {
+  constructor(id: string, version: string, rules: string[]) {
+    super(`${id}@${version} was taken down by its registry (${rules.join(", ") || "delisted"}); it is disabled and is not started`);
+    this.name = "PluginDisabledError";
+  }
+}
+
 export async function startPlugin(opts: StartOptions): Promise<PluginInstance> {
+  // Review 12, L2: the install record's `disabled` flag (review 11, M5) is enforced here, the one way a plugin starts.
+  const record = (await (await import("../install")).installedPlugins())[opts.manifest.id];
+  if (record?.disabled && record.version === opts.manifest.version) throw new PluginDisabledError(record.id, record.version, record.disabled.rules);
   if (running.has(opts.manifest.id)) await stopPlugin(opts.manifest.id);
   const entry: Running = { instance: null as unknown as PluginInstance, commands: [], langs: new Set(), renders: new Map() };
   // Register before the load: the plugin's top-level code calls the services while it starts.
