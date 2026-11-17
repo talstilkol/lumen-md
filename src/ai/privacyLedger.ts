@@ -97,10 +97,8 @@ const RULES: Rule[] = [
   // a local-only policy blocks it like the research service. W6.47: it also
   // writes — only the PDF highlights the user sends and confirms.
   { test: (h) => h === "api.zotero.org", category: "research", reason: "Zotero Web API (your library; writes only the PDF highlights you send)" },
-  // D1 §6 (review 12, L4): "Cite from a DOI" through OpenAlex is its own entry, not the citation graph's:
-  // the work's own fields for one DOI the user approved (doiOpenAlex.ts); the graph asks only for referenced_works.
+  // D1 §6 / review 12 L4: cite-from-DOI (doiOpenAlex.ts) first; then W12.X3, the citation graph's optional reference lookup (select=referenced_works), off by default; only DOIs go out.
   { test: (h, p, q) => h === "api.openalex.org" && p.startsWith("/works/doi:") && q.get("select") !== "referenced_works", category: "research", reason: "OpenAlex: cite from a DOI (the DOI you approved only, when you turn it on)" },
-  // Plan W12.X3: the citation graph's optional reference lookup, off by default; only DOIs go out.
   { test: (h) => h === "api.openalex.org", category: "research", reason: "OpenAlex: the references of a DOI (citation graph, only when you turn it on)" },
   // W10.E38 (plan 6.13): a DOI the user looked up and approved, and nothing else.
   { test: (h) => h === "api.crossref.org", category: "research", reason: "CrossRef DOI lookup: the DOI you asked for only" },
