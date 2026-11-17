@@ -169,3 +169,18 @@ export function readHandoff(md) {
     where: w ? { path: w[1].replace(/\\\|/g, "|"), branch: w[2] ? w[2].replace(/\\\|/g, "|") : null } : null,
   };
 }
+
+/**
+ * Plan 0.13 step 2: `--refresh` regenerates the document at the end of a PR
+ * (the lane's reference-transaction hook runs it after each push origin
+ * confirmed) and keeps what only a person or agent can say: the current task
+ * and the next step, from the document it replaces, unless new ones are given.
+ * @param {string | null} previousMd  the HANDOFF.md being replaced, or null
+ * @param {{ task: string | null; next: string | null }} given  --task / --next
+ */
+export function refreshFields(previousMd, given) {
+  const prev = previousMd ? readHandoff(previousMd) : { task: null, next: null };
+  const explicit = given.task != null || given.next != null;
+  return explicit ? { task: given.task ?? null, next: given.next ?? null } : { task: prev.task, next: prev.next };
+}
+

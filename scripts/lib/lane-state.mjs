@@ -274,3 +274,16 @@ export function parseWatchRecord(text) {
 
 /** The entry of `record` for `file` as watchPlan's `running`, or null. */
 export const runningFor = (record, file) => (file && record[file] ? { pid: record[file].pid, file } : null);
+
+/**
+ * Plan 0.13 step 2: after a push origin confirmed, the handoff of the
+ * worktree that pushed is regenerated (scripts/handoff.mjs --refresh, local
+ * data only: a hook makes no GitHub calls). null when nothing was confirmed
+ * or the checkout has no handoff script.
+ * @param {number} confirmed  pushes origin confirmed in this transaction
+ * @param {boolean} hasScript  scripts/handoff.mjs exists in the worktree
+ */
+export function handoffRefreshArgs(confirmed, hasScript) {
+  return confirmed > 0 && hasScript ? ["scripts/handoff.mjs", "--refresh", "--no-github"] : null;
+}
+
