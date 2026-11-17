@@ -2,7 +2,7 @@
 title: All highlights
 description: Every highlight from PDFs, books and clipped pages in one place: search them, tag them, export them to a note with links back, or drag one into a note.
 type: reference
-tasks: ["W12.R1", "W12.R3", "W7.2"]
+tasks: ["W12.R1", "W12.R3", "W7.2", "W10.C25"]
 ---
 
 **Command palette → All highlights** lists every highlight in your vault:
@@ -73,3 +73,9 @@ document. Each PDF's details come from your citation library (Zotero, or a
 about once, and the answer is remembered on this device. The page is the
 PDF page number; a book whose printed page numbers differ needs its page
 labels, which this export does not read yet.
+
+## Speed
+
+The panel's list comes from the vault's index worker: no note is read or
+parsed on the page's main thread, so typing doesn't stall while the panel
+fills in a large vault.

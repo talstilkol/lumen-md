@@ -2,7 +2,7 @@
 title: Links, embeds and block references
 description: Link notes with [[ and its completion, preview a link by hovering, turn plain mentions into links, embed a note or one of its sections, and link to a single paragraph with ^id.
 type: how-to
-tasks: ["4.5", "4.6", "4.7", "4.8"]
+tasks: ["4.5", "4.6", "4.7", "4.8", "W11.H11"]
 ---
 
 Notes link to each other with `[[Note name]]`, as in Obsidian. The links
@@ -49,6 +49,11 @@ Only whole words count. A Hebrew prefix (ו, ה, ב, ל, מ, ש, כ, וב, של)
 outside the link, so `בתל אביב` becomes `ב[[תל אביב]]`. Text inside links,
 URLs, code, front matter and HTML is never touched, and a note never
 counts as mentioning itself. Mentions match the title, not the aliases.
+
+When the Hebrew name model (DictaBERT-NER) is already on this device, the
+section also lists the names of people, places and organisations this note
+mentions, so you can link them. It runs on this device, and is not
+downloaded for this.
 
 ## Embeds
 

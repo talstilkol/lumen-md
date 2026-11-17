@@ -2,7 +2,7 @@
 title: Sync in two clicks
 description: A guided setup that picks the best place for your encrypted notes on this device, makes the key for you, and shows every file's state.
 type: reference
-tasks: ["W4.19"]
+tasks: ["W4.19", "W10.C19", "W10.C20"]
 ---
 
 Run **Set up sync (two clicks)** from the command palette.
@@ -17,8 +17,7 @@ The best choice for this device is already selected:
 | **Lumen's encrypted relay** | On phones, and browsers that can't open folders | Nothing. The relay stores encrypted files and can't read them. |
 | **WebDAV** (Nextcloud, a NAS) | When neither of the above is there | The server's address, user name and password. |
 
-**Advanced** opens the full panel: S3, and Dropbox or Google Drive through
-their own sign-in once those are available.
+**Advanced** opens the full panel: S3, Dropbox and Google Drive.
 
 ## 2. Your key: 13 Hebrew words
 
@@ -104,3 +103,21 @@ spaces are not affected):
 - `VAULT_RELAY_INVITE=<secret>`: an invite. Build the app with
   `VITE_SYNC_RELAY_INVITE` set to the same secret. Anyone who has the build has
   the invite, so use it for a relay whose app you don't publish.
+
+## Google Drive and Dropbox
+
+The wizard can also store the vault in Google Drive or Dropbox: sign in, and
+Lumen keeps only encrypted files there, in a "Lumen Vault" folder of your
+Drive or in Lumen's app folder in Dropbox. Neither service can read them.
+
+With Google Drive, the vault syncs, but keys and devices can't be changed
+there (no re-key, no revocation, no new device key). Drive can't refuse a
+second "create" of the same file atomically. Make those changes with
+another storage, or move the vault.
+
+## The key as a QR code
+
+**Show as a QR code** draws the key's words as a QR code, made in the app
+(no service is asked). Scan it with the other device's camera, then paste
+the words into **I already have a key from another device**. Anyone who
+sees the code can read your notes: show it only to your own device.

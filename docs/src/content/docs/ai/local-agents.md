@@ -2,7 +2,7 @@
 title: Local agents
 description: Every AI command runs through one local agent runtime — the model proposes, tools execute, validators decide, and an improvement agent steps in when there is no answer.
 type: reference
-tasks: ["R12.18", "W10.E66", "W10.E33", "7.2", "W1.33", "5.6"]
+tasks: ["R12.18", "W10.E66", "W10.E33", "7.2", "W1.33", "5.6", "W11.I2"]
 ---
 
 Lumen's AI commands are **agents**: a definition of what to ask the
@@ -105,6 +105,13 @@ as they were. `extract_quotes` checks quotes word for word against a
 page read in the same run, a workspace file or the open document, and
 returns the exact text with its offsets. All tools stop when the run is
 cancelled.
+
+## The rule of two
+
+A run that holds outside content (a web page, a server's answer, a pasted
+document) together with your own notes asks you before each call that
+writes or reaches the network, one call at a time. The privacy ledger
+records when a run first held outside content, and each of your answers.
 
 ## Reviewing proposed changes
 

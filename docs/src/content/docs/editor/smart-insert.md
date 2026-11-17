@@ -2,6 +2,7 @@
 title: Smart Insert (⌘⇧V)
 description: Paste anything into one dialog — Lumen detects the type and wraps it in the right block.
 type: how-to
+tasks: ["W10.D1", "W10.D2"]
 untracked: "shipped before the plan (release 9.4); no plan task covers it"
 ---
 
@@ -74,3 +75,14 @@ highlighting.
 
 - The toolbar's **Insert** menu → first item, marked with ✨.
 - The command palette (`⌘K`), search "insert anything".
+
+## How embeds are framed
+
+An embed runs in a separate content frame, never in the app's own page.
+
+- The frame's Content Security Policy allows its one script by hash. There
+  is no fixed nonce that another page could reuse.
+- A GitHub Gist is GitHub's embed script, run inside that opaque-origin
+  frame. It is never written into the app's page with `document.write`. The
+  desktop app shows a Gist as a link.
+- A site Lumen can't embed shows a notice and the link instead.

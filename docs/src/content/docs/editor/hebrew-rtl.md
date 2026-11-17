@@ -2,7 +2,7 @@
 title: Hebrew and right-to-left
 description: How Lumen decides the direction of every block — paragraphs, tables, lists, quotes and code — in the editor, the preview, WYSIWYG and the export.
 type: reference
-tasks: ["9.7"]
+tasks: ["9.7", "W11.H2", "W11.H4"]
 ---
 
 Lumen doesn't make a whole note right-to-left or left-to-right. Each block
@@ -33,6 +33,17 @@ on the left. The source editor and code stay left-to-right.
 The arrow keys keep their visual meaning: **←** moves to what is drawn on
 the left. In the Hebrew tab strip that is the next tab; in the welcome tour
 ← is "next". Home and End go to the first and the last tab.
+
+## Mixed lines and choosing a direction
+
+- Inline code, links, URLs and other inline Markdown are isolated in the
+  source editor, so an English word or a URL inside a Hebrew line doesn't
+  reorder the punctuation around it.
+- Each line takes the direction of its first strong letter after its
+  Markdown markers. **Switch paragraph direction** (in the command palette)
+  sets one paragraph the other way when that guess is wrong.
+- `dir: rtl`, `dir: ltr` or `dir: auto` in the front matter sets the whole
+  note.
 
 ## Tested
 

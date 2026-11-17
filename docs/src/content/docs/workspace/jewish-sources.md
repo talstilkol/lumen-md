@@ -2,7 +2,7 @@
 title: Jewish sources from Sefaria
 description: Quote a verse, a mishnah or a Talmud folio by its reference, with each text's licence. Keep a copy for offline use, and see every note that cites the same verse.
 type: reference
-tasks: ["W5.1"]
+tasks: ["W5.1", "W10.C24"]
 ---
 
 Type a reference the way you write it, such as `בראשית א:א`, `ב״ר א, א`,
@@ -30,6 +30,14 @@ The quote replaces the reference:
 
 Every version's title and licence are written next to it. The link
 `[[Genesis.1.1|…]]` makes the verse a node in the graph.
+
+### Or just type the reference
+
+When the words before the cursor are a full reference (`בראשית א ג`,
+`שמות כ׳:ב׳`, `Gen. 1:3`, `ברכות ב.`), a small suggestion opens under it:
+**Quote from Sefaria?** Nothing is sent while you type. **Insert** (a click,
+or Alt+Enter) sends only the reference, and a saved offline copy is used
+first. **Not now** or Esc dismisses it for that reference.
 
 ## Licences: what is copied and what is only linked
 
@@ -65,7 +73,8 @@ question, and it works with no network at all.
 ## My notes on this verse
 
 Put the cursor on a reference, or open a saved source note, and run **My notes
-on this verse**. Lumen lists every note that cites the verse, through a wiki
+on this verse**. It opens as a side panel that follows the verse under the
+cursor as you move. Lumen lists every note that cites the verse, through a wiki
 link (`[[בראשית א:א]]`, `[[Genesis.1.1]]`) or a Sefaria link. The search
 reads your vault on this device and sends nothing.
 

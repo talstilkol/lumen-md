@@ -2,7 +2,7 @@
 title: Graph and local graph
 description: The knowledge graph of the whole vault — 10,000 notes and 50,000 links — and the local graph of the open note, with filters, colour groups and full keyboard use.
 type: how-to
-tasks: ["W12.V8", "W12.V3", "W1.10", "W13.G1", "W13.G11"]
+tasks: ["W12.V8", "W12.V3", "W1.10", "W13.G1", "W13.G11", "W10.E60"]
 ---
 
 ## The graph
@@ -36,6 +36,10 @@ for every `[[link]]` between two notes.
   "Incoming: …"), and a summary of the view ("12 neighbours in 3
   groups"). ↑/↓ move between neighbours, Enter goes there, Backspace goes
   back. The summary follows the filters.
+
+The **table** lists the notes and their links, most linked first, and is
+what a screen reader reads instead of the canvas. The graph view, the list
+and the table are checked with axe.
 
 ## Structure: tree and sunburst
 

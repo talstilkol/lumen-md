@@ -2,7 +2,7 @@
 title: Daily notes and the Hebrew calendar
 description: The calendar's holidays, fasts and weekly Torah portion, for Israel or the diaspora, and the {{holiday}} and {{parasha}} placeholders of the daily note.
 type: how-to
-tasks: ["4.12"]
+tasks: ["4.12", "W12.H7", "W12.H8"]
 ---
 
 **Show / hide the calendar** (command palette) shows a month under the file tree. A day with a daily
@@ -67,6 +67,21 @@ For example, the template
 
 gives, on Friday 16 May 2025 in Israel, a line with the Hebrew date,
 `Emor` and `Lag BaOmer` (in a Hebrew UI: `פרשת אמור` and `ל״ג בעומר`).
+
+## The day's timeline
+
+While a daily note is open, the day's timeline sits under the month
+calendar. It shows the note's time blocks (lines such as
+`- 09:00–10:30 Writing`), the events of your calendar subscriptions
+(read-only), and Shabbat or yom tov as blocked time.
+
+- Drag a block to move it in 15-minute steps, or use ↑ and ↓; Shift+↑ and
+  Shift+↓ change its length. Moving a block rewrites only the times on its
+  line.
+- Candle lighting and havdalah come from sunset for a city you choose by
+  hand; Lumen never locates you. A block that falls in Shabbat or a chag is
+  marked, with a suggested time and a button to move it there. It is never
+  moved by itself.
 
 ## The Hebrew-month view
 

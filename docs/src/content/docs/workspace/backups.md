@@ -2,7 +2,7 @@
 title: Backups to a second drive
 description: A daily backup of the whole vault to another drive or folder, plain or encrypted with age, kept 7 days, 4 weeks and 6 months, and a restore you can check.
 type: how-to
-tasks: ["W1.6"]
+tasks: ["W1.6", "W10.C15"]
 ---
 
 Version history protects you from your own edits, but it lives on the same
@@ -62,6 +62,17 @@ deletes the vault and restores it, plain and encrypted: **every file has the
 same SHA-256**. It also checks that a broken drive is reported within a
 minute, and that a backup writes nothing into the vault.
 `e2e/backup-drill.spec.ts` runs the same drill from the panel in the browser.
+
+## Back up to a WebDAV server
+
+In the Backups panel, **Back up to a WebDAV server** takes the server's
+`https` address, a user name and a password. Archives go into a
+`lumen-backups` folder there, and the password is kept in the secret store,
+not with the backup settings.
+
+- Choose the encrypted backup unless you run the server yourself: a plain
+  backup can be read by whoever runs the server.
+- Under the local-only privacy policy, a plain backup to WebDAV is refused.
 
 ## Limits
 

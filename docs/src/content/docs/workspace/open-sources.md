@@ -2,7 +2,7 @@
 title: Open sources
 description: One search over Sefaria, the Knesset, data.gov.il and the CBS, and the Ben-Yehuda library, with the rights of every result and the right way to quote it.
 type: reference
-tasks: ["W7.24"]
+tasks: ["W7.24", "W10.C28"]
 ---
 
 Every open Hebrew source comes with its own terms. The **Open sources**
@@ -12,6 +12,10 @@ so you don't have to know what section 6 or the CBS licence say.
 Open it with **⌥⌘S** (Ctrl+Alt+S on Windows and Linux) or **Open sources…**
 in the command palette. (Ctrl+Shift+S stays Save as.)
 
+Or type `@מקור` (or `@source`) as a word of its own in the editor: the
+dialog opens and the trigger text is removed. Only typing does this; pasted
+text and undo never open it.
+
 ## Search
 
 - Type a verse (`בראשית א:א`), a law (`חוק הגנת הפרטיות`), a poem
@@ -20,6 +24,8 @@ in the command palette. (Ctrl+Shift+S stays Save as.)
   and the Ben-Yehuda works you downloaded. Nothing is sent.
 - **Search online** (Alt+O) asks first, then sends only your words, and
   only to the sources you turned on. Each request is in the privacy ledger.
+- Free text (not a reference) is also searched in Sefaria's library when
+  Sefaria is on, after you ask to search online. Its hits are verses.
 - Filter by kind: Jewish sources, laws, literature, datasets or statistics.
 
 ## Rights

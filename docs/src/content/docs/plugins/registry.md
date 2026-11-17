@@ -2,7 +2,7 @@
 title: Plugin registry and the built-in ten
 description: The ten plugins in Lumen's plugin gallery, what each one may do, and how the static registry is built and scanned.
 type: how-to
-tasks: ["W12.S6", "W10.B3", "W6.35"]
+tasks: ["W12.S6", "W10.B3", "W6.35", "W10.B1", "W10.B2"]
 ---
 
 The **Sandboxed plugins** section of the Plugin Gallery lists plugins from a
@@ -73,6 +73,15 @@ Check that the registry is current (this example runs in the docs check):
 ```sh run
 node scripts/build-plugin-registry.mjs --check
 ```
+
+## In the gallery
+
+- **Install** runs a plugin only from a bundle that passed the signed path
+  below. A plugin from a registry that has no signed bundle yet shows
+  **Not available yet**, and nothing is downloaded or run.
+- **Verified by Lumen** appears only when the registry's signature verified
+  against a pinned key. Any other plugin is marked **Not verified**: a
+  missing or unknown signature never counts as verified.
 
 ## The signed registry
 

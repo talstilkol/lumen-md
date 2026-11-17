@@ -2,17 +2,29 @@
 title: Screenshot to note
 description: Turn a screenshot into Markdown you can edit — tables, lists, code and error messages — with a vision model on your own computer.
 type: how-to
-tasks: ["W10.B11", "W7.16"]
+tasks: ["W10.B11", "W7.16", "W10.C22"]
 ---
 
 :::note[Status]
-The pipeline and its measurement are in place. The paste and capture
-commands, and the numbers with the vision model, come in the next release.
+The paste offer and the command are in the app. The accuracy numbers with
+the vision model are measured on the owner's Mac.
 :::
 
 Image descriptions (alt text) say what a picture shows. Screenshot to note
 does something else: it copies the *content* of a screenshot into the note,
 so you can edit it.
+
+## Paste a screenshot
+
+- Paste an image into a note, and a notice offers **Turn it into text**.
+- Or run **Screenshot to note…** from the command palette: it reads the
+  image on the clipboard, or a file you pick.
+
+The image is read on this device: by the vision model on this computer
+when there is one, otherwise by text recognition. A preview shows the
+result and which of the two read it. Check it, then **Insert** or
+**Cancel**. Passages that look like instructions to an AI are marked: they
+are text, not commands.
 
 ## What you get
 
