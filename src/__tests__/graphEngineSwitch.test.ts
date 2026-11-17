@@ -11,7 +11,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { buildGraph, filteredGraph, neighborsOf, type GraphNoteInput } from "../graph/graphModel";
-import { initialPositions } from "../graph/layout";
+import { initialPositions, layoutGraph } from "../graph/layout";
 import { chooseEngine, gpuCapable, GPU_THRESHOLD, layoutWithEngine, NO_CAPS, probeCaps, textureSide, type GraphCaps } from "../graph/engine";
 import { buildGrid, defaultParams, exactRepulsion, gridLevels, gridRepulsion, gridSize, packAdjacency, referenceStep, temperatureAt, MAX_DEGREE_READS } from "../graph/gpu/pack";
 
@@ -286,4 +286,45 @@ describe("the GPU engine is a lazy chunk", () => {
     expect(gpuChunk).not.toBe(entry);
     expect(entry.imports.some((im) => im.kind === "dynamic-import")).toBe(true);
   });
+});
+
+describe("audit r4 A3 #12: the GPU layout separates clusters as well as the CPU one", () => {
+  /** k planted clusters of `size` nodes, 3 links each inside, 5% random links (the audit's probe). */
+  function planted(k: number, size: number, seed: number) {
+    let s = seed;
+    const r = () => (s = (s * 48271) % 2147483647) / 2147483647;
+    const n = k * size;
+    const e: number[] = [];
+    for (let c = 0; c < k; c++) for (let i = 0; i < size; i++) for (let j = 0; j < 3; j++) e.push(c * size + i, c * size + Math.floor(r() * size));
+    for (let x = 0; x < n / 20; x++) e.push(Math.floor(r() * n), Math.floor(r() * n));
+    return { n, edges: Uint32Array.from(e), of: (i: number) => Math.floor(i / size), k };
+  }
+  /** Mean distance to the own cluster's centre over the mean distance between centres (lower: better separated). */
+  function separation(p: Float32Array, g: ReturnType<typeof planted>) {
+    const cx = new Float64Array(g.k), cy = new Float64Array(g.k), cnt = new Float64Array(g.k);
+    for (let i = 0; i < g.n; i++) (cx[g.of(i)] += p[2 * i]), (cy[g.of(i)] += p[2 * i + 1]), cnt[g.of(i)]++;
+    for (let c = 0; c < g.k; c++) (cx[c] /= cnt[c]), (cy[c] /= cnt[c]);
+    let intra = 0;
+    for (let i = 0; i < g.n; i++) intra += Math.hypot(p[2 * i] - cx[g.of(i)], p[2 * i + 1] - cy[g.of(i)]);
+    let inter = 0, m = 0;
+    for (let a = 0; a < g.k; a++) for (let b = a + 1; b < g.k; b++) (inter += Math.hypot(cx[a] - cx[b], cy[a] - cy[b])), m++;
+    return intra / g.n / (inter / m);
+  }
+  const mirror = (g: ReturnType<typeof planted>, over: Partial<ReturnType<typeof defaultParams>> = {}) => {
+    const p = { ...defaultParams(g.n, 300), ...over, n: g.n };
+    const packed = packAdjacency(g.n, g.edges);
+    let pos = initialPositions(g.n, p.k);
+    for (let s = 0; s < p.iterations; s++) pos = referenceStep(pos, packed, p, s);
+    for (let i = 0; i < 2 * g.n; i++) expect(Math.abs(pos[i])).toBeLessThan(p.R * 0.9); // well inside the square, never pinned to its edge
+    return pos;
+  };
+  it("within 25% of the CPU layout's separation (Fruchterman–Reingold's d² springs were 37% worse)", () => {
+    const g = planted(5, 200, 11);
+    const cpu = separation(layoutGraph(g.n, g.edges, {}), g);
+    const gpu = separation(mirror(g), g);
+    const fr = separation(mirror(g, { springPower: 2, gravity: 0.5 }), g);
+    console.log(`[W13.G1] separation n=${g.n}: cpu ${cpu.toFixed(3)} · gpu ${gpu.toFixed(3)} · old FR ${fr.toFixed(3)}`);
+    expect(gpu).toBeLessThanOrEqual(cpu * 1.25);
+    expect(fr).toBeGreaterThan(cpu * 1.25);
+  }, 120_000);
 });

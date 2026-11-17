@@ -1,5 +1,7 @@
 {
   "graphClusters.again": "Analyse again",
+  "graphClusters.basis.embeddings": "Clusters compared by meaning: the smart-search index ({model})",
+  "graphClusters.basis.tfidf": "Clusters compared by shared words (TF-IDF). Build the smart-search index to compare them by meaning.",
   "graphClusters.bridge": "Proposed link:",
   "graphClusters.close": "Close",
   "graphClusters.clusters": "Clusters",

@@ -17,6 +17,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react"
 import { t } from "../../i18n";
 import { extent, fitCamera, lift3d, orbit, pick3d, project, viewProjection, zoom, type Camera } from "../../graph/graph3d";
 import { prefersReducedMotion } from "../../lib/motion";
+import { graphemes, prepareLabel, type LabelDir, type PreparedLabel } from "../../graph/labels";
 
 export interface Graph3DViewProps {
   labels: readonly string[];
@@ -34,7 +35,6 @@ export interface Graph3DViewProps {
   labelColor?: string;
 }
 
-const RTL = /[֐-ࣿיִ-﷿ﹰ-﻿]/;
 const MAX_LABELS = 80;
 
 const VS = `
@@ -80,6 +80,20 @@ export function Graph3DView({ labels, edges, positions, colors, sizes, neighbors
   const order = useMemo(() => Array.from({ length: n }, (_, i) => i).sort((a, b) => neighbors(b).length - neighbors(a).length || a - b), [n, neighbors]);
   const [focus, setFocus] = useState(-1);
   const size = useRef({ w: 300, h: 200, dpr: 1 });
+  // W13.G2 (audit r4 A3 #1): the same bidi-correct labels as the 2D canvas — direction by the first
+  // strong character, FSI … PDI around runs in the other direction, shortened by grapheme. Once per label.
+  const prepared = useMemo(() => {
+    const cache = new Map<number, PreparedLabel & { width: number }>();
+    const uiDir: LabelDir = typeof document !== "undefined" && document.documentElement.dir === "rtl" ? "rtl" : "ltr";
+    return (i: number) => {
+      let p = cache.get(i);
+      if (!p) {
+        const l = prepareLabel(labels[i] ?? "", { maxGraphemes: 40, fallback: uiDir });
+        cache.set(i, (p = { ...l, width: graphemes(l.text.replace(/[\u2066-\u2069]/g, "")).length }));
+      }
+      return p;
+    };
+  }, [labels]);
 
   // GL setup.
   useEffect(() => {
@@ -163,7 +177,7 @@ export function Graph3DView({ labels, edges, positions, colors, sizes, neighbors
     const placed: Array<[number, number, number, number]> = [];
     const list: typeof cand = [];
     for (const c of cand) {
-      const half = Math.min(40, labels[c.i].length) * 3.2;
+      const half = prepared(c.i).width * 3.2;
       const box: [number, number, number, number] = [c.p.x - half, c.p.y - 20, c.p.x + half, c.p.y - 4];
       if (c.i !== focus && placed.some((b) => box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1])) continue;
       placed.push(box);
@@ -176,9 +190,9 @@ export function Graph3DView({ labels, edges, positions, colors, sizes, neighbors
     for (const { i, p } of list) {
       const strong = i === focus;
       lc.font = `${strong ? 600 : 400} ${strong ? 13 : 11}px system-ui, "Noto Sans Hebrew", sans-serif`;
-      lc.direction = RTL.test(labels[i]) ? "rtl" : "ltr";
-      const text = labels[i].length > 40 ? `${[...labels[i]].slice(0, 38).join("")}…` : labels[i];
-      lc.fillText(text, p.x, p.y - 6);
+      const label = prepared(i);
+      lc.direction = label.dir;
+      lc.fillText(label.text, p.x, p.y - 6);
       if (strong) {
         lc.strokeStyle = lc.fillStyle;
         lc.lineWidth = 2;
@@ -187,7 +201,7 @@ export function Graph3DView({ labels, edges, positions, colors, sizes, neighbors
         lc.stroke();
       }
     }
-  }, [data, cam, focus, labels, order, neighbors, p3, n, edges, labelColor]);
+  }, [data, cam, focus, prepared, order, neighbors, p3, n, edges, labelColor]);
 
   const drag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
   const step = (d: number) => {

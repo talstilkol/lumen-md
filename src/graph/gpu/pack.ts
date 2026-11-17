@@ -4,8 +4,9 @@
  * exact algorithm the fragment shader runs (./shaders.ts). The browser
  * check compares the two.
  *
- * The force model is Fruchterman–Reingold: repulsion k²·m / d, springs d² / k
- * along each link, a pull to the centre, and a step capped by a temperature
+ * The force model is Fruchterman–Reingold's repulsion k²·m / d with linear
+ * springs along each link (as ForceAtlas2 and the CPU layout; FR's d² / k
+ * springs pull clusters into each other), a light pull to the centre, and a step capped by a temperature
  * that cools. Repulsion is approximated with a multilevel density grid, the
  * way cosmos.gl does it: level 0 is an F × F grid of (count, Σx, Σy) over
  * the layout's square; each coarser level halves it. A node takes its 3 × 3
@@ -87,6 +88,8 @@ export const domainRadius = (n: number, k = IDEAL) => Math.max(20 * k, 2.5 * k *
 export interface GpuLayoutParams {
   n: number;
   k: number;
+  /** Spring force ∝ d^springPower / k^(springPower − 1): 2 is Fruchterman–Reingold, 1 a linear (ForceAtlas2) spring. */
+  springPower: number;
   R: number;
   F: number;
   gravity: number;
@@ -98,7 +101,10 @@ export interface GpuLayoutParams {
 export function defaultParams(n: number, iterations?: number): GpuLayoutParams {
   const k = IDEAL;
   const R = domainRadius(n, k);
-  return { n, k, R, F: gridSize(n, k), gravity: 0.5, iterations: iterations ?? defaultGpuIterations(n), t0: Math.max(4 * k, R / 8), t1: k / 20 };
+  // Linear springs and a light pull to the centre (audit r4 A3 #12): Fruchterman–Reingold's d² springs and
+  // gravity 0.5 drew clusters together (separation 1.2–1.5× the CPU layout's); these come within 15% of it
+  // and keep the picture well inside the square (≤ 0.85 R on the audit's graphs).
+  return { n, k, springPower: 1, R, F: gridSize(n, k), gravity: 0.15, iterations: iterations ?? defaultGpuIterations(n), t0: Math.max(4 * k, R / 8), t1: k / 20 };
 }
 
 /** Steps: the GPU can afford many more than the CPU layout's 60 at this size. */
@@ -106,6 +112,9 @@ export const defaultGpuIterations = (n: number) => (n > 200_000 ? 250 : n > 50_0
 
 /** The temperature (largest move) at a step: exponential cooling from t0 to t1. */
 export const temperatureAt = (step: number, p: GpuLayoutParams) => p.t0 * Math.pow(p.t1 / p.t0, Math.min(1, step / Math.max(1, p.iterations - 1)));
+
+/** The spring's factor on the vector to the neighbour: (d / k)^(springPower − 1). */
+export const springWeight = (d: number, p: Pick<GpuLayoutParams, "k" | "springPower">) => Math.pow(Math.max(d, 1e-9) / p.k, p.springPower - 1);
 
 /* ─── CPU mirror of the shaders ──────────────────────────────────────── */
 
@@ -219,8 +228,9 @@ export function referenceStep(pos: Float32Array, packed: PackedAdjacency, p: Gpu
       const dx = pos[2 * j] - x;
       const dy = pos[2 * j + 1] - y;
       const d = Math.hypot(dx, dy);
-      fx += (dx * d * stride) / p.k;
-      fy += (dy * d * stride) / p.k;
+      const w = springWeight(d, p);
+      fx += dx * w * stride;
+      fy += dy * w * stride;
     }
     // A pull to the centre that grows with the distance: the picture settles
     // at a radius of about k·√(n / gravity) whatever the graph.

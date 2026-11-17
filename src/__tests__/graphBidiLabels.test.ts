@@ -61,6 +61,19 @@ describe("the 30-label baseline (logical)", () => {
   }
 });
 
+/**
+ * Audit r4 (A3 #5): a signed number or an international phone number in a
+ * right-to-left label. [label, drawn, visual left-to-right order]
+ */
+const SIGNED: ReadonlyArray<readonly [string, string, string]> = [
+  ["יתרה -500", "יתרה ⟦-500⟧", "-500 הרתי"],
+  ["טל׳ +1-555-0100", "טל׳ ⟦+1-555-0100⟧", "+1-555-0100 ׳לט"],
+  ["טמפ׳ -5°", "טמפ׳ ⟦-5°⟧", "-5° ׳פמט"],
+  ["טלפון: +972-3-555-1234", "טלפון: ⟦+972-3-555-1234⟧", "+972-3-555-1234 :ןופלט"],
+  ["חיוג +972 3 555 1234", "חיוג ⟦+972 3 555 1234⟧", "+972 3 555 1234 גויח"],
+  ["שינוי (+3%) השנה", "שינוי (⟦+3%⟧) השנה", "הנשה )+3%( יוניש"],
+];
+
 /** Visible characters in screen order, from the browser's layout of the drawn string. */
 function visualOrder(text: string, dir: string): string {
   const span = document.createElement("span");
@@ -102,10 +115,32 @@ describe.runIf(hasLayout)("the 30-label baseline (visual, real layout engine onl
       expect(visualOrder(p.text, p.dir)).toBe(visual);
     });
   }
+  // Audit r4 (A3 #5): signed numbers and phone numbers.
+  for (const [label, , visual] of SIGNED) {
+    it(`${label} reads ${visual}`, () => {
+      const p = prepareLabel(label, { fallback: "rtl" });
+      expect(visualOrder(p.text, p.dir)).toBe(visual);
+    });
+  }
   it("the old drawing got at least 8 of them wrong", () => {
     const RTL = /[֐-׿؀-ۿݐ-ݿ]/;
     const wrong = BASELINE.filter(([label, , , visual]) => visualOrder(label.length > 40 ? `${label.slice(0, 38)}…` : label, RTL.test(label) ? "rtl" : "ltr") !== visual);
     expect(wrong.length).toBeGreaterThanOrEqual(8);
+  });
+});
+
+describe("signed numbers and phone numbers in a right-to-left label (logical)", () => {
+  for (const [label, drawn] of SIGNED) {
+    it(`${label} → ${drawn}`, () => {
+      const p = prepareLabel(label, { fallback: "rtl" });
+      expect(p.dir).toBe("rtl");
+      expect(show(p.text)).toBe(drawn);
+    });
+  }
+  it("a range, a hyphenated word and a left-to-right label are left alone", () => {
+    expect(isolateRuns("פרק 3-4", "rtl")).toBe("פרק 3-4");
+    expect(isolateRuns("ו-5 שקלים", "rtl")).toBe("ו-5 שקלים");
+    expect(isolateRuns("Balance -500", "ltr")).toBe("Balance -500");
   });
 });
 

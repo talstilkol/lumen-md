@@ -164,3 +164,45 @@ describe("W13.G10 keyboard and fallback", () => {
     expect(screen.getByTestId("graph-3d-nogl")).toBeTruthy();
   });
 });
+
+describe("W13.G10 labels go through G2's prepareLabel (audit r4 A3 #1)", () => {
+  it("each label is drawn in its own direction, with isolates, cut by grapheme", async () => {
+    motion(false);
+    const drawn: Array<{ text: string; dir: string }> = [];
+    const noop = () => ({});
+    // A WebGL context that accepts every call, and a 2D context that records what is drawn.
+    const fakeGl = new Proxy({} as Record<string | symbol, unknown>, { get: (_t, k) => (typeof k === "string" && /^[A-Z_]+$/.test(k) ? 1 : k === "then" ? undefined : noop) });
+    const ctx2d: Record<string, unknown> = { direction: "ltr" };
+    const fake2d = new Proxy(ctx2d, {
+      get: (t, k) => (k === "fillText" ? (text: string) => drawn.push({ text, dir: String(t.direction) }) : k in t ? t[k as string] : k === "then" ? undefined : noop),
+      set: (t, k, v) => ((t[k as string] = v), true),
+    });
+    const realCtx = HTMLCanvasElement.prototype.getContext;
+    const realRect = Element.prototype.getBoundingClientRect;
+    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, kind: string) {
+      return (kind === "2d" ? fake2d : fakeGl) as never;
+    } as typeof realCtx;
+    Element.prototype.getBoundingClientRect = () => ({ x: 0, y: 0, left: 0, top: 0, width: 600, height: 400, right: 600, bottom: 400, toJSON: () => ({}) }) as DOMRect;
+    try {
+      const verse = "וַיֹּאמֶר אֱלֹהִים יְהִי אוֹר וַיְהִי אוֹר וַיַּרְא אֱלֹהִים אֶת הָאוֹר";
+      const labels = ["מדריך C++", "Python מדריך", verse];
+      const pos = new Float32Array([-1, 0, 1, 0, 0, 1]);
+      const edges = new Uint32Array([0, 1, 1, 2]);
+      const nb = (i: number) => (i === 1 ? [0, 2] : [1]);
+      render(h(Graph3DView, { labels, edges, positions: pos, colors: new Float32Array(12).fill(1), sizes: new Float32Array(3).fill(4), neighbors: nb, onOpen: () => {}, ariaLabel: "g" }));
+      await act(async () => {});
+      const by = (start: string) => drawn.find((d) => d.text.replace(/[⁦-⁩]/g, "").startsWith(start));
+      expect(by("מדריך")).toEqual({ text: "מדריך ⁨C++⁩", dir: "rtl" });
+      expect(by("Python")).toEqual({ text: "Python ⁨מדריך⁩", dir: "ltr" });
+      const v = by("וַ")!;
+      expect(v.dir).toBe("rtl");
+      expect(v.text.endsWith("…")).toBe(true);
+      // Never cut inside a letter's niqqud: the shortened label is a prefix of the verse's graphemes.
+      expect(verse.startsWith(v.text.slice(0, -1))).toBe(true);
+      expect(/[֑-ׇ]/u.test(verse[v.text.length - 1] ?? "")).toBe(false);
+    } finally {
+      HTMLCanvasElement.prototype.getContext = realCtx;
+      Element.prototype.getBoundingClientRect = realRect;
+    }
+  });
+});

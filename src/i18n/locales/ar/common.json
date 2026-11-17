@@ -1884,6 +1884,8 @@
   "graphAlt.summary.unconnected.one": "1 with no link",
   "graphAlt.summary.unconnected.other": "{n} with no link",
   "graphClusters.again": "Analyse again",
+  "graphClusters.basis.embeddings": "قورنت المجموعات حسب المعنى: فهرس البحث الذكي ({model})",
+  "graphClusters.basis.tfidf": "قورنت المجموعات حسب الكلمات المشتركة (TF-IDF). أنشئ فهرس البحث الذكي لمقارنتها حسب المعنى.",
   "graphClusters.bridge": "Proposed link:",
   "graphClusters.close": "Close",
   "graphClusters.clusters": "Clusters",

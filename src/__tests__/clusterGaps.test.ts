@@ -20,6 +20,8 @@ import { analyzeClusters, convexHull, words, type GapInput } from "../graph/clus
 import { stageGapLinks, wikiLink, withSeeAlso, GAP_AGENT, GAP_TOOL } from "../graph/clusterGapsStage";
 import { clearStagedChanges, listStagedChanges } from "../agents/staging";
 import { ClusterGapsPanel } from "../ui/graph/ClusterGapsPanel";
+import { analyzeClustersOffThread, lastClusterRunWhere } from "../graph/clusterGapsClient";
+import { clusterEmbeddings } from "../graph/clusterGaps";
 
 /** Topics as vocabularies; a cluster is `size` notes that link in a ring and to a few others of their own. */
 const TOPICS: Record<string, string[]> = {
@@ -146,6 +148,7 @@ describe("W13.G8 panel", () => {
         edges: v.edges,
         texts: async (paths: string[]) => new Map(paths.map((p) => [p, files.get(p)!])),
         read: async (p: string) => files.get(p)!,
+        noteVectors: async () => null,
         onAnalysis: (x: unknown) => (analysis = x),
         colorOf: () => "#888",
         onClose: () => {},
@@ -163,5 +166,136 @@ describe("W13.G8 panel", () => {
     expect(listStagedChanges().every((c) => c.status === "pending")).toBe(true);
     const r = await axe.run(container, { rules: { "color-contrast": { enabled: false } } });
     expect(r.violations.map((x) => x.id)).toEqual([]);
+  });
+});
+
+describe("audit r4 A3 #4: the panel in Hebrew — arrow and focus", () => {
+  const v = merge(topicCluster("אפייה", "bake", 12, 0), topicCluster("דגנים", "grain", 12, 1));
+  const files = new Map(v.nodes.map((n) => [n.id, n.text]));
+  const props = {
+    nodes: v.nodes.map((n) => ({ id: n.id, label: n.label })),
+    edges: v.edges,
+    texts: async (paths: string[]) => new Map(paths.map((p) => [p, files.get(p)!])),
+    read: async (p: string) => files.get(p)!,
+    noteVectors: async () => null,
+    onAnalysis: () => {},
+    colorOf: () => "#888",
+    onClose: () => {},
+  };
+  it("from → to points the way a right-to-left line reads; the pair is named for a screen reader", async () => {
+    render(h(ClusterGapsPanel, props));
+    await act(async () => void fireEvent.click(screen.getByTestId("cluster-gaps-run")));
+    await waitFor(() => expect(screen.getAllByTestId("cluster-gaps-arrow").length).toBeGreaterThan(0));
+    for (const a of screen.getAllByTestId("cluster-gaps-arrow")) {
+      expect(a.textContent).toBe("←");
+      expect(a.getAttribute("aria-hidden")).toBe("true");
+    }
+    const group = screen.getAllByTestId("cluster-gaps-bridge")[0];
+    expect(group.getAttribute("role")).toBe("group");
+    expect(group.getAttribute("aria-label")).toMatch(/אפייה|דגנים/);
+  });
+  it("in English it points right", async () => {
+    applyLocale("en");
+    render(h(ClusterGapsPanel, props));
+    await act(async () => void fireEvent.click(screen.getByTestId("cluster-gaps-run")));
+    await waitFor(() => expect(screen.getAllByTestId("cluster-gaps-arrow").length).toBeGreaterThan(0));
+    expect(screen.getAllByTestId("cluster-gaps-arrow").every((a) => a.textContent === "→")).toBe(true);
+  });
+  it("the run button is never disabled while it works, so the keyboard focus stays on it", async () => {
+    let release: () => void = () => {};
+    const gate = new Promise<void>((r) => (release = r));
+    render(h(ClusterGapsPanel, { ...props, texts: async (paths: string[]) => (await gate, props.texts(paths)) }));
+    const run = screen.getByTestId("cluster-gaps-run") as HTMLButtonElement;
+    run.focus();
+    await act(async () => void fireEvent.click(run));
+    expect(run.getAttribute("aria-disabled")).toBe("true");
+    expect(run.disabled).toBe(false);
+    expect(document.activeElement).toBe(run);
+    await act(async () => release());
+    await waitFor(() => expect(screen.getByTestId("cluster-gaps-modularity")).toBeTruthy());
+    expect(document.activeElement).toBe(screen.getByTestId("cluster-gaps-run"));
+    expect(run.getAttribute("aria-disabled")).toBe("false");
+  });
+});
+
+describe("review-13 L4: the analysis runs off the main thread", () => {
+  it("in a worker when there is one; on this thread, with the same result, when there is none", async () => {
+    const v = merge(topicCluster("אפייה", "bake", 12, 0), topicCluster("דגנים", "grain", 12, 1));
+    const here = await analyzeClustersOffThread(v, {}, { inThread: true });
+    expect(lastClusterRunWhere()).toBe("thread");
+    expect(here.gaps.length).toBeGreaterThan(0);
+    // A stand-in worker: the request crosses as plain data (structured clone), the answer comes back by message.
+    const { analyzeClusters: real } = await import("../graph/clusterGaps");
+    const posted: unknown[] = [];
+    class FakeWorker extends EventTarget {
+      constructor() {
+        super();
+      }
+      postMessage(msg: { id: number; input: GapInput; opts: object }) {
+        const copy = structuredClone(msg);
+        posted.push(copy);
+        setTimeout(() => this.dispatchEvent(new MessageEvent("message", { data: { id: copy.id, analysis: structuredClone(real(copy.input, copy.opts)) } })), 0);
+      }
+      terminate() {}
+    }
+    const had = (globalThis as { Worker?: unknown }).Worker;
+    (globalThis as { Worker?: unknown }).Worker = FakeWorker;
+    try {
+      const off = await analyzeClustersOffThread(v);
+      expect(lastClusterRunWhere()).toBe("worker");
+      expect(posted).toHaveLength(1);
+      expect(off.gaps.map((g) => [g.a, g.b, g.from, g.to])).toEqual(here.gaps.map((g) => [g.a, g.b, g.from, g.to]));
+      expect(off.clusterOf).toBeInstanceOf(Map);
+    } finally {
+      (globalThis as { Worker?: unknown }).Worker = had;
+    }
+  });
+  it("the panel's default is the off-thread client, not analyzeClusters on the main thread", async () => {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync(new URL("../ui/graph/ClusterGapsPanel.tsx", import.meta.url), "utf8");
+    expect(src).toMatch(/analyze = analyzeClustersOffThread/);
+    expect(src).not.toMatch(/import \{[^}]*\banalyzeClusters\b[^}]*\} from "\.\.\/\.\.\/graph\/clusterGaps"/);
+  });
+});
+
+describe("audit r4 A3 #11 (W13.G8): embeddings through the vectors hook, TF-IDF as the fallback", () => {
+  const v = merge(topicCluster("אפייה", "bake", 12, 0), topicCluster("דגנים", "grain", 12, 1), topicCluster("טיפוס", "climb", 12, 2));
+  it("with note embeddings, similarity comes from them: a gap the words do not show is found", () => {
+    // Baking and climbing share no words; their embeddings say they are close, grain is far.
+    const vec = new Map(v.nodes.map((n) => [n.id, n.id.startsWith("דגנים") ? [0, 1, 0] : [1, 0, 0.01]]));
+    const words = analyzeClusters(v);
+    expect(words.basis).toBe("tfidf");
+    const meaning = analyzeClusters(v, { noteVectors: vec });
+    expect(meaning.basis).toBe("embeddings");
+    const pairs = (a: ReturnType<typeof analyzeClusters>) => a.gaps.map((g) => [a.clusters[g.a], a.clusters[g.b]].map((c) => c.members[0].split("/")[0]).sort().join("+"));
+    expect(pairs(words)).not.toContain("אפייה+טיפוס");
+    expect(pairs(meaning)).toContain("אפייה+טיפוס");
+    expect(pairs(meaning)).not.toContain("אפייה+דגנים");
+  });
+  it("a cluster with no embedded note, or vectors of two lengths: TF-IDF", () => {
+    const some = new Map(v.nodes.filter((n) => !n.id.startsWith("טיפוס")).map((n) => [n.id, [1, 0]]));
+    expect(analyzeClusters(v, { noteVectors: some }).basis).toBe("tfidf");
+    expect(clusterEmbeddings([["a"], ["b"]], new Map([["a", [1, 0]], ["b", [1, 0, 0]]]))).toBeNull();
+    expect(clusterEmbeddings([["a", "b"]], new Map([["a", [2, 0]], ["b", [0, 3]]]))).toEqual([[1, 1]]);
+  });
+  it("the panel passes the stored note vectors on and says which basis it used", async () => {
+    const files = new Map(v.nodes.map((n) => [n.id, n.text]));
+    const seen: unknown[] = [];
+    render(
+      h(ClusterGapsPanel, {
+        nodes: v.nodes.map((n) => ({ id: n.id, label: n.label })),
+        edges: v.edges,
+        texts: async (paths: string[]) => new Map(paths.map((p) => [p, files.get(p)!])),
+        read: async (p: string) => files.get(p)!,
+        noteVectors: async (paths: string[]) => ({ embedding: "ollama:bge-m3", vectors: new Map(paths.map((p) => [p, [1, 0]])) }),
+        analyze: async (input: GapInput, opts: object) => (seen.push(opts), analyzeClusters(input, opts)),
+        onAnalysis: () => {},
+        colorOf: () => "#888",
+        onClose: () => {},
+      }),
+    );
+    await act(async () => void fireEvent.click(screen.getByTestId("cluster-gaps-run")));
+    await waitFor(() => expect(screen.getByTestId("cluster-gaps-basis").textContent).toContain("ollama:bge-m3"));
+    expect((seen[0] as { noteVectors?: Map<string, number[]> }).noteVectors?.size).toBe(36);
   });
 });

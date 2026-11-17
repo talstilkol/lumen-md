@@ -1884,6 +1884,8 @@
   "graphAlt.summary.unconnected.one": "1 with no link",
   "graphAlt.summary.unconnected.other": "{n} with no link",
   "graphClusters.again": "Analyse again",
+  "graphClusters.basis.embeddings": "按含义比较聚类：智能搜索索引（{model}）",
+  "graphClusters.basis.tfidf": "按共同词语比较聚类（TF-IDF）。构建智能搜索索引即可按含义比较。",
   "graphClusters.bridge": "Proposed link:",
   "graphClusters.close": "Close",
   "graphClusters.clusters": "Clusters",

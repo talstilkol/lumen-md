@@ -19,6 +19,8 @@
  * the file).
  */
 
+import { graphemes, labelDirection as labelDir, prepareLabel } from "./labels";
+
 export type Rgba = readonly [number, number, number, number];
 
 export interface SceneNode {
@@ -56,28 +58,26 @@ export interface Scene {
   background?: Rgba | null;
 }
 
-const RTL_STRONG = /[֐-ࣿיִ-﷿ﹰ-﻿]/;
-const LTR_STRONG = /[A-Za-zÀ-ɏͰ-ϿЀ-ӿ]/;
-
-/** "rtl" when the label's first strong character is Hebrew or Arabic (the Unicode P2/P3 rule), else "ltr". */
+/** The label's direction: G2's rule (first strong character; digits alone read left to right). */
 export function labelDirection(s: string): "rtl" | "ltr" {
-  for (const ch of s) {
-    if (RTL_STRONG.test(ch)) return "rtl";
-    if (LTR_STRONG.test(ch)) return "ltr";
-  }
-  return "ltr";
+  return labelDir(s, "ltr");
 }
 
 /** At most `max` graphemes, with "…" when cut: never splits a letter from its niqqud or an emoji. */
 export function clipGraphemes(s: string, max: number): string {
-  const Seg = (Intl as unknown as { Segmenter?: new (l?: string, o?: { granularity: string }) => { segment(s: string): Iterable<{ segment: string }> } }).Segmenter;
-  const parts = Seg ? [...new Seg(undefined, { granularity: "grapheme" }).segment(s)].map((x) => x.segment) : Array.from(s.replace(/([^֑-ׇ])([֑-ׇ]+)/g, "$1$2\u0000")).join("").split("\u0000");
+  const parts = graphemes(s);
   return parts.length > max ? parts.slice(0, max - 1).join("").trimEnd() + "…" : s;
 }
 
-const xml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g, "");
+/** Unpaired UTF-16 surrogates are not XML characters (nor UTF-8): U+FFFD in their place. */
+const loneSurrogates = (s: string) => s.replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "\uFFFD");
+/** Text content: escaped, with the characters XML 1.0 forbids removed. */
+const xml = (s: string) => loneSurrogates(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, "");
+/** An attribute value: as `xml`, and a newline, return or tab as a character reference — a parser turns a literal one into a space (XML 1.0 §3.3.3). */
+const attr = (s: string) => xml(s).replace(/\n/g, "&#10;").replace(/\r/g, "&#13;").replace(/\t/g, "&#9;");
 const css = (c: Rgba) => `rgb(${Math.round(c[0] * 255)} ${Math.round(c[1] * 255)} ${Math.round(c[2] * 255)}${c[3] < 1 ? ` / ${+c[3].toFixed(3)}` : ""})`;
-const num = (v: number) => +v.toFixed(2);
+/** A coordinate: a finite number, 2 decimals (Infinity or NaN from a broken layout would make the file invalid). */
+const num = (v: number) => (Number.isFinite(v) ? +v.toFixed(2) : 0);
 
 export interface SvgOptions {
   /** Output width in px; the height follows the layout's aspect ratio. */
@@ -93,14 +93,16 @@ export function sceneToSvg(scene: Scene, opts: SvgOptions = {}): string {
   const width = opts.width ?? 1600;
   const margin = opts.margin ?? 48;
   const maxLabel = opts.maxLabel ?? 40;
+  const uiDir = /^(he|iw|ar|fa|ur|yi)\b/i.test(scene.lang ?? "") ? "rtl" : "ltr";
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   for (const n of scene.nodes) {
+    if (!Number.isFinite(n.x) || !Number.isFinite(n.y) || !Number.isFinite(n.size)) continue;
     minX = Math.min(minX, n.x - n.size);
     maxX = Math.max(maxX, n.x + n.size);
     minY = Math.min(minY, n.y - n.size);
     maxY = Math.max(maxY, n.y + n.size);
   }
-  if (!scene.nodes.length) minX = minY = 0, maxX = maxY = 1;
+  if (!Number.isFinite(minX)) minX = minY = 0, maxX = maxY = 1;
   const spanX = Math.max(1e-6, maxX - minX);
   const spanY = Math.max(1e-6, maxY - minY);
   const k = (width - 2 * margin) / Math.max(spanX, spanY * 0.5);
@@ -137,8 +139,9 @@ export function sceneToSvg(scene: Scene, opts: SvgOptions = {}): string {
   for (const n of scene.nodes) {
     if (!labelled.has(n.id)) continue;
     const p = pos.get(n.id)!;
-    const dir = labelDirection(n.label);
-    out.push(`<text x="${p.x}" y="${num(p.y - p.r - 3)}" direction="${dir}" style="direction:${dir}">${xml(clipGraphemes(n.label, maxLabel))}</text>`);
+    // G2's labels (audit r4 A3 #2): FSI … PDI around runs in the other direction, so "C++" is not drawn "++C".
+    const l = prepareLabel(n.label, { maxGraphemes: maxLabel, fallback: uiDir });
+    out.push(`<text x="${p.x}" y="${num(p.y - p.r - 3)}" direction="${l.dir}" style="direction:${l.dir}">${xml(l.text)}</text>`);
   }
   out.push(`</g>`);
   out.push(`</svg>`);
@@ -176,6 +179,7 @@ function attrTable(items: ReadonlyArray<{ attrs?: Record<string, string | number
   const types = new Map<string, AttrType>(Object.entries(fixed));
   for (const it of items)
     for (const [k, v] of Object.entries(it.attrs ?? {})) {
+      if (!usable(v)) continue;
       const t = typeOf(v);
       const had = types.get(k);
       types.set(k, !had || had === t ? t : had === "integer" && t === "double" ? "double" : had === "double" && t === "integer" ? "double" : "string");
@@ -183,6 +187,8 @@ function attrTable(items: ReadonlyArray<{ attrs?: Record<string, string | number
   return [...types].map(([id, type]) => ({ id, type }));
 }
 
+/** Infinity and NaN are not GEXF integers or doubles: such a value is left out. */
+const usable = (v: string | number | boolean | undefined) => v !== undefined && v !== "" && (typeof v !== "number" || Number.isFinite(v));
 const fmt = (v: string | number | boolean) => (typeof v === "number" ? String(+v.toFixed(6)) : String(v));
 
 /** GEXF 1.3 with viz:position/color/size, node and edge attributes. `date` is the meta's lastmodifieddate (YYYY-MM-DD). */
@@ -202,22 +208,22 @@ export function sceneToGexf(scene: Scene, date = new Date().toISOString().slice(
   const decl = (cls: "node" | "edge", list: Array<{ id: string; type: AttrType }>) => {
     if (!list.length) return;
     out.push(`    <attributes class="${cls}">`);
-    list.forEach((a, i) => out.push(`      <attribute id="${cls[0]}${i}" title="${xml(a.id)}" type="${a.type}"/>`));
+    list.forEach((a, i) => out.push(`      <attribute id="${cls[0]}${i}" title="${attr(a.id)}" type="${a.type}"/>`));
     out.push(`    </attributes>`);
   };
   decl("node", nodeAttrs);
   decl("edge", edgeAttrs);
   const values = (cls: "n" | "e", list: Array<{ id: string }>, v: Record<string, string | number | boolean | undefined>) => {
-    const vals = list.map((a, i) => [i, v[a.id]] as const).filter(([, x]) => x !== undefined && x !== "");
+    const vals = list.map((a, i) => [i, v[a.id]] as const).filter(([, x]) => usable(x));
     if (!vals.length) return [];
-    return [`        <attvalues>`, ...vals.map(([i, x]) => `          <attvalue for="${cls}${i}" value="${xml(fmt(x!))}"/>`), `        </attvalues>`];
+    return [`        <attvalues>`, ...vals.map(([i, x]) => `          <attvalue for="${cls}${i}" value="${attr(fmt(x!))}"/>`), `        </attvalues>`];
   };
   out.push(`    <nodes>`);
   for (const n of scene.nodes) {
-    out.push(`      <node id="${xml(n.id)}" label="${xml(n.label)}">`);
+    out.push(`      <node id="${attr(n.id)}" label="${attr(n.label)}">`);
     out.push(...values("n", nodeAttrs, { kind: n.kind, ...n.attrs }));
     const [r, g, b, a] = n.color;
-    out.push(`        <viz:color r="${Math.round(r * 255)}" g="${Math.round(g * 255)}" b="${Math.round(b * 255)}" a="${+a.toFixed(3)}"/>`);
+    out.push(`        <viz:color r="${Math.round(r * 255)}" g="${Math.round(g * 255)}" b="${Math.round(b * 255)}" a="${Number.isFinite(a) ? +a.toFixed(3) : 1}"/>`);
     out.push(`        <viz:position x="${num(n.x)}" y="${num(-n.y)}" z="0"/>`);
     out.push(`        <viz:size value="${num(n.size)}"/>`);
     out.push(`      </node>`);
@@ -227,7 +233,7 @@ export function sceneToGexf(scene: Scene, date = new Date().toISOString().slice(
   scene.edges.forEach((e, i) => {
     if (!ids.has(e.source) || !ids.has(e.target)) return;
     const body = values("e", edgeAttrs, { relation: e.relation, ...e.attrs });
-    const open = `      <edge id="e${i}" source="${xml(e.source)}" target="${xml(e.target)}"${e.relation ? ` label="${xml(e.relation)}"` : ""}`;
+    const open = `      <edge id="e${i}" source="${attr(e.source)}" target="${attr(e.target)}"${e.relation ? ` label="${attr(e.relation)}"` : ""}`;
     if (!body.length) out.push(`${open}/>`);
     else out.push(`${open}>`, ...body, `      </edge>`);
   });

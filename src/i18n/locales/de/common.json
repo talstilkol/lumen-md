@@ -1884,6 +1884,8 @@
   "graphAlt.summary.unconnected.one": "1 with no link",
   "graphAlt.summary.unconnected.other": "{n} with no link",
   "graphClusters.again": "Analyse again",
+  "graphClusters.basis.embeddings": "Cluster nach Bedeutung verglichen: der Index der intelligenten Suche ({model})",
+  "graphClusters.basis.tfidf": "Cluster nach gemeinsamen Wörtern verglichen (TF-IDF). Erstelle den Index der intelligenten Suche, um sie nach Bedeutung zu vergleichen.",
   "graphClusters.bridge": "Proposed link:",
   "graphClusters.close": "Close",
   "graphClusters.clusters": "Clusters",
