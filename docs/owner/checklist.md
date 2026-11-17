@@ -3,7 +3,7 @@
 
 # רשימת הבעלים — כל צעדי הבעלים במקום אחד
 
-נוצר: 2026-11-16 22:15 UTC · מקור: 841 open PRs (gh) + plan/plan.json · 847 צעדים מ-433 PR-ים (431 מהם פתוחים עם צעדי בעלים; השאר משימות ב-plan.json) · 0 סומנו כבוצעו · 14 צעדים ירדו מאז הריצה הקודמת (PR מוזג/נסגר או שהגוף השתנה).
+נוצר: 2026-11-17 00:22 UTC · מקור: 840 open PRs (gh) + plan/plan.json · 846 צעדים מ-435 PR-ים (433 מהם פתוחים עם צעדי בעלים; השאר משימות ב-plan.json) · 0 סומנו כבוצעו · 11 צעדים ירדו מאז הריצה הקודמת (PR מוזג/נסגר או שהגוף השתנה).
 
 איך משתמשים: עוברים על הישיבות לפי הסדר; בכל ישיבה כל מה שצריך את אותו משאב. מסמנים `[x]` כשצעד בוצע. `npm run owner:checklist` מרענן את הרשימה ושומר את הסימונים; `npm run owner:checklist -- --check` נכשל כשיש PR פתוח שצעדי הבעלים שלו לא כאן.
 
@@ -11,21 +11,21 @@
 
 | # | ישיבה | צעדים | PR-ים | למה בסדר הזה |
 |---|---|---|---|---|
-| 1 | חשבונות ושירותים | 102 | 52 | אימות חשבונות לוקח ימים, והטוקנים שלהם נדרשים לכמעט כל השאר |
-| 2 | משפטי והחלטות | 105 | 34 | החלטות ושליחות משפטיות מחכות לצד השני — לשלוח מוקדם |
+| 1 | חשבונות ושירותים | 96 | 52 | אימות חשבונות לוקח ימים, והטוקנים שלהם נדרשים לכמעט כל השאר |
+| 2 | משפטי והחלטות | 104 | 32 | החלטות ושליחות משפטיות מחכות לצד השני — לשלוח מוקדם |
 | 3 | אנשים (בודקים, קליניקה, מתחזק שני, דוברים) | 30 | 22 | גיוס אנשים לוקח זמן; לפתוח עכשיו ולהריץ כשמוכנים |
-| 4 | מודלים, Hugging Face, ‏Kaggle ונתונים | 88 | 59 | צריך את HF_TOKEN מהחשבונות; ההצמדות וההורדות משמשות את ה-Mac ואת המארח השני |
+| 4 | מודלים, Hugging Face, ‏Kaggle ונתונים | 89 | 60 | צריך את HF_TOKEN מהחשבונות; ההצמדות וההורדות משמשות את ה-Mac ואת המארח השני |
 | 5 | Cloudflare | 22 | 11 | ה-Workers וה-Pages נותנים כתובות שמשתני Vercel צריכים |
 | 6 | Vercel | 11 | 8 | משתני סביבה אחרי ש-Cloudflare נתן כתובות; פריסה אחת בסוף |
-| 7 | מארח שני (מחשב שתמיד דולק) | 19 | 13 | הרצות לילה ובדיקות מול שתי הפריסות — אחרי Cloudflare ו-Vercel |
-| 8 | Mac | 165 | 120 | ישיבה אחת על ה-Mac: מודלים אמיתיים, Xcode, בניות — אחרי הטוקנים והמראה |
+| 7 | מארח שני (מחשב שתמיד דולק) | 18 | 12 | הרצות לילה ובדיקות מול שתי הפריסות — אחרי Cloudflare ו-Vercel |
+| 8 | Mac | 166 | 121 | ישיבה אחת על ה-Mac: מודלים אמיתיים, Xcode, בניות — אחרי הטוקנים והמראה |
 | 9 | מכשירים | 17 | 16 | מכשירים בודקים בניות ופריסות שכבר קיימות — בסוף |
-| 10 | כל מחשב עם npm install | 288 | 206 | בדיקות שצריכות npm install מלא; בכל מחשב, בכל זמן |
-| | **סה״כ** | **847** | **433** | |
+| 10 | כל מחשב עם npm install | 293 | 210 | בדיקות שצריכות npm install מלא; בכל מחשב, בכל זמן |
+| | **סה״כ** | **846** | **435** | |
 
 לא נכללו (רכבות אינטגרציה שמעתיקות גופים של PR-ים אחרים): [#495](https://github.com/talstilkol/lumen-md/pull/495), [#616](https://github.com/talstilkol/lumen-md/pull/616), [#640](https://github.com/talstilkol/lumen-md/pull/640), [#844](https://github.com/talstilkol/lumen-md/pull/844), [#938](https://github.com/talstilkol/lumen-md/pull/938).
 
-## ישיבה 1 — חשבונות ושירותים (102)
+## ישיבה 1 — חשבונות ושירותים (96)
 
 אימות חשבונות לוקח ימים, והטוקנים שלהם נדרשים לכמעט כל השאר.
 
@@ -112,7 +112,7 @@
   ```
 
   - משחרר: אימות W4.28 (Bus factor: מתחזק שני וסקירה אנושית לקוד רגיש); ואחריו W6.13
-  - אחרי: 7.19 (⚠ 7.19 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 7.18 (⚠ 7.18 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: (inline)
 - [ ] **1.13** [#485](https://github.com/talstilkol/lumen-md/pull/485) · W5.23 — A 1,000-item library synced in ≤ 60 s — `src/__tests__/zoteroWeb.test.ts`, "1,000 items…": 1,003 objects in 25 requests (21 item batches of ≤ 50), checked to stay under 60 s even at 2 s per request. Owed: Tal, a real library over a real network. <!-- id:10b24aaeb4 prs:485 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
@@ -735,36 +735,13 @@
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות #936
   - סעיף מקור: Owner commands
-- [ ] **1.96** [#1115](https://github.com/talstilkol/lumen-md/pull/1115) — One Buildkite switch-on, shared by W10.E10, E24, E25, E32 and E33. <!-- id:8025ec6275 prs:1115 -->
+- [ ] **1.96** [#1148](https://github.com/talstilkol/lumen-md/pull/1148) — `eval/reading-study/protocol.json`: 6 modes (baseline W3.5, focus R2, RSVP R3, anchor R4, immersive R5, page view R10) × 6 invented Hebrew passages (not real texts), 3 multiple-choice questions each. The order is a Latin square: every reader meets each mode and each passage once, every position has every mode once,… <!-- id:41457a8608 prs:1148 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
-  - משחרר: אימות #1115
-  - סעיף מקור: Owner pack
-- [ ] **1.97** [#1115](https://github.com/talstilkol/lumen-md/pull/1115) — knip as a devDependency. In the cloud, a new orphan file already fails check-unused-files. <!-- id:462a2b510b prs:1115 -->
-  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
-  - משחרר: אימות #1115
-  - סעיף מקור: Owner pack
-- [ ] **1.98** [#1115](https://github.com/talstilkol/lumen-md/pull/1115) — A PR-comment token and the Renovate app. <!-- id:1bb5cd6a45 prs:1115 -->
-  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
-  - משחרר: אימות #1115
-  - סעיף מקור: Owner pack
-- [ ] **1.99** [#1115](https://github.com/talstilkol/lumen-md/pull/1115) — A ci-doctor read token. <!-- id:4b356f4d04 prs:1115 -->
-  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
-  - משחרר: אימות #1115
-  - סעיף מקור: Owner pack
-- [ ] **1.100** [#1115](https://github.com/talstilkol/lumen-md/pull/1115) — Percy: recommend not using it, superseded by W10.E23. <!-- id:7685bba1f3 prs:1115 -->
-  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
-  - משחרר: אימות #1115
-  - סעיף מקור: Owner pack
-- [ ] **1.101** [#1115](https://github.com/talstilkol/lumen-md/pull/1115) — The first beta release, for the downloads page. <!-- id:d347f2c763 prs:1115 -->
-  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
-  - משחרר: אימות #1115
-  - סעיף מקור: Owner pack
-- [ ] **1.102** [#1115](https://github.com/talstilkol/lumen-md/pull/1115) — The first store: recommend the Google Play internal track. <!-- id:1672bac629 prs:1115 -->
-  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
-  - משחרר: אימות #1115
-  - סעיף מקור: Owner pack
+  - משחרר: אימות #1148
+  - נוגע גם ב: מודלים, Hugging Face, ‏Kaggle ונתונים
+  - סעיף מקור: W13.R14: reading study kit (the study itself is the owner's)
 
-## ישיבה 2 — משפטי והחלטות (105)
+## ישיבה 2 — משפטי והחלטות (104)
 
 החלטות ושליחות משפטיות מחכות לצד השני — לשלוח מוקדם. 38 מהצעדים כאן הם ממצאי סקירה שהואצלו ל-Claude (מסומנים „הואצל“).
 
@@ -1269,90 +1246,90 @@
 
   - משחרר: אימות #902
   - סעיף מקור: Owner commands
-- [ ] **2.87** [#1099](https://github.com/talstilkol/lumen-md/pull/1099) — `origin/main` (7fc2e65364) is not an ancestor of verify/train-7 (f090c20812): main holds #432's three commits. `promote:main` moves main only by fast-forward, so it can never take a train today. <!-- id:6036a33df6 prs:1099 -->
-  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
-  - משחרר: אימות #1099
-  - סעיף מקור: OWNER-DECISION draft — do not merge without the decision (W10.O4, W1.1). Never merged by a lane.
-- [ ] **2.88** [#1109](https://github.com/talstilkol/lumen-md/pull/1109) — Owner: turn on PVR (§4), and decide the VITE_ONENOTE_CLIENT_ID entry. <!-- id:6d221edcc9 prs:1109 -->
-  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
-  - משחרר: אימות #1109
-  - סעיף מקור: Owed
-- [ ] **2.89** [#1115](https://github.com/talstilkol/lumen-md/pull/1115) — There are no OWNER-DECISION drafts, because no recommended option needs a repo change that can be made in the cloud. <!-- id:cbff2b84fd prs:1115 -->
-  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
-  - משחרר: אימות #1115
-  - סעיף מקור: Owner pack
-- [ ] **2.90** [#1123](https://github.com/talstilkol/lumen-md/pull/1123) — Lane D1 or the owner: the WIP decisions for the 165. <!-- id:fbcfa6c1dc prs:1123 -->
+- [ ] **2.87** [#1123](https://github.com/talstilkol/lumen-md/pull/1123) — Lane D1 or the owner: the WIP decisions for the 165. <!-- id:fbcfa6c1dc prs:1123 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות #1123
   - סעיף מקור: Owed
-- [ ] **2.91** [#235](https://github.com/talstilkol/lumen-md/pull/235) · 4.2 — [`4311163141`](https://github.com/talstilkol/lumen-md/pull/261#discussion_r4311163141) — (מ-#261, קוד של #235) מעבר כספת לא מעתיק תיקיות ריקות, וה-preflight לא רואה התנגשות קובץ/תיקייה. <!-- id:6af2fd3c2b prs:235 -->
+- [ ] **2.88** [#1148](https://github.com/talstilkol/lumen-md/pull/1148) — The study needs six real readers, two of them with dyslexia, so it cannot be run here. This PR builds everything around it: the sessions then produce evidence and a decision, and the owner-session command tracks it. <!-- id:5944519c31 prs:1148 -->
+  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
+  - משחרר: אימות #1148
+  - סעיף מקור: W13.R14: reading study kit (the study itself is the owner's)
+- [ ] **2.89** [#1148](https://github.com/talstilkol/lumen-md/pull/1148) — Owed (owner): the 6 sessions, the summary, and the R3/R4 decision. `npm run owner:session -- status` lists the step as open until then. No receipts were created. <!-- id:faf93f5874 prs:1148 -->
+
+  ```sh
+  npm run owner:session -- status
+  ```
+
+  - משחרר: אימות #1148
+  - סעיף מקור: W13.R14: reading study kit (the study itself is the owner's)
+- [ ] **2.90** [#235](https://github.com/talstilkol/lumen-md/pull/235) · 4.2 — [`4311163141`](https://github.com/talstilkol/lumen-md/pull/261#discussion_r4311163141) — (מ-#261, קוד של #235) מעבר כספת לא מעתיק תיקיות ריקות, וה-preflight לא רואה התנגשות קובץ/תיקייה. <!-- id:6af2fd3c2b prs:235 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 4.2 (כספת בתיקייה אמיתית בדפדפן); ואחריו 4.4, 11.4, 14.1, 15.8
-  - אחרי: 2.97, 2.98, 2.99, 2.100, 2.101, 2.102
+  - אחרי: 2.96, 2.97, 2.98, 2.99, 2.100, 2.101
   - הואצל: ממצא סקירה (Codex) שטל הסמיך את Claude להחליט בו — אפשר לסגור בלי טל
   - סעיף מקור: נשאר להחלטת הבעלים
-- [ ] **2.92** [#235](https://github.com/talstilkol/lumen-md/pull/235) · 4.2 — [`4311163146`](https://github.com/talstilkol/lumen-md/pull/261#discussion_r4311163146) — (מ-#261, קוד של #235) היסטוריית הגרסאות ממופתחת לפי נתיב יחסי בלבד; כספת אחרת עם אותו נתיב רואה snapshot-ים זרים. <!-- id:8d8bfc768c prs:235 -->
+- [ ] **2.91** [#235](https://github.com/talstilkol/lumen-md/pull/235) · 4.2 — [`4311163146`](https://github.com/talstilkol/lumen-md/pull/261#discussion_r4311163146) — (מ-#261, קוד של #235) היסטוריית הגרסאות ממופתחת לפי נתיב יחסי בלבד; כספת אחרת עם אותו נתיב רואה snapshot-ים זרים. <!-- id:8d8bfc768c prs:235 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 4.2 (כספת בתיקייה אמיתית בדפדפן); ואחריו 4.4, 11.4, 14.1, 15.8
-  - אחרי: 2.97, 2.98, 2.99, 2.100, 2.101, 2.102
+  - אחרי: 2.96, 2.97, 2.98, 2.99, 2.100, 2.101
   - הואצל: ממצא סקירה (Codex) שטל הסמיך את Claude להחליט בו — אפשר לסגור בלי טל
   - סעיף מקור: נשאר להחלטת הבעלים
-- [ ] **2.93** [#235](https://github.com/talstilkol/lumen-md/pull/235) · 4.2 — 08c61af (cherry-pick של 48ee010 מ-#261): שני תיקוני P1 בקוד של PR זה — התאוששות כשה-chunk של מיקום הכספת נכשל באתחול, ומזהים ייחודיים לפתקים מנותקים. <!-- id:192ad8d42c prs:235 -->
+- [ ] **2.92** [#235](https://github.com/talstilkol/lumen-md/pull/235) · 4.2 — 08c61af (cherry-pick של 48ee010 מ-#261): שני תיקוני P1 בקוד של PR זה — התאוששות כשה-chunk של מיקום הכספת נכשל באתחול, ומזהים ייחודיים לפתקים מנותקים. <!-- id:192ad8d42c prs:235 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 4.2 (כספת בתיקייה אמיתית בדפדפן); ואחריו 4.4, 11.4, 14.1, 15.8
-  - אחרי: 2.97, 2.98, 2.99, 2.100, 2.101, 2.102
+  - אחרי: 2.96, 2.97, 2.98, 2.99, 2.100, 2.101
   - סעיף מקור: נשאר להחלטת הבעלים
-- [ ] **2.94** [#258](https://github.com/talstilkol/lumen-md/pull/258) · 4.4 — ממצאי Codex P2 שנשארו אחרי שני סבבי תיקון (plan 4.4); לא מתוקנים עוד כאן. <!-- id:ed9bdbe890 prs:258 -->
+- [ ] **2.93** [#258](https://github.com/talstilkol/lumen-md/pull/258) · 4.4 — ממצאי Codex P2 שנשארו אחרי שני סבבי תיקון (plan 4.4); לא מתוקנים עוד כאן. <!-- id:ed9bdbe890 prs:258 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 4.4 (שינויים מבחוץ: מעקב ויישוב); ואחריו 3.7, 4.20, 10.2, 11.4, 13.1, W1.9, W13.V6
-  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.91, 2.92, 2.93, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.90, 2.91, 2.92, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - הואצל: ממצא סקירה (Codex) שטל הסמיך את Claude להחליט בו — אפשר לסגור בלי טל
   - סעיף מקור: נשאר להחלטת הבעלים
-- [ ] **2.95** [#258](https://github.com/talstilkol/lumen-md/pull/258) · 4.4 — [`4311564686`](https://github.com/talstilkol/lumen-md/pull/258#discussion_r4311564686) — אמיתי: ב-watcher של תיקיית הדפדפן כל דחייה של backend.list() — גם הרשאה שבוטלה או שגיאת IO חולפת — נחשבת כתיקייה שנעלמה; כשל בשורש נותן snapshot ריק ומחיקות לכל הכספת (הפתקים הפתוחים מתנתקים). תיקון: להתעלם רק מ-NotFound ולבטל את… <!-- id:0473a8fe87 prs:258 -->
+- [ ] **2.94** [#258](https://github.com/talstilkol/lumen-md/pull/258) · 4.4 — [`4311564686`](https://github.com/talstilkol/lumen-md/pull/258#discussion_r4311564686) — אמיתי: ב-watcher של תיקיית הדפדפן כל דחייה של backend.list() — גם הרשאה שבוטלה או שגיאת IO חולפת — נחשבת כתיקייה שנעלמה; כשל בשורש נותן snapshot ריק ומחיקות לכל הכספת (הפתקים הפתוחים מתנתקים). תיקון: להתעלם רק מ-NotFound ולבטל את… <!-- id:0473a8fe87 prs:258 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 4.4 (שינויים מבחוץ: מעקב ויישוב); ואחריו 3.7, 4.20, 10.2, 11.4, 13.1, W1.9, W13.V6
-  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.91, 2.92, 2.93, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.90, 2.91, 2.92, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - הואצל: ממצא סקירה (Codex) שטל הסמיך את Claude להחליט בו — אפשר לסגור בלי טל
   - סעיף מקור: נשאר להחלטת הבעלים
-- [ ] **2.96** [#258](https://github.com/talstilkol/lumen-md/pull/258) · 4.4 — [`4311564696`](https://github.com/talstilkol/lumen-md/pull/258#discussion_r4311564696) — אמיתי: autosave שנפל בזמן שהדיאלוג פתוח (saveOpenNote מחזיר false) לא מתוזמן מחדש, כי המצב שמשוחזר זהה (content, dirty:true) — הפתק נשאר לא שמור עד עריכה הבאה. תיקון: לתזמן שמירה אחרי ההכרעה. <!-- id:a7ab50864d prs:258 -->
+- [ ] **2.95** [#258](https://github.com/talstilkol/lumen-md/pull/258) · 4.4 — [`4311564696`](https://github.com/talstilkol/lumen-md/pull/258#discussion_r4311564696) — אמיתי: autosave שנפל בזמן שהדיאלוג פתוח (saveOpenNote מחזיר false) לא מתוזמן מחדש, כי המצב שמשוחזר זהה (content, dirty:true) — הפתק נשאר לא שמור עד עריכה הבאה. תיקון: לתזמן שמירה אחרי ההכרעה. <!-- id:a7ab50864d prs:258 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 4.4 (שינויים מבחוץ: מעקב ויישוב); ואחריו 3.7, 4.20, 10.2, 11.4, 13.1, W1.9, W13.V6
-  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.91, 2.92, 2.93, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.90, 2.91, 2.92, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - הואצל: ממצא סקירה (Codex) שטל הסמיך את Claude להחליט בו — אפשר לסגור בלי טל
   - סעיף מקור: נשאר להחלטת הבעלים
-- [ ] **2.97** [#261](https://github.com/talstilkol/lumen-md/pull/261) · 14.1 — Codex P2s, left open after the 2-round cap and tracked in plan 15.16 (12): <!-- id:e4c20f5278 prs:261 -->
+- [ ] **2.96** [#261](https://github.com/talstilkol/lumen-md/pull/261) · 14.1 — Codex P2s, left open after the 2-round cap and tracked in plan 15.16 (12): <!-- id:e4c20f5278 prs:261 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 14.1 (חוויית התחלה); ואחריו W1.29, W3.6, W4.35, W11.P6
-  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.91, 2.92, 2.93, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.90, 2.91, 2.92, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - הואצל: ממצא סקירה (Codex) שטל הסמיך את Claude להחליט בו — אפשר לסגור בלי טל
   - סעיף מקור: נשאר להחלטת הבעלים (left for the owner)
-- [ ] **2.98** [#261](https://github.com/talstilkol/lumen-md/pull/261) · 14.1 — 4311616383: setup reads the vault's place once, so a restore slower than 3 s (`restoring`) shows "browser storage" while the saved folder may still resolve. Fix path: treat `restoring` as pending in the vault step and re-read on `onVaultStatusChange`. <!-- id:ca72780605 prs:261 -->
+- [ ] **2.97** [#261](https://github.com/talstilkol/lumen-md/pull/261) · 14.1 — 4311616383: setup reads the vault's place once, so a restore slower than 3 s (`restoring`) shows "browser storage" while the saved folder may still resolve. Fix path: treat `restoring` as pending in the vault step and re-read on `onVaultStatusChange`. <!-- id:ca72780605 prs:261 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 14.1 (חוויית התחלה); ואחריו W1.29, W3.6, W4.35, W11.P6
-  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.91, 2.92, 2.93, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.90, 2.91, 2.92, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: נשאר להחלטת הבעלים (left for the owner)
-- [ ] **2.99** [#261](https://github.com/talstilkol/lumen-md/pull/261) · 14.1 — 4311163141: a vault move doesn't carry empty folders, and its preflight doesn't see a file blocking a folder path. <!-- id:bfeff3afb2 prs:261 -->
+- [ ] **2.98** [#261](https://github.com/talstilkol/lumen-md/pull/261) · 14.1 — 4311163141: a vault move doesn't carry empty folders, and its preflight doesn't see a file blocking a folder path. <!-- id:bfeff3afb2 prs:261 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 14.1 (חוויית התחלה); ואחריו W1.29, W3.6, W4.35, W11.P6
-  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.91, 2.92, 2.93, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.90, 2.91, 2.92, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: נשאר להחלטת הבעלים (left for the owner)
-- [ ] **2.100** [#261](https://github.com/talstilkol/lumen-md/pull/261) · 14.1 — 4311163146: version history is keyed by relative path only, so opening an unrelated folder vault can show the old vault's snapshots. <!-- id:3da273b391 prs:261 -->
+- [ ] **2.99** [#261](https://github.com/talstilkol/lumen-md/pull/261) · 14.1 — 4311163146: version history is keyed by relative path only, so opening an unrelated folder vault can show the old vault's snapshots. <!-- id:3da273b391 prs:261 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 14.1 (חוויית התחלה); ואחריו W1.29, W3.6, W4.35, W11.P6
-  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.91, 2.92, 2.93, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.90, 2.91, 2.92, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: נשאר להחלטת הבעלים (left for the owner)
-- [ ] **2.101** [#261](https://github.com/talstilkol/lumen-md/pull/261) · 14.1 — The last two are #235's code (`src/storage/vault/location.ts`), merged into this branch for its folder picker. They belong to #235. <!-- id:4a117ccdf5 prs:261 -->
+- [ ] **2.100** [#261](https://github.com/talstilkol/lumen-md/pull/261) · 14.1 — The last two are #235's code (`src/storage/vault/location.ts`), merged into this branch for its folder picker. They belong to #235. <!-- id:4a117ccdf5 prs:261 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 14.1 (חוויית התחלה); ואחריו W1.29, W3.6, W4.35, W11.P6
-  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.91, 2.92, 2.93, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.90, 2.91, 2.92, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: נשאר להחלטת הבעלים (left for the owner)
-- [ ] **2.102** [#261](https://github.com/talstilkol/lumen-md/pull/261) · 14.1 — The two P1s on #235's code that Codex raised here (the location chunk failing at boot; detached tabs sharing an id) are fixed in 48ee010d, and the same commit should be applied to #235. <!-- id:8a45bc8657 prs:261 -->
+- [ ] **2.101** [#261](https://github.com/talstilkol/lumen-md/pull/261) · 14.1 — The two P1s on #235's code that Codex raised here (the location chunk failing at boot; detached tabs sharing an id) are fixed in 48ee010d, and the same commit should be applied to #235. <!-- id:8a45bc8657 prs:261 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 14.1 (חוויית התחלה); ואחריו W1.29, W3.6, W4.35, W11.P6
-  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.91, 2.92, 2.93, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.90, 2.91, 2.92, 10.2 (⚠ 10.2 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - הואצל: ממצא סקירה (Codex) שטל הסמיך את Claude להחליט בו — אפשר לסגור בלי טל
   - סעיף מקור: נשאר להחלטת הבעלים (left for the owner)
-- [ ] **2.103** [#316](https://github.com/talstilkol/lumen-md/pull/316) · 13.1 — Docker `LUMEN_COLLAB_TOKEN`: pass it to the web image as `VITE_YJS_WEBSOCKET_TOKEN` (a build arg in `docker/Dockerfile.web` · `docker-compose.yml`), or remove it from `.env.onprem.example`. That's a code change outside 13.1. <!-- id:70930edfbf prs:316 -->
+- [ ] **2.102** [#316](https://github.com/talstilkol/lumen-md/pull/316) · 13.1 — Docker `LUMEN_COLLAB_TOKEN`: pass it to the web image as `VITE_YJS_WEBSOCKET_TOKEN` (a build arg in `docker/Dockerfile.web` · `docker-compose.yml`), or remove it from `.env.onprem.example`. That's a code change outside 13.1. <!-- id:70930edfbf prs:316 -->
 
   ```sh
   docker/Dockerfile.web
@@ -1360,18 +1337,18 @@
   ```
 
   - משחרר: אימות 13.1 (תיעוד: ביקורת שלמות (כל משימה כותבת את העמוד שלה כחלק מה-DoD)); ואחריו W1.28, W4.10, W13.D4
-  - אחרי: 2.94, 2.95, 2.96
+  - אחרי: 2.93, 2.94, 2.95
   - נוגע גם ב: מארח שני (מחשב שתמיד דולק)
   - סעיף מקור: נשאר להחלטת הבעלים
-- [ ] **2.104** [#316](https://github.com/talstilkol/lumen-md/pull/316) · 13.1 — ~~Web Clipper extension: add a receiver, or remove the extension.~~ Decided (2.92): keep it; the receiver exists. See above. <!-- id:0409f77ee0 prs:316 -->
+- [ ] **2.103** [#316](https://github.com/talstilkol/lumen-md/pull/316) · 13.1 — ~~Web Clipper extension: add a receiver, or remove the extension.~~ Decided (2.92): keep it; the receiver exists. See above. <!-- id:0409f77ee0 prs:316 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 13.1 (תיעוד: ביקורת שלמות (כל משימה כותבת את העמוד שלה כחלק מה-DoD)); ואחריו W1.28, W4.10, W13.D4
-  - אחרי: 2.94, 2.95, 2.96
+  - אחרי: 2.93, 2.94, 2.95
   - סעיף מקור: נשאר להחלטת הבעלים
-- [ ] **2.105** [#316](https://github.com/talstilkol/lumen-md/pull/316) · 13.1 — MCP / create-lumen-plugin: publish to npm, or keep build-from-source as documented. <!-- id:2c0565c03c prs:316 -->
+- [ ] **2.104** [#316](https://github.com/talstilkol/lumen-md/pull/316) · 13.1 — MCP / create-lumen-plugin: publish to npm, or keep build-from-source as documented. <!-- id:2c0565c03c prs:316 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 13.1 (תיעוד: ביקורת שלמות (כל משימה כותבת את העמוד שלה כחלק מה-DoD)); ואחריו W1.28, W4.10, W13.D4
-  - אחרי: 2.94, 2.95, 2.96
+  - אחרי: 2.93, 2.94, 2.95
   - סעיף מקור: נשאר להחלטת הבעלים
 
 ## ישיבה 3 — אנשים (בודקים, קליניקה, מתחזק שני, דוברים) (30)
@@ -1432,7 +1409,7 @@
   ```
 
   - משחרר: אימות W4.28 (Bus factor: מתחזק שני וסקירה אנושית לקוד רגיש); ואחריו W6.13
-  - אחרי: 7.19 (⚠ 7.19 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 7.18 (⚠ 7.18 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: Owner commands
 - [ ] **3.7** [#522](https://github.com/talstilkol/lumen-md/pull/522) · W6.30 — On the nightly Mac: For NVDA, on a Windows host: `npm run test:sr -- --project=nvda-chrome`. Recruiting the 3 users is your step: see docs `editor/screen-reader-testers`. <!-- id:23afc24147 prs:522 -->
 
@@ -1610,7 +1587,7 @@
   - אחרי: 3.26, 3.27, 3.28, 8.44 (⚠ 8.44 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: Owner commands
 
-## ישיבה 4 — מודלים, Hugging Face, ‏Kaggle ונתונים (88)
+## ישיבה 4 — מודלים, Hugging Face, ‏Kaggle ונתונים (89)
 
 צריך את HF_TOKEN מהחשבונות; ההצמדות וההורדות משמשות את ה-Mac ואת המארח השני.
 
@@ -2373,6 +2350,11 @@
 
   - משחרר: אימות #935
   - סעיף מקור: Owner commands
+- [ ] **4.89** [#1148](https://github.com/talstilkol/lumen-md/pull/1148) — `scripts/owner/readingStudy.mjs`: · `blank <id> --slot <0-5> [--dyslexia]`: an empty sheet. Readers get pseudonymous ids only; no names are recorded. · `status`: exit 0 only with 6 valid sessions, ≥2 of them with dyslexia, and a decision for each experimental mode. · `summary`: writes… <!-- id:bf681c19aa prs:1148 -->
+  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
+  - משחרר: אימות #1148
+  - נוגע גם ב: משפטי והחלטות
+  - סעיף מקור: W13.R14: reading study kit (the study itself is the owner's)
 
 ## ישיבה 5 — Cloudflare (22)
 
@@ -2690,7 +2672,7 @@
   - נוגע גם ב: מודלים, Hugging Face, ‏Kaggle ונתונים
   - סעיף מקור: Owner commands
 
-## ישיבה 7 — מארח שני (מחשב שתמיד דולק) (19)
+## ישיבה 7 — מארח שני (מחשב שתמיד דולק) (18)
 
 הרצות לילה ובדיקות מול שתי הפריסות — אחרי Cloudflare ו-Vercel.
 
@@ -2858,18 +2840,13 @@
   - משחרר: אימות W7.23 (בנייה משתחזרת מאומתת בשתי תשתיות: Cloudflare Workers Builds בונה שוב ו)
   - אחרי: 7.3, 7.4, 10.16, 10.17, 10.18, 10.19, 10.20 (⚠ 10.16, 10.17, 10.18, 10.19, 10.20 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: Owner commands
-- [ ] **7.18** [#1115](https://github.com/talstilkol/lumen-md/pull/1115) — Real-model pins and Docker on the agent. <!-- id:9a99cf70f3 prs:1115 -->
-  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
-  - משחרר: אימות #1115
-  - נוגע גם ב: מודלים, Hugging Face, ‏Kaggle ונתונים
-  - סעיף מקור: Owner pack
-- [ ] **7.19** 14.3 — משימה מתוזמנת אצל הבעלים) <!-- id:f7ba4ab075 prs: -->
+- [ ] **7.18** 14.3 — משימה מתוזמנת אצל הבעלים) <!-- id:f7ba4ab075 prs: -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 14.3 (סוכן מיון issues); ואחריו W4.28, W13.D6
   - אחרי: 7.1
   - סעיף מקור: plan.json status
 
-## ישיבה 8 — Mac (165)
+## ישיבה 8 — Mac (166)
 
 ישיבה אחת על ה-Mac: מודלים אמיתיים, Xcode, בניות — אחרי הטוקנים והמראה.
 
@@ -3356,7 +3333,7 @@
   ```
 
   - משחרר: אימות W7.22 (שרשרת אספקה בלי Actions: SLSA provenance עם Witness, וחתימת Sigstore ב); ואחריו W11.S5, W11.S12, W13.T3
-  - אחרי: 8.32, 8.33, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.285, 10.286, 10.287 (⚠ 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.290, 10.291, 10.292 (⚠ 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: Owner steps (once; in the docs page)
 - [ ] **8.53** [#550](https://github.com/talstilkol/lumen-md/pull/550) · W7.22 — Sign the policy with the factory host's public key (`keys/oracle-a1.pem` in `lumen-md-receipts`). Commit the output, and re-sign within 365 days: The output is `security/provenance-policy.dsse.json`. <!-- id:476e5c1e79 prs:550 -->
 
@@ -3366,7 +3343,7 @@
   ```
 
   - משחרר: אימות W7.22 (שרשרת אספקה בלי Actions: SLSA provenance עם Witness, וחתימת Sigstore ב); ואחריו W11.S5, W11.S12, W13.T3
-  - אחרי: 8.32, 8.33, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.285, 10.286, 10.287 (⚠ 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.290, 10.291, 10.292 (⚠ 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: Owner steps (once; in the docs page)
 - [ ] **8.54** [#550](https://github.com/talstilkol/lumen-md/pull/550) · W7.22 — `brew install cosign`, then sign one test file to see the identity. Put that email in `security/sigstore-identity.json` (the issuer is GitHub's, if you log in with GitHub). <!-- id:b56ff83d59 prs:550 -->
 
@@ -3376,7 +3353,7 @@
   ```
 
   - משחרר: אימות W7.22 (שרשרת אספקה בלי Actions: SLSA provenance עם Witness, וחתימת Sigstore ב); ואחריו W11.S5, W11.S12, W13.T3
-  - אחרי: 8.32, 8.33, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.285, 10.286, 10.287 (⚠ 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.290, 10.291, 10.292 (⚠ 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: Owner steps (once; in the docs page)
 - [ ] **8.55** [#550](https://github.com/talstilkol/lumen-md/pull/550) · W7.22 — On the factory host: `sudo bash scripts/supply-chain/install-tools.sh`. Paste the printed sha256 values into the PR. Set `LUMEN_WITNESS_KEY` (a key file for Witness) in `/etc/lumen-factory/env`. <!-- id:f24ef000ce prs:550 -->
 
@@ -3385,7 +3362,7 @@
   ```
 
   - משחרר: אימות W7.22 (שרשרת אספקה בלי Actions: SLSA provenance עם Witness, וחתימת Sigstore ב); ואחריו W11.S5, W11.S12, W13.T3
-  - אחרי: 8.32, 8.33, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.285, 10.286, 10.287 (⚠ 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.290, 10.291, 10.292 (⚠ 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: Owner steps (once; in the docs page)
 - [ ] **8.56** [#564](https://github.com/talstilkol/lumen-md/pull/564) · W7.20 — On a Mac with a real account: create an app password (Fastmail / iCloud), and once the UI lands run `LUMEN_CALDAV_URL=<collection parent> npx vitest run src/__tests__/caldavSync.test.ts` against a test calendar (the test empties the collection it makes). <!-- id:922e062bff prs:564 -->
 
@@ -3453,7 +3430,7 @@
 - [ ] **8.63** [#568](https://github.com/talstilkol/lumen-md/pull/568) · W6.43 — Full text in docs → *Releasing a version → The update drill*. <!-- id:5ca8973f88 prs:568 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות W6.43 (beta.1 מיד כשהקריפטו נסגר: release-beta1 נבנה מחדש, ותרגיל עדכון אמיתי)
-  - אחרי: 8.32, 8.33, 10.69, 10.285, 10.286, 10.287 (⚠ 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 10.69, 10.290, 10.291, 10.292 (⚠ 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: The update drill (owner, on the Mac, once)
 - [ ] **8.64** [#568](https://github.com/talstilkol/lumen-md/pull/568) · W6.43 — Set up the keys and identity: · `TAURI_SIGNING_PRIVATE_KEY` (+ `_PASSWORD`) · `LUMEN_RELEASE_KEY` (+ `_PASSPHRASE`) · `LUMEN_BUILD_KEY` and `LUMEN_FACTORY_HOST=mac` · commit `security/updater-key.pub`, `security/release-key.pub`, `security/provenance-policy.{pub,dsse.json}`, and the identity in… <!-- id:dd3f4ebb84 prs:568 -->
 
@@ -3465,7 +3442,7 @@
   ```
 
   - משחרר: אימות W6.43 (beta.1 מיד כשהקריפטו נסגר: release-beta1 נבנה מחדש, ותרגיל עדכון אמיתי)
-  - אחרי: 8.32, 8.33, 8.52, 8.53, 8.54, 8.55, 10.69, 10.285, 10.286, 10.287 (⚠ 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 8.52, 8.53, 8.54, 8.55, 10.69, 10.290, 10.291, 10.292 (⚠ 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: The update drill (owner, on the Mac, once)
 - [ ] **8.65** [#568](https://github.com/talstilkol/lumen-md/pull/568) · W6.43 — On a clean `main` with this branch merged: `npm ci && npm run release -- 0.2.0-beta.1 --dry-run`. Check `REPRODUCIBLE` and `provenance gate: … files`, and that `git status` is empty. <!-- id:de3ddbb147 prs:568 -->
 
@@ -3475,7 +3452,7 @@
   ```
 
   - משחרר: אימות W6.43 (beta.1 מיד כשהקריפטו נסגר: release-beta1 נבנה מחדש, ותרגיל עדכון אמיתי)
-  - אחרי: 8.32, 8.33, 10.69, 10.285, 10.286, 10.287 (⚠ 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 10.69, 10.290, 10.291, 10.292 (⚠ 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: The update drill (owner, on the Mac, once)
 - [ ] **8.66** [#568](https://github.com/talstilkol/lumen-md/pull/568) · W6.43 — `npm run release -- 0.2.0-beta.1 --publish`. <!-- id:82a9f4b07d prs:568 -->
 
@@ -3484,7 +3461,7 @@
   ```
 
   - משחרר: אימות W6.43 (beta.1 מיד כשהקריפטו נסגר: release-beta1 נבנה מחדש, ותרגיל עדכון אמיתי)
-  - אחרי: 8.32, 8.33, 10.69, 10.285, 10.286, 10.287 (⚠ 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 10.69, 10.290, 10.291, 10.292 (⚠ 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: The update drill (owner, on the Mac, once)
 - [ ] **8.67** [#568](https://github.com/talstilkol/lumen-md/pull/568) · W6.43 — `gh release download v0.2.0-beta.1 -D /tmp/b1`, then run `verify-release.mjs … --pub security/release-key.pub` and `node scripts/supply-chain/verify.mjs /tmp/b1`. Both must fail on a copy with one changed byte. <!-- id:d115473f86 prs:568 -->
 
@@ -3494,17 +3471,17 @@
   ```
 
   - משחרר: אימות W6.43 (beta.1 מיד כשהקריפטו נסגר: release-beta1 נבנה מחדש, ותרגיל עדכון אמיתי)
-  - אחרי: 8.32, 8.33, 10.69, 10.285, 10.286, 10.287 (⚠ 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 10.69, 10.290, 10.291, 10.292 (⚠ 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: The update drill (owner, on the Mac, once)
 - [ ] **8.68** [#568](https://github.com/talstilkol/lumen-md/pull/568) · W6.43 — Install the `.dmg`. `strings /Applications/Lumen.app/Contents/MacOS/* — grep -c beta-channel` must print ≥ 1, and the updater key's first 16 characters must be found the same way. <!-- id:8a5f35fd07 prs:568 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות W6.43 (beta.1 מיד כשהקריפטו נסגר: release-beta1 נבנה מחדש, ותרגיל עדכון אמיתי)
-  - אחרי: 8.32, 8.33, 10.69, 10.285, 10.286, 10.287 (⚠ 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 10.69, 10.290, 10.291, 10.292 (⚠ 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: The update drill (owner, on the Mac, once)
 - [ ] **8.69** [#568](https://github.com/talstilkol/lumen-md/pull/568) · W6.43 — Open beta.1: Feature flags shows *Encrypted sync (experimental)* off. <!-- id:cb01a69411 prs:568 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות W6.43 (beta.1 מיד כשהקריפטו נסגר: release-beta1 נבנה מחדש, ותרגיל עדכון אמיתי)
-  - אחרי: 8.32, 8.33, 10.69, 10.285, 10.286, 10.287 (⚠ 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 10.69, 10.290, 10.291, 10.292 (⚠ 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: The update drill (owner, on the Mac, once)
 - [ ] **8.70** [#568](https://github.com/talstilkol/lumen-md/pull/568) · W6.43 — Make a small change on `main`, add `release-notes/0.2.0-beta.2.{he,en}.md`, then `npm run release -- 0.2.0-beta.2 --publish`. <!-- id:e8e8031f01 prs:568 -->
 
@@ -3513,17 +3490,17 @@
   ```
 
   - משחרר: אימות W6.43 (beta.1 מיד כשהקריפטו נסגר: release-beta1 נבנה מחדש, ותרגיל עדכון אמיתי)
-  - אחרי: 8.32, 8.33, 10.69, 10.285, 10.286, 10.287 (⚠ 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 10.69, 10.290, 10.291, 10.292 (⚠ 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: The update drill (owner, on the Mac, once)
 - [ ] **8.71** [#568](https://github.com/talstilkol/lumen-md/pull/568) · W6.43 — In beta.1, run *Check for updates…*: it offers 0.2.0-beta.2. Install it; Lumen restarts on beta.2. Take a screenshot of each step. <!-- id:9401ddbaf1 prs:568 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות W6.43 (beta.1 מיד כשהקריפטו נסגר: release-beta1 נבנה מחדש, ותרגיל עדכון אמיתי)
-  - אחרי: 8.32, 8.33, 10.69, 10.285, 10.286, 10.287 (⚠ 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 10.69, 10.290, 10.291, 10.292 (⚠ 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: The update drill (owner, on the Mac, once)
 - [ ] **8.72** [#568](https://github.com/talstilkol/lumen-md/pull/568) · W6.43 — Change one character of the darwin signature in a copy of `latest.json`, serve it locally with `LUMEN_UPDATER_ENDPOINT_BETA` set at build time, and check that the update is refused. <!-- id:7f63284eb8 prs:568 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות W6.43 (beta.1 מיד כשהקריפטו נסגר: release-beta1 נבנה מחדש, ותרגיל עדכון אמיתי)
-  - אחרי: 8.32, 8.33, 10.69, 10.285, 10.286, 10.287 (⚠ 10.69, 10.285, 10.286, 10.287 בישיבה מאוחרת יותר — לעשות אותם קודם)
+  - אחרי: 8.32, 8.33, 10.69, 10.290, 10.291, 10.292 (⚠ 10.69, 10.290, 10.291, 10.292 בישיבה מאוחרת יותר — לעשות אותם קודם)
   - סעיף מקור: The update drill (owner, on the Mac, once)
 - [ ] **8.73** [#572](https://github.com/talstilkol/lumen-md/pull/572) · W7.16 — 50 screenshots (25 he, 25 en: tables, dialogs, code): CER ≤ 5%, tables right ≥ 80% — `run.mjs measure --engine ollama` (owed: owner, model). Here: measuring checked with `--engine gold` (CER 0.00%/0.00%, 18/18 tables); fallback baseline `--engine tesseract-cli` CER he 17.84%, en 8.61%, tables 0/18. The fallback alone… <!-- id:2515df527e prs:572 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
@@ -4386,6 +4363,11 @@
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות #1121
   - סעיף מקור: Owed
+- [ ] **8.166** [#1137](https://github.com/talstilkol/lumen-md/pull/1137) — Annotator preference ≥ 60% against the base summary. This needs the independent annotators of W13.W18 (owner) and a real-model run (W13.W17, Mac). It is not measured here, so the task is partial. <!-- id:79b31eadc1 prs:1137 -->
+  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
+  - משחרר: אימות #1137
+  - נוגע גם ב: מודלים, Hugging Face, ‏Kaggle ונתונים
+  - סעיף מקור: Owed
 
 ## ישיבה 9 — מכשירים (17)
 
@@ -4398,7 +4380,7 @@
   ```
 
   - משחרר: אימות 4.20 (כספת בתיקייה במובייל); ואחריו W1.5, 15.13
-  - אחרי: 2.94, 2.95, 2.96
+  - אחרי: 2.93, 2.94, 2.95
   - סעיף מקור: (inline)
 - [ ] **9.2** [#360](https://github.com/talstilkol/lumen-md/pull/360) · W1.23 — If Lumen is offered as a service in Israel: name an accessibility coordinator (name, phone, email) in the statement. Today the contact is the GitHub issues label `accessibility`. <!-- id:f870e2cf2a prs:360 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
@@ -4503,7 +4485,7 @@
   - נוגע גם ב: משפטי והחלטות
   - סעיף מקור: Owner commands
 
-## ישיבה 10 — כל מחשב עם npm install (288)
+## ישיבה 10 — כל מחשב עם npm install (293)
 
 בדיקות שצריכות npm install מלא; בכל מחשב, בכל זמן.
 
@@ -4518,7 +4500,7 @@
 - [ ] **10.3** 15.8 — בדיקות ידניות לשחרור (≈ 1 ש׳) <!-- id:8cef756402 prs: -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות 15.8 (בדיקות ידניות לשחרור)
-  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.91, 2.92, 2.93, 10.2
+  - אחרי: 2.8, 2.9, 2.10, 2.11, 2.90, 2.91, 2.92, 10.2
   - סעיף מקור: plan.json owner
 - [ ] **10.4** [#257](https://github.com/talstilkol/lumen-md/pull/257) · 9.2 — ה-test אצל הבעלים (15.11) (W10.G8) · (dev: recall 75%, FP 2.5% / 3.9% <!-- id:b1257bf9b7 prs:257 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
@@ -5348,12 +5330,12 @@
   ```
 
   - משחרר: אימות 13.1 (תיעוד: ביקורת שלמות (כל משימה כותבת את העמוד שלה כחלק מה-DoD)); ואחריו W1.28, W4.10, W13.D4
-  - אחרי: 2.94, 2.95, 2.96
+  - אחרי: 2.93, 2.94, 2.95
   - סעיף מקור: Owner commands
 - [ ] **10.118** [#384](https://github.com/talstilkol/lumen-md/pull/384) · W1.28 — Owner: turn on GitHub Discussions as the forum, then add the link to the docs `social` list. <!-- id:33aff19491 prs:384 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות W1.28 (תיעוד עברי-ראשון עם חיפוש ומדריכי מעבר); ואחריו W2.25, W3.7, W4.10, W4.34, W6.28, W13.D1
-  - אחרי: 2.103, 2.104, 2.105, 10.117
+  - אחרי: 2.102, 2.103, 2.104, 10.117
   - סעיף מקור: (inline)
 - [ ] **10.119** [#624](https://github.com/talstilkol/lumen-md/pull/624) — Owner commands <!-- id:f78e6531ee prs:624 -->
 
@@ -6092,7 +6074,7 @@
   ```
 
   - משחרר: אימות W1.9 (מיזוג תלת-כיווני אוטומטי לפני דיאלוג קונפליקט); ואחריו W11.S6, W11.S7, W12.S3
-  - אחרי: 2.27, 2.28, 2.29, 2.30, 2.31, 2.94, 2.95, 2.96, 8.3
+  - אחרי: 2.27, 2.28, 2.29, 2.30, 2.31, 2.93, 2.94, 2.95, 8.3
   - סעיף מקור: Owner commands
 - [ ] **10.214** [#828](https://github.com/talstilkol/lumen-md/pull/828) — Owner commands <!-- id:09c09f502e prs:828 -->
 
@@ -6685,58 +6667,82 @@
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות #1124
   - סעיף מקור: Owed by the owner
-- [ ] **10.285** [#557](https://github.com/talstilkol/lumen-md/pull/557) · W7.22, W4.5 — The ones in #550, plus, on the machine that runs `--publish`: <!-- id:562729fa5e prs:557 -->
+- [ ] **10.285** [#1133](https://github.com/talstilkol/lumen-md/pull/1133) — The gold sets were written by the author of the rules; the independent held-out set is W13.W18 (owner). <!-- id:3009ed2f40 prs:1133 -->
+  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
+  - משחרר: אימות #1133
+  - סעיף מקור: Owed / honest notes
+- [ ] **10.286** [#1144](https://github.com/talstilkol/lumen-md/pull/1144) — W13.W18: blocked (OWNER: two annotators). Its dod `npm run heldout -- --check writing` now exists and exits 1 until the owner's set is sealed. <!-- id:b2f4f50a63 prs:1144 -->
+
+  ```sh
+  npm run heldout -- --check writing
+  ```
+
+  - משחרר: אימות #1144
+  - סעיף מקור: (inline)
+- [ ] **10.287** [#1146](https://github.com/talstilkol/lumen-md/pull/1146) — Not done / owed: cards exist for 3 of the 12 planned writing agents (the others are L5/L6's or later waves); the held-out set is not sealed — W6.17 needs the evaluator key (owner), real texts (W10.B13) and annotators (W13.W18). Synthetic ⇒ never ✅. <!-- id:b71254d59f prs:1146 -->
+  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
+  - משחרר: אימות #1146
+  - סעיף מקור: (inline)
+- [ ] **10.288** [#1148](https://github.com/talstilkol/lumen-md/pull/1148) — `scripts/owner/steps.mjs`: new step `devices/reading-study` (240 min), checked automatically, plus a manual consent attestation. This is the 15th step, within the existing ≤15 limit. <!-- id:e36e657eaf prs:1148 -->
+  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
+  - משחרר: אימות #1148
+  - סעיף מקור: W13.R14: reading study kit (the study itself is the owner's)
+- [ ] **10.289** [#1148](https://github.com/talstilkol/lumen-md/pull/1148) — `src/__tests__/readingStudy.test.ts`: 9/9. It fails without the script. `ownerSession`: 18/18, `ownerChecklist`: 16/16, `goldenOwnerLogs`: 3/3. <!-- id:00506ffcd5 prs:1148 -->
+  - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
+  - משחרר: אימות #1148
+  - סעיף מקור: W13.R14: reading study kit (the study itself is the owner's)
+- [ ] **10.290** [#557](https://github.com/talstilkol/lumen-md/pull/557) · W7.22, W4.5 — The ones in #550, plus, on the machine that runs `--publish`: <!-- id:562729fa5e prs:557 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות W7.22 (שרשרת אספקה בלי Actions: SLSA provenance עם Witness, וחתימת Sigstore ב); W4.5 (שחרור ראשון אמיתי: 0.2.0-beta.1 חתום עם עדכון אוטומטי); ואחריו W6.43, W11.S5, W11.S12, W13.T3, W13.T4
-  - אחרי: 8.32, 8.33, 8.52, 8.53, 8.54, 8.55, 10.15, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.286, 10.287
+  - אחרי: 8.32, 8.33, 8.52, 8.53, 8.54, 8.55, 10.15, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.291, 10.292
   - סעיף מקור: Owner steps
-- [ ] **10.286** [#557](https://github.com/talstilkol/lumen-md/pull/557) · W7.22, W4.5 — export `LUMEN_BUILD_KEY` (or `LUMEN_NIGHTLY_KEY` on the factory host) and `LUMEN_FACTORY_HOST`, matching a builder the policy names <!-- id:2bb12e97fd prs:557 -->
+- [ ] **10.291** [#557](https://github.com/talstilkol/lumen-md/pull/557) · W7.22, W4.5 — export `LUMEN_BUILD_KEY` (or `LUMEN_NIGHTLY_KEY` on the factory host) and `LUMEN_FACTORY_HOST`, matching a builder the policy names <!-- id:2bb12e97fd prs:557 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות W7.22 (שרשרת אספקה בלי Actions: SLSA provenance עם Witness, וחתימת Sigstore ב); W4.5 (שחרור ראשון אמיתי: 0.2.0-beta.1 חתום עם עדכון אוטומטי); ואחריו W6.43, W11.S5, W11.S12, W13.T3, W13.T4
-  - אחרי: 8.32, 8.33, 10.15, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.285, 10.287
+  - אחרי: 8.32, 8.33, 10.15, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.290, 10.292
   - סעיף מקור: Owner steps
-- [ ] **10.287** [#557](https://github.com/talstilkol/lumen-md/pull/557) · W7.22, W4.5 — have cosign ≥ 3.0.4 <!-- id:b142e6728c prs:557 -->
+- [ ] **10.292** [#557](https://github.com/talstilkol/lumen-md/pull/557) · W7.22, W4.5 — have cosign ≥ 3.0.4 <!-- id:b142e6728c prs:557 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות W7.22 (שרשרת אספקה בלי Actions: SLSA provenance עם Witness, וחתימת Sigstore ב); W4.5 (שחרור ראשון אמיתי: 0.2.0-beta.1 חתום עם עדכון אוטומטי); ואחריו W6.43, W11.S5, W11.S12, W13.T3, W13.T4
-  - אחרי: 8.32, 8.33, 10.15, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.285, 10.286
+  - אחרי: 8.32, 8.33, 10.15, 10.16, 10.17, 10.18, 10.19, 10.20, 10.69, 10.290, 10.291
   - סעיף מקור: Owner steps
-- [ ] **10.288** [#568](https://github.com/talstilkol/lumen-md/pull/568) · W6.43 — The released binary has a non-empty pubkey and configured endpoints — #492's `checkUpdaterConf(…, {release:true})` refuses an empty or placeholder key; the drill's step 5 checks the installed binary with `strings` — ✅ check in code; the real binary (owner) <!-- id:e02ad3f5eb prs:568 -->
+- [ ] **10.293** [#568](https://github.com/talstilkol/lumen-md/pull/568) · W6.43 — The released binary has a non-empty pubkey and configured endpoints — #492's `checkUpdaterConf(…, {release:true})` refuses an empty or placeholder key; the drill's step 5 checks the installed binary with `strings` — ✅ check in code; the real binary (owner) <!-- id:e02ad3f5eb prs:568 -->
   - פקודה: אין פקודה מדויקת ב-PR — הצעד כתוב במילים למעלה.
   - משחרר: אימות W6.43 (beta.1 מיד כשהקריפטו נסגר: release-beta1 נבנה מחדש, ותרגיל עדכון אמיתי)
-  - אחרי: 8.32, 8.33, 10.69, 10.285, 10.286, 10.287
+  - אחרי: 8.32, 8.33, 10.69, 10.290, 10.291, 10.292
   - סעיף מקור: (inline)
 
 </div>
 
 ## English
 
-Generated 2026-11-16 22:15 UTC from 841 open PRs (gh) + plan/plan.json: **847 owner steps** from **433 PRs** (431 of them open PRs with owner steps; the rest are plan.json tasks), grouped by the resource they need and ordered into sessions. Each step above has its exact command, the PR and task it comes from, what it unblocks, and the steps it must come after (`after: 3.2` = session 3, step 2). Tick `[x]` when done; `npm run owner:checklist` refreshes the list and keeps the ticks; `npm run owner:checklist -- --check` fails when an open PR's owner steps are missing.
+Generated 2026-11-17 00:22 UTC from 840 open PRs (gh) + plan/plan.json: **846 owner steps** from **435 PRs** (433 of them open PRs with owner steps; the rest are plan.json tasks), grouped by the resource they need and ordered into sessions. Each step above has its exact command, the PR and task it comes from, what it unblocks, and the steps it must come after (`after: 3.2` = session 3, step 2). Tick `[x]` when done; `npm run owner:checklist` refreshes the list and keeps the ticks; `npm run owner:checklist -- --check` fails when an open PR's owner steps are missing.
 
 | # | Session | Steps | PRs | Why in this order |
 |---|---|---|---|---|
-| 1 | Accounts and services | 102 | 52 | Account verification takes days, and its tokens feed almost everything else |
-| 2 | Legal and decisions | 105 | 34 | Decisions and legal sends wait on someone else — send them early |
+| 1 | Accounts and services | 96 | 52 | Account verification takes days, and its tokens feed almost everything else |
+| 2 | Legal and decisions | 104 | 32 | Decisions and legal sends wait on someone else — send them early |
 | 3 | People (testers, clinic, maintainer, native speakers) | 30 | 22 | Recruiting takes time; start now, run when ready |
-| 4 | Models, Hugging Face, Kaggle and data | 88 | 59 | Needs HF_TOKEN from accounts; the pins and downloads feed the Mac and the second host |
+| 4 | Models, Hugging Face, Kaggle and data | 89 | 60 | Needs HF_TOKEN from accounts; the pins and downloads feed the Mac and the second host |
 | 5 | Cloudflare | 22 | 11 | Workers and Pages give the URLs the Vercel variables need |
 | 6 | Vercel | 11 | 8 | Env vars after Cloudflare gave URLs; one redeploy at the end |
-| 7 | Second host (always-on machine) | 19 | 13 | Nightly runs and two-host checks — after Cloudflare and Vercel |
-| 8 | Mac | 165 | 120 | One Mac sitting: real models, Xcode, builds — after the tokens and the mirror |
+| 7 | Second host (always-on machine) | 18 | 12 | Nightly runs and two-host checks — after Cloudflare and Vercel |
+| 8 | Mac | 166 | 121 | One Mac sitting: real models, Xcode, builds — after the tokens and the mirror |
 | 9 | Devices | 17 | 16 | Devices check builds and deployments that already exist — last |
-| 10 | Any computer with a full npm install | 288 | 206 | Checks that need a full npm install; any computer, any time |
-| | **Total** | **847** | **433** | |
+| 10 | Any computer with a full npm install | 293 | 210 | Checks that need a full npm install; any computer, any time |
+| | **Total** | **846** | **435** | |
 
 38 of the legal/decision steps are leftover review (Codex) threads that Tal delegated to Claude; they are marked "הואצל" and can be closed without Tal.
 
 PRs per session:
 
-- **1. Accounts and services:** #354, #377, #392, #395, #408, #411, #476, #481, #485, #486, #491, #493, #494, #499, #510, #515, #521, #525, #527, #531, #536, #540, #543, #549, #551, #577, #587, #596, #598, #600, #663, #668, #675, #697, #716, #718, #738, #745, #747, #750, #754, #759, #774, #789, #792, #795, #815, #858, #860, #898, #936, #1115; plan 15.18, 15.4, 15.5, 15.6
-- **2. Legal and decisions:** #223, #235, #258, #261, #267, #268, #272, #275, #276, #277, #306, #316, #369, #374, #395, #469, #499, #552, #554, #576, #602, #617, #780, #785, #858, #862, #864, #875, #886, #902, #1099, #1109, #1115, #1123; plan 15.10, 15.2
+- **1. Accounts and services:** #354, #377, #392, #395, #408, #411, #476, #481, #485, #486, #491, #493, #494, #499, #510, #515, #521, #525, #527, #531, #536, #540, #543, #549, #551, #577, #587, #596, #598, #600, #663, #668, #675, #697, #716, #718, #738, #745, #747, #750, #754, #759, #774, #789, #792, #795, #815, #858, #860, #898, #936, #1148; plan 15.18, 15.4, 15.5, 15.6
+- **2. Legal and decisions:** #223, #235, #258, #261, #267, #268, #272, #275, #276, #277, #306, #316, #369, #374, #395, #469, #499, #552, #554, #576, #602, #617, #780, #785, #858, #862, #864, #875, #886, #902, #1123, #1148; plan 15.10, 15.2
 - **3. People (testers, clinic, maintainer, native speakers):** #388, #447, #456, #458, #466, #481, #487, #522, #524, #536, #541, #543, #544, #545, #551, #554, #603, #606, #611, #732, #765, #811
-- **4. Models, Hugging Face, Kaggle and data:** #189, #225, #339, #345, #353, #358, #376, #379, #383, #388, #391, #394, #421, #434, #437, #443, #449, #454, #458, #466, #476, #503, #504, #519, #525, #558, #576, #582, #594, #601, #602, #606, #607, #678, #693, #715, #723, #735, #752, #761, #793, #796, #797, #799, #802, #806, #809, #810, #812, #813, #816, #817, #819, #832, #876, #885, #904, #917, #935; plan 15.11, 15.15, 15.16, 15.9, 15.14
+- **4. Models, Hugging Face, Kaggle and data:** #189, #225, #339, #345, #353, #358, #376, #379, #383, #388, #391, #394, #421, #434, #437, #443, #449, #454, #458, #466, #476, #503, #504, #519, #525, #558, #576, #582, #594, #601, #602, #606, #607, #678, #693, #715, #723, #735, #752, #761, #793, #796, #797, #799, #802, #806, #809, #810, #812, #813, #816, #817, #819, #832, #876, #885, #904, #917, #935, #1148; plan 15.11, 15.15, 15.16, 15.9, 15.14
 - **5. Cloudflare:** #469, #483, #518, #531, #536, #543, #561, #565, #575, #629, #925
 - **6. Vercel:** #469, #476, #483, #486, #528, #531, #561, #739
-- **7. Second host (always-on machine):** #245, #455, #468, #484, #499, #503, #527, #535, #558, #561, #566, #575, #1115; plan 14.3
-- **8. Mac:** #275, #293, #305, #313, #336, #337, #343, #360, #364, #374, #379, #383, #395, #398, #404, #423, #429, #438, #440, #441, #455, #464, #467, #476, #478, #479, #482, #492, #493, #499, #504, #509, #519, #520, #522, #523, #524, #526, #529, #530, #536, #539, #542, #549, #550, #564, #566, #568, #572, #578, #581, #583, #586, #590, #599, #603, #609, #621, #633, #650, #656, #662, #670, #674, #680, #684, #687, #689, #698, #700, #706, #709, #711, #716, #719, #722, #726, #727, #728, #733, #740, #742, #743, #746, #757, #761, #770, #774, #777, #791, #808, #818, #821, #826, #829, #831, #834, #838, #842, #843, #847, #849, #853, #857, #863, #869, #871, #873, #877, #884, #887, #893, #897, #901, #913, #915, #933, #934, #937, #1121; plan 15.3, 15.7, 15.17, 15.13
+- **7. Second host (always-on machine):** #245, #455, #468, #484, #499, #503, #527, #535, #558, #561, #566, #575; plan 14.3
+- **8. Mac:** #275, #293, #305, #313, #336, #337, #343, #360, #364, #374, #379, #383, #395, #398, #404, #423, #429, #438, #440, #441, #455, #464, #467, #476, #478, #479, #482, #492, #493, #499, #504, #509, #519, #520, #522, #523, #524, #526, #529, #530, #536, #539, #542, #549, #550, #564, #566, #568, #572, #578, #581, #583, #586, #590, #599, #603, #609, #621, #633, #650, #656, #662, #670, #674, #680, #684, #687, #689, #698, #700, #706, #709, #711, #716, #719, #722, #726, #727, #728, #733, #740, #742, #743, #746, #757, #761, #770, #774, #777, #791, #808, #818, #821, #826, #829, #831, #834, #838, #842, #843, #847, #849, #853, #857, #863, #869, #871, #873, #877, #884, #887, #893, #897, #901, #913, #915, #933, #934, #937, #1121, #1137; plan 15.3, 15.7, 15.17, 15.13
 - **9. Devices:** #344, #360, #376, #378, #448, #465, #467, #475, #478, #531, #595, #766, #774, #778, #782, #840
-- **10. Any computer with a full npm install:** #235, #257, #263, #270, #276, #277, #336, #355, #361, #375, #382, #384, #389, #392, #394, #395, #399, #401, #406, #410, #413, #418, #424, #426, #437, #451, #453, #458, #462, #467, #472, #477, #478, #482, #483, #488, #491, #492, #497, #498, #501, #505, #506, #512, #513, #516, #529, #531, #536, #537, #538, #551, #552, #554, #555, #556, #557, #558, #559, #568, #578, #586, #587, #589, #591, #592, #593, #597, #599, #615, #617, #618, #620, #622, #624, #625, #626, #630, #649, #650, #658, #659, #677, #683, #684, #692, #694, #696, #701, #704, #705, #710, #715, #718, #725, #730, #736, #741, #744, #745, #748, #749, #751, #753, #755, #756, #758, #759, #760, #763, #764, #767, #768, #769, #771, #772, #773, #775, #776, #778, #779, #782, #783, #786, #787, #794, #797, #798, #800, #801, #803, #804, #805, #807, #808, #811, #813, #814, #819, #820, #822, #823, #824, #827, #828, #830, #833, #836, #837, #838, #839, #841, #846, #850, #851, #852, #854, #855, #856, #859, #861, #865, #866, #867, #868, #869, #870, #872, #874, #882, #888, #889, #890, #891, #892, #894, #895, #896, #899, #900, #903, #905, #906, #907, #908, #909, #910, #911, #912, #914, #916, #918, #919, #920, #921, #928, #931, #933, #934, #935, #937, #1101, #1120, #1123, #1124, #1126; plan 15.1, 15.8, 15.12
+- **10. Any computer with a full npm install:** #235, #257, #263, #270, #276, #277, #336, #355, #361, #375, #382, #384, #389, #392, #394, #395, #399, #401, #406, #410, #413, #418, #424, #426, #437, #451, #453, #458, #462, #467, #472, #477, #478, #482, #483, #488, #491, #492, #497, #498, #501, #505, #506, #512, #513, #516, #529, #531, #536, #537, #538, #551, #552, #554, #555, #556, #557, #558, #559, #568, #578, #586, #587, #589, #591, #592, #593, #597, #599, #615, #617, #618, #620, #622, #624, #625, #626, #630, #649, #650, #658, #659, #677, #683, #684, #692, #694, #696, #701, #704, #705, #710, #715, #718, #725, #730, #736, #741, #744, #745, #748, #749, #751, #753, #755, #756, #758, #759, #760, #763, #764, #767, #768, #769, #771, #772, #773, #775, #776, #778, #779, #782, #783, #786, #787, #794, #797, #798, #800, #801, #803, #804, #805, #807, #808, #811, #813, #814, #819, #820, #822, #823, #824, #827, #828, #830, #833, #836, #837, #838, #839, #841, #846, #850, #851, #852, #854, #855, #856, #859, #861, #865, #866, #867, #868, #869, #870, #872, #874, #882, #888, #889, #890, #891, #892, #894, #895, #896, #899, #900, #903, #905, #906, #907, #908, #909, #910, #911, #912, #914, #916, #918, #919, #920, #921, #928, #931, #933, #934, #935, #937, #1101, #1120, #1123, #1124, #1126, #1133, #1144, #1146, #1148; plan 15.1, 15.8, 15.12
