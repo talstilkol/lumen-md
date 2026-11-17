@@ -1,0 +1,266 @@
+[
+ {
+  "id": "FC3-W10.C9-rouge",
+  "task": "W10.C9",
+  "pr": 1172,
+  "cmd": "npm run eval:summarize",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "eval/results/summary-*.json",
+     "path": ".rougeL",
+     "op": ">",
+     "value": 0
+    },
+    {
+     "file": "eval/results/summary-*.json",
+     "path": ".rows",
+     "op": "len>=",
+     "value": 5
+    }
+   ],
+   "note": "ROUGE-L and ROUGE-Lsum per document and as a mean, on the committed dev split"
+  },
+  "needs": [
+   "the train head with FC3's PRs (#1172 #1173 #1174 #1175) checked out, npm ci done (W10.M1 first)",
+   "Ollama running at http://127.0.0.1:11434",
+   "ollama pull qwen2.5:7b"
+  ],
+  "minutes": 15
+ },
+ {
+  "id": "FC3-W10.C9-hebsummaries",
+  "task": "W10.C9",
+  "pr": 1172,
+  "cmd": "LUMEN_EVAL_SUMMARY_DIRS=eval/golden/summarize/hebsummaries-test npm run eval:summarize",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "eval/results/summary-*.json",
+     "path": ".rougeL",
+     "op": ">",
+     "value": 0
+    }
+   ],
+   "after": "the owner reads the ROUGE-L and grounding share against the 95 % bar of acceptance 3"
+  },
+  "needs": [
+   "the train head with FC3's PRs (#1172 #1173 #1174 #1175) checked out, npm ci done (W10.M1 first)",
+   "Ollama running at http://127.0.0.1:11434",
+   "owner decision W11.O4 (HebSummaries licence) and its test split in eval/golden/summarize/hebsummaries-test as *.json with items [{id, document, reference}]"
+  ],
+  "minutes": 40
+ },
+ {
+  "id": "FC3-W2.14-clip-interpreter",
+  "task": "W2.14",
+  "pr": 1172,
+  "cmd": "npm run eval:clip-interpreter",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "eval/results/clip-interpreter-*.json",
+     "path": ".pass",
+     "equals": true
+    },
+    {
+     "file": "eval/results/clip-interpreter-*.json",
+     "path": ".modelShare",
+     "gte": 0.85
+    },
+    {
+     "file": "eval/results/clip-interpreter-*.json",
+     "path": ".msMax",
+     "op": "<",
+     "value": 10000
+    }
+   ],
+   "note": "20 golden pages, qwen2.5:3b; the run fails itself when a gate fails"
+  },
+  "needs": [
+   "the train head with FC3's PRs (#1172 #1173 #1174 #1175) checked out, npm ci done (W10.M1 first)",
+   "Ollama running at http://127.0.0.1:11434",
+   "ollama pull qwen2.5:3b"
+  ],
+  "minutes": 15
+ },
+ {
+  "id": "FC3-W10.B18-fetch",
+  "task": "W10.B18",
+  "pr": 1172,
+  "cmd": "python3 scripts/retrieval/fetch.py eval/public-data/retrieval --pins eval/retrieval-public.pins.json",
+  "expect": {
+   "exit": 0,
+   "files": [
+    "eval/public-data/retrieval/webfaq-heb/source.json",
+    "eval/public-data/retrieval/belebele-heb/source.json",
+    "eval/retrieval-public.pins.json"
+   ],
+   "note": "exit 3 means a dataset card's licence was not the accepted one (WebFAQ cc-by-4.0, Belebele cc-by-sa-4.0): that set is not written; do not override",
+   "after": "commit eval/retrieval-public.pins.json (no data in it) if both licences passed"
+  },
+  "needs": [
+   "the train head with FC3's PRs (#1172 #1173 #1174 #1175) checked out, npm ci done (W10.M1 first)",
+   "pip install datasets huggingface_hub",
+   "network to huggingface.co"
+  ],
+  "minutes": 20
+ },
+ {
+  "id": "FC3-W10.B18-rerank",
+  "task": "W10.B18",
+  "pr": 1172,
+  "cmd": "LUMEN_EVAL_RERANK_DIRS=eval/synthetic/retrieval-hard npm run eval:rerank",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "eval/results/rerank-*.json",
+     "path": ".rows",
+     "op": "len>=",
+     "value": 4
+    },
+    {
+     "file": "eval/results/rerank-*.json",
+     "path": ".defaultAllowed.ok",
+     "op": "exists"
+    }
+   ],
+   "note": "rows: retrieval-hard dev and heldout, public/webfaq-heb and public/belebele-heb, each with its top-20 p95; defaultAllowed says whether bge-reranker-v2-m3 may become the default (>= +3 hard, >= +2 public, <= 150 ms)"
+  },
+  "needs": [
+   "the train head with FC3's PRs (#1172 #1173 #1174 #1175) checked out, npm ci done (W10.M1 first)",
+   "FC3-W10.B18-fetch",
+   "network to huggingface.co once (the model, ~570 MB q8)"
+  ],
+  "minutes": 40
+ },
+ {
+  "id": "FC3-W7.3-office-paste",
+  "task": "W7.3",
+  "pr": 1173,
+  "cmd": "npx vitest run src/__tests__/officePasteRoundTrip.test.ts --reporter=json --outputFile=reports/mac-pack/FC3/office-paste.json",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "reports/mac-pack/FC3/office-paste.json",
+     "path": ".numFailedTests",
+     "equals": 0
+    },
+    {
+     "file": "reports/mac-pack/FC3/office-paste.json",
+     "path": ".numPassedTests",
+     "gte": 13
+    }
+   ],
+   "after": "the owner copies the 10 notes of src/__tests__/fixtures/office-paste/*.md from Lumen into Word and into Google Docs and confirms headings, bold and direction (not machine-checkable)"
+  },
+  "needs": [
+   "the train head with FC3's PRs (#1172 #1173 #1174 #1175) checked out, npm ci done (W10.M1 first)"
+  ],
+  "minutes": 10
+ },
+ {
+  "id": "FC3-W7.6-pdf",
+  "task": "W7.6",
+  "pr": 1173,
+  "cmd": "npx playwright test e2e/datagov-pdf.spec.ts --project=chromium",
+  "expect": {
+   "exit": 0
+  },
+  "needs": [
+   "the train head with FC3's PRs (#1172 #1173 #1174 #1175) checked out, npm ci done (W10.M1 first)",
+   "poppler (brew install poppler: pdftotext, pdffonts)"
+  ],
+  "minutes": 5
+ },
+ {
+  "id": "FC3-W10.C25-worker",
+  "task": "W10.C25",
+  "pr": 1173,
+  "cmd": "npx playwright test e2e/highlights-worker.spec.ts --project=chromium --project=firefox",
+  "expect": {
+   "exit": 0,
+   "note": "on chromium the V8 call count of buildIndex on the main thread is asserted; firefox runs the engine and resource probes"
+  },
+  "needs": [
+   "the train head with FC3's PRs (#1172 #1173 #1174 #1175) checked out, npm ci done (W10.M1 first)"
+  ],
+  "minutes": 5
+ },
+ {
+  "id": "FC3-W2.21-coldstart",
+  "task": "W2.21",
+  "pr": 1173,
+  "cmd": "npm run perf:coldstart",
+  "expect": {
+   "exit": 0,
+   "note": "10,000-note start within 15 % of the 100-note one, CLS < 0.05 for both, and each start opened its seeded vault (index file counts)"
+  },
+  "needs": [
+   "the train head with FC3's PRs (#1172 #1173 #1174 #1175) checked out, npm ci done (W10.M1 first)",
+   "a production build served at PLAYWRIGHT_BASE_URL (perf:coldstart does it)"
+  ],
+  "minutes": 15
+ },
+ {
+  "id": "FC3-W12.R1-scanned",
+  "task": "W12.R1",
+  "pr": 1173,
+  "cmd": "npx vitest run src/__tests__/pdfHighlightCardScanned.test.tsx src/__tests__/pdfOcrLayer.test.tsx --reporter=json --outputFile=reports/mac-pack/FC3/scanned.json",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "reports/mac-pack/FC3/scanned.json",
+     "path": ".numFailedTests",
+     "equals": 0
+    }
+   ]
+  },
+  "needs": [
+   "the train head with FC3's PRs (#1172 #1173 #1174 #1175) checked out, npm ci done (W10.M1 first)"
+  ],
+  "minutes": 5
+ },
+ {
+  "id": "FC3-W2.20-soak",
+  "task": "W2.20",
+  "pr": 1174,
+  "cmd": "npx vitest run src/__tests__/collabSoak.test.ts src/__tests__/collabRelay.test.ts src/__tests__/collabE2eeSharing.test.ts --reporter=json --outputFile=reports/mac-pack/FC3/soak.json",
+  "expect": {
+   "exit": 0,
+   "json": [
+    {
+     "file": "reports/mac-pack/FC3/soak.json",
+     "path": ".numFailedTests",
+     "equals": 0
+    }
+   ],
+   "note": "collabRelay and collabE2eeSharing crash in the cloud shim (Event class mismatch); they must pass with the compaction change"
+  },
+  "needs": [
+   "the train head with FC3's PRs (#1172 #1173 #1174 #1175) checked out, npm ci done (W10.M1 first)"
+  ],
+  "minutes": 10
+ },
+ {
+  "id": "FC3-W2.20-lan-latency",
+  "task": "W2.20",
+  "pr": 1174,
+  "cmd": "node scripts/collab-latency.mjs",
+  "expect": {
+   "exit": 0,
+   "after": "two machines on one LAN: p95 < 150 ms between two participants (acceptance 2)"
+  },
+  "needs": [
+   "the train head with FC3's PRs (#1172 #1173 #1174 #1175) checked out, npm ci done (W10.M1 first)",
+   "a second machine on the same LAN running the collab server"
+  ],
+  "minutes": 20
+ }
+]

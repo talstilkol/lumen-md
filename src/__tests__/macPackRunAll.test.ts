@@ -186,6 +186,12 @@ describe("mac:pack pieces", () => {
     expect(normalize({ exit: 0, count: { glob: "release/*.{apk,aab}", gte: 2 } }).checks[1]).toEqual({ kind: "count", glob: "release/*.{apk,aab}", gte: 2 });
   });
 
+  it("loads the follow-up lanes' FC<n>.json after the L<n>.json lanes, each by number", () => {
+    const e = (id: string) => [{ id, cmd: `run-${id}`, expect: { exit: 0 }, needs: [] }];
+    const dir = root({ FC10: e("FC10-a"), L10: e("L10-a"), FC3: e("FC3-a"), L2: e("L2-a"), X1: e("X1-a") });
+    expect(loadPacks(dir).map((x: { lane: string; id: string }) => `${x.lane}:${x.id}`)).toEqual(["L2:L2-a", "L10:L10-a", "FC3:FC3-a", "FC10:FC10-a"]);
+  });
+
   it("loads the real packs of every lane: unique ids, every named need exists, no loop", () => {
     const all = loadPacks(REPO);
     expect(new Set(all.map((e: { lane: string }) => e.lane)).size).toBeGreaterThanOrEqual(8);
