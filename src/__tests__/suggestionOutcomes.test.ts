@@ -40,7 +40,7 @@ describe("counting from the review queue", () => {
     const a = range("proofreader");
     const b = range("proofreader");
     const c = range("proofreader");
-    const d = range("tagger", "run-2");
+    range("tagger", "run-2");
     clock = 3000;
     await approveStagedChange(a.id);
     clock = 5000;
