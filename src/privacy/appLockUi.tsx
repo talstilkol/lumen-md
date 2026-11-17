@@ -9,7 +9,7 @@ import { createRoot } from "react-dom/client";
 import { t } from "../i18n";
 import { Modal } from "../ui/Modal";
 import "./appLockStrings";
-import { AppLock, readSettings, webAuthnSeam, type LockState, type NativePrivacy } from "./appLock";
+import { AppLock, readSettings, webAuthnSeam, writeSettings, type LockState, type NativePrivacy } from "./appLock";
 import { BOOT_CLASS } from "./appLockBoot";
 
 let lock: AppLock | null = null;
@@ -21,7 +21,7 @@ function native(): NativePrivacy | null {
 
 /** The one lock of this window (made on first use). */
 export function appLock(): AppLock {
-  lock ??= new AppLock({ settings: () => readSettings(), seam: webAuthnSeam(), now: () => Date.now(), native: native() });
+  lock ??= new AppLock({ settings: () => readSettings(), save: (s) => writeSettings(s), seam: webAuthnSeam(), now: () => Date.now(), native: native() });
   return lock;
 }
 
@@ -40,7 +40,12 @@ export function LockOverlay({ lock: l, doc = document }: { lock: AppLock; doc?: 
   const [state, setState] = useState<LockState>(l.state);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  // Review 14 M6: the recovery code, when the device's check cannot pass any more.
+  const [recovering, setRecovering] = useState(false);
+  const [code, setCode] = useState("");
+  const [recoverNote, setRecoverNote] = useState("");
   const button = useRef<HTMLButtonElement>(null);
+  const codeInput = useRef<HTMLInputElement>(null);
   const before = useRef<Element | null>(null);
 
   useEffect(() => l.onChange(setState), [l]);
@@ -59,8 +64,11 @@ export function LockOverlay({ lock: l, doc = document }: { lock: AppLock; doc?: 
 
   // After a failed check the button is enabled again on this render: focus goes back to it, never to <body>.
   useEffect(() => {
-    if (error && !busy) button.current?.focus();
-  }, [error, busy]);
+    if (error && !busy && !recovering) button.current?.focus();
+  }, [error, busy, recovering]);
+  useEffect(() => {
+    if (recovering) codeInput.current?.focus();
+  }, [recovering]);
 
   if (state === "unlocked") return null;
   const cover: React.CSSProperties = { position: "fixed", inset: 0, zIndex: 2147483647, display: "grid", placeItems: "center", background: "hsl(var(--bg))", color: "hsl(var(--fg))" };
@@ -72,6 +80,19 @@ export function LockOverlay({ lock: l, doc = document }: { lock: AppLock; doc?: 
     const ok = await l.unlock();
     setBusy(false);
     if (!ok) setError(t(l.failedAttempts >= 3 ? "appLock.failedMany" : "appLock.failed"));
+  };
+  const recover = async () => {
+    setBusy(true);
+    const r = await l.recover(code);
+    setBusy(false);
+    if (r === "unlocked") {
+      setCode("");
+      setRecovering(false);
+      void import("../ui/AiToast").then((m) => m.showAiToast(t("appLock.recover.done"), "info"));
+      return;
+    }
+    setRecoverNote(r === "wait" ? t("appLock.recover.wait", { seconds: Math.ceil(l.recoveryWaitMs / 1000) }) : r === "none" ? t("appLock.recover.none") : t("appLock.recover.wrong"));
+    codeInput.current?.select();
   };
   return (
     // Review 14 M6: the real Modal (top layer, the rest inert, focus trapped); nothing dismisses it but an unlock.
@@ -90,6 +111,31 @@ export function LockOverlay({ lock: l, doc = document }: { lock: AppLock; doc?: 
         <div role="alert" style={{ minHeight: 20, fontSize: 13, color: "hsl(var(--danger))" }}>
           {error}
         </div>
+        {recovering ? (
+          <form
+            data-testid="app-lock-recover-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void recover();
+            }}
+            style={{ display: "grid", gap: 8, justifyItems: "center", width: "100%" }}
+          >
+            <label htmlFor="app-lock-code" style={{ fontSize: 13 }}>
+              {t("appLock.recover.label")}
+            </label>
+            <input ref={codeInput} id="app-lock-code" data-testid="app-lock-code" dir="ltr" autoComplete="off" autoCapitalize="characters" spellCheck={false} value={code} onChange={(e) => setCode(e.currentTarget.value)} aria-describedby="app-lock-recover-note" style={{ width: "100%", padding: "6px 8px", fontFamily: "var(--font-mono, monospace)", fontSize: 14, textAlign: "center", border: "1px solid hsl(var(--border-strong))", borderRadius: 6, background: "hsl(var(--bg))", color: "hsl(var(--fg))" }} />
+            <button type="submit" className="btn" disabled={busy || !code.trim()} data-testid="app-lock-recover-submit" style={{ padding: "6px 14px", borderRadius: 6, border: "1px solid hsl(var(--border-strong))", background: "hsl(var(--bg))", color: "hsl(var(--fg))", fontSize: 14, cursor: "pointer" }}>
+              {t("appLock.recover.submit")}
+            </button>
+            <div id="app-lock-recover-note" role="status" style={{ minHeight: 18, fontSize: 13, color: "hsl(var(--danger))" }}>
+              {recoverNote}
+            </div>
+          </form>
+        ) : (
+          <button type="button" className="btn" data-testid="app-lock-recover" onClick={() => setRecovering(true)} style={{ padding: "4px 10px", border: "none", background: "transparent", color: "hsl(var(--fg-muted))", fontSize: 13, textDecoration: "underline", cursor: "pointer" }}>
+            {t("appLock.recover")}
+          </button>
+        )}
       </div>
     </Modal>
   );

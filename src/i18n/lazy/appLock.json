@@ -3,6 +3,15 @@
   "appLock.checking": "Checking…",
   "appLock.failed": "That didn't unlock it. Try again.",
   "appLock.failedMany": "Still locked after three tries. Your notes stay hidden until the device's check passes.",
+  "appLock.recover": "Use the recovery code",
+  "appLock.recover.done": "Unlocked with the recovery code. The app lock is off now: turn it on again to make a new key and a new code.",
+  "appLock.recover.label": "Recovery code",
+  "appLock.recover.none": "This lock has no recovery code (it was turned on before there were codes). Unlock with the device's check.",
+  "appLock.recover.show.body": "If this device's check stops working (Windows Hello reset, a new fingerprint, a cleared browser), this code unlocks Lumen once. Write it down and keep it away from this device. It is shown only now: {code}",
+  "appLock.recover.show.title": "Your app lock recovery code",
+  "appLock.recover.submit": "Unlock with the code",
+  "appLock.recover.wait": "Too many wrong codes. Try again in {seconds} seconds.",
+  "appLock.recover.wrong": "That code is not right.",
   "appLock.title": "Lumen is locked",
   "appLock.unlock": "Unlock"
 }
