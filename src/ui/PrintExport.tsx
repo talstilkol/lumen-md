@@ -10,6 +10,7 @@ import { MM, PAGE_SLACK_MM, pageArea, applyPageBreaks, buildToc, contentDirectio
 import { getLocale, t } from "../i18n";
 import { safeSetHtml, safeClearHtml } from "../lib/trustedTypes";
 import { exportReadyText } from "../storage/exportReady";
+import { makePrintAccessible, type PdfPreflight } from "../print/accessiblePdf";
 
 /**
  * Generate a printable document from markdown content.
@@ -40,6 +41,8 @@ export interface PreparedPrint {
   lang: string;
   styles: string;
   html: string;
+  /** W13.F3: what the accessibility pass changed, and the images still without a real description. */
+  preflight: PdfPreflight;
 }
 
 /** Render the note and lay it out for print (W2.23). Exposed for the print golden tests. */
@@ -76,6 +79,8 @@ export async function preparePrint(markdownText: string, docName: string, opts: 
     const toc = buildToc(work, t("print.toc"));
     if (toc) work.prepend(toc);
   }
+  // W13.F3: what a tagged PDF / PDF/UA-1 needs from the HTML (heading levels, alt text, table headers, language runs).
+  const preflight = makePrintAccessible(work, { lang, fallbackAlt: t("pdfUa.imageFallbackAlt") });
   let html = work.innerHTML;
 
   // The app's own styles (theme, callouts, code, math, fonts), then the print layout.
@@ -102,6 +107,7 @@ export async function preparePrint(markdownText: string, docName: string, opts: 
     lang,
     styles: styles.join("\n\n"),
     html,
+    preflight,
   };
 }
 

@@ -270,6 +270,20 @@
       "icon": "Download"
     },
     {
+      "id": "file.exportPdfUa",
+      "label": "Export accessible PDF (PDF/UA)…",
+      "group": "File",
+      "hint": "Tagged: headings, image descriptions, table headers, language — then finished as PDF/UA-1",
+      "icon": "Download"
+    },
+    {
+      "id": "file.finishPdfUa",
+      "label": "Make a saved PDF accessible (PDF/UA)…",
+      "group": "File",
+      "hint": "Adds the PDF/UA identification, the language and the shown title to a tagged PDF, on this device",
+      "icon": "Download"
+    },
+    {
       "id": "file.exportMarkdown",
       "label": "Export Markdown",
       "group": "File",
@@ -2783,6 +2797,20 @@
       "icon": "Download"
     },
     {
+      "id": "file.exportPdfUa",
+      "label": "Export accessible PDF (PDF/UA)…",
+      "group": "File",
+      "hint": "Tagged: headings, image descriptions, table headers, language — then finished as PDF/UA-1",
+      "icon": "Download"
+    },
+    {
+      "id": "file.finishPdfUa",
+      "label": "Make a saved PDF accessible (PDF/UA)…",
+      "group": "File",
+      "hint": "Adds the PDF/UA identification, the language and the shown title to a tagged PDF, on this device",
+      "icon": "Download"
+    },
+    {
       "id": "file.exportMarkdown",
       "label": "Export Markdown",
       "group": "File",
@@ -5172,6 +5200,8 @@
     "file.exportSite",
     "file.exportPptx",
     "file.exportPdf",
+    "file.exportPdfUa",
+    "file.finishPdfUa",
     "file.exportMarkdown",
     "edit.redact",
     "file.notePassword",

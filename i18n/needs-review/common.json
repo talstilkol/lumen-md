@@ -1663,6 +1663,195 @@
     "ru": "1qjiuwu",
     "zh-CN": "1qjiuwu"
   },
+  "pdfUa.failed": {
+    "ar": "1n0dmr3",
+    "de": "1n0dmr3",
+    "fr": "1n0dmr3",
+    "he": "1n0dmr3",
+    "ja": "1n0dmr3",
+    "ru": "1n0dmr3",
+    "zh-CN": "1n0dmr3"
+  },
+  "pdfUa.finish": {
+    "ar": "1tinfgu",
+    "de": "1tinfgu",
+    "fr": "1tinfgu",
+    "he": "1tinfgu",
+    "ja": "1tinfgu",
+    "ru": "1tinfgu",
+    "zh-CN": "1tinfgu"
+  },
+  "pdfUa.imageFallbackAlt": {
+    "ar": "ophmze",
+    "de": "ophmze",
+    "fr": "ophmze",
+    "he": "ophmze",
+    "ja": "ophmze",
+    "ru": "ophmze",
+    "zh-CN": "ophmze"
+  },
+  "pdfUa.noAlt": {
+    "ar": "e0oqok",
+    "de": "e0oqok",
+    "fr": "e0oqok",
+    "he": "e0oqok",
+    "ja": "e0oqok",
+    "ru": "e0oqok",
+    "zh-CN": "e0oqok"
+  },
+  "pdfUa.notTagged": {
+    "ar": "wv4so8",
+    "de": "wv4so8",
+    "fr": "wv4so8",
+    "he": "wv4so8",
+    "ja": "wv4so8",
+    "ru": "wv4so8",
+    "zh-CN": "wv4so8"
+  },
+  "pdfUa.notTaggedBody": {
+    "ar": "1a8k53w",
+    "de": "1a8k53w",
+    "fr": "1a8k53w",
+    "he": "1a8k53w",
+    "ja": "1a8k53w",
+    "ru": "1a8k53w",
+    "zh-CN": "1a8k53w"
+  },
+  "pdfUa.problem.figureWithoutAlt": {
+    "ar": "xblb39",
+    "de": "xblb39",
+    "fr": "xblb39",
+    "he": "xblb39",
+    "ja": "xblb39",
+    "ru": "xblb39",
+    "zh-CN": "xblb39"
+  },
+  "pdfUa.problem.headingSkipped": {
+    "ar": "1qq1yvc",
+    "de": "1qq1yvc",
+    "fr": "1qq1yvc",
+    "he": "1qq1yvc",
+    "ja": "1qq1yvc",
+    "ru": "1qq1yvc",
+    "zh-CN": "1qq1yvc"
+  },
+  "pdfUa.problem.linkWithoutText": {
+    "ar": "w6orcf",
+    "de": "w6orcf",
+    "fr": "w6orcf",
+    "he": "w6orcf",
+    "ja": "w6orcf",
+    "ru": "w6orcf",
+    "zh-CN": "w6orcf"
+  },
+  "pdfUa.problem.noDisplayDocTitle": {
+    "ar": "1kwazf6",
+    "de": "1kwazf6",
+    "fr": "1kwazf6",
+    "he": "1kwazf6",
+    "ja": "1kwazf6",
+    "ru": "1kwazf6",
+    "zh-CN": "1kwazf6"
+  },
+  "pdfUa.problem.noLang": {
+    "ar": "kz614v",
+    "de": "kz614v",
+    "fr": "kz614v",
+    "he": "kz614v",
+    "ja": "kz614v",
+    "ru": "kz614v",
+    "zh-CN": "kz614v"
+  },
+  "pdfUa.problem.noPdfUaId": {
+    "ar": "1vlch4r",
+    "de": "1vlch4r",
+    "fr": "1vlch4r",
+    "he": "1vlch4r",
+    "ja": "1vlch4r",
+    "ru": "1vlch4r",
+    "zh-CN": "1vlch4r"
+  },
+  "pdfUa.problem.noStructTree": {
+    "ar": "hzh7tx",
+    "de": "hzh7tx",
+    "fr": "hzh7tx",
+    "he": "hzh7tx",
+    "ja": "hzh7tx",
+    "ru": "hzh7tx",
+    "zh-CN": "hzh7tx"
+  },
+  "pdfUa.problem.noTitle": {
+    "ar": "gakwtk",
+    "de": "gakwtk",
+    "fr": "gakwtk",
+    "he": "gakwtk",
+    "ja": "gakwtk",
+    "ru": "gakwtk",
+    "zh-CN": "gakwtk"
+  },
+  "pdfUa.problem.notTagged": {
+    "ar": "mk0v7a",
+    "de": "mk0v7a",
+    "fr": "mk0v7a",
+    "he": "mk0v7a",
+    "ja": "mk0v7a",
+    "ru": "mk0v7a",
+    "zh-CN": "mk0v7a"
+  },
+  "pdfUa.problem.tableWithoutHeaders": {
+    "ar": "gfc7l8",
+    "de": "gfc7l8",
+    "fr": "gfc7l8",
+    "he": "gfc7l8",
+    "ja": "gfc7l8",
+    "ru": "gfc7l8",
+    "zh-CN": "gfc7l8"
+  },
+  "pdfUa.saved": {
+    "ar": "mq3vn5",
+    "de": "mq3vn5",
+    "fr": "mq3vn5",
+    "he": "mq3vn5",
+    "ja": "mq3vn5",
+    "ru": "mq3vn5",
+    "zh-CN": "mq3vn5"
+  },
+  "pdfUa.savedBody": {
+    "ar": "4fijqw",
+    "de": "4fijqw",
+    "fr": "4fijqw",
+    "he": "4fijqw",
+    "ja": "4fijqw",
+    "ru": "4fijqw",
+    "zh-CN": "4fijqw"
+  },
+  "pdfUa.savedWithProblems": {
+    "ar": "5ml7qv",
+    "de": "5ml7qv",
+    "fr": "5ml7qv",
+    "he": "5ml7qv",
+    "ja": "5ml7qv",
+    "ru": "5ml7qv",
+    "zh-CN": "5ml7qv"
+  },
+  "pdfUa.step2": {
+    "ar": "1d541qt",
+    "de": "1d541qt",
+    "fr": "1d541qt",
+    "he": "1d541qt",
+    "ja": "1d541qt",
+    "ru": "1d541qt",
+    "zh-CN": "1d541qt"
+  },
+  "pdfUa.step2Body": {
+    "ar": "1ovxijq",
+    "de": "1ovxijq",
+    "fr": "1ovxijq",
+    "he": "1ovxijq",
+    "ja": "1ovxijq",
+    "ru": "1ovxijq",
+    "zh-CN": "1ovxijq"
+  },
   "query.tooLarge": {
     "he": "3jwg13",
     "ar": "3jwg13",

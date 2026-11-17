@@ -16193,6 +16193,116 @@
       "vars": []
     },
     {
+      "key": "pdfUa.failed",
+      "en": "The PDF could not be finished",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.finish",
+      "en": "Finish the saved PDF…",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.imageFallbackAlt",
+      "en": "Image",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.noAlt",
+      "en": "{n} images have no description",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "pdfUa.notTagged",
+      "en": "This PDF is not tagged",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.notTaggedBody",
+      "en": "Print it again from a Chromium browser (Chrome, Edge) with “Save as PDF”, or from an app that writes tagged PDF.",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.problem.figureWithoutAlt",
+      "en": "a figure without a description",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.problem.headingSkipped",
+      "en": "a heading level is skipped",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.problem.linkWithoutText",
+      "en": "a link without text",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.problem.noDisplayDocTitle",
+      "en": "the title is not shown",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.problem.noLang",
+      "en": "no document language",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.problem.noPdfUaId",
+      "en": "no PDF/UA identification",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.problem.noStructTree",
+      "en": "no structure tree",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.problem.noTitle",
+      "en": "no title",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.problem.notTagged",
+      "en": "not marked as tagged",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.problem.tableWithoutHeaders",
+      "en": "a table without header cells",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.saved",
+      "en": "The PDF is ready (PDF/UA-1)",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.savedBody",
+      "en": "Tagged, with its language and title. {figures} figures, {tables} tables.",
+      "vars": [
+        "figures",
+        "tables"
+      ]
+    },
+    {
+      "key": "pdfUa.savedWithProblems",
+      "en": "The PDF is saved, but some checks fail",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.step2",
+      "en": "Save as PDF, then finish it",
+      "vars": []
+    },
+    {
+      "key": "pdfUa.step2Body",
+      "en": "In the print dialog choose “Save as PDF”. Then pick the saved file here to make it PDF/UA.",
+      "vars": []
+    },
+    {
       "key": "photoMeta.refused",
       "en": "{count} photo(s) were not added: their location, time and camera details could not be removed. Save a copy from an image editor and add that instead.",
       "vars": [

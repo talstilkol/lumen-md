@@ -1092,6 +1092,16 @@
       "vars": []
     },
     {
+      "key": "cmd.file.exportPdfUa",
+      "en": "Export accessible PDF (PDF/UA)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportPdfUa.hint",
+      "en": "Tagged: headings, image descriptions, table headers, language — then finished as PDF/UA-1",
+      "vars": []
+    },
+    {
       "key": "cmd.file.exportPptx",
       "en": "Export to PowerPoint (.pptx)",
       "vars": []
@@ -1169,6 +1179,16 @@
     {
       "key": "cmd.file.exportVcard.hint",
       "en": "Every person note as one vCard 4.0 file, downloaded on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.finishPdfUa",
+      "en": "Make a saved PDF accessible (PDF/UA)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.finishPdfUa.hint",
+      "en": "Adds the PDF/UA identification, the language and the shown title to a tagged PDF, on this device",
       "vars": []
     },
     {

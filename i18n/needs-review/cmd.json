@@ -1,4 +1,40 @@
 {
+  "cmd.file.exportPdfUa": {
+    "ar": "4e92qr",
+    "de": "4e92qr",
+    "fr": "4e92qr",
+    "he": "4e92qr",
+    "ja": "4e92qr",
+    "ru": "4e92qr",
+    "zh-CN": "4e92qr"
+  },
+  "cmd.file.exportPdfUa.hint": {
+    "ar": "1uz07l0",
+    "de": "1uz07l0",
+    "fr": "1uz07l0",
+    "he": "1uz07l0",
+    "ja": "1uz07l0",
+    "ru": "1uz07l0",
+    "zh-CN": "1uz07l0"
+  },
+  "cmd.file.finishPdfUa": {
+    "ar": "1d4vebr",
+    "de": "1d4vebr",
+    "fr": "1d4vebr",
+    "he": "1d4vebr",
+    "ja": "1d4vebr",
+    "ru": "1d4vebr",
+    "zh-CN": "1d4vebr"
+  },
+  "cmd.file.finishPdfUa.hint": {
+    "ar": "ntenfy",
+    "de": "ntenfy",
+    "fr": "ntenfy",
+    "he": "ntenfy",
+    "ja": "ntenfy",
+    "ru": "ntenfy",
+    "zh-CN": "ntenfy"
+  },
   "cmd.mcp.ask": {
     "ar": "vubk2m",
     "de": "vubk2m",
