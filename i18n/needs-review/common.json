@@ -11511,5 +11511,86 @@
     "ru": "jyp9ab",
     "zh-CN": "jyp9ab",
     "fa": "jyp9ab"
+  },
+  "mcpServers.signIn.start": {
+    "ar": "w9nig3",
+    "de": "w9nig3",
+    "fa": "w9nig3",
+    "fr": "w9nig3",
+    "ja": "w9nig3",
+    "ru": "w9nig3",
+    "zh-CN": "w9nig3"
+  },
+  "mcpServers.signIn.again": {
+    "ar": "4uzwwb",
+    "de": "4uzwwb",
+    "fa": "4uzwwb",
+    "fr": "4uzwwb",
+    "ja": "4uzwwb",
+    "ru": "4uzwwb",
+    "zh-CN": "4uzwwb"
+  },
+  "mcpServers.signIn.cancel": {
+    "ar": "1or6o5o",
+    "de": "1or6o5o",
+    "fa": "1or6o5o",
+    "fr": "1or6o5o",
+    "ja": "1or6o5o",
+    "ru": "1or6o5o",
+    "zh-CN": "1or6o5o"
+  },
+  "mcpServers.signIn.note": {
+    "ar": "5qy8p3",
+    "de": "5qy8p3",
+    "fa": "5qy8p3",
+    "fr": "5qy8p3",
+    "ja": "5qy8p3",
+    "ru": "5qy8p3",
+    "zh-CN": "5qy8p3"
+  },
+  "mcpServers.signIn.waiting": {
+    "ar": "x2iux5",
+    "de": "x2iux5",
+    "fa": "x2iux5",
+    "fr": "x2iux5",
+    "ja": "x2iux5",
+    "ru": "x2iux5",
+    "zh-CN": "x2iux5"
+  },
+  "mcpServers.signIn.done": {
+    "ar": "18ophv1",
+    "de": "18ophv1",
+    "fa": "18ophv1",
+    "fr": "18ophv1",
+    "ja": "18ophv1",
+    "ru": "18ophv1",
+    "zh-CN": "18ophv1"
+  },
+  "mcpServers.signIn.failed": {
+    "ar": "4kd0th",
+    "de": "4kd0th",
+    "fa": "4kd0th",
+    "fr": "4kd0th",
+    "ja": "4kd0th",
+    "ru": "4kd0th",
+    "zh-CN": "4kd0th"
+  },
+  "mcpServers.signIn.desktopOnly": {
+    "ar": "rry5ah",
+    "de": "rry5ah",
+    "fa": "rry5ah",
+    "fr": "rry5ah",
+    "ja": "rry5ah",
+    "ru": "rry5ah",
+    "zh-CN": "rry5ah"
+  },
+  "mcpServers.signIn.needsCommand": {
+    "ar": "n9vgh8",
+    "de": "n9vgh8",
+    "fa": "n9vgh8",
+    "fr": "n9vgh8",
+    "ja": "n9vgh8",
+    "ru": "n9vgh8",
+    "zh-CN": "n9vgh8"
   }
 }

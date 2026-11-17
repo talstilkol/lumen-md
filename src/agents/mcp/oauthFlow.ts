@@ -74,6 +74,29 @@ export function wellKnown(url: string, name: string): string {
   return `${u.origin}/.well-known/${name}${path}`;
 }
 
+/**
+ * Review 14, Low 1: every endpoint of the authorization server is https (the
+ * MCP authorization spec; OAuth 2.1 §1.5). A code, a PKCE verifier, a refresh
+ * token or a registration never goes over plain http, not even to loopback:
+ * the issuer itself must be https, so its endpoints are too.
+ */
+export function requireHttps(url: string | undefined, what: string): void {
+  let u: URL;
+  try {
+    u = new URL(url ?? "");
+  } catch {
+    throw new OAuthFlowError(`the ${what} is not a valid address: refused`);
+  }
+  if (u.protocol !== "https:") throw new OAuthFlowError(`the ${what} is not on https: refused`);
+}
+
+/** The authorization, token and (when listed) registration endpoints are all https. */
+export function requireHttpsEndpoints(meta: FullAuthServerMetadata): void {
+  requireHttps(meta.authorization_endpoint, "authorization endpoint");
+  requireHttps(meta.token_endpoint, "token endpoint");
+  if (meta.registration_endpoint !== undefined) requireHttps(meta.registration_endpoint, "registration endpoint");
+}
+
 /** Steps 1: the authorization server of an MCP server, checked. */
 export async function discover(serverUrl: string, fetchImpl: Fetch, wwwAuthenticate?: string | null): Promise<{ resource: string; meta: FullAuthServerMetadata; scopes?: string[] }> {
   const resource = canonicalResource(serverUrl);
@@ -88,6 +111,7 @@ export async function discover(serverUrl: string, fetchImpl: Fetch, wwwAuthentic
   if (!meta) meta = (await getJson(fetchImpl, wellKnown(issuer, "openid-configuration"))) as FullAuthServerMetadata | null;
   if (!meta) throw new OAuthFlowError(`no authorization server metadata at ${issuer}`);
   checkAuthServerMetadata(meta, issuer);
+  requireHttpsEndpoints(meta);
   return { resource, meta, ...(prm.scopes_supported ? { scopes: prm.scopes_supported } : {}) };
 }
 
@@ -116,6 +140,7 @@ export async function registrationFor(meta: FullAuthServerMetadata, opts: { regi
   if (!opts.allowLegacyDcr || !meta.registration_endpoint) {
     throw new OAuthFlowError("this authorization server supports neither Client ID Metadata Documents nor a client id you entered; dynamic registration is deprecated and off for it");
   }
+  requireHttps(meta.registration_endpoint, "registration endpoint");
   const res = await opts.fetchImpl(meta.registration_endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -146,6 +171,7 @@ export async function startAuthorization(serverUrl: string, opts: { fetchImpl: F
 }
 
 async function tokenRequest(fetchImpl: Fetch, endpoint: string, form: Record<string, string>): Promise<{ access_token: string; refresh_token?: string; expires_in?: number; token_type?: string }> {
+  requireHttps(endpoint, "token endpoint");
   const res = await fetchImpl(endpoint, { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" }, body: new URLSearchParams(form).toString(), redirect: "error" });
   const body = (await res.json().catch(() => null)) as { access_token?: unknown; refresh_token?: unknown; expires_in?: unknown; token_type?: unknown; error?: unknown } | null;
   if (!res.ok || !body || typeof body.access_token !== "string") throw new OAuthFlowError(`the token request failed${body && typeof body.error === "string" ? `: ${body.error}` : ""}`);

@@ -20,6 +20,8 @@ export const STD_CRATES = [
   ["manifest-sig", "src-tauri/src/manifest_sig.rs"],
   ["desktop", "src-tauri/desktop/src/lib.rs"],
   ["preview", "src-tauri/preview/src/lib.rs"],
+  // F16: the MCP sign-in's loopback redirect listener (W13.A1). Its Tauri command is the owner's (lib.rs + isolation allow-list).
+  ["oauth-loopback", "src-tauri/src/oauth_loopback.rs"],
 ];
 
 /**

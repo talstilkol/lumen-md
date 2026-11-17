@@ -19,8 +19,10 @@
  *     to its full path, its sha256 and the exact arguments: "Check approval"
  *     says whether this exact command is still on it (a changed program is
  *     not), "Withdraw approval" takes it off. Neither starts anything.
+ *   • A server reached by address can be signed in to with OAuth (W13.A1,
+ *     McpSignIn): desktop only, through the loopback redirect.
  */
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { lazy, Suspense, useMemo, useState, useSyncExternalStore } from "react";
 import { t } from "../../i18n";
 import { formatTime } from "../../i18n/format";
 import "../mcpServersStrings";
@@ -30,6 +32,9 @@ import { serverLog, subscribeServerLog } from "../../agents/mcp/log";
 import { toolApprovals } from "../../agents/mcp/approvals";
 import type { ListedTool } from "../../agents/mcp/registry";
 import { stdioRefusal, type StdioSpec } from "../../agents/mcp/transports/stdio";
+
+// W13.A1: OAuth sign-in for a server reached by address, with the OAuth code, in its own chunk.
+const McpSignIn = lazy(() => import("./McpSignIn"));
 
 type Draft = { id: string; label: string; transport: "http" | "stdio"; url: string; command: string; args: string; cwd: string; offline: boolean; defaultPermission: ToolPermission };
 
@@ -222,6 +227,11 @@ export function McpServers({
               <span style={muted}>{s.transport === "http" ? s.url : `${s.command ?? ""} ${(s.args ?? []).join(" ")}`}</span>
             </div>
             {s.transport === "stdio" && !desktop && <p style={muted}>{t("mcpServers.desktopOnly")}</p>}
+            {s.transport === "http" && (
+              <Suspense fallback={null}>
+                <McpSignIn server={s} onSignedIn={refresh} />
+              </Suspense>
+            )}
             {s.transport === "stdio" && desktop && <StdioApproval server={s} approvals={approvals} />}
             <div style={row}>
               <label style={row}>

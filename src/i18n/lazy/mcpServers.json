@@ -96,5 +96,14 @@
   "mcpServers.tools.pinAll": "Approve these definitions",
   "mcpServers.tools.pinned": "as you approved it",
   "mcpServers.use": "Use",
-  "mcpServers.yours": "Your servers"
+  "mcpServers.yours": "Your servers",
+  "mcpServers.signIn.start": "Sign in",
+  "mcpServers.signIn.again": "Sign in again",
+  "mcpServers.signIn.cancel": "Cancel sign-in",
+  "mcpServers.signIn.note": "Opens the server's sign-in page in your browser. Lumen keeps the token for this session only and sends it to this server only.",
+  "mcpServers.signIn.waiting": "Waiting for the browser to return…",
+  "mcpServers.signIn.done": "Signed in with {issuer}.",
+  "mcpServers.signIn.failed": "Sign-in failed: {error}",
+  "mcpServers.signIn.desktopOnly": "Signing in to a server works in the desktop app only: the browser returns to a listener on this computer, which a web page cannot open.",
+  "mcpServers.signIn.needsCommand": "Sign-in is not available yet: it needs a desktop command that is not enabled in this build (owner: isolation allow-list)."
 }
