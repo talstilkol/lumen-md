@@ -623,6 +623,16 @@
       "vars": []
     },
     {
+      "key": "cmd.cite.exportForZotero",
+      "en": "Citations: export the vault's sources for Zotero (CSL JSON)",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.exportRis",
+      "en": "Citations: export the vault's sources as RIS",
+      "vars": []
+    },
+    {
       "key": "cmd.cite.fillReferencesOpenAlex",
       "en": "Citations: fill references from OpenAlex…",
       "vars": []
@@ -635,6 +645,11 @@
     {
       "key": "cmd.cite.fromDoi",
       "en": "Cite from a DOI (CrossRef)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.importZoteroFile",
+      "en": "Citations: import a Zotero export file (CSL JSON, BibTeX, RIS)",
       "vars": []
     },
     {

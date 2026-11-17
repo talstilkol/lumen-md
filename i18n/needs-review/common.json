@@ -1837,5 +1837,95 @@
     "ja": "1gjpbva",
     "ru": "1gjpbva",
     "zh-CN": "1gjpbva"
+  },
+  "cite.file.imported": {
+    "he": "1sktdjc",
+    "ar": "1sktdjc",
+    "de": "1sktdjc",
+    "fr": "1sktdjc",
+    "ja": "1sktdjc",
+    "ru": "1sktdjc",
+    "zh-CN": "1sktdjc"
+  },
+  "cite.file.nothing": {
+    "he": "vgk4ko",
+    "ar": "vgk4ko",
+    "de": "vgk4ko",
+    "fr": "vgk4ko",
+    "ja": "vgk4ko",
+    "ru": "vgk4ko",
+    "zh-CN": "vgk4ko"
+  },
+  "cite.file.missingTitle": {
+    "he": "gb1f3e",
+    "ar": "gb1f3e",
+    "de": "gb1f3e",
+    "fr": "gb1f3e",
+    "ja": "gb1f3e",
+    "ru": "gb1f3e",
+    "zh-CN": "gb1f3e"
+  },
+  "cite.file.missingBody": {
+    "he": "118xvx6",
+    "ar": "118xvx6",
+    "de": "118xvx6",
+    "fr": "118xvx6",
+    "ja": "118xvx6",
+    "ru": "118xvx6",
+    "zh-CN": "118xvx6"
+  },
+  "cite.file.format": {
+    "he": "1jk2gul",
+    "ar": "1jk2gul",
+    "de": "1jk2gul",
+    "fr": "1jk2gul",
+    "ja": "1jk2gul",
+    "ru": "1jk2gul",
+    "zh-CN": "1jk2gul"
+  },
+  "cite.file.empty": {
+    "he": "1yzowhf",
+    "ar": "1yzowhf",
+    "de": "1yzowhf",
+    "fr": "1yzowhf",
+    "ja": "1yzowhf",
+    "ru": "1yzowhf",
+    "zh-CN": "1yzowhf"
+  },
+  "cite.file.json": {
+    "he": "pds9mt",
+    "ar": "pds9mt",
+    "de": "pds9mt",
+    "fr": "pds9mt",
+    "ja": "pds9mt",
+    "ru": "pds9mt",
+    "zh-CN": "pds9mt"
+  },
+  "cite.file.failed": {
+    "he": "1nasf4x",
+    "ar": "1nasf4x",
+    "de": "1nasf4x",
+    "fr": "1nasf4x",
+    "ja": "1nasf4x",
+    "ru": "1nasf4x",
+    "zh-CN": "1nasf4x"
+  },
+  "cite.file.exported": {
+    "he": "b1k5mo",
+    "ar": "b1k5mo",
+    "de": "b1k5mo",
+    "fr": "b1k5mo",
+    "ja": "b1k5mo",
+    "ru": "b1k5mo",
+    "zh-CN": "b1k5mo"
+  },
+  "cite.file.noSources": {
+    "he": "c2cc78",
+    "ar": "c2cc78",
+    "de": "c2cc78",
+    "fr": "c2cc78",
+    "ja": "c2cc78",
+    "ru": "c2cc78",
+    "zh-CN": "c2cc78"
   }
 }

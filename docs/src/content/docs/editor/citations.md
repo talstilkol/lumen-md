@@ -32,6 +32,27 @@ Keys come from the source: the BibTeX key, CSL's `citation-key`, or a
 `Citation Key:` line from Better BibTeX. Otherwise the key is the author's
 family name and the year (`austen1813`, `כהן2020`).
 
+## Zotero by file
+
+Works on every build, offline, with nothing sent anywhere:
+
+1. In Zotero, choose **File → Export Library…** (or right-click a
+   collection → **Export Collection…**) and pick **CSL JSON**, **BibTeX**
+   or **RIS**. Better BibTeX keys are kept.
+2. In Lumen, **⌘K → Citations: import a Zotero export file** and pick the
+   file. The sources join the cite dialog.
+
+Importing the same library again changes only what changed: Lumen matches
+each source by its citation key, then its Zotero id, its DOI, or its title
+and year, and says how many were added, updated and unchanged. Sources that
+are not in the file stay, unless you agree to remove them (an export of one
+collection is not the whole library).
+
+The other way: **⌘K → Citations: export the vault's sources for Zotero**
+writes `lumen-sources.json` (CSL JSON) with every source of the vault
+(`.bib`, CSL JSON and the Zotero copy), keys included; **…as RIS** writes
+`lumen-sources.ris`. In Zotero, **File → Import…** adds them.
+
 ## Zotero without the desktop app
 
 On the web and on phones, **⌘K → Citations: sync the Zotero library from
