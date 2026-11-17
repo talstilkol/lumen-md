@@ -1621,6 +1621,36 @@
       "verified": false,
       "catalog": "VERDICTS_DATASET (src/sources/openlaw/book.ts)",
       "notes": "Plan W11.H16: Supreme Court rulings are link only (verdictLink: a title and a link to the court's site, never the text) until the dataset's licence is clear. Nothing is downloaded."
+    },
+    {
+      "id": "harper",
+      "kind": "other",
+      "source": "https://github.com/Automattic/harper",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Harper © Automattic and contributors, licensed under the Apache License 2.0.",
+      "size": "~1–3 MB WebAssembly (harper.js), rule engine, no weights",
+      "runs": "browser",
+      "delivery": "none",
+      "catalog": "models/writing-defaults.json (engine of the grammarEn writing agent, W13.W10)",
+      "verified": true,
+      "notes": "W13.W16. English grammar rule engine (Rust/WASM, milliseconds per check, < 1/50 of LanguageTool's memory). Not bundled by this entry; W13.W10 adds the package."
+    },
+    {
+      "id": "nspell",
+      "kind": "other",
+      "source": "https://github.com/wooorm/nspell",
+      "license": "MIT",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "nspell © Titus Wormer, licensed under the MIT License.",
+      "size": "~30 KB (npm package already in the production dependencies)",
+      "runs": "browser",
+      "delivery": "none",
+      "catalog": "models/writing-defaults.json (engine of the spelling writing agent)",
+      "verified": true,
+      "notes": "W13.W16. Hunspell-compatible spelling engine; the code ships as an npm production dependency (checked by the npm part of this gate), so this entry delivers nothing itself. Its Hebrew dictionary is Hspell (AGPL, entry hspell-he-dictionary): a user download only, never bundled and never a default."
     }
   ]
 }
