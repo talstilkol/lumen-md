@@ -107,7 +107,7 @@ export function GraphListView({ graph, start, kindLabel, relationLabel, onOpen, 
           {t("graphAlt.list.goTo")}
           <select value={current} onChange={(e) => go(e.target.value)} data-testid="graph-list-goto" style={{ fontSize: 12, maxInlineSize: 240 }}>
             {graph.nodes.map((n) => (
-              <option key={n.id} value={n.id}>
+              <option key={n.id} value={n.id} dir="auto">
                 {n.label}
               </option>
             ))}

@@ -72,7 +72,7 @@ export function NamedVersionsDialog({ session, author, onClose }: { session: Col
 
   const options = [
     ...versions.map((v) => (
-      <option key={v.id} value={v.id}>
+      <option key={v.id} value={v.id} dir="auto">
         {v.name}
       </option>
     )),
@@ -126,7 +126,7 @@ export function NamedVersionsDialog({ session, author, onClose }: { session: Col
               <ul data-testid="named-versions" style={{ margin: 0, paddingInlineStart: 18, fontSize: 13 }}>
                 {versions.map((v) => (
                   <li key={v.id} dir="auto">
-                    <strong>{v.name}</strong> — {t("versions.by", { author: v.author ?? t("versions.unknownAuthor"), date: fmt.format(v.at) })}
+                    <strong><bdi>{v.name}</bdi></strong> — {t("versions.by", { author: v.author ?? t("versions.unknownAuthor"), date: fmt.format(v.at) })}
                   </li>
                 ))}
               </ul>

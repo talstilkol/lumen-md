@@ -95,9 +95,11 @@ const GraphOverlay = lazy(() => import("./ui/GraphOverlay").then((m) => ({ defau
 import { DropHint } from "./ui/DropHint";
 // W13.R7: the linked three-column view is a reading mode; its root carries the marker (src/reading/modes.ts).
 import { modeRoot } from "./reading/modeRoot";
+import { useWindowTitle } from "./ui/useWindowTitle";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
+  useWindowTitle(doc.name);
   // Side effects that own no App state: reading options, snippets, update check, theme, locale, plugins… (W6.25)
   useAppBootEffects();
   const setContent = useAppStore((s) => s.setContent);

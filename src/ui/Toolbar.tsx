@@ -511,7 +511,7 @@ export function Toolbar({
           }}
           title={doc.name}
         >
-          {doc.name}
+          <bdi>{doc.name}</bdi>
           {doc.dirty && <span style={{ color: "hsl(var(--accent))", marginInlineStart: 4 }}>•</span>}
         </div>
       </div>
