@@ -1,6 +1,9 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
 import { generateKeyPairSync } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+import { dirname, join, resolve } from "node:path";
 import {
   COSIGN_MIN,
   IDENTITY_PLACEHOLDER,
@@ -15,6 +18,7 @@ import {
   keyId,
   makePolicy,
   pae,
+  sigstorePolicy,
   provenanceStatement,
   signEnvelope,
   verifyEnvelope,
@@ -133,5 +137,50 @@ describe("Sigstore identity and tools", () => {
   it("maps SLSA Build L2 requirement by requirement, each with evidence", () => {
     expect(SLSA_L2.length).toBeGreaterThanOrEqual(5);
     for (const r of SLSA_L2 as { id: string; how: string; evidence: string }[]) expect(r.how.length && r.evidence.length).toBeTruthy();
+  });
+});
+
+/**
+ * F14: sigstore-js checks the certificate's identity with
+ * `san.match(policy.subjectAlternativeName)`, a regular expression, not an
+ * equality. The pinned identity must be escaped and anchored, or a look-alike
+ * certificate identity is accepted as the release identity.
+ */
+describe("Sigstore identity is matched exactly (F14)", () => {
+  // npm's own sigstore-js, as verify.mjs finds it; String.prototype.match is the same check when it is not there.
+  const npmSigstore = [join(dirname(process.execPath), "../lib/node_modules/npm/node_modules/sigstore/package.json"), join(dirname(process.execPath), "node_modules/npm/node_modules/sigstore/package.json")].find((p) => existsSync(p));
+  let san: (policy: string, signer: string) => void = (policy, signer) => {
+    if (!signer.match(policy)) throw new Error("UNTRUSTED_SIGNER_ERROR");
+  };
+  if (npmSigstore) {
+    try {
+      const policyJs = createRequire(npmSigstore).resolve("@sigstore/verify/dist/policy.js");
+      san = (createRequire(policyJs)(policyJs) as { verifySubjectAlternativeName: typeof san }).verifySubjectAlternativeName;
+    } catch {
+      // why: an npm without the verifier inside; the stand-in above is the same check
+    }
+  }
+  const pinned = { identity: "tal.release@example.com", issuer: "https://github.com/login/oauth" };
+  const policy = sigstorePolicy(pinned) as { subjectAlternativeName: string; extensions: { issuer: string } };
+
+  it("accepts the pinned identity, regex characters and all", () => {
+    expect(() => san(policy.subjectAlternativeName, pinned.identity)).not.toThrow();
+    expect(policy.extensions).toEqual({ issuer: pinned.issuer });
+    const plus = sigstorePolicy({ identity: "tal+release@example.com", issuer: pinned.issuer }) as { subjectAlternativeName: string };
+    expect(() => san(plus.subjectAlternativeName, "tal+release@example.com")).not.toThrow();
+    expect(() => san(plus.subjectAlternativeName, "tallrelease@example.com")).toThrow(/UNTRUSTED_SIGNER_ERROR|certificate identity/);
+  });
+
+  it("refuses look-alike identities", () => {
+    for (const lookAlike of ["evil-tal.release@example.com", "tal.release@example.com.attacker.test", "tal.release@exampleXcom", "talXrelease@example.com", "tal.release@example.com\n", "xtal.release@example.com"]) {
+      expect(() => san(policy.subjectAlternativeName, lookAlike), lookAlike).toThrow(/UNTRUSTED_SIGNER_ERROR|certificate identity/);
+    }
+  });
+
+  it("verify.mjs hands sigstore-js that policy, not the raw identity", () => {
+    const src = readFileSync(resolve(__dirname, "../../scripts/supply-chain/verify.mjs"), "utf8");
+    const calls = [...src.matchAll(/\.verify\(entity,([^;]*)\);/g)].map((m) => m[1].trim());
+    expect(calls).toEqual(["sigstorePolicy(identity)"]);
+    expect(src).not.toMatch(/subjectAlternativeName:\s*identity\.identity/);
   });
 });
