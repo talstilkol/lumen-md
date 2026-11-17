@@ -2,7 +2,7 @@
 /**
  * The whole Mac pack in one command (integrator INT6a, wave g6).
  *
- *   npm run mac:pack                    run every entry of every plan/mac-pack/L*.json
+ *   npm run mac:pack                    run every entry of every plan/mac-pack/L*.json and FC*.json
  *   npm run mac:pack -- --list          what would run, how, and in which order; run nothing
  *   npm run mac:pack -- --only <id|lane>[,…]   run only those (an id, or a lane such as L3)
  *   npm run mac:pack -- --dry           print each rewritten command; run nothing
@@ -46,10 +46,19 @@ const SHARED_REPORT = `${OUT_DIR}/shared/e2e.pw.json`;
 
 // ── load and classify ─────────────────────────────────────────────────────
 
-/** Every entry of every plan/mac-pack/L*.json, in lane then file order. */
+/** A lane's pack file: L<n>.json (the g6 lanes) or FC<n>.json (the follow-up code lanes). */
+export const PACK_FILE = /^(L|FC)(\d+)\.json$/;
+/** L lanes first, then FC lanes, each by number. */
+const byLane = (a, b) => {
+  const [, pa, na] = PACK_FILE.exec(a);
+  const [, pb, nb] = PACK_FILE.exec(b);
+  return pa === pb ? Number(na) - Number(nb) : pa === "L" ? -1 : 1;
+};
+
+/** Every entry of every plan/mac-pack/L*.json and FC*.json, in lane then file order. */
 export function loadPacks(root) {
   const dir = join(root, "plan/mac-pack");
-  const files = existsSync(dir) ? readdirSync(dir).filter((f) => /^L\d+\.json$/.test(f)).sort((a, b) => Number(a.slice(1, -5)) - Number(b.slice(1, -5))) : [];
+  const files = existsSync(dir) ? readdirSync(dir).filter((f) => PACK_FILE.test(f)).sort(byLane) : [];
   const out = [];
   for (const f of files) {
     const lane = f.slice(0, -5);
