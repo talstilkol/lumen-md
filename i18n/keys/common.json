@@ -18627,6 +18627,177 @@
       "vars": []
     },
     {
+      "key": "settingsSearch.count",
+      "en": "{n} settings found",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "settingsSearch.hint",
+      "en": "↑↓ to move · Enter to open · ⌘F to search again",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.autoSave",
+      "en": "save, autosave, automatic saving",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.grammarCheck",
+      "en": "grammar, LanguageTool, style",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.locale",
+      "en": "language, interface language, translation, locale",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.lumen.ai.policy",
+      "en": "local only, cloud, offline, privacy",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.lumen.images.keepMetadata",
+      "en": "EXIF, GPS, photo location, metadata",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.lumen.ollama.baseUrl",
+      "en": "Ollama server, address, URL, host",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.lumen.ollama.model",
+      "en": "Ollama model, local model, LLM",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.lumen.telemetry.optOut",
+      "en": "telemetry, error reports, crash reports, Sentry",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.mode",
+      "en": "editor view, source, preview, split, WYSIWYG",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.pageView",
+      "en": "page, print layout, paper",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.rtl",
+      "en": "right to left, direction, Hebrew, Arabic, bidi",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.showBacklinks",
+      "en": "backlinks, linked mentions, references",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.showOutline",
+      "en": "table of contents, headings, TOC",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.spellCheck",
+      "en": "spelling, typos, dictionary",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.syncScroll",
+      "en": "scroll, sync scroll, linked scrolling",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.tab.ai",
+      "en": "AI, artificial intelligence, model, LLM, agents",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.tab.appearance",
+      "en": "appearance, look, colors, font, typography",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.tab.general",
+      "en": "general, basic, main options",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.tab.privacy",
+      "en": "privacy, images, network, external hosts",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.tab.security",
+      "en": "security, keys, signing, monitoring",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.tab.sync",
+      "en": "sync, collaboration, share, real-time",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.theme",
+      "en": "dark mode, light mode, night mode, color scheme",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.themeSettings",
+      "en": "font, typeface, font size, line height, accent color, content width",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.typewriterMode",
+      "en": "typewriter, focus, centered line",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.useLocalAi",
+      "en": "local AI, on-device, offline, WebGPU",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.vimEnabled",
+      "en": "vim, keybindings, modal editing",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.kw.writingGoalWords",
+      "en": "writing goal, words per day, target",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.none",
+      "en": "No setting matches “{q}”.",
+      "vars": [
+        "q"
+      ]
+    },
+    {
+      "key": "settingsSearch.pluginHit",
+      "en": "Plugin: {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "settingsSearch.results",
+      "en": "Matching settings",
+      "vars": []
+    },
+    {
+      "key": "settingsSearch.tabHit",
+      "en": "Settings tab",
+      "vars": []
+    },
+    {
       "key": "share.close",
       "en": "Close",
       "vars": []

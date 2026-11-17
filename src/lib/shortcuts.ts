@@ -39,6 +39,8 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { id: "view.preview", combo: "Mod+3", scope: "app" },
   { id: "view.wysiwyg", combo: "Mod+4", scope: "app" },
   { id: "help.shortcuts", combo: "Mod+/", scope: "app" },
+  // W13.E4: the settings screen, its search field focused (Obsidian, VS Code and macOS use ⌘,).
+  { id: "settings.open", combo: "Mod+,", scope: "app" },
   { id: "note.today", combo: "Mod+Alt+D", scope: "global" },
   { id: "note.capture", combo: "Mod+Alt+N", scope: "global" },
   { id: "cite.insert", combo: "Mod+Alt+C", scope: "global" },

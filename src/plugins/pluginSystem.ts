@@ -24,6 +24,7 @@
 
 import { countWords } from "../text/hebrew";
 import { log } from "../lib/logger";
+import { registerPluginSetting, unregisterPluginSettings, type PluginSettingDef } from "../settings/pluginSettings";
 
 export interface LumenCommand {
   id: string;
@@ -71,6 +72,14 @@ export interface LumenPluginAPI {
    * guard and asks before its first run. Removed with the plugin.
    */
   registerSkill: (path: string, text: string) => Promise<{ ok: true; name: string } | { ok: false; error: string }>;
+  /**
+   * Add a setting to the settings search (W13.E4): found by its label,
+   * description and keywords (one string, or one per locale code), and
+   * `open()` is called when the person picks it — show your own view there.
+   * Deep link: `lumen://settings/plugin:<plugin id>/<id>`. Returns the
+   * function that removes it; deactivating the plugin removes it too.
+   */
+  registerSetting: (def: PluginSettingDef) => () => void;
 }
 
 // ── Plugin Registry ─────────────────────────────────────────────────────────
@@ -98,7 +107,7 @@ export function wirePluginAPI(opts: {
   _showToast = opts.showToast;
 }
 
-function createAPI(pluginId: string): LumenPluginAPI {
+function createAPI(pluginId: string, pluginName?: string): LumenPluginAPI {
   return {
     registerCommand: (cmd) => {
       const list = pluginCommands.get(pluginId) ?? [];
@@ -136,6 +145,7 @@ function createAPI(pluginId: string): LumenPluginAPI {
       const r = (await import("../agents/skills/library")).registerPluginSkill(pluginId, path, text);
       return r.ok ? { ok: true, name: r.skill.name } : r;
     },
+    registerSetting: (def) => registerPluginSetting(pluginId, def, pluginName),
   };
 }
 
@@ -148,7 +158,7 @@ export async function registerPlugin(plugin: LumenPlugin): Promise<void> {
   plugins.set(plugin.id, { plugin, active: false });
   
   if (plugin.activate) {
-    const api = createAPI(plugin.id);
+    const api = createAPI(plugin.id, plugin.name);
     await plugin.activate(api);
   }
   plugins.get(plugin.id)!.active = true;
@@ -163,6 +173,7 @@ export function unregisterPlugin(pluginId: string): void {
   // A removed plugin's skills go with it (loaded only if the library is, so a plugin that added none costs nothing).
   void import("../agents/skills/library").then((m) => m.unregisterPluginSkills(pluginId));
   pluginCommands.delete(pluginId);
+  unregisterPluginSettings(pluginId);
   changeHandlers.delete(pluginId);
   saveHandlers.delete(pluginId);
   plugins.delete(pluginId);
