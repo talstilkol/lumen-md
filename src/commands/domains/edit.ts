@@ -33,6 +33,20 @@ export function buildEditCommands({ getEditorView, suggestingMode, toggleSuggest
         }
       },
     },
+    // W13.H5: א. ב. ג. for this note's ordered lists in the preview, PDF and DOCX.
+    {
+      id: "edit.hebrewListNumbering",
+      label: /^\uFEFF?---\r?\n[\s\S]*?^list-?[nN]umbering\s*:\s*["']?(hebrew|he)\b/m.test(useAppStore.getState().doc.content) ? t("cmd.edit.hebrewLists.off") : t("cmd.edit.hebrewLists.on"),
+      hint: t("cmd.edit.hebrewLists.hint"),
+      group: t("group.edit"),
+      action: async () => {
+        const { toggleHebrewListNumbering } = await import("../../editor/listNumberingCommand");
+        const { text, on } = toggleHebrewListNumbering(useAppStore.getState().doc.content);
+        useAppStore.getState().setContent(text);
+        showAiToast(t(on ? "cmd.edit.hebrewLists.done.on" : "cmd.edit.hebrewLists.done.off"), "success");
+        getEditorView?.()?.focus();
+      },
+    },
     ...buildFormatCommands(
       {
         getView: () => getEditorView?.() ?? null,

@@ -6,6 +6,7 @@
  */
 
 import { extractFrontmatter, renderMarkdown } from "../renderer/pipeline";
+import { hebrewListCss, listNumberingOf } from "../lib/hebrewListNumbering";
 import { MM, PAGE_SLACK_MM, pageArea, applyPageBreaks, buildToc, contentDirection, contentLang, layoutFootnotePages, printCss, printFrontmatter, type PrintOptions } from "../print/printLayout";
 import { getLocale, t } from "../i18n";
 import { safeSetHtml, safeClearHtml } from "../lib/trustedTypes";
@@ -90,6 +91,8 @@ export async function preparePrint(markdownText: string, docName: string, opts: 
     }
   }
   styles.push(printCss({ title, dir, ...settings }));
+  // W13.H5: א. ב. ג. for a note that asks for Hebrew list numbering (the Markdown keeps 1. 2. 3.).
+  if (listNumberingOf(fm) === "hebrew") styles.push(hebrewListCss("html"));
   // W2.23: footnotes at the bottom of their page unless the note asks for endnotes.
   if ((settings.footnotes ?? "page") === "page" && /data-footnotes|class="footnotes"/.test(html)) {
     html = (await layoutInFrame(html, styles.join("\n\n"), dir, lang, { title, dir, ...settings })) ?? html;

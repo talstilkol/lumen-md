@@ -2273,3 +2273,7 @@ dialog.lumen-modal:is([data-reading-mode="side-by-side"], [data-reading-mode="da
   outline: 2px solid hsl(var(--accent));
   outline-offset: -2px;
 }
+
+/* W13.H5: a note with `listNumbering: hebrew` numbers its ordered lists א. ב. ג.;
+   the browser's `hebrew` style until lib/hebrewListNumbering adds the exact one (ט״ו, ער). */
+[data-list-numbering="hebrew"] ol { list-style-type: hebrew; }
