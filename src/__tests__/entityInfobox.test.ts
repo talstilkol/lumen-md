@@ -8,6 +8,7 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import axe from "axe-core";
+import { createElement as h } from "react";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import type { Root } from "mdast";
@@ -219,10 +220,7 @@ describe("the card, in Hebrew", () => {
     document.head.append(style);
     const m = infoboxModel({ entity: haifa, noteText: NOTE_HAIFA, edges: EDGES, nameOf, idOf });
     const { container } = render(
-      <div dir="rtl" style={{ inlineSize: 800 }}>
-        <EntityInfobox model={m} dir="rtl" />
-        <p>טקסט</p>
-      </div>,
+      h("div", { dir: "rtl", style: { inlineSize: 800 } }, h(EntityInfobox, { model: m, dir: "rtl" }), h("p", null, "טקסט")),
     );
     const box = container.querySelector(".lumen-infobox") as HTMLElement;
     // In a real layout engine (Chromium) the card's right edge is the container's; happy-dom has no layout.
@@ -235,11 +233,11 @@ describe("the card, in Hebrew", () => {
   });
   it("an empty card says so; a picture shows when the vault has it", async () => {
     const lone = infoboxModel({ entity: ent("concept", "רעיון"), edges: [], nameOf });
-    render(<EntityInfobox model={lone} />);
+    render(h(EntityInfobox, { model: lone }));
     expect(screen.getByText(/entityGraph\.infobox\.empty|אין עדיין|No fields or relations yet/)).toBeTruthy();
     cleanup();
     const m = infoboxModel({ entity: david, noteText: NOTE_DAVID, edges: EDGES, nameOf, idOf });
-    render(<EntityInfobox model={m} resolveImage={async (p) => (p === "תמונות/בן-גוריון.png" ? "blob:pic" : undefined)} />);
+    render(h(EntityInfobox, { model: m, resolveImage: async (p: string) => (p === "תמונות/בן-גוריון.png" ? "blob:pic" : undefined) }));
     await waitFor(() => expect(screen.getByRole("img").getAttribute("src")).toBe("blob:pic"));
   });
 });
@@ -258,7 +256,7 @@ describe("in the app: embed and hover read the vault", () => {
   });
   afterEach(() => cleanup());
   it("the embed component loads the relations and shows the card", async () => {
-    render(<EntityInfoboxEmbed path="ישויות/אנשים/דוד בן-גוריון.md" text={NOTE_DAVID} />);
+    render(h(EntityInfoboxEmbed, { path: "ישויות/אנשים/דוד בן-גוריון.md", text: NOTE_DAVID }));
     await waitFor(() => expect(screen.getByText("מפא״י").tagName).toBe("A"));
     expect(screen.getAllByRole("rowheader").length).toBe(7);
     expect(screen.getByTestId("entity-infobox").getAttribute("data-entity")).toBe(david.id);
