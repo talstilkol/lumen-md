@@ -56,13 +56,27 @@ final class LanRendezvous {
         return sb.toString();
     }
 
-    /** Private, link-local or loopback: the only peers the rendezvous talks to. */
+    /**
+     * Private, link-local or loopback: the only peers the rendezvous talks to.
+     * The same rule as src/sync/e2ee/lan/address.ts and src-tauri/lan-mdns
+     * (net::is_lan_ip): IPv4 10/8, 172.16/12, 192.168/16, 169.254/16, 127/8;
+     * IPv6 ::1, fe80::/10, fc00::/7; an IPv4-mapped address by its IPv4 rule
+     * (Java hands those over as Inet4Address). Carrier-grade NAT (100.64/10)
+     * is refused, as on the desktop: it is a carrier's network, not the
+     * user's. So is IPv6 site-local (fec0::/10, deprecated), which Java's
+     * isSiteLocalAddress would let through.
+     */
     static boolean isLanAddress(InetAddress a) {
-        if (a.isLoopbackAddress() || a.isLinkLocalAddress() || a.isSiteLocalAddress()) return true;
-        if (a instanceof Inet6Address) return (a.getAddress()[0] & 0xfe) == 0xfc; // fc00::/7
+        if (a == null || a.isAnyLocalAddress()) return false;
+        if (a.isLoopbackAddress()) return true;
+        byte[] b = a.getAddress();
         if (a instanceof Inet4Address) {
-            byte[] b = a.getAddress();
-            return (b[0] & 0xff) == 100 && (b[1] & 0xc0) == 64; // 100.64.0.0/10 (CGNAT, e.g. a phone hotspot)
+            int x = b[0] & 0xff, y = b[1] & 0xff;
+            return x == 10 || x == 127 || (x == 172 && y >= 16 && y <= 31) || (x == 192 && y == 168) || (x == 169 && y == 254);
+        }
+        if (a instanceof Inet6Address) {
+            if ((b[0] & 0xff) == 0xfe && (b[1] & 0xc0) == 0x80) return true; // fe80::/10
+            return (b[0] & 0xfe) == 0xfc; // fc00::/7
         }
         return false;
     }

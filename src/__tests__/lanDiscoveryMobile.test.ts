@@ -7,8 +7,11 @@
  * The native build is the owner's (Mac).
  */
 import { afterEach, describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
+import { isLanHost } from "../sync/e2ee/lan/address";
 import { capacitorInvoke, nativeLanAvailable, type LumenLanPlugin } from "../sync/e2ee/lan/nativeDiscovery";
 import { announcePairing, discoveryAvailable, findDevices, joinFound, DiscoveryError } from "../sync/e2ee/lan/discovery";
 
@@ -16,6 +19,11 @@ const ROOT = resolve(__dirname, "..", "..");
 const read = (f: string) => readFileSync(join(ROOT, f), "utf8");
 const OFFER = "lumen-lan:1:offerFromHost_1";
 const ANSWER = "lumen-lan:1:answerFromPeer_2";
+// JUnit 4 for the Android unit test, where a JDK and Gradle's own JUnit are installed (LUMEN_JUNIT_DIR to point elsewhere).
+const JUNIT_DIR = process.env.LUMEN_JUNIT_DIR ?? "/opt/gradle-8.14.3/lib";
+const JUNIT = join(JUNIT_DIR, "junit-4.13.2.jar");
+const HAMCREST = join(JUNIT_DIR, "hamcrest-core-1.3.jar");
+const hasJavac = spawnSync("javac", ["-version"]).status === 0 && existsSync(JUNIT) && existsSync(HAMCREST);
 
 function fakePlugin() {
   const calls: string[] = [];
@@ -97,6 +105,40 @@ describe("the native halves are in the projects, with the desktop's protocol (W1
     }
     expect(java).toContain("5 * 60 * 1000");
     expect(swift).toContain("5 * 60");
+  });
+
+  it("the same peers as the desktop: the Rust host's address cases hold for address.ts, and the Android test checks every one of them", () => {
+    // The vectors of src-tauri/lan-mdns's the_local_network_rule_matches_address_ts.
+    const block = rust.slice(rust.indexOf("fn the_local_network_rule_matches_address_ts"));
+    const list = (kind: "ok" | "no") => [...(new RegExp(`for ${kind} in \\[([^\\]]*)\\]`).exec(block)?.[1] ?? "").matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+    const ok = list("ok");
+    const no = list("no");
+    expect(ok.length).toBeGreaterThan(5);
+    expect(no).toContain("100.64.0.1");
+    for (const a of ok) expect(isLanHost(a), a).toBe(true);
+    for (const a of no) expect(isLanHost(a), a).toBe(false);
+    const junit = read("android/app/src/test/java/com/lumen/editor/LanRendezvousTest.java");
+    for (const a of [...ok, ...no]) expect(junit, a).toContain(`"${a}"`);
+    // Carrier-grade NAT (100.64/10) is refused on the phones too (W2.19: a carrier's network is not the user's).
+    for (const src of [java, swift]) {
+      expect(src).not.toMatch(/== 100 && \(b\[1\] & 0xc0\) == 64/);
+      expect(src).not.toMatch(/isSiteLocalAddress\(\)/);
+    }
+    expect(swift).toContain("isLanV4(Array(b[12..<16]))");
+  });
+
+  it.skipIf(!hasJavac)("the Android rendezvous passes its JUnit test (plain javac and JUnit 4)", () => {
+    const out = mkdtempSync(join(tmpdir(), "lumen-lan-junit-"));
+    try {
+      const cp = [JUNIT, HAMCREST].join(":");
+      const c = spawnSync("javac", ["-d", out, "-cp", cp, "android/app/src/main/java/com/lumen/editor/LanRendezvous.java", "android/app/src/test/java/com/lumen/editor/LanRendezvousTest.java"], { cwd: ROOT, encoding: "utf8" });
+      expect(c.status, c.stderr).toBe(0);
+      const r = spawnSync("java", ["-cp", `${out}:${cp}`, "org.junit.runner.JUnitCore", "com.lumen.editor.LanRendezvousTest"], { cwd: ROOT, encoding: "utf8" });
+      expect(r.stdout, r.stdout + r.stderr).toMatch(/OK \(4 tests\)/);
+      expect(r.status).toBe(0);
+    } finally {
+      rmSync(out, { recursive: true, force: true });
+    }
   });
 
   it("Android registers the plugin as LumenLan, with NsdManager, and only after LumenNative", () => {

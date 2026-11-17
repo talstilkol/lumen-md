@@ -42,18 +42,30 @@ enum LanProtocol {
         return b.map { String(format: "%02x", $0) }.joined()
     }
 
-    /// Private, link-local or loopback (and 100.64/10, a phone hotspot): the only peers spoken to.
+    /// Private, link-local or loopback: the only peers spoken to. The same rule as
+    /// src/sync/e2ee/lan/address.ts and src-tauri/lan-mdns (net::is_lan_ip): IPv4 10/8,
+    /// 172.16/12, 192.168/16, 169.254/16, 127/8; IPv6 ::1, fe80::/10, fc00::/7, and an
+    /// IPv4-mapped address by its IPv4 rule. Carrier-grade NAT (100.64/10) is refused,
+    /// as on the desktop: it is a carrier's network, not the user's.
     static func isLan(_ host: NWEndpoint.Host) -> Bool {
         switch host {
         case .ipv4(let a):
-            let b = [UInt8](a.rawValue)
-            return a.isLoopback || a.isLinkLocal || b[0] == 10 || (b[0] == 172 && (b[1] & 0xf0) == 16) || (b[0] == 192 && b[1] == 168) || (b[0] == 100 && (b[1] & 0xc0) == 64)
+            return isLanV4([UInt8](a.rawValue))
         case .ipv6(let a):
             let b = [UInt8](a.rawValue)
-            return a.isLoopback || a.isLinkLocal || (b[0] & 0xfe) == 0xfc
+            if b.count == 16 && b[0..<10].allSatisfy({ $0 == 0 }) && b[10] == 0xff && b[11] == 0xff {
+                return isLanV4(Array(b[12..<16])) // ::ffff:a.b.c.d
+            }
+            return a.isLoopback || (b[0] == 0xfe && (b[1] & 0xc0) == 0x80) || (b[0] & 0xfe) == 0xfc
         default:
             return false
         }
+    }
+
+    /// The IPv4 half of the rule, on the four bytes of the address.
+    static func isLanV4(_ b: [UInt8]) -> Bool {
+        guard b.count == 4 else { return false }
+        return b[0] == 10 || b[0] == 127 || (b[0] == 172 && (b[1] & 0xf0) == 16) || (b[0] == 192 && b[1] == 168) || (b[0] == 169 && b[1] == 254)
     }
 }
 
