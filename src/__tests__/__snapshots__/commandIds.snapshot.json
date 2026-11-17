@@ -1229,6 +1229,13 @@
       "action": "store:toggleRtl"
     },
     {
+      "id": "view.hebrewCalendarDates",
+      "label": "Dates: show them in the Hebrew calendar",
+      "group": "View",
+      "hint": "Every date Lumen writes, in the UI language; your notes are not changed",
+      "icon": "PanelRightOpen"
+    },
+    {
       "id": "lang.en",
       "label": "Language: English",
       "group": "View",
@@ -3749,6 +3756,13 @@
       "action": "store:toggleRtl"
     },
     {
+      "id": "view.hebrewCalendarDates",
+      "label": "Dates: show them in the Hebrew calendar",
+      "group": "View",
+      "hint": "Every date Lumen writes, in the UI language; your notes are not changed",
+      "icon": "PanelRightOpen"
+    },
+    {
       "id": "lang.en",
       "label": "Language: English",
       "group": "View",
@@ -5310,6 +5324,7 @@
     "nikud.remove",
     "tools.checkGrammar",
     "view.rtl",
+    "view.hebrewCalendarDates",
     "lang.en",
     "lang.he",
     "lang.ar",
