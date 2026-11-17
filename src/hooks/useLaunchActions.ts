@@ -85,6 +85,8 @@ export function useLaunchActions({ setCaptureOpen, setCaptureVoice, setPaletteOp
           setSearchOpen(true);
         },
         daily: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
+        // W13.X5: lumen://capture?text=… writes to the inbox: asked first.
+        confirm: async (a) => (await import("../security/LinkConfirmDialog")).confirmLinkInApp(a),
       });
     });
     return () => stop?.();

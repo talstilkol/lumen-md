@@ -141,13 +141,20 @@ export interface NativeHandlers {
   newNote: () => void;
   search: (query: string) => void;
   daily: () => void;
+  /**
+   * W13.X5: may a link write this? (src/security/linkConfirm.ts). Without it, a link that writes does nothing:
+   * any app can open a lumen:// link, so it fails closed. Opening the empty box, search and today's note do not ask.
+   */
+  confirm?: (a: import("../security/linkConfirm").LinkAction) => Promise<boolean>;
 }
 
 export function applyAction(p: ParsedAction, h: NativeHandlers): void {
   const a = p.action;
   if (a.kind === "capture") {
-    if (a.text) void h.captureText(a.text, new Date());
-    else h.capture(a.mode, p.tappedAt);
+    if (a.text) {
+      const text = a.text;
+      void (h.confirm ? h.confirm({ kind: "capture", text }) : Promise.resolve(false)).then((ok) => (ok ? h.captureText(text, new Date()) : undefined));
+    } else h.capture(a.mode, p.tappedAt);
   } else if (a.kind === "new") h.newNote();
   else if (a.kind === "search") h.search(a.query);
   else h.daily();

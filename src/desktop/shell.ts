@@ -11,11 +11,13 @@
 // Which window this is, its storage and the tab state it hands over: in ./window,
 // so the store and the tab strip get them at startup without the rest of the shell.
 import { isDesktop, parseTabState, storeKeyFor, windowLabel, type TabState } from "./window";
+import type { LinkAction } from "../security/linkConfirm";
 export { isDesktop, windowLabel, STORE_KEY, storeKeyFor, seedFromMain, windowStorage, parseTabState, droppedOutside, type TabState } from "./window";
 
 /** What Rust asks the main window to open (`lumen-open`). */
 export type OpenRequest =
-  | { kind: "vault"; root: string; rel: string; line: number | null }
+  /** `link`: from a `lumen://` link (confirmed first, W13.X5); the OS and the tray are not links. */
+  | { kind: "vault"; root: string; rel: string; line: number | null; link?: boolean }
   | { kind: "file"; token: string; name: string }
   | { kind: "unknown-vault"; name: string }
   | { kind: "new"; title: string | null; text: string | null; folder: string | null }
@@ -31,12 +33,24 @@ export interface OpenDeps {
   newNote: (title: string | null, text: string | null, folder: string | null) => Promise<void>;
   capture: (text: string) => Promise<void>;
   notifyUnknownVault: (name: string) => void;
+  /**
+   * W13.X5: may a link do this? Asks the user (src/security/linkConfirm.ts). Without it, a link that writes or
+   * opens does nothing: a link is any page's or app's request, so it fails closed.
+   */
+  confirm?: (a: LinkAction) => Promise<boolean>;
+  /** The text of a vault file, for the confirmation of local HTML (does it load from the network?). */
+  peek?: (rel: string) => Promise<string | null>;
 }
 
 /** Apply one open request. A file of another known vault switches to that vault first. */
 export async function handleOpenRequest(req: OpenRequest, d: OpenDeps): Promise<void> {
+  const allowed = (a: LinkAction) => (d.confirm ? d.confirm(a) : Promise.resolve(false));
   switch (req.kind) {
     case "vault":
+      if (req.link) {
+        const html = /\.(x?html?|mhtml)$/i.test(req.rel) && d.peek ? await d.peek(req.rel).catch(() => null) : null;
+        if (!(await allowed({ kind: "open-file", path: req.rel, html }))) return;
+      }
       if (req.root && req.root !== d.activeRoot()) await d.switchVault(req.root);
       return d.openVaultFile(req.rel, req.line);
     case "file":
@@ -44,8 +58,11 @@ export async function handleOpenRequest(req: OpenRequest, d: OpenDeps): Promise<
     case "unknown-vault":
       return d.notifyUnknownVault(req.name);
     case "new":
+      // An empty new note is the tray's (or a harmless link's): nothing to confirm.
+      if ((req.title || req.text || req.folder) && !(await allowed({ kind: "new-note", title: req.title, text: req.text, folder: req.folder }))) return;
       return d.newNote(req.title, req.text, req.folder);
     case "capture":
+      if (!(await allowed({ kind: "capture", text: req.text }))) return;
       return d.capture(req.text);
   }
 }

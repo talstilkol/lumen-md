@@ -91,6 +91,9 @@ export async function startDesktopShell(opts: { current: ShellOpts }): Promise<(
       opts.current.showToast(t("desktop.captured"));
     },
     notifyUnknownVault: (name) => opts.current.showToast(t("desktop.unknownVault", { name })),
+    // W13.X5: a lumen:// link that writes or opens asks first (the dialog loads only when a link arrives).
+    confirm: async (a) => (await import("../security/LinkConfirmDialog")).confirmLinkInApp(a),
+    peek: async (rel) => ws.readWorkspaceFile(rel).catch(() => null),
     tabIds: () => useAppStore.getState().openTabs.map((x) => x.id),
     receiveTab: async (state) => {
       const st = useAppStore.getState();

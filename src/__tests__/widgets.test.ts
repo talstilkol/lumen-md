@@ -34,7 +34,7 @@ describe("action links", () => {
     expect(parseNativeUrl("lumen://capture?mode=voice&text=x")!.action).toEqual({ kind: "capture", mode: "voice", text: null });
   });
 
-  it("applying: text goes straight to the inbox, the rest opens the app's views", async () => {
+  it("applying: text goes to the inbox once the user allows it (W13.X5), the rest opens the app's views", async () => {
     const calls: string[] = [];
     const h: NativeHandlers = {
       capture: (mode, t) => void calls.push(`box ${mode} ${t}`),
@@ -42,10 +42,11 @@ describe("action links", () => {
       newNote: () => void calls.push("new"),
       search: (q) => void calls.push(`search ${q}`),
       daily: () => void calls.push("daily"),
+      confirm: async (a) => (calls.push(`asked ${a.kind}`), true),
     };
     for (const u of ["lumen://capture?t=1762761900000", "lumen://capture?text=hi", "lumen://new", "lumen://search?q=x", "lumen://daily"]) applyAction(parseNativeUrl(u)!, h);
-    await Promise.resolve();
-    expect(calls).toEqual(["box text 1762761900000", "inbox hi", "new", "search x", "daily"]);
+    await new Promise((r) => setTimeout(r, 0));
+    expect(calls).toEqual(["box text 1762761900000", "asked capture", "new", "search x", "daily", "inbox hi"]);
   });
 });
 

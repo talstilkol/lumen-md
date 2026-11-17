@@ -88,6 +88,8 @@ describe("open requests", () => {
       newNote: async (t) => void calls.push(`new ${t ?? ""}`),
       capture: async (t) => void calls.push(`capture ${t}`),
       notifyUnknownVault: (n) => void calls.push(`unknown ${n}`),
+      // W13.X5: the user allows every link here (src/__tests__/uriConfirm.test.ts covers refusals).
+      confirm: async () => true,
     };
     return { d, calls };
   }
