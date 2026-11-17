@@ -23,7 +23,7 @@ import { claimPath } from "./names";
 import { emptyVault, type ConvertedVault, type ImportSourceId } from "./types";
 
 /** Every source the wizard offers, in the order it shows them. */
-export const IMPORT_SOURCES: readonly ImportSourceId[] = ["obsidian", "notion", "evernote", "bear", "appleNotes", "keep", "logseq", "onenote", "roam", "craft", "textbundle", "dayOne", "appleJournal", "samsungNotes", "airtable", "tomboy", "lumen"];
+export const IMPORT_SOURCES: readonly ImportSourceId[] = ["obsidian", "notion", "evernote", "bear", "appleNotes", "keep", "logseq", "onenote", "roam", "craft", "textbundle", "dayOne", "appleJournal", "samsungNotes", "airtable", "tomboy", "pandoc", "lumen"];
 
 /** Brand names stay as they are in every language. */
 export const SOURCE_NAMES: Record<ImportSourceId, string> = {
@@ -43,6 +43,7 @@ export const SOURCE_NAMES: Record<ImportSourceId, string> = {
   samsungNotes: "Samsung Notes",
   airtable: "Airtable",
   tomboy: "Tomboy / Gnote",
+  pandoc: "Pandoc",
   lumen: "Lumen",
 };
 
@@ -64,6 +65,8 @@ export const SOURCE_ACCEPT: Record<ImportSourceId, string> = {
   samsungNotes: ".txt,.pdf,.zip,.sdocx",
   airtable: ".csv,.json,.zip",
   tomboy: ".note,.zip",
+  // W13.F5: what the user's Pandoc reads and Lumen does not (src/storage/import/pandocBridge.ts).
+  pandoc: ".dbk,.docbook,.xml,.wiki,.mediawiki,.jira,.opml,.t2t,.dokuwiki,.textile,.creole,.twiki,.tikiwiki,.vimwiki,.muse,.fb2,.man,.1,.haddock,.pod,.zip",
   lumen: ".zip",
 };
 

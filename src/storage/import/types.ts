@@ -7,7 +7,7 @@
  * into a new folder, counts the links, and keeps what it needs to undo.
  */
 
-export type ImportSourceId = "obsidian" | "notion" | "evernote" | "bear" | "appleNotes" | "keep" | "logseq" | "onenote" | "roam" | "craft" | "textbundle" | "dayOne" | "appleJournal" | "samsungNotes" | "airtable" | "tomboy" | "lumen";
+export type ImportSourceId = "obsidian" | "notion" | "evernote" | "bear" | "appleNotes" | "keep" | "logseq" | "onenote" | "roam" | "craft" | "textbundle" | "dayOne" | "appleJournal" | "samsungNotes" | "airtable" | "tomboy" | "pandoc" | "lumen";
 
 /** Why a file of the export did not become a note or an attachment. */
 export type SkipReason =

@@ -10,6 +10,10 @@ mod manifest_sig;
 
 mod whisper_core;
 mod tectonic;
+// W13.F5: the Pandoc bridge's logic (std only, tested with rustc --test). Its Tauri commands are owed: a new
+// command needs the isolation app's allow-list (src-tauri/isolation/index.js), reviewed by its owner.
+#[allow(dead_code)]
+mod pandoc;
 
 /// Build the native menu bar and emit `lumen-menu` events when an item fires.
 /// The frontend listens for these events in `useTauriMenu` and dispatches the

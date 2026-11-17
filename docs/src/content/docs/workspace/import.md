@@ -46,6 +46,18 @@ Dates are kept as the properties `created` and `updated` (a browser cannot
 set a file's own dates). Hebrew names — files, folders, tags, properties —
 stay as they are; only characters a file system refuses are replaced.
 
+## Other formats, through your Pandoc (desktop)
+
+If [Pandoc](https://pandoc.org) 2.15 or later is installed on the computer,
+the wizard offers **Pandoc** for the formats Lumen has no importer of its own
+for: DocBook, MediaWiki, Jira, OPML, txt2tags, DokuWiki, Textile, Creole,
+TWiki, TikiWiki, Vimwiki, Muse, FictionBook, man pages, Haddock and POD.
+Lumen does not include Pandoc (it is GPL software): it runs the copy you
+installed, with `--sandbox` (it reads the one file and writes the result,
+nothing else, no network) and a fixed set of options, and each run is listed
+in the privacy ledger. Without Pandoc, and in the browser, the choice is not
+shown.
+
 ## The report
 
 The last step shows what came in, what did not and why (the app's own

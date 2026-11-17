@@ -2159,6 +2159,7 @@
   "importWizard.how.notion": "In Notion: Einstellungen → Exportieren → Markdown & CSV (oder HTML), mit Unterseiten. Wählen Sie das .zip, wie es kam. Jede Datenbank wird eine .base-Datei mit denselben Spalten.",
   "importWizard.how.obsidian": "Wählen Sie den Vault-Ordner oder ein .zip davon. Die Einstellungen von Obsidian (.obsidian) werden ausgelassen.",
   "importWizard.how.onenote": "In OneNote für Windows: Datei → Exportieren → Seite oder Abschnitt → Webseite in einer Datei (.mht). Wählen Sie eine oder mehrere .mht-Dateien.",
+  "importWizard.how.pandoc": "Converted by the Pandoc installed on this computer (DocBook, MediaWiki, Jira, OPML, txt2tags, DokuWiki, Textile and more). Pick the files; nothing leaves the computer.",
   "importWizard.how.roam": "In Roam: ⋯ (top right) → Export All → JSON. Pick the .json, or the .zip as it came. Blocks stay an outline, block references become ^ids, daily notes go to journal/.",
   "importWizard.how.samsungNotes": "In Samsung Notes: select notes → Share → Text file (or PDF file), then pick the files. Notes in Samsung's own .sdocx format cannot be read.",
   "importWizard.how.textbundle": "TextBundle or TextPack from Ulysses, iA Writer and other editors: pick the .textbundle folders, the .textpack files, or a .zip of them. Images in assets/ come along.",

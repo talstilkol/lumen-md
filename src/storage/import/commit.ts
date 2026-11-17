@@ -82,7 +82,12 @@ export async function prepareImport(picked: Map<string, Uint8Array>, name: strin
   const noteStore = chosen === "appleNotes" && [...opened.keys()].some((p) => /(^|\/)NoteStore\.sqlite$/i.test(p));
   // Review Z7-L3: the vault's own type ids, so an imported database never takes one (and its schema) over.
   const existingTypeIds = opts.notionTypes ? (await listWorkspaceFolder(TYPES_DIR)).filter((n) => n.endsWith(".yaml")).map((n) => n.slice(0, -".yaml".length)) : [];
-  const vault = noteStore ? await (await import("./appleNotes")).convertAppleNotesStore(opened) : convertExport(chosen, opened, folder, { ...opts, existingTypeIds });
+  // W13.F5: the user's own Pandoc, through the desktop (async, a process per file).
+  const vault = noteStore
+    ? await (await import("./appleNotes")).convertAppleNotesStore(opened)
+    : chosen === "pandoc"
+      ? await (await import("./pandocBridge")).convertWithPandoc(opened)
+      : convertExport(chosen, opened, folder, { ...opts, existingTypeIds });
   for (const p of junk) vault.skipped.push({ path: p, reason: "appFolder" });
   return { source: chosen, detected, name, folder, vault, links: linkStats(vault) };
 }
