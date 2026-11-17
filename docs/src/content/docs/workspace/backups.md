@@ -77,8 +77,8 @@ not with the backup settings.
 ## Limits
 
 - The browser needs the File System Access API to write to a folder
-  (Chromium). The desktop app's own folder access (Tauri) and WebDAV targets
-  are behind the same `BackupTarget` interface and come with their pull
-  requests.
+  (Chromium). A WebDAV server (above) works in every browser. The desktop
+  app's own folder access (Tauri) is behind the same `BackupTarget`
+  interface and comes with its pull request.
 - Backups run while Lumen is open, so a laptop that's always closed gets
   none. The three-day notice says so.
