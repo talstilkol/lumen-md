@@ -1,9 +1,9 @@
 {
  "about": "W10.F7: a decision for every open PR whose head is not in the train (npm run train:missing). in = a task or train brings it; rejected = it will not go in, and why; replaced = what carries it instead. A decision is about one head: a PR that moves needs a new one.",
  "train": "verify/train-7",
- "trainHead": "c47476b3f97454c7e1f7c4ed2ee0a1b6a9ed3bee",
+ "trainHead": "13c6d1e58a35e59d526f17c1568d2db1c6706ebb",
  "decided": "2026-11-17",
- "note": "Integrator INT7 (17.11): wave g3 (#1131-#1171, 41 PRs) is merged into verify/train-7 from a6ef1580a2; their heads are in the train. W13 statuses stay as plan.json has them (the WIP gate refuses wave-13 starts). trainHead is the integration head this file was checked against (before this commit). Integrator INT8 (17.11): the 31 drafts of lanes F12, FC3, FC1 and FC2 (#1172-#1202) are merged into verify/int8-stage on top of INT7's 53dd679c5e and pushed to verify/train-7 with it; trainHead is the stage head this file was checked against (before this commit).",
+ "note": "Integrator INT7 (17.11): wave g3 (#1131-#1171, 41 PRs) is merged into verify/train-7 from a6ef1580a2; their heads are in the train. W13 statuses stay as plan.json has them (the WIP gate refuses wave-13 starts). trainHead is the integration head this file was checked against (before this commit). Integrator INT8 (17.11): the 31 drafts of lanes F12, FC3, FC1 and FC2 (#1172-#1202) are merged into verify/int8-stage on top of INT7's 53dd679c5e and pushed to verify/train-7 with it; trainHead is the stage head this file was checked against (before this commit). Integrator INT9 (17.11): the 52 drafts of lanes F13a, F13b and wave g4 L1-L8 (#1203-#1254) are merged into verify/int9-stage on top of INT8's 49fe18ccb8 and pushed to verify/train-7 with it; trainHead is the stage head this file was checked against (before this commit).",
  "decisions": [
   {
    "pr": 109,
@@ -1106,6 +1106,370 @@
    "decision": "in",
    "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
    "via": "lane FC2"
+  },
+  {
+   "pr": 1203,
+   "head": "1bbac2ad4443b7cf1fae4d5c97d6b0fac49f0c08",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L7"
+  },
+  {
+   "pr": 1204,
+   "head": "958f782e3278434bb72acbc10c944974c337bba7",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13a"
+  },
+  {
+   "pr": 1205,
+   "head": "d345f25818ef48a0366516725d7d2f92aad50576",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L6"
+  },
+  {
+   "pr": 1206,
+   "head": "779557c41f9abc5a82c3dc837e13b365ce64a8bc",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L1"
+  },
+  {
+   "pr": 1207,
+   "head": "2592f84994176ddee1a265619a842d26fc882187",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L2"
+  },
+  {
+   "pr": 1208,
+   "head": "5d854bf6ccf8a915f6a703ad55101394be9af4ff",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L7"
+  },
+  {
+   "pr": 1209,
+   "head": "82b7eba89c2643672629fa6fa55245feadc67099",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13a"
+  },
+  {
+   "pr": 1210,
+   "head": "489a0a5c475f4109970897472884a3e210354e17",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L4"
+  },
+  {
+   "pr": 1211,
+   "head": "6e3512f6b343564608ba50b219b6a1980837695d",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L4"
+  },
+  {
+   "pr": 1212,
+   "head": "42a75076b70eb4b2b481dbfced3b69cc90b9b8db",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L4"
+  },
+  {
+   "pr": 1213,
+   "head": "042c1751afc3042533a9e3428cf98617adb5c44d",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L5"
+  },
+  {
+   "pr": 1214,
+   "head": "9a747cccaf8c2873290b06f5bc91175d334755f0",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L7"
+  },
+  {
+   "pr": 1215,
+   "head": "aa7ef1af0be5469661ccb331523744484bc145e4",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L2"
+  },
+  {
+   "pr": 1216,
+   "head": "5986c7d2dbf8c921d80b09afaa0834b3cf1ca9df",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L1"
+  },
+  {
+   "pr": 1217,
+   "head": "186c3d68c0a3acb0afa53fc6523891d210e15c54",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13b"
+  },
+  {
+   "pr": 1218,
+   "head": "d56289b810a601d50d040eabf27930b72159ded1",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13b"
+  },
+  {
+   "pr": 1219,
+   "head": "1df448f7d793d53c2b31d3264f5de81cc2f3a038",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13b"
+  },
+  {
+   "pr": 1220,
+   "head": "66d10a7f985fbe0a8e6158d5ef4c0048a6e8a7d6",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13b"
+  },
+  {
+   "pr": 1221,
+   "head": "cab0c60564ef6861654b493dd5c7c78b18c2618e",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13a"
+  },
+  {
+   "pr": 1222,
+   "head": "6b72a4a47a165ed9b33f0a13fd6d161696e82a04",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L7"
+  },
+  {
+   "pr": 1223,
+   "head": "3babe0219ff49b2957dd73e7d9bc09376286c45d",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L2"
+  },
+  {
+   "pr": 1224,
+   "head": "52b436f470a9dd94153a6ee50ff002997ed47f7d",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L3"
+  },
+  {
+   "pr": 1225,
+   "head": "acc6170270391302a766c3d8ec918615fc46cffa",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L3"
+  },
+  {
+   "pr": 1226,
+   "head": "9f74669369e45375c404808d5db8008716d048e1",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L3"
+  },
+  {
+   "pr": 1227,
+   "head": "e570e55b97598d1749c08f75c9d2e2beee190bdb",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L3"
+  },
+  {
+   "pr": 1228,
+   "head": "d687805f1ae88f038f5629997d36c84518dba748",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L2"
+  },
+  {
+   "pr": 1229,
+   "head": "644db8832cea5104124fdb9fa8c42dab8a2ed692",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L3"
+  },
+  {
+   "pr": 1230,
+   "head": "b38d27155690805d6629ec215421aa8a3392d401",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L4"
+  },
+  {
+   "pr": 1231,
+   "head": "0bbbe79ec28662c6382cc088c689ef2696a7153a",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L4"
+  },
+  {
+   "pr": 1232,
+   "head": "a9c384b79363e86d0ebde17c7f6dba8781d2f66d",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1233,
+   "head": "b68ef62f13908ea731451bada600cf95ea390472",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1234,
+   "head": "ddda400df2081ab8015b36490935e52908015822",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1235,
+   "head": "b8ccb256c51071fd20a4eea1f64516cc54e2584a",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1236,
+   "head": "a08db7cd2c380079b152679f9fa04dffbb7d0817",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1237,
+   "head": "a94e61c266833c94bb3c7a4fc9896e8c02ffed7b",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1238,
+   "head": "f83b3c711da28e2f8d68c3e22055268c1cd1ff0f",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1239,
+   "head": "9db60bcc0443c2fcdb34744bbed7409160809c79",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1240,
+   "head": "61ad3a8310854a80d0b1d9513c8d8778cdef2634",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1241,
+   "head": "27cce11de20194b5ec6001b7b9e6d188be03fb90",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13a"
+  },
+  {
+   "pr": 1242,
+   "head": "d68f02b613eb1cb8dfe225977739ec588c322d9f",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L2"
+  },
+  {
+   "pr": 1243,
+   "head": "cb19b1e7d114c61594db54099d09d91730eb05e4",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13a"
+  },
+  {
+   "pr": 1244,
+   "head": "9e97d88b362ed99bfb23f996f819e60e3e47b17c",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L6"
+  },
+  {
+   "pr": 1245,
+   "head": "68bb195229df1e76aa96772c69fb22364c50e15b",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L6"
+  },
+  {
+   "pr": 1246,
+   "head": "6babedb70777b30f590e8ab21ee5b0f0222157d3",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L1"
+  },
+  {
+   "pr": 1247,
+   "head": "5a22353f610e615766bc0aa2ea0e43ffeb640bdf",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L7"
+  },
+  {
+   "pr": 1248,
+   "head": "be41096b806e43fdb4798413ff500ac4afcae143",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L6"
+  },
+  {
+   "pr": 1249,
+   "head": "fd033a1ba76ff51fbd93f0739aa89b3f0e57534e",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L1"
+  },
+  {
+   "pr": 1250,
+   "head": "81afd285c77e7a278e7cbf75df3307e37d0a74fe",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L5"
+  },
+  {
+   "pr": 1251,
+   "head": "881a5c35404b13e95e562547da94d1b2940493b5",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L5"
+  },
+  {
+   "pr": 1252,
+   "head": "172c001b074e23ea151ac86f6252965bee8f45e1",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L5"
+  },
+  {
+   "pr": 1253,
+   "head": "12e97fbde220c3a5822396621bc62733e66c7a79",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L1"
+  },
+  {
+   "pr": 1254,
+   "head": "cde3512cec49d238c3b8fb51cbaec3a0a4838704",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L5"
   }
  ]
 }
