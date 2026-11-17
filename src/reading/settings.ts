@@ -11,7 +11,7 @@
  */
 import { DYSLEXIA_FONT, HEBREW_FONTS, loadReadingFont, type ReadingFont, type ReadingFontId } from "./fonts";
 import { loadAids, AIDS_KEY, AIDS_TINTS, AIDS_LIMITS, type AidsTint } from "./readingAids";
-import { READING_KEY, readStored, writeStored, type StoredReading } from "./profileCore";
+import { READING_KEY, readStored, writeStored } from "./profileCore";
 
 export interface ReadingSettings {
   font: ReadingFontId;
