@@ -90,6 +90,8 @@ const LAZY_FILES = import.meta.glob<Strings>(["./locales/*/*.json", "!./locales/
 const BUNDLES: Partial<Record<Locale, Strings>> = { en };
 
 let activeLocale: Locale = "en";
+/** The direction of a bundle installed under a code SUPPORTED_LOCALES doesn't list (installBundle). */
+const EXTRA_DIR: Record<string, "ltr" | "rtl"> = {};
 
 export function getLocale(): Locale {
   return activeLocale;
@@ -130,7 +132,7 @@ export function applyLocale(locale: Locale): void {
   if (typeof document !== "undefined") {
     const meta = SUPPORTED_LOCALES.find((l) => l.code === locale);
     document.documentElement.lang = locale;
-    document.documentElement.dir = meta?.dir ?? "ltr";
+    document.documentElement.dir = meta?.dir ?? EXTRA_DIR[locale] ?? "ltr";
   }
   // Kick off an async fetch for non-synchronous locales so subsequent
   // `t()` calls find the bundle. We don't await — `t()` falls back to
@@ -243,6 +245,17 @@ export function tPlural(base: string, n: number, vars?: Record<string, string | 
   return t(key, { n, ...vars });
 }
 
+/**
+ * Tests and pseudo-localisation only (plan W13.I1: en-XA, ar-XB, through
+ * src/testing/e2eHooks.ts — a production build drops it with the hooks):
+ * a bundle under a code the language picker never lists, then
+ * `applyLocale(code)`. Keys it lacks fall back to English as usual.
+ */
+export function installBundle(code: string, strings: Strings, dir: "ltr" | "rtl"): void {
+  BUNDLES[code as Locale] = strings;
+  EXTRA_DIR[code] = dir;
+}
+
 /** True when `locale`'s strings are in memory (so `t()` can use them). */
 export function isLocaleLoaded(locale: Locale): boolean {
   return locale in BUNDLES;
@@ -285,5 +298,5 @@ export async function initLocale(storageKey = "lumen-md"): Promise<Locale> {
 export { detectLocale, systemLanguages };
 
 export function isRTL(): boolean {
-  return SUPPORTED_LOCALES.find((l) => l.code === activeLocale)?.dir === "rtl";
+  return (SUPPORTED_LOCALES.find((l) => l.code === activeLocale)?.dir ?? EXTRA_DIR[activeLocale]) === "rtl";
 }

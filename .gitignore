@@ -166,3 +166,6 @@ edu/dist/
 .ci-local/
 # Mac pack results (plan/mac-pack/*.json, npm run mac:pack): lane L2 writes .mac-pack/; reports/mac-pack/ is under /reports/* above
 /.mac-pack/
+
+# Pseudo-locales, built on demand (scripts/i18n-pseudo.mjs, plan W13.I1)
+/.pseudo/
