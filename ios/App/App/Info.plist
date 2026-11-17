@@ -100,7 +100,7 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Lumen can save images you create or edit back to your photos.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Lumen can capture a photo and embed it in the current note.</string>
+	<string>Lumen uses the camera to take a photo for a note, or to scan a document into a note (the pages stay on this device).</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Lumen uses the microphone for voice-to-markdown dictation.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

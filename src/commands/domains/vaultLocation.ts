@@ -50,6 +50,15 @@ export function buildVaultLocationCommands(): Command[] {
             group: t("group.file"),
             action: async () => (await import("../../mobile/spotlightActions")).chooseSpotlightMode(),
           },
+          {
+            // W13.M4: VisionKit / ML Kit document scanner, OCR on this device, a new note.
+            id: "mobile.scan",
+            label: t("cmd.mobile.scan"),
+            hint: t("cmd.mobile.scan.hint"),
+            icon: cmdIcons.FileText,
+            group: t("group.file"),
+            action: async () => void (await import("../../mobile/docScanActions")).scanDocumentCommand(),
+          },
         ]
       : []),
   ];

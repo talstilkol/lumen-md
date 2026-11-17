@@ -557,5 +557,23 @@
     "ja": "9tm0ab",
     "ru": "9tm0ab",
     "zh-CN": "9tm0ab"
+  },
+  "cmd.mobile.scan": {
+    "ar": "1ctbhh6",
+    "de": "1ctbhh6",
+    "fr": "1ctbhh6",
+    "he": "1ctbhh6",
+    "ja": "1ctbhh6",
+    "ru": "1ctbhh6",
+    "zh-CN": "1ctbhh6"
+  },
+  "cmd.mobile.scan.hint": {
+    "ar": "1mfccdh",
+    "de": "1mfccdh",
+    "fr": "1mfccdh",
+    "he": "1mfccdh",
+    "ja": "1mfccdh",
+    "ru": "1mfccdh",
+    "zh-CN": "1mfccdh"
   }
 }

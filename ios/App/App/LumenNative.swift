@@ -72,6 +72,8 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "endCaptureActivity", returnType: CAPPluginReturnPromise),
         // W13.M3: the notes Spotlight and Siri may know (the WebView chooses).
         CAPPluginMethod(name: "updateSpotlight", returnType: CAPPluginReturnPromise),
+        // W13.M4: VisionKit's document camera.
+        CAPPluginMethod(name: "scanDocument", returnType: CAPPluginReturnPromise),
     ]
 
     override public func load() {
@@ -104,6 +106,11 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func updateCaptureActivity(_ call: CAPPluginCall) {
         LiveCapture.update(mode: Self.mode(call), since: Self.since(call))
         call.resolve()
+    }
+
+    /// W13.M4: scan pages with the document camera → { status, engine, pages: [base64 JPEG], pdf }.
+    @objc func scanDocument(_ call: CAPPluginCall) {
+        DispatchQueue.main.async { DocScanner.start(call, from: self.bridge?.viewController) }
     }
 
     /// W13.M3: { upsert: [{path, title, snippet, modified}], remove: [path], reset }.

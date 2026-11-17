@@ -5065,6 +5065,56 @@
       "vars": []
     },
     {
+      "key": "docScan.empty",
+      "en": "No text was found on this page.",
+      "vars": []
+    },
+    {
+      "key": "docScan.failed",
+      "en": "The scan could not be saved: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "docScan.page",
+      "en": "Page {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "docScan.reading",
+      "en": "Reading {pages} pages on this device…",
+      "vars": [
+        "pages"
+      ]
+    },
+    {
+      "key": "docScan.saved",
+      "en": "Scan saved: {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "docScan.source",
+      "en": "The scan (PDF)",
+      "vars": []
+    },
+    {
+      "key": "docScan.title",
+      "en": "Scan {when}",
+      "vars": [
+        "when"
+      ]
+    },
+    {
+      "key": "docScan.uncertain",
+      "en": "The text below was hard to read: check it against the scan.",
+      "vars": []
+    },
+    {
       "key": "e2ee.activity.attention",
       "en": "Needs attention",
       "vars": []
@@ -12314,6 +12364,16 @@
       "vars": []
     },
     {
+      "key": "ipad.key.closeTab",
+      "en": "Close tab",
+      "vars": []
+    },
+    {
+      "key": "ipad.key.smartPaste",
+      "en": "Smart paste",
+      "vars": []
+    },
+    {
       "key": "israeliTime.academic.inBreak",
       "en": "In the academic break ({name}): suggested {date}",
       "vars": [
@@ -19446,6 +19506,26 @@
     {
       "key": "speakers.unavailable",
       "en": "Speaker identification isn't set up on this device yet, so the transcript has no speakers.",
+      "vars": []
+    },
+    {
+      "key": "spotlight.mode.all",
+      "en": "Spotlight and Siri: all notes, up to 5,000 (title and a short snippet; never locked or private notes).",
+      "vars": []
+    },
+    {
+      "key": "spotlight.mode.off",
+      "en": "Spotlight and Siri: no notes. Anything indexed before is removed.",
+      "vars": []
+    },
+    {
+      "key": "spotlight.mode.recent",
+      "en": "Spotlight and Siri: the 50 most recent notes (title and a short snippet; never locked or private notes).",
+      "vars": []
+    },
+    {
+      "key": "spotlight.notSaved",
+      "en": "This choice could not be saved on this device, so no notes are indexed.",
       "vars": []
     },
     {

@@ -241,5 +241,6 @@
   "cmd.writing.harper.hint": "Local English grammar for the English parts of the note — suggestions to review",
   "cmd.writing.readability.hint": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
   "cmd.writing.structure.hint": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only",
-  "cmd.mobile.spotlight.hint": "off, the 50 most recent, or all notes; locked and private notes never"
+  "cmd.mobile.spotlight.hint": "off, the 50 most recent, or all notes; locked and private notes never",
+  "cmd.mobile.scan.hint": "the camera finds the page; the PDF goes to attachments/ and its text, read on this device, into a new note"
 }

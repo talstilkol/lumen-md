@@ -55,6 +55,9 @@ dependencies {
     implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
     implementation project(':capacitor-android')
+    // Plan W13.M4: the document scanner (on the device, run by Google Play services; the app
+    // falls back to the photo picker without Play services or under "local only").
+    implementation "com.google.android.gms:play-services-mlkit-document-scanner:$mlkitDocumentScannerVersion"
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"

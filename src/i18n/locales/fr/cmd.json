@@ -344,6 +344,8 @@
   "cmd.mobile.readLongNotes": "Téléphone : ouvrir les longues notes en lecture",
   "cmd.mobile.readLongNotes.off": "Actuellement DÉSACTIVÉ",
   "cmd.mobile.readLongNotes.on": "Actuellement ACTIVÉ (touchez le texte pour éditer)",
+  "cmd.mobile.scan": "Scan a document…",
+  "cmd.mobile.scan.hint": "the camera finds the page; the PDF goes to attachments/ and its text, read on this device, into a new note",
   "cmd.mobile.spotlight": "Spotlight and Siri: which notes…",
   "cmd.mobile.spotlight.hint": "off, the 50 most recent, or all notes; locked and private notes never",
   "cmd.new": "Nouveau document",
