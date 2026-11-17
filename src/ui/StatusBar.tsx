@@ -3,7 +3,7 @@ import { useSettledText } from "../hooks/useSettledText";
 import React, { useMemo, useState, useCallback, useSyncExternalStore } from "react";
 import { Sparkles, ShieldCheck, SpellCheck, FileDiff, Activity, BarChart3, CloudCog, CloudOff, AlertCircle } from "lucide-react";
 import type { CollabPeer } from "../collab/yjs";
-import { t, getLocale } from "../i18n";
+import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { getMonitoringConsent, setMonitoringConsent } from "../lib/telemetry";
 import type { ConfigHealthReport } from "../lib/configHealth";
@@ -173,10 +173,10 @@ export const StatusBar = React.memo(function StatusBar({
         </span>
       ) : null}
       <span className="sb-item" title={t("status.words.title")}>
-        {t("status.words", { n: stats.words.toLocaleString(getLocale()) })}
+        {t("status.words", { n: stats.words })}
       </span>
       <span className="sb-item" title={t("status.chars.title")}>
-        {t("status.chars", { n: stats.chars.toLocaleString(getLocale()) })}
+        {t("status.chars", { n: stats.chars })}
       </span>
       <span className="sb-item" title={t("status.reading.title")}>
         {t("status.reading", { n: stats.readingMin })}

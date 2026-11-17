@@ -13,6 +13,7 @@
  * landed via `scripts/translate-locale.mjs`.
  */
 
+import { parsePlural } from "../i18n/plural";
 import { describe, it, expect } from "vitest";
 import { readLocale } from "../../scripts/lib/i18n-files.mjs";
 import { lazyEnglish } from "./helpers/i18nLazy";
@@ -79,8 +80,9 @@ describe("i18n placeholder integrity", () => {
 
   it("known plural-style keys carry the documented placeholders", () => {
     // Smoke-check a few high-traffic keys to lock the contract.
-    expect(placeholders(en["status.words"])).toContain("n");
-    expect(placeholders(he["status.words"])).toContain("n");
+    // status.words counts with a CLDR plural block (W13.I2): its count variable is n.
+    expect(parsePlural(en["status.words"])?.arg).toBe("n");
+    expect(parsePlural(he["status.words"])?.arg).toBe("n");
     expect(placeholders(en["templates.installed"])).toContain("name");
     expect(placeholders(en["templates.installed"])).toContain("path");
   });

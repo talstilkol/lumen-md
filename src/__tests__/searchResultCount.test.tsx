@@ -33,7 +33,7 @@ afterEach(() => {
 });
 
 describe("tPlural", () => {
-  it("selects .one / .other by Intl.PluralRules", () => {
+  it("selects the CLDR form by Intl.PluralRules (W13.I2: one value holds every form)", () => {
     expect(tPlural("search.results", 1)).toBe("1 result");
     expect(tPlural("search.results", 0)).toBe("0 results");
     expect(tPlural("search.results", 7)).toBe("7 results");
@@ -42,15 +42,17 @@ describe("tPlural", () => {
   it("works in Hebrew", async () => {
     await loadLocale("he");
     applyLocale("he");
-    expect(tPlural("search.results", 1)).toBe("1 תוצאה");
+    expect(tPlural("search.results", 1)).toBe("תוצאה אחת");
+    expect(tPlural("search.results", 2)).toBe("2 תוצאות");
     expect(tPlural("search.results", 5)).toBe("5 תוצאות");
   });
 
-  it("falls back to .other for categories a locale bundle lacks (ru few/many)", async () => {
+  it("Russian has its own few and many forms (no count-neutral fallback any more)", async () => {
     await loadLocale("ru");
     applyLocale("ru");
     expect(tPlural("search.results", 1)).toBe("1 результат");
-    expect(tPlural("search.results", 3)).toBe("Результатов: 3");
+    expect(tPlural("search.results", 3)).toBe("3 результата");
+    expect(tPlural("search.results", 5)).toBe("5 результатов");
   });
 });
 

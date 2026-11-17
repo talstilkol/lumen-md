@@ -1,6 +1,5 @@
 {
-  "agent.grammar.found.one": "Found {n} issue:\n\n{list}",
-  "agent.grammar.found.other": "Found {n} issues:\n\n{list}",
+  "agent.grammar.found": "{n, plural, one {Found # issue:\n\n{list}} other {Found # issues:\n\n{list}}}",
   "agent.links.needWorkspace": "Open the file from your workspace first — the link agent reads neighboring notes.",
   "agent.links.no": "no",
   "agent.links.prompt": "Found {n} link suggestions:\n\n{summary}\n\nApply all? (Type '{no}' to skip)",

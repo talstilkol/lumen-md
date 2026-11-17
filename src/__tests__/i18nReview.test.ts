@@ -5,8 +5,10 @@
  */
 import { describe, it, expect } from "vitest";
 import { join } from "node:path";
+import { cpSync, mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 // @ts-expect-error the review agent is plain JavaScript
-import { checkPair, chrF, placeholders, review, formatReport, LOCALES } from "../../scripts/i18n-review.mjs";
+import { checkPair, chrF, hebrewDrafts, placeholders, review, formatReport, LOCALES } from "../../scripts/i18n-review.mjs";
 
 const ROOT = join(__dirname, "../..");
 
@@ -49,5 +51,31 @@ describe("the seven locales (acceptance: 0 missing variables)", () => {
     expect(LOCALES).toHaveLength(7);
     expect(errors).toEqual([]);
     expect(formatReport(result)).toContain("Missing variables: **0** · extra variables: **0**");
+  });
+});
+
+describe("Hebrew is the source language: no machine draft is left in it (W13.I6)", () => {
+  it("a Hebrew string listed in i18n/needs-review/ is an error, and the report counts it", async () => {
+    const tmp = mkdtempSync(join(tmpdir(), "he-draft-"));
+    try {
+      for (const d of ["i18n", "src/i18n/locales"]) cpSync(join(ROOT, d), join(tmp, d), { recursive: true });
+      cpSync(join(ROOT, "src/i18n/lazy"), join(tmp, "src/i18n/lazy"), { recursive: true });
+      const file = join(tmp, "i18n/needs-review/common.json");
+      const list = JSON.parse(readFileSync(file, "utf8"));
+      list["academic.pick"] = { ...(list["academic.pick"] ?? {}), he: "umnr27" };
+      writeFileSync(file, JSON.stringify(list));
+      expect(hebrewDrafts(tmp)).toEqual(["academic.pick"]);
+      const result = (await review(tmp)) as { findings: Finding[] };
+      expect(result.findings.filter((f) => f.level === "error").map((f) => `${f.locale} ${f.key} ${f.kind}`)).toEqual(["he academic.pick he-draft"]);
+      expect(formatReport(result)).toContain("unreviewed Hebrew drafts: **1**");
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it("the tree has 0 Hebrew drafts, the seven academic.* strings included", () => {
+    expect(hebrewDrafts(ROOT)).toEqual([]);
+    const he = JSON.parse(readFileSync(join(ROOT, "src/i18n/locales/he/common.json"), "utf8"));
+    for (const k of ["academic.chosen", "academic.chosenUnverified", "academic.exported", "academic.noChoice", "academic.none", "academic.pick", "academic.unverified"]) expect(he[k], k).toMatch(/[\u0590-\u05FF]/);
   });
 });

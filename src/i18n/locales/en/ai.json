@@ -1,6 +1,5 @@
 {
-  "agent.grammar.found.one": "Found {n} issue:\n\n{list}",
-  "agent.grammar.found.other": "Found {n} issues:\n\n{list}",
+  "agent.grammar.found": "{n, plural, one {Found # issue:\n\n{list}} other {Found # issues:\n\n{list}}}",
   "agent.notGood.button": "Not good — try again",
   "agent.notGood.prompt": "Answer from {agent}.",
   "agent.panel.close": "Close",

@@ -649,9 +649,8 @@
     },
     {
       "key": "sample.toast.created",
-      "en": "Added {count} sample notes to “{folder}”.",
+      "en": "{count, plural, one {Added # sample note to “{folder}”.} other {Added # sample notes to “{folder}”.}}",
       "vars": [
-        "count",
         "folder"
       ]
     },
@@ -713,18 +712,9 @@
       ]
     },
     {
-      "key": "search.results.one",
-      "en": "{n} result",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "search.results.other",
-      "en": "{n} results",
-      "vars": [
-        "n"
-      ]
+      "key": "search.results",
+      "en": "{n, plural, one {# result} other {# results}}",
+      "vars": []
     },
     {
       "key": "search.save",
@@ -959,18 +949,9 @@
       "vars": []
     },
     {
-      "key": "searchDialog.turns.one",
-      "en": "{n} turn in this conversation",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "searchDialog.turns.other",
-      "en": "{n} turns in this conversation",
-      "vars": [
-        "n"
-      ]
+      "key": "searchDialog.turns",
+      "en": "{n, plural, one {# turn in this conversation} other {# turns in this conversation}}",
+      "vars": []
     },
     {
       "key": "tagsPanel.addTag",
@@ -1344,10 +1325,8 @@
     },
     {
       "key": "trash.restoredMany",
-      "en": "{count} restored from the trash",
-      "vars": [
-        "count"
-      ]
+      "en": "{count, plural, one {# item restored from the trash} other {# items restored from the trash}}",
+      "vars": []
     },
     {
       "key": "trash.restoring",
@@ -1630,10 +1609,8 @@
     },
     {
       "key": "tree.linksUpdated",
-      "en": "Links updated in {count} notes",
-      "vars": [
-        "count"
-      ]
+      "en": "{count, plural, one {Links updated in # note} other {Links updated in # notes}}",
+      "vars": []
     },
     {
       "key": "tree.newFile",
@@ -1741,10 +1718,8 @@
     },
     {
       "key": "tree.trashed",
-      "en": "{count} moved to the trash",
-      "vars": [
-        "count"
-      ]
+      "en": "{count, plural, one {# item moved to the trash} other {# items moved to the trash}}",
+      "vars": []
     },
     {
       "key": "tree.undo",

@@ -84,7 +84,6 @@
     "zh-CN": "l899cf"
   },
   "cmd.cite.importZoteroFile": {
-    "he": "1lfup3",
     "ar": "1lfup3",
     "de": "1lfup3",
     "fr": "1lfup3",
@@ -93,7 +92,6 @@
     "zh-CN": "1lfup3"
   },
   "cmd.cite.exportForZotero": {
-    "he": "razw4v",
     "ar": "razw4v",
     "de": "razw4v",
     "fr": "razw4v",
@@ -102,7 +100,6 @@
     "zh-CN": "razw4v"
   },
   "cmd.cite.exportRis": {
-    "he": "18aclrs",
     "ar": "18aclrs",
     "de": "18aclrs",
     "fr": "18aclrs",
@@ -111,7 +108,6 @@
     "zh-CN": "18aclrs"
   },
   "cmd.file.exportTypstPdf": {
-    "he": "cf5i90",
     "ar": "cf5i90",
     "de": "cf5i90",
     "fr": "cf5i90",
@@ -120,7 +116,6 @@
     "zh-CN": "cf5i90"
   },
   "cmd.file.exportTypstPdf.hint": {
-    "he": "l02o2q",
     "ar": "l02o2q",
     "de": "l02o2q",
     "fr": "l02o2q",
@@ -688,5 +683,73 @@
     "ja": "138zp6l",
     "ru": "138zp6l",
     "zh-CN": "138zp6l"
+  },
+  "cmd.ai.organize": {
+    "ja": "1fssnyf"
+  },
+  "cmd.vault.check": {
+    "ja": "4ge0kk",
+    "de": "4ge0kk"
+  },
+  "cmd.view.asOf.hint": {
+    "ja": "rzvoys"
+  },
+  "cmd.cite.syncZotero": {
+    "de": "1f9pvbk"
+  },
+  "cmd.file.sampleVault.researcher": {
+    "de": "1mzdogp"
+  },
+  "cmd.file.sampleVault.student": {
+    "de": "6rb1fi"
+  },
+  "cmd.file.sampleVault.writer": {
+    "de": "1r9ay0"
+  },
+  "cmd.help.diagnostics.hint": {
+    "de": "q3xfgc"
+  },
+  "cmd.research.litReview": {
+    "de": "4nsx2y"
+  },
+  "cmd.tools.autoTag.hint": {
+    "fr": "ec3uub"
+  },
+  "cmd.view.tags.hint": {
+    "fr": "9ohb5c"
+  },
+  "cmd.export.latexProject.hint": {
+    "ar": "12rykyr",
+    "de": "12rykyr"
+  },
+  "cmd.file.importVcard.hint": {
+    "ar": "1x99suq",
+    "ru": "1x99suq",
+    "fr": "1x99suq",
+    "de": "1x99suq",
+    "ja": "1x99suq",
+    "zh-CN": "1x99suq"
+  },
+  "cmd.sources.datagovInsert.hint": {
+    "ar": "w1iesk",
+    "ru": "w1iesk",
+    "fr": "w1iesk",
+    "de": "w1iesk",
+    "ja": "w1iesk",
+    "zh-CN": "w1iesk"
+  },
+  "cmd.view.tags": {
+    "ar": "1pftjsh",
+    "ru": "1pftjsh",
+    "ja": "1pftjsh",
+    "zh-CN": "1pftjsh"
+  },
+  "cmd.view.backlinks": {
+    "ar": "pa2eo1",
+    "ru": "pa2eo1",
+    "fr": "pa2eo1",
+    "de": "pa2eo1",
+    "ja": "pa2eo1",
+    "zh-CN": "pa2eo1"
   }
 }

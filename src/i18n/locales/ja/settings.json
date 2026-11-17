@@ -156,7 +156,7 @@
   "privacy.mcp.decision.proposed": "変更を提案",
   "privacy.mcp.decision.rejected": "却下",
   "privacy.mcp.decision.written": "書き込み済み",
-  "privacy.mcp.empty": "このボールトを使った MCP クライアントはまだありません。",
+  "privacy.mcp.empty": "この保管庫を使った MCP クライアントはまだありません。",
   "privacy.mcp.unavailable": "MCP の記録を読めませんでした: {error}",
   "privacy.onlyLeaving": "端末外への通信のみ",
   "privacy.openAiSettings": "AI 設定を開く",

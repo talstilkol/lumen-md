@@ -102,7 +102,8 @@ describe("the strings", () => {
 });
 
 describe("the docs (en and he) match the list", () => {
-  const rows = (md: string) => [...md.matchAll(/^\| (.+?) \| (.+?) \|$/gm)].map((m) => [m[1], m[2]]).filter(([a]) => a !== "Language" && a !== "שפה" && !a.startsWith("---"));
+  // The status table is in the page's intro, before its first "## " section (the glossary table comes later, W13.I4).
+  const rows = (page: string) => [...page.split(/^## /m)[0].matchAll(/^\| (.+?) \| (.+?) \|$/gm)].map((m) => [m[1], m[2]]).filter(([a]) => a !== "Language" && a !== "שפה" && !a.startsWith("---"));
   it("the status table: two full, six beta, in the same order as SUPPORTED_LOCALES", () => {
     const en = rows(read("docs/src/content/docs/contributing/translations.md"));
     const he = rows(read("docs/src/content/docs/he/contributing/translations.md"));

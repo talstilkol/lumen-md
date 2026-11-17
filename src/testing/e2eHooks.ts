@@ -37,6 +37,8 @@ const MODULES = {
   "ui/PrintExport": () => import("../ui/PrintExport"),
   // e2e/reading-modes.spec.ts: the compare view of two texts (W13.R8), as version history opens it.
   "reading/openCompare": () => import("../reading/openCompare"),
+  // e2e/i18n-pseudo.spec.ts: the pseudo-locales en-XA / ar-XB, installed under codes the picker never lists (W13.I1).
+  "i18n/index": () => import("../i18n/index"),
 };
 
 export type E2eModuleName = keyof typeof MODULES;

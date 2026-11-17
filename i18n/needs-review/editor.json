@@ -1,4 +1,44 @@
 {
+  "block.codeDoctor.bestEffort": {
+    "ar": "8ap5u5",
+    "ru": "8ap5u5",
+    "fr": "8ap5u5",
+    "de": "8ap5u5",
+    "ja": "8ap5u5",
+    "zh-CN": "8ap5u5"
+  },
+  "block.codeDoctor.fixesReady": {
+    "ar": "19j2bkn",
+    "ru": "19j2bkn",
+    "fr": "19j2bkn",
+    "de": "19j2bkn",
+    "ja": "19j2bkn",
+    "zh-CN": "19j2bkn"
+  },
+  "block.codeDoctor.parsesCleanly": {
+    "ar": "17u0zg3",
+    "ru": "17u0zg3",
+    "fr": "17u0zg3",
+    "de": "17u0zg3",
+    "ja": "17u0zg3",
+    "zh-CN": "17u0zg3"
+  },
+  "block.codeDoctor.partial": {
+    "ar": "1ezuydg",
+    "ru": "1ezuydg",
+    "fr": "1ezuydg",
+    "de": "1ezuydg",
+    "ja": "1ezuydg",
+    "zh-CN": "1ezuydg"
+  },
+  "block.insights.estFiles": {
+    "ar": "1xz6lo6",
+    "ru": "1xz6lo6",
+    "fr": "1xz6lo6",
+    "de": "1xz6lo6",
+    "ja": "1xz6lo6",
+    "zh-CN": "1xz6lo6"
+  },
   "docTabs.menu": {
     "ar": "zjkkt4",
     "de": "zjkkt4",

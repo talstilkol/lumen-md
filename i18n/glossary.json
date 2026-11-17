@@ -1,0 +1,562 @@
+{
+  "about": "Lumen's terms and their one approved translation per language (plan W13.I4). `match` finds the term in the English (a regex, case-insensitive); in every language, a translation of a string that uses the term must contain one of `forms` (a word part: prefixes and endings are allowed around it). `avoid` lists the variants that are wrong here. Checked by `npm run i18n:check` (scripts/i18n-glossary.mjs); shown on the Help translate page; given to the draft agent (npm run i18n:draft). Change a term here, never in one string.",
+  "terms": [
+    {
+      "id": "vault",
+      "en": "vault",
+      "match": "\\bvaults?\\b",
+      "definition": "The folder of notes Lumen works on: on this device, in the browser's storage or in a folder you pick.",
+      "he": {
+        "term": "כספת",
+        "forms": [
+          "כספת",
+          "כספות"
+        ],
+        "avoid": [
+          "מאגר"
+        ]
+      },
+      "ar": {
+        "term": "الخزنة",
+        "forms": [
+          "خزن"
+        ],
+        "avoid": [
+          "مستودع"
+        ]
+      },
+      "ru": {
+        "term": "хранилище",
+        "forms": [
+          "хранилищ"
+        ],
+        "avoid": [
+          "сейф"
+        ]
+      },
+      "fr": {
+        "term": "coffre",
+        "forms": [
+          "coffre"
+        ],
+        "avoid": [
+          "dépôt"
+        ]
+      },
+      "de": {
+        "term": "Tresor",
+        "forms": [
+          "tresor"
+        ],
+        "avoid": [
+          "Ablage"
+        ]
+      },
+      "ja": {
+        "term": "保管庫",
+        "forms": [
+          "保管庫"
+        ],
+        "avoid": [
+          "ボールト"
+        ]
+      },
+      "zh-CN": {
+        "term": "库",
+        "forms": [
+          "库"
+        ],
+        "avoid": [
+          "保险库"
+        ]
+      },
+      "ignore": "Lumen Vault|Vault Doctor"
+    },
+    {
+      "id": "note",
+      "en": "note",
+      "match": "\\bnotes?\\b",
+      "definition": "One Markdown file in the vault.",
+      "he": {
+        "term": "פתק",
+        "forms": [
+          "פתק"
+        ],
+        "avoid": [
+          "רשומה"
+        ]
+      },
+      "ar": {
+        "term": "ملاحظة",
+        "forms": [
+          "ملاحظ"
+        ],
+        "avoid": []
+      },
+      "ru": {
+        "term": "заметка",
+        "forms": [
+          "заметк",
+          "заметок"
+        ],
+        "avoid": []
+      },
+      "fr": {
+        "term": "note",
+        "forms": [
+          "note"
+        ],
+        "avoid": []
+      },
+      "de": {
+        "term": "Notiz",
+        "forms": [
+          "notiz"
+        ],
+        "avoid": []
+      },
+      "ja": {
+        "term": "ノート",
+        "forms": [
+          "ノート"
+        ],
+        "avoid": [
+          "メモ"
+        ]
+      },
+      "zh-CN": {
+        "term": "笔记",
+        "forms": [
+          "笔记"
+        ],
+        "avoid": []
+      },
+      "strict": false,
+      "ignore": "Apple Notes|Notes\\.Read|meeting notes|speaker notes|margin notes|footnotes?|side ?notes"
+    },
+    {
+      "id": "sync",
+      "en": "sync",
+      "match": "\\bsync(?:s|ed|ing|hroni[sz]e[sd]?|hroni[sz]ation)?\\b",
+      "definition": "Keeping the same vault up to date on several devices.",
+      "he": {
+        "term": "סנכרון",
+        "forms": [
+          "סנכר",
+          "סונכר",
+          "סתנכר"
+        ],
+        "avoid": []
+      },
+      "ar": {
+        "term": "المزامنة",
+        "forms": [
+          "مزامن",
+          "تزامن",
+          "يزامن",
+          "زامن",
+          "يُزامَن",
+          "تُزامَن",
+          "زامِن"
+        ],
+        "avoid": []
+      },
+      "ru": {
+        "term": "синхронизация",
+        "forms": [
+          "синхрониз"
+        ],
+        "avoid": []
+      },
+      "fr": {
+        "term": "synchronisation",
+        "forms": [
+          "synchronis",
+          "synchro"
+        ],
+        "avoid": []
+      },
+      "de": {
+        "term": "Synchronisierung",
+        "forms": [
+          "synchronis",
+          "sync",
+          "abgleich",
+          "abgeglichen"
+        ],
+        "avoid": []
+      },
+      "ja": {
+        "term": "同期",
+        "forms": [
+          "同期"
+        ],
+        "avoid": []
+      },
+      "zh-CN": {
+        "term": "同步",
+        "forms": [
+          "同步"
+        ],
+        "avoid": []
+      },
+      "ignore": "Directory Sync"
+    },
+    {
+      "id": "property",
+      "en": "property",
+      "match": "\\bpropert(?:y|ies)\\b",
+      "definition": "A named field of a note, in its frontmatter (status: done).",
+      "he": {
+        "term": "מאפיין",
+        "forms": [
+          "מאפיין",
+          "מאפיינים"
+        ],
+        "avoid": [
+          "תכונה"
+        ]
+      },
+      "ar": {
+        "term": "خاصية",
+        "forms": [
+          "خاصي",
+          "خصائص"
+        ],
+        "avoid": []
+      },
+      "ru": {
+        "term": "свойство",
+        "forms": [
+          "свойств"
+        ],
+        "avoid": []
+      },
+      "fr": {
+        "term": "propriété",
+        "forms": [
+          "propriét"
+        ],
+        "avoid": []
+      },
+      "de": {
+        "term": "Eigenschaft",
+        "forms": [
+          "eigenschaft"
+        ],
+        "avoid": []
+      },
+      "ja": {
+        "term": "プロパティ",
+        "forms": [
+          "プロパティ"
+        ],
+        "avoid": []
+      },
+      "zh-CN": {
+        "term": "属性",
+        "forms": [
+          "属性"
+        ],
+        "avoid": []
+      }
+    },
+    {
+      "id": "tag",
+      "en": "tag",
+      "match": "\\btags?\\b",
+      "definition": "A #label on a note; one note can have many.",
+      "he": {
+        "term": "תגית",
+        "forms": [
+          "תגית",
+          "תגיות",
+          "תיוג",
+          "תייג"
+        ],
+        "avoid": [
+          "תגים"
+        ]
+      },
+      "ar": {
+        "term": "وسم",
+        "forms": [
+          "وسم",
+          "وسوم"
+        ],
+        "avoid": []
+      },
+      "ru": {
+        "term": "тег",
+        "forms": [
+          "тег"
+        ],
+        "avoid": []
+      },
+      "fr": {
+        "term": "tag",
+        "forms": [
+          "tag"
+        ],
+        "avoid": [
+          "étiquette"
+        ]
+      },
+      "de": {
+        "term": "Tag",
+        "forms": [
+          "tag"
+        ],
+        "avoid": []
+      },
+      "ja": {
+        "term": "タグ",
+        "forms": [
+          "タグ"
+        ],
+        "avoid": []
+      },
+      "zh-CN": {
+        "term": "标签",
+        "forms": [
+          "标签"
+        ],
+        "avoid": []
+      },
+      "ignore": "release tags?|Tag the invisible"
+    },
+    {
+      "id": "trash",
+      "en": "trash",
+      "match": "\\btrash\\b",
+      "definition": "Where deleted notes wait before they are gone for good.",
+      "he": {
+        "term": "סל המחזור",
+        "forms": [
+          "סל המחזור"
+        ],
+        "avoid": [
+          "פח"
+        ]
+      },
+      "ar": {
+        "term": "سلة المهملات",
+        "forms": [
+          "المهملات"
+        ],
+        "avoid": []
+      },
+      "ru": {
+        "term": "корзина",
+        "forms": [
+          "корзин"
+        ],
+        "avoid": []
+      },
+      "fr": {
+        "term": "corbeille",
+        "forms": [
+          "corbeille"
+        ],
+        "avoid": []
+      },
+      "de": {
+        "term": "Papierkorb",
+        "forms": [
+          "papierkorb"
+        ],
+        "avoid": []
+      },
+      "ja": {
+        "term": "ごみ箱",
+        "forms": [
+          "ごみ箱"
+        ],
+        "avoid": [
+          "ゴミ箱"
+        ]
+      },
+      "zh-CN": {
+        "term": "回收站",
+        "forms": [
+          "回收站"
+        ],
+        "avoid": [
+          "废纸篓"
+        ]
+      },
+      "ignore": "Keep's trash"
+    },
+    {
+      "id": "template",
+      "en": "template",
+      "match": "\\btemplates?\\b",
+      "definition": "A note to start new notes from.",
+      "he": {
+        "term": "תבנית",
+        "forms": [
+          "תבנית",
+          "תבניות"
+        ],
+        "avoid": []
+      },
+      "ar": {
+        "term": "قالب",
+        "forms": [
+          "قالب",
+          "قوالب"
+        ],
+        "avoid": []
+      },
+      "ru": {
+        "term": "шаблон",
+        "forms": [
+          "шаблон"
+        ],
+        "avoid": []
+      },
+      "fr": {
+        "term": "modèle",
+        "forms": [
+          "modèle"
+        ],
+        "avoid": []
+      },
+      "de": {
+        "term": "Vorlage",
+        "forms": [
+          "vorlage"
+        ],
+        "avoid": []
+      },
+      "ja": {
+        "term": "テンプレート",
+        "forms": [
+          "テンプレート"
+        ],
+        "avoid": []
+      },
+      "zh-CN": {
+        "term": "模板",
+        "forms": [
+          "模板"
+        ],
+        "avoid": []
+      }
+    },
+    {
+      "id": "canvas",
+      "en": "canvas",
+      "match": "\\bcanvas(?:es)?\\b",
+      "definition": "A board of cards and drawings (a .canvas file).",
+      "he": {
+        "term": "קנבס",
+        "forms": [
+          "קנבס"
+        ],
+        "avoid": []
+      },
+      "ar": {
+        "term": "لوحة",
+        "forms": [
+          "لوح"
+        ],
+        "avoid": []
+      },
+      "ru": {
+        "term": "холст",
+        "forms": [
+          "холст"
+        ],
+        "avoid": []
+      },
+      "fr": {
+        "term": "canevas",
+        "forms": [
+          "canevas"
+        ],
+        "avoid": []
+      },
+      "de": {
+        "term": "Canvas",
+        "forms": [
+          "canvas"
+        ],
+        "avoid": [
+          "Leinwand"
+        ]
+      },
+      "ja": {
+        "term": "キャンバス",
+        "forms": [
+          "キャンバス"
+        ],
+        "avoid": []
+      },
+      "zh-CN": {
+        "term": "画布",
+        "forms": [
+          "画布"
+        ],
+        "avoid": []
+      },
+      "ignore": "JSON Canvas"
+    },
+    {
+      "id": "backlink",
+      "en": "backlink",
+      "match": "\\bbacklinks?\\b",
+      "definition": "A link to this note from another note.",
+      "he": {
+        "term": "קישור נכנס",
+        "forms": [
+          "נכנס"
+        ],
+        "avoid": []
+      },
+      "ar": {
+        "term": "رابط عكسي",
+        "forms": [
+          "عكسي",
+          "عكسية"
+        ],
+        "avoid": []
+      },
+      "ru": {
+        "term": "обратная ссылка",
+        "forms": [
+          "обратн"
+        ],
+        "avoid": []
+      },
+      "fr": {
+        "term": "rétrolien",
+        "forms": [
+          "rétrolien"
+        ],
+        "avoid": []
+      },
+      "de": {
+        "term": "Rückverweis",
+        "forms": [
+          "rückverweis"
+        ],
+        "avoid": []
+      },
+      "ja": {
+        "term": "バックリンク",
+        "forms": [
+          "バックリンク"
+        ],
+        "avoid": []
+      },
+      "zh-CN": {
+        "term": "反向链接",
+        "forms": [
+          "反向链接"
+        ],
+        "avoid": []
+      }
+    }
+  ]
+}

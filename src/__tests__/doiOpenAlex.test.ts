@@ -93,7 +93,9 @@ describe("Cite from a DOI via OpenAlex (D1 §6)", () => {
       expect(en[k], k).toBeTruthy();
       for (const lang of ["he", "ar", "ru", "fr", "de", "ja", "zh-CN"]) {
         expect(JSON.parse(read(`src/i18n/locales/${lang}/common.json`))[k], `${lang} ${k}`).toBeTruthy();
-        expect(review[k]?.[lang], `needs-review ${lang} ${k}`).toBeTruthy();
+        // Hebrew is reviewed by hand (W13.I6): it is never left listed as a draft.
+        if (lang === "he") expect(review[k]?.he, `needs-review he ${k}`).toBeUndefined();
+        else expect(review[k]?.[lang], `needs-review ${lang} ${k}`).toBeTruthy();
       }
     }
   });

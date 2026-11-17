@@ -275,7 +275,6 @@
     "ar": "14z9nj7",
     "de": "14z9nj7",
     "fr": "14z9nj7",
-    "he": "14z9nj7",
     "ja": "14z9nj7",
     "ru": "14z9nj7",
     "zh-CN": "14z9nj7"
@@ -312,5 +311,94 @@
     "ja": "ujjzk2",
     "ru": "ujjzk2",
     "zh-CN": "ujjzk2"
+  },
+  "search.results": {
+    "ar": "vzdh68",
+    "ru": "vzdh68",
+    "fr": "vzdh68",
+    "de": "vzdh68",
+    "ja": "vzdh68",
+    "zh-CN": "vzdh68"
+  },
+  "searchDialog.turns": {
+    "ar": "1eoz786",
+    "ru": "1eoz786",
+    "fr": "1eoz786",
+    "de": "1eoz786",
+    "ja": "1eoz786",
+    "zh-CN": "1eoz786"
+  },
+  "tree.linksUpdated": {
+    "ar": "1xzl513",
+    "ru": "1xzl513",
+    "fr": "1xzl513",
+    "de": "1xzl513",
+    "ja": "1xzl513",
+    "zh-CN": "1xzl513"
+  },
+  "tree.trashed": {
+    "ar": "1ubf1ob",
+    "ru": "1ubf1ob",
+    "fr": "1ubf1ob",
+    "de": "1ubf1ob",
+    "ja": "1ubf1ob",
+    "zh-CN": "1ubf1ob"
+  },
+  "trash.restoredMany": {
+    "ar": "1h4f5t3",
+    "ru": "1h4f5t3",
+    "fr": "1h4f5t3",
+    "de": "1h4f5t3",
+    "ja": "1h4f5t3",
+    "zh-CN": "1h4f5t3"
+  },
+  "sample.toast.created": {
+    "ar": "r90tg7",
+    "ru": "r90tg7",
+    "fr": "r90tg7",
+    "de": "r90tg7",
+    "ja": "r90tg7",
+    "zh-CN": "r90tg7"
+  },
+  "trash.emptyAllConfirm": {
+    "ja": "tf19ix"
+  },
+  "tagsPanel.close": {
+    "fr": "1g7jmx6"
+  },
+  "tree.tagFilter.clear": {
+    "fr": "1hagbz0"
+  },
+  "tagsPanel.loading": {
+    "fr": "rc5wll"
+  },
+  "tagsPanel.title": {
+    "fr": "wy2g8w"
+  },
+  "tagsPanel.summary": {
+    "fr": "12enc7r"
+  },
+  "templates.searchPlaceholder": {
+    "ar": "2h7frp",
+    "ru": "2h7frp",
+    "fr": "2h7frp",
+    "de": "2h7frp",
+    "ja": "2h7frp",
+    "zh-CN": "2h7frp"
+  },
+  "trash.emptyAll": {
+    "ar": "325i8g"
+  },
+  "templates.loading": {
+    "ar": "1necae2",
+    "ru": "1necae2",
+    "fr": "1necae2",
+    "de": "1necae2",
+    "ja": "1necae2",
+    "zh-CN": "1necae2"
+  },
+  "backlinks.title": {
+    "ar": "1mppi0b",
+    "fr": "1mppi0b"
   }
 }

@@ -1,6 +1,5 @@
 {
-  "agent.grammar.found.one": "Найдена {n} проблема:\n\n{list}",
-  "agent.grammar.found.other": "Найдено проблем: {n}\n\n{list}",
+  "agent.grammar.found": "{n, plural, one {Найдена # проблема:\n\n{list}} few {Найдено # проблемы:\n\n{list}} many {Найдено # проблем:\n\n{list}} other {Найдено # проблемы:\n\n{list}}}",
   "agent.links.needWorkspace": "Сначала откройте файл из рабочей папки — агент ссылок читает соседние заметки.",
   "agent.links.no": "нет",
   "agent.links.prompt": "Найдено предложений ссылок: {n}\n\n{summary}\n\nПрименить все? (Введите '{no}', чтобы пропустить)",
