@@ -13,7 +13,7 @@ function socketChannel(socket: Socket, onFrame?: (data: Uint8Array) => void): La
   const msg = new Set<(d: Uint8Array) => void>();
   const close = new Set<() => void>();
   let closed = false;
-  let buf = Buffer.alloc(0);
+  let buf: Buffer = Buffer.alloc(0);
   socket.setNoDelay(true);
   socket.on("data", (chunk: Buffer) => {
     buf = buf.length ? Buffer.concat([buf, chunk]) : chunk;

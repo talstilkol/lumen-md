@@ -774,7 +774,8 @@ describe("directory-handle backend specifics", () => {
       },
     );
     off();
-    expect(Object.fromEntries(res)).toEqual({ "n/a.md": true, "n/b.md": false, "m/c.md": true });
+    expect(res).not.toBeNull();
+    expect(Object.fromEntries(res!)).toEqual({ "n/a.md": true, "n/b.md": false, "m/c.md": true });
     expect(locked.sort()).toEqual(["m/c.md", "n/a.md", "n/b.md"]);
     expect(await v.readText("n/a.md")).toBe("A2");
     expect(await v.readText("n/b.md")).toBe("changed meanwhile");

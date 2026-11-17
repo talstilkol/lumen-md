@@ -107,7 +107,7 @@ describe("audit r4 A1.6: daf, bilingual and compare read the note's reading prof
   it("the bilingual view takes the profile's size, face and line height (its own when unset)", async () => {
     const { BilingualView } = await import("../ui/BilingualView");
     const side = (lang: string) => ({ lang, dir: (lang === "he" ? "rtl" : "ltr") as "rtl" | "ltr", title: lang, license: null });
-    const data = { kind: "machine" as const, title: "t", source: side("he"), target: side("en"), rows: [{ n: 1, label: "א", source: "בראשית", target: "In the beginning", sentences: null }], unmatched: 0 };
+    const data = { kind: "machine" as const, title: "t", source: side("he"), target: side("en"), rows: [{ n: 1, label: "א", source: "בראשית", target: "In the beginning", sentences: null, stale: false }], unmatched: 0 };
     render(<BilingualView data={data} initialMode="columns" />);
     expect((document.querySelector("[data-testid=bilingual-view]") as HTMLElement).style.fontSize).toBe("var(--reading-size, inherit)");
     const src = document.querySelector("[data-testid=bi-src]") as HTMLElement;

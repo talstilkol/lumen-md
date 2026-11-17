@@ -192,7 +192,11 @@ describe("subscriptions/listen instead of the GET stream", () => {
 
 describe("deterministic list order (SEP-2549)", () => {
   it("tools/list has the same order on every call, whatever order the grant lists its scopes in, on stdio and HTTP", async () => {
-    const names = async () => ((await ep.handle(body("tools/list"))) as { result: { tools: { name: string }[] } }).result.tools.map((t) => t.name);
+    const names = async () => {
+      const res = await ep.handle(body("tools/list"));
+      if (!res || !("result" in res)) throw new Error(`tools/list: ${JSON.stringify(res)}`);
+      return (res.result as { tools: { name: string }[] }).tools.map((t) => t.name);
+    };
     await enableClient(vault, "claude-code", ["read", "propose", "search"]);
     const a = await names();
     await enableClient(vault, "claude-code", ["propose", "search", "read"]);

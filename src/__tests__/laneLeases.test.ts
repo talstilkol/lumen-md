@@ -11,8 +11,11 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync, mkdirSync, copyFileSync, chmodSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { globToRegExp, installHook, outsideLease, overlaps, refusalMessage } from "../../scripts/lanes/leases.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { claim, listClaims, release } from "../../scripts/lanes/claims.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { unionSorted } from "../../scripts/lanes/merge-driver.mjs";
 
 const REPO = resolve(__dirname, "../..");

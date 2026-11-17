@@ -35,7 +35,7 @@ describe("Israeli import: Notion exports", () => {
     const input = files(join(DIR, c, "export"));
     const source = detectImportSource([...input.keys()]);
     const v = convertExport(source, input, `Imported/${c}`);
-    const lumen: Vault = new Map([...v.notes, ...v.attachments]);
+    const lumen: Vault = new Map<string, string | Uint8Array>([...v.notes, ...v.attachments]);
     const r = scoreVault(c, lumen, asVault(files(join(DIR, c, "expected"))));
     return source === "notion" ? r : { ...r, pass: false, problems: [`detected as ${source}`, ...r.problems] };
   });

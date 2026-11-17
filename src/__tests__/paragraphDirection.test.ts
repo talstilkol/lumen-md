@@ -57,7 +57,7 @@ describe("dir in the frontmatter", () => {
 });
 
 describe("source editor: the command, saved in the text and read again on reopening", () => {
-  const view = (doc: string, sel: EditorSelection) => new EditorView({ state: EditorState.create({ doc, selection: sel }), parent: document.body });
+  const view = (doc: string, sel: EditorSelection | { anchor: number; head?: number }) => new EditorView({ state: EditorState.create({ doc, selection: sel }), parent: document.body });
 
   it("switches every selected line in one change, skipping fenced code and the frontmatter", () => {
     const doc = "---\ndir: auto\n---\niPhone חדש\n```\ncode line\n```\nאחת two";

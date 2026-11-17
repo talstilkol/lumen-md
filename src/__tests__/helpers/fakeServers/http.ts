@@ -26,7 +26,7 @@ export interface FakeServer {
   log: string[];
 }
 
-async function bodyBytes(input: Request | string, init?: RequestInit): Promise<Uint8Array> {
+async function bodyBytes(input: RequestInfo | URL, init?: RequestInit): Promise<Uint8Array> {
   if (input instanceof Request) return new Uint8Array(await input.clone().arrayBuffer());
   const b = init?.body;
   if (b == null) return new Uint8Array();
@@ -40,7 +40,7 @@ async function bodyBytes(input: Request | string, init?: RequestInit): Promise<U
 }
 
 /** A `fetch` that answers from `handler`; requests for other hosts fail like a network error. */
-export function fakeFetch(handler: FakeHandler, hosts?: string[]): (input: Request | string, init?: RequestInit) => Promise<Response> {
+export function fakeFetch(handler: FakeHandler, hosts?: string[]): (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> {
   return async (input, init) => {
     const url = new URL(input instanceof Request ? input.url : input);
     if (hosts && !hosts.includes(url.host)) throw new TypeError(`fakeFetch: no route to ${url.host}`);
@@ -54,7 +54,7 @@ export function fakeFetch(handler: FakeHandler, hosts?: string[]): (input: Reque
 }
 
 /** Several servers behind one fetch, by host. */
-export function fakeNetwork(servers: Record<string, FakeHandler>): (input: Request | string, init?: RequestInit) => Promise<Response> {
+export function fakeNetwork(servers: Record<string, FakeHandler>): (input: RequestInfo | URL, init?: RequestInit) => Promise<Response> {
   const hosts = Object.keys(servers);
   return fakeFetch((req) => servers[req.url.host](req), hosts);
 }

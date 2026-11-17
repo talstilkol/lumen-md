@@ -31,16 +31,12 @@ import {
   checkDoneLevel,
   checkStatusLength,
   STATUS_MAX,
-  wipWarnings,
-  formatWip,
-  waveNumber,
-  belowFloor,
-  WIP_LIMIT,
   isStarted,
   // @ts-expect-error — plain .mjs script without type declarations
 } from "../../scripts/plan/build.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { classify, prOf, migrate } from "../../scripts/plan/migrate-verified.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { WIP_FROZEN_FILE, formatGate, pruned, readFrozen, wipGate } from "../../scripts/plan/wipGate.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { decidedPairs, lowerOnlyLimit, wipDecisionProblems } from "../../scripts/plan/wipDecisions.mjs";
@@ -468,7 +464,7 @@ describe("work-in-progress limit (plan W6.39)", () => {
     const dir = copy("wipgate");
     cpSync(join(ROOT, WIP_FROZEN_FILE), join(dir, WIP_FROZEN_FILE));
     const p = plan();
-    const live = new Set(realWip(p).map((w) => w.next));
+    const live = new Set(realWip(p).map((w: { next: number }) => w.next));
     const phase = p.phases.find((ph: { title: string; tasks: Task[] }) => live.has(waveNumber(ph.title)) && ph.tasks.some((t) => !frozen.started.includes(t.id)));
     const fresh: Task = phase.tasks.find((t: Task) => !frozen.started.includes(t.id));
     fresh.status = "⏳ #99999 started anyway";

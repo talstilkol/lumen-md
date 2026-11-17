@@ -343,7 +343,7 @@ export const DocTabs = React.memo(function DocTabs({
  * in Hebrew as in English. ↑/↓ move between the items, Escape closes and
  * gives focus back to the tab.
  */
-function TabMenu(p: { x: number; y: number; label: string; menuRef: React.RefObject<HTMLDivElement | null>; canEarlier: boolean; canLater: boolean; onEarlier: () => void; onLater: () => void; onClose: () => void }) {
+function TabMenu(p: { x: number; y: number; label: string; menuRef: React.RefObject<HTMLDivElement>; canEarlier: boolean; canLater: boolean; onEarlier: () => void; onLater: () => void; onClose: () => void }) {
   React.useEffect(() => {
     p.menuRef.current?.querySelector<HTMLButtonElement>("[role=menuitem]:not([aria-disabled=true])")?.focus();
     const away = (e: PointerEvent) => {

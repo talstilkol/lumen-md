@@ -15,7 +15,7 @@ async function acr() {
     WCAG22: { A: string[]; AA: string[] };
     PAGES: Record<"en" | "he", string>;
     loadReport(root?: string): { version: string; criteria: Array<{ id: string; level: string; status: string; plan?: unknown }> };
-    checkReport(report: unknown, root?: string): string[];
+    checkReport(report: unknown, root?: string, axe?: unknown): string[];
     summary(report: unknown): Record<"A" | "AA", Record<string, number>>;
     renderPage(report: unknown, lang: "en" | "he", en?: unknown, runs?: Set<string>, axe?: unknown): string;
     loadE2eRuns(root?: string): Set<string>;

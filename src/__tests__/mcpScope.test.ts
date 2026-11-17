@@ -24,8 +24,10 @@ const write = (rel: string, text: string) => {
 };
 type Out = { text: string; isError: boolean; anchors?: string[] };
 async function call(ep: McpEndpoint, name: string, args: Record<string, unknown>, client = "claude-code"): Promise<Out> {
-  const r = (await ep.handle({ jsonrpc: "2.0", id: ++seq, method: "tools/call", params: { name, arguments: args, _meta: { [META.protocolVersion]: "2026-07-28", [META.clientInfo]: { name: client, version: "1" }, [META.clientCapabilities]: {} } } })) as { result: { content: { text: string }[]; isError?: boolean; _meta?: Record<string, unknown> } };
-  return { text: r.result.content.map((c) => c.text).join("\n"), isError: !!r.result.isError, anchors: r.result._meta?.["io.lumen/anchors"] as string[] | undefined };
+  const res = await ep.handle({ jsonrpc: "2.0", id: ++seq, method: "tools/call", params: { name, arguments: args, _meta: { [META.protocolVersion]: "2026-07-28", [META.clientInfo]: { name: client, version: "1" }, [META.clientCapabilities]: {} } } });
+  if (!res || !("result" in res)) throw new Error(`tools/call ${name}: ${JSON.stringify(res)}`);
+  const result = res.result as { content: { text: string }[]; isError?: boolean; _meta?: Record<string, unknown> };
+  return { text: result.content.map((c) => c.text).join("\n"), isError: !!result.isError, anchors: result._meta?.["io.lumen/anchors"] as string[] | undefined };
 }
 const setScope = (vaultScope: unknown, clientScopes: Record<string, unknown> = {}) => {
   const cfg = JSON.parse(readFileSync(configPath(vault), "utf8"));

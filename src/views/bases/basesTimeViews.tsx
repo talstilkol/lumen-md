@@ -12,6 +12,7 @@ import { t } from "../../i18n";
 import { explainError } from "../../lib/userError";
 import { EmptyState, learnHow } from "../../ui/EmptyState";
 import { nameCell, type ViewProps } from "./basesCells";
+import { useAppStore } from "../../store/useStore";
 
 const muted = "hsl(var(--fg-muted))";
 

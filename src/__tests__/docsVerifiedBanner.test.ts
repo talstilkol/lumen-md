@@ -65,7 +65,7 @@ describe("the docs site plugin (remark)", () => {
     return p;
   })();
   const run = (path: string, tasks: string[]) => {
-    const tree = { type: "root", children: [{ type: "paragraph", children: [] }] } as { children: Array<{ type: string; value?: string }> };
+    const tree: { type: string; children: Array<{ type: string; value?: string; children?: unknown[] }> } = { type: "root", children: [{ type: "paragraph", children: [] }] };
     remarkVerifiedBanner({ plan: tmpPlan })(tree, { path, data: { astro: { frontmatter: { tasks } } } });
     return tree.children;
   };

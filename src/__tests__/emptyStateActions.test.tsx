@@ -17,7 +17,7 @@ import "../ui/graphViewStrings"; // GraphView registers the table's lazy English
 import { OPEN_HELP_EVENT } from "../ui/HelpButton";
 
 /** The detail of every event of `type` sent while `fn` runs. */
-async function events(type: string, fn: () => void | Promise<void>): Promise<unknown[]> {
+async function events(type: string, fn: () => unknown): Promise<unknown[]> {
   const seen: unknown[] = [];
   const on = (e: Event) => seen.push((e as CustomEvent).detail);
   window.addEventListener(type, on);

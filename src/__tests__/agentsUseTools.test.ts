@@ -204,7 +204,7 @@ describe("builder: all files or none (5.3.2)", () => {
       expect(c.kind === "file" && c.after).toBe(res.files.get(c.path!));
       // The review screen's diff of a new file: every line added.
       const rows = lineDiffRows(c.kind === "file" ? c.before : null, c.kind === "file" ? c.after : "");
-      expect(rows, c.path).not.toBeNull();
+      expect(rows, c.path ?? undefined).not.toBeNull();
       expect(rows!.some((r) => r.op === "add")).toBe(true);
     }
     expect(staged.find((c) => c.path === "pomodoro/app.js")).toMatchObject({ after: files["app.js"] });

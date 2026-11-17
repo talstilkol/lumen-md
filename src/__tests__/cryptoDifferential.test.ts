@@ -18,10 +18,17 @@ import * as ourAge from "../sync/e2ee/age";
  * probed once: an offline runner may resolve a missing package to a stand-in
  * that only throws when used, so a successful import alone proves nothing.
  */
+/**
+ * The lib directory is outside the root tsconfig until the Mac run installs
+ * its packages (lib/tsconfig.json, `npm run typecheck:crypto-lib`). A literal
+ * specifier here made `tsc -b` follow it into lib and fail on the missing
+ * packages; a computed one keeps it out, and vitest still loads the module.
+ */
+const AUDITED_LIB = "../sync/e2ee/primitives/lib";
 const audited: { impl: Primitives | null; age: AgeLib | null; why: string } = await (async () => {
   try {
-    const { AUDITED } = (await import("../sync/e2ee/primitives/lib/audited")) as { AUDITED: Primitives };
-    const age = (await import("../sync/e2ee/primitives/lib/age")) as AgeLib;
+    const { AUDITED } = (await import(/* @vite-ignore */ `${AUDITED_LIB}/audited`)) as { AUDITED: Primitives };
+    const age = (await import(/* @vite-ignore */ `${AUDITED_LIB}/age`)) as AgeLib;
     AUDITED.blake2b(new Uint8Array(1), 1);
     AUDITED.chachaSeal(new Uint8Array(32), new Uint8Array(12), new Uint8Array(1));
     await AUDITED.scrypt(new Uint8Array(1), new Uint8Array(1), { logN: 1, r: 1, p: 1, dkLen: 1 });

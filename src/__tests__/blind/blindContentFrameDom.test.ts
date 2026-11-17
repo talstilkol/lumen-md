@@ -75,6 +75,7 @@ describe("createContentFrame (C9)", () => {
 describe("applyContentFrameSize (C8)", () => {
   it("applies a reported size, and ignores what is not a size", () => {
     const f = createContentFrame(reqs[0], document);
+    if (!(f instanceof HTMLIFrameElement)) throw new Error("an image request is framed, not linked");
     document.body.append(f);
     applyContentFrameSize(f, { width: 320, height: 40 });
     const shown = () => `${f.getAttribute("style") ?? ""}|${f.getAttribute("width") ?? ""}|${f.getAttribute("height") ?? ""}`;

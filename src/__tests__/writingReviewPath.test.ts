@@ -14,6 +14,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { fromFinding, findingKind, SUGGESTION_KINDS, SuggestionError, validateSuggestion, type CheckerFinding } from "../agents/writing/suggestion";
 import { hunkProposals, stageFinding, stageWritingSuggestions, toRangeProposal } from "../agents/writingReview";
 import { applyRangeToText, clearStagedChanges, listStagedChanges, recordEdit } from "../agents/staging";
+import type { ChangeProposal } from "../agents/types";
 import { detectRepetition } from "../agents/writing/repetition";
 import { detectLoanwords } from "../agents/writing/loanwords";
 import { critiqueStructure } from "../agents/writing/structure/structureCritic";
@@ -152,7 +153,7 @@ describe("review 13 M9: the review queue offers the per-hunk choice too", () => 
   });
 
   it("either hunk applies alone, and the other still applies after it (its offsets mapped through the approval)", () => {
-    const [h1, h2] = hunkProposals(fromFinding(text, tone), text, "n.md") as Array<{ from: number; to: number; before: string; after: string; context: never; basis: string }>;
+    const [h1, h2] = hunkProposals(fromFinding(text, tone), text, "n.md").filter((p): p is Extract<ChangeProposal, { kind: "range" }> => p.kind === "range");
     const only2 = applyRangeToText(text, h2)!;
     expect(only2).toBe("The report was very long and was written by Dina in 2024.");
     recordEdit(text, only2, { from: h2.from, to: h2.to, insert: h2.after });

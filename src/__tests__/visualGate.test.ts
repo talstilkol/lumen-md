@@ -11,7 +11,9 @@
 import { describe, expect, it } from "vitest";
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { isGateRun, snapshotUpdateMode } from "../../scripts/lib/visualGate.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { SUITES, approveCommand } from "../../scripts/visual-approve.mjs";
 
 const read = (p: string) => readFileSync(p, "utf8");
@@ -75,7 +77,7 @@ describe("scripts/visual-approve.mjs (W10.B16)", () => {
     });
 
   it("refuses on the gate", () => {
-    for (const env of [{ CI: "true" }, { LUMEN_CI: "buildkite" }, { LUMEN_GATE: "1" }]) {
+    for (const env of [{ CI: "true" }, { LUMEN_CI: "buildkite" }, { LUMEN_GATE: "1" }] as Record<string, string>[]) {
       const r = cli(["visual", "--yes", "--dry-run"], env);
       expect(r.status).toBe(2);
       expect(r.stderr).toMatch(/refuses to run on the gate/);

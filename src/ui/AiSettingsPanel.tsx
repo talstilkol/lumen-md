@@ -38,7 +38,8 @@ interface Props {
   embedded?: boolean;
 }
 
-type RunnerId = Exclude<ExecutorId, "transformers">;
+// LM Studio has no row on this screen yet (no strings for it): "auto" still reaches it (DEFAULT_EXECUTOR_ORDER).
+type RunnerId = Exclude<ExecutorId, "transformers" | "lmstudio">;
 
 // Where models download from (plan W4.14): its strings travel with it.
 const ModelSourcesSection = lazy(() => import("./ModelSourcesSection").then((m) => ({ default: m.ModelSourcesSection })));

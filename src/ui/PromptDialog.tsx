@@ -109,8 +109,6 @@ function PromptDialogImpl({
             ref={selectRef}
             className="prompt-input"
             aria-label={title ?? message}
-            type={password ? "password" : undefined}
-            autoComplete={password ? "new-password" : undefined}
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onKeyDown={(e) => {
@@ -134,6 +132,8 @@ function PromptDialogImpl({
             ref={inputRef}
             className="prompt-input"
             aria-label={title ?? message}
+            type={password ? "password" : undefined}
+            autoComplete={password ? "new-password" : undefined}
             value={value}
             placeholder={placeholder}
             onChange={(e) => setValue(e.target.value)}

@@ -58,8 +58,8 @@ export function DevPanel({ connect }: { connect?: (url: string) => Promise<DevCo
   }
 
   const used = inst?.capabilityUse ?? new Map<string, number>();
-  const asked = status?.manifest?.capabilities.map((c) => c.id) ?? [];
-  const extra = [...used.keys()].filter((c) => !asked.includes(c as never));
+  const asked: string[] = status?.manifest?.capabilities.map((c) => c.id) ?? [];
+  const extra = [...used.keys()].filter((c) => !asked.includes(c));
   const stats = inst?.stats ?? null;
   const denied = new Map<string, number>([...(inst?.denied ?? []), ...Object.entries(stats?.denied ?? {})]);
 
@@ -103,7 +103,9 @@ export function DevPanel({ connect }: { connect?: (url: string) => Promise<DevCo
           </span>
           {stats && (
             <span data-testid="plugin-dev-stats">
-              {t("pluginDev.cpu", { ms: Math.round(stats.cpuMs), max: Math.round(stats.maxEntryMs), n: stats.entries })} · {t("pluginDev.memory", { size: kb(stats.memoryBytes) })}
+              {t("pluginDev.cpu", { ms: Math.round(stats.cpuMs), max: Math.round(stats.maxEntryMs), n: stats.entries })}
+              {/* why: null when the engine cannot measure the sandbox heap (sandbox.ts): no number then */}
+              {stats.memoryBytes != null && ` · ${t("pluginDev.memory", { size: kb(stats.memoryBytes) })}`}
             </span>
           )}
           {status.scan && status.scan.findings.length > 0 && <span>{t("pluginDev.scanNotes", { n: status.scan.findings.length, grade: status.scan.grade })}</span>}

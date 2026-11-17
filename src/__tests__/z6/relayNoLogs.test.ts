@@ -15,6 +15,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import ts from "typescript";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import worker, { VaultRelay } from "../../../edge-workers/vault-relay/worker.mjs";
 import { FakeStorage, fakeState } from "../helpers/durableObject";
 

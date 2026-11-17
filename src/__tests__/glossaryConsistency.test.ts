@@ -12,7 +12,6 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 // @ts-expect-error plain JavaScript
 import { GLOSSARY_LANGS, checkGlossary, glossaryPrompt, glossaryShape, readGlossary } from "../../scripts/lib/i18n-glossary.mjs";
-// @ts-expect-error plain JavaScript
 import { ollamaEngine } from "../../scripts/lib/i18n-draft.mjs";
 import { listLocales, readLocale } from "../../scripts/lib/i18n-files.mjs";
 // @ts-expect-error plain JavaScript
@@ -105,9 +104,9 @@ describe("where the glossary is used", () => {
   it("the draft agent (npm run i18n:draft) gets the terms in its system prompt", async () => {
     expect(glossaryPrompt(glossary, "he")).toContain("vault → כספת (not: מאגר)");
     let body = "";
-    const fetchImpl = async (_url: string, init: { body: string }) => {
-      body = init.body;
-      return { ok: true, json: async () => ({ message: { content: JSON.stringify({ t: ["x"] }) } }) };
+    const fetchImpl = async (_url: RequestInfo | URL, init?: RequestInit) => {
+      body = String(init?.body);
+      return new Response(JSON.stringify({ message: { content: JSON.stringify({ t: ["x"] }) } }));
     };
     await ollamaEngine({ fetchImpl, glossary }).translate(["Open the vault"], "he");
     const system = JSON.parse(body).messages[0].content;

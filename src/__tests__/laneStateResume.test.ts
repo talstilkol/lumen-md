@@ -19,11 +19,15 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { HOOK_BODY } from "../../scripts/lib/ciLocal.mjs";
 import { killWatchersUnder } from "./helpers/laneWatchers";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { PREPUSH_MARK, parseBranches, prePushPlan, renderBranches } from "../../scripts/lib/lane-state.mjs";
 
 const ROOT = resolve(__dirname, "../..");
+/** A row of STATE.md's Branches table, as parseBranches (lane-state.mjs) reads it. */
+type Branch = { branch: string; pushed: string | null };
 
 function lab() {
   const dir = mkdtempSync(join(tmpdir(), "lumen-lane-resume-"));
@@ -114,7 +118,7 @@ describe("lane state: stop anywhere, resume without redoing work (W8.10)", () =>
       L.push("done");
       // LUMEN_LANE_WATCH=0: the hook records, and leaves no watcher behind.
       for (const at of [L.main, L.wt("done")]) expect(existsSync(resolve(at, L.git(at, "rev-parse", "--git-path", "lumen-lane-watch.json")))).toBe(false);
-      const row = parseBranches(readFileSync(L.state, "utf8")).find((r) => r.branch === "done")!;
+      const row = parseBranches(readFileSync(L.state, "utf8")).find((r: Branch) => r.branch === "done")!;
       expect(row.pushed).toBe(sha.slice(0, row.pushed!.length));
       expect(readFileSync(L.state, "utf8")).toMatch(new RegExp(`## Pushes[\\s\\S]*done[\\s\\S]*${sha.slice(0, 10)}`));
     } finally {
@@ -153,7 +157,7 @@ describe("lane state: stop anywhere, resume without redoing work (W8.10)", () =>
       expect(got).toEqual([`done ${done}`, `cut ${cut}`, `ahead ${ahead1}`, `ahead ${ahead2}`]);
       expect(new Set(got).size).toBe(got.length);
       // STATE.md now holds what origin holds, written by the hook (ahead) and by record (cut).
-      const rows = Object.fromEntries(parseBranches(readFileSync(L.state, "utf8")).map((r) => [r.branch, r.pushed]));
+      const rows: Record<string, string | null | undefined> = Object.fromEntries(parseBranches(readFileSync(L.state, "utf8")).map((r: Branch) => [r.branch, r.pushed]));
       for (const [b, sha] of Object.entries({ done, cut, ahead: ahead2 })) expect(sha.startsWith(rows[b]!)).toBe(true);
     } finally {
       L.done();

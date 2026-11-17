@@ -38,7 +38,7 @@ describe("the argument types (W12.V4)", () => {
       ["qualifies", "claim", true],
     ]);
     expect(reg.types.get("evidence")!.label.he).toBe("מקור");
-    expect(typesOfNote(reg, { path: "x.md", fm: { type: "claim" }, tags: [] }).types.map((x) => x.id)).toEqual(["claim"]);
+    expect(typesOfNote(reg, { fm: { type: "claim" }, tags: [] }).types.map((x) => x.id)).toEqual(["claim"]);
   });
 });
 

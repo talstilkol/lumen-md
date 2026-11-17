@@ -10,6 +10,7 @@ import { DatabaseSync } from "node:sqlite";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import * as Y from "yjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { createCollabServer } from "../../../sync-server/collab-server.mjs";
 
 const cleanups: Array<() => unknown> = [];

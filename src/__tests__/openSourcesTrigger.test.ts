@@ -75,7 +75,7 @@ describe("Sefaria free-text search", () => {
   it("the open-sources online search asks Sefaria only for free text, and only when Sefaria is on", async () => {
     const urls: string[] = [];
     const f = (async (u: RequestInfo | URL) => (urls.push(String(u)), new Response(JSON.stringify(body)))) as typeof fetch;
-    const on = { sefaria: true, knesset: false, datagov: false, benyehuda: false };
+    const on = { sefaria: true, knesset: false, datagov: false, benyehuda: false, registers: false };
     const r = await searchOnline("בראשית ברא", on, f);
     expect(r.map((x) => [x.source, x.kind, x.title, x.rights, x.local])).toEqual([
       ["sefaria", "verse", "בראשית א׳:א׳", "link-only", false],

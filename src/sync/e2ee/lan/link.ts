@@ -39,10 +39,10 @@ export class LanLinkError extends Error {
 
 /* ─── Codes ────────────────────────────────────────────────────────────── */
 
-async function pipe(bytes: Uint8Array, stream: { readable: ReadableStream<Uint8Array>; writable: WritableStream<Uint8Array> }): Promise<Uint8Array> {
+async function pipe(bytes: Uint8Array, stream: CompressionStream | DecompressionStream): Promise<Uint8Array> {
   const out = new Response(stream.readable).arrayBuffer();
   const w = stream.writable.getWriter();
-  await w.write(new Uint8Array(bytes));
+  await w.write(new Uint8Array(bytes) as BufferSource);
   await w.close();
   return new Uint8Array(await out);
 }

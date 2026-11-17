@@ -9,10 +9,15 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { parseAllowedSigners, signSshSig, verifySshSig, verifyTag } from "../../scripts/supply-chain/sshsig.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { attest, checkVsa, evaluate, protections, refMatches } from "../../scripts/supply-chain/source-vsa-lib.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { factsFor } from "../../scripts/supply-chain/source-vsa.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { releaseIdentity, sourceProblems } from "../../scripts/supply-chain/verify-release.mjs";
+// @ts-expect-error — plain .mjs module without type declarations (#1304)
 import { generateKeys, signData } from "../../scripts/supply-chain/minisign.mjs";
 
 const ROOT = process.cwd();
@@ -97,7 +102,7 @@ describe("SLSA source track: evaluation and VSA", () => {
   it("facts from this repository: the committed ruleset protects the trains", () => {
     const head = execFileSync("git", ["rev-parse", "HEAD"], { cwd: ROOT, encoding: "utf8" }).trim();
     const f = factsFor(ROOT, { ref: "refs/heads/verify/train-7", commit: head, previous: null, live: null });
-    expect(evaluate(f).checks.find((c) => c.id === "declared-continuity")?.ok).toBe(true);
+    expect(evaluate(f).checks.find((c: { id: string }) => c.id === "declared-continuity")?.ok).toBe(true);
   });
 });
 
