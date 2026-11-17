@@ -70,8 +70,8 @@ export async function admit(manifest: Manifestish, installId: string): Promise<R
 }
 
 /** 128 random bits, hex: made here, kept here, never sent. */
-export function newInstallId(random: (a: Uint8Array) => Uint8Array = (a) => crypto.getRandomValues(a)): string {
-  return [...random(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, "0")).join("");
+export function newInstallId(random: () => Uint8Array = () => crypto.getRandomValues(new Uint8Array(16))): string {
+  return [...random().subarray(0, 16)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 /** This device's install id, made on first use. Storage that throws gives a fresh id each time (so a device without storage is in or out at random per check, never tracked). */

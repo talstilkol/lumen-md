@@ -5,7 +5,7 @@
  * in; halt stops everyone; a malformed rollout holds. The release side
  * (scripts/lib/rollout.mjs, release-run's --rollout) uses the same rule.
  */
-import { createHash, webcrypto } from "node:crypto";
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import vectors from "../update/rolloutVectors.json";
 import { BUCKETS, admit, bucketOf, installId, newInstallId, parseRollout, threshold } from "../update/stagedRollout";
@@ -25,7 +25,7 @@ const ids = (n: number, seed = 1) => {
     }
     return a;
   };
-  return Array.from({ length: n }, () => newInstallId(rnd));
+  return Array.from({ length: n }, () => newInstallId(() => rnd(new Uint8Array(16))));
 };
 const manifest = (extra: Record<string, unknown> = {}) => ({ version: "1.5.0", channel: "stable", expires: "2099-01-01T00:00:00Z", platforms: {}, ...extra });
 
@@ -34,7 +34,7 @@ describe("the bucket rule", () => {
     expect(vectors.vectors.length).toBeGreaterThanOrEqual(15);
     for (const v of vectors.vectors) expect(await bucketOf(v.installId, v.salt, digest)).toBe(v.bucket);
     // and with WebCrypto, as the app runs it
-    for (const v of vectors.vectors.slice(0, 3)) expect(await bucketOf(v.installId, v.salt, (d) => webcrypto.subtle.digest("SHA-256", d as BufferSource))).toBe(v.bucket);
+    for (const v of vectors.vectors.slice(0, 3)) expect(await bucketOf(v.installId, v.salt, (d) => globalThis.crypto.subtle.digest("SHA-256", d as BufferSource))).toBe(v.bucket);
   });
 
   it("threshold in buckets", () => {
