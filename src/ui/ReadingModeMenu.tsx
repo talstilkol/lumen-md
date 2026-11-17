@@ -73,9 +73,9 @@ function fieldUi(k: keyof ReadingProfile): FieldUi | null {
       return { kind: "select", options: AIDS_TINTS };
     case "focusUnit":
       return { kind: "select", options: FOCUS_UNITS };
-    // A two-page spread comes with plan W13.R6; until then the menu offers the layouts that exist.
+    // Audit r4 A1.6: the two-page spread (W13.R6, book pages) is a layout the menu offers.
     case "layout":
-      return { kind: "select", options: ["single", "sideBySide"] };
+      return { kind: "select", options: ["single", "sideBySide", "spread"] };
     case "voice": {
       const names = voices().map((v) => v.name);
       return { kind: "select", options: ["", ...names], label: (v) => (v === "" ? t("readingMode.voice.auto") : String(v)) };

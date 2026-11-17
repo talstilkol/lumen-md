@@ -49,3 +49,17 @@ export function patchGlobal(patch: Partial<ReadingProfile>): void {
   const s = readStored();
   writeStored({ ...s, global: { ...(s.global ?? {}), ...patch } });
 }
+
+/**
+ * The note's reading profile for a mode's own text (audit r4 A1.6: the daf, bilingual and compare views
+ * ignored it): the profile's face, size, line height and Hebrew spacing, or the mode's own when unset.
+ * (applyProfile puts the variables on <html>; this only reads them.)
+ */
+export const readingText = (relSize?: string, lineHeight: string | number = "inherit") => ({
+  fontFamily: "var(--reading-font, inherit)",
+  // The block that holds the text takes the profile's size; a cell inside it keeps its relative size.
+  fontSize: relSize ?? "var(--reading-size, inherit)",
+  lineHeight: `var(--reading-line-height, ${lineHeight})`,
+  wordSpacing: "var(--reading-word-spacing, normal)",
+  letterSpacing: "var(--reading-letter-spacing, normal)",
+});

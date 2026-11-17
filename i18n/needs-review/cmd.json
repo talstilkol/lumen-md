@@ -539,5 +539,46 @@
     "ja": "12myrs1",
     "ru": "12myrs1",
     "zh-CN": "12myrs1"
+  },
+  "cmd.insert.embed.hint": {
+    "ar": "15wc57",
+    "de": "15wc57",
+    "fr": "15wc57",
+    "he": "15wc57",
+    "ja": "15wc57",
+    "ru": "15wc57",
+    "zh-CN": "15wc57"
+  },
+  "cmd.learning.plans.hint": {
+    "ar": "199zoak",
+    "de": "199zoak",
+    "fr": "199zoak",
+    "ja": "199zoak",
+    "ru": "199zoak",
+    "zh-CN": "199zoak"
+  },
+  "cmd.student.syllabus.hint": {
+    "ar": "p1d0ks",
+    "de": "p1d0ks",
+    "fr": "p1d0ks",
+    "ja": "p1d0ks",
+    "ru": "p1d0ks",
+    "zh-CN": "p1d0ks"
+  },
+  "cmd.view.sideBySide": {
+    "ar": "1320h2f",
+    "de": "1320h2f",
+    "fr": "1320h2f",
+    "ja": "1320h2f",
+    "ru": "1320h2f",
+    "zh-CN": "1320h2f"
+  },
+  "cmd.view.sideBySide.hint": {
+    "ar": "1bcg9d8",
+    "de": "1bcg9d8",
+    "fr": "1bcg9d8",
+    "ja": "1bcg9d8",
+    "ru": "1bcg9d8",
+    "zh-CN": "1bcg9d8"
   }
 }

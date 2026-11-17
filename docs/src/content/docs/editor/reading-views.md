@@ -89,3 +89,11 @@ the same choice in its toolbar (**Scrolling**, **One page**, **Two pages**,
 - **Your place is kept.** Switching between pages and scrolling keeps the
   same paragraph on screen. A note or book left in pages opens again in
   pages, at the same place.
+
+## Talmud page (daf)
+
+**View → Talmud page** lays a note out as a page of the Talmud: the main
+text in the middle, Rashi on the inner side and Tosafot on the outer side,
+in the shape of the printed page; on a narrow window, or with **Linear**,
+the same text one block after another. The note is not changed. Your own
+notes on the page sit in a column beside it.

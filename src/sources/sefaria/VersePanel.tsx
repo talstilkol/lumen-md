@@ -11,6 +11,7 @@ import { t } from "../../i18n";
 import { onCursorVerse } from "../../editor/refTrigger";
 import { EmptyState, learnHow } from "../../ui/EmptyState";
 import type { SourceRef } from "./refs";
+import { HelpButton } from "../../ui/HelpButton";
 
 export interface VersePanelProps {
   /** The verse to start with (the selection's, or the open source note's). */
@@ -57,6 +58,7 @@ export function VersePanel({ initial, notesFor, onOpen, onClose, follow = onCurs
         <h2 id="verse-panel-title" style={{ fontSize: 14, margin: 0, flex: 1 }}>
           {verse ? t("sources.panel.title", { ref: verse.he }) : t("sources.panel.titleNone")}
         </h2>
+        <HelpButton topic="workspace/jewish-sources#my-notes-on-this-verse" size={20} />
         <button type="button" onClick={onClose} aria-label={t("sources.panel.close")} data-testid="verse-panel-close">
           ×
         </button>

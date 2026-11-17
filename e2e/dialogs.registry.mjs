@@ -10,8 +10,12 @@
  *   then      what to click after the command (a test id), for a dialog inside another
  *   firstRun  the dialog shows on a first visit
  *   embedded  the file's dialog is a tab of the settings screen: the check runs on that screen
+ *   seed      the open note's text before the opener runs ("file:<path>" reads a fixture); review 13 M7
+ *   steps     test ids clicked in order after the command (a dialog that opens another and closes): the last dialog is checked
+ *   hook      an expression run in the page to open the dialog (through window.__lumenTest, src/testing/e2eHooks.ts)
  *   fixme     the dialog needs a state the spec cannot make yet (said why); it is listed, not skipped silently
  */
+const NOTE = "# סקר\n\nהסקר נערך במרץ עם 400 תלמידים. רוב התלמידים העדיפו שיעורי בוקר. בית הספר יבדוק מערכת שעות חדשה בשנה הבאה.\n\nThe survey ran in March with 400 students. Most students preferred morning classes, and the house was very old. The house was very old and the house was cold.\n\nבסופו של דבר, הבית היה גדול. הבית עמד על גבעה, והבית נמכר.\n";
 export const DIALOGS = [
   { file: "src/ai/ScreenshotNoteDialog.tsx", command: "ai.screenshotToNote", fixme: "W10.C22: needs an image on the clipboard or a picked file before the preview opens" },
   { file: "src/ai/mt/openSideBySide.tsx", command: "view.sideBySide", fixme: "W12.H6: needs an open note and a local translation engine" },
@@ -31,9 +35,9 @@ export const DIALOGS = [
   { file: "src/plugins/runtime/InstallDialog.tsx", fixme: "shown when a sandboxed plugin is installed from a file" },
   { file: "src/privacy/NetworkMonitor.tsx", command: "privacy.networkMonitor" },
   { file: "src/pwa/InstallDialog.tsx", command: "app.install" },
-  { file: "src/reading/CompareView.tsx", fixme: "W13.R8: opened from version history or the file tree with two texts; the reading-modes gate opens it through the e2e hooks" },
-  { file: "src/reading/bilingual/openBilingual.tsx", command: "view.bilingual", fixme: "W13.R12: needs an open note with a translation sidecar or a Sefaria source" },
-  { file: "src/reading/daf/openDaf.tsx", command: "view.daf", fixme: "W13.R11: needs an open note (e2e/daf-view.spec.ts seeds one)" },
+  { file: "src/reading/CompareView.tsx", hook: 'window.__lumenTest.load("reading/openCompare").then((m) => m.openCompare({ label: "a", text: "one\\ntwo" }, { label: "b", text: "one\\nthree" }))' },
+  { file: "src/reading/bilingual/openBilingual.tsx", command: "view.bilingual", seed: NOTE },
+  { file: "src/reading/daf/openDaf.tsx", command: "view.daf", seed: "file:e2e/fixtures/daf/berakhot-2a.md" },
   { file: "src/research/ClipTemplatesEditor.tsx", command: "research.clipTemplates" },
   { file: "src/share/ShareLinkDialog.tsx", command: "file.shareLink" },
   { file: "src/slides/Presentation.tsx", command: "view.present" },
@@ -48,7 +52,7 @@ export const DIALOGS = [
   { file: "src/sync/e2ee/ui/unaudited.tsx", command: "sync.open", fixme: "E2eeGate (W11.S1): the gate sync.open shows while the sync.e2ee flag is off, the default; with the flag off the SyncPanel, SetupWizard and ClassroomPanel entries above open this gate instead, so the spec must set the flag per entry (owed on the Mac e2e run)" },
   { file: "src/types/ObjectStudio.tsx", command: "types.studio" },
   { file: "src/types/TypePage.tsx", command: "types.page" },
-  { file: "src/ui/AbstractDialog.tsx", command: "writing.abstract", fixme: "W13.W12: needs an open note of some length" },
+  { file: "src/ui/AbstractDialog.tsx", command: "writing.abstract", seed: NOTE },
   { file: "src/ui/AcademicExportDialog.tsx", command: "file.exportAcademic" },
   { file: "src/ui/AgentReviewPanel.tsx", command: "ai.reviewChanges" },
   { file: "src/ui/AiDoctorPanel.tsx", command: "ai.doctor" },
@@ -70,7 +74,7 @@ export const DIALOGS = [
   { file: "src/ui/GoalsDialog.tsx", command: "writing.goals" },
   { file: "src/ui/HelpPanel.tsx", command: "help.open" },
   { file: "src/ui/ImageHostsPanel.tsx", command: "privacy.imageHosts" },
-  { file: "src/ui/ImmersiveReader.tsx", fixme: "W13.R5: opened from the Reading mode menu (Immersive, then Open); the reading-modes gate does that" },
+  { file: "src/ui/ImmersiveReader.tsx", command: "view.readingProfile", steps: ["rm-mode-immersive", "rm-open"], seed: NOTE },
   { file: "src/ui/InsertTextDialog.tsx", keys: "ControlOrMeta+Shift+V" },
   { file: "src/ui/KeyboardShortcuts.tsx", keys: "ControlOrMeta+/" },
   { file: "src/ui/McpDialogs.tsx", fixme: "W10.C2/W11.I6: shown when an MCP server asks for input (elicitation) or a tool call waits for approval" },
@@ -86,7 +90,7 @@ export const DIALOGS = [
   { file: "src/ui/ReadingAids.tsx", command: "reading.aids" },
   { file: "src/ui/ReadingModeMenu.tsx", command: "view.readingProfile" },
   { file: "src/ui/ReadingSettings.tsx", command: "view.readingOptions" },
-  { file: "src/ui/RsvpReader.tsx", fixme: "W13.R3: opened from the Reading mode menu (RSVP, then Open); the reading-modes gate does that" },
+  { file: "src/ui/RsvpReader.tsx", command: "view.readingProfile", steps: ["rm-mode-rsvp", "rm-open"], seed: NOTE },
   { file: "src/ui/SearchDialog.tsx", command: "view.search" },
   { file: "src/ui/SettingsScreen.tsx", command: "settings.open" },
   { file: "src/ui/ShareDialog.tsx", command: "collab.share" },
@@ -102,7 +106,7 @@ export const DIALOGS = [
   { file: "src/ui/VaultUnlock.tsx", guarded: true, fixme: "shown only for a locked encrypted vault" },
   { file: "src/ui/VersionHistory.tsx", command: "view.versionHistory" },
   { file: "src/ui/WikidataLink.tsx", command: "entities.wikidata", fixme: "W12.E10: needs an entity note open (and not airplane mode); asks consent before any request" },
-  { file: "src/ui/WritingChecksDialog.tsx", command: "writing.repetition", fixme: "W13.W11: needs an open note with text" },
+  { file: "src/ui/WritingChecksDialog.tsx", command: "writing.repetition", seed: NOTE },
   { file: "src/ui/graph/SetGraphDialog.tsx", fixme: "W13.G9: opened by \"Open as graph\" on a Base or a query block" },
   { file: "src/viewers/FileViewerOverlay.tsx", fixme: "W12.F4/F5/F7: opens from the file tree on a notebook, data or map file in the vault" },
   { file: "src/voice-corpus/Recorder.tsx", command: "voice.corpusRecorder" },

@@ -132,7 +132,9 @@ export function attachNoteSpread(root: HTMLElement, id: string, opts: { mode?: S
   });
   const onKey = (e: KeyboardEvent) => {
     if (e.altKey || e.ctrlKey || e.metaKey) return;
-    if ((e.target as Element | null)?.closest?.("select, input, textarea")) return;
+    if ((e.target as Element | null)?.closest?.("select, input, textarea, [contenteditable]:not([contenteditable='false'])")) return;
+    // Review 13 M8: Space and Enter on a control (the bar's buttons, a link, a <summary>) press that control.
+    if ((e.key === " " || e.key === "Enter") && (e.target as Element | null)?.closest?.("button, a[href], summary, [role=button]")) return;
     const s = spreadForKey(e.key, e.shiftKey, dir, flow.spread, flow.count);
     if (s === null) return;
     e.preventDefault();

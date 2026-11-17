@@ -56,21 +56,47 @@ export function paragraphAt(text: string, pos: number): Span {
   return { from, to };
 }
 
-function fenceAround(text: string, lineStart: number): Span | null {
+/**
+ * The fenced code blocks of a text, found once per text (review 13 M4: a scan from the start for every
+ * paragraph made a long note's analysis quadratic — 7.7 s on 960k characters).
+ */
+let fenceMemo: { text: string; fences: Span[] } | null = null;
+function fencesOf(text: string): Span[] {
+  if (fenceMemo && fenceMemo.text === text) return fenceMemo.fences;
+  const fences: Span[] = [];
   let open: number | null = null;
   const re = /^(```|~~~)/gm;
   for (let m = re.exec(text); m; m = re.exec(text)) {
     const end = text.indexOf("\n", m.index);
     const lineEnd = end < 0 ? text.length : end;
-    if (open === null) {
-      if (m.index > lineStart) return null;
-      open = m.index;
-    } else {
-      if (lineStart >= open && lineStart <= m.index) return { from: open, to: lineEnd };
+    if (open === null) open = m.index;
+    else {
+      fences.push({ from: open, to: lineEnd });
       open = null;
     }
   }
-  return open !== null && lineStart >= open ? { from: open, to: text.length } : null;
+  if (open !== null) fences.push({ from: open, to: text.length });
+  fenceMemo = { text, fences };
+  return fences;
+}
+
+function fenceAround(text: string, lineStart: number): Span | null {
+  const fences = fencesOf(text);
+  // Binary search: the last fence that opens at or before the line.
+  let lo = 0;
+  let hi = fences.length - 1;
+  let hit = -1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (fences[mid].from <= lineStart) {
+      hit = mid;
+      lo = mid + 1;
+    } else hi = mid - 1;
+  }
+  if (hit < 0) return null;
+  const f = fences[hit];
+  // The old scan treated a line exactly at a closing fence's start as inside; a block runs to its closing line.
+  return lineStart <= f.to ? f : null;
 }
 
 const segmenters = new Map<string, Intl.Segmenter | null>();

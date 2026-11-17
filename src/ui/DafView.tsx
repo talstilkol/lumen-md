@@ -11,6 +11,8 @@ import { registerEnglish, t } from "../i18n";
 import english from "../i18n/lazy/daf.json";
 import { buildDaf, DAF_CSS, layoutDaf } from "../reading/daf/dafDom";
 import type { DafContent, DafText } from "../reading/daf/dafSources";
+import { HelpButton } from "./HelpButton";
+import { readingText } from "../reading/profileCore";
 
 registerEnglish(english);
 
@@ -161,12 +163,12 @@ export function DafView({ content, myNotes = [], choices = [], loadCommentary, i
 
   const section = (key: string, label: string, text: DafText | null) =>
     text?.paragraphs.length ? (
-      <section key={key} aria-labelledby={`daf-lin-${key}`} lang="he" dir="rtl" style={{ marginBlockEnd: 20 }}>
+      <section key={key} aria-labelledby={`daf-lin-${key}`} lang="he" dir="rtl" style={{ marginBlockEnd: 20, ...readingText() }}>
         <h2 id={`daf-lin-${key}`} style={{ fontSize: 17, margin: "0 0 6px" }}>
           {text.title ? `${label}: ${text.title}` : label}
         </h2>
         {text.paragraphs.map((p, i) => (
-          <p key={i} style={{ margin: "0 0 8px", lineHeight: 1.7 }}>
+          <p key={i} style={{ margin: "0 0 8px", lineHeight: "var(--reading-line-height, 1.7)" }}>
             {p}
           </p>
         ))}
@@ -192,6 +194,7 @@ export function DafView({ content, myNotes = [], choices = [], loadCommentary, i
     <div data-testid="daf-view" data-ready={String(linear || laid)} data-mode={linear ? "linear" : "page"} data-inner-side={side} style={{ display: "flex", flexDirection: "column", gap: 8, minHeight: 0 }}>
       <style>{DAF_CSS + TOOLBAR_CSS}</style>
       <div role="toolbar" className="daf-toolbar" aria-label={t("daf.toolbar")} style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center", fontSize: 13 }}>
+        <HelpButton topic="editor/reading-views#talmud-page-daf" size={20} />
         <div role="group" aria-label={t("daf.view")} style={{ display: "inline-flex", gap: 2 }}>
           <button type="button" data-testid="daf-mode-page" aria-pressed={!linear} disabled={narrow} onClick={() => setLinearChosen(false)}>
             {t("daf.mode.page")}

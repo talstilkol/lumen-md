@@ -10,6 +10,7 @@ import { useEffect, useState, type KeyboardEvent } from "react";
 import { registerEnglish, t } from "../i18n";
 import english from "../i18n/lazy/bilingual.json";
 import { BILINGUAL_MODES, readMode, saveMode, type Bilingual, type BilingualMode } from "../reading/bilingual/bilingual";
+import { readingText } from "../reading/profileCore";
 
 registerEnglish(english);
 
@@ -40,7 +41,7 @@ export function BilingualView({ data, initialMode }: Props) {
       : t("bilingual.machine", { layer: tg.title ? t(`mt.layer.name.${tg.title}`) : "" });
 
   return (
-    <section aria-labelledby="bi-title" data-testid="bilingual-view" data-mode={mode} onKeyDown={onKey} style={{ display: "grid", gap: 10 }}>
+    <section aria-labelledby="bi-title" data-testid="bilingual-view" data-mode={mode} onKeyDown={onKey} style={{ display: "grid", gap: 10, fontSize: "var(--reading-size, inherit)" }}>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
         <h2 id="bi-title" lang={s.lang} dir={s.dir} style={{ margin: 0, fontSize: 18, flex: 1 }}>
           {data.title}
@@ -75,10 +76,10 @@ export function BilingualView({ data, initialMode }: Props) {
               <span role="rowheader" style={{ ...muted, fontSize: 12 }}>
                 {r.label}
               </span>
-              <div role="cell" data-testid="bi-src" lang={s.lang} dir={s.dir} style={{ fontSize: "1.1em", lineHeight: 1.75 }}>
+              <div role="cell" data-testid="bi-src" lang={s.lang} dir={s.dir} style={{ ...readingText("1.1em", 1.75) }}>
                 {r.source}
               </div>
-              <div role="cell" data-testid="bi-tgt" lang={tg.lang} dir={tg.dir} style={{ lineHeight: 1.6, opacity: r.stale ? 0.6 : 1 }}>
+              <div role="cell" data-testid="bi-tgt" lang={tg.lang} dir={tg.dir} style={{ ...readingText(undefined, 1.6), opacity: r.stale ? 0.6 : 1 }}>
                 {r.stale && <span style={{ fontSize: 10, marginInlineEnd: 6 }}>{t("bilingual.stale")}</span>}
                 {r.target ?? <span style={muted}>{t("bilingual.missing")}</span>}
               </div>
@@ -92,7 +93,7 @@ export function BilingualView({ data, initialMode }: Props) {
             <li key={r.n} data-testid="bi-row" data-verse={r.n} aria-label={t("bilingual.verseN", { n: r.label })}>
               {(r.sentences ?? [[r.source, r.target ?? ""]]).map(([a, b], i) => (
                 <div key={i} style={{ marginBlockEnd: 4 }}>
-                  <div data-testid="bi-src" lang={s.lang} dir={s.dir} style={{ fontSize: "1.15em", lineHeight: 1.75 }}>
+                  <div data-testid="bi-src" lang={s.lang} dir={s.dir} style={{ ...readingText("1.15em", 1.75) }}>
                     {i === 0 && (
                       <span aria-hidden="true" style={{ ...muted, fontSize: 12, marginInlineEnd: 8 }}>
                         {r.label}
@@ -100,7 +101,7 @@ export function BilingualView({ data, initialMode }: Props) {
                     )}
                     {a}
                   </div>
-                  <div data-testid="bi-tgt" lang={tg.lang} dir={tg.dir} style={{ fontSize: "0.92em", lineHeight: 1.5, color: "hsl(var(--fg-muted))", textAlign: s.dir === "rtl" ? "right" : "left", opacity: r.stale ? 0.6 : 1 }}>
+                  <div data-testid="bi-tgt" lang={tg.lang} dir={tg.dir} style={{ ...readingText("0.92em", 1.5), color: "hsl(var(--fg-muted))", textAlign: s.dir === "rtl" ? "right" : "left", opacity: r.stale ? 0.6 : 1 }}>
                     {b || (r.target === null ? t("bilingual.missing") : "")}
                   </div>
                 </div>

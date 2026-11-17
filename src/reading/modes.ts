@@ -26,9 +26,16 @@ export const MODE_DEFS: ReadingModeDef[] = [
     id: "page",
     label: "readingMode.mode.page",
     hint: "readingMode.mode.page.hint",
-    fields: ["layout"],
+    // Audit r4 A1.6: the margins (W13.R9) and book pages (W13.R6) are the page's options too.
+    fields: ["layout", "sidenotes"],
     open: async (p) => {
+      (await import("./sidenotesSetting")).setSidenotes(p.sidenotes);
       if (p.layout === "sideBySide") return (await import("../ai/mt/openSideBySide")).openSideBySide();
+      if (p.layout === "spread") {
+        // The note's preview in book pages (the palette's switch; a note already in pages stays).
+        if (!document.querySelector('[data-reading-mode="book-spread"]')) window.dispatchEvent(new Event((await import("./noteSpreadHook")).BOOK_SPREAD_TOGGLE));
+        return;
+      }
       (await import("../epub/ReadingMode")).openReadingMode();
     },
   },

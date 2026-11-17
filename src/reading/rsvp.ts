@@ -36,7 +36,8 @@ export interface RsvpWord {
 
 const HEBREW = /[֐-׿]/;
 const LETTER = /[\p{L}\p{N}]/u;
-const HE_PREFIX = /^[והבכלמש]/;
+/** Which prefix letter may follow which (text/hebrewPrefix's table, kept here: this module loads nothing). */
+const PREFIX_NEXT: Record<string, string> = { "ו": "שהבכלמ", "ש": "הבכלמ", "כ": "ש", "מ": "הש", "ה": "", "ב": "", "ל": "" };
 
 let graphemeSeg: Intl.Segmenter | null | undefined;
 /** Grapheme clusters: a Hebrew letter with its niqqud and cantillation is one. */
@@ -65,14 +66,24 @@ export function orpOffset(n: number): number {
 /**
  * How many prefix letters a Hebrew word's stem starts after (0–3). A
  * heuristic without a lexicon: only words of five letters or more, and a
- * stem of three letters or more is always left. Its known error is a word
- * that merely starts with a prefix letter (״מחשבה״ is read as מ + חשבה): the
- * point then lands one letter later, inside the tolerance of a fixation.
+ * stem of three letters or more is always left; each next prefix letter
+ * must be one that may follow the last (וכש, מה, שה — never ה then ב).
+ * Audit r4 A1.4: מ and ש start so many nouns (משפחה, ממשלה, מלכות, שולחן,
+ * שמשון) that they count as a prefix only before the article ה (מהבית,
+ * שהספר). Its known error is then a word that merely starts with ו, ה, ב,
+ * כ or ל (״לימודים״ read as ל + ימודים): the point lands one letter later,
+ * inside the tolerance of a fixation.
  */
 export function hebrewPrefixLength(letters: string[]): number {
   if (letters.length < 5) return 0;
   let n = 0;
-  while (n < 3 && n < letters.length && HE_PREFIX.test(letters[n]) && letters.length - (n + 1) >= 3) n++;
+  while (n < 3 && letters.length - (n + 1) >= 3) {
+    const c = letters[n];
+    if (!(c in PREFIX_NEXT)) break;
+    if (n > 0 && !PREFIX_NEXT[letters[n - 1]].includes(c)) break;
+    if ((c === "מ" || c === "ש") && letters[n + 1] !== "ה") break;
+    n++;
+  }
   return n;
 }
 
@@ -199,3 +210,21 @@ export function minutesLeft(words: readonly RsvpWord[], i: number, wpm: number):
 
 /** The research the "experimental" label links to. */
 export const RSVP_RESEARCH = "https://www.psychologicalscience.org/news/releases/speed-reading-apps-may-impair-reading-comprehension-by-limiting-ability-to-backtrack.html";
+
+/**
+ * Each word's paragraph direction (audit r4 A1.2): the majority of the paragraph's words. The keys and the
+ * arrow buttons follow it, so a Latin word inside a Hebrew paragraph does not flip ← and → under the reader.
+ */
+export function paragraphDirections(words: readonly RsvpWord[]): boolean[] {
+  const out: boolean[] = new Array(words.length);
+  let start = 0;
+  for (let k = 0; k < words.length; k++) {
+    if (!words[k].paragraphEnd && k < words.length - 1) continue;
+    const para = words.slice(start, k + 1);
+    const rtl = para.filter((w) => w.rtl).length * 2 >= para.length && para.some((w) => w.rtl);
+    out.fill(rtl, start, k + 1);
+    start = k + 1;
+  }
+  return out;
+}
+

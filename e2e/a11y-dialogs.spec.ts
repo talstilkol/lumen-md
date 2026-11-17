@@ -18,7 +18,17 @@ import { DIALOGS } from "./dialogs.registry.mjs";
  * a state this spec cannot make yet is a `fixme` with its reason.
  */
 
-type Entry = { file: string; command?: string; keys?: string; then?: string; firstRun?: boolean; embedded?: boolean; guarded?: boolean; fixme?: string };
+type Entry = { file: string; command?: string; keys?: string; then?: string; steps?: string[]; seed?: string; hook?: string; firstRun?: boolean; embedded?: boolean; guarded?: boolean; fixme?: string };
+
+/** Review 13 M7: the open note a dialog needs, typed into the source editor ("file:<path>" reads a fixture). */
+async function seedNote(page: Page, seed: string) {
+  const text = seed.startsWith("file:") ? readFileSync(seed.slice(5), "utf8") : seed;
+  await page.evaluate((t) => {
+    const el = document.querySelector(".cm-content") as (HTMLElement & { cmTile?: { root?: { view?: { state: { doc: { length: number } }; dispatch(tr: unknown): void } } } }) | null;
+    const view = el?.cmTile?.root?.view;
+    view?.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: t }, userEvent: "input" });
+  }, text);
+}
 
 const require = createRequire(import.meta.url);
 const AXE = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
@@ -37,7 +47,8 @@ async function boot(page: Page, lang: "en" | "he", firstRun = false) {
 }
 
 async function open(page: Page, d: Entry) {
-  if (d.keys) await page.keyboard.press(d.keys);
+  if (d.hook) await page.evaluate(d.hook);
+  else if (d.keys) await page.keyboard.press(d.keys);
   else if (d.command) {
     await page.evaluate((id) => window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id } })), d.command);
   }
@@ -47,6 +58,10 @@ async function open(page: Page, d: Entry) {
     await dialog.getByTestId(d.then).click();
     await expect(page.locator("dialog.lumen-modal")).toHaveCount(2);
   }
+  for (const id of d.steps ?? []) {
+    await page.locator("dialog.lumen-modal").last().getByTestId(id).click();
+  }
+  if (d.steps?.length) await expect(page.locator("dialog.lumen-modal").last()).toBeVisible({ timeout: 15_000 });
   return page.locator("dialog.lumen-modal").last();
 }
 
@@ -66,6 +81,7 @@ for (const lang of ["en", "he"] as const) {
         await boot(page, lang, !!d.firstRun);
         // The opener: the editor, where the shortcut is pressed or the command is run from.
         if (!d.firstRun) await page.locator(".cm-content").first().click();
+        if (d.seed) await seedNote(page, d.seed);
         const before = await page.evaluate(() => document.activeElement?.outerHTML.slice(0, 80) ?? "");
         const dialog = await open(page, d);
 
