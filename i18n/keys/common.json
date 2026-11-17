@@ -23491,6 +23491,48 @@
       "key": "query.openAsGraph",
       "en": "Open as graph",
       "vars": []
+    },
+    {
+      "key": "graph3d.aria",
+      "en": "Entity graph in 3D, {nodes} entities",
+      "vars": [
+        "nodes"
+      ]
+    },
+    {
+      "key": "graph3d.focused",
+      "en": "{name}: {links} links ({index} of {total})",
+      "vars": [
+        "name",
+        "links",
+        "index",
+        "total"
+      ]
+    },
+    {
+      "key": "graph3d.keys",
+      "en": "Arrows: rotate · + / −: zoom · 0: fit · ] / [: next / previous node · Enter: open",
+      "vars": []
+    },
+    {
+      "key": "graph3d.mode",
+      "en": "3D (experimental)",
+      "vars": []
+    },
+    {
+      "key": "graph3d.noWebgl",
+      "en": "3D needs WebGL, which this browser does not offer here. The graph and the table show the same data.",
+      "vars": []
+    },
+    {
+      "key": "graph3d.reduced",
+      "en": "3D is off because your system asks for reduced motion.",
+      "vars": []
+    },
+    {
+      "key": "graph3d.role",
+      "en": "3D graph",
+      "vars": []
     }
   ]
 }
