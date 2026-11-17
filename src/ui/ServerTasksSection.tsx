@@ -7,6 +7,15 @@ import { t } from "../i18n";
 import { serverTasks, type ServerTaskRow } from "../agents/mcp/serverTasks";
 import "./serverTasksStrings";
 
+/** Cancel, then keep keyboard focus nearby: the next task's Cancel, else the previous one's, else the panel's list. */
+function cancel(button: HTMLButtonElement, r: ServerTaskRow): void {
+  const li = button.closest("li");
+  const next = (li?.nextElementSibling ?? li?.previousElementSibling)?.querySelector("button") as HTMLButtonElement | null;
+  const scroller = button.closest("[tabindex='0']") as HTMLElement | null;
+  r.cancel();
+  setTimeout(() => (next?.isConnected ? next : scroller)?.focus(), 0);
+}
+
 export default function ServerTasksSection({ btn }: { btn: React.CSSProperties }) {
   const [rows, setRows] = useState<ServerTaskRow[]>(() => serverTasks.list());
   useEffect(() => serverTasks.subscribe(() => setRows(serverTasks.list())), []);
@@ -24,12 +33,12 @@ export default function ServerTasksSection({ btn }: { btn: React.CSSProperties }
                 <bdi>{r.tool}</bdi> · <bdi>{r.server}</bdi>
               </strong>
               <span style={{ fontSize: 11.5, color: "hsl(var(--fg-muted))" }}>{t(`serverTasks.status.${r.status}`)}</span>
-              <button type="button" style={btn} onClick={() => r.cancel()} aria-label={t("serverTasks.cancelLabel", { tool: r.tool, server: r.server })}>
+              <button type="button" style={btn} onClick={(e) => cancel(e.currentTarget, r)} aria-label={t("serverTasks.cancelLabel", { tool: r.tool, server: r.server })}>
                 {t("serverTasks.cancel")}
               </button>
             </div>
             {/* No percentage from the server: an indeterminate bar, with its message read out. */}
-            <progress aria-label={r.statusMessage ? r.statusMessage : t(`serverTasks.status.${r.status}`)} style={{ width: "100%", marginTop: 6 }} />
+            <progress aria-label={r.statusMessage ? r.statusMessage : t(`serverTasks.status.${r.status}`)} style={{ width: "100%", height: 6, marginTop: 6, accentColor: "hsl(var(--accent, 221 83% 53%))" }} />
             {r.statusMessage && (
               <div dir="auto" style={{ fontSize: 12, marginTop: 2 }}>
                 {r.statusMessage}
