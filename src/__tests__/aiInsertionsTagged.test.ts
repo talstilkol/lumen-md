@@ -269,8 +269,13 @@ describe("the writes the check found, now tagged", () => {
     clearAiOutputs();
   });
 
-  it("AI: Extract claims marks its callout as AI text in the editor", async () => {
+  it("AI: Extract claims stages its callout; approving it marks it as AI text in the editor", async () => {
     const { claimsFlow } = await import("../commands/domains/claimsAction");
+    const { setDocumentKeyProvider } = await import("../agents/docKey");
+    const { listStagedChanges, setDocumentApplier, approveStagedChange } = await import("../agents/staging");
+    const { createDocumentApplier } = await import("../agents/documentApplier");
+    const { editorDocumentHost } = await import("../agents/reviewBridge");
+    const { useAppStore } = await import("../store/useStore");
     const content = "Dana met the board.";
     let state = EditorState.create({ doc: content, extensions: [aiSpansField], selection: { anchor: 3 } });
     const view = {
@@ -279,11 +284,22 @@ describe("the writes the check found, now tagged", () => {
       },
       dispatch: (spec: TransactionSpec) => void (state = state.update(spec).state),
     };
+    useAppStore.setState((s) => ({ doc: { ...s.doc, name: "n.md", content, workspaceName: undefined } }));
+    setDocumentKeyProvider(() => "doc-1");
     await claimsFlow({ getEditorView: () => view as never, liveDoc: () => ({ name: "n.md", content }) as never });
+    // the AI suggests: nothing in the note yet
+    expect(state.doc.toString()).toBe(content);
+    const staged = listStagedChanges().filter((c) => c.agentId === "claim-extractor");
+    expect(staged).toHaveLength(1);
+    // the user approves: the review panel's path (reviewBridge's editor host) writes it, tagged as AI text
+    setDocumentApplier(createDocumentApplier(editorDocumentHost({ current: { getView: () => view } } as never, { active: () => "doc-1", tab: () => undefined })));
+    await approveStagedChange(staged[0].id);
     const doc = state.doc.toString();
     expect(doc).toContain("[!claims]");
     expect(texts(doc, state.field(aiSpansField)).join("")).toContain("[!claims] Candidate claims (1)");
     expect(texts(doc, state.field(aiSpansField)).join("")).not.toContain("Dana met the board.\n");
+    setDocumentApplier(null);
+    setDocumentKeyProvider(null);
   });
 
   it("a voice memo marks only its summary; the transcript stays the user's", () => {

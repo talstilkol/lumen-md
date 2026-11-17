@@ -1,0 +1,98 @@
+{
+ "about": "Planted probe set for the claim extractor (plan R12.11), written by hand for this repository, apart from the generated dev set (eval/synthetic/claims, gen.py) and in a different shape: real-looking paragraphs in Hebrew and English with prefixes, numbers written two ways, lists, quotes and mixed scripts, and model drafts that fail the way a small local model fails (a changed number, a flipped negation, a swapped entity that the paragraph does name elsewhere, two sentences merged, a hedged sentence turned into a fact, a pronoun left unresolved). Every name is invented. Labels: keep = a faithful, checkable claim that should survive; every other label is a draft that should be dropped, with the failure it plants. Same author as the rules, so its numbers are development numbers, not a held-out score. Licence CC0-1.0.",
+ "license": "CC0-1.0",
+ "version": "1",
+ "cases": [
+  {"id": "p-he-01", "lang": "he", "paragraph": "נועה ברק מנהלת את מעבדת הגנטיקה בבית החולים בבאר שבע. היא הצטרפה למעבדה ב-2016. לדעתי היא החוקרת הטובה בעיר.", "drafts": [
+   {"sentence": 1, "text": "נועה ברק מנהלת את מעבדת הגנטיקה בבית החולים בבאר שבע.", "label": "keep"},
+   {"sentence": 2, "text": "נועה ברק הצטרפה למעבדה ב-2016.", "label": "keep"},
+   {"sentence": 2, "text": "נועה ברק הצטרפה למעבדה ב-2015.", "label": "changed-number"},
+   {"sentence": 1, "text": "נועה ברק לא מנהלת את מעבדת הגנטיקה.", "label": "negation"},
+   {"sentence": 3, "text": "נועה ברק היא החוקרת הטובה בעיר.", "label": "opinion"}]},
+  {"id": "p-he-02", "lang": "he", "paragraph": "עיריית חדרה אישרה תקציב של 2.4 מיליון ש״ח לשיפוץ הספרייה. העבודות יימשכו שמונה חודשים. ראש העירייה, אורי שגיא, הודיע על כך בישיבה.", "drafts": [
+   {"sentence": 1, "text": "עיריית חדרה אישרה תקציב של 2.4 מיליון ש״ח לשיפוץ הספרייה.", "label": "keep"},
+   {"sentence": 2, "text": "העבודות בספרייה יימשכו שמונה חודשים.", "label": "keep"},
+   {"sentence": 3, "text": "אורי שגיא הוא ראש עיריית חדרה.", "label": "keep"},
+   {"sentence": 1, "text": "עיריית חדרה אישרה תקציב של 4.2 מיליון ש״ח לשיפוץ הספרייה.", "label": "changed-number"},
+   {"sentence": 2, "text": "העבודות יימשכו שנה.", "label": "invented"}]},
+  {"id": "p-he-03", "lang": "he", "paragraph": "הסופרת מיכל דגן פרסמה את ספרה הראשון בהוצאת עם עובד. הספר תורגם לאנגלית ולצרפתית. הוא זכה בפרס ספיר.", "drafts": [
+   {"sentence": 1, "text": "מיכל דגן פרסמה את ספרה הראשון בהוצאת עם עובד.", "label": "keep"},
+   {"sentence": 2, "text": "ספרה הראשון של מיכל דגן תורגם לאנגלית ולצרפתית.", "label": "keep"},
+   {"sentence": 3, "text": "ספרה הראשון של מיכל דגן זכה בפרס ספיר.", "label": "keep"},
+   {"sentence": 2, "text": "הספר תורגם לאנגלית ולגרמנית.", "label": "invented"},
+   {"sentence": 3, "text": "הוא זכה בפרס ספיר.", "label": "unresolved-pronoun"}]},
+  {"id": "p-he-04", "lang": "he", "paragraph": "מחיר דירה ממוצעת בחיפה עלה ב-6% בשנה האחרונה. בתל אביב המחיר ירד ב-2%. אולי המגמה תתהפך בשנה הבאה?", "drafts": [
+   {"sentence": 1, "text": "מחיר דירה ממוצעת בחיפה עלה ב-6% בשנה האחרונה.", "label": "keep"},
+   {"sentence": 2, "text": "מחיר דירה ממוצעת בתל אביב ירד ב-2% בשנה האחרונה.", "label": "keep"},
+   {"sentence": 1, "text": "מחיר דירה ממוצעת בתל אביב עלה ב-6% בשנה האחרונה.", "label": "swapped-entity"},
+   {"sentence": 3, "text": "המגמה תתהפך בשנה הבאה.", "label": "question"}]},
+  {"id": "p-he-05", "lang": "he", "paragraph": "יוסי אלמוג ניהל את הצוות במשך חמש שנים. לפני כן עבד בחברת תוכנה בהרצליה. הוא עזב את החברה בשנת 2020.", "drafts": [
+   {"sentence": 1, "text": "יוסי אלמוג ניהל את הצוות במשך חמש שנים.", "label": "keep"},
+   {"sentence": 2, "text": "יוסי אלמוג עבד בחברת תוכנה בהרצליה.", "label": "keep"},
+   {"sentence": 3, "text": "יוסי אלמוג עזב את החברה בשנת 2020.", "label": "keep"},
+   {"sentence": 3, "text": "יוסי אלמוג עזב את החברה בשנת 2021.", "label": "changed-number"},
+   {"sentence": 1, "text": "יוסי אלמוג ניהל את הצוות במשך חמש שנים ועבד בחברת תוכנה בהרצליה.", "label": "merged"}]},
+  {"id": "p-he-06", "lang": "he", "paragraph": "בסקר השתתפו 1,200 תלמידים מ-14 בתי ספר. 38% מהם אמרו שהם קוראים ספר בכל שבוע. החוקרים ממליצים להאריך את שעת הקריאה.", "drafts": [
+   {"sentence": 1, "text": "בסקר השתתפו 1,200 תלמידים מ-14 בתי ספר.", "label": "keep"},
+   {"sentence": 2, "text": "38% מהתלמידים בסקר אמרו שהם קוראים ספר בכל שבוע.", "label": "keep"},
+   {"sentence": 1, "text": "בסקר השתתפו 1,300 תלמידים מ-14 בתי ספר.", "label": "changed-number"},
+   {"sentence": 2, "text": "38% מהתלמידים אמרו שהם לא קוראים ספר בכל שבוע.", "label": "negation"}]},
+  {"id": "p-he-07", "lang": "he", "paragraph": "הגשר החדש על הירקון נפתח לתנועה ביום ראשון. אורכו 120 מטרים. הגשר הישן ייסגר בחודש הבא.", "drafts": [
+   {"sentence": 1, "text": "הגשר החדש על הירקון נפתח לתנועה ביום ראשון.", "label": "keep"},
+   {"sentence": 2, "text": "אורכו של הגשר החדש על הירקון 120 מטרים.", "label": "keep"},
+   {"sentence": 3, "text": "הגשר הישן על הירקון ייסגר בחודש הבא.", "label": "keep"},
+   {"sentence": 2, "text": "אורכו של הגשר הישן 120 מטרים.", "label": "swapped-entity"},
+   {"sentence": 1, "text": "הגשר החדש על הירקון נפתח לתנועה ביום שני.", "label": "invented"}]},
+  {"id": "p-he-08", "lang": "he", "paragraph": "רונית שמש ואבי שמש ייסדו את העמותה ב-2011. העמותה מפעילה שלושה מועדוניות ברמלה. כדאי לתרום לה.", "drafts": [
+   {"sentence": 1, "text": "רונית שמש ואבי שמש ייסדו את העמותה ב-2011.", "label": "keep"},
+   {"sentence": 2, "text": "העמותה של רונית שמש ואבי שמש מפעילה שלושה מועדוניות ברמלה.", "label": "keep"},
+   {"sentence": 2, "text": "העמותה מפעילה ארבעה מועדוניות ברמלה.", "label": "invented"},
+   {"sentence": 3, "text": "תרומה לעמותה מועילה.", "label": "opinion"}]},
+  {"id": "p-en-01", "lang": "en", "paragraph": "Lior Katz has led the city's water utility since 2018. Under her, leaks fell by 30 percent. Critics say the rates rose too fast.", "drafts": [
+   {"sentence": 1, "text": "Lior Katz has led the city's water utility since 2018.", "label": "keep"},
+   {"sentence": 2, "text": "Under Lior Katz, leaks fell by 30 percent.", "label": "keep"},
+   {"sentence": 2, "text": "Under Lior Katz, leaks fell by 40 percent.", "label": "changed-number"},
+   {"sentence": 1, "text": "Lior Katz has not led the city's water utility since 2018.", "label": "negation"},
+   {"sentence": 2, "text": "Under her, leaks fell by 30 percent.", "label": "unresolved-pronoun"}]},
+  {"id": "p-en-02", "lang": "en", "paragraph": "The museum reopened in March after a two-year renovation. It now has 14 galleries, up from 9. Entry is free on Fridays.", "drafts": [
+   {"sentence": 1, "text": "The museum reopened in March after a two-year renovation.", "label": "keep"},
+   {"sentence": 2, "text": "The museum now has 14 galleries, up from 9.", "label": "keep"},
+   {"sentence": 3, "text": "Entry to the museum is free on Fridays.", "label": "keep"},
+   {"sentence": 2, "text": "The museum now has 9 galleries, up from 14.", "label": "swapped-entity"},
+   {"sentence": 1, "text": "The museum reopened in April after a two-year renovation.", "label": "invented"}]},
+  {"id": "p-en-03", "lang": "en", "paragraph": "Omer Tal wrote the parser in Rust. He released version 2.0 in 2023. Maybe a Python port will follow.", "drafts": [
+   {"sentence": 1, "text": "Omer Tal wrote the parser in Rust.", "label": "keep"},
+   {"sentence": 2, "text": "Omer Tal released version 2.0 of the parser in 2023.", "label": "keep"},
+   {"sentence": 2, "text": "Omer Tal released version 3.0 of the parser in 2023.", "label": "changed-number"},
+   {"sentence": 3, "text": "A Python port of the parser will follow.", "label": "opinion"},
+   {"sentence": 1, "text": "Omer Tal wrote the parser in Go.", "label": "invented"}]},
+  {"id": "p-en-04", "lang": "en", "paragraph": "The survey reached 2,000 households in the north. 61% said they own a car. In the south the share was 48%.", "drafts": [
+   {"sentence": 1, "text": "The survey reached 2,000 households in the north.", "label": "keep"},
+   {"sentence": 2, "text": "61% of the surveyed households in the north said they own a car.", "label": "keep"},
+   {"sentence": 3, "text": "In the south 48% of the surveyed households said they own a car.", "label": "keep"},
+   {"sentence": 2, "text": "48% of the surveyed households in the north said they own a car.", "label": "swapped-entity"},
+   {"sentence": 1, "text": "The survey reached 2,500 households in the north.", "label": "changed-number"}]},
+  {"id": "p-en-05", "lang": "en", "paragraph": "Shira Ben-David chairs the board. The board met six times last year. Is that enough?", "drafts": [
+   {"sentence": 1, "text": "Shira Ben-David chairs the board.", "label": "keep"},
+   {"sentence": 2, "text": "The board chaired by Shira Ben-David met six times last year.", "label": "keep"},
+   {"sentence": 2, "text": "The board met seven times last year.", "label": "invented"},
+   {"sentence": 3, "text": "Six meetings a year are enough for the board.", "label": "question"}]},
+  {"id": "p-en-06", "lang": "en", "paragraph": "The trial enrolled 340 patients across 5 hospitals. Half received the new drug and half a placebo. The drug did not shorten recovery time.", "drafts": [
+   {"sentence": 1, "text": "The trial enrolled 340 patients across 5 hospitals.", "label": "keep"},
+   {"sentence": 3, "text": "The new drug did not shorten recovery time in the trial.", "label": "keep"},
+   {"sentence": 3, "text": "The new drug did shorten recovery time in the trial.", "label": "negation"},
+   {"sentence": 1, "text": "The trial enrolled 340 patients across 6 hospitals.", "label": "changed-number"},
+   {"sentence": 2, "text": "Half of the 340 patients received the new drug, across 5 hospitals.", "label": "merged"}]},
+  {"id": "p-en-07", "lang": "en", "paragraph": "Gal Mizrahi moved from Eilat to Nazareth in 2012. She opened a bakery there two years later. The bakery employs eleven people.", "drafts": [
+   {"sentence": 1, "text": "Gal Mizrahi moved from Eilat to Nazareth in 2012.", "label": "keep"},
+   {"sentence": 2, "text": "Gal Mizrahi opened a bakery in Nazareth two years later.", "label": "keep"},
+   {"sentence": 3, "text": "Gal Mizrahi's bakery employs eleven people.", "label": "keep"},
+   {"sentence": 1, "text": "Gal Mizrahi moved from Nazareth to Eilat in 2012.", "label": "swapped-entity"},
+   {"sentence": 3, "text": "The bakery employs twelve people.", "label": "invented"}]},
+  {"id": "p-en-08", "lang": "en", "paragraph": "The council voted 7 to 2 to close the road on Saturdays. The closure starts in June. I think it will hurt local shops.", "drafts": [
+   {"sentence": 1, "text": "The council voted 7 to 2 to close the road on Saturdays.", "label": "keep"},
+   {"sentence": 2, "text": "The Saturday road closure starts in June.", "label": "keep"},
+   {"sentence": 1, "text": "The council voted 2 to 7 to close the road on Saturdays.", "label": "swapped-entity"},
+   {"sentence": 3, "text": "The road closure will hurt local shops.", "label": "opinion"}]}
+ ]
+}

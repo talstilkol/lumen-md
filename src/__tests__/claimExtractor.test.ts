@@ -87,17 +87,27 @@ describe("stages 2–3 checks and anchoring", () => {
   });
 });
 
-describe("the ai.claims command: the paragraph at the cursor → a callout under it, in one edit", () => {
-  it("inserts the candidates after the paragraph and reports the counts", async () => {
+describe("the ai.claims command: the paragraph at the cursor → a callout under it, staged for review", () => {
+  it("proposes the candidates after the paragraph; the note is unchanged until the proposal is approved", async () => {
+    const { listStagedChanges, discardRunChanges } = await import("../agents/staging");
     const doc = `# Note\n\n${PARA}\n\nAnother paragraph.`;
     const view = new EditorView({ state: EditorState.create({ doc, selection: { anchor: doc.indexOf("moved") } }) });
     runAgent.mockResolvedValueOnce({ status: "ok", model: "m", output: { claims: [draft(2, "Dana Levi moved to Haifa in 2019."), draft(1, "Dana Levi works as a senior engineer in Haifa.")] } });
+    const before = listStagedChanges().length;
     await claimsFlow({ getEditorView: () => view, liveDoc: () => ({ name: "dana.md", content: doc, dirty: false, workspaceName: "notes/dana.md" }) as never });
-    const out = view.state.doc.toString();
-    expect(out).toContain(`${PARA}\n\n> [!claims] Candidate claims (1) · 1 dropped`);
-    expect(out).toContain("> - Dana Levi moved to Haifa in 2019. — “Dana Levi works as an engineer in Haifa. She moved to Haifa in 2019.”");
-    expect(out.endsWith("\n\nAnother paragraph.")).toBe(true);
+    // the AI suggests, the user approves: nothing is written into the editor by the command itself
+    expect(view.state.doc.toString()).toBe(doc);
+    const staged = listStagedChanges().slice(before);
+    expect(staged).toHaveLength(1);
+    const c = staged[0] as Extract<(typeof staged)[number], { kind: "range" }>;
+    expect(c).toMatchObject({ kind: "range", path: "notes/dana.md", status: "pending", agentId: "claim-extractor", tool: "insert_claims", before: "" });
+    const at = doc.indexOf(PARA) + PARA.length;
+    expect([c.from, c.to]).toEqual([at, at]);
+    expect(c.after).toContain("\n\n> [!claims] Candidate claims (1) · 1 dropped");
+    expect(c.after).toContain("> - Dana Levi moved to Haifa in 2019. — “Dana Levi works as an engineer in Haifa. She moved to Haifa in 2019.”");
+    expect(c.summary).toMatch(/^Candidate claims \(1\)/);
     expect(toasts.at(-1)?.[1]).toBe("success");
+    discardRunChanges(c.runId ?? "");
     view.destroy();
   });
 });
@@ -172,6 +182,114 @@ describe("R12.11 eval: 20 synthetic paragraphs", () => {
       },
       perCase: rows,
       note: "SYNTHETIC set written for R12.11 (tag dev). A real-model run (Ollama on the Mac) is owed.",
+    };
+    if (process.env.LUMEN_WRITE_EVAL === "1") writeFileSync(RESULT, `${JSON.stringify(report, null, 1)}\n`);
+    expect(JSON.parse(readFileSync(RESULT, "utf8"))).toEqual(report);
+  });
+});
+
+describe("rules the planted probes added", () => {
+  it("a claim that still leans on a pronoun is not standalone (English anywhere; Hebrew only as its first word)", async () => {
+    const { unresolvedPronoun } = await import("../agents/defs/claimExtractor");
+    expect(unresolvedPronoun("Under her, leaks fell by 30 percent.")).toBe(true);
+    expect(unresolvedPronoun("הוא זכה בפרס ספיר.")).toBe(true);
+    expect(unresolvedPronoun("אורי שגיא הוא ראש עיריית חדרה.")).toBe(false);
+    expect(unresolvedPronoun("Lior Katz has led the utility since 2018.")).toBe(false);
+  });
+
+  it("the paragraph's numbers or names in another order are dropped as reordered", () => {
+    const para = "The museum now has 14 galleries, up from 9. Gal Mizrahi moved from Eilat to Nazareth in 2012.";
+    const r = anchorClaims(para, selectCheckable(para), [
+      { sentence: 1, text: "The museum now has 9 galleries, up from 14.", subject: "", predicate: "", object: "" },
+      { sentence: 2, text: "Gal Mizrahi moved from Nazareth to Eilat in 2012.", subject: "", predicate: "", object: "" },
+      { sentence: 2, text: "Gal Mizrahi moved from Eilat to Nazareth in 2012.", subject: "", predicate: "", object: "" },
+    ], meta);
+    expect(r.dropped.map((d) => d.reason)).toEqual(["reordered", "reordered"]);
+    expect(r.claims.map((c) => c.text)).toEqual(["Gal Mizrahi moved from Eilat to Nazareth in 2012."]);
+  });
+});
+
+describe("R12.11 eval: the planted probe set (eval/probes/claims-planted.json)", () => {
+  // Hand-written apart from the generated dev set, with the failures a small local model makes. Honest numbers:
+  // a planted bad draft the rules keep is a false positive here, and a faithful claim they drop is a miss.
+  interface Probe {
+    id: string;
+    lang: string;
+    paragraph: string;
+    drafts: Array<{ sentence: number; text: string; label: string }>;
+  }
+  const SET = JSON.parse(readFileSync("eval/probes/claims-planted.json", "utf8")) as { version: string; license: string; cases: Probe[] };
+  const RESULT = "eval/cards/claim-extractor-probes.json";
+  const results = SET.cases.flatMap((c) => {
+    const drafts = c.drafts.map((d) => ({ ...d, subject: "", predicate: "", object: "" }));
+    const r = anchorClaims(c.paragraph, selectCheckable(c.paragraph), drafts, { note: `${c.id}.md`, anchor: "p-0", model: "scripted", date: "2026-11-17T00:00:00Z" });
+    const kept = new Set(r.claims.map((x) => x.text));
+    const unquoted = r.claims.filter((x) => !x.provenance.quote || c.paragraph.slice(x.provenance.start, x.provenance.end) !== x.provenance.quote).length;
+    return c.drafts.map((d) => ({ id: c.id, lang: c.lang, label: d.label, text: d.text, kept: kept.has(d.text), unquoted }));
+  });
+
+  it("is not empty, and plants every failure kind in both languages", () => {
+    expect(SET.cases.length).toBeGreaterThanOrEqual(16);
+    for (const lang of ["he", "en"]) for (const label of ["keep", "changed-number", "negation", "swapped-entity", "invented", "opinion"]) expect(results.some((r) => r.lang === lang && r.label === label), `${lang} ${label}`).toBe(true);
+  });
+
+  it("no kept claim is without its quote (the acceptance), on the probes too", () => {
+    expect(results.reduce((a, r) => a + r.unquoted, 0)).toBe(0);
+  });
+
+  it("the committed probe card is what this run computes (precision and recall as they come out)", () => {
+    const count = (rs: typeof results) => ({
+      tp: rs.filter((r) => r.label === "keep" && r.kept).length,
+      fn: rs.filter((r) => r.label === "keep" && !r.kept).length,
+      fp: rs.filter((r) => r.label !== "keep" && r.kept).length,
+    });
+    const pr = (c: { tp: number; fp: number; fn: number }) => ({ precision: c.tp + c.fp ? c.tp / (c.tp + c.fp) : 1, recall: c.tp + c.fn ? c.tp / (c.tp + c.fn) : 1 });
+    const { tp, fp, fn } = count(results);
+    const point = pr({ tp, fp, fn });
+    const byLabel: Record<string, { n: number; kept: number }> = {};
+    for (const r of results) {
+      const b = (byLabel[r.label] ??= { n: 0, kept: 0 });
+      b.n++;
+      if (r.kept) b.kept++;
+    }
+    const r4 = (x: number) => Math.round(x * 10000) / 10000;
+    // 95% bootstrap over paragraphs (a paragraph's drafts stay together), seeded as the dev card is
+    let a = 11 >>> 0;
+    const rand = () => {
+      a = (a + 0x6d2b79f5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    const ids = SET.cases.map((c) => c.id);
+    const draws: Record<"precision" | "recall", number[]> = { precision: [], recall: [] };
+    for (let b = 0; b < 1000; b++) {
+      const sample = ids.flatMap(() => results.filter((r) => r.id === ids[Math.floor(rand() * ids.length)]));
+      const m = pr(count(sample));
+      draws.precision.push(m.precision);
+      draws.recall.push(m.recall);
+    }
+    const ci = (v: number[]) => (v.sort((x, y) => x - y), [r4(v[25]), r4(v[974])]);
+    const report = {
+      card: {
+        schema: 1,
+        tag: "dev",
+        model: { name: "scripted drafts (no model): this measures the rules around the model", digest: "n/a (no model weights)" },
+        seed: 11,
+        temperature: 0,
+        dataset: { name: "claims-planted", version: SET.version, license: SET.license },
+        n: results.length,
+        metrics: {
+          precision: { value: r4(point.precision), ci95: ci(draws.precision), method: "bootstrap" },
+          recall: { value: r4(point.recall), ci95: ci(draws.recall), method: "bootstrap" },
+        },
+      },
+      counts: { tp, fp, fn },
+      byLabel,
+      leaks: results.filter((r) => r.label !== "keep" && r.kept).map((r) => `${r.id} ${r.label}: ${r.text}`),
+      misses: results.filter((r) => r.label === "keep" && !r.kept).map((r) => `${r.id}: ${r.text}`),
+      note: "Hand-planted probes (same author as the rules, so development numbers). The probes found two gaps, now rules: a pronoun left in the claim (unresolved-pronoun) and the paragraph's numbers or Latin names in another order (reordered). Still leaking: a Hebrew entity swapped for one named in another sentence, and two sentences merged into one claim; the review queue is where a person catches them. Recall misses are claims that reword (an inflection the paragraph lacks) or join an antecedent from another sentence that the quote gate cannot cover.",
     };
     if (process.env.LUMEN_WRITE_EVAL === "1") writeFileSync(RESULT, `${JSON.stringify(report, null, 1)}\n`);
     expect(JSON.parse(readFileSync(RESULT, "utf8"))).toEqual(report);

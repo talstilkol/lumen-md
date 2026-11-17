@@ -1,0 +1,95 @@
+{
+ "card": {
+  "schema": 1,
+  "tag": "dev",
+  "model": {
+   "name": "scripted drafts (no model): this measures the rules around the model",
+   "digest": "n/a (no model weights)"
+  },
+  "seed": 11,
+  "temperature": 0,
+  "dataset": {
+   "name": "claims-planted",
+   "version": "1",
+   "license": "CC0-1.0"
+  },
+  "n": 75,
+  "metrics": {
+   "precision": {
+    "value": 0.8889,
+    "ci95": [
+     0.7857,
+     0.975
+    ],
+    "method": "bootstrap"
+   },
+   "recall": {
+    "value": 0.8205,
+    "ci95": [
+     0.6875,
+     0.9318
+    ],
+    "method": "bootstrap"
+   }
+  }
+ },
+ "counts": {
+  "tp": 32,
+  "fp": 4,
+  "fn": 7
+ },
+ "byLabel": {
+  "keep": {
+   "n": 39,
+   "kept": 32
+  },
+  "changed-number": {
+   "n": 8,
+   "kept": 0
+  },
+  "negation": {
+   "n": 4,
+   "kept": 0
+  },
+  "opinion": {
+   "n": 4,
+   "kept": 0
+  },
+  "invented": {
+   "n": 8,
+   "kept": 0
+  },
+  "unresolved-pronoun": {
+   "n": 2,
+   "kept": 0
+  },
+  "swapped-entity": {
+   "n": 6,
+   "kept": 2
+  },
+  "question": {
+   "n": 2,
+   "kept": 0
+  },
+  "merged": {
+   "n": 2,
+   "kept": 2
+  }
+ },
+ "leaks": [
+  "p-he-04 swapped-entity: מחיר דירה ממוצעת בתל אביב עלה ב-6% בשנה האחרונה.",
+  "p-he-05 merged: יוסי אלמוג ניהל את הצוות במשך חמש שנים ועבד בחברת תוכנה בהרצליה.",
+  "p-he-07 swapped-entity: אורכו של הגשר הישן 120 מטרים.",
+  "p-en-06 merged: Half of the 340 patients received the new drug, across 5 hospitals."
+ ],
+ "misses": [
+  "p-he-02: אורי שגיא הוא ראש עיריית חדרה.",
+  "p-he-03: ספרה הראשון של מיכל דגן זכה בפרס ספיר.",
+  "p-he-05: יוסי אלמוג עזב את החברה בשנת 2020.",
+  "p-en-04: 61% of the surveyed households in the north said they own a car.",
+  "p-en-04: In the south 48% of the surveyed households said they own a car.",
+  "p-en-05: The board chaired by Shira Ben-David met six times last year.",
+  "p-en-07: Gal Mizrahi's bakery employs eleven people."
+ ],
+ "note": "Hand-planted probes (same author as the rules, so development numbers). The probes found two gaps, now rules: a pronoun left in the claim (unresolved-pronoun) and the paragraph's numbers or Latin names in another order (reordered). Still leaking: a Hebrew entity swapped for one named in another sentence, and two sentences merged into one claim; the review queue is where a person catches them. Recall misses are claims that reword (an inflection the paragraph lacks) or join an antecedent from another sentence that the quote gate cannot cover."
+}
