@@ -1041,6 +1041,14 @@
     "ru": "1df7h82",
     "zh-CN": "1df7h82"
   },
+  "mcpServers.added": {
+    "ar": "8fhd91",
+    "de": "8fhd91",
+    "fr": "8fhd91",
+    "ja": "8fhd91",
+    "ru": "8fhd91",
+    "zh-CN": "8fhd91"
+  },
   "mcpServers.approval.check": {
     "ar": "v9zjxi",
     "de": "v9zjxi",
@@ -1192,6 +1200,38 @@
     "ja": "94iy7w",
     "ru": "94iy7w",
     "zh-CN": "94iy7w"
+  },
+  "mcpServers.chip.address": {
+    "ar": "9u2nwa",
+    "de": "9u2nwa",
+    "fr": "9u2nwa",
+    "ja": "9u2nwa",
+    "ru": "9u2nwa",
+    "zh-CN": "9u2nwa"
+  },
+  "mcpServers.chip.asks": {
+    "ar": "l31g02",
+    "de": "l31g02",
+    "fr": "l31g02",
+    "ja": "l31g02",
+    "ru": "l31g02",
+    "zh-CN": "l31g02"
+  },
+  "mcpServers.chip.builtin": {
+    "ar": "3l91ca",
+    "de": "3l91ca",
+    "fr": "3l91ca",
+    "ja": "3l91ca",
+    "ru": "3l91ca",
+    "zh-CN": "3l91ca"
+  },
+  "mcpServers.chip.program": {
+    "ar": "1iemhfu",
+    "de": "1iemhfu",
+    "fr": "1iemhfu",
+    "ja": "1iemhfu",
+    "ru": "1iemhfu",
+    "zh-CN": "1iemhfu"
   },
   "mcpServers.default": {
     "ar": "10087wk",
@@ -1424,6 +1464,14 @@
     "ru": "qvtz3k",
     "zh-CN": "qvtz3k"
   },
+  "mcpServers.filled": {
+    "ar": "oi3vl5",
+    "de": "oi3vl5",
+    "fr": "oi3vl5",
+    "ja": "oi3vl5",
+    "ru": "oi3vl5",
+    "zh-CN": "oi3vl5"
+  },
   "mcpServers.forget": {
     "ar": "1fknumc",
     "de": "1fknumc",
@@ -1576,6 +1624,14 @@
     "ru": "v2y2ur",
     "zh-CN": "v2y2ur"
   },
+  "mcpServers.installLabel": {
+    "ar": "yp5atq",
+    "de": "yp5atq",
+    "fr": "yp5atq",
+    "ja": "yp5atq",
+    "ru": "yp5atq",
+    "zh-CN": "yp5atq"
+  },
   "mcpServers.intro": {
     "ar": "1gpkt10",
     "de": "1gpkt10",
@@ -1687,6 +1743,174 @@
     "ru": "9c35st",
     "zh-CN": "9c35st"
   },
+  "mcpServers.s.data-gov-il.about": {
+    "ar": "o1mr9n",
+    "de": "o1mr9n",
+    "fr": "o1mr9n",
+    "ja": "o1mr9n",
+    "ru": "o1mr9n",
+    "zh-CN": "o1mr9n"
+  },
+  "mcpServers.s.data-gov-il.name": {
+    "ar": "l74n6a",
+    "de": "l74n6a",
+    "fr": "l74n6a",
+    "ja": "l74n6a",
+    "ru": "l74n6a",
+    "zh-CN": "l74n6a"
+  },
+  "mcpServers.s.data-gov-il.source": {
+    "ar": "2b89ef",
+    "de": "2b89ef",
+    "fr": "2b89ef",
+    "ja": "2b89ef",
+    "ru": "2b89ef",
+    "zh-CN": "2b89ef"
+  },
+  "mcpServers.s.everything.about": {
+    "ar": "vujr4p",
+    "de": "vujr4p",
+    "fr": "vujr4p",
+    "ja": "vujr4p",
+    "ru": "vujr4p",
+    "zh-CN": "vujr4p"
+  },
+  "mcpServers.s.everything.install": {
+    "ar": "tssa97",
+    "de": "tssa97",
+    "fr": "tssa97",
+    "ja": "tssa97",
+    "ru": "tssa97",
+    "zh-CN": "tssa97"
+  },
+  "mcpServers.s.everything.name": {
+    "ar": "cg5xay",
+    "de": "cg5xay",
+    "fr": "cg5xay",
+    "ja": "cg5xay",
+    "ru": "cg5xay",
+    "zh-CN": "cg5xay"
+  },
+  "mcpServers.s.everything.source": {
+    "ar": "fxjghc",
+    "de": "fxjghc",
+    "fr": "fxjghc",
+    "ja": "fxjghc",
+    "ru": "fxjghc",
+    "zh-CN": "fxjghc"
+  },
+  "mcpServers.s.files.about": {
+    "ar": "24nbz4",
+    "de": "24nbz4",
+    "fr": "24nbz4",
+    "ja": "24nbz4",
+    "ru": "24nbz4",
+    "zh-CN": "24nbz4"
+  },
+  "mcpServers.s.files.install": {
+    "ar": "yo77c8",
+    "de": "yo77c8",
+    "fr": "yo77c8",
+    "ja": "yo77c8",
+    "ru": "yo77c8",
+    "zh-CN": "yo77c8"
+  },
+  "mcpServers.s.files.name": {
+    "ar": "131f4c1",
+    "de": "131f4c1",
+    "fr": "131f4c1",
+    "ja": "131f4c1",
+    "ru": "131f4c1",
+    "zh-CN": "131f4c1"
+  },
+  "mcpServers.s.files.source": {
+    "ar": "vk28d6",
+    "de": "vk28d6",
+    "fr": "vk28d6",
+    "ja": "vk28d6",
+    "ru": "vk28d6",
+    "zh-CN": "vk28d6"
+  },
+  "mcpServers.s.knesset.about": {
+    "ar": "1ldgf2v",
+    "de": "1ldgf2v",
+    "fr": "1ldgf2v",
+    "ja": "1ldgf2v",
+    "ru": "1ldgf2v",
+    "zh-CN": "1ldgf2v"
+  },
+  "mcpServers.s.knesset.install": {
+    "ar": "195ljbm",
+    "de": "195ljbm",
+    "fr": "195ljbm",
+    "ja": "195ljbm",
+    "ru": "195ljbm",
+    "zh-CN": "195ljbm"
+  },
+  "mcpServers.s.knesset.name": {
+    "ar": "i53zlo",
+    "de": "i53zlo",
+    "fr": "i53zlo",
+    "ja": "i53zlo",
+    "ru": "i53zlo",
+    "zh-CN": "i53zlo"
+  },
+  "mcpServers.s.knesset.source": {
+    "ar": "1gpiwl",
+    "de": "1gpiwl",
+    "fr": "1gpiwl",
+    "ja": "1gpiwl",
+    "ru": "1gpiwl",
+    "zh-CN": "1gpiwl"
+  },
+  "mcpServers.s.sefaria.about": {
+    "ar": "142xzwq",
+    "de": "142xzwq",
+    "fr": "142xzwq",
+    "ja": "142xzwq",
+    "ru": "142xzwq",
+    "zh-CN": "142xzwq"
+  },
+  "mcpServers.s.sefaria.name": {
+    "ar": "tn5bl8",
+    "de": "tn5bl8",
+    "fr": "tn5bl8",
+    "ja": "tn5bl8",
+    "ru": "tn5bl8",
+    "zh-CN": "tn5bl8"
+  },
+  "mcpServers.s.sefaria.source": {
+    "ar": "cvv65e",
+    "de": "cvv65e",
+    "fr": "cvv65e",
+    "ja": "cvv65e",
+    "ru": "cvv65e",
+    "zh-CN": "cvv65e"
+  },
+  "mcpServers.s.zotero.about": {
+    "ar": "jpl99o",
+    "de": "jpl99o",
+    "fr": "jpl99o",
+    "ja": "jpl99o",
+    "ru": "jpl99o",
+    "zh-CN": "jpl99o"
+  },
+  "mcpServers.s.zotero.name": {
+    "ar": "10pkeju",
+    "de": "10pkeju",
+    "fr": "10pkeju",
+    "ja": "10pkeju",
+    "ru": "10pkeju",
+    "zh-CN": "10pkeju"
+  },
+  "mcpServers.s.zotero.source": {
+    "ar": "owd8ic",
+    "de": "owd8ic",
+    "fr": "owd8ic",
+    "ja": "owd8ic",
+    "ru": "owd8ic",
+    "zh-CN": "owd8ic"
+  },
   "mcpServers.showTools": {
     "ar": "rj7imf",
     "de": "rj7imf",
@@ -1694,6 +1918,14 @@
     "ja": "rj7imf",
     "ru": "rj7imf",
     "zh-CN": "rj7imf"
+  },
+  "mcpServers.sourceLabel": {
+    "ar": "gyxz34",
+    "de": "gyxz34",
+    "fr": "gyxz34",
+    "ja": "gyxz34",
+    "ru": "gyxz34",
+    "zh-CN": "gyxz34"
   },
   "mcpServers.stdio.changed": {
     "ar": "140y270",
@@ -1774,6 +2006,14 @@
     "ja": "1fn0bdg",
     "ru": "1fn0bdg",
     "zh-CN": "1fn0bdg"
+  },
+  "mcpServers.useFor": {
+    "ar": "147wxel",
+    "de": "147wxel",
+    "fr": "147wxel",
+    "ja": "147wxel",
+    "ru": "147wxel",
+    "zh-CN": "147wxel"
   },
   "mcpServers.yours": {
     "ar": "1qjiuwu",
