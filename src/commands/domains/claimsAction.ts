@@ -1,9 +1,12 @@
 /**
  * `ai.claims` (R12.11): the paragraph at the cursor (or the selected text)
- * → candidate claims, each with the verifier's quote, inserted under the
- * paragraph as a `[!claims]` callout in one undoable edit. Nothing becomes a
- * fact: the callout lists candidates, and the toast says how many were
- * dropped.
+ * → candidate claims, each with the verifier's quote, proposed as a
+ * `[!claims]` callout under the paragraph. The AI suggests and the user
+ * approves: the callout is staged for review (agents/staging, the review
+ * panel's diff with approve / reject), never written straight into the
+ * note; approving it applies it as AI-authored text in one undoable edit.
+ * Nothing becomes a fact: the callout lists candidates, and the toast says
+ * how many were dropped.
  */
 import { t } from "../../i18n";
 import { showAiToast } from "../../ui/AiToast";
@@ -34,9 +37,24 @@ export async function claimsFlow({ getEditorView, liveDoc }: Pick<CommandContext
       }),
     );
     const callout = claimsCallout(r, hasHebrew(p.text) ? "he" : "en");
-    // The callout is the model's output: marked as AI text at the insertion (5.9, W10.E37).
-    const { aiAuthored } = await import("../../editor/aiAuthorship");
-    view.dispatch({ changes: { from: p.end, insert: `\n\n${callout}` }, annotations: aiAuthored.of(true) });
+    // Staged, not dispatched: the review panel shows the insertion as a diff, and only its approval writes it,
+    // marked as AI text (reviewBridge applies approved changes with aiAuthored, 5.9 / W10.E37).
+    const [{ stageChange, rangeContext, textFingerprint }, { currentDocumentKey }] = await Promise.all([import("../../agents/staging"), import("../../agents/docKey")]);
+    stageChange(
+      {
+        kind: "range",
+        path: doc.workspaceName ?? null,
+        from: p.end,
+        to: p.end,
+        before: "",
+        after: `\n\n${callout}`,
+        context: rangeContext(content, p.end, p.end),
+        basis: textFingerprint(content),
+        docKey: currentDocumentKey(),
+        summary: callout.split("\n")[0].replace(/^>\s*\[!claims\]\s*/, ""),
+      },
+      { tool: "insert_claims", agentId: claimExtractorAgent.id, runId: `claims-${Date.now().toString(36)}` },
+    );
     showAiToast(t("toast.claimsDone", { defaultValue: "{{kept}} candidate claims · {{dropped}} dropped without a quote", kept: r.claims.length, dropped: r.dropped.length }), "success");
   } catch (e) {
     if (isAbort(e)) return;

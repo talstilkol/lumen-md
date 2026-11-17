@@ -150,7 +150,47 @@ export const claimExtractorAgent: AgentDefinition<ClaimExtractorInput, ClaimExtr
 
 export const CLAIM_EXTRACTOR_VERSION = "claim-extractor@1";
 
-export type DropReason = "not-selected" | "invented-words" | "no-quote";
+export type DropReason = "not-selected" | "invented-words" | "unresolved-pronoun" | "reordered" | "no-quote";
+
+/* ─── Stage 2 and 3 checks a small model fails (found by the planted probes) ── */
+
+const PRONOUN_EN = /\b(?:he|she|it|they|him|her|them|his|hers|its|their|theirs)\b/i;
+const PRONOUN_HE_FIRST = /^(?:הוא|היא|הם|הן|זה|זו|זאת)(?=\s)/;
+
+/**
+ * A claim still leaning on a pronoun ("Under her, leaks fell…", "הוא זכה…")
+ * was not disambiguated: alone it can't be checked. In Hebrew only a
+ * pronoun opening the claim counts — הוא / היא are also the copula
+ * ("אורי שגיא הוא ראש העירייה").
+ */
+export function unresolvedPronoun(claim: string): boolean {
+  return PRONOUN_EN.test(claim) || PRONOUN_HE_FIRST.test(claim.trim());
+}
+
+/** Is `seq` a subsequence of `of` (order kept, gaps allowed)? */
+const inOrder = (seq: readonly string[], of: readonly string[]) => {
+  let i = 0;
+  for (const x of of) if (x === seq[i]) i++;
+  return i === seq.length;
+};
+/** Latin names inside a sentence (capitalised, not its first word). */
+const latinNames = (s: string) => s.split(/\s+/).slice(1).map((w) => w.replace(/[^\p{L}'-]/gu, "")).filter((w) => /^\p{Lu}\p{Ll}/u.test(w));
+
+/**
+ * The paragraph's own words, put in another order ("9 galleries, up from
+ * 14" for "14, up from 9"; "from Nazareth to Eilat" for "from Eilat to
+ * Nazareth"): two or more numbers, or two or more Latin names, of the claim
+ * must appear in its quote in the claim's order. Each such word the quote
+ * does not have is left to the other checks.
+ */
+export function reordered(claim: string, quote: string): boolean {
+  for (const pick of [numbersOf, latinNames]) {
+    const inQuote = pick(quote);
+    const seq = pick(claim).filter((x) => inQuote.includes(x));
+    if (seq.length >= 2 && !inOrder(seq, inQuote)) return true;
+  }
+  return false;
+}
 
 export interface CandidateClaim {
   id: string;
@@ -201,10 +241,18 @@ export function anchorClaims(paragraph: string, selected: readonly Selected[], d
       dropped.push({ text, reason: "invented-words" });
       continue;
     }
+    if (unresolvedPronoun(text)) {
+      dropped.push({ text, reason: "unresolved-pronoun" });
+      continue;
+    }
     const g = citeOrDelete(`${text.replace(/[.!?׃]?$/, ".")}[^1]`, [{ n: 1, id: meta.note, text: paragraph }]);
     const e = g.evidence[0];
     if (!e) {
       dropped.push({ text, reason: "no-quote" });
+      continue;
+    }
+    if (reordered(text, e.text)) {
+      dropped.push({ text, reason: "reordered" });
       continue;
     }
     const id = `claim-${fnv1a(`${meta.note}\u0000${meta.anchor}\u0000${text}`)}`;
