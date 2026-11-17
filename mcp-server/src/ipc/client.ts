@@ -12,7 +12,7 @@
 import * as net from "node:net";
 import * as path from "node:path";
 import { spawn } from "node:child_process";
-import { configDir, readEndpointFile, type EndpointFile } from "./endpoint.js";
+import { configDir, ownedSocket, readEndpointFile, type EndpointFile } from "./endpoint.js";
 import { diskHost, handle, type Response } from "./host.js";
 import type { WireRequest } from "./server.js";
 import { langOf, REFUSED, SPEC_BY_NAME, SPECS } from "./specs.js";
@@ -43,7 +43,9 @@ export function parseIpcArgs(argv: string[]): { positional: string[]; flags: Rec
 }
 
 /** One request to the app; null when nothing answers (not running, stale file). */
-export function callApp(ep: EndpointFile, req: Omit<WireRequest, "token" | "v">, timeoutMs = 30_000): Promise<Response | null> {
+export async function callApp(ep: EndpointFile, req: Omit<WireRequest, "token" | "v">, timeoutMs = 30_000): Promise<Response | null> {
+  // Review 14 Low 2: the token goes only to a socket of this user's (a stale endpoint file could name a path another user took).
+  if (!(await ownedSocket(ep.endpoint))) return null;
   return new Promise((resolve, reject) => {
     const sock = net.connect(ep.endpoint);
     let buf = "";

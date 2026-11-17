@@ -13,8 +13,17 @@
  * - Every request carries the token; the host compares in constant time
  *   and closes the connection on a mismatch.
  * - `cli-settings.json` next to it holds the user's choices for the CLI
- *   (`allowYes`). The CLI only reads it: the app's settings write it, so an
- *   agent with a shell cannot turn on `--yes` with a `lumen` command.
+ *   (`allowYes`). `lumen` only reads it, and no `lumen` command or request
+ *   field can turn `--yes` on: the host reads the file itself. It is a
+ *   file of this user's, though: a process running as this user (an agent
+ *   with a shell) can write it, as it can write the vault directly. `--yes`
+ *   keeps out a request, not this user's own processes (review 14 Low 2).
+ * - Where no short per-user runtime folder exists, the socket goes in a
+ *   folder of this user's under the temp folder (`lumen-cli-<uid>`, mode
+ *   0700), never straight into the shared /tmp, where another user could
+ *   create the name first. The server refuses a socket folder that is not
+ *   this user's or that others can write to, and `lumen` sends its token
+ *   only to a socket this user owns (review 14 Low 2).
  */
 import { promises as fs } from "node:fs";
 import * as os from "node:os";
@@ -29,6 +38,8 @@ export interface EndpointEnv {
   platform?: NodeJS.Platform;
   home?: string;
   user?: string;
+  /** The user id (tests); `process.getuid()` otherwise. */
+  uid?: number;
 }
 
 /** The app's per-user config folder (Tauri's `app_config_dir`). `LUMEN_CONFIG_DIR` overrides it. */
@@ -53,7 +64,34 @@ export function endpointFor(e: EndpointEnv): string {
   // A Unix socket path must stay under ~104 bytes: prefer the short runtime folder.
   const runtime = e.env.XDG_RUNTIME_DIR;
   const p = path.join(runtime && runtime.length < 60 ? runtime : dir, "lumen-cli.sock");
-  return p.length < 100 ? p : path.join(os.tmpdir(), `lumen-cli-${createHash("sha256").update(dir).digest("hex").slice(0, 12)}.sock`);
+  if (p.length < 100) return p;
+  // Review 14 Low 2: a per-user 0700 folder under the temp folder, not a name in the shared /tmp itself.
+  const uid = e.uid ?? process.getuid?.() ?? 0;
+  return path.join(os.tmpdir(), `lumen-cli-${uid}`, `${createHash("sha256").update(dir).digest("hex").slice(0, 12)}.sock`);
+}
+
+/**
+ * The folder of a Unix socket must be this user's (not a link) and writable by no one else, or another
+ * user could put their own socket at the name (review 14 Low 2). Throws why not.
+ */
+export async function checkSocketDir(dir: string, uid: number | undefined = process.getuid?.()): Promise<void> {
+  const st = await fs.lstat(dir);
+  if (st.isSymbolicLink() || !st.isDirectory()) throw new Error(`${dir} is not a folder (a link?): refused for the lumen socket.`);
+  if (uid !== undefined && st.uid !== uid) throw new Error(`${dir} belongs to another user: refused for the lumen socket.`);
+  if ((st.mode & 0o022) !== 0) throw new Error(`${dir} can be written by other users: refused for the lumen socket.`);
+}
+
+/** Is `endpoint` a socket of this user's, in a folder of this user's? (A Windows pipe: true; its name is per user.) */
+export async function ownedSocket(endpoint: string, uid: number | undefined = process.getuid?.()): Promise<boolean> {
+  if (endpoint.startsWith("\\\\")) return true;
+  try {
+    const st = await fs.lstat(endpoint);
+    if (!st.isSocket() || (uid !== undefined && st.uid !== uid)) return false;
+    await checkSocketDir(path.dirname(endpoint), uid);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export interface EndpointFile {
