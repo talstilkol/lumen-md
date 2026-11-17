@@ -1,0 +1,22 @@
+[
+  { "id": "he.enter.bullet", "source": "W13.H5", "op": "enter", "before": "- שלום‸", "after": "- שלום\n- ‸" },
+  { "id": "he.enter.alef-bet", "source": "W13.H5", "op": "enter", "before": "א. ראשון‸", "after": "א. ראשון\nב. ‸" },
+  { "id": "he.enter.tet-yud", "source": "W13.H5", "op": "enter", "before": "ט. תשע‸", "after": "ט. תשע\nי. ‸" },
+  { "id": "he.enter.tet-vav", "source": "W13.H5", "op": "enter", "before": "יד. ארבע־עשרה‸", "after": "יד. ארבע־עשרה\nטו. ‸" },
+  { "id": "he.enter.tet-zayin", "source": "W13.H5", "op": "enter", "before": "טו. חמש־עשרה‸", "after": "טו. חמש־עשרה\nטז. ‸" },
+  { "id": "he.enter.renumber", "source": "W13.H5", "op": "enter", "before": "א. אחת‸\nב. שתיים", "after": "א. אחת\nב. ‸\nג. שתיים" },
+  { "id": "he.enter.paren", "source": "W13.H5", "op": "enter", "before": "א) ראשון‸", "after": "א) ראשון\nב) ‸" },
+  { "id": "he.enter.split-niqqud", "source": "W13.H5", "op": "enter", "before": "- שָׁלוֹם‸עוֹלָם", "after": "- שָׁלוֹם\n- ‸עוֹלָם" },
+  { "id": "he.enter.task", "source": "W13.H5", "op": "enter", "before": "- [x] לקנות חלב‸", "after": "- [x] לקנות חלב\n- [ ] ‸" },
+  { "id": "he.enter.empty-nested", "source": "W13.H5", "op": "enter", "before": "- אבא\n  - ‸", "after": "- אבא\n- ‸" },
+  { "id": "he.enter.mixed-bidi", "source": "W13.H5", "op": "enter", "before": "- Hello שלום 2026‸", "after": "- Hello שלום 2026\n- ‸" },
+  { "id": "he.enter.not-a-numeral", "source": "W13.H5", "op": "enter", "before": "אב. משהו‸", "after": null },
+  { "id": "he.tab.bullet", "source": "W13.H5", "op": "tab", "before": "- אחת\n- ‸שתיים", "after": "- אחת\n  - ‸שתיים" },
+  { "id": "he.tab.restarts-alef", "source": "W13.H5", "op": "tab", "before": "א. אחת\nב. ‸שתיים\nג. שלוש", "after": "א. אחת\n   א. ‸שתיים\nב. שלוש" },
+  { "id": "he.shift-tab.renumbers", "source": "W13.H5", "op": "shiftTab", "before": "א. אחת\n   א. ‸שתיים\nב. שלוש", "after": "א. אחת\nב. ‸שתיים\nג. שלוש" },
+  { "id": "he.move.with-children", "source": "W13.H5", "op": "moveUp", "before": "- אחת\n- ‸שתיים\n  - משנה", "after": "- ‸שתיים\n  - משנה\n- אחת" },
+  { "id": "he.move.renumbers", "source": "W13.H5", "op": "moveUp", "before": "א. אחת\nב. ‸שתיים", "after": "א. ‸שתיים\nב. אחת" },
+  { "id": "he.bold.partial", "source": "W13.H5", "op": "toggleBold", "before": "**שלום ⟦עולם⟧**", "after": "**שלום** ⟦עולם⟧" },
+  { "id": "he.bold.caret-word", "source": "W13.H5", "op": "toggleBold", "before": "של‸ום לכם", "after": "**של‸ום** לכם" },
+  { "id": "he.paste.list", "source": "W13.H5", "op": "paste", "arg": "- תפוח\n  - ירוק", "before": "- ‸", "after": "- תפוח\n  - ירוק‸" }
+]

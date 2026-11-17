@@ -1,0 +1,14 @@
+[
+  {"id": "enter.bullet", "source": "commonmark", "op": "enter", "before": "- a‸", "after": "- a\n- ‸"},
+  {"id": "enter.number", "source": "commonmark", "op": "enter", "before": "1. a‸", "after": "1. a\n2. ‸"},
+  {"id": "enter.renumber", "source": "obsidian-1.14.0", "op": "enter", "before": "1. a‸\n2. b", "after": "1. a\n2. ‸\n3. b"},
+  {"id": "enter.task-unchecked", "source": "obsidian-1.14.0", "op": "enter", "before": "- [x] done‸", "after": "- [x] done\n- [ ] ‸"},
+  {"id": "enter.split", "source": "commonmark", "op": "enter", "before": "- hello‸world", "after": "- hello\n- ‸world"},
+  {"id": "enter.empty-ends-list", "source": "obsidian-1.14.0", "op": "enter", "before": "- a\n- ‸", "after": "- a\n‸"},
+  {"id": "enter.empty-nested-outdents", "source": "obsidian-1.15.1", "op": "enter", "before": "- a\n  - ‸", "after": "- a\n- ‸"},
+  {"id": "enter.empty-nested-ordered", "source": "obsidian-1.15.1", "op": "enter", "before": "1. a\n   1. ‸\n2. b", "after": "1. a\n2. ‸\n3. b"},
+  {"id": "enter.at-text-start", "source": "obsidian-1.14.0", "op": "enter", "before": "- ‸text", "after": "- \n- ‸text"},
+  {"id": "enter.lazy-numbers", "source": "commonmark", "op": "enter", "before": "1. a\n1. b‸", "after": "1. a\n1. b\n1. ‸"},
+  {"id": "enter.not-a-list", "source": "commonmark", "op": "enter", "before": "plain‸", "after": null},
+  {"id": "shift-enter.continuation", "source": "obsidian-1.14.0", "op": "shiftEnter", "before": "- a‸b", "after": "- a\n  ‸b"}
+]

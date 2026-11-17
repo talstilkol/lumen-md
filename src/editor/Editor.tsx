@@ -133,6 +133,8 @@ const commentsCompartment = new Compartment();
 const grammarCompartment = new Compartment();
 // Outline mode: folding, zoom and block operations (plan W2.13), loaded after mount.
 const outlineCompartment = new Compartment();
+/** W13.E2: smart lists (Enter, Tab, Alt+↑/↓, Mod+Enter, Mod+B, paste in lists), a lazy chunk. */
+const smartListsCompartment = new Compartment();
 // W1.2 — the document's own line ending, so a CRLF file saves as CRLF.
 const lineSeparatorCompartment = new Compartment();
 
@@ -367,6 +369,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // Loaded dynamically when toggled on to keep the initial bundle small.
       grammarCompartment.of([]),
       outlineCompartment.of([]),
+      smartListsCompartment.of([]),
       // Live markdown lint — wavy underlines for trailing whitespace,
       // mixed-indent, heading-skip, broken wiki-links. Runs every 250 ms
       // after the user stops typing.
@@ -686,6 +689,19 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       const view = viewRef.current;
       if (cancelled || !view) return;
       view.dispatch({ effects: outlineCompartment.reconfigure(m.outlineExtension()) });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Smart lists (plan W13.E2): their own lazy chunk, like the outline.
+  useEffect(() => {
+    let cancelled = false;
+    void import("./smartListsExtension").then((m) => {
+      const view = viewRef.current;
+      if (cancelled || !view) return;
+      view.dispatch({ effects: smartListsCompartment.reconfigure(m.smartListKeymap()) });
     });
     return () => {
       cancelled = true;

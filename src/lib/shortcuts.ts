@@ -72,6 +72,12 @@ export const SHORTCUTS: readonly Shortcut[] = [
   // W11.H4: switch the paragraph's direction (both editors' keymaps).
   { id: "edit.toggleDirection", combo: "Mod+Shift+X", scope: "editor" },
   { id: "edit.complete", combo: "Ctrl+Space", scope: "editor" },
+  // W13.E2: smart lists in the source editor (editor/smartListsExtension.ts). Enter, Tab and
+  // Backspace keep their meaning outside a list; Alt+↑/↓ move a whole item with its children.
+  { id: "list.moveUp", combo: "Alt+↑", scope: "editor" },
+  { id: "list.moveDown", combo: "Alt+↓", scope: "editor" },
+  { id: "list.toggleTask", combo: "Mod+↵", scope: "editor" },
+  { id: "list.lineBreak", combo: "Shift+↵", scope: "editor" },
   { id: "file.print", combo: "Mod+P", scope: "browser" },
 ];
 
