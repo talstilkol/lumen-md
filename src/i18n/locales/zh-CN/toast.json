@@ -17,7 +17,7 @@
   "toast.aiWorkspaceSearchFailed": "AI 工作区搜索失败",
   "toast.appLock.afterPrompt": "在后台多久后锁定？",
   "toast.appLock.atOnce": "立即",
-  "toast.appLock.minutes": "{n} 分钟",
+  "toast.appLock.minutes": "{n, plural, other {# 分钟}}",
   "toast.appLock.off": "应用锁已关闭。",
   "toast.appLock.on": "应用锁已开启：Lumen 在后台 {after} 后以及每次启动时锁定。",
   "toast.appLock.unavailable": "此设备未向应用提供 Face ID、Touch ID、指纹或 Windows Hello，因此无法在此开启应用锁。",

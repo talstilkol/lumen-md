@@ -354,7 +354,7 @@
   "outline.close": "Close the outline",
   "outline.empty": "No headings yet. Start typing # to add one.",
   "outline.filter": "Filter headings",
-  "outline.filterCount": "{n} of {total} headings",
+  "outline.filterCount": "{total, plural, one {{n} of # heading} other {{n} of # headings}}",
   "outline.filterNoMatch": "No heading matches “{q}”.",
   "outline.fold": "Fold",
   "outline.title": "Outline",

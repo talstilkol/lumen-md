@@ -1278,17 +1278,13 @@
     },
     {
       "key": "trash.renamesSkipped",
-      "en": "{n} could not be moved back: the file is gone, or something new has its old name",
-      "vars": [
-        "n"
-      ]
+      "en": "{n, plural, one {# could not be moved back: the file is gone, or something new has its old name} other {# could not be moved back: the files are gone, or something new has their old names}}",
+      "vars": []
     },
     {
       "key": "trash.renamesUndone",
-      "en": "{n} moved back to their old names",
-      "vars": [
-        "n"
-      ]
+      "en": "{n, plural, one {# moved back to its old name} other {# moved back to their old names}}",
+      "vars": []
     },
     {
       "key": "trash.restore",
@@ -1304,10 +1300,8 @@
     },
     {
       "key": "trash.restoreFailedMany",
-      "en": "{n} could not be restored and stay in the trash",
-      "vars": [
-        "n"
-      ]
+      "en": "{n, plural, one {# could not be restored and stays in the trash} other {# could not be restored and stay in the trash}}",
+      "vars": []
     },
     {
       "key": "trash.restoreSelected",
@@ -1338,9 +1332,8 @@
     },
     {
       "key": "trash.retention.applied",
-      "en": "Removed {n} old versions ({size})",
+      "en": "{n, plural, one {Removed # old version ({size})} other {Removed # old versions ({size})}}",
       "vars": [
-        "n",
         "size"
       ]
     },
@@ -1356,17 +1349,13 @@
     },
     {
       "key": "trash.retention.bytes",
-      "en": "{n} B",
-      "vars": [
-        "n"
-      ]
+      "en": "{n, plural, one {# B} other {# B}}",
+      "vars": []
     },
     {
       "key": "trash.retention.days",
-      "en": "{n} days",
-      "vars": [
-        "n"
-      ]
+      "en": "{n, plural, one {# day} other {# days}}",
+      "vars": []
     },
     {
       "key": "trash.retention.failed",
@@ -1419,10 +1408,9 @@
     },
     {
       "key": "trash.retention.saving",
-      "en": "Frees {size}: {n} old versions (files: {docs}). The newest version of every file is always kept.",
+      "en": "{n, plural, one {Frees {size}: # old version (files: {docs}). The newest version of every file is always kept.} other {Frees {size}: # old versions (files: {docs}). The newest version of every file is always kept.}}",
       "vars": [
         "size",
-        "n",
         "docs"
       ]
     },
@@ -1797,10 +1785,8 @@
     },
     {
       "key": "vault.exportEverything.done",
-      "en": "Exported {n} files with manifest.json (SHA-256 of each) and OBSIDIAN.md.",
-      "vars": [
-        "n"
-      ]
+      "en": "{n, plural, one {Exported # file with manifest.json (SHA-256 of each) and OBSIDIAN.md.} other {Exported # files with manifest.json (SHA-256 of each) and OBSIDIAN.md.}}",
+      "vars": []
     },
     {
       "key": "vault.exportEverything.failed",

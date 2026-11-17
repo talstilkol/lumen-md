@@ -1,5 +1,5 @@
 {
   "outline.filter": "Filter headings",
-  "outline.filterCount": "{n} of {total} headings",
+  "outline.filterCount": "{total, plural, one {{n} of # heading} other {{n} of # headings}}",
   "outline.filterNoMatch": "No heading matches “{q}”."
 }

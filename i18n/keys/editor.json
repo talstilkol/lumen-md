@@ -1988,10 +1988,9 @@
     },
     {
       "key": "outline.filterCount",
-      "en": "{n} of {total} headings",
+      "en": "{total, plural, one {{n} of # heading} other {{n} of # headings}}",
       "vars": [
-        "n",
-        "total"
+        "n"
       ]
     },
     {

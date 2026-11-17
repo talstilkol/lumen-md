@@ -476,10 +476,9 @@
     },
     {
       "key": "agentMemory.reads.row",
-      "en": "{agent} read {n} facts · {time}",
+      "en": "{n, plural, one {{agent} read # fact · {time}} other {{agent} read # facts · {time}}}",
       "vars": [
         "agent",
-        "n",
         "time"
       ]
     },
@@ -13713,10 +13712,8 @@
     },
     {
       "key": "localData.deleted",
-      "en": "Deleted {n} item(s).",
-      "vars": [
-        "n"
-      ]
+      "en": "{n, plural, one {Deleted # item.} other {Deleted # items.}}",
+      "vars": []
     },
     {
       "key": "localData.empty",
@@ -14955,10 +14952,8 @@
     },
     {
       "key": "modelCard.n",
-      "en": "{n} items",
-      "vars": [
-        "n"
-      ]
+      "en": "{n, plural, one {# item} other {# items}}",
+      "vars": []
     },
     {
       "key": "modelCard.notMeasured",
@@ -17281,10 +17276,8 @@
     },
     {
       "key": "pdfUa.noAlt",
-      "en": "{n} images have no description",
-      "vars": [
-        "n"
-      ]
+      "en": "{n, plural, one {# image has no description} other {# images have no description}}",
+      "vars": []
     },
     {
       "key": "pdfUa.notTagged",
@@ -20051,10 +20044,8 @@
     },
     {
       "key": "settingsSearch.count",
-      "en": "{n} settings found",
-      "vars": [
-        "n"
-      ]
+      "en": "{n, plural, one {# setting found} other {# settings found}}",
+      "vars": []
     },
     {
       "key": "settingsSearch.hint",
@@ -24040,10 +24031,8 @@
     },
     {
       "key": "vaults.daysLeft",
-      "en": "{count} days left",
-      "vars": [
-        "count"
-      ]
+      "en": "{count, plural, one {# day left} other {# days left}}",
+      "vars": []
     },
     {
       "key": "vaults.empty",
@@ -24114,10 +24103,8 @@
     },
     {
       "key": "vaults.notes",
-      "en": "{count} notes",
-      "vars": [
-        "count"
-      ]
+      "en": "{count, plural, one {# note} other {# notes}}",
+      "vars": []
     },
     {
       "key": "vaults.open",
@@ -24126,10 +24113,8 @@
     },
     {
       "key": "vaults.plugins",
-      "en": "{count} plugins",
-      "vars": [
-        "count"
-      ]
+      "en": "{count, plural, one {# plugin} other {# plugins}}",
+      "vars": []
     },
     {
       "key": "vaults.rename",

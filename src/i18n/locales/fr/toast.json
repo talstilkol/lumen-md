@@ -17,7 +17,7 @@
   "toast.aiWorkspaceSearchFailed": "Échec de la recherche IA dans l'espace de travail",
   "toast.appLock.afterPrompt": "Verrouiller après combien de temps en arrière-plan ?",
   "toast.appLock.atOnce": "immédiatement",
-  "toast.appLock.minutes": "{n} min",
+  "toast.appLock.minutes": "{n, plural, one {# min} many {# min} other {# min}}",
   "toast.appLock.off": "Verrouillage de l’app désactivé.",
   "toast.appLock.on": "Verrouillage activé : Lumen se verrouille après {after} en arrière-plan, et à chaque démarrage.",
   "toast.appLock.unavailable": "Cet appareil n’offre ni Face ID, ni Touch ID, ni empreinte, ni Windows Hello à l’app : le verrouillage ne peut pas être activé ici.",

@@ -118,7 +118,7 @@
   "vault.boot.failed": "Your notes can't be opened yet: part of Lumen didn't load (are you offline?).",
   "vault.boot.retry": "Try again",
   "vault.desktop.backedUp": "A backup of the app's notes was saved to {path}.",
-  "vault.exportEverything.done": "Exported {n} files with manifest.json (SHA-256 of each) and OBSIDIAN.md.",
+  "vault.exportEverything.done": "{n, plural, one {Exported # file with manifest.json (SHA-256 of each) and OBSIDIAN.md.} other {Exported # files with manifest.json (SHA-256 of each) and OBSIDIAN.md.}}",
   "vault.exportEverything.failed": "The export did not finish: {error}",
   "vault.folder.alreadyBrowser": "The vault is already in browser storage.",
   "vault.folder.conflict": "Not moved: {n} files in “{folder}” already exist with different content (for example {path}). Nothing was changed.",

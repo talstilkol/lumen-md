@@ -19,7 +19,7 @@
   "localData.delete": "Delete",
   "localData.deleteAll": "Delete everything",
   "localData.deleteWhat": "Delete: {what}",
-  "localData.deleted": "Deleted {n} item(s).",
+  "localData.deleted": "{n, plural, one {Deleted # item.} other {Deleted # items.}}",
   "localData.empty": "nothing",
   "localData.export": "Save the report (JSON)",
   "localData.kb": "{n} KB",

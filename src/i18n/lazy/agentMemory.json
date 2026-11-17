@@ -2,7 +2,7 @@
   "agentMemory.intro": "Facts you approved live in {file} in your vault: read it, edit it, delete a line to forget. An agent adds a fact only through the review screen, and reads the file only if you allow it here.",
   "agentMemory.readers": "Agents that may read it",
   "agentMemory.reads.none": "No agent has read the agent memory.",
-  "agentMemory.reads.row": "{agent} read {n} facts · {time}",
+  "agentMemory.reads.row": "{n, plural, one {{agent} read # fact · {time}} other {{agent} read # facts · {time}}}",
   "agentMemory.reads.title": "When agents read the agent memory",
   "agentMemory.title": "Agent memory"
 }

@@ -17,7 +17,7 @@
   "toast.aiWorkspaceSearchFailed": "KI-Suche im Workspace fehlgeschlagen",
   "toast.appLock.afterPrompt": "Nach wie langer Zeit im Hintergrund sperren?",
   "toast.appLock.atOnce": "sofort",
-  "toast.appLock.minutes": "{n} Min.",
+  "toast.appLock.minutes": "{n, plural, one {# Min.} other {# Min.}}",
   "toast.appLock.off": "App-Sperre aus.",
   "toast.appLock.on": "App-Sperre an: Lumen sperrt nach {after} im Hintergrund und bei jedem Start.",
   "toast.appLock.unavailable": "Dieses Gerät bietet der App kein Face ID, Touch ID, Fingerabdruck oder Windows Hello; die App-Sperre lässt sich hier nicht einschalten.",

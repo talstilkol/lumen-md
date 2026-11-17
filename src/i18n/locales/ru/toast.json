@@ -17,7 +17,7 @@
   "toast.aiWorkspaceSearchFailed": "Не удалось выполнить поиск ИИ по рабочему пространству",
   "toast.appLock.afterPrompt": "Через сколько времени в фоне блокировать?",
   "toast.appLock.atOnce": "сразу",
-  "toast.appLock.minutes": "{n} мин",
+  "toast.appLock.minutes": "{n, plural, one {# мин} few {# мин} many {# мин} other {# мин}}",
   "toast.appLock.off": "Блокировка приложения выключена.",
   "toast.appLock.on": "Блокировка включена: Lumen блокируется через {after} в фоне и при каждом запуске.",
   "toast.appLock.unavailable": "Это устройство не даёт приложению Face ID, Touch ID, отпечаток или Windows Hello, поэтому блокировку здесь не включить.",

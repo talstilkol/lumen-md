@@ -1,5 +1,5 @@
 {
-  "settingsSearch.count": "{n} settings found",
+  "settingsSearch.count": "{n, plural, one {# setting found} other {# settings found}}",
   "settingsSearch.hint": "↑↓ to move · Enter to open · ⌘F to search again",
   "settingsSearch.kw.autoSave": "save, autosave, automatic saving",
   "settingsSearch.kw.grammarCheck": "grammar, LanguageTool, style",

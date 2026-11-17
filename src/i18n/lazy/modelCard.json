@@ -9,7 +9,7 @@
   "modelCard.measuredOn": "measured {date}",
   "modelCard.model": "Model",
   "modelCard.modelFromSettings": "The model chosen in Settings > AI",
-  "modelCard.n": "{n} items",
+  "modelCard.n": "{n, plural, one {# item} other {# items}}",
   "modelCard.notMeasured": "Not measured: no eval card for this agent yet.",
   "modelCard.open": "Model card",
   "modelCard.tag.dev": "Developer set (written by us, not a quality claim)",

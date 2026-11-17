@@ -354,7 +354,7 @@
   "outline.close": "إغلاق المخطط",
   "outline.empty": "لا توجد عناوين بعد. اكتب # لإضافة عنوان.",
   "outline.filter": "تصفية العناوين",
-  "outline.filterCount": "{n} من {total} عناوين",
+  "outline.filterCount": "{total, plural, zero {{n} من # عناوين} one {{n} من # عناوين} two {{n} من # عناوين} few {{n} من # عناوين} many {{n} من # عناوين} other {{n} من # عناوين}}",
   "outline.filterNoMatch": "لا يوجد عنوان يطابق «{q}».",
   "outline.fold": "طي",
   "outline.title": "المخطط",

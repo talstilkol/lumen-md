@@ -17,7 +17,7 @@
   "toast.aiWorkspaceSearchFailed": "חיפוש AI בסביבת העבודה נכשל",
   "toast.appLock.afterPrompt": "לנעול אחרי כמה זמן ברקע?",
   "toast.appLock.atOnce": "מיד",
-  "toast.appLock.minutes": "{n} דק׳",
+  "toast.appLock.minutes": "{n, plural, one {דקה אחת} two {שתי דקות} other {# דק׳}}",
   "toast.appLock.off": "נעילת האפליקציה כבויה.",
   "toast.appLock.on": "נעילת האפליקציה פעילה: Lumen ננעל אחרי {after} ברקע, ובכל הפעלה.",
   "toast.appLock.unavailable": "המכשיר הזה לא מציע לאפליקציה Face ID, ‏Touch ID, טביעת אצבע או Windows Hello, ולכן אי אפשר להפעיל כאן נעילה.",

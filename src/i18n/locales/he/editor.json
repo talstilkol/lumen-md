@@ -354,7 +354,7 @@
   "outline.close": "סגירת המתאר",
   "outline.empty": "אין עדיין כותרות. הקלד # כדי להוסיף.",
   "outline.filter": "סינון כותרות",
-  "outline.filterCount": "{n} מתוך {total} כותרות",
+  "outline.filterCount": "{total, plural, one {{n} מתוך כותרת אחת} two {{n} מתוך שתי כותרות} other {{n} מתוך # כותרות}}",
   "outline.filterNoMatch": "אין כותרת שמתאימה ל-״{q}״.",
   "outline.fold": "קיפול",
   "outline.title": "תוכן עניינים",

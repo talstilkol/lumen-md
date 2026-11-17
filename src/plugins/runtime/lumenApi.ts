@@ -249,6 +249,7 @@ export interface LumenNetwork {
    * const r = await lumen.network.fetch("https://api.example.org/v1/word?q=שלום");
    * if (r.status === 200) console.log(JSON.parse(r.body));
    */
+  // privacy-ledger: not a call — the type of lumen.network.fetch; pluginHost.ts records each request (recordPluginRequest).
   fetch(url: string, init?: { method?: string; headers?: Record<string, string>; body?: string }): Promise<{ status: number; headers: Record<string, string>; body: string }>;
 }
 

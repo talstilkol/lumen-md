@@ -17,7 +17,7 @@
   "toast.aiWorkspaceSearchFailed": "فشل البحث بالذكاء الاصطناعي في مساحة العمل",
   "toast.appLock.afterPrompt": "يُقفل بعد كم من الوقت في الخلفية؟",
   "toast.appLock.atOnce": "فورًا",
-  "toast.appLock.minutes": "{n} د",
+  "toast.appLock.minutes": "{n, plural, zero {# د} one {# د} two {# د} few {# د} many {# د} other {# د}}",
   "toast.appLock.off": "تم إيقاف قفل التطبيق.",
   "toast.appLock.on": "قفل التطبيق مفعّل: يُقفل Lumen بعد {after} في الخلفية وعند كل تشغيل.",
   "toast.appLock.unavailable": "لا يوفّر هذا الجهاز Face ID أو Touch ID أو البصمة أو Windows Hello للتطبيق، لذا لا يمكن تفعيل القفل هنا.",

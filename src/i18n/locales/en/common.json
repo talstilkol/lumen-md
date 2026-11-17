@@ -228,7 +228,7 @@
   "pdfUa.failed": "The PDF could not be finished",
   "pdfUa.finish": "Finish the saved PDF…",
   "pdfUa.imageFallbackAlt": "Image",
-  "pdfUa.noAlt": "{n} images have no description",
+  "pdfUa.noAlt": "{n, plural, one {# image has no description} other {# images have no description}}",
   "pdfUa.notTagged": "This PDF is not tagged",
   "pdfUa.notTaggedBody": "Print it again from a Chromium browser (Chrome, Edge) with “Save as PDF”, or from an app that writes tagged PDF.",
   "pdfUa.problem.figureWithoutAlt": "a figure without a description",

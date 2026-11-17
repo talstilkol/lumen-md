@@ -354,7 +354,7 @@
   "outline.close": "Gliederung schließen",
   "outline.empty": "Noch keine Überschriften. Tippe #, um eine hinzuzufügen.",
   "outline.filter": "Überschriften filtern",
-  "outline.filterCount": "{n} von {total} Überschriften",
+  "outline.filterCount": "{total, plural, one {{n} von # Überschriften} other {{n} von # Überschriften}}",
   "outline.filterNoMatch": "Keine Überschrift passt zu „{q}“.",
   "outline.fold": "Einklappen",
   "outline.title": "Gliederung",

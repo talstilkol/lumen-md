@@ -111,10 +111,8 @@
     },
     {
       "key": "toast.appLock.minutes",
-      "en": "{n} min",
-      "vars": [
-        "n"
-      ]
+      "en": "{n, plural, one {# min} other {# min}}",
+      "vars": []
     },
     {
       "key": "toast.appLock.off",
