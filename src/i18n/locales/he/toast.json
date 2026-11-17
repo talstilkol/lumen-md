@@ -55,6 +55,8 @@
   "toast.gitWatchOnPullingEvery": "👀 מעקב Git פעיל — משיכה כל 5 דקות",
   "toast.gitWatchPaused": "⏸ מעקב Git הושהה",
   "toast.grammarCheckFailed": "בדיקת הדקדוק נכשלה: {error}",
+  "toast.hebrewDates.off": "התאריכים מוצגים עכשיו בלוח הלועזי: היום {today}.",
+  "toast.hebrewDates.on": "התאריכים מוצגים עכשיו בלוח העברי: היום {today}.",
   "toast.imageAlt.done": "נוסף טקסט חלופי: {done} מתוך {count}",
   "toast.imageAlt.none": "אין בפתק תמונות שצריכות טקסט חלופי",
   "toast.imageAlt.working": "קורא תמונות במכשיר: {count}…",

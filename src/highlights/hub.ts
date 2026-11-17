@@ -15,6 +15,7 @@
 import { describeAnnotation, encodeWikiPath, highlightLinkTarget, normalizeWithMap, readAnnotationsNote, type PdfAnnotation, type TextualBody } from "../pdf/annotations";
 import { describeEpubAnnotation, epubHighlightLink, readEpubNote, type EpubAnnotation } from "../epub/annotations";
 import { isImportNote, readImportNote } from "./import/notes";
+import { compareNames } from "../i18n/collate";
 
 export type HighlightKind = "pdf" | "epub" | "clip" | "import";
 
@@ -157,7 +158,7 @@ export function search(items: readonly HighlightItem[], q: Query): HighlightItem
 export function allTags(items: readonly HighlightItem[]): Array<{ tag: string; count: number }> {
   const m = new Map<string, number>();
   for (const it of items) for (const t of it.tags) m.set(t, (m.get(t) ?? 0) + 1);
-  return [...m].map(([tag, count]) => ({ tag, count })).sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+  return [...m].map(([tag, count]) => ({ tag, count })).sort((a, b) => b.count - a.count || compareNames(a.tag, b.tag));
 }
 
 /** Every source in the index with its kind and count, by name. */
@@ -168,7 +169,7 @@ export function allSources(items: readonly HighlightItem[]): Array<{ source: str
     e.count++;
     m.set(it.source, e);
   }
-  return [...m].map(([source, e]) => ({ source, ...e })).sort((a, b) => a.source.localeCompare(b.source));
+  return [...m].map(([source, e]) => ({ source, ...e })).sort((a, b) => compareNames(a.source, b.source));
 }
 
 const inline = (s: string) => s.replace(/\s+/g, " ").trim().replace(/([\\`*_[\]<>|#~])/g, "\\$1");
@@ -188,7 +189,7 @@ export function exportNote(items: readonly HighlightItem[], labels: ExportLabels
   const bySource = new Map<string, HighlightItem[]>();
   for (const it of items) bySource.set(it.source, [...(bySource.get(it.source) ?? []), it]);
   const parts = [`# ${labels.title}`, ""];
-  for (const [source, list] of [...bySource].sort((a, b) => a[0].localeCompare(b[0]))) {
+  for (const [source, list] of [...bySource].sort((a, b) => compareNames(a[0], b[0]))) {
     parts.push(`## [[${encodeWikiPath(source)}]]`, "");
     for (const it of [...list].sort((a, b) => (a.location ?? 0) - (b.location ?? 0))) parts.push(quoteBlock(it, labels.where(it)), "");
   }

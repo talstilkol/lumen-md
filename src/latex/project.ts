@@ -9,6 +9,7 @@ import { parseBibtex, type BibEntry } from "../data/bibtex";
 import { formatReference, parseNames, recordFromBibtex } from "../data/citationStyles";
 import { zip, type ZipInput } from "../storage/zip";
 import { bidiText, documentLang, escapeTex, latexDocument, mdastToLatex } from "./toLatex";
+import { compareNames } from "../i18n/collate";
 
 export interface LatexProjectInput {
   markdown: string;
@@ -42,7 +43,7 @@ const HEBREW = /[\u0590-\u05FF]/;
  */
 export function bibliographyTex(entries: BibEntry[], docLang: "he" | "en"): string {
   if (!entries.length) return "";
-  const sorted = [...entries].sort((a, b) => (a.fields.author ?? "").localeCompare(b.fields.author ?? "", "he") || (a.fields.year ?? "").localeCompare(b.fields.year ?? ""));
+  const sorted = [...entries].sort((a, b) => (a.fields.author ?? "").localeCompare(b.fields.author ?? "", "he") || compareNames((a.fields.year ?? ""), b.fields.year ?? ""));
   const items = sorted.map((raw) => {
     // BibTeX markup in values (`{\\TeX}book`, protected `{Capitals}`) is not text.
     const e: BibEntry = { ...raw, fields: Object.fromEntries(Object.entries(raw.fields).map(([k, v]) => [k, v.replace(/\\([A-Za-z]+)\s?/g, "$1").replace(/[{}]/g, "")])) };

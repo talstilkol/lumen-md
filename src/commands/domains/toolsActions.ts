@@ -2,7 +2,7 @@
  * The bodies of tools.ts's Hebrew grammar-level and dictionary commands,
  * loaded when one runs (W4.9; train 5, startup budget after the W6.25 split).
  */
-import { t } from "../../i18n";
+import { formatNumber, t } from "../../i18n";
 import { uiConfirm } from "../../ui/PromptDialog";
 import { showAiToast } from "../../ui/AiToast";
 import { explainError } from "../../lib/userError";
@@ -41,7 +41,7 @@ export const toggleHebrewDictionary = async (): Promise<void> => {
   if (!(await uiConfirm({ message: t("spell.he.downloadConfirm") }))) return;
   try {
     const n = await svc.downloadHebrewDictionary();
-    showAiToast(t("spell.he.installed", { n: n.toLocaleString() }), "info");
+    showAiToast(t("spell.he.installed", { n: formatNumber(n) }), "info");
   } catch (e) {
     showAiToast(t("spell.he.failed", { error: explainError(e) }), "error");
   }

@@ -1,3 +1,4 @@
+import { compareNames } from "../i18n/collate";
 /**
  * Image search by text (plan 6.7): the vault's images and the query go into
  * one SigLIP space (google/siglip-base-patch16-256-multilingual, Apache-2.0,
@@ -113,7 +114,7 @@ export interface ImageHit {
 export function rankImages(index: ImageIndex, query: number[], k = 20): ImageHit[] {
   return index.images
     .map((i) => ({ path: i.path, score: dot(i.vector, query) }))
-    .sort((a, b) => b.score - a.score || a.path.localeCompare(b.path))
+    .sort((a, b) => b.score - a.score || compareNames(a.path, b.path))
     .slice(0, k);
 }
 

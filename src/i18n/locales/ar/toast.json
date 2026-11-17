@@ -55,6 +55,8 @@
   "toast.gitWatchOnPullingEvery": "👀 مراقبة Git قيد التشغيل — سحب كل 5 دقائق",
   "toast.gitWatchPaused": "⏸ تم إيقاف مراقبة Git مؤقتًا",
   "toast.grammarCheckFailed": "فشل التدقيق النحوي: {error}",
+  "toast.hebrewDates.off": "تُعرض التواريخ الآن بالتقويم الميلادي: اليوم {today}.",
+  "toast.hebrewDates.on": "تُعرض التواريخ الآن بالتقويم العبري: اليوم {today}.",
   "toast.imageAlt.done": "أُضيف نص بديل: {done} من {count}",
   "toast.imageAlt.none": "لا توجد صور تحتاج نصاً بديلاً في هذه الملاحظة",
   "toast.imageAlt.working": "قراءة الصور على الجهاز: {count}…",

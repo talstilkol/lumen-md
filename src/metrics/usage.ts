@@ -22,6 +22,7 @@
  */
 
 import { version as appVersion } from "../../package.json";
+import { compareCodePoints } from "../i18n/collate";
 
 export const USAGE_KEY = "lumen.usage.v1";
 /** "0" when the user turned counting off (counting is on by default; it never leaves the device). */
@@ -243,7 +244,7 @@ export function summarize(store: UsageStore, today: string): UsageSummary {
     retained30: retained(30),
     opens7,
     errors7,
-    features30: [...features.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])),
+    features30: [...features.entries()].sort((a, b) => b[1] - a[1] || compareCodePoints(a[0], b[0])),
   };
 }
 

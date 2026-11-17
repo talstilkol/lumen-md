@@ -21,6 +21,7 @@
  */
 
 import { Document, isMap, isNode, isScalar, isSeq, parseDocument, Scalar, YAMLSeq, type Pair } from "yaml";
+import { compareNames } from "../i18n/collate";
 
 /**
  * "amount" and "address" are text in the file; ./valueTypes.ts reads them
@@ -407,7 +408,7 @@ export function rankSuggestions(counts: Map<string, number> | undefined, exclude
   const skip = new Set(exclude);
   return [...counts.entries()]
     .filter(([v]) => !skip.has(v))
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .sort((a, b) => b[1] - a[1] || compareNames(a[0], b[0]))
     .slice(0, limit)
     .map(([v]) => v);
 }

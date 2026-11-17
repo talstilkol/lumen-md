@@ -15,6 +15,7 @@ import { runsToMarkdown, type CitationRecord } from "../data/citationStyles";
 import type { CiteItem, Cluster } from "../citations/pandoc";
 import { encodeWikiPath } from "../pdf/annotations";
 import type { HighlightItem } from "./hub";
+import { compareNames } from "../i18n/collate";
 
 export interface SourceMeta {
   /** The citation key (library item key). */
@@ -74,7 +75,7 @@ export function exportNoteApa(items: readonly HighlightItem[], metaOf: (source: 
   const suffix = yearSuffixes(cited, "il");
   const ctx = { style: "il" as const, lang: "he" as const, suffix };
   const parts = [`# ${labels.title}`, ""];
-  for (const [source, list] of [...bySource].sort((a, b) => a[0].localeCompare(b[0]))) {
+  for (const [source, list] of [...bySource].sort((a, b) => compareNames(a[0], b[0]))) {
     const meta = metas.get(source)!;
     parts.push(`## [[${encodeWikiPath(source)}]]`, "");
     for (const it of [...list].sort((a, b) => (a.location ?? 0) - (b.location ?? 0))) {

@@ -5,7 +5,7 @@
  */
 import "./jewishLanguagesStrings";
 import type { EditorView } from "@codemirror/view";
-import { t } from "../i18n";
+import { formatNumber, t } from "../i18n";
 import { uiConfirm, uiSelect } from "../ui/PromptDialog";
 import { showAiToast } from "../ui/AiToast";
 import { explainError } from "../lib/userError";
@@ -70,7 +70,7 @@ export async function runYiddishDictionaryCommand(): Promise<void> {
   if (!(await uiConfirm({ message: t("jewishLang.dict.downloadConfirm") }))) return;
   try {
     const n = await svc.downloadYiddishDictionary();
-    showAiToast(t("jewishLang.dict.installed", { count: n.toLocaleString() }), "success");
+    showAiToast(t("jewishLang.dict.installed", { count: formatNumber(n) }), "success");
   } catch (e) {
     showAiToast(t("jewishLang.dict.failed", { error: explainError(e) }), "error");
   }

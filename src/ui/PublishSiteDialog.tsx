@@ -18,6 +18,7 @@ import "./publishSiteDialogStrings";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
 import { Modal } from "./Modal";
+import { compareNames } from "../i18n/collate";
 
 const SETTINGS_KEY = "lumen.publishSite.v1";
 const TOKEN_SECRET = "lumen.publish.github.token";
@@ -86,7 +87,7 @@ export function PublishSiteDialog({ onClose }: { onClose: () => void }) {
     let cancelled = false;
     void (async () => {
       const { readAllNotes } = await import("../storage/workspaceNotes");
-      const all = (await readAllNotes()).map((n) => ({ path: n.path, content: n.text })).sort((a, b) => a.path.localeCompare(b.path));
+      const all = (await readAllNotes()).map((n) => ({ path: n.path, content: n.text })).sort((a, b) => compareNames(a.path, b.path));
       if (cancelled) return;
       setNotes(all);
       const last = loadSettings().picked;

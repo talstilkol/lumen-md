@@ -1,3 +1,4 @@
+import { compareNames } from "../i18n/collate";
 /**
  * "Your morning" (plan W5.19): a block in today's daily note with what
  * changed in the vault since the last morning, the tasks due today or
@@ -68,7 +69,7 @@ export function tasksDue(notes: readonly MorningNote[], today: string): MorningT
       out.push({ path: n.path, line: i + 1, text: m[1].replace(DUE, "").replace(/\s+/g, " ").trim(), due: d[1] });
     }
   }
-  return out.sort((a, b) => a.due.localeCompare(b.due) || a.path.localeCompare(b.path) || a.line - b.line);
+  return out.sort((a, b) => compareNames(a.due, b.due) || compareNames(a.path, b.path) || a.line - b.line);
 }
 
 export interface MorningInput {

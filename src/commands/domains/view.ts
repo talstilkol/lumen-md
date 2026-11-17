@@ -7,6 +7,8 @@ import { t, SUPPORTED_LOCALES } from "../../i18n";
 import type { CommandContext } from "./context";
 import { EXCALIDRAW_CANVAS_ENABLED } from "../../canvas/engine";
 import { log } from "../../lib/logger";
+import { dateCalendar, formatDate, setDateCalendar } from "../../i18n/format";
+import { showAiToast } from "../../ui/AiToast";
 
 /** Editor modes, side panels and the editor's on/off settings. */
 export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEnabled, spellCheck, typewriterMode, pageView, toggleWorkspace, toggleBacklinks, toggleVim, toggleSpellCheck, toggleTypewriter, tsChecks, toggleTsChecks, grammarCheck, toggleGrammarCheck, setMode, toggleOutline }: CommandContext): Command[] {
@@ -365,6 +367,19 @@ export function buildLanguageCommands({ rtl, toggleRtl, setLocale }: CommandCont
       icon: cmdIcons.Pencil,
       group: t("group.view"),
       action: toggleRtl,
+    },
+    {
+      // W13.I3 / W2.10: dates in the Hebrew calendar (Intl -u-ca-hebrew), on every screen that formats through src/i18n/format.ts.
+      id: "view.hebrewCalendarDates",
+      label: dateCalendar() === "hebrew" ? t("cmd.view.hebrewDates.off") : t("cmd.view.hebrewDates.on"),
+      hint: t("cmd.view.hebrewDates.hint"),
+      icon: cmdIcons.PanelRightOpen,
+      group: t("group.view"),
+      action: () => {
+        const next = dateCalendar() === "hebrew" ? "gregory" : "hebrew";
+        setDateCalendar(next);
+        showAiToast(t(next === "hebrew" ? "toast.hebrewDates.on" : "toast.hebrewDates.off", { today: formatDate(Date.now(), { dateStyle: "long" }) }), "info");
+      },
     },
     ...SUPPORTED_LOCALES.map((l) => ({
       id: `lang.${l.code}`,

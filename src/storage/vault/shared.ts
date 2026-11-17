@@ -6,6 +6,7 @@
 
 import { log } from "../../lib/logger";
 import { VaultError, type VaultData, type VaultEntry, type VaultEvent, type VaultListener } from "./types";
+import { compareNames } from "../../i18n/collate";
 
 // ── Paths ────────────────────────────────────────────────────────────────
 
@@ -44,7 +45,7 @@ export function vaultSegments(path: string): string[] {
 /** `list()` order: directories first, then files, each group by name. */
 export function compareVaultEntries(a: Pick<VaultEntry, "kind" | "name">, b: Pick<VaultEntry, "kind" | "name">): number {
   if (a.kind !== b.kind) return a.kind === "directory" ? -1 : 1;
-  return a.name.localeCompare(b.name);
+  return compareNames(a.name, b.name);
 }
 
 /**

@@ -38,6 +38,7 @@ import type { Root as MdastRoot } from "mdast";
 import { headingSlug, headingSlugger, noteKey } from "../lib/slug";
 import { firstStrongDirection, markdownBaseDirection } from "../lib/textDirection";
 import { EMBED_SOURCE, LITERAL_NODES as LITERAL, type EmbedExpander } from "./remarkEmbeds";
+import { compareNames } from "../i18n/collate";
 
 export { hasEmbeds } from "./remarkEmbeds";
 
@@ -185,7 +186,7 @@ export function resolveEmbedTarget(
   if (!tail.length) return null;
   return (
     tail.find((p) => dirOf(p) === fromDir) ??
-    [...tail].sort((a, b) => a.split("/").length - b.split("/").length || a.localeCompare(b))[0]
+    [...tail].sort((a, b) => a.split("/").length - b.split("/").length || compareNames(a, b))[0]
   );
 }
 

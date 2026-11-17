@@ -8,6 +8,7 @@
 
 import { useEffect, useState, useSyncExternalStore, type FormEvent } from "react";
 import { t } from "../../../i18n";
+import { formatTime } from "../../../i18n/format";
 import "../strings";
 import { PassphraseForm } from "./PassphraseForm";
 import { FreshnessBanner } from "./FreshnessBanner";
@@ -346,7 +347,7 @@ function Unlocked({ session }: { session: SyncSession }) {
       </div>
       {last && s.lastAt && (
         <div role="status" data-testid="sync-result" style={muted}>
-          {t("e2ee.sync.result", { time: new Date(s.lastAt).toLocaleTimeString(), up: last.uploaded, down: last.downloaded, deleted: last.deleted })}
+          {t("e2ee.sync.result", { time: formatTime(s.lastAt), up: last.uploaded, down: last.downloaded, deleted: last.deleted })}
           {last.held.length > 0 && <> · {t("e2ee.sync.held", { n: last.held.length })}</>}
         </div>
       )}

@@ -6,6 +6,7 @@
  * (read from node_modules).
  */
 import type * as TS from "typescript";
+import { compareCodePoints } from "../i18n/collate";
 
 export interface BlockInput {
   id: string;
@@ -156,7 +157,7 @@ export function createTsService(ts: typeof TS, libs: Record<string, string>) {
     if (!info) return [];
     return info.entries
       .slice()
-      .sort((x, y) => (x.sortText < y.sortText ? -1 : x.sortText > y.sortText ? 1 : x.name.localeCompare(y.name)))
+      .sort((x, y) => (x.sortText < y.sortText ? -1 : x.sortText > y.sortText ? 1 : compareCodePoints(x.name, y.name)))
       .slice(0, limit)
       .map((e) => ({ label: e.name, kind: e.kind, sort: e.sortText }));
   }

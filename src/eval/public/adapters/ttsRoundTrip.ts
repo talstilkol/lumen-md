@@ -12,6 +12,7 @@
  */
 import { countChars, countWords, microRate, r4 } from "../metrics";
 import type { AsrEngine, AsrItem } from "./asr";
+import { compareNames } from "../../../i18n/collate";
 
 export interface TtsEngine {
   id: string;
@@ -32,11 +33,11 @@ export interface RoundTripScore {
  */
 export function freezePrompts(items: readonly AsrItem[], count: number): AsrItem[] {
   const first = new Map<string, AsrItem>();
-  for (const it of [...items].sort((a, b) => a.id.localeCompare(b.id))) {
+  for (const it of [...items].sort((a, b) => compareNames(a.id, b.id))) {
     const sid = it.id.split("/")[0];
     if (!first.has(sid)) first.set(sid, it);
   }
-  const ids = [...first.keys()].sort((a, b) => Number(a) - Number(b) || a.localeCompare(b));
+  const ids = [...first.keys()].sort((a, b) => Number(a) - Number(b) || compareNames(a, b));
   if (ids.length < count) throw new Error(`only ${ids.length} distinct sentences, ${count} needed`);
   return ids.slice(0, count).map((id) => first.get(id)!);
 }

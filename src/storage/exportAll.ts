@@ -20,6 +20,7 @@ import {
   writeWorkspaceBlob,
   writeWorkspaceFile,
 } from "./workspace";
+import { compareNames } from "../i18n/collate";
 
 export interface ExportedFile {
   path: string;
@@ -34,7 +35,7 @@ export async function collectVault(): Promise<ExportedFile[]> {
     const blob = await readWorkspaceBlob(f.path);
     out.push({ path: f.path, data: new Uint8Array(await blob.arrayBuffer()) });
   }
-  return out.sort((a, b) => a.path.localeCompare(b.path));
+  return out.sort((a, b) => compareNames(a.path, b.path));
 }
 
 /** The vault as one .zip (paths kept). */

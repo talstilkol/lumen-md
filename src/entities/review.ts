@@ -27,6 +27,7 @@ import { ensureAnchor, paragraphByAnchor, splitParagraphs } from "./paragraphs";
 import { assertEdge } from "./schema";
 import { DECISIONS_PATH, EDGES_PATH, PROPOSALS_PATH, parseJsonl, proposalKey, readEdges, toJsonl, type Decision, type EntityProposal, type Proposal } from "./store";
 import { entityNote, parseEntityNote } from "./notes";
+import { compareNames } from "../i18n/collate";
 
 export type Files = ReadonlyMap<string, string>;
 /** Each touched path and what it held before (null: it did not exist). */
@@ -80,7 +81,7 @@ export function entitiesOf(files: Files): Entity[] {
     const e = parseEntityNote(p, c);
     if (e) out.push(e);
   }
-  return out.sort((a, b) => a.id.localeCompare(b.id));
+  return out.sort((a, b) => compareNames(a.id, b.id));
 }
 
 export function proposalsOf(files: Files): Proposal[] {

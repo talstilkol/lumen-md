@@ -11,6 +11,7 @@ import { t } from "../i18n";
 import "./creditsDialogStrings";
 import { HelpButton } from "./HelpButton";
 import { Modal } from "./Modal";
+import { compareNames } from "../i18n/collate";
 
 interface Entry {
   id: string;
@@ -24,7 +25,7 @@ interface Entry {
 
 /** Models the app can download or ships, with their attribution line. */
 export function creditEntries(list: readonly Entry[] = (registry as { models: Entry[] }).models): Entry[] {
-  return list.filter((m) => m.attribution && m.class !== "forbidden" && m.delivery !== "none").sort((a, b) => a.kind.localeCompare(b.kind) || a.id.localeCompare(b.id));
+  return list.filter((m) => m.attribution && m.class !== "forbidden" && m.delivery !== "none").sort((a, b) => compareNames(a.kind, b.kind) || compareNames(a.id, b.id));
 }
 
 /** What each licence asks of whoever ships the model. */

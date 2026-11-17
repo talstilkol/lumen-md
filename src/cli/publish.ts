@@ -37,6 +37,7 @@ import { MD_RE, PUBLISH_CSS, encodePath, pageTitle, rewriteMarkdownLinks, rewrit
 import { resolveWikiTarget, splitWikiTarget } from "../renderer/wikiLinks";
 import { prepareForExport } from "../lib/redaction";
 import { cleanPublishedFile, sniffMedia } from "../lib/imageMetadata";
+import { compareNames } from "../i18n/collate";
 
 /** The first bytes of a file: enough to tell what it is without reading a video whole. */
 function fileHead(path: string, n = 4096): Uint8Array {
@@ -416,7 +417,7 @@ export async function publishSite(
   const rootIndex = pages.find((p) => p.output === "index.html");
   const listed = pages
     .filter((p) => p !== rootIndex)
-    .sort((a, b) => a.output.localeCompare(b.output));
+    .sort((a, b) => compareNames(a.output, b.output));
 
   for (const p of pages) {
     const depth = p.output.split("/").length - 1;

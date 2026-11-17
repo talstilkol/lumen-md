@@ -33,6 +33,7 @@
 import { gdriveFetch } from "../../cloud/gdrive";
 import { PreconditionFailedError, ProviderUnavailableError, type PutCondition, type StoredObject, type SyncProvider } from "../provider";
 import { checkConditionalWrites, checkObjectName, defaultFetch, failed, ProviderUnsupportedError, type FetchLike } from "./http";
+import { compareNames } from "../../../i18n/collate";
 
 export interface GDriveSyncConfig {
   /** Name of the vault folder in Drive. */
@@ -106,7 +107,7 @@ export function gdriveSyncProvider(cfg: GDriveSyncConfig = {}, deps: { fetch?: F
       {},
       name,
     );
-    return [...found.files].sort((a, b) => (a.createdTime ?? "").localeCompare(b.createdTime ?? "") || a.id.localeCompare(b.id));
+    return [...found.files].sort((a, b) => compareNames((a.createdTime ?? ""), b.createdTime ?? "") || compareNames(a.id, b.id));
   }
 
   /** The metadata ETag (the HTTP header) — what `If-Match` compares against. */

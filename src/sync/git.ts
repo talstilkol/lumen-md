@@ -26,6 +26,7 @@ import { authFor, getCorsProxy } from "./gitProxy";
 import { writeIntoMirror } from "./gitMirror";
 import { getVaultBackend } from "../storage/vault";
 import { swallowed } from "../lib/logger";
+import { compareNames } from "../i18n/collate";
 
 type Fs = {
   promises: {
@@ -693,5 +694,5 @@ export async function gitDiffEntries(
     },
   })) as GitFileChange[] | undefined;
   abort();
-  return (result ?? []).filter(Boolean).sort((a, b) => a.path.localeCompare(b.path));
+  return (result ?? []).filter(Boolean).sort((a, b) => compareNames(a.path, b.path));
 }

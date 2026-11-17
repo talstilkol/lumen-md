@@ -14,6 +14,7 @@ import { expandTemplate } from "../editor/templateVars";
 import { checkFieldValue, newObjectText, type ValueProblem } from "./fieldValues";
 import { fieldsOfNote, noteIsA, typesOfNote, type EffectiveField, type NoteLike, type TypeRegistry } from "./typeRegistry";
 import { FIELD_KINDS, normTypeId, typeFilePath, typeToYaml, type FieldDef, type FieldKind, type Label } from "./typeSchema";
+import { compareNames } from "../i18n/collate";
 
 export interface FormField {
   field: EffectiveField;
@@ -45,7 +46,7 @@ export function relationCandidates(reg: TypeRegistry, field: FieldDef, notes: Re
   return notes
     .filter((n) => noteIsA(reg, n, field.to!))
     .map((n) => n.path.slice(n.path.lastIndexOf("/") + 1).replace(/\.(md|markdown)$/i, ""))
-    .sort((a, b) => a.localeCompare(b));
+    .sort((a, b) => compareNames(a, b));
 }
 
 /**

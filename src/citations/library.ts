@@ -10,6 +10,7 @@ import { parseBibtex } from "../data/bibtex";
 import { recordFromBibtex, plainTitle, type CitationRecord } from "../data/citationStyles";
 import { cslToRecord, keyFromNote, type CslItem } from "./csl";
 import { baseKey, isKey, uniqueKey } from "./keys";
+import { compareNames } from "../i18n/collate";
 
 export type Origin = "bibtex" | "csl" | "zotero";
 
@@ -81,7 +82,7 @@ export function searchLibrary(items: readonly LibraryItem[], query: string, rece
     if (ri >= 0) score += 10 - Math.min(ri, 9);
     scored.push({ it, score });
   }
-  return scored.sort((a, b) => b.score - a.score || a.it.key.localeCompare(b.it.key)).map((x) => x.it);
+  return scored.sort((a, b) => b.score - a.score || compareNames(a.it.key, b.it.key)).map((x) => x.it);
 }
 
 /* ─── The vault's library, cached until the vault changes ─────────── */

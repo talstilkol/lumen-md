@@ -21,6 +21,7 @@
  * next/last week/month. Unknown lines are reported, not ignored.
  */
 import type { Priority, Task } from "./taskParser";
+import { compareNames } from "../i18n/collate";
 
 export interface TaskQuery {
   filters: Array<(t: Task, all: Task[]) => boolean>;
@@ -351,5 +352,5 @@ export function runQuery(q: TaskQuery, all: Task[], today = new Date()): QueryRe
       group.tasks.push(t);
     }
   }
-  return { groups: [...groups].sort(([a], [b]) => (a === b ? 0 : a === LAST ? 1 : b === LAST ? -1 : a.localeCompare(b))).map(([, g]) => g), total, errors: [] };
+  return { groups: [...groups].sort(([a], [b]) => (a === b ? 0 : a === LAST ? 1 : b === LAST ? -1 : compareNames(a, b))).map(([, g]) => g), total, errors: [] };
 }

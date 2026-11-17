@@ -21,6 +21,7 @@ import { isOPFSAvailable, listWorkspace, readWorkspaceFile, workspaceHasFile, wr
 import { fetchWithRetry } from "../lib/fetchRetry";
 import { getLocale } from "../i18n";
 import { TEMPLATES_CHANGED_EVENT } from "./templateEvents";
+import { compareNames } from "../i18n/collate";
 
 export interface MarketplaceTemplate {
   id: string;
@@ -231,7 +232,7 @@ export async function listInstalledTemplates(): Promise<InstalledTemplate[]> {
     const id = rest.replace(/\.md$/i, "");
     out.push({ id, name: names[id] || nameFromId(id), path: e.path });
   }
-  out.sort((a, b) => a.name.localeCompare(b.name));
+  out.sort((a, b) => compareNames(a.name, b.name));
   return out;
 }
 

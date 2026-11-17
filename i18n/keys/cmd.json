@@ -2968,6 +2968,21 @@
       "vars": []
     },
     {
+      "key": "cmd.view.hebrewDates.hint",
+      "en": "Every date Lumen writes, in the UI language; your notes are not changed",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.hebrewDates.off",
+      "en": "Dates: show them in the Gregorian calendar",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.hebrewDates.on",
+      "en": "Dates: show them in the Hebrew calendar",
+      "vars": []
+    },
+    {
       "key": "cmd.view.hebrewGrammarLevel",
       "en": "Hebrew grammar: change the writing level",
       "vars": []

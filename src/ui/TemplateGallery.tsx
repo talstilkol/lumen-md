@@ -28,6 +28,7 @@ import { EmptyState } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import "./templateGalleryStrings";
 import { Modal } from "./Modal";
+import { compareNames } from "../i18n/collate";
 
 interface Props {
   open: boolean;
@@ -106,7 +107,7 @@ export function TemplateGallery({ open, onClose }: Props) {
     list = list.slice().sort((a, b) => {
       if (sort === "rating") return b.rating - a.rating;
       if (sort === "downloads") return b.downloads - a.downloads;
-      return a.name.localeCompare(b.name);
+      return compareNames(a.name, b.name);
     });
     return list;
   }, [templates, query, activeCategory, sort]);

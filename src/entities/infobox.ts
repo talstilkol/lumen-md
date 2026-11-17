@@ -18,6 +18,7 @@
  */
 import { splitFrontmatter } from "./frontmatter";
 import { ENTITY_ROOT, PREDICATES, TYPE_INFO, type Edge, type Entity, type EntityType } from "./model";
+import { compareNames } from "../i18n/collate";
 
 /** The folders entity notes live in (`ישויות/<folder>/<name>.md`). The embed check in the renderer mirrors this list. */
 export const ENTITY_FOLDERS = Object.values(TYPE_INFO).map((t) => t.folder);
@@ -250,7 +251,7 @@ export function infoboxModel(input: InfoboxInput): InfoboxModel {
     }
   }
   const rank = (k: KeyRelation) => score(k.edge) + 0.1 * Math.min(5, k.count) + 0.05 * Math.log1p(degree.get(k.other) ?? 0);
-  const key = [...byOther.values()].sort((a, b) => rank(b) - rank(a) || name(a.other).localeCompare(name(b.other))).slice(0, input.maxKey ?? 5);
+  const key = [...byOther.values()].sort((a, b) => rank(b) - rank(a) || compareNames(name(a.other), name(b.other))).slice(0, input.maxKey ?? 5);
   const names = new Map<string, string>();
   for (const k of key) names.set(k.other, name(k.other));
   for (const r of rows) for (const v of r.values) if (v.id) names.set(v.id, v.text);

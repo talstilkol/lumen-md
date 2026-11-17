@@ -18,6 +18,7 @@
  * Pure; no DOM. The UI formats the parts with t().
  */
 import { leiden } from "../views/leiden";
+import { compareNames } from "../i18n/collate";
 
 export interface AltNode {
   id: string;
@@ -108,11 +109,11 @@ export function summarize(g: AltGraph, top = 3): GraphSummary {
   const hubs = g.nodes
     .filter((n) => (deg.get(n.id) ?? 0) > 0)
     .map((n) => ({ id: n.id, label: n.label, degree: deg.get(n.id)! }))
-    .sort((a, b) => b.degree - a.degree || a.label.localeCompare(b.label))
+    .sort((a, b) => b.degree - a.degree || compareNames(a.label, b.label))
     .slice(0, top);
   const kc = new Map<string, number>();
   for (const n of g.nodes) if (n.kind) kc.set(n.kind, (kc.get(n.kind) ?? 0) + 1);
-  const kinds = [...kc].map(([kind, count]) => ({ kind, count })).sort((a, b) => b.count - a.count || a.kind.localeCompare(b.kind));
+  const kinds = [...kc].map(([kind, count]) => ({ kind, count })).sort((a, b) => b.count - a.count || compareNames(a.kind, b.kind));
   return { nodes: g.nodes.length, edges: g.edges.length, clusters: [...size.values()].filter((s) => s >= 2).length, clusterMethod: method, unconnected, hubs, kinds };
 }
 
@@ -146,8 +147,8 @@ export function neighbourGroups(g: AltGraph, id: string): NeighbourGroup[] {
     grp.nodes.push(other);
   }
   return [...groups.values()]
-    .map(({ seen: _seen, ...grp }) => ({ ...grp, nodes: grp.nodes.sort((a, b) => a.label.localeCompare(b.label)) }))
-    .sort((a, b) => (a.direction === b.direction ? a.relation.localeCompare(b.relation) : a.direction === "out" ? -1 : 1));
+    .map(({ seen: _seen, ...grp }) => ({ ...grp, nodes: grp.nodes.sort((a, b) => compareNames(a.label, b.label)) }))
+    .sort((a, b) => (a.direction === b.direction ? compareNames(a.relation, b.relation) : a.direction === "out" ? -1 : 1));
 }
 
 /** The node ids every view of `g` shows, in one order (for the "same nodes" check). */

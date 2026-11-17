@@ -10,7 +10,7 @@ import "./shareStrings";
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { Link2, X } from "lucide-react";
-import { t } from "../i18n";
+import { formatNumber, t } from "../i18n";
 import { createShareLink, EXPIRY_DAYS, MAX_LINK_DATA, SHARE_FILE_EXTENSION, ShareLinkError, shareOrigin, type ShareLink } from "./linkShare";
 import { HelpButton } from "../ui/HelpButton";
 import { explainError } from "../lib/userError";
@@ -137,13 +137,13 @@ export function ShareLinkDialog({ title, markdown, onClose }: { title: string; m
                   <CopyField value={link.key} label={t("shareLink.copyKey")} testId="share-link-key" />
                 </>
               )}
-              <span style={muted}>{t("shareLink.size", { chars: link.dataChars.toLocaleString(), max: MAX_LINK_DATA.toLocaleString() })}</span>
+              <span style={muted}>{t("shareLink.size", { chars: formatNumber(link.dataChars), max: formatNumber(MAX_LINK_DATA) })}</span>
             </div>
           )}
           {link && !link.url && (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }} data-testid="share-link-too-big">
               <p style={{ margin: 0 }} role="status">
-                {t("shareLink.tooBig", { chars: link.dataChars.toLocaleString(), max: MAX_LINK_DATA.toLocaleString() })}
+                {t("shareLink.tooBig", { chars: formatNumber(link.dataChars), max: formatNumber(MAX_LINK_DATA) })}
               </p>
               <div style={row}>
                 <button type="button" style={primary} onClick={() => download(link.file, fileName)} data-testid="share-link-file">

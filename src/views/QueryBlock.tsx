@@ -12,6 +12,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { AlertCircle } from "lucide-react";
 import { getLocale, isRTL, t } from "../i18n";
+import { formatDate } from "../i18n/format";
 import { ensureIndex, indexedNotes, searchWorkspace } from "../storage/workspaceIndex";
 import { watchVault } from "../storage/vault";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
@@ -195,7 +196,7 @@ export default function QueryBlock({ source, lang }: Props) {
                     <NoteLink path={r.path} name={r.name} />
                   </td>
                   <td dir="auto">{r.folder}</td>
-                  <td>{r.modified ? new Date(r.modified).toLocaleDateString() : ""}</td>
+                  <td>{r.modified ? formatDate(r.modified) : ""}</td>
                   <td dir="auto">{r.tags.map((x) => "#" + x).join(" ")}</td>
                 </tr>
               ))}

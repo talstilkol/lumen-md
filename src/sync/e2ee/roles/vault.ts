@@ -39,6 +39,7 @@ import { firstAcl, personalScope, withMember, withoutMember, type Acl, type Role
 import { newSigner, type Signer } from "./envelope";
 import { roleProvider, roleSpaceId, type RoleProvider } from "./provider";
 import type { FetchLike } from "../providers/http";
+import { compareNames } from "../../../i18n/collate";
 
 /** What one device holds for a role vault (kept in IndexedDB; the signing key is non-extractable). */
 export interface MemberKeys {
@@ -257,5 +258,5 @@ export async function readPersonal(provider: RoleProvider, scope: string, identi
     const prev = latest.get(o.path);
     if (!prev || o.at >= prev.at) latest.set(o.path, { object, path: o.path, text: o.text, at: o.at });
   }
-  return [...latest.values()].sort((a, b) => a.path.localeCompare(b.path));
+  return [...latest.values()].sort((a, b) => compareNames(a.path, b.path));
 }

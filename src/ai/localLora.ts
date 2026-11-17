@@ -21,6 +21,7 @@
  */
 
 import type { StyleProfile } from "./styleProfiles";
+import { compareCodePoints } from "../i18n/collate";
 
 export const MAC_BASE = "mistralai/Mistral-7B-Instruct-v0.3";
 export const MAC_BASE_OLLAMA = "mistral:7b-instruct";
@@ -55,7 +56,7 @@ export function hashPath(path: string): number {
 
 /** Split notes into train / valid / held-out by path hash (10 % each for valid and held-out, at least one held-out note). */
 export function splitNotes(notes: LoraNote[]): { train: LoraNote[]; valid: LoraNote[]; heldOut: LoraNote[] } {
-  const sorted = [...notes].sort((a, b) => hashPath(a.path) - hashPath(b.path) || a.path.localeCompare(b.path));
+  const sorted = [...notes].sort((a, b) => hashPath(a.path) - hashPath(b.path) || compareCodePoints(a.path, b.path));
   const train: LoraNote[] = [];
   const valid: LoraNote[] = [];
   const heldOut: LoraNote[] = [];

@@ -1,3 +1,4 @@
+import { compareCodePoints } from "../i18n/collate";
 /**
  * Retention loops (plan W11.P15), the pure part: "On this day" and the
  * weekly summary, built from the notes on this device. Nothing is sent, and
@@ -78,7 +79,7 @@ export function onThisDay(notes: readonly RetentionNote[], today: Ymd, dailyPath
       out.push({ year: y, path: n.path, excerpt: excerpt(n.content), why: "created" });
     }
   }
-  return out.sort((a, b) => b.year - a.year || a.path.localeCompare(b.path));
+  return out.sort((a, b) => b.year - a.year || compareCodePoints(a.path, b.path));
 }
 
 export interface WeekData {
@@ -128,7 +129,7 @@ export function weekData(notes: readonly RetentionNote[], end: Date, skip: (path
     words += (body.match(/[\p{L}\p{N}]+(?:['’׳"״-][\p{L}\p{N}]+)*/gu) ?? []).length;
     for (const t of body.matchAll(TAG)) tags.set(t[1].toLowerCase(), (tags.get(t[1].toLowerCase()) ?? 0) + 1);
   }
-  done.sort((a, b) => a.date.localeCompare(b.date) || a.path.localeCompare(b.path));
+  done.sort((a, b) => compareCodePoints(a.date, b.date) || compareCodePoints(a.path, b.path));
   return {
     from: fromIso,
     to: ymd(new Date(to.getTime() - DAY)),
@@ -136,7 +137,7 @@ export function weekData(notes: readonly RetentionNote[], end: Date, skip: (path
     editedMore: Math.max(0, edited.length - limits.edited),
     done: done.slice(0, limits.done),
     doneMore: Math.max(0, done.length - limits.done),
-    tags: [...tags].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, limits.tags).map(([tag, count]) => ({ tag, count })),
+    tags: [...tags].sort((a, b) => b[1] - a[1] || compareCodePoints(a[0], b[0])).slice(0, limits.tags).map(([tag, count]) => ({ tag, count })),
     words,
   };
 }
