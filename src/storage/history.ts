@@ -264,7 +264,7 @@ const latestText = new Map<string, { id: number; content: string }>();
  * Delete `victims` (row ids) and make each affected document's oldest
  * remaining row a full text, so no remaining delta loses its base.
  */
-async function dropRows(byDoc: Map<string, Row[]>, victims: Set<number>): Promise<void> {
+async function dropRows(byDoc: Map<string, Row[]>, victims: Set<number>, protect: ReadonlySet<number> = new Set()): Promise<void> {
   const rebased: Row[] = [];
   for (const rows of byDoc.values()) {
     const keep = rows.filter((r) => !victims.has(r.id));
@@ -283,7 +283,8 @@ async function dropRows(byDoc: Map<string, Row[]>, victims: Set<number>): Promis
     for (const r of orphans) {
       const text = texts[span.indexOf(r)];
       if (text === null) {
-        victims.add(r.id);
+        // Unreadable already (a chain broken long ago); a protected row stays as it is.
+        if (!protect.has(r.id)) victims.add(r.id);
         continue;
       }
       // The new full row is sealed in an encrypted vault (plan 11.4).
@@ -415,6 +416,53 @@ export async function pruneOldest(fraction = 0.25): Promise<number> {
   const count = victims.size;
   await dropRows(byDoc, victims);
   return count;
+}
+
+/**
+ * Apply a retention policy (plan W13.S1) to the active vault's history:
+ * every version older than its document's keep time goes, except each
+ * document's newest version, whatever its age. `dryRun` only measures what
+ * would go (the settings' "space saved"). Remaining delta chains are rebased
+ * so every kept version still reads back.
+ */
+export async function pruneHistory(
+  settings: import("./historyRetention").RetentionSettings,
+  now = Date.now(),
+  opts: { dryRun?: boolean } = {},
+): Promise<{ versions: number; documents: number; bytes: number }> {
+  const v = vault;
+  if (v === null || typeof indexedDB === "undefined") return { versions: 0, documents: 0, bytes: 0 };
+  const { planRetention } = await import("./historyRetention");
+  const db = await openDB();
+  const tx = db.transaction(STORE, "readonly");
+  const all = ((await promisify(tx.objectStore(STORE).getAll())) as Row[]).sort((a, b) => a.timestamp - b.timestamp || a.id - b.id);
+  const enc = new TextEncoder();
+  const size = (r: Row) =>
+    typeof r.content === "string" ? enc.encode(r.content).length : r.delta === undefined ? 0 : typeof r.delta === "string" ? enc.encode(r.delta).length : r.delta.byteLength;
+  const byDoc = new Map<string, Row[]>();
+  const refs: Array<{ id: number; name: string; timestamp: number; bytes: number }> = [];
+  for (const r of all) {
+    const name = unscoped(r.name, v);
+    if (name === null) continue;
+    const list = byDoc.get(r.name) ?? [];
+    list.push(r);
+    byDoc.set(r.name, list);
+    refs.push({ id: r.id, name, timestamp: r.timestamp, bytes: size(r) });
+  }
+  const plan = planRetention(refs, settings, now);
+  const out = { versions: plan.victims.size, documents: plan.documents, bytes: plan.bytes };
+  if (opts.dryRun || !plan.victims.size) return out;
+  const newest = new Set([...byDoc.values()].map((l) => l[l.length - 1].id));
+  for (const id of newest) plan.victims.delete(id);
+  // Only documents that lose a version are rebased.
+  const touched = new Map([...byDoc].filter(([, rows]) => rows.some((r) => plan.victims.has(r.id))));
+  await openRows([...touched.values()].flat()).then((opened) => {
+    const byId = new Map(opened.map((r) => [r.id, r]));
+    for (const [k, rows] of touched) touched.set(k, rows.map((r) => byId.get(r.id) ?? r));
+  });
+  await dropRows(touched, plan.victims, newest);
+  latestText.clear();
+  return out;
 }
 
 // ── Quota ────────────────────────────────────────────────────────────────

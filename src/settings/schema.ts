@@ -329,6 +329,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   local("lumen.writing.rankWithModel", { kind: "setting", tab: "ai", type: "boolean", values: ["0", "1"] }),
   local("lumen.writingChecks.v1", { kind: "setting", tab: "general", type: "json" }),
   data("lumen.writingGoals.log.v1"),
+  // Wave g4 (W13.S1): how long this vault keeps old versions of notes and attachments (per vault).
+  local("lumen.history.retention.v1.*", { kind: "setting", tab: "general", type: "json" }),
   local("lumen.map.offline", { kind: "setting", tab: "privacy", type: "boolean", values: ["", "1"] }),
   local("lumen-paged", { kind: "setting", tab: "general", type: "json" }),
   local("lumen.compare", { kind: "setting", tab: "general", type: "json" }),
