@@ -106,7 +106,7 @@ describe("W13.W8 on 150 labelled arguments", () => {
       model: { name: "rules (no model)", digest: "n/a (no model weights)" },
       seed: 8,
       temperature: 0,
-      dataset: { name: "eval/writing/argumentChecker/synthetic", version: "1", license: "MIT (written for lumen-md; synthetic)", origin: "synthetic" },
+      dataset: { name: "src/__tests__/argumentChecker.test.ts (its synthetic set, built in the test)", version: "1", license: "MIT (written for lumen-md; synthetic)", origin: "synthetic" },
       n: set.length,
       metrics: { precision: bootstrapCi(r.pred, { seed: 8 }), recall: bootstrapCi(r.rec, { seed: 8 }), unseenPrecision: bootstrapCi(u.pred, { seed: 8 }) },
     };

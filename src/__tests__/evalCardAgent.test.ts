@@ -20,7 +20,7 @@ const card = (over: Record<string, unknown> = {}) => ({
   model: { name: "rules", digest: "n/a" },
   seed: 1,
   temperature: 0,
-  dataset: { name: "x", version: "1", license: "MIT" },
+  dataset: { name: "eval/sets/x.jsonl (its items)", version: "1", license: "MIT" },
   n: 3,
   metrics: { precision: { value: 1, ci95: [1, 1], method: "bootstrap" } },
   ...over,
@@ -30,6 +30,8 @@ describe("eval:card --agent", () => {
   const root = join(tmp, "root");
   mkdirSync(join(root, "eval/cards/writing"), { recursive: true });
   mkdirSync(join(root, "eval/results"), { recursive: true });
+  mkdirSync(join(root, "eval/sets"), { recursive: true });
+  writeFileSync(join(root, "eval/sets/x.jsonl"), "{}\n"); // a writing card's dataset is a path in the repository (review 13 M3)
   writeFileSync(join(root, "eval/cards/writing/good.json"), JSON.stringify({ card: card() }));
   writeFileSync(join(root, "eval/cards/writing/bad.json"), JSON.stringify({ card: card({ n: 0 }) }));
   writeFileSync(join(root, "eval/results/named.json"), JSON.stringify({ card: card({ agent: "named" }) }));

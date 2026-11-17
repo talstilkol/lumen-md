@@ -23,7 +23,7 @@ import { acceptInView, showSuggestions, suggestionsIn } from "../agents/writing/
 import { acceptInPm, pmRange, pmSuggestions, pmTextIndex, showPmSuggestions } from "../agents/writing/pmBridge";
 import { aiAuthored } from "../editor/aiAuthorship";
 import { suggestionsFromIssues } from "../agents/writing/adapters";
-import { diskModules, directWritesIn, writingSources, type ModuleLoader } from "./helpers/writingStatic";
+import { directWritesIn, writingSources } from "./helpers/writingStatic";
 
 const sug = (text: string, from: number, to: number, replacement: string | null, o: Partial<WritingSuggestion> = {}) =>
   makeSuggestion(text, { range: { from, to }, kind: "concision", message: "m", rationale: "r", confidence: 0.7, replacement, agentId: "test", model: "rules", ...o });
@@ -256,28 +256,14 @@ describe("static: no writing agent writes to a document or a file (W13.W1)", () 
   });
 
   it("every file under src/agents/writing (except the two editor bridges) only proposes", () => {
-    expect(directWritesIn(sources, diskModules)).toEqual([]);
+    expect(directWritesIn(sources)).toEqual([]);
   });
 
-  it("an import outside the allow-list passes only when it and all it imports only compute (INT7: one check for W13.W1–W15)", () => {
-    const files: Record<string, string> = {
-      "lib/pure.ts": 'import { twice } from "./pureToo";\nexport const f = (s: string) => twice(s);',
-      "lib/pureToo.ts": "export const twice = (s: string) => s + s;",
-      "lib/sneaky.ts": 'import { save } from "./deeper";\nexport const g = (s: string) => save(s);',
-      "lib/deeper.ts": 'import { writeWorkspaceFile } from "../storage/workspace";\nexport const save = (s: string) => writeWorkspaceFile("x.md", s);',
-      "storage/workspace.ts": "export const writeWorkspaceFile = async (p: string, c: string) => { localStorage.setItem(p, c); };",
-      "lib/pkg.ts": 'import { parse } from "yaml";\nexport const h = (s: string) => parse(s);',
-    };
-    const load: ModuleLoader = (m) => (files[`${m}.ts`] !== undefined ? { file: `${m}.ts`, text: files[`${m}.ts`] } : null);
+  it("an import outside the allow-list is rejected, however pure (W13.W1's rule, restored after review 13 H1)", () => {
     const agent = (spec: string) => new Map([["agents/writing/agents/x.ts", `import { f } from "${spec}";\nexport const run = (t: string) => f(t);`]]);
-    expect(directWritesIn(agent("../../../lib/pure"), load)).toEqual([]);
-    const deep = directWritesIn(agent("../../../lib/sneaky"), load);
-    expect(deep).toHaveLength(1);
-    expect(deep[0]).toMatch(/imports \.\.\/\.\.\/\.\.\/lib\/sneaky \(lib\/sneaky → lib\/deeper → storage\/workspace\.ts:1 uses localStorage\)/);
-    expect(directWritesIn(agent("../../../lib/pkg"), load)[0]).toMatch(/lib\/pkg\.ts:1 imports the package yaml/);
-    expect(directWritesIn(agent("../../../lib/missing"), load)[0]).toMatch(/not found/);
-    // Without a loader nothing outside the allow-list is accepted (W13.W1's rule).
-    expect(directWritesIn(agent("../../../lib/pure"))[0]).toMatch(/not in the allow-list/);
+    expect(directWritesIn(agent("../../../lib/pure"))).toEqual(["agents/writing/agents/x.ts:1 imports ../../../lib/pure (not in the allow-list)"]);
+    expect(directWritesIn(agent("../../../ai/paragraphAnchors"))).toEqual([]);
+    expect(directWritesIn(agent("yaml"))[0]).toMatch(/imports the package yaml/);
   });
 
   it("the check fails on an agent that writes directly", () => {

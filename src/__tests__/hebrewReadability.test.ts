@@ -6,7 +6,7 @@
  * equal a refit on the training split. Flesch–Kincaid: the formula and the
  * syllable rules checked by hand here; the ±0.1 match against a known
  * library on 50 texts is scripts/writing/fk-compare.py over
- * eval/writing/readability/fk-en.jsonl (needs textstat: owed to the Mac).
+ * eval/fixtures/writing/readability/fk-en.jsonl (needs textstat: owed to the Mac).
  */
 import { describe, expect, it } from "vitest";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -117,7 +117,7 @@ describe("W13.W9 Hebrew index", () => {
     };
     const fk = FK_TEXTS.map((d) => ({ id: d.id, text: d.text, grade: fleschKincaid(d.text).grade }));
     const cardFile = resolve(ROOT, "eval/cards/writing/readability.json");
-    const fkFile = resolve(ROOT, "eval/writing/readability/fk-en.jsonl");
+    const fkFile = resolve(ROOT, "eval/fixtures/writing/readability/fk-en.jsonl");
     const report = { card };
     if (process.env.LUMEN_WRITE_CARDS) {
       mkdirSync(dirname(cardFile), { recursive: true });

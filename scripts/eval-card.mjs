@@ -6,16 +6,26 @@
  *   npm run eval:card -- <file|dir> …       these reports
  *   npm run eval:card -- --json             one line of JSON per report
  *   npm run eval:card -- --agent <id>       the writing agent's card (eval/cards/writing/<id>.json), W13.W2
+ *   npm run eval:card -- --suite writing    list every writing eval set (each folder of eval/writing) and
+ *                                           what is wrong with its card; exit 0 (a report, not a gate)
  *   npm run eval:card -- --suite writing --check
- *                                           every writing eval set (eval/writing/<agent>) has a complete,
- *                                           current card: its dataset version is the set's manifest, and the
- *                                           set has ≥ 150 items in Hebrew and in English
+ *                                           the gate: every folder of eval/writing is an eval set (a
+ *                                           manifest; plain fixtures live in eval/fixtures/writing) with a
+ *                                           complete, current card: its dataset version is the set's
+ *                                           manifest, and the set has ≥ 150 items in Hebrew and in English
  *                                           an agent without an eval set (eval/writing/<id>): its card in
  *                                           eval/cards/writing/<id>.json, or any report whose card.agent or
  *                                           top-level agent is <id> (W13.W6–W12); exit 2 without an id
  *
+ *   npm run eval:card -- --suite writing --check --measured
+ *                                           W13.W17 (the Mac measurement day): also every agent of the
+ *                                           suite has at least one heldout or public report on a real,
+ *                                           digest-pinned model; none at all fails ("0 reports" is red)
+ *
  * Exit 1 when any report has no card or its card is missing a field
- * (scripts/lib/evalCard.mjs lists them). Exit 0 with nothing to check.
+ * (scripts/lib/evalCard.mjs lists them), or when a writing card's
+ * dataset.name is not a path in the repository (a trailing "(…)" note
+ * aside). Exit 0 with nothing to check. `--check` goes with `--suite`.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { createHash } from "node:crypto";
@@ -50,8 +60,16 @@ export function checkReports(paths, { root = ROOT } = {}) {
       return { file, problems: [`not JSON (${e.message})`] };
     }
     const card = cardOf(report);
-    return { file, tag: card?.tag, problems: validateCard(card) };
+    const problems = validateCard(card);
+    if (file.startsWith("eval/cards/writing/") && typeof card?.dataset?.name === "string" && !datasetOnDisk(root, card.dataset.name)) problems.push(`card.dataset.name ${card.dataset.name}: no such file or folder in the repository`);
+    return { file, tag: card?.tag, problems };
   });
+}
+
+/** Review 13 M3: a writing card's dataset is a path in the repository ("path (a note)" allowed). */
+export function datasetOnDisk(root, name) {
+  const path = name.replace(/\s+\([^)]*\)\s*$/, "").trim();
+  return path !== "" && !path.startsWith("/") && !path.split("/").includes("..") && existsSync(join(root, path));
 }
 
 /** W13.W2: the dataset version a writing card must carry — the manifest's version and its files' digests. */
@@ -64,7 +82,7 @@ export function writingSetVersion(root, agent) {
 export function checkWritingAgent(agent, { root = ROOT } = {}) {
   const file = join("eval/cards/writing", `${agent}.json`);
   const [r] = existsSync(join(root, file)) ? checkReports([file], { root }) : [{ file, problems: ["no card (run its eval with LUMEN_WRITE_CARDS=1)"] }];
-  if (!existsSync(join(root, "eval/writing", agent, "manifest.json"))) return { ...r, problems: [...r.problems, `no eval set eval/writing/${agent}`] };
+  if (!existsSync(join(root, "eval/writing", agent, "manifest.json"))) return { ...r, problems: [...r.problems, existsSync(join(root, "eval/writing", agent)) ? `eval/writing/${agent} has no manifest.json (an eval set needs one; plain fixtures go in eval/fixtures/writing)` : `no eval set eval/writing/${agent}`] };
   const { m, version } = writingSetVersion(root, agent);
   const problems = [...r.problems];
   for (const lang of ["he", "en"]) {
@@ -80,10 +98,22 @@ export function checkWritingAgent(agent, { root = ROOT } = {}) {
   return { ...r, problems };
 }
 
-/** Every writing agent with an eval set (a folder with a manifest; W13.W9/W10's plain fixtures are not sets). */
+/** Every folder of eval/writing: each is an eval set and must carry a manifest (review 13 M3; plain fixtures live in eval/fixtures/writing). */
 export function writingAgentsWithSets(root = ROOT) {
   const dir = join(root, "eval/writing");
-  return existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory() && existsSync(join(dir, e.name, "manifest.json"))).map((e) => e.name).sort() : [];
+  return existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name).sort() : [];
+}
+
+/** W13.W17: the agent's measured reports — a complete heldout or public card on a model pinned by sha256 digest. */
+export function measuredReports(agent, { root = ROOT } = {}) {
+  return agentReports(agent, { root }).filter((f) => {
+    try {
+      const card = cardOf(JSON.parse(readFileSync(join(root, f), "utf8")));
+      return !validateCard(card).length && (card.tag === "heldout" || card.tag === "public") && /^sha256:[0-9a-f]{64}$/.test(card.model?.digest ?? "");
+    } catch {
+      return false;
+    }
+  });
 }
 
 /**
@@ -119,17 +149,30 @@ export function main(argv, { root = ROOT, log = console.log, err = console.error
     err(`eval:card: unknown suite ${suite} (known: writing)`);
     return 1;
   }
+  const check = argv.includes("--check");
+  if (check && suite === undefined) {
+    err("eval:card: --check gates a suite: use --suite writing --check");
+    return 2;
+  }
   // An agent with an eval set (W13.W2) is held to its set; one without (W13.W6–W10) to its card alone.
   if (suite === "writing" || (agent !== undefined && existsSync(join(root, "eval/writing", agent, "manifest.json")))) {
     const agents = agent !== undefined ? [agent] : writingAgentsWithSets(root);
-    const results = agents.map((a) => checkWritingAgent(a, { root }));
+    const measured = argv.includes("--measured");
+    const results = agents.map((a) => {
+      const r = checkWritingAgent(a, { root });
+      // Audit r4 A2.12: W13.W17's gate is red until the Mac's real-model reports exist — never vacuously green.
+      if (measured && !measuredReports(a, { root }).length) return { ...r, problems: [...r.problems, `no measured report: a heldout or public card on a digest-pinned model (W13.W17, the Mac measurement day)`] };
+      return r;
+    });
     for (const r of results) {
       if (json) log(JSON.stringify(r));
       else if (r.problems.length) err(`✗ ${r.file}\n    ${r.problems.join("\n    ")}`);
       else log(`✓ ${r.file} (${r.tag}) — card complete`);
     }
     const bad = results.filter((r) => r.problems.length).length;
-    if (!json) log(`eval:card: ${results.length - bad}/${results.length} writing agents carry a complete, current card`);
+    if (!json) log(`eval:card: ${results.length - bad}/${results.length} writing agents carry a complete, current card${suite === "writing" && !check ? " (report only: add --check to gate)" : ""}`);
+    if (suite === "writing" && !check) return 0;
+    if (measured && !results.length) err("eval:card: --measured with no writing agents to measure: 0 reports is not a pass");
     return bad || !results.length ? 1 : 0;
   }
   if (agent !== undefined) {
@@ -140,8 +183,7 @@ export function main(argv, { root = ROOT, log = console.log, err = console.error
     }
     argv = [...argv.slice(0, ai), ...argv.slice(ai + 2), ...files];
   }
-  const skip = new Set(["--json", "--check"]);
-  const results = checkReports(argv.filter((a) => !a.startsWith("--") && !skip.has(a)), { root });
+  const results = checkReports(argv.filter((a) => !a.startsWith("--")), { root });
   for (const r of results) {
     if (json) log(JSON.stringify(r));
     else if (r.problems.length) err(`✗ ${r.file}\n    ${r.problems.join("\n    ")}`);

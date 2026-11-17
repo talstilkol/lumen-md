@@ -141,7 +141,7 @@ describe("W13.W7 precision on the labelled set", () => {
       model: { name: "rules (no model; the topic-sentence model is optional)", digest: "n/a (no model weights)" },
       seed: 7,
       temperature: 0,
-      dataset: { name: "eval/writing/structureCritic/synthetic", version: "1", license: "MIT (written for lumen-md; synthetic)", origin: "synthetic" },
+      dataset: { name: "src/__tests__/structureCritic.test.ts (its synthetic set, built in the test)", version: "1", license: "MIT (written for lumen-md; synthetic)", origin: "synthetic" },
       n: set.length,
       metrics: { precision: bootstrapCi(r.perPrediction, { seed: 7 }), recall: bootstrapCi(r.perExpected, { seed: 7 }) },
     };

@@ -146,7 +146,7 @@ describe("W13.W6 on the synthetic vault (50 planted)", () => {
       model: { name: "rules (no model)", digest: "n/a (no model weights)" },
       seed: 13,
       temperature: 0,
-      dataset: { name: "eval/writing/consistency/synthetic-vault", version: "1", license: "MIT (written for lumen-md; synthetic)", origin: "synthetic" },
+      dataset: { name: "src/__tests__/vaultConsistency.test.ts (its synthetic vault, built in the test)", version: "1", license: "MIT (written for lumen-md; synthetic)", origin: "synthetic" },
       n: planted.length,
       metrics: {
         precision: bootstrapCi(correct.map(Number), { seed: 13 }),

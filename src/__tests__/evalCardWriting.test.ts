@@ -64,13 +64,54 @@ describe("eval:card for the writing agents (W13.W2)", () => {
     expect(r.status).toBe(0);
   });
 
-  it("a folder of plain fixtures without a manifest is not an eval set (INT7: W13.W9/W10's eval/writing folders)", () => {
+  it("a folder of eval/writing without a manifest fails the suite (review 13 M3: plain fixtures live in eval/fixtures/writing)", () => {
     const dir = sandbox();
     mkdirSync(join(dir, "eval/writing/plainFixtures"), { recursive: true });
     writeFileSync(join(dir, "eval/writing/plainFixtures/en.jsonl"), "{}\n");
     const r = run(["--suite", "writing", "--check"], dir);
-    expect(r.out).not.toMatch(/plainFixtures/);
-    expect(r.code).toBe(0);
+    expect(r.out).toMatch(/eval\/writing\/plainFixtures has no manifest\.json/);
+    expect(r.out).toMatch(/3\/4 writing agents/);
+    expect(r.code).toBe(1);
+  });
+
+  it("--check is the gate: without it the suite only reports; with no suite it is refused", () => {
+    const dir = sandbox();
+    mkdirSync(join(dir, "eval/writing/plainFixtures"), { recursive: true });
+    const report = run(["--suite", "writing"], dir);
+    expect(report.code).toBe(0);
+    expect(report.out).toMatch(/report only/);
+    expect(run(["--suite", "writing", "--check"], dir).code).toBe(1);
+    expect(run(["--check"], ROOT).code).toBe(2);
+  });
+
+  it("a writing card whose dataset.name is not a path in the repository fails", () => {
+    const dir = sandbox();
+    const p = join(dir, "eval/cards/writing/styleCoach.json");
+    const rep = JSON.parse(readFileSync(p, "utf8"));
+    rep.card.dataset.name = "eval/writing/styleCoach-gone";
+    writeFileSync(p, JSON.stringify(rep));
+    const r = run(["--agent", "styleCoach"], dir);
+    expect(r.code).toBe(1);
+    expect(r.out).toMatch(/card\.dataset\.name eval\/writing\/styleCoach-gone: no such file or folder/);
+    // A note after the path is allowed; the path itself must be there.
+    expect(run(["eval/cards/writing"], ROOT).code).toBe(0);
+  });
+
+  it("audit r4 A2.12: W13.W17's gate (--measured) is red with 0 measured reports, green once each agent has a heldout card on a pinned model", () => {
+    const r = run(["--suite", "writing", "--check", "--measured"], ROOT);
+    expect(r.code).toBe(1);
+    expect(r.out).toMatch(/no measured report/);
+    const dir = sandbox();
+    mkdirSync(join(dir, "eval/results/writing"), { recursive: true });
+    for (const agent of ["concision", "styleCoach", "toneShifter"]) {
+      const card = JSON.parse(readFileSync(join(ROOT, "eval/cards/writing", `${agent}.json`), "utf8")).card;
+      const measured = { ...card, agent, tag: "heldout", model: { name: "qwen3:4b", digest: `sha256:${"a".repeat(64)}` }, dataset: { name: "eval/heldout/writing-w17", version: "1", license: "owner" } };
+      delete measured.dataset.origin;
+      writeFileSync(join(dir, "eval/results/writing", `${agent}-qwen3.json`), JSON.stringify({ card: measured }));
+    }
+    const ok = run(["--suite", "writing", "--check", "--measured"], dir);
+    expect(ok.out).not.toMatch(/no measured report/);
+    expect(ok.code).toBe(0);
   });
 
   it("an unknown suite is refused", () => {
