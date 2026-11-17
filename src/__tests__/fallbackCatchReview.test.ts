@@ -98,6 +98,8 @@ const REVIEWED: Record<string, number> = {
   "storage/import/notion.ts": 1,
   "storage/import/notionDates.ts": 2,
   "storage/import/onenoteGraph.ts": 5,
+  // INT8 (#1193 met #1189): localStorage read/write of the user's own client id (storage detection; a failed save returns false to the wizard) and the optional /lumen-runtime.json (no file = OneNote not offered).
+  "storage/import/onenoteClientId.ts": 3,
   "storage/import/onenoteReturn.ts": 1,
   "storage/import/onenoteSignIn.ts": 2,
   "storage/iwork.ts": 4,
@@ -109,6 +111,8 @@ const REVIEWED: Record<string, number> = {
   "storage/searchHistory.ts": 2,
   "storage/templateMarketplace.ts": 2,
   "storage/trash.ts": 3,
+  // INT8 (#1201 met #1189): a missing fonts.json is TypstUnavailableError("not-installed"), shown as a toast; the reset lets the next export try again, and the error still reaches the awaiting caller.
+  "storage/typstPdf.ts": 2,
   "storage/vault/atomic.ts": 5,
   "storage/vault/cas.ts": 2,
   "storage/vault/encrypted/session.ts": 5,
