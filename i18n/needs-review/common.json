@@ -913,6 +913,42 @@
     "ru": "1m06cjj",
     "zh-CN": "1m06cjj"
   },
+  "map.offline.none": {
+    "ar": "1d9u2hv",
+    "de": "1d9u2hv",
+    "fr": "1d9u2hv",
+    "he": "1d9u2hv",
+    "ja": "1d9u2hv",
+    "ru": "1d9u2hv",
+    "zh-CN": "1d9u2hv"
+  },
+  "map.tiles.allow": {
+    "ar": "v4jucp",
+    "de": "v4jucp",
+    "fr": "v4jucp",
+    "he": "v4jucp",
+    "ja": "v4jucp",
+    "ru": "v4jucp",
+    "zh-CN": "v4jucp"
+  },
+  "map.tiles.stop": {
+    "ar": "x1qbdj",
+    "de": "x1qbdj",
+    "fr": "x1qbdj",
+    "he": "x1qbdj",
+    "ja": "x1qbdj",
+    "ru": "x1qbdj",
+    "zh-CN": "x1qbdj"
+  },
+  "map.tiles.why": {
+    "ar": "hd79vv",
+    "de": "hd79vv",
+    "fr": "hd79vv",
+    "he": "hd79vv",
+    "ja": "hd79vv",
+    "ru": "hd79vv",
+    "zh-CN": "hd79vv"
+  },
   "mcpServers.add": {
     "ar": "1df7h82",
     "de": "1df7h82",
@@ -4682,15 +4718,6 @@
     "ru": "yhvo28",
     "zh-CN": "yhvo28",
     "he": "yhvo28"
-  },
-  "map.offline.none": {
-    "ar": "t05ewh",
-    "de": "t05ewh",
-    "fr": "t05ewh",
-    "ja": "t05ewh",
-    "ru": "t05ewh",
-    "zh-CN": "t05ewh",
-    "he": "t05ewh"
   },
   "map.offline.remove": {
     "ar": "9c35st",

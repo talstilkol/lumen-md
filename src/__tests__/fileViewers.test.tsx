@@ -21,6 +21,7 @@ import { featureRows, gpxToGeoJson, lineLengthKm, parseGeoJson } from "../viewer
 import { FileViewerOverlay, loadFileView, type FileViewerIo } from "../viewers/FileViewerOverlay";
 import { addBaseTiles } from "../plugins/map/tiles";
 import { enableAirplaneMode } from "../privacy/airplane";
+import { setOnlineTilesAllowed } from "../privacy/mapTiles";
 import { zip } from "../storage/zip";
 
 afterEach(cleanup);
@@ -238,13 +239,23 @@ describe("GeoJSON and GPX on a map (W12.F7)", () => {
     expect(() => gpxToGeoJson("<kml/>")).toThrow(/not a GPX/);
   });
 
-  it("background tiles are the only request, and in airplane mode none is added", () => {
+  it("background tiles are the only request, only with consent, and in airplane mode none is added", async () => {
     const calls: string[] = [];
     const L = { tileLayer: (url: string) => ({ addTo: () => calls.push(url) }) } as unknown as typeof import("leaflet");
-    expect(addBaseTiles(L, {} as never)).toBe(true);
-    expect(calls).toEqual(["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"]);
-    enableAirplaneMode();
-    expect(addBaseTiles(L, {} as never)).toBe(false);
-    expect(calls).toHaveLength(1);
+    const map = { _container: {} } as never;
+    expect(addBaseTiles(L, map)).toBe(true);
+    await new Promise((r) => setTimeout(r, 50));
+    expect(calls).toEqual([]); // no consent yet (audit r4 A3 #6)
+    setOnlineTilesAllowed(true);
+    try {
+      addBaseTiles(L, map);
+      await waitFor(() => expect(calls).toEqual(["https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"]));
+      enableAirplaneMode();
+      expect(addBaseTiles(L, map)).toBe(false);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(calls).toHaveLength(1);
+    } finally {
+      setOnlineTilesAllowed(false);
+    }
   });
 });

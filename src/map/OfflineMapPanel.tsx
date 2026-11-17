@@ -53,12 +53,15 @@ export default function OfflineMapPanel({ vault, onChange }: { vault?: MapVault;
         <ul style={{ margin: 0, paddingInlineStart: 18 }}>
           {maps.map((m) => (
             <li key={m.path} data-map={m.path}>
-              <span dir="auto">{m.name}</span> · {mb(m.size)} · {t("map.offline.zooms", { min: String(m.header.minZoom), max: String(m.header.maxZoom) })} ·{" "}
-              <span dir="ltr">
+              {/* Each part isolated (audit r4 A3 #13): in a Hebrew line "0.0 MB" read "MB 0.0" and the zoom range ran backwards. */}
+              <bdi dir="auto" data-part="name">{m.name}</bdi> · <bdi dir="ltr" data-part="size">{mb(m.size)}</bdi> · <bdi data-part="zooms">{t("map.offline.zooms", { min: String(m.header.minZoom), max: String(m.header.maxZoom) })}</bdi> ·{" "}
+              <bdi dir="ltr" data-part="bbox">
                 {m.header.minLat.toFixed(2)},{m.header.minLon.toFixed(2)} – {m.header.maxLat.toFixed(2)},{m.header.maxLon.toFixed(2)}
-              </span>
+              </bdi>
               <br />
-              <small dir="auto">{m.attribution}</small>{" "}
+              <small dir="auto">
+                <bdi>{m.attribution}</bdi>
+              </small>{" "}
               <button
                 type="button"
                 style={btn}
