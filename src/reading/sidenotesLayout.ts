@@ -55,7 +55,7 @@ export function layoutSidenotes(notes: readonly NoteBox[], gap = 8, min = 0, max
 /** Do any two laid-out notes overlap (closer than `gap`)? The acceptance check. */
 export function overlaps(tops: readonly number[], heights: readonly number[], gap = 0): number {
   let count = 0;
-  const order = tops.map((t, i) => i).sort((a, b) => tops[a] - tops[b]);
+  const order = tops.map((_t, i) => i).sort((a, b) => tops[a] - tops[b]);
   for (let k = 1; k < order.length; k++) {
     const a = order[k - 1];
     const b = order[k];

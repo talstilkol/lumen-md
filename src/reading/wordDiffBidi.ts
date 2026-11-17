@@ -207,7 +207,7 @@ function prefixSplits(word: string): Array<{ prefix: string; stem: string }> {
 const isHebrewWord = (t: string) => HEB_LETTER.test(t) && /^[א-ת֑-ׇ'"׳״]+$/.test(t);
 
 /** A single-word replacement that is only a prefix change (same stem), else null. */
-export function prefixChange(oldWord: string, newWord: string, opts: DiffOptions = {}): { oldPrefix: string; newPrefix: string; stem: string; oldStem: string } | null {
+export function prefixChange(oldWord: string, newWord: string, _opts: DiffOptions = {}): { oldPrefix: string; newPrefix: string; stem: string; oldStem: string } | null {
   if (!isHebrewWord(oldWord) || !isHebrewWord(newWord) || oldWord === newWord) return null;
   // Stems match by their letters: a prefix change often moves a dagesh or a vowel (הַבַּיִת → וּבַיִת);
   // the view marks such a stem as a niqqud change (`oldStem` ≠ `stem`).

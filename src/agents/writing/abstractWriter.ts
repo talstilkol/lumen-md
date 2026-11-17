@@ -174,7 +174,9 @@ export const abstractWriterAgent: AgentDefinition<AbstractWriterInput, AbstractD
         if (!d.titles || d.titles.length < 3) return fail("fewer than 3 titles", "Give exactly 3 titles: short, medium and long.");
         if (!d.tldr) return fail("no tldr", "Add a one-sentence tldr.");
         const w = wordsIn(d);
-        if (w < input.extra.minWords * 0.8 || w > input.extra.maxWords * 1.2) return fail(`${w} words`, `The abstract must be ${input.extra.minWords}–${input.extra.maxWords} words.`);
+        const ex = (input.extra ?? {}) as { minWords?: unknown; maxWords?: unknown };
+        const [min, max] = [Number(ex.minWords), Number(ex.maxWords)];
+        if (w < min * 0.8 || w > max * 1.2) return fail(`${w} words`, `The abstract must be ${min}–${max} words.`);
         return ok;
       },
     },

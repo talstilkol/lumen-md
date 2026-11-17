@@ -302,7 +302,7 @@ function frameOf(sentence: string, base: number, vals: Value[], i: number, skip:
   return new Set(before.length ? before : pick(v.end, hi));
 }
 
-const overlap = (a: Set<string>, b: Set<string>) => {
+const overlap = <T,>(a: ReadonlySet<T>, b: ReadonlySet<T>) => {
   let n = 0;
   for (const x of a) if (b.has(x)) n++;
   return n;

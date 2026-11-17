@@ -132,9 +132,9 @@ describe("W13.W12 every sentence anchored", () => {
     expect(() => parseDraft("no json")).toThrow();
     const v = abstractWriterAgent.validators![0];
     const input = { text: "", extra: { language: "English", academic: false, minWords: 150, maxWords: 250 } } as never;
-    expect(v.check({ titles: ["a"], tldr: "x", abstract: "y" }, input).ok).toBe(false);
-    expect(v.check({ titles: ["a", "b", "c"], tldr: "x", abstract: "word ".repeat(200) }, input).ok).toBe(true);
-    expect(v.check({ titles: ["a", "b", "c"], tldr: "x", abstract: "word ".repeat(40) }, input).ok).toBe(false);
+    expect((v.check({ titles: ["a"], tldr: "x", abstract: "y" }, input) as { ok: boolean }).ok).toBe(false);
+    expect((v.check({ titles: ["a", "b", "c"], tldr: "x", abstract: "word ".repeat(200) }, input) as { ok: boolean }).ok).toBe(true);
+    expect((v.check({ titles: ["a", "b", "c"], tldr: "x", abstract: "word ".repeat(40) }, input) as { ok: boolean }).ok).toBe(false);
   });
 
   it("anchorSentences: empty input, and stray [n] markers from the model are ignored", () => {
