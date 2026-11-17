@@ -64,9 +64,17 @@ export const IMPORT_ALLOW = [
   "ai/defaultSelection",
 ];
 /** Calls that change a document, the store or a file. */
-const WRITE_CALLS = new Set(["dispatch", "setContent", "writeAiContent", "insertText", "replaceWith", "replaceRangeWith", "writeFile", "writeTextFile", "writeBinaryFile", "saveFile", "saveNote", "writeNote", "createFile", "openTab", "invoke", "updateDoc", "setState", "appendFile", "rename", "remove", "unlink", "mkdir"]);
+const WRITE_CALLS = new Set(["dispatch", "update", "setContent", "writeAiContent", "insertText", "replaceWith", "replaceRangeWith", "writeFile", "writeTextFile", "writeBinaryFile", "saveFile", "saveNote", "writeNote", "createFile", "openTab", "invoke", "updateDoc", "setState", "appendFile", "rename", "remove", "unlink", "mkdir"]);
 /** Globals and escapes no agent names, for either rule: storage, the store, a way to call by alias or reach a global. */
 const GLOBAL_IDS = ["useAppStore", "globalThis", "window", "self", "document", "localStorage", "sessionStorage", "indexedDB", "caches", "require", "Reflect", "Function", "eval"];
+/**
+ * Review 14 M1: the window's other names and what reaches the network or a page from them (`top.fetch`,
+ * `parent.localStorage`, `frames[0]`, `opener`, `location.assign`, `open(…)`, `new Audio(url)`, `new Option`).
+ * They are ordinary words too (`const top = …`), so a name declared in an enclosing scope is the local, not the global.
+ */
+const WINDOW_IDS = new Set(["top", "parent", "frames", "opener", "location", "open", "Audio", "Option"]);
+/** Methods whose bare read is a write by alias (`const d = v.dispatch; d(t)`). */
+const WRITE_READS = new Set(["dispatch", "update"]);
 /** Calling a function by alias: `.bind`, `.call`, `.apply`. */
 const ALIAS_CALLS = new Set(["bind", "call", "apply"]);
 
@@ -106,6 +114,8 @@ function targetOf(file: string, spec: string): string {
 
 /** Is this import allowed for `file`? Returns why not, or null. */
 function importProblem(file: string, spec: string, typeOnly: boolean): string | null {
+  // Review 14 M1: `../ai/llm.ts?x.json` is code, whatever its suffix says; a query or a fragment is never a plain module.
+  if (/[?#]/.test(spec)) return `imports ${spec} (a query or fragment in the spec)`;
   if (!spec.startsWith(".")) return typeOnly ? null : `imports the package ${spec}`;
   const target = targetOf(file, spec);
   if (/\.json$/.test(target)) return null; // data: nothing to run
@@ -148,14 +158,60 @@ export function directWritesIn(sources: ReadonlyMap<string, string>): string[] {
         const name = ts.isIdentifier(e) ? e.text : ts.isPropertyAccessExpression(e) ? e.name.text : ts.isElementAccessExpression(e) ? "[computed]" : null;
         if (name && WRITE_CALLS.has(name)) out.push(`${at(n)} ${name}(…)`);
         if (name === "[computed]") out.push(`${at(n)} computed call`);
+        // Review 14 M1: `(0, v.dispatch)(t)`, `(a || b)(t)`: a call whose callee is not a name, a property or a function written there (an IIFE).
+        if (ts.isParenthesizedExpression(e) && !ts.isIdentifier(stripped(e)) && !ts.isPropertyAccessExpression(stripped(e)) && !ts.isArrowFunction(stripped(e)) && !ts.isFunctionExpression(stripped(e))) out.push(`${at(n)} indirect call`);
       }
+      if (ts.isPropertyAccessExpression(n) && WRITE_READS.has(n.name.text) && !(ts.isCallExpression(n.parent) && n.parent.expression === n)) out.push(`${at(n)} reads .${n.name.text}`);
+      if (ts.isMetaProperty(n) && n.keywordToken === ts.SyntaxKind.ImportKeyword) out.push(`${at(n)} import.meta`);
       if (ts.isPropertyAccessExpression(n) && ALIAS_CALLS.has(n.name.text)) out.push(`${at(n)} .${n.name.text}`);
       if (ts.isIdentifier(n) && GLOBAL_IDS.includes(n.text) && !isPropertyName(n)) out.push(`${at(n)} uses ${n.text}`);
+      if (ts.isIdentifier(n) && isWindowGlobal(n)) out.push(`${at(n)} uses ${n.text}`);
       ts.forEachChild(n, visit);
     };
     visit(sf);
   }
   return out;
+}
+
+/** The expression inside parentheses, `as`, `!` and `satisfies`. */
+function stripped(e: ts.Expression): ts.Expression {
+  while (ts.isParenthesizedExpression(e) || ts.isAsExpression(e) || ts.isNonNullExpression(e) || ts.isSatisfiesExpression(e) || ts.isTypeAssertionExpression(e)) e = e.expression;
+  return e;
+}
+
+/** Is `name` declared by this node itself (a parameter, a variable, a function, a class, an import or a catch binding)? */
+function declares(node: ts.Node, name: string): boolean {
+  const inBinding = (b: ts.BindingName): boolean => (ts.isIdentifier(b) ? b.text === name : b.elements.some((el) => !ts.isOmittedExpression(el) && inBinding(el.name)));
+  const inList = (l: ts.VariableDeclarationList) => l.declarations.some((d) => inBinding(d.name));
+  if (ts.isFunctionLike(node)) {
+    if (node.parameters.some((p) => inBinding(p.name))) return true;
+    if ((ts.isFunctionExpression(node) || ts.isClassExpression(node as ts.Node)) && node.name && ts.isIdentifier(node.name) && node.name.text === name) return true;
+  }
+  if (ts.isCatchClause(node) && node.variableDeclaration && inBinding(node.variableDeclaration.name)) return true;
+  if ((ts.isForStatement(node) || ts.isForOfStatement(node) || ts.isForInStatement(node)) && node.initializer && ts.isVariableDeclarationList(node.initializer) && inList(node.initializer)) return true;
+  if (ts.isSourceFile(node) || ts.isBlock(node) || ts.isModuleBlock(node) || ts.isCaseClause(node) || ts.isDefaultClause(node)) {
+    for (const st of node.statements) {
+      if (ts.isVariableStatement(st) && inList(st.declarationList)) return true;
+      if ((ts.isFunctionDeclaration(st) || ts.isClassDeclaration(st) || ts.isEnumDeclaration(st)) && st.name?.text === name) return true;
+      if (ts.isImportDeclaration(st) && st.importClause) {
+        const c = st.importClause;
+        if (c.name?.text === name) return true;
+        const nb = c.namedBindings;
+        if (nb && (ts.isNamespaceImport(nb) ? nb.name.text === name : nb.elements.some((el) => el.name.text === name))) return true;
+      }
+    }
+  }
+  return false;
+}
+
+/** One of WINDOW_IDS used as the global: not a property name, not a declaration's own name, not declared in an enclosing scope. */
+function isWindowGlobal(n: ts.Identifier): boolean {
+  if (!WINDOW_IDS.has(n.text) || isPropertyName(n)) return false;
+  const p = n.parent;
+  if ((ts.isVariableDeclaration(p) || ts.isParameter(p) || ts.isBindingElement(p) || ts.isFunctionDeclaration(p) || ts.isFunctionExpression(p) || ts.isMethodDeclaration(p) || ts.isPropertyDeclaration(p)|| ts.isImportSpecifier(p)) && (p as { name?: ts.Node }).name === n) return false;
+  if (ts.isBindingElement(p) && p.propertyName === n) return false;
+  for (let a: ts.Node | undefined = p; a; a = a.parent) if (declares(a, n.text)) return false;
+  return true;
 }
 
 /** `x.window` or `{ window: 1 }`: a property name, not the global. */
@@ -180,6 +236,8 @@ export function networkUsesIn(sources: ReadonlyMap<string, string>): string[] {
     }
     const visit = (n: ts.Node): void => {
       if (ts.isIdentifier(n) && NET_IDS.has(n.text) && !isPropertyName(n)) out.push(`${at(n)} ${n.text}`);
+      if (ts.isIdentifier(n) && isWindowGlobal(n)) out.push(`${at(n)} ${n.text}`);
+      if (ts.isMetaProperty(n) && n.keywordToken === ts.SyntaxKind.ImportKeyword) out.push(`${at(n)} import.meta`);
       if (ts.isPropertyAccessExpression(n) && ["sendBeacon", "postMessage"].includes(n.name.text)) out.push(`${at(n)} .${n.name.text}`);
       if ((ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n) || ts.isTemplateHead(n)) && /\b(?:https?|wss?):\/\/|^\/\/[\w.-]/.test(n.text)) out.push(`${at(n)} URL ${n.text.slice(0, 40)}`);
       ts.forEachChild(n, visit);
