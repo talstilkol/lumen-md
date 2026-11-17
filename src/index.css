@@ -1414,7 +1414,8 @@
   .vault-folder-btn {
     border: none;
     background: hsl(var(--accent));
-    color: white;
+    /* W13.T5: the accent's own foreground (white on light, dark on the lighter dark-theme accent): AA in both. */
+    color: hsl(var(--accent-fg));
     padding-block: 5px;
     padding-inline: 12px;
     border-radius: 999px;
