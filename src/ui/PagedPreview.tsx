@@ -18,6 +18,7 @@ import { registerEnglish } from "../i18n";
 import { fitScale, layoutPages, pageAtScroll, pagedGeometry, readPagedPrefs, savePagedPrefs, sheetOffsetPx, ZOOMS, type PagedZoom } from "../print/pagedPreview";
 import { printFrontmatter, type PageMargins, type PageNumbering } from "../print/printLayout";
 import { extractFrontmatter } from "../renderer/pipeline";
+import { explainError } from "../lib/userError";
 
 registerEnglish(english);
 
@@ -113,7 +114,7 @@ export function PagedPreview({ markdownText, docName, delay = 350 }: Props) {
         setStatus("ready");
       } catch (e) {
         if (id !== run.current) return;
-        setError(e instanceof Error ? e.message : String(e));
+        setError(explainError(e, "paged-preview"));
         setStatus("error");
       }
     }, delay);
@@ -189,6 +190,7 @@ export function PagedPreview({ markdownText, docName, delay = 350 }: Props) {
             </option>
           ))}
         </select>
+        {/* empty-allow: the toolbar's page indicator ("nothing to lay out"); the editor is the way out */}
         <span data-testid="paged-indicator" aria-live="polite" style={{ minWidth: 90, textAlign: "center", color: "hsl(var(--fg))" }}>
           {status === "ready" ? t("paged.pageOf", { n: current, total: pages }) : status === "empty" ? t("paged.empty") : status === "error" ? t("paged.error", { error }) : t("paged.laying")}
         </span>

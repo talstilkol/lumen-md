@@ -30,5 +30,32 @@
     "de": "1ii0ct2",
     "ja": "1ii0ct2",
     "zh-CN": "1ii0ct2"
+  },
+  "ai.settings.ollama.pull.missing": {
+    "ar": "1y2jl16",
+    "de": "1y2jl16",
+    "fa": "1y2jl16",
+    "fr": "1y2jl16",
+    "ja": "1y2jl16",
+    "ru": "1y2jl16",
+    "zh-CN": "1y2jl16"
+  },
+  "ai.settings.ollama.pull.disk": {
+    "ar": "1dofh0l",
+    "de": "1dofh0l",
+    "fa": "1dofh0l",
+    "fr": "1dofh0l",
+    "ja": "1dofh0l",
+    "ru": "1dofh0l",
+    "zh-CN": "1dofh0l"
+  },
+  "ai.settings.ollama.pull.name": {
+    "ar": "1xmfc2p",
+    "de": "1xmfc2p",
+    "fa": "1xmfc2p",
+    "fr": "1xmfc2p",
+    "ja": "1xmfc2p",
+    "ru": "1xmfc2p",
+    "zh-CN": "1xmfc2p"
   }
 }

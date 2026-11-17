@@ -25,12 +25,28 @@ export interface PullProgress {
   fraction: number | null;
 }
 
+/**
+ * What went wrong, in terms the panel can say in words (plan W3.2): Ollama's
+ * own text goes to the log, but "no such model" and "the disk is full" are
+ * diagnoses the person needs, not a generic "something went wrong".
+ */
+export type OllamaPullReason = "missing" | "disk" | "name";
+
+/** The reason Ollama's error text names, if it is one we can say in words. */
+export function pullReason(text: string): OllamaPullReason | undefined {
+  if (/file does not exist|manifest unknown|model .*not found|pull access denied|not found/i.test(text)) return "missing";
+  if (/no space left|disk (is )?full|insufficient (disk|storage)/i.test(text)) return "disk";
+  return undefined;
+}
+
 export class OllamaPullError extends Error {
   readonly status?: number;
-  constructor(message: string, status?: number) {
+  readonly reason?: OllamaPullReason;
+  constructor(message: string, status?: number, reason: OllamaPullReason | undefined = pullReason(message)) {
     super(message);
     this.name = "OllamaPullError";
     this.status = status;
+    this.reason = reason;
   }
 }
 
@@ -76,7 +92,7 @@ export async function pullOllamaModel(
   opts: { onProgress?: (p: PullProgress) => void; signal?: AbortSignal; fetchImpl?: typeof fetch } = {},
 ): Promise<void> {
   const model = name.trim();
-  if (!validOllamaName(model)) throw new OllamaPullError(`Not a model name: "${model}"`);
+  if (!validOllamaName(model)) throw new OllamaPullError(`Not a model name: "${model}"`, undefined, "name");
   const doFetch = opts.fetchImpl ?? fetch;
   const res = await doFetch(`${base.replace(/\/+$/, "")}/api/pull`, {
     method: "POST",

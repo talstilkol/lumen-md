@@ -153,6 +153,7 @@ export function PerspectiveBar({ scope, kinds, kindLabel, defaultColor, rules, o
       <label style={{ display: "inline-flex", gap: 4, alignItems: "center" }}>
         {t("graphPersp.view")}
         <select value={current} onChange={(e) => open(e.target.value)} data-testid="graph-perspective" aria-keyshortcuts="Alt+1 Alt+2 Alt+3" style={style}>
+          {/* empty-allow: the "no perspective" option of a select, not an empty state */}
           <option value="">{t("graphPersp.none")}</option>
           {mine.map((p, i) => (
             <option key={p.id} value={p.id}>

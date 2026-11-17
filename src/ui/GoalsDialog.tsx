@@ -68,6 +68,7 @@ export function GoalsDialogImpl({ onClose, now = new Date() }: { onClose: () => 
           <label style={{ display: "flex", flexDirection: "column", gap: 2, fontSize: 13 }}>
             {t("goal.field.readability")}
             <select value={g.readability ?? ""} data-testid="goal-readability" onChange={(e) => setG({ ...g, readability: (e.target.value || undefined) as NoteGoal["readability"] })}>
+              {/* empty-allow: the "no goal" option of a select, not an empty state */}
               <option value="">{t("goal.none")}</option>
               {(["easy", "medium", "hard"] as const).map((l) => (
                 <option key={l} value={l}>
@@ -79,6 +80,7 @@ export function GoalsDialogImpl({ onClose, now = new Date() }: { onClose: () => 
           <label style={{ display: "flex", flexDirection: "column", gap: 2, fontSize: 13 }}>
             {t("goal.field.tone")}
             <select value={g.tone ?? ""} data-testid="goal-tone" onChange={(e) => setG({ ...g, tone: (e.target.value || undefined) as NoteGoal["tone"] })}>
+              {/* empty-allow: the "no goal" option of a select, not an empty state */}
               <option value="">{t("goal.none")}</option>
               {(["formal", "neutral", "casual"] as const).map((l) => (
                 <option key={l} value={l}>

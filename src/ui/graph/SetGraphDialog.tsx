@@ -17,6 +17,7 @@ import { PerspectiveBar } from "./PerspectiveBar";
 import { groupColor, resolveColor } from "./graphData";
 import "./perspectiveStrings";
 import { compareNames } from "../../i18n/collate";
+import { EmptyState, learnHow } from "../EmptyState";
 
 export interface SetGraphDialogProps {
   title: string;
@@ -153,7 +154,7 @@ export function SetGraphDialog({ title, rows, paths, onClose, onOpen, vault, loa
           ) : !graph ? (
             <p style={{ padding: 16 }}>{t("graphPersp.loading")}</p>
           ) : !graph.nodes.length ? (
-            <p style={{ padding: 16 }} data-testid="set-graph-empty">{t("graphPersp.empty")}</p>
+            <EmptyState testId="set-graph-empty" message={t("graphPersp.empty")} action={learnHow("workspace/graph")} />
           ) : asTable ? (
             <GraphTable labels={graph.nodes.map((n) => n.label)} neighbors={(i) => adjacency[i] ?? []} onOpen={(k) => onOpen?.(graph.nodes[k].id)} />
           ) : (

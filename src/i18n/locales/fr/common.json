@@ -2529,6 +2529,7 @@
   "map.offline.imported": "{name} est maintenant la carte hors ligne",
   "map.offline.importing": "Copie de {name} dans le coffre…",
   "map.offline.none": "Aucune carte hors ligne dans le coffre. Les cartes n’affichent des tuiles en ligne que si vous l’autorisez (jamais en mode avion).",
+  "map.offline.notPmtiles": "“{name}” is not a PMTiles map (version 3). Make one with the pmtiles command below.",
   "map.offline.remove": "Supprimer",
   "map.offline.removed": "{name} supprimé",
   "map.offline.title": "Carte hors ligne",

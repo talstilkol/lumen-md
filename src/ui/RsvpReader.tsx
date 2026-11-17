@@ -16,6 +16,7 @@ import { RSVP_RESEARCH, WPM, keyAction, minutesLeft, paragraphDirections, rewind
 import { Modal } from "./Modal";
 // The palette's dialog look (.cmd-palette): loaded with this dialog too, which can open before the palette ever has (INT7).
 import "./CommandPalette.css";
+import { EmptyState, learnHow } from "./EmptyState";
 
 const btn: CSSProperties = { border: "1px solid hsl(var(--border-strong))", borderRadius: 8, padding: "6px 12px", background: "hsl(var(--bg))", color: "hsl(var(--fg))", font: "inherit", fontSize: 13, cursor: "pointer" };
 
@@ -76,7 +77,7 @@ export function RsvpReader({ content, initialWpm, close }: { content: string; in
     return (
       <Modal onClose={close} className="cmd-palette-backdrop" aria-label={t("rsvp.title")} data-testid="rsvp-reader" data-reading-mode="rsvp">
         <div className="cmd-palette" style={{ padding: 24, maxWidth: 420 }}>
-          <p>{t("rsvp.empty")}</p>
+          <EmptyState style={{ padding: 0 }} message={t("rsvp.empty")} action={learnHow("editor/reading-modes")} />
           <button type="button" style={btn} onClick={close}>
             {t("rsvp.close")}
           </button>

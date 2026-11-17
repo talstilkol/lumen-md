@@ -48,6 +48,7 @@ export function LocalDataDialog({ deps, onClose, save }: { deps: StorageDeps; on
                   {t(`localData.cat.${c.category}`)}
                   <div style={{ fontSize: 12, fontWeight: 400, color: "hsl(var(--fg-muted))" }}>{t(`localData.about.${c.category}`)}</div>
                 </th>
+                {/* empty-allow: a size cell ("nothing stored"); the row's Delete is beside it */}
                 <td style={{ padding: "8px 4px", whiteSpace: "nowrap" }}>{c.items.length ? size(c.bytes) : t("localData.empty")}</td>
                 <td style={{ padding: "8px 4px", textAlign: "end" }}>
                   <button type="button" className="btn" disabled={busy || !c.items.length} onClick={() => void remove(c.category)} aria-label={t("localData.deleteWhat", { what: t(`localData.cat.${c.category}`) })} style={{ padding: "4px 10px", border: "1px solid hsl(var(--border))", borderRadius: 6 }}>

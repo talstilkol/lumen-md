@@ -18,6 +18,7 @@ import type { ClusterAnalysis, GapInput, GapNode } from "../../graph/clusterGaps
 import { analyzeClustersOffThread, type WorkerAnalyzeOptions } from "../../graph/clusterGapsClient";
 import { stageGapLinks } from "../../graph/clusterGapsStage";
 import "./clusterGapsStrings";
+import { explainError } from "../../lib/userError";
 
 export interface ClusterGapsPanelProps {
   /** The graph on screen: note paths, labels and links. */
@@ -79,7 +80,7 @@ export function ClusterGapsPanel({ nodes, edges, texts = indexTexts, read = read
       onAnalysis(res);
       setStatus(t("graphClusters.done", { clusters: res.clusters.length, gaps: res.gaps.length }));
     } catch (e) {
-      setStatus(t("graphClusters.failed", { error: e instanceof Error ? e.message : String(e) }));
+      setStatus(t("graphClusters.failed", { error: explainError(e, "graph-clusters") }));
     } finally {
       setBusy(false);
       // The button's label changes ("Analyse again"); the focus stays on it.
@@ -100,7 +101,7 @@ export function ClusterGapsPanel({ nodes, edges, texts = indexTexts, read = read
       });
       setStatus(t("graphClusters.staged", { n: staged.length }));
     } catch (e) {
-      setStatus(t("graphClusters.failed", { error: e instanceof Error ? e.message : String(e) }));
+      setStatus(t("graphClusters.failed", { error: explainError(e, "graph-clusters") }));
     }
   };
 

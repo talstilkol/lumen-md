@@ -120,10 +120,34 @@ describe("model manager — Ollama pull from the panel", () => {
     f.push({ status: "pulling manifest" });
     f.push({ error: "pull model manifest: file does not exist" });
     f.end();
-    // W3.2: the record's words go to the log; the screen says what happened in words.
-    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe(`Download failed: ${t("error.unknown")}`));
+    // W3.2: the record's words go to the log; the screen says what happened in words — and which
+    // diagnosis it is (no such model), not a generic "something went wrong" (audit r2).
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe(`Download failed: ${t("ai.settings.ollama.pull.missing", { model: "nope:1b" })}`));
+    expect(screen.getByRole("alert").textContent).toContain("nope:1b");
+    expect(screen.getByRole("alert").textContent).not.toContain(t("error.unknown"));
     expect(screen.getByRole("alert").textContent).not.toContain("manifest");
     expect(screen.getByRole("button", { name: "Download" })).toBeTruthy();
+  });
+
+  it("a full disk is said as a full disk; an error Ollama gives no diagnosis for stays generic", async () => {
+    const f = fakePullFetch();
+    vi.stubGlobal("fetch", f.fetchMock);
+    render(<AiSettingsPanel open onClose={() => {}} />);
+    fireEvent.change(await screen.findByPlaceholderText("qwen3:4b"), { target: { value: "big:70b" } });
+    fireEvent.click(screen.getByRole("button", { name: "Download" }));
+    await waitFor(() => expect(f.requests).toHaveLength(1));
+    f.push({ error: "write /root/.ollama/models/blobs/sha256-1: no space left on device" });
+    f.end();
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe(`Download failed: ${t("ai.settings.ollama.pull.disk", { model: "big:70b" })}`));
+    expect(screen.getByRole("alert").textContent).not.toContain("/root");
+    const g = fakePullFetch();
+    vi.stubGlobal("fetch", g.fetchMock);
+    fireEvent.click(screen.getByRole("button", { name: "Download" }));
+    await waitFor(() => expect(g.requests).toHaveLength(1));
+    g.push({ error: "max retries exceeded: EOF 0x7f3a" });
+    g.end();
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe(`Download failed: ${t("error.unknown")}`));
+    expect(screen.getByRole("alert").textContent).not.toContain("0x7f3a");
   });
 
   it("a double click starts one download, not two", async () => {

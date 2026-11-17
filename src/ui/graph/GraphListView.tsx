@@ -13,6 +13,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react"
 import { t } from "../../i18n";
 import { degrees, neighbourGroups, type AltGraph, type AltNode } from "../../graph/textAlt";
 import "./graphAltStrings";
+import { EmptyState, learnHow } from "../EmptyState";
 
 export interface GraphListViewProps {
   graph: AltGraph;
@@ -93,9 +94,7 @@ export function GraphListView({ graph, start, kindLabel, relationLabel, onOpen, 
 
   if (!node) {
     return (
-      <p data-testid="graph-list-empty" style={{ padding: 16, color: "hsl(var(--fg-muted))" }}>
-        {t("graphAlt.list.empty")}
-      </p>
+      <EmptyState testId="graph-list-empty" message={t("graphAlt.list.empty")} action={learnHow("workspace/graph")} />
     );
   }
   const links = deg.get(node.id) ?? 0;
@@ -129,6 +128,7 @@ export function GraphListView({ graph, start, kindLabel, relationLabel, onOpen, 
         {desc}
       </p>
       <div ref={list} role="group" aria-labelledby="graph-list-desc" style={{ display: "grid", gap: 10 }}>
+        {/* empty-action: the Back button above (graph-list-back) returns to the node you came from */}
         {!groups.length && <p style={{ margin: 0 }}>{t("graphAlt.list.none")}</p>}
         {groups.map((g) => {
           const hid = `graph-list-g-${g.direction}-${g.relation || "link"}`;

@@ -147,6 +147,7 @@ export default function PathFinderPanel({ entities, edges, texts, from = "", to 
           {t("entityGraph.paths.find")}
         </button>
       </form>
+      {/* empty-action: the from/to form right above (change the ends or the length and search again) */}
       <p role="status" aria-live="polite" style={{ margin: 0, color: "hsl(var(--fg-muted))" }} data-testid="path-status">
         {problem ?? (result ? (result.paths.length ? t("entityGraph.paths.found", { n: String(result.paths.length), ms: String(result.ms) }) : t("entityGraph.paths.none")) : "")}
       </p>

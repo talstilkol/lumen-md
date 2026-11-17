@@ -20,6 +20,7 @@ export function ExplainChangeView({ r, versionLabel, lang }: { r: ChangeExplanat
       </p>
       {!r.hunks.length ? (
         <div role="status" data-testid="xchg-none">
+          {/* empty-allow: the result of a comparison ("nothing changed"), not an empty panel */}
           {t("xchg.none")}
         </div>
       ) : (

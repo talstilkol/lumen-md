@@ -345,6 +345,7 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
         <span className="epub-spacer" />
         <select data-testid="epub-layout" aria-label={t("pdf.spread.label")} value={spread.layout} onChange={(e) => spread.setLayout(e.target.value as EpubLayout)}>
           <option value="scroll">{t("readingViews.spread.scroll")}</option>
+          {/* empty-allow: an option label ("single page"), not an empty state */}
           <option value="none">{t("pdf.spread.none")}</option>
           <option value="odd">{t("pdf.spread.odd")}</option>
           <option value="even">{t("pdf.spread.even")}</option>

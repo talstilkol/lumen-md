@@ -132,6 +132,7 @@ export function EntityInfobox({ model, resolveImage, linkOf, hover, dir }: Entit
           )}
           {!model.rows.length && !model.key.length && (
             <tr>
+              {/* empty-allow: a row of the infobox card ("no facts yet"), inside a card that has its own actions */}
               <td colSpan={2} className="lumen-infobox-rel">
                 {t("entityGraph.infobox.empty")}
               </td>

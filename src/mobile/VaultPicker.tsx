@@ -17,13 +17,10 @@ import "./VaultPicker.css";
 import "./vaultPickerStrings";
 import { daysLeft, formatBytes, purgeExpired, readRegistry, rename, restore, trash, VaultPickerError, writeRegistry, type KV, type Registry, type VaultCard } from "./vaultRegistry";
 import { kv, openVault } from "./vaultPickerActions";
+import { explainError } from "../lib/userError";
+import { EmptyState, learnHow } from "../ui/EmptyState";
 
 type Busy = null | { id: string; what: "rename" | "trash" | "restore" | "open" | "move" };
-
-function errorText(e: unknown): string {
-  if (e instanceof VaultPickerError) return t(`vaults.error.${e.code}`);
-  return e instanceof Error ? e.message : String(e);
-}
 
 export function VaultPicker({ onClose, now = Date.now, openId: openIdProp, store = kv, open = openVault }: { onClose: () => void; now?: () => number; openId?: string | null; store?: KV; open?: typeof openVault }) {
   const [reg, setReg] = useState<Registry | null>(null);
@@ -72,7 +69,7 @@ export function VaultPicker({ onClose, now = Date.now, openId: openIdProp, store
     try {
       await f();
     } catch (e) {
-      setError(errorText(e));
+      setError(e instanceof VaultPickerError ? t(`vaults.error.${e.code}`) : explainError(e, "vault-picker"));
       focusAfter.current = `[data-card="${b.id}"] .vault-menu-button`;
     } finally {
       setBusy(null);
@@ -121,7 +118,7 @@ export function VaultPicker({ onClose, now = Date.now, openId: openIdProp, store
           </p>
         )}
         {reg.vaults.length === 0 ? (
-          <p style={{ fontSize: 14 }}>{t("vaults.empty")}</p>
+          <EmptyState style={{ padding: "8px 0", fontSize: 14 }} message={t("vaults.empty")} action={learnHow("workspace/mobile-vault-folder")} />
         ) : (
           <ul aria-label={t("vaults.title")} style={{ listStyle: "none", margin: "8px 0", padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
             {reg.vaults.map((c) => {

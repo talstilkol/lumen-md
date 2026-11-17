@@ -240,6 +240,7 @@ export function ReadingModeMenu({ close }: { close: () => void }) {
           </button>
         </header>
         <div style={{ overflowY: "auto", padding: 16 }}>
+          {/* empty-allow: a line saying where the reading settings come from, not an empty state */}
           <p style={muted} data-testid="rm-sources" dir="auto">
             {fileKeys || deviceKeys ? t("readingMode.sources", { file: fileKeys, device: deviceKeys }) : t("readingMode.sources.none")}
           </p>

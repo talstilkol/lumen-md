@@ -240,7 +240,8 @@ export function CompareView({ left, right, onClose }: Props) {
               ? current >= 0
                 ? t("readingViews.compare.position", { i: String(current + 1), n: String(runs.length) })
                 : t("readingViews.compare.count", { n: String(runs.length), ins: String(stats.ins), del: String(stats.del) })
-              : t("readingViews.compare.none")}
+              : // empty-allow: the toolbar's result count ("no differences"), not an empty panel
+                t("readingViews.compare.none")}
           </span>
           <button type="button" className="cmp-close" onClick={onClose}>
             {t("readingViews.compare.close")}

@@ -19,6 +19,7 @@ import type { WritingSuggestion } from "../agents/writing/writingSuggestion";
 import { loadWritingChecks, saveWritingChecks, type WritingCheckSettings } from "./writingCheckSettings";
 import { stageFinding } from "../agents/writingReview";
 import "./writingChecksDialogStrings";
+import { explainError } from "../lib/userError";
 
 export type WritingCheckId = "repetition" | "loanwords";
 
@@ -98,7 +99,7 @@ export function WritingChecksDialogImpl({ target, onClose }: { target: WritingCh
         done.add(`${s.range.from}:${s.kind}`);
         n++;
       } catch (e) {
-        showAiToast(String((e as Error).message ?? e), "error");
+        showAiToast(explainError(e, "writing-checks"), "error");
         break;
       }
     }
@@ -156,6 +157,7 @@ export function WritingChecksDialogImpl({ target, onClose }: { target: WritingCh
             </label>
           )}
         </div>
+        {/* empty-allow: the result count of a check ("no findings"); the check picker above is the next step */}
         <div role="status" style={{ fontSize: 13, fontWeight: 600 }} data-testid="wchk-count">
           {shown.length ? t("wchk.count", { count: shown.length }) : target.check === "loanwords" && settings.register === "everyday" ? t("wchk.loanwords.everyday") : t("wchk.none")}
         </div>

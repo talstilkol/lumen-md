@@ -54,6 +54,7 @@ export async function openBilingual(): Promise<void> {
       ) : (
         <div data-testid="bilingual-empty" style={{ display: "grid", gap: 10 }}>
           <h2 style={{ margin: 0, fontSize: 18 }}>{t("bilingual.title")}</h2>
+          {/* empty-action: the "make a translation" button below */}
           <p style={{ margin: 0 }}>{t("bilingual.none")}</p>
           <div>
             <button

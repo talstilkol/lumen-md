@@ -19,6 +19,7 @@ import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent }
 import { getLocale, t } from "../../i18n";
 import { dayString, ganttLayout, panWindow, zoomWindow, type GanttItem, type GanttLayout, type GanttWindow } from "./gantt";
 import "./timelineStrings";
+import { EmptyState, learnHow } from "../../ui/EmptyState";
 
 export interface GanttViewProps {
   items: readonly GanttItem[];
@@ -200,7 +201,7 @@ export default function GanttView({ items, onOpen, initialTable = false, dir }: 
     </span>
   );
 
-  if (!layout.rows.length && !layout.undated.length) return <p data-testid="gantt-empty">{t("timeline.empty")}</p>;
+  if (!layout.rows.length && !layout.undated.length) return <EmptyState testId="gantt-empty" message={t("timeline.empty")} action={learnHow("ai/research")} />;
 
   return (
     <section aria-labelledby={titleId} data-testid="gantt" dir={rtl ? "rtl" : "ltr"} style={{ display: "grid", gap: 8, fontSize: 12 }}>

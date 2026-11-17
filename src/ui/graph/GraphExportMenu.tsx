@@ -17,6 +17,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { t } from "../../i18n";
 import type { Scene } from "../../graph/exportImage";
+import { explainError } from "../../lib/userError";
 
 export type ExportFormat = "svg" | "png" | "gexf";
 
@@ -93,7 +94,7 @@ export function GraphExportMenu({ scene, testId = "graph-export-view", style, on
       (onFile ?? download)(blob, name);
       setStatus(t("graphExport.saved", { file: name, nodes: s.nodes.length }));
     } catch (e) {
-      setStatus(t("graphExport.failed", { error: e instanceof Error ? e.message : String(e) }));
+      setStatus(t("graphExport.failed", { error: explainError(e, "graph-export") }));
     } finally {
       setBusy(false);
     }

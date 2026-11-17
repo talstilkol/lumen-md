@@ -2529,6 +2529,7 @@
   "map.offline.imported": "{name} היא עכשיו המפה הלא מקוונת",
   "map.offline.importing": "מעתיקים את {name} לכספת…",
   "map.offline.none": "אין מפה לא מקוונת בכספת. מפות מציגות אריחים מהרשת רק אם אישרתם זאת (אף פעם לא במצב טיסה).",
+  "map.offline.notPmtiles": "״{name}״ אינו מפת PMTiles (גרסה 3). אפשר ליצור מפה בפקודת pmtiles שלמטה.",
   "map.offline.remove": "הסרה",
   "map.offline.removed": "{name} הוסר",
   "map.offline.title": "מפה לא מקוונת",

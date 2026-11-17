@@ -16,6 +16,7 @@ import { buildFamily, layoutChart, lifeYears, type ChartMode } from "../entities
 import type { ExportPerson } from "../entities/gedcom";
 import type { Edge } from "../entities/model";
 import { compareNames } from "../i18n/collate";
+import { EmptyState, learnHow } from "./EmptyState";
 
 export interface FamilyTreeViewProps {
   people: readonly ExportPerson[];
@@ -64,7 +65,7 @@ export function FamilyTreeView({ people, edges, start, onOpen }: FamilyTreeViewP
     wrap.current?.querySelector<HTMLElement>(`[data-person="${CSS.escape(next)}"]`)?.focus();
   };
 
-  if (!fam.persons.size) return <p style={{ padding: 16 }} data-testid="family-empty">{t("family.empty")}</p>;
+  if (!fam.persons.size) return <EmptyState testId="family-empty" message={t("family.empty")} action={learnHow("workspace/entity-graph")} />;
   const me = fam.persons.get(focus);
   return (
     <section aria-label={t("family.label")} data-testid="family-tree" style={{ display: "flex", flexDirection: "column", blockSize: "100%" }}>

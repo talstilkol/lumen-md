@@ -13,6 +13,7 @@ import { buildDaf, DAF_CSS, layoutDaf } from "../reading/daf/dafDom";
 import type { DafContent, DafText } from "../reading/daf/dafSources";
 import { HelpButton } from "./HelpButton";
 import { readingText } from "../reading/profileCore";
+import { EmptyState, learnHow } from "./EmptyState";
 
 registerEnglish(english);
 
@@ -156,7 +157,7 @@ export function DafView({ content, myNotes = [], choices = [], loadCommentary, i
   if (!content.main) {
     return (
       <div data-testid="daf-view" data-ready="true" style={{ padding: 16 }}>
-        <p>{t("daf.empty")}</p>
+        <EmptyState style={{ padding: 0 }} message={t("daf.empty")} action={learnHow("editor/reading-views")} />
       </div>
     );
   }
