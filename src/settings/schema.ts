@@ -263,6 +263,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   local("lumen.nikud.quality", { kind: "setting", tab: "general", type: "text" }),
   local("lumen.tts.settings", { kind: "setting", tab: "general", type: "json" }),
   local("lumen.bidiMarks", { kind: "setting", tab: "general", type: "boolean", values: ["", "1"] }),
+  // W13.V6: extra folders the tree, the index and the watcher skip (.git, node_modules… always); `!name` walks a default again.
+  local("lumen.index.ignore", { kind: "setting", tab: "general", label: "settings.indexIgnore", type: "list", maxItems: 50 }),
   local("lumen-reading", { kind: "setting", tab: "general", type: "json" }),
   local("lumen-reading-aids", { kind: "setting", tab: "general", type: "json" }),
   local("lumen-hebrew-typography", { kind: "setting", tab: "general", type: "json" }),

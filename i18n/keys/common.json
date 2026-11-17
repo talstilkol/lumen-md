@@ -18592,6 +18592,11 @@
       ]
     },
     {
+      "key": "settings.indexIgnore",
+      "en": "Folders the index skips (besides .git, node_modules)",
+      "vars": []
+    },
+    {
       "key": "settings.keepImageMetadata",
       "en": "Keep photos' location, time and camera details (when adding photos and when exporting)",
       "vars": []
@@ -19669,6 +19674,26 @@
       "vars": [
         "score"
       ]
+    },
+    {
+      "key": "status.indexing",
+      "en": "Indexing {done} / {total}",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "status.indexing.sr",
+      "en": "Indexing the vault: {pct}%",
+      "vars": [
+        "pct"
+      ]
+    },
+    {
+      "key": "status.indexing.title",
+      "en": "Reading the vault into the search index. You can keep working.",
+      "vars": []
     },
     {
       "key": "status.leave",

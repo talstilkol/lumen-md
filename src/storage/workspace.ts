@@ -12,6 +12,7 @@
 import { randomId } from "../lib/cryptoRandom";
 import { getVaultBackend, VaultNotFoundError, type VaultData, type VaultEntry } from "./vault";
 import { basename, dirname, splitPath } from "./vault/shared";
+import { isIgnoredDir } from "./vault/ignore";
 import { lockedNotes, noteSealer } from "./lockedNotesRegistry";
 
 export { basename, dirname, joinPath, splitPath } from "./vault/shared";
@@ -58,6 +59,8 @@ async function readDirInto(
     // real repository content such as `.github/` — only the trash stays out.
     if (name.startsWith(".") && (!opts.includeHidden || (!dir && name === ".trash"))) continue;
     if (entry.kind === "directory") {
+      // W13.V6: .git, node_modules… are never walked (vault/ignore), even for sync's mirror.
+      if (isIgnoredDir(path)) continue;
       let children: WorkspaceNode[];
       try {
         children = await readDirInto(path, opts);

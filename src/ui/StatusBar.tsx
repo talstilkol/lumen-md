@@ -12,6 +12,7 @@ import { secretStoreMode, subscribeSecretStoreMode } from "../lib/secretStore";
 import { parseSuggestions, mayContainCriticMarkup } from "../editor/suggesting";
 import { BetaBadge } from "./FeatureFlagsHost";
 import { StatusBarA11yLink } from "./AccessibilityLinks";
+import { IndexProgressStatus } from "./IndexProgressStatus";
 // W13.W14: the note's writing goal, in its own chunk, loaded only for a note whose frontmatter sets one.
 const NoteGoalStatus = React.lazy(() => import("./NoteGoalStatus"));
 const HAS_GOAL = /^\uFEFF?---\r?\n[\s\S]*?^goal[.:\s]/m;
@@ -92,6 +93,7 @@ export const StatusBar = React.memo(function StatusBar({
       <BetaBadge />
         {dirty ? "●" : "○"} {filename}
       </span>
+      <IndexProgressStatus />
       {syncState !== "idle" && (
         <span className="sb-item" title={t("status.sync.title", { state: t(`status.sync.${syncState}`) })} style={{ gap: 4 }}>
           {syncState === "syncing" && <CloudCog size={10} className="spin" />}

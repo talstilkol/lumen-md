@@ -12,6 +12,7 @@ import { sameNote, utf8Length } from "./indexSnapshot";
 import { summarize } from "./noteSummary";
 import { cache, type ReadNote } from "./workspaceIndexState";
 import { swallowed } from "../lib/logger";
+import { PROGRESS_MIN, startIndexProgress } from "./indexProgress";
 
 /** Notes sent to the worker per message while building. */
 export const UPSERT_BATCH = 500;
@@ -57,10 +58,19 @@ export async function indexFile(e: { path: string; name: string; modified: numbe
 /** Run `fn` over `items` with at most `limit` in flight (a 10k vault must not open 10k reads at once). */
 export async function mapLimit<T>(items: T[], limit: number, fn: (x: T) => Promise<void>): Promise<void> {
   let i = 0;
+  // W13.V6: a large batch shows "Indexing 3,200 / 10,000" in the status bar while it runs.
+  const progress = items.length >= PROGRESS_MIN ? startIndexProgress(items.length) : null;
   const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (i < items.length) await fn(items[i++]);
+    while (i < items.length) {
+      await fn(items[i++]);
+      progress?.tick();
+    }
   });
-  await Promise.all(workers);
+  try {
+    await Promise.all(workers);
+  } finally {
+    progress?.end();
+  }
 }
 
 export const nameOf = (path: string) => path.split("/").pop() ?? path;

@@ -283,6 +283,24 @@ fn snapshot_sees_external_edits_renames_and_deletes() {
 }
 
 #[test]
+fn snapshot_skips_git_and_node_modules() {
+    let (t, v) = vault();
+    v.write("a.md", b"a").unwrap();
+    v.write("notes/b.md", b"b").unwrap();
+    for dir in [".git/objects/ab", "node_modules/pkg", "notes/node_modules/x", ".venv/lib"] {
+        fs::create_dir_all(t.0.join(dir)).unwrap();
+        for i in 0..50 {
+            fs::write(t.0.join(dir).join(format!("f{i}")), b"x").unwrap();
+        }
+    }
+    let paths: Vec<String> = v.snapshot().unwrap().into_iter().map(|e| e.path).collect();
+    assert_eq!(paths, vec!["a.md".to_string(), "notes/b.md".to_string()]);
+    // A file that only looks like one of them is still seen.
+    fs::write(t.0.join("node_modules.md"), b"n").unwrap();
+    assert!(v.snapshot().unwrap().iter().any(|e| e.path == "node_modules.md"));
+}
+
+#[test]
 fn snapshot_skips_temporary_files() {
     let (t, v) = vault();
     v.write("a.md", b"a").unwrap();
