@@ -2958,6 +2958,8 @@
   "openSources.failed": "החיפוש נכשל: {error}",
   "openSources.found": "{count} תוצאות ברשת",
   "openSources.hint": "הקלידו כדי לחפש במקורות שבמכשיר; ״חיפוש ברשת״ שואל לפני שהוא שולח משהו.",
+  "openSources.inserts.copy": "‏Enter מכניס את הטקסט עצמו, עם ייחוס",
+  "openSources.inserts.link": "‏Enter מכניס קישור בלבד: הרישיון לא מתיר העתקה",
   "openSources.keys": "↑↓ בחירה · Enter הכנסה · Alt+O חיפוש ברשת · Esc סגירה",
   "openSources.kind": "סוג",
   "openSources.kind.all": "הכול",

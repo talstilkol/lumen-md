@@ -75,3 +75,57 @@ describe("W7.24 dialog in a real browser: keyboard only, badges, ledger", () => 
     expect(e.map((x) => [x.decision, x.consent, x.category])).toEqual([["allowed", true, "cloud-text"]]);
   });
 });
+
+describe("W7.24 world-class pass: the trap, what Enter inserts, axe", () => {
+  const results: OpenResult[] = [
+    { key: "k1", source: "knesset", kind: "law", title: "חוק הגנת הפרטיות", detail: "", rights: "section-6", url: "https://example.org/k", local: true, payload: {} },
+    { key: "s1", source: "sefaria", kind: "verse", title: "Rashi on Genesis 1:1", detail: "", rights: "link-only", url: "https://example.org/s", local: false, payload: {} },
+  ] as OpenResult[];
+  async function mountWith(): Promise<{ host: HTMLElement; unmount: () => void }> {
+    localStorage.clear();
+    const host = document.createElement("div");
+    document.body.appendChild(host);
+    const root = createRoot(host);
+    await act(async () => {
+      root.render(<OpenSourcesDialog loadLocal={async () => ({ laws: [], library: null })} searchLocal={(q) => (q ? results : [])} searchOnline={async () => []} insertion={async (r) => r.key} onInsert={() => {}} onClose={() => {}} />);
+      await tick();
+    });
+    await typeInto(host.querySelector<HTMLInputElement>("[data-testid=open-sources-query]")!, "פרטיות");
+    return { host, unmount: () => act(() => root.unmount()) };
+  }
+
+  it("Tab from the last control wraps to the first, Shift+Tab from the first to the last: focus never leaves the dialog", async () => {
+    const { host, unmount } = await mountWith();
+    const { focusableIn } = await import("../ui/useFocusTrap");
+    const dialog = host.querySelector<HTMLElement>("[role=dialog]")!;
+    const items = focusableIn(dialog);
+    expect(items.length).toBeGreaterThan(4);
+    const last = items[items.length - 1];
+    last.focus();
+    await key(last, "Tab");
+    expect(document.activeElement).toBe(items[0]);
+    await key(items[0], "Tab", { shiftKey: true });
+    expect(document.activeElement).toBe(last);
+    unmount();
+  });
+
+  it("each result says what Enter will insert: the text with its credit, or only a link when the licence allows no copy", async () => {
+    const { host, unmount } = await mountWith();
+    const modes = [...host.querySelectorAll<HTMLElement>("[data-testid=open-sources-inserts]")].map((n) => [n.dataset.mode, n.textContent]);
+    expect(modes).toEqual([
+      ["copy", "Enter inserts the text itself, with its credit"],
+      ["link", "Enter inserts a link only: the licence allows no copy"],
+    ]);
+    // Part of the option's text, so a screen reader reads it with the result.
+    expect(host.querySelector("#os-opt-1")!.textContent).toContain("link only");
+    unmount();
+  });
+
+  it("axe: no serious or critical violation with results on screen", async () => {
+    const { host, unmount } = await mountWith();
+    const axe = (await import("axe-core")).default;
+    const r = await axe.run(host, { resultTypes: ["violations"], rules: { "color-contrast": { enabled: false } } });
+    expect(r.violations.filter((v) => v.impact === "serious" || v.impact === "critical").map((v) => v.id)).toEqual([]);
+    unmount();
+  });
+});

@@ -2958,6 +2958,8 @@
   "openSources.failed": "فشل البحث: {error}",
   "openSources.found": "{count} نتيجة على الشبكة",
   "openSources.hint": "اكتب للبحث على هذا الجهاز؛ البحث على الشبكة يسأل قبل الإرسال.",
+  "openSources.inserts.copy": "Enter inserts the text itself, with its credit",
+  "openSources.inserts.link": "Enter inserts a link only: the licence allows no copy",
   "openSources.keys": "↑↓ اختيار · Enter إدراج · Alt+O بحث على الشبكة · Esc إغلاق",
   "openSources.kind": "النوع",
   "openSources.kind.all": "الكل",

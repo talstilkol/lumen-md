@@ -3,7 +3,15 @@
 .os-title { font-size: 1rem; margin: 0 0 0.5rem; }
 .os-kinds { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; margin: 0.5rem 0; font-size: 0.85rem; }
 .os-kind { display: inline-flex; align-items: center; gap: 0.25rem; }
-.os-badge { margin-inline-start: auto; font-size: 0.75rem; padding: 0.05rem 0.4rem; border-radius: 0.6rem; border: 1px solid currentColor; white-space: nowrap; }
+.os-badge-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem 0.5rem; margin-block-start: 0.15rem; }
+.os-inserts { font-size: 0.75rem; color: hsl(var(--fg-muted)); }
+/* Copyable content reads as green, link-only as a dashed outline; the words say it too (never colour alone). */
+.os-copy { color: hsl(142 72% 26%); background: hsl(142 60% 40% / 0.08); }
+.dark .os-copy { color: hsl(142 60% 70%); }
+.os-link { color: hsl(var(--fg)); }
+/* The selected row's tint: the muted text stays at 4.5:1 on it. */
+.os-dialog .cite-item.sel .cite-meta, .os-dialog .cite-item.sel .os-inserts { color: hsl(var(--fg)); }
+.os-badge { font-size: 0.75rem; padding: 0.05rem 0.4rem; border-radius: 0.6rem; border: 1px solid currentColor; white-space: nowrap; }
 .os-badge-link-only { opacity: 0.85; border-style: dashed; }
 .os-status { min-height: 1.2em; font-size: 0.8rem; margin: 0.25rem 0; }
 .os-switches { border: 1px solid var(--border, #8884); border-radius: 0.4rem; padding: 0.4rem 0.6rem; font-size: 0.85rem; }

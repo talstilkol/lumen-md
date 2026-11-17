@@ -11511,5 +11511,23 @@
     "ru": "jyp9ab",
     "zh-CN": "jyp9ab",
     "fa": "jyp9ab"
+  },
+  "openSources.inserts.copy": {
+    "ar": "1132bsh",
+    "de": "1132bsh",
+    "fa": "1132bsh",
+    "fr": "1132bsh",
+    "ja": "1132bsh",
+    "ru": "1132bsh",
+    "zh-CN": "1132bsh"
+  },
+  "openSources.inserts.link": {
+    "ar": "q1ru8e",
+    "de": "q1ru8e",
+    "fa": "q1ru8e",
+    "fr": "q1ru8e",
+    "ja": "q1ru8e",
+    "ru": "q1ru8e",
+    "zh-CN": "q1ru8e"
   }
 }

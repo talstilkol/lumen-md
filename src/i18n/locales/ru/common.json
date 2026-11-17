@@ -2958,6 +2958,8 @@
   "openSources.failed": "Поиск не удался: {error}",
   "openSources.found": "Найдено в сети: {count}",
   "openSources.hint": "Введите запрос для поиска на устройстве; поиск в сети спросит перед отправкой.",
+  "openSources.inserts.copy": "Enter inserts the text itself, with its credit",
+  "openSources.inserts.link": "Enter inserts a link only: the licence allows no copy",
   "openSources.keys": "↑↓ выбор · Enter вставить · Alt+O в сети · Esc закрыть",
   "openSources.kind": "Тип",
   "openSources.kind.all": "Все",
