@@ -88,6 +88,7 @@ export default function SheetBlock({ source }: { source: string }) {
                     role="gridcell"
                     data-cell={refName(r, c)}
                     tabIndex={isActive ? 0 : -1}
+                    aria-selected={isActive}
                     aria-label={`${refName(r, c)} ${shown}`}
                     title={res.kind === "error" ? res.message : (row[c] ?? "").startsWith("=") ? row[c] : undefined}
                     className={`${res.kind === "error" ? "sheet-err" : ""}${num ? " sheet-num" : ""}`}
