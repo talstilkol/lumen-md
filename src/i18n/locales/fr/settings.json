@@ -170,6 +170,7 @@
   "privacy.secretCopy.hint": "Copié comme secret : marqué sensible, et effacé du presse-papiers après 60 secondes",
   "privacy.staticAssets": "Fichiers statiques : {n}",
   "privacy.tab.mcp": "Clients MCP",
+  "privacy.tab.memory": "Agent memory",
   "privacy.tab.requests": "Requêtes réseau",
   "privacy.title": "Journal de confidentialité",
   "runtimeMetrics.clear": "Effacer",

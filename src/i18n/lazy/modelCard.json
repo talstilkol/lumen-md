@@ -1,0 +1,19 @@
+{
+  "modelCard.benchmark": "How Lumen is measured: the public benchmark page",
+  "modelCard.ci": "95% interval {lo}–{hi}",
+  "modelCard.dataset": "Dataset",
+  "modelCard.dateUnknown": "date unknown",
+  "modelCard.evalModel": "evaluated with",
+  "modelCard.licence": "Licence",
+  "modelCard.licenceUnknown": "Not in the model list",
+  "modelCard.measuredOn": "measured {date}",
+  "modelCard.model": "Model",
+  "modelCard.modelFromSettings": "The model chosen in Settings > AI",
+  "modelCard.n": "{n} items",
+  "modelCard.notMeasured": "Not measured: no eval card for this agent yet.",
+  "modelCard.open": "Model card",
+  "modelCard.tag.dev": "Developer set (written by us, not a quality claim)",
+  "modelCard.tag.heldout": "Held-out set",
+  "modelCard.tag.public": "Public benchmark",
+  "modelCard.title": "Model card: {agent}"
+}

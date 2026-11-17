@@ -32,6 +32,12 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "nativeMenu.json": { module: "desktop/nativeMenuStrings.ts", users: ["desktop/nativeMenu.ts"], prefixes: ["nativeMenu."] },
   // MCP server tasks in the batch panel (plan W13.A2): BatchPanel loads ServerTasksSection with React.lazy.
   "serverTasks.json": { module: "ui/serverTasksStrings.ts", users: ["ui/ServerTasksSection.tsx"], prefixes: ["serverTasks."] },
+  // Settings > AI's suggestion report (plan W13.A4): AiSettingsPanel loads the section with React.lazy.
+  "suggestionOutcomes.json": { module: "ui/suggestionOutcomesStrings.ts", users: ["ui/SuggestionOutcomesSection.tsx"], prefixes: ["outcomes."] },
+  // An agent's model card (plan W13.A5): the review panel and Settings load it with React.lazy.
+  "modelCard.json": { module: "ui/modelCardStrings.ts", users: ["ui/ModelCard.tsx", "ui/ModelCardToggle.tsx"], prefixes: ["modelCard."] },
+  // Agent memory (plan W13.A3): Settings > AI and the privacy panel load its sections with React.lazy.
+  "agentMemory.json": { module: "ui/agentMemoryStrings.ts", users: ["ui/AgentMemorySection.tsx", "ui/MemoryReadsView.tsx"], prefixes: ["agentMemory."] },
   "analyst.json": { module: "agents/analystStrings.ts", users: ["agents/analyst.ts"], prefixes: ["analyst.", "cmd.ai.analyse.ask"] },
   "lora.json": { module: "ai/localLoraStrings.ts", users: ["ui/FineTuneSettings.tsx", "ui/LocalLoraSection.tsx"], prefixes: ["lora.", "fineTune.cloudRoute"] },
   "doctor.json": { module: "agents/doctorStrings.ts", users: ["ui/AiDoctorPanel.tsx"], prefixes: ["ai.doctor."] },

@@ -170,6 +170,7 @@
   "privacy.secretCopy.hint": "Копируется как секрет: помечается как конфиденциальное и стирается из буфера через 60 секунд",
   "privacy.staticAssets": "Статические файлы: {n}",
   "privacy.tab.mcp": "Клиенты MCP",
+  "privacy.tab.memory": "Agent memory",
   "privacy.tab.requests": "Сетевые запросы",
   "privacy.title": "Журнал приватности",
   "runtimeMetrics.clear": "Очистить",

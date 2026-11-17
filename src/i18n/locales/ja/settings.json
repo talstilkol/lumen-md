@@ -170,6 +170,7 @@
   "privacy.secretCopy.hint": "秘密としてコピー: 機密としてマークされ、60 秒後にクリップボードから消去されます",
   "privacy.staticAssets": "静的ファイル: {n}",
   "privacy.tab.mcp": "MCP クライアント",
+  "privacy.tab.memory": "Agent memory",
   "privacy.tab.requests": "ネットワーク要求",
   "privacy.title": "プライバシー記録",
   "runtimeMetrics.clear": "クリア",

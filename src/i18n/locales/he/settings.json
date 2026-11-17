@@ -170,6 +170,7 @@
   "privacy.secretCopy.hint": "מועתק כסוד: מסומן כרגיש, ונמחק מהלוח אחרי 60 שניות",
   "privacy.staticAssets": "קבצים סטטיים: {n}",
   "privacy.tab.mcp": "לקוחות MCP",
+  "privacy.tab.memory": "זיכרון הסוכנים",
   "privacy.tab.requests": "בקשות רשת",
   "privacy.title": "יומן פרטיות",
   "runtimeMetrics.clear": "ניקוי",

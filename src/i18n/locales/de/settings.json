@@ -170,6 +170,7 @@
   "privacy.secretCopy.hint": "Als Geheimnis kopiert: als sensibel markiert und nach 60 Sekunden aus der Zwischenablage gelöscht",
   "privacy.staticAssets": "Statische Dateien: {n}",
   "privacy.tab.mcp": "MCP-Clients",
+  "privacy.tab.memory": "Agent memory",
   "privacy.tab.requests": "Netzwerkanfragen",
   "privacy.title": "Datenschutz-Protokoll",
   "runtimeMetrics.clear": "Leeren",
