@@ -57,7 +57,7 @@ import { useAuth } from "./auth/useAuth";
 import { useConfigHealth } from "./hooks/useConfigHealth";
 import { docIdentity } from "./renderer/previewDoc";
 import { auditScope } from "./ui/auditScope";
-import { useAppStore, isNarrowScreen } from "./store/useStore";
+import { useAppStore, isNarrowScreen, tabIdOf } from "./store/useStore";
 import { t } from "./i18n";
 import { historyKey } from "./storage/history";
 import { isOPFSAvailable, readWorkspaceFile } from "./storage/workspace";
@@ -296,6 +296,8 @@ export default function App() {
 
   useCommandEvents(commands);
   useWindowEvent("lumen-open-ai-settings", () => setSettingsTab("ai"));
+  // W13.E1: Vim's :q closes the open tab (:w runs file.save through lumen-run-command).
+  useWindowEvent("lumen-vim-quit", () => closeTabAction(tabIdOf(useAppStore.getState().doc)));
   // W13.E4: `focus` names a setting to open on (lumen://settings/<id>, settings/settingsLink.ts).
   const [settingsFocus, setSettingsFocus] = useState<string | undefined>(undefined);
   useWindowEvent("lumen-open-settings", (e) => {

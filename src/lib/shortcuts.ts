@@ -78,6 +78,8 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { id: "list.moveDown", combo: "Alt+↓", scope: "editor" },
   { id: "list.toggleTask", combo: "Mod+↵", scope: "editor" },
   { id: "list.lineBreak", combo: "Shift+↵", scope: "editor" },
+  // W13.E5: the next occurrence as another cursor (editor/multiCursor.ts); Alt+drag (a rectangle) is a mouse gesture.
+  { id: "edit.selectNextOccurrence", combo: "Mod+D", scope: "editor" },
   { id: "file.print", combo: "Mod+P", scope: "browser" },
 ];
 

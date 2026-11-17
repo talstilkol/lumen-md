@@ -135,13 +135,16 @@ const grammarCompartment = new Compartment();
 const outlineCompartment = new Compartment();
 /** W13.E2: smart lists (Enter, Tab, Alt+↑/↓, Mod+Enter, Mod+B, paste in lists), a lazy chunk. */
 const smartListsCompartment = new Compartment();
+/** W13.E5: several cursors, Alt+drag rectangles, Mod+D, Esc to one cursor — a lazy chunk. */
+const multiCursorCompartment = new Compartment();
 // W1.2 — the document's own line ending, so a CRLF file saves as CRLF.
 const lineSeparatorCompartment = new Compartment();
 
 let vimExtensionPromise: Promise<unknown> | null = null;
+/** W13.E1: Vim with RTL-aware motions, :w / :q and the AI-first Esc (editor/vimMode.ts), one lazy chunk. */
 async function loadVimExtension() {
   if (!vimExtensionPromise) {
-    vimExtensionPromise = import("@replit/codemirror-vim").then((m) => m.vim());
+    vimExtensionPromise = import("./vimMode").then((m) => m.loadVimMode());
   }
   return vimExtensionPromise;
 }
@@ -370,6 +373,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       grammarCompartment.of([]),
       outlineCompartment.of([]),
       smartListsCompartment.of([]),
+      multiCursorCompartment.of([]),
       // Live markdown lint — wavy underlines for trailing whitespace,
       // mixed-indent, heading-skip, broken wiki-links. Runs every 250 ms
       // after the user stops typing.
@@ -695,13 +699,18 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
     };
   }, []);
 
-  // Smart lists (plan W13.E2): their own lazy chunk, like the outline.
+  // Smart lists (plan W13.E2) and multiple cursors (W13.E5): their own lazy chunks, like the outline.
   useEffect(() => {
     let cancelled = false;
     void import("./smartListsExtension").then((m) => {
       const view = viewRef.current;
       if (cancelled || !view) return;
       view.dispatch({ effects: smartListsCompartment.reconfigure(m.smartListKeymap()) });
+    });
+    void import("./multiCursor").then((m) => {
+      const view = viewRef.current;
+      if (cancelled || !view) return;
+      view.dispatch({ effects: multiCursorCompartment.reconfigure(m.multiCursorExtension()) });
     });
     return () => {
       cancelled = true;

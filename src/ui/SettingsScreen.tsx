@@ -242,8 +242,43 @@ export function SettingsScreen({ tab: initialTab = "general", focus, onClose, on
     }
   };
 
+  // W13.E1: with Vim mode on, the settings move by Vim keys too (Obsidian 1.13).
+  const vimKeys = useAppStore((st) => st.vimEnabled);
+  const onVimKey = (e: React.KeyboardEvent): boolean => {
+    if (!vimKeys || e.metaKey || e.ctrlKey || e.altKey) return false;
+    const target = e.target as HTMLElement;
+    // Typing stays typing: text fields keep their letters (a select's type-ahead gives way to j / k).
+    if (target.matches?.('input:not([type="checkbox"]):not([type="radio"]), textarea, [contenteditable="true"]')) return false;
+    if (e.key === "/") {
+      e.preventDefault();
+      searchRef.current?.focus();
+      searchRef.current?.select();
+      return true;
+    }
+    if (e.key !== "j" && e.key !== "k") return false;
+    const step = e.key === "j" ? 1 : -1;
+    if (target.getAttribute("role") === "listbox") {
+      e.preventDefault();
+      setActive((i) => Math.max(0, Math.min(hits.length - 1, i + step)));
+      return true;
+    }
+    // In the tab list: the tabs; elsewhere: the controls of the open tab.
+    const scope = target.closest('[role="tablist"]') ? '[role="tablist"] [role="tab"]' : '[role="tabpanel"] input, [role="tabpanel"] select, [role="tabpanel"] button';
+    const list = [...(e.currentTarget as HTMLElement).querySelectorAll<HTMLElement>(scope)];
+    const at = list.indexOf(target);
+    const next = list[at < 0 ? 0 : at + step];
+    if (next) {
+      e.preventDefault();
+      next.focus();
+      if (next.getAttribute("role") === "tab") next.click();
+      return true;
+    }
+    return false;
+  };
+
   // ⌘F / Ctrl+F anywhere in the screen: back to the search field (Obsidian 1.13).
   const onScreenKey = (e: React.KeyboardEvent) => {
+    if (onVimKey(e)) return;
     if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && (e.code === "KeyF" || e.key.toLowerCase() === "f")) {
       e.preventDefault();
       e.stopPropagation();
