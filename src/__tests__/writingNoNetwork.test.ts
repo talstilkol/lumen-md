@@ -17,25 +17,19 @@ import { writingAgents } from "../agents/writing/agent";
 import "../agents/writing/agents";
 import { LOCAL_EXECUTORS, writingDefinition, type LocalModel } from "../agents/writing/model";
 import { validateSuggestion } from "../agents/writing/suggestion";
-import { diskModules, networkUsesIn, writingSources, type ModuleLoader } from "./helpers/writingStatic";
+import { networkUsesIn, writingSources } from "./helpers/writingStatic";
 
 describe("static: no network from src/agents/writing (W13.W1)", () => {
   it("no file names a network API or a network module", () => {
     const sources = writingSources();
     expect(sources.size).toBeGreaterThan(5);
-    expect(networkUsesIn(sources, diskModules)).toEqual([]);
+    expect(networkUsesIn(sources)).toEqual([]);
   });
 
-  it("a helper an agent imports is held to it too, down the chain (INT7: one check for W13.W1–W15)", () => {
-    const files: Record<string, string> = {
-      "lib/pure.ts": "export const f = (s: string) => s.trim();",
-      "lib/leaky.ts": 'import { send } from "./wire";\nexport const f = (s: string) => send(s);',
-      "lib/wire.ts": 'export const send = (s: string) => fetch("/log", { method: "POST", body: s });',
-    };
-    const load: ModuleLoader = (m) => (files[`${m}.ts`] !== undefined ? { file: `${m}.ts`, text: files[`${m}.ts`] } : null);
+  it("an import outside the allow-list is reported, a listed pure helper is not (review 13 H1)", () => {
     const agent = (spec: string) => new Map([["agents/writing/agents/x.ts", `import { f } from "${spec}";\nexport const run = (t: string) => f(t);`]]);
-    expect(networkUsesIn(agent("../../../lib/pure"), load)).toEqual([]);
-    expect(networkUsesIn(agent("../../../lib/leaky"), load)).toEqual(["agents/writing/agents/x.ts:1 imports ../../../lib/leaky (lib/leaky → lib/wire.ts:1 fetch)"]);
+    expect(networkUsesIn(agent("../../../lib/leaky"))).toEqual(["agents/writing/agents/x.ts:1 imports ../../../lib/leaky (not in the allow-list)"]);
+    expect(networkUsesIn(agent("../../../text/outlineCore"))).toEqual([]);
   });
 
   it("the check fails on an agent that fetches", () => {

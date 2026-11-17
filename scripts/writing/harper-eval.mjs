@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * W13.W10 (Mac step): Harper on the 150-sentence English set
- * (eval/writing/harperGrammar/en.jsonl, written by
+ * (eval/fixtures/writing/harperGrammar/en.jsonl, written by
  * src/__tests__/harperGrammar.test.ts with LUMEN_WRITE_CARDS=1).
  *
  *   node scripts/writing/harper-eval.mjs [--lt http://localhost:8010]
@@ -26,7 +26,7 @@ try {
   console.error("harper-eval: harper.js is not installed (npm i -D harper.js on the Mac) — not run");
   process.exit(2);
 }
-const items = readFileSync(join(ROOT, "eval/writing/harperGrammar/en.jsonl"), "utf8").trim().split("\n").map((l) => JSON.parse(l));
+const items = readFileSync(join(ROOT, "eval/fixtures/writing/harperGrammar/en.jsonl"), "utf8").trim().split("\n").map((l) => JSON.parse(l));
 const linter = new harper.LocalLinter({ binary: harper.binary });
 await linter.setup();
 /** Harper's spans count code points; offsets here are UTF-16. */
@@ -83,7 +83,7 @@ const card = {
   model: { name: `harper.js@${harper.version ?? "?"}`, digest: "see public/vendor/harper/MANIFEST.json" },
   seed: 10,
   temperature: 0,
-  dataset: { name: "eval/writing/harperGrammar/en.jsonl", version: "1", license: "MIT (written for lumen-md; synthetic)", origin: "synthetic" },
+  dataset: { name: "eval/fixtures/writing/harperGrammar/en.jsonl", version: "1", license: "MIT (written for lumen-md; synthetic)", origin: "synthetic" },
   n: recall.length,
   metrics: { recall: strip(bootstrapCi(recall, { seed: 10 })), cleanNoAlarm: strip(bootstrapCi(clean, { seed: 10 })), ...(lt ? { languageToolRecall: lt } : {}) },
   latencyMs: { p50: Math.round(p(0.5) * 100) / 100, p95: Math.round(p(0.95) * 100) / 100 },

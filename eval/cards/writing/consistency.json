@@ -10,7 +10,7 @@
   "seed": 13,
   "temperature": 0,
   "dataset": {
-   "name": "eval/writing/consistency/synthetic-vault",
+   "name": "src/__tests__/vaultConsistency.test.ts (its synthetic vault, built in the test)",
    "version": "1",
    "license": "MIT (written for lumen-md; synthetic)",
    "origin": "synthetic"

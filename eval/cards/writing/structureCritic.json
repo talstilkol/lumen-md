@@ -10,7 +10,7 @@
   "seed": 7,
   "temperature": 0,
   "dataset": {
-   "name": "eval/writing/structureCritic/synthetic",
+   "name": "src/__tests__/structureCritic.test.ts (its synthetic set, built in the test)",
    "version": "1",
    "license": "MIT (written for lumen-md; synthetic)",
    "origin": "synthetic"

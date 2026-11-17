@@ -10,7 +10,7 @@
   "seed": 8,
   "temperature": 0,
   "dataset": {
-   "name": "eval/writing/argumentChecker/synthetic",
+   "name": "src/__tests__/argumentChecker.test.ts (its synthetic set, built in the test)",
    "version": "1",
    "license": "MIT (written for lumen-md; synthetic)",
    "origin": "synthetic"

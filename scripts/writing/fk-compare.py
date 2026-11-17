@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """W13.W9 acceptance 2: our Flesch-Kincaid grade against a known library.
 
-    python3 scripts/writing/fk-compare.py [eval/writing/readability/fk-en.jsonl]
+    python3 scripts/writing/fk-compare.py [eval/fixtures/writing/readability/fk-en.jsonl]
 
 Each line of the file is {"id", "text", "grade"} where "grade" is lumen-md's
 fleschKincaid() (written by src/__tests__/hebrewReadability.test.ts with
@@ -15,7 +15,7 @@ is not installed (this machine has no package index; run it on the Mac:
 import json
 import sys
 
-path = sys.argv[1] if len(sys.argv) > 1 else "eval/writing/readability/fk-en.jsonl"
+path = sys.argv[1] if len(sys.argv) > 1 else "eval/fixtures/writing/readability/fk-en.jsonl"
 try:
     import textstat  # type: ignore
 except ImportError:

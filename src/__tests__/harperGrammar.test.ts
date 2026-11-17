@@ -180,8 +180,8 @@ describe("the English set (150 errors + 50 clean) and the Mac measurement", () =
     expect(r.p95).toBeGreaterThanOrEqual(r.p50);
   });
 
-  it("eval/writing/harperGrammar/en.jsonl is this set (harper-eval.mjs reads it)", () => {
-    const file = resolve(__dirname, "../../eval/writing/harperGrammar/en.jsonl");
+  it("eval/fixtures/writing/harperGrammar/en.jsonl is this set (harper-eval.mjs reads it)", () => {
+    const file = resolve(__dirname, "../../eval/fixtures/writing/harperGrammar/en.jsonl");
     const lines = set.map((x) => JSON.stringify({ id: x.id, text: x.text, kind: x.kind, error: x.error }));
     if (process.env.LUMEN_WRITE_CARDS) {
       mkdirSync(dirname(file), { recursive: true });
