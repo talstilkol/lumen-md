@@ -9173,6 +9173,38 @@
       ]
     },
     {
+      "key": "graph.engine",
+      "en": "Engine",
+      "vars": []
+    },
+    {
+      "key": "graph.engine.auto",
+      "en": "Automatic",
+      "vars": []
+    },
+    {
+      "key": "graph.engine.gpu",
+      "en": "GPU",
+      "vars": []
+    },
+    {
+      "key": "graph.engine.list",
+      "en": "Table only",
+      "vars": []
+    },
+    {
+      "key": "graph.engine.noGpu",
+      "en": "{nodes} notes are too many to draw without WebGL 2 here, so the graph shows as a table.",
+      "vars": [
+        "nodes"
+      ]
+    },
+    {
+      "key": "graph.engine.standard",
+      "en": "Standard",
+      "vars": []
+    },
+    {
       "key": "graph.filter.folder",
       "en": "Folder",
       "vars": []

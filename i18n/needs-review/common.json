@@ -1508,6 +1508,60 @@
     "ru": "oj38q",
     "zh-CN": "oj38q"
   },
+  "graph.engine": {
+    "ar": "1ovbg4b",
+    "de": "1ovbg4b",
+    "fr": "1ovbg4b",
+    "ja": "1ovbg4b",
+    "ru": "1ovbg4b",
+    "zh-CN": "1ovbg4b",
+    "he": "1ovbg4b"
+  },
+  "graph.engine.auto": {
+    "ar": "r122ro",
+    "de": "r122ro",
+    "fr": "r122ro",
+    "ja": "r122ro",
+    "ru": "r122ro",
+    "zh-CN": "r122ro",
+    "he": "r122ro"
+  },
+  "graph.engine.gpu": {
+    "ar": "12bawxh",
+    "de": "12bawxh",
+    "fr": "12bawxh",
+    "ja": "12bawxh",
+    "ru": "12bawxh",
+    "zh-CN": "12bawxh",
+    "he": "12bawxh"
+  },
+  "graph.engine.list": {
+    "ar": "1o5bufz",
+    "de": "1o5bufz",
+    "fr": "1o5bufz",
+    "ja": "1o5bufz",
+    "ru": "1o5bufz",
+    "zh-CN": "1o5bufz",
+    "he": "1o5bufz"
+  },
+  "graph.engine.noGpu": {
+    "ar": "8vwxt2",
+    "de": "8vwxt2",
+    "fr": "8vwxt2",
+    "ja": "8vwxt2",
+    "ru": "8vwxt2",
+    "zh-CN": "8vwxt2",
+    "he": "8vwxt2"
+  },
+  "graph.engine.standard": {
+    "ar": "vuco",
+    "de": "vuco",
+    "fr": "vuco",
+    "ja": "vuco",
+    "ru": "vuco",
+    "zh-CN": "vuco",
+    "he": "vuco"
+  },
   "hl.scan": {
     "ar": "qb0k9u",
     "de": "qb0k9u",
