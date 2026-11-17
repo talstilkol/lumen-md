@@ -28,6 +28,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "eviction.json": { module: "storage/evictionStrings.ts", users: ["storage/evictionReminder.ts"], prefixes: ["storage.eviction."] },
   // Learning plans (plan W12.H4): the palette opens learning/open.tsx with a dynamic import.
   "learning.json": { module: "learning/learningStrings.ts", users: ["learning/LearningPlansDialog.tsx"], prefixes: ["learning."] },
+  // MCP server tasks in the batch panel (plan W13.A2): BatchPanel loads ServerTasksSection with React.lazy.
+  "serverTasks.json": { module: "ui/serverTasksStrings.ts", users: ["ui/ServerTasksSection.tsx"], prefixes: ["serverTasks."] },
   "analyst.json": { module: "agents/analystStrings.ts", users: ["agents/analyst.ts"], prefixes: ["analyst.", "cmd.ai.analyse.ask"] },
   "lora.json": { module: "ai/localLoraStrings.ts", users: ["ui/FineTuneSettings.tsx", "ui/LocalLoraSection.tsx"], prefixes: ["lora.", "fineTune.cloudRoute"] },
   "doctor.json": { module: "agents/doctorStrings.ts", users: ["ui/AiDoctorPanel.tsx"], prefixes: ["ai.doctor."] },

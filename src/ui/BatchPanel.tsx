@@ -3,7 +3,7 @@
  * job, with Pause / Resume / Cancel. Lazy — mounted on demand by
  * "AI: Batch Jobs" and after a submit, never part of the startup bundle.
  */
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { Layers, X } from "lucide-react";
 import { t } from "../i18n";
@@ -14,6 +14,8 @@ import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
 import { EmptyState, runCommand } from "./EmptyState";
 import { Modal } from "./Modal";
+// W13.A2: MCP server tasks, with their strings, in their own chunk.
+const ServerTasksSection = lazy(() => import("./ServerTasksSection"));
 
 const btn: React.CSSProperties = { padding: "4px 10px", fontSize: 12, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" };
 
@@ -146,7 +148,10 @@ export function BatchPanel({ onClose }: { onClose: () => void }) {
             <X size={14} />
           </button>
         </header>
-        <div style={{ overflow: "auto", flex: 1 }}>
+        <div style={{ overflow: "auto", flex: 1 }} tabIndex={0}>
+          <Suspense fallback={null}>
+            <ServerTasksSection btn={btn} />
+          </Suspense>
           {list === null ? null : list.length === 0 ? (
             <EmptyState message={t("batch.none")} action={{ label: t("cmd.ai.batch"), onClick: () => (onClose(), runCommand("ai.batch")) }} />
           ) : (

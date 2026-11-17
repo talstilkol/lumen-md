@@ -26,6 +26,11 @@
  * is left out of the list on HTTP.
  */
 import type { ElicitationHandler, ElicitationResult } from "./elicitation";
+import type { ListCache } from "./listCache";
+import { expired, parseTask, pollDelay, serverTasks, TERMINAL, type TaskState } from "./serverTasks";
+
+/** The Tasks extension's id (SEP-2663). */
+export const TASKS_EXTENSION = "io.modelcontextprotocol/tasks";
 
 export const CLIENT_INFO = { name: "lumen", version: "1" } as const;
 export const MODERN = "2026-07-28";
@@ -54,6 +59,12 @@ export interface McpTransport {
   /** "http" mirrors body fields into headers (and so checks `x-mcp-header`); others may ignore them. */
   readonly binding?: "http" | "stdio" | "memory";
   send(msg: JsonRpcMessage, meta: SendMeta): Promise<{ message: JsonRpcMessage | null; sessionId?: string }>;
+  /**
+   * W13.A2: a transport that can stream (`subscriptions/listen`) delivers the
+   * server's notifications for this request to `onMessage` until `signal`
+   * aborts. Optional: without it, tasks are polled.
+   */
+  listen?(msg: JsonRpcMessage, meta: SendMeta, onMessage: (m: JsonRpcMessage) => void, signal: AbortSignal): Promise<void>;
 }
 
 export interface McpTool {
@@ -78,7 +89,28 @@ export interface ClientOptions {
   maxRounds?: number;
   /** Logs a tool left out of the list (an invalid `x-mcp-header`). */
   warn?: (message: string) => void;
+  /** W13.A2: declare the Tasks extension, so a long tool call may come back as a task. */
+  tasks?: boolean;
+  /** W13.A2: keep lists for their `ttlMs` (per vault unless the server says they are shared). */
+  listCache?: { cache: ListCache; server: string; vault: string };
+  /** Waits between polls (tests pass a fake clock). Resolves early when `signal` aborts. */
+  sleep?: (ms: number, signal?: AbortSignal) => Promise<void>;
+  now?: () => number;
 }
+
+/** How a tool call that became a task is followed. */
+export interface CallOptions {
+  /** Cancel: sends `tasks/cancel` and stops waiting. */
+  signal?: AbortSignal;
+  /** Each status the task reports. */
+  onTask?: (t: TaskState) => void;
+}
+
+const defaultSleep = (ms: number, signal?: AbortSignal) =>
+  new Promise<void>((resolve) => {
+    const id = setTimeout(resolve, ms);
+    signal?.addEventListener("abort", () => (clearTimeout(id), resolve()), { once: true });
+  });
 
 /** How many times one call may come back input_required before Lumen stops retrying. */
 export const MAX_INPUT_ROUNDS = 6;
@@ -115,7 +147,7 @@ export class McpClient {
   /** The client capabilities sent with every modern request. */
   capabilities(): Record<string, unknown> {
     // Both modes: form (in-band, reviewed by the user) and url (opened outside Lumen). Never sampling or roots (deprecated).
-    return this.opts.elicit ? { elicitation: { form: {}, url: {} } } : {};
+    return { ...(this.opts.elicit ? { elicitation: { form: {}, url: {} } } : {}), ...(this.opts.tasks ? { extensions: { [TASKS_EXTENSION]: {} } } : {}) };
   }
 
   private meta(): Record<string, unknown> {
@@ -158,22 +190,32 @@ export class McpClient {
     this.era = "legacy";
   }
 
-  private async request(method: string, params: Record<string, unknown>, extra: Pick<SendMeta, "paramHeaders"> = {}): Promise<Record<string, unknown>> {
+  private async request(method: string, params: Record<string, unknown>, extra: Pick<SendMeta, "paramHeaders"> = {}, allowTask = false): Promise<Record<string, unknown>> {
     await this.connect();
     const res = await this.raw(method, this.era === "modern" ? { ...params, _meta: this.meta() } : params, false, extra);
     if (!res) throw new McpClientError(`${method}: no answer`);
     if (res.error) throw new McpClientError(`${method}: ${res.error.message}`, res.error.code);
     const result = res.result ?? {};
     const type = result.resultType ?? "complete";
-    if (type !== "complete" && type !== "input_required") throw new McpClientError(`${method}: unknown resultType "${String(type)}"`);
+    // A task only where we declared the extension, and only for tools/call (SEP-2663: anything else is an invalid response).
+    if (type === "task" && !(allowTask && this.opts.tasks)) throw new McpClientError(`${method}: the server answered with a task Lumen did not ask for`);
+    if (type !== "complete" && type !== "input_required" && type !== "task") throw new McpClientError(`${method}: unknown resultType "${String(type)}"`);
     return result;
   }
 
   async listTools(): Promise<McpTool[]> {
+    const lc = this.opts.listCache;
+    const cached = lc?.cache.get<McpTool[]>(lc.server, "tools/list", lc.vault);
+    if (cached) {
+      for (const t of cached) this.schemas.set(t.name, t.inputSchema);
+      return cached;
+    }
     const out: McpTool[] = [];
     let cursor: string | undefined;
+    let first: Record<string, unknown> | null = null;
     for (let page = 0; page < 20; page++) {
       const r = await this.request("tools/list", cursor ? { cursor } : {});
+      first ??= r;
       for (const t of (r.tools as McpTool[] | undefined) ?? []) {
         if (!t || typeof t.name !== "string") continue;
         // Streamable HTTP clients MUST leave out a tool whose x-mcp-header breaks the rules (spec: Schema Extension).
@@ -190,7 +232,133 @@ export class McpClient {
       cursor = typeof r.nextCursor === "string" ? r.nextCursor : undefined;
       if (!cursor) break;
     }
+    if (lc && first) lc.cache.put(lc.server, "tools/list", lc.vault, first, out);
     return out;
+  }
+
+  /** `resources/list`, cached like the tools. */
+  async listResources(): Promise<Array<{ uri: string; name?: string; mimeType?: string }>> {
+    const lc = this.opts.listCache;
+    const cached = lc?.cache.get<Array<{ uri: string; name?: string; mimeType?: string }>>(lc.server, "resources/list", lc.vault);
+    if (cached) return cached;
+    const out: Array<{ uri: string; name?: string; mimeType?: string }> = [];
+    let cursor: string | undefined;
+    let first: Record<string, unknown> | null = null;
+    for (let page = 0; page < 20; page++) {
+      const r = await this.request("resources/list", cursor ? { cursor } : {});
+      first ??= r;
+      for (const x of (r.resources as Array<{ uri?: unknown; name?: unknown; mimeType?: unknown }> | undefined) ?? []) {
+        if (x && typeof x.uri === "string") out.push({ uri: x.uri, ...(typeof x.name === "string" ? { name: x.name } : {}), ...(typeof x.mimeType === "string" ? { mimeType: x.mimeType } : {}) });
+      }
+      cursor = typeof r.nextCursor === "string" ? r.nextCursor : undefined;
+      if (!cursor) break;
+    }
+    if (lc && first) lc.cache.put(lc.server, "resources/list", lc.vault, first, out);
+    return out;
+  }
+
+  /** A server notification (from a stream): list changes drop the cached lists. */
+  onNotification(msg: JsonRpcMessage): void {
+    const lc = this.opts.listCache;
+    if (lc && msg.method) lc.cache.onNotification(lc.server, msg.method);
+  }
+
+  /** Answers to a set of elicitation requests (MRTR or a task's inputRequests), through the user's dialog. */
+  private async answer(asks: Record<string, unknown>, method: string): Promise<{ answers: Record<string, ElicitationResult>; refused: ElicitationResult["action"] | null }> {
+    const { parseElicitation, ElicitationError } = await import("./elicitation");
+    const answers: Record<string, ElicitationResult> = {};
+    let refused: ElicitationResult["action"] | null = null;
+    for (const [key, req] of Object.entries(asks).slice(0, 10)) {
+      const m = req && typeof req === "object" ? (req as { method?: unknown }).method : undefined;
+      if (m !== "elicitation/create") throw new McpClientError(`${method}: the server asked for ${String(m).slice(0, 60)}, which Lumen does not offer`);
+      let ans: ElicitationResult;
+      try {
+        ans = await this.opts.elicit!({ server: this.opts.serverLabel ?? this.serverInfo.name ?? "MCP server", key, request: parseElicitation((req as { params?: unknown }).params) });
+      } catch (e) {
+        if (e instanceof ElicitationError) ans = { action: "decline" };
+        else throw e;
+      }
+      answers[key] = ans.action === "accept" ? ans : { action: ans.action };
+      if (ans.action !== "accept") refused = refused === "cancel" ? "cancel" : ans.action;
+    }
+    return { answers, refused };
+  }
+
+  /**
+   * Follow a task to its end (SEP-2663): poll `tasks/get` at the server's
+   * interval (or take `notifications/tasks` from a stream), answer its input
+   * requests once each with `tasks/update`, `tasks/cancel` on abort, and give
+   * up after its TTL. Listed in `serverTasks` while it runs.
+   */
+  private async followTask(tool: string, seed: TaskState, call: CallOptions): Promise<McpCallResult> {
+    const sleep = this.opts.sleep ?? defaultSleep;
+    const now = this.opts.now ?? (() => Date.now());
+    const startedAt = now();
+    const answered = new Set<string>();
+    const local = new AbortController();
+    const stop = () => local.abort();
+    call.signal?.addEventListener("abort", stop, { once: true });
+    let task = seed;
+    let pushed: TaskState | null = null;
+    let wake: (() => void) | null = null;
+    const rowId = `${this.opts.serverLabel ?? this.serverInfo.name ?? "mcp"}:${task.taskId}`;
+    const show = () => serverTasks.upsert({ id: rowId, server: this.opts.serverLabel ?? this.serverInfo.name ?? "MCP server", tool, status: task.status, ...(task.statusMessage ? { statusMessage: task.statusMessage } : {}), startedAt, cancel: stop });
+    // A streaming transport: listen for this task's notifications (polling stays as the fallback).
+    if (this.transport.listen && this.era === "modern") {
+      const msg: JsonRpcMessage = { jsonrpc: "2.0", id: ++this.seq, method: "subscriptions/listen", params: { notifications: { taskIds: [task.taskId] }, _meta: this.meta() } };
+      void this.transport
+        .listen(msg, { protocolVersion: this.version }, (m) => {
+          if (m.method === "notifications/tasks" && m.params?.taskId === task.taskId) {
+            try {
+              pushed = parseTask(m.params);
+              wake?.();
+            } catch {
+              /* a malformed notification: the next poll decides */
+            }
+          } else this.onNotification(m);
+        }, local.signal)
+        .catch(() => undefined);
+    }
+    try {
+      for (;;) {
+        call.onTask?.(task);
+        show();
+        if (local.signal.aborted) {
+          await this.request("tasks/cancel", { taskId: task.taskId }).catch(() => undefined);
+          throw new DOMException("The task was cancelled.", "AbortError");
+        }
+        if (TERMINAL.has(task.status)) break;
+        if (expired(task, now(), startedAt)) throw new McpClientError(`the task ${task.taskId.slice(0, 40)} passed its time to live without finishing`);
+        if (task.status === "input_required" && task.inputRequests) {
+          const fresh = Object.fromEntries(Object.entries(task.inputRequests).filter(([k]) => !answered.has(k)));
+          if (Object.keys(fresh).length) {
+            if (!this.opts.elicit) return { kind: "input_required", text: "The server's task needs the user's input to finish (it was not given)." };
+            const { answers } = await this.answer(fresh, "tasks/get");
+            for (const k of Object.keys(fresh)) answered.add(k);
+            await this.request("tasks/update", { taskId: task.taskId, inputResponses: answers });
+          }
+        }
+        await new Promise<void>((resolve) => {
+          wake = resolve;
+          void sleep(pollDelay(task), local.signal).then(resolve);
+        });
+        wake = null;
+        if (local.signal.aborted) continue;
+        if (pushed) {
+          task = pushed;
+          pushed = null;
+          continue;
+        }
+        task = parseTask(await this.request("tasks/get", { taskId: task.taskId }));
+      }
+    } finally {
+      local.abort();
+      call.signal?.removeEventListener("abort", stop);
+      serverTasks.remove(rowId);
+    }
+    if (task.status === "completed") return completeOf(task.result ?? {});
+    if (task.status === "cancelled") return { kind: "complete", text: "The server cancelled the task.", isError: true };
+    return { kind: "complete", text: `The server's task failed: ${String(task.error?.message ?? task.statusMessage ?? "no reason given").slice(0, 500)}`, isError: true };
   }
 
   /**
@@ -200,14 +368,15 @@ export class McpClient {
    * server sent one. Without a handler, or after a decline or cancel the
    * server still waits on, the result is `input_required`.
    */
-  async callTool(name: string, args: Record<string, unknown>): Promise<McpCallResult> {
+  async callTool(name: string, args: Record<string, unknown>, call: CallOptions = {}): Promise<McpCallResult> {
     const paramHeaders = this.transport.binding === "http" ? paramHeadersFor(this.schemas.get(name), args) : undefined;
     const extra = paramHeaders && Object.keys(paramHeaders).length ? { paramHeaders } : {};
     let params: Record<string, unknown> = { name, arguments: args };
     let refused: ElicitationResult["action"] | null = null;
     const rounds = this.opts.maxRounds ?? MAX_INPUT_ROUNDS;
     for (let round = 0; ; round++) {
-      const r = await this.request("tools/call", params, extra);
+      const r = await this.request("tools/call", params, extra, true);
+      if (r.resultType === "task") return this.followTask(name, parseTask(r), call);
       if (r.resultType !== "input_required") return completeOf(r);
       const asks = r.inputRequests && typeof r.inputRequests === "object" && !Array.isArray(r.inputRequests) ? (r.inputRequests as Record<string, unknown>) : null;
       const state = r.requestState;
@@ -215,24 +384,11 @@ export class McpClient {
       if (!this.opts.elicit || refused || round >= rounds) {
         return { kind: "input_required", text: refused ? `The user ${refused === "decline" ? "declined" : "cancelled"} the server's request, and the server still needs it.` : "The server needs the user's input to finish this (it was not given).", ...(refused ? { declined: true } : {}) };
       }
-      const answers: Record<string, ElicitationResult> = {};
+      let answers: Record<string, ElicitationResult> = {};
       if (asks) {
-        const { parseElicitation, ElicitationError } = await import("./elicitation");
-        for (const [key, req] of Object.entries(asks).slice(0, 10)) {
-          const method = req && typeof req === "object" ? (req as { method?: unknown }).method : undefined;
-          // Servers MUST NOT send what we did not declare (MRTR rule 7): sampling and roots are never answered.
-          if (method !== "elicitation/create") throw new McpClientError(`tools/call: the server asked for ${String(method).slice(0, 60)}, which Lumen does not offer`);
-          let ans: ElicitationResult;
-          try {
-            ans = await this.opts.elicit({ server: this.opts.serverLabel ?? this.serverInfo.name ?? "MCP server", key, request: parseElicitation((req as { params?: unknown }).params) });
-          } catch (e) {
-            // A request the spec does not allow (a nested schema, a non-http URL) is declined, not shown.
-            if (e instanceof ElicitationError) ans = { action: "decline" };
-            else throw e;
-          }
-          answers[key] = ans.action === "accept" ? ans : { action: ans.action };
-          if (ans.action !== "accept") refused = refused === "cancel" ? "cancel" : ans.action;
-        }
+        const got = await this.answer(asks, "tools/call");
+        answers = got.answers;
+        if (got.refused) refused = got.refused;
       }
       params = { name, arguments: args, ...(asks ? { inputResponses: answers } : {}), ...(typeof state === "string" ? { requestState: state } : {}) };
     }
