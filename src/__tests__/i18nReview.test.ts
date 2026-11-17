@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { cpSync, mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 // @ts-expect-error the review agent is plain JavaScript
-import { checkPair, chrF, hebrewDrafts, placeholders, review, formatReport, LOCALES } from "../../scripts/i18n-review.mjs";
+import { checkPair, chrF, hebrewDrafts, placeholders, review, formatReport, LOCALES, modelReviewed, localeStrings } from "../../scripts/i18n-review.mjs";
 
 const ROOT = join(__dirname, "../..");
 
@@ -71,6 +71,21 @@ describe("Hebrew is the source language: no machine draft is left in it (W13.I6)
     } finally {
       rmSync(tmp, { recursive: true, force: true });
     }
+  });
+
+  it("review 14 M2: the Hebrew a model approved is listed, reported as owed native review, and every key is real", async () => {
+    const list = modelReviewed(ROOT) as Record<string, string>;
+    // 6c0784430c (123 drafts + 3 rewrites outside them) and 545bbf02b8 (202 drafts), one key in both; then
+    // f15-applock's 9 recovery strings, written by a model.
+    expect(Object.keys(list).length).toBe(336);
+    expect(new Set(Object.values(list))).toEqual(new Set(["6c0784430c", "545bbf02b8", "f15-applock"]));
+    const he = localeStrings(ROOT, "he") as Record<string, string>;
+    expect(Object.keys(list).filter((k) => typeof he[k] !== "string")).toEqual([]);
+    const result = (await review(ROOT)) as { findings: Finding[] };
+    const owed = result.findings.filter((f) => f.kind === "he-model-reviewed");
+    expect(owed.map((f) => f.key).sort()).toEqual(Object.keys(list).sort());
+    expect(owed.every((f) => f.level === "warning" && f.locale === "he" && /native review owed/.test(f.detail ?? ""))).toBe(true);
+    expect(formatReport(result)).toContain("Hebrew approved by a model, native review owed: **336**");
   });
 
   it("the tree has 0 Hebrew drafts, the seven academic.* strings included", () => {

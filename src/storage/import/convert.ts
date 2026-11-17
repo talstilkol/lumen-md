@@ -21,6 +21,7 @@ import { convertAirtable, looksLikeAirtable } from "./airtable";
 import { convertTomboy } from "./tomboy";
 import { claimPath } from "./names";
 import { emptyVault, type ConvertedVault, type ImportSourceId } from "./types";
+import { swallowed } from "../../lib/logger";
 
 /** Every source the wizard offers, in the order it shows them. */
 export const IMPORT_SOURCES: readonly ImportSourceId[] = ["obsidian", "notion", "evernote", "bear", "appleNotes", "keep", "logseq", "onenote", "roam", "craft", "textbundle", "dayOne", "appleJournal", "samsungNotes", "airtable", "tomboy", "pandoc", "lumen"];
@@ -93,7 +94,8 @@ export async function expandArchives(files: Map<string, Uint8Array>, depth = 0):
       let inner: Map<string, Uint8Array>;
       try {
         inner = await unzip(data.slice().buffer);
-      } catch {
+      } catch (e) {
+        swallowed("import/convert: an inner .zip did not open; it is imported as a file", e);
         out.set(clean, data);
         continue;
       }
@@ -132,7 +134,8 @@ function isRoamJson(files: Map<string, Uint8Array> | undefined, p: string): bool
   if (!/^\s*\[\s*\{[\s\S]*"title"/.test(head(files, p, 2048))) return false;
   try {
     return looksLikeRoam(JSON.parse(new TextDecoder().decode(files!.get(p))));
-  } catch {
+  } catch (e) {
+    swallowed("import/convert: a .json is not JSON, so not a Roam export", e);
     return false;
   }
 }
@@ -161,7 +164,8 @@ export function detectImportSource(paths: string[], files?: Map<string, Uint8Arr
     const whole = (p: string) => {
       try {
         return JSON.parse(new TextDecoder().decode(files.get(p))) as unknown;
-      } catch {
+      } catch (e) {
+        swallowed("import/convert: a .json is not JSON; its format is not detected", e);
         return null;
       }
     };

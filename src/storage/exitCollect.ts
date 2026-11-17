@@ -9,12 +9,13 @@ import { listDocuments, listSnapshots } from "./history";
 import { exportSettings, type SettingsTarget } from "../settings/io";
 import { buildExitPackage, type ExitSources } from "./exitPackage";
 import { zip } from "./zip";
+import { swallowed } from "../lib/logger";
 
 export async function collectExitSources(settingsTarget: SettingsTarget): Promise<ExitSources> {
   const files = await collectVault();
   const history: NonNullable<ExitSources["history"]> = {};
-  for (const d of await listDocuments().catch(() => [])) {
-    const snaps = await listSnapshots(d.name).catch(() => []);
+  for (const d of await listDocuments().catch((e: unknown) => (swallowed("storage/exitCollect: the document list did not read; the exit package has no history", e), []))) {
+    const snaps = await listSnapshots(d.name).catch((e: unknown) => (swallowed("storage/exitCollect: a note's versions did not read; the exit package has none for it", e), []));
     if (snaps.length) history[d.name] = snaps.map((s) => ({ timestamp: s.timestamp, content: s.content, ...(s.reason ? { reason: s.reason } : {}), ...(s.author ? { author: s.author } : {}) }));
   }
   const settings = exportSettings(settingsTarget);

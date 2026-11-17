@@ -101,7 +101,8 @@ export function loadConsent(vault: string): SharedConsent {
     const out = { ...NO_CONSENT };
     for (const k of PROTECTED_KINDS) out[k] = parsed?.[k] === true;
     return out;
-  } catch {
+  } catch (e) {
+    swallowed("sync/sharedVault: the consent record is not JSON; nothing protected is shared", e);
     return NO_CONSENT;
   }
 }

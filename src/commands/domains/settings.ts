@@ -6,7 +6,7 @@ import { canPurchasePlans, manageBilling, upgradeTo } from "../../billing/planAc
 import type { CommandContext } from "./context";
 import { airplaneFlagOn } from "../../privacy/airplaneBoot";
 import { appLockOn } from "../../privacy/appLockBoot";
-import { uiSelect } from "../../ui/PromptDialog";
+import { uiAlert, uiSelect } from "../../ui/PromptDialog";
 import { showAiToast } from "../../ui/AiToast";
 
 /** Panels only some builds mount: listed only when App passes their setter. */
@@ -162,7 +162,12 @@ function buildAppLockCommands(): Command[] {
         } catch {
           return showAiToast(t("toast.appLock.unavailable"), "error");
         }
-        writeSettings({ ...s, enabled: true, credentialId });
+        // Review 14 M6: a one-time recovery code for the day the device's check cannot pass; shown once, kept hashed.
+        const { newRecoveryCode, recoveryRecord } = await import("../../privacy/appLock");
+        await import("../../privacy/appLockStrings");
+        const code = newRecoveryCode();
+        writeSettings({ ...s, enabled: true, credentialId, recovery: await recoveryRecord(code) });
+        await uiAlert({ title: t("appLock.recover.show.title"), message: t("appLock.recover.show.body", { code }) });
         mountAppLock();
         void appLock().syncSecure();
         showAiToast(t("toast.appLock.on", { after: afterLabel(s.after) }), "success");

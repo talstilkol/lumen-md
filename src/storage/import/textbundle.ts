@@ -14,6 +14,7 @@
 import { claimPath, dirOf, mdDest, relativeTo, safeName, safePath, stemOf } from "./names";
 import { withFrontmatter, type Props } from "./frontmatter";
 import { emptyVault, type ConvertedVault } from "./types";
+import { swallowed } from "../../lib/logger";
 
 export const BUNDLE = /^(.*?[^/]+\.textbundle)\//i;
 
@@ -43,7 +44,8 @@ function readInfo(parts: Map<string, Uint8Array>): BundleInfo {
   try {
     const j = JSON.parse(new TextDecoder().decode(bytes)) as unknown;
     return j && typeof j === "object" && !Array.isArray(j) ? { json: j as Record<string, unknown>, broken: false } : { json: {}, broken: true };
-  } catch {
+  } catch (e) {
+    swallowed("import/textbundle: info.json is not JSON; the bundle is marked broken", e);
     return { json: {}, broken: true };
   }
 }
@@ -76,7 +78,8 @@ function placeBundle(vault: ConvertedVault, taken: Set<string>, notePath: string
   const decode = (raw: string) => {
     try {
       return decodeURIComponent(raw);
-    } catch {
+    } catch (e) {
+      swallowed("import/textbundle: an asset link is not URI-encoded; it is used as written", e);
       return raw;
     }
   };

@@ -7,8 +7,8 @@
  */
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { createElement } from "react";
-import { act, render, screen, fireEvent } from "@testing-library/react";
-import { AppLock, DEFAULT_SETTINGS, readSettings, writeSettings, webAuthnSeam, APP_LOCK_KEY, type AppLockSettings, type BiometricSeam } from "../privacy/appLock";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { AppLock, DEFAULT_SETTINGS, newRecoveryCode, normalizeRecoveryCode, readSettings, recoveryMatches, recoveryRecord, writeSettings, webAuthnSeam, APP_LOCK_KEY, type AppLockSettings, type BiometricSeam } from "../privacy/appLock";
 import { appLockOn, bootAppLock, BOOT_CLASS } from "../privacy/appLockBoot";
 import { LockOverlay } from "../privacy/appLockUi";
 import { readFileSync } from "node:fs";
@@ -171,6 +171,99 @@ describe("the lock screen", () => {
     act(() => lock.hidden());
     expect(screen.getByTestId("app-cover").getAttribute("aria-hidden")).toBe("true");
     expect(document.getElementById("root")?.hasAttribute("inert")).toBe(true);
+  });
+});
+
+/*
+ * Review 14 M6: the credential can disappear (Windows Hello reset, a new fingerprint, a cleared
+ * profile). A one-time recovery code, shown once and kept only as a salted SHA-256, unlocks once and
+ * turns the lock off; five wrong codes make it wait, doubling.
+ */
+describe("the recovery code (review 14 M6)", () => {
+  async function withCode(verify = false) {
+    const code = newRecoveryCode();
+    const recovery = await recoveryRecord(code);
+    let now = 5_000_000;
+    let s: AppLockSettings = { ...DEFAULT_SETTINGS, enabled: true, credentialId: "gone", recovery };
+    const save = vi.fn((n: AppLockSettings) => void (s = n));
+    const seam: BiometricSeam = { available: async () => true, enroll: async () => "x", verify: async () => verify };
+    const lock = new AppLock({ settings: () => s, save, seam, now: () => now, native: null });
+    return { code, recovery, lock, save, settings: () => s, tick: (ms: number) => (now += ms) };
+  }
+
+  it("a code is 26 Crockford characters (130 bits) in groups of four, different every time, and only its hash is kept", async () => {
+    const codes = new Set(Array.from({ length: 200 }, () => newRecoveryCode()));
+    expect(codes.size).toBe(200);
+    for (const c of codes) expect(c).toMatch(/^([0-9A-HJKMNP-TV-Z]{4}-){6}[0-9A-HJKMNP-TV-Z]{2}$/);
+    const code = [...codes][0];
+    const rec = await recoveryRecord(code);
+    expect(JSON.stringify(rec)).not.toContain(code.replace(/-/g, ""));
+    expect((await recoveryRecord(code)).hash).not.toBe(rec.hash); // salted
+    expect(await recoveryMatches(code.toLowerCase().replace(/-/g, " "), rec)).toBe(true);
+    expect(normalizeRecoveryCode("ol-il")).toBe("0111");
+    expect(await recoveryMatches(newRecoveryCode(), rec)).toBe(false);
+  });
+
+  it("the right code unlocks once and turns the lock off (the credential is gone); the device check alone still fails", async () => {
+    const w = await withCode(false);
+    w.lock.start();
+    expect(await w.lock.unlock()).toBe(false);
+    expect(w.lock.state).toBe("locked");
+    expect(await w.lock.recover(w.code)).toBe("unlocked");
+    expect(w.lock.state).toBe("unlocked");
+    expect(w.save).toHaveBeenCalledWith({ enabled: false, after: DEFAULT_SETTINGS.after });
+    expect(w.settings().recovery).toBeUndefined();
+    expect(w.settings().credentialId).toBeUndefined();
+  });
+
+  it("a wrong code keeps it locked; five in a row make it wait 30 s, then 60 s", async () => {
+    const w = await withCode();
+    w.lock.start();
+    for (let i = 0; i < 5; i++) expect(await w.lock.recover("0000-0000")).toBe("wrong");
+    expect(w.lock.recoveryWaitMs).toBe(30_000);
+    expect(await w.lock.recover(w.code)).toBe("wait"); // even the right one waits
+    expect(w.lock.state).toBe("locked");
+    w.tick(30_000);
+    expect(await w.lock.recover("0000")).toBe("wrong");
+    expect(w.lock.recoveryWaitMs).toBe(60_000);
+    w.tick(60_000);
+    expect(await w.lock.recover(w.code)).toBe("unlocked");
+  });
+
+  it("a lock turned on before codes existed has none: the device check is the only way", async () => {
+    const { lock } = setup({}, false);
+    lock.start();
+    expect(await lock.recover("anything")).toBe("none");
+    expect(lock.state).toBe("locked");
+  });
+
+  it("a malformed stored recovery is dropped when the settings are read", () => {
+    localStorage.setItem(APP_LOCK_KEY, JSON.stringify({ enabled: true, after: 1, credentialId: "c", recovery: { salt: 1, hash: "x" } }));
+    expect(readSettings().recovery).toBeUndefined();
+    localStorage.setItem(APP_LOCK_KEY, JSON.stringify({ enabled: true, after: 1, credentialId: "c", recovery: { salt: "s", hash: "h" } }));
+    expect(readSettings().recovery).toEqual({ salt: "s", hash: "h" });
+  });
+
+  it("the lock screen: 'Use the recovery code' opens a labelled field with focus; a wrong code is announced; the right one unlocks", async () => {
+    document.body.innerHTML = '<div id="root"></div>';
+    const w = await withCode();
+    render(createElement(LockOverlay, { lock: w.lock }));
+    act(() => void w.lock.start());
+    fireEvent.click(screen.getByTestId("app-lock-recover"));
+    const input = screen.getByLabelText(/Recovery code/) as HTMLInputElement;
+    expect(document.activeElement).toBe(input);
+    fireEvent.change(input, { target: { value: "WRONG-CODE" } });
+    await act(async () => {
+      fireEvent.submit(screen.getByTestId("app-lock-recover-form"));
+    });
+    await waitFor(() => expect(screen.getByRole("status").textContent).toMatch(/not right/));
+    expect(w.lock.state).toBe("locked");
+    fireEvent.change(input, { target: { value: w.code.toLowerCase() } });
+    await act(async () => {
+      fireEvent.submit(screen.getByTestId("app-lock-recover-form"));
+    });
+    await waitFor(() => expect(w.lock.state).toBe("unlocked"));
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 });
 

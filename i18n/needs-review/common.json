@@ -11511,5 +11511,86 @@
     "ru": "jyp9ab",
     "zh-CN": "jyp9ab",
     "fa": "jyp9ab"
+  },
+  "appLock.recover": {
+    "ar": "1gr1vo7",
+    "de": "1gr1vo7",
+    "fr": "1gr1vo7",
+    "ja": "1gr1vo7",
+    "ru": "1gr1vo7",
+    "zh-CN": "1gr1vo7",
+    "fa": "1gr1vo7"
+  },
+  "appLock.recover.done": {
+    "ar": "zar992",
+    "de": "zar992",
+    "fr": "zar992",
+    "ja": "zar992",
+    "ru": "zar992",
+    "zh-CN": "zar992",
+    "fa": "zar992"
+  },
+  "appLock.recover.label": {
+    "ar": "1lqrpen",
+    "de": "1lqrpen",
+    "fr": "1lqrpen",
+    "ja": "1lqrpen",
+    "ru": "1lqrpen",
+    "zh-CN": "1lqrpen",
+    "fa": "1lqrpen"
+  },
+  "appLock.recover.none": {
+    "ar": "1rqufrm",
+    "de": "1rqufrm",
+    "fr": "1rqufrm",
+    "ja": "1rqufrm",
+    "ru": "1rqufrm",
+    "zh-CN": "1rqufrm",
+    "fa": "1rqufrm"
+  },
+  "appLock.recover.show.body": {
+    "ar": "adbbqn",
+    "de": "adbbqn",
+    "fr": "adbbqn",
+    "ja": "adbbqn",
+    "ru": "adbbqn",
+    "zh-CN": "adbbqn",
+    "fa": "adbbqn"
+  },
+  "appLock.recover.show.title": {
+    "ar": "1dqam30",
+    "de": "1dqam30",
+    "fr": "1dqam30",
+    "ja": "1dqam30",
+    "ru": "1dqam30",
+    "zh-CN": "1dqam30",
+    "fa": "1dqam30"
+  },
+  "appLock.recover.submit": {
+    "ar": "7cz7rl",
+    "de": "7cz7rl",
+    "fr": "7cz7rl",
+    "ja": "7cz7rl",
+    "ru": "7cz7rl",
+    "zh-CN": "7cz7rl",
+    "fa": "7cz7rl"
+  },
+  "appLock.recover.wait": {
+    "ar": "6fhbvt",
+    "de": "6fhbvt",
+    "fr": "6fhbvt",
+    "ja": "6fhbvt",
+    "ru": "6fhbvt",
+    "zh-CN": "6fhbvt",
+    "fa": "6fhbvt"
+  },
+  "appLock.recover.wrong": {
+    "ar": "d3u90e",
+    "de": "d3u90e",
+    "fr": "d3u90e",
+    "ja": "d3u90e",
+    "ru": "d3u90e",
+    "zh-CN": "d3u90e",
+    "fa": "d3u90e"
   }
 }

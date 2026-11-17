@@ -11,6 +11,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { enableAirplaneMode, disableAirplaneMode } from "../privacy/airplane";
 import { NetworkMonitor } from "../privacy/NetworkMonitor";
+import { SUPPORTED_LOCALES } from "../i18n";
 
 const ROOT = process.cwd();
 const LOCALES = join(ROOT, "src/i18n/locales");
@@ -36,7 +37,8 @@ describe("the airplane certificate note matches what the download does (W10.C11)
     expect(en["airplane.certificate.unsigned"]).toBeUndefined();
     expect(en["airplane.certificate.signed"]).toMatch(/minisign/);
     const langs = readdirSync(LOCALES, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "en").map((d) => d.name);
-    expect(langs.length).toBe(7);
+    // Every shipped locale, no fixed count (review 14: fa made it 8).
+    expect(langs.sort()).toEqual(SUPPORTED_LOCALES.map((l) => l.code).filter((c) => c !== "en").sort());
     for (const l of langs) {
       const strings = readJson(join(LOCALES, l, "common.json"));
       expect(strings["airplane.certificate.unsigned"], l).toBeUndefined();

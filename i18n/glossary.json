@@ -70,7 +70,17 @@
           "保险库"
         ]
       },
-      "ignore": "Lumen Vault|Vault Doctor"
+      "ignore": "Lumen Vault|Vault Doctor",
+      "fa": {
+        "term": "گاوصندوق",
+        "forms": [
+          "گاوصندوق"
+        ],
+        "avoid": [
+          "مخزن"
+        ],
+        "review": "machine draft (review 14 L9): a native Persian speaker's review is owed"
+      }
     },
     {
       "id": "note",
@@ -132,7 +142,14 @@
         "avoid": []
       },
       "strict": false,
-      "ignore": "Apple Notes|Notes\\.Read|meeting notes|speaker notes|margin notes|footnotes?|side ?notes"
+      "ignore": "Apple Notes|Notes\\.Read|meeting notes|speaker notes|margin notes|footnotes?|side ?notes",
+      "fa": {
+        "term": "یادداشت",
+        "forms": [
+          "یادداشت"
+        ],
+        "review": "machine draft (review 14 L9): a native Persian speaker's review is owed"
+      }
     },
     {
       "id": "sync",
@@ -200,7 +217,14 @@
         ],
         "avoid": []
       },
-      "ignore": "Directory Sync"
+      "ignore": "Directory Sync",
+      "fa": {
+        "term": "همگام‌سازی",
+        "forms": [
+          "همگام"
+        ],
+        "review": "machine draft (review 14 L9): a native Persian speaker's review is owed"
+      }
     },
     {
       "id": "property",
@@ -259,6 +283,13 @@
           "属性"
         ],
         "avoid": []
+      },
+      "fa": {
+        "term": "ویژگی",
+        "forms": [
+          "ویژگی"
+        ],
+        "review": "machine draft (review 14 L9): a native Persian speaker's review is owed"
       }
     },
     {
@@ -323,7 +354,14 @@
         ],
         "avoid": []
       },
-      "ignore": "release tags?|Tag the invisible"
+      "ignore": "release tags?|Tag the invisible",
+      "fa": {
+        "term": "برچسب",
+        "forms": [
+          "برچسب"
+        ],
+        "review": "machine draft (review 14 L9): a native Persian speaker's review is owed"
+      }
     },
     {
       "id": "trash",
@@ -385,7 +423,14 @@
           "废纸篓"
         ]
       },
-      "ignore": "Keep's trash"
+      "ignore": "Keep's trash",
+      "fa": {
+        "term": "سطل زباله",
+        "forms": [
+          "زباله"
+        ],
+        "review": "machine draft (review 14 L9): a native Persian speaker's review is owed"
+      }
     },
     {
       "id": "template",
@@ -442,6 +487,13 @@
           "模板"
         ],
         "avoid": []
+      },
+      "fa": {
+        "term": "قالب",
+        "forms": [
+          "قالب"
+        ],
+        "review": "machine draft (review 14 L9): a native Persian speaker's review is owed"
       }
     },
     {
@@ -500,7 +552,14 @@
         ],
         "avoid": []
       },
-      "ignore": "JSON Canvas"
+      "ignore": "JSON Canvas",
+      "fa": {
+        "term": "بوم",
+        "forms": [
+          "بوم"
+        ],
+        "review": "machine draft (review 14 L9): a native Persian speaker's review is owed"
+      }
     },
     {
       "id": "backlink",
@@ -556,6 +615,13 @@
           "反向链接"
         ],
         "avoid": []
+      },
+      "fa": {
+        "term": "پیوند برگشتی",
+        "forms": [
+          "برگشتی"
+        ],
+        "review": "machine draft (review 14 L9): a native Persian speaker's review is owed"
       }
     }
   ]

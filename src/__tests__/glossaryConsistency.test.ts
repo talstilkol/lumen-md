@@ -11,6 +11,7 @@ import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:f
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 // @ts-expect-error plain JavaScript
+import { SUPPORTED_LOCALES } from "../i18n";
 import { GLOSSARY_LANGS, checkGlossary, glossaryPrompt, glossaryShape, readGlossary } from "../../scripts/lib/i18n-glossary.mjs";
 // @ts-expect-error plain JavaScript
 import { ollamaEngine } from "../../scripts/lib/i18n-draft.mjs";
@@ -25,11 +26,12 @@ const locales: Record<string, Record<string, string>> = Object.fromEntries(listL
 type Dev = { term: string; key: string; lang: string; kind: string; level: string; detail: string };
 
 describe("the glossary file", () => {
-  it("has the core terms, each with a definition and an approved translation in all seven languages", () => {
+  it("has the core terms, each with a definition and an approved translation in every language", () => {
     expect(glossaryShape(glossary)).toEqual([]);
     const ids = glossary.terms.map((t: { id: string }) => t.id);
     for (const id of ["vault", "note", "sync", "property"]) expect(ids).toContain(id);
-    expect(GLOSSARY_LANGS).toEqual(["he", "ar", "ru", "fr", "de", "ja", "zh-CN"]);
+    // Every shipped language but English (review 14 L9: fa had none).
+    expect([...GLOSSARY_LANGS].sort()).toEqual(SUPPORTED_LOCALES.map((l) => l.code).filter((c) => c !== "en").sort());
     const vault = glossary.terms.find((t: { id: string }) => t.id === "vault");
     expect(vault.he.term).toBe("כספת");
     expect(vault.he.avoid).toContain("מאגר");

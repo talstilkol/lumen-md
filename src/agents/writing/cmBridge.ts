@@ -141,7 +141,7 @@ export function acceptInView(view: EditorView, choices: readonly AcceptChoice[])
   const rest = list.filter((s) => !done.has(s.id));
   const changes = plan.changes.map(({ from, to, insert }) => ({ from, to, insert }));
   const annotations = [Transaction.userEvent.of("input.writing"), ...(isolate ? [isolate.of("full") as never] : [])];
-  // ai-authorship: a model's replacement is tagged at the insertion (5.9); a rule's fix or the user's own edit is not.
+  // A model's replacement carries aiAuthored at the insertion (5.9); a rule's fix or the user's own edit does not.
   if (plan.changes.some((c) => c.ai)) view.dispatch({ changes, effects: setWritingSuggestions.of(rest), annotations: [...annotations, aiAuthored.of(true)] });
   else view.dispatch({ changes, effects: setWritingSuggestions.of(rest), annotations });
   return plan;

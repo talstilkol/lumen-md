@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { opfsWritable, vaultOrSkip } from "./_opfs";
+import { testHooks, type LumenTestWindow } from "./_lumen";
 
 /**
  * Complete history (plan 3.2): versions are kept as compressed deltas and
@@ -13,6 +14,7 @@ test.beforeEach(async ({ page }) => {
   });
   await page.goto("/");
   await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
+  await testHooks(page);
 });
 
 test("delta versions read back intact, and the storage state is shown", async ({ page }) => {
@@ -65,8 +67,8 @@ test("bulk restore with Shift+click, search, and the retention setting", async (
   vaultOrSkip(await opfsWritable(page), browserName);
   const paths = ["notes/א.md", "notes/ב.md", "notes/ג.md", "notes/ד.md", "inbox/Meeting.md"];
   await page.evaluate(async (paths) => {
-    const ws = await import("/src/storage/workspace.ts");
-    const trash = await import("/src/storage/trash.ts");
+    const ws = await (window as unknown as LumenTestWindow).__lumenTest.load("storage/workspace");
+    const trash = await (window as unknown as LumenTestWindow).__lumenTest.load("storage/trash");
     for (const p of paths) await ws.writeWorkspaceFile(p, `body of ${p}`);
     // Oldest first, so the list (newest first) is inbox, ד, ג, ב, א.
     for (const [i, p] of paths.entries()) await trash.moveToTrash([p], {}, Date.now() - (paths.length - i) * 60_000);
@@ -95,7 +97,7 @@ test("bulk restore with Shift+click, search, and the retention setting", async (
   expect(await page.evaluate(() => document.activeElement !== document.body && !!document.activeElement?.closest("dialog"))).toBe(true);
 
   const back = await page.evaluate(async () => {
-    const ws = await import("/src/storage/workspace.ts");
+    const ws = await (window as unknown as LumenTestWindow).__lumenTest.load("storage/workspace");
     const out: Record<string, string | null> = {};
     for (const p of ["notes/ד.md", "notes/ג.md", "notes/ב.md", "notes/א.md", "inbox/Meeting.md"]) out[p] = (await ws.workspaceHasEntry(p)) ? await ws.readWorkspaceFile(p) : null;
     return out;

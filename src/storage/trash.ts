@@ -31,15 +31,12 @@ export interface TrashItem {
   kind: "file" | "directory";
 }
 
+/** A trashed entry that could not be deleted (after its restore, or when it expired) stays in .trash. */
+const leftInTrash = (e: unknown) => swallowed("storage/trash: a trashed entry could not be deleted; it stays in .trash", e);
+
+/** The index for a change: an unreadable one (reported by readTrashIndex) counts as empty, as it always did. */
 async function readIndex(): Promise<TrashItem[]> {
-  try {
-    const parsed = JSON.parse(await readWorkspaceFile(INDEX)) as unknown;
-    return Array.isArray(parsed) ? (parsed as TrashItem[]) : [];
-  } catch (e) {
-    // An index that is missing is an empty trash; one that can't be read or parsed hides what is in it.
-    if (!(e instanceof VaultNotFoundError)) swallowed("storage/trash: the trash index could not be read; the trash shows as empty", e);
-    return [];
-  }
+  return (await readTrashIndex()) ?? [];
 }
 
 async function writeIndex(items: TrashItem[]): Promise<void> {
@@ -61,16 +58,12 @@ export function trashedPathOf(item: TrashItem, path: string): string | null {
  * a trash that was never written has no index file and is empty.
  */
 export async function readTrashIndex(): Promise<TrashItem[] | null> {
-  let text: string;
   try {
-    text = await readWorkspaceFile(INDEX);
-  } catch (e) {
-    return e instanceof VaultNotFoundError ? [] : null;
-  }
-  try {
-    const parsed = JSON.parse(text) as unknown;
+    const parsed = JSON.parse(await readWorkspaceFile(INDEX)) as unknown;
     return Array.isArray(parsed) ? (parsed as TrashItem[]) : null;
-  } catch {
+  } catch (e) {
+    if (e instanceof VaultNotFoundError) return [];
+    swallowed("storage/trash: index unreadable", e);
     return null;
   }
 }
@@ -88,7 +81,7 @@ export async function listTrash(): Promise<TrashItem[]> {
 let indexQueue: Promise<unknown> = Promise.resolve();
 function serialized<T>(fn: () => Promise<T>): Promise<T> {
   const run = indexQueue.then(fn, fn);
-  indexQueue = run.catch(() => undefined);
+  indexQueue = run.catch((e: unknown) => swallowed("storage/trash: index write failed", e));
   return run;
 }
 
@@ -173,21 +166,23 @@ export function restoreFromTrashIfPresent(id: string): Promise<string | null> {
   return serialized(() => restoreNow(id));
 }
 
+/** The original path, or a free name next to it when something new took that path. */
+async function freeTarget(item: TrashItem): Promise<string> {
+  const p = item.originalPath;
+  if (!(await workspaceHasEntry(p))) return p;
+  if (item.kind === "file") return uniqueWorkspaceName(p);
+  let n = 2;
+  while (await workspaceHasEntry(`${p} ${n}`)) n++;
+  return `${p} ${n}`;
+}
+
 async function restoreNow(id: string): Promise<string | null> {
   const items = await readIndex();
   const item = items.find((i) => i.id === id);
   if (!item) return null;
-  let target = item.originalPath;
-  if (await workspaceHasEntry(target)) {
-    if (item.kind === "file") target = await uniqueWorkspaceName(target);
-    else {
-      let n = 2;
-      while (await workspaceHasEntry(`${item.originalPath} ${n}`)) n++;
-      target = `${item.originalPath} ${n}`;
-    }
-  }
+  const target = await freeTarget(item);
   await renameWorkspaceFile(`${TRASH_DIR}/${id}/${basename(item.originalPath)}`, target);
-  await deleteWorkspaceFile(`${TRASH_DIR}/${id}`).catch((e: unknown) => swallowed("storage/trash: a trashed file could not be deleted; it stays in .trash", e));
+  await deleteWorkspaceFile(`${TRASH_DIR}/${id}`).catch(leftInTrash);
   await writeIndex(items.filter((i) => i.id !== id));
   lastTrashed = lastTrashed.filter((i) => i.id !== id);
   return target;
@@ -217,19 +212,11 @@ export function restoreManyFromTrash(
     try {
       for (const item of todo) {
         try {
-          let target = item.originalPath;
-          if (await workspaceHasEntry(target)) {
-            if (item.kind === "file") target = await uniqueWorkspaceName(target);
-            else {
-              let k = 2;
-              while (await workspaceHasEntry(`${item.originalPath} ${k}`)) k++;
-              target = `${item.originalPath} ${k}`;
-            }
-          }
+          const target = await freeTarget(item);
           await renameWorkspaceFile(`${TRASH_DIR}/${item.id}/${basename(item.originalPath)}`, target);
           gone.add(item.id);
           restored.push({ id: item.id, path: target });
-          await deleteWorkspaceFile(`${TRASH_DIR}/${item.id}`).catch((e: unknown) => swallowed("storage/trash: a trashed folder could not be deleted after its restore; it stays in .trash", e));
+          await deleteWorkspaceFile(`${TRASH_DIR}/${item.id}`).catch(leftInTrash);
         } catch (error) {
           failed.push({ id: item.id, error });
         }
@@ -250,7 +237,7 @@ export function emptyTrash(opts: { id?: string; olderThanMs?: number } = {}, now
   return serialized(async () => {
     const items = await readIndex();
     const doomed = items.filter((i) => (opts.id ? i.id === opts.id : now - i.trashedAt >= (opts.olderThanMs ?? 0)));
-    for (const i of doomed) await deleteWorkspaceFile(`${TRASH_DIR}/${i.id}`).catch((e: unknown) => swallowed("storage/trash: an expired trashed file could not be deleted; it stays in .trash", e));
+    for (const i of doomed) await deleteWorkspaceFile(`${TRASH_DIR}/${i.id}`).catch(leftInTrash);
     await writeIndex(items.filter((i) => !doomed.includes(i)));
     return doomed.length;
   });
