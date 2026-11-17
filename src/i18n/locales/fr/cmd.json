@@ -524,6 +524,8 @@
   "cmd.view.runtimeMetrics": "Métriques d'exécution",
   "cmd.view.runtimeMetrics.hint": "Inspecter les nouvelles tentatives, délais dépassés et latences par catégorie de transport",
   "cmd.view.search": "Rechercher workspace…",
+  "cmd.view.sideBySide": "Side-by-side translation",
+  "cmd.view.sideBySide.hint": "This note and its translation (Hebrew ↔ English) paragraph by paragraph, on a local model; saved next to the note as <note>.<lang>.md",
   "cmd.view.smartSearch": "Recherche intelligente (sémantique + mots-clés)",
   "cmd.view.smartSearch.hint": "Recherche hybride dans vos notes",
   "cmd.view.source": "Vue source",

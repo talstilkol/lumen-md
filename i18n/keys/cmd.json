@@ -2647,6 +2647,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.sideBySide",
+      "en": "Side-by-side translation",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.sideBySide.hint",
+      "en": "This note and its translation (Hebrew ↔ English) paragraph by paragraph, on a local model; saved next to the note as <note>.<lang>.md",
+      "vars": []
+    },
+    {
       "key": "cmd.view.smartSearch",
       "en": "Smart search (semantic + keyword)",
       "vars": []

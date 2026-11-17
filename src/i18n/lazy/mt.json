@@ -17,5 +17,16 @@
   "mt.size.approx": "about {size}",
   "toast.translatedWith": "Translated with {layer}",
   "toast.translatedWithUnmeasured": "Translated with {layer} — its quality on this pair is not measured yet",
-  "toast.localMtUnavailable": "Local translation was not available ({why}); the AI model translated instead."
+  "toast.localMtUnavailable": "Local translation was not available ({why}); the AI model translated instead.",
+  "mt.sideBySide.title": "Side by side",
+  "mt.sideBySide.layer": "Translated with {layer}",
+  "mt.sideBySide.noChrome": "Chrome's built-in translator isn't available here, so the next local layer is used.",
+  "mt.sideBySide.translate": "Translate {count} paragraph(s)",
+  "mt.sideBySide.upToDate": "Up to date",
+  "mt.sideBySide.failed": "Couldn't translate: {error}",
+  "mt.sideBySide.stale": "out of date",
+  "mt.sideBySide.missing": "not translated yet",
+  "mt.sideBySide.close": "Close",
+  "mt.sideBySide.needVault": "Save the note in the vault first: the translation is saved next to it.",
+  "mt.sideBySide.sidecar": "Saved as {path}"
 }

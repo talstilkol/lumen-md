@@ -524,6 +524,8 @@
   "cmd.view.runtimeMetrics": "مقاييس التشغيل",
   "cmd.view.runtimeMetrics.hint": "افحص إعادات المحاولة وانتهاءات المهلة وزمن الاستجابة حسب فئة النقل",
   "cmd.view.search": "بحث workspace…",
+  "cmd.view.sideBySide": "Side-by-side translation",
+  "cmd.view.sideBySide.hint": "This note and its translation (Hebrew ↔ English) paragraph by paragraph, on a local model; saved next to the note as <note>.<lang>.md",
   "cmd.view.smartSearch": "بحث ذكي (دلالي + بالكلمات المفتاحية)",
   "cmd.view.smartSearch.hint": "استرجاع هجين عبر ملاحظاتك",
   "cmd.view.source": "عرض المصدر",

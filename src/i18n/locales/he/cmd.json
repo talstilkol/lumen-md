@@ -524,6 +524,8 @@
   "cmd.view.runtimeMetrics": "מדדי ריצה",
   "cmd.view.runtimeMetrics.hint": "בדוק ניסיון מחדש, פגיי זמן וזמני תגובה לפי קטגוריה",
   "cmd.view.search": "חיפוש במרחב העבודה…",
+  "cmd.view.sideBySide": "תרגום צד לצד",
+  "cmd.view.sideBySide.hint": "הפתק והתרגום שלו (עברית ↔ אנגלית) פסקה מול פסקה, במודל מקומי; נשמר ליד הפתק כ־<פתק>.<שפה>.md",
   "cmd.view.smartSearch": "חיפוש חכם (סמנטי + מילות מפתח)",
   "cmd.view.smartSearch.hint": "אחזור היברידי על הקבצים שלך",
   "cmd.view.source": "מצב מקור",

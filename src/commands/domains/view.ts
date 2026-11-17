@@ -28,6 +28,15 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => setMode("split"),
     },
     {
+      id: "view.sideBySide",
+      label: t("cmd.view.sideBySide"),
+      hint: t("cmd.view.sideBySide.hint"),
+      icon: cmdIcons.Columns2,
+      group: t("group.view"),
+      // Plan W12.H6: the note and its translation aligned by paragraph (local layers only).
+      action: () => void import("../../ai/mt/openSideBySide").then((m) => m.openSideBySide()),
+    },
+    {
       id: "view.preview",
       label: t("cmd.view.preview"),
       shortcut: "⌘3",

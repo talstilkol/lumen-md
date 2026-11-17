@@ -233,6 +233,13 @@
       "icon": "Columns2"
     },
     {
+      "id": "view.sideBySide",
+      "label": "Side-by-side translation",
+      "group": "View",
+      "hint": "This note and its translation (Hebrew ↔ English) paragraph by paragraph, on a local model; saved next to the note as <note>.<lang>.md",
+      "icon": "Columns2"
+    },
+    {
       "id": "view.preview",
       "label": "Preview only",
       "group": "View",
@@ -2308,6 +2315,13 @@
       "icon": "Columns2"
     },
     {
+      "id": "view.sideBySide",
+      "label": "Side-by-side translation",
+      "group": "View",
+      "hint": "This note and its translation (Hebrew ↔ English) paragraph by paragraph, on a local model; saved next to the note as <note>.<lang>.md",
+      "icon": "Columns2"
+    },
+    {
       "id": "view.preview",
       "label": "Preview only",
       "group": "View",
@@ -4290,6 +4304,7 @@
     "file.print",
     "view.source",
     "view.split",
+    "view.sideBySide",
     "view.preview",
     "view.wysiwyg",
     "view.outline",

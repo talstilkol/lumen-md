@@ -524,6 +524,8 @@
   "cmd.view.runtimeMetrics": "运行时指标",
   "cmd.view.runtimeMetrics.hint": "按传输类型查看重试、超时和延迟",
   "cmd.view.search": "搜索 workspace…",
+  "cmd.view.sideBySide": "Side-by-side translation",
+  "cmd.view.sideBySide.hint": "This note and its translation (Hebrew ↔ English) paragraph by paragraph, on a local model; saved next to the note as <note>.<lang>.md",
   "cmd.view.smartSearch": "智能搜索(语义 + 关键词)",
   "cmd.view.smartSearch.hint": "对笔记进行混合检索",
   "cmd.view.source": "源码视图",

@@ -523,6 +523,8 @@
   "cmd.view.runtimeMetrics": "Runtime metrics",
   "cmd.view.runtimeMetrics.hint": "Inspect retries, timeouts, and latency by transport category",
   "cmd.view.search": "Search workspace…",
+  "cmd.view.sideBySide": "Side-by-side translation",
+  "cmd.view.sideBySide.hint": "This note and its translation (Hebrew ↔ English) paragraph by paragraph, on a local model; saved next to the note as <note>.<lang>.md",
   "cmd.view.smartSearch": "Smart search (semantic + keyword)",
   "cmd.view.smartSearch.hint": "Hybrid retrieval over your notes",
   "cmd.view.source": "Source view",

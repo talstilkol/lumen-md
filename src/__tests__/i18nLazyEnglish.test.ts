@@ -27,7 +27,7 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "lora.json": { module: "ai/localLoraStrings.ts", users: ["ui/FineTuneSettings.tsx", "ui/LocalLoraSection.tsx"], prefixes: ["lora.", "fineTune.cloudRoute"] },
   "doctor.json": { module: "agents/doctorStrings.ts", users: ["ui/AiDoctorPanel.tsx"], prefixes: ["ai.doctor."] },
   "imageSearch.json": { module: "ai/imageSearchStrings.ts", users: ["ui/SearchDialog.tsx", "ui/ImageSearchPanel.tsx", "ai/imageSearchService.ts"], prefixes: ["imageSearch."] },
-  "mt.json": { module: "ai/mt/strings.ts", users: ["ai/mt/index.ts", "agents/commands.ts"], prefixes: ["models.", "mt.", "toast.translatedWith", "toast.localMtUnavailable"] },
+  "mt.json": { module: "ai/mt/strings.ts", users: ["ai/mt/index.ts", "agents/commands.ts", "ui/SideBySideTranslation.tsx", "ai/mt/openSideBySide.tsx"], prefixes: ["models.", "mt.", "toast.translatedWith", "toast.localMtUnavailable"] },
   // Encrypted sync (plan 3.4): the whole of src/sync/e2ee/ loads on demand.
   // `shared`: the string-free crypto helpers the encrypted vault (plan 11.4) and the backups (age) use too; they may be
   // imported from outside, and must not reach the strings.

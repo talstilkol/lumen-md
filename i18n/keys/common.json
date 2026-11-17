@@ -9072,6 +9072,69 @@
       "vars": []
     },
     {
+      "key": "mt.sideBySide.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "mt.sideBySide.failed",
+      "en": "Couldn't translate: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "mt.sideBySide.layer",
+      "en": "Translated with {layer}",
+      "vars": [
+        "layer"
+      ]
+    },
+    {
+      "key": "mt.sideBySide.missing",
+      "en": "not translated yet",
+      "vars": []
+    },
+    {
+      "key": "mt.sideBySide.needVault",
+      "en": "Save the note in the vault first: the translation is saved next to it.",
+      "vars": []
+    },
+    {
+      "key": "mt.sideBySide.noChrome",
+      "en": "Chrome's built-in translator isn't available here, so the next local layer is used.",
+      "vars": []
+    },
+    {
+      "key": "mt.sideBySide.sidecar",
+      "en": "Saved as {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "mt.sideBySide.stale",
+      "en": "out of date",
+      "vars": []
+    },
+    {
+      "key": "mt.sideBySide.title",
+      "en": "Side by side",
+      "vars": []
+    },
+    {
+      "key": "mt.sideBySide.translate",
+      "en": "Translate {count} paragraph(s)",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "mt.sideBySide.upToDate",
+      "en": "Up to date",
+      "vars": []
+    },
+    {
       "key": "mt.size.approx",
       "en": "about {size}",
       "vars": [

@@ -524,6 +524,8 @@
   "cmd.view.runtimeMetrics": "ランタイムメトリクス",
   "cmd.view.runtimeMetrics.hint": "通信カテゴリごとの再試行、タイムアウト、レイテンシを確認します",
   "cmd.view.search": "検索 workspace…",
+  "cmd.view.sideBySide": "Side-by-side translation",
+  "cmd.view.sideBySide.hint": "This note and its translation (Hebrew ↔ English) paragraph by paragraph, on a local model; saved next to the note as <note>.<lang>.md",
   "cmd.view.smartSearch": "スマート検索 (セマンティック + キーワード)",
   "cmd.view.smartSearch.hint": "ノート全体へのハイブリッド検索",
   "cmd.view.source": "ソース表示",

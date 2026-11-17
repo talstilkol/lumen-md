@@ -524,6 +524,8 @@
   "cmd.view.runtimeMetrics": "Метрики выполнения",
   "cmd.view.runtimeMetrics.hint": "Повторы, тайм-ауты и задержки по категориям транспорта",
   "cmd.view.search": "Поиск workspace…",
+  "cmd.view.sideBySide": "Side-by-side translation",
+  "cmd.view.sideBySide.hint": "This note and its translation (Hebrew ↔ English) paragraph by paragraph, on a local model; saved next to the note as <note>.<lang>.md",
   "cmd.view.smartSearch": "Умный поиск (семантика + ключевые слова)",
   "cmd.view.smartSearch.hint": "Гибридный поиск по вашим заметкам",
   "cmd.view.source": "Режим исходника",
