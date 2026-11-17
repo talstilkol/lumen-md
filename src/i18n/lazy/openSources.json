@@ -44,5 +44,7 @@
   "openSources.source.sefaria": "Sefaria",
   "openSources.switches": "Sources (off: nothing is sent to it)",
   "openSources.terms": "Terms of use",
-  "openSources.title": "Open sources"
+  "openSources.title": "Open sources",
+  "openSources.inserts.copy": "Enter inserts the text itself, with its credit",
+  "openSources.inserts.link": "Enter inserts a link only: the licence allows no copy"
 }

@@ -2958,6 +2958,8 @@
   "openSources.failed": "検索に失敗：{error}",
   "openSources.found": "オンライン結果 {count} 件",
   "openSources.hint": "入力して端末内を検索。オンライン検索は送信前に確認します。",
+  "openSources.inserts.copy": "Enter inserts the text itself, with its credit",
+  "openSources.inserts.link": "Enter inserts a link only: the licence allows no copy",
   "openSources.keys": "↑↓ 選択 · Enter 挿入 · Alt+O オンライン · Esc 閉じる",
   "openSources.kind": "種類",
   "openSources.kind.all": "すべて",

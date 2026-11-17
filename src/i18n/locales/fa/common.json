@@ -2958,6 +2958,8 @@
   "openSources.failed": "The search failed: {error}",
   "openSources.found": "{count} result(s) online",
   "openSources.hint": "Type to search the sources on this device; “Search online” asks before it sends anything.",
+  "openSources.inserts.copy": "Enter inserts the text itself, with its credit",
+  "openSources.inserts.link": "Enter inserts a link only: the licence allows no copy",
   "openSources.keys": "↑↓ choose · Enter insert · Alt+O search online · Esc close",
   "openSources.kind": "Kind",
   "openSources.kind.all": "All",

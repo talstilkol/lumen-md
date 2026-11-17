@@ -13,9 +13,11 @@ import { createRoot, type Root } from "react-dom/client";
 import { getLocale, t } from "../../i18n";
 import "./strings";
 import "../../citations/CiteDialog.css";
+import "../../ui/PromptDialog.css";
 import "./OpenSourcesDialog.css";
 import { enabledSources, setSourceEnabled, type OpenSourceId } from "./gate";
 import { KINDS, merge, type Kind, type LocalSources, type OpenResult } from "./search";
+import { mayCopy } from "./rights";
 import { explainError } from "../../lib/userError";
 import { HelpButton } from "../../ui/HelpButton";
 import { Modal } from "../../ui/Modal";
@@ -97,7 +99,9 @@ export function OpenSourcesDialog(d: DialogDeps) {
   };
 
   const onKey = (e: KeyboardEvent) => {
-    e.stopPropagation();
+    // The app's shortcuts underneath must not see the dialog's keys — but Tab must reach the dialog's focus trap
+    // (on the document), or Tab from the last control leaves the dialog for the page.
+    if (e.key !== "Tab") e.stopPropagation();
     if (e.key === "Escape") {
       e.preventDefault();
       d.onClose();
@@ -140,7 +144,7 @@ export function OpenSourcesDialog(d: DialogDeps) {
             onChange={(e) => setQuery(e.target.value)}
             data-testid="open-sources-query"
           />
-          <button type="button" onClick={() => void goOnline()} disabled={busy || !query.trim()} data-testid="open-sources-online" aria-keyshortcuts="Alt+O">
+          <button type="button" className="prompt-btn prompt-btn-cancel" onClick={() => void goOnline()} disabled={busy || !query.trim()} data-testid="open-sources-online" aria-keyshortcuts="Alt+O">
             {t("openSources.online")}
           </button>
         </div>
@@ -172,8 +176,14 @@ export function OpenSourcesDialog(d: DialogDeps) {
               <span className="cite-meta" dir="auto">
                 {[t(`openSources.source.${r.source}`), r.detail].filter(Boolean).join(" · ")} {r.local ? `· ${t("openSources.onDevice")}` : ""}
               </span>
-              <span className={`os-badge os-badge-${r.rights}`} data-testid="open-sources-badge">
-                {t(`openSources.rights.${r.rights}`)}
+              <span className="os-badge-row">
+                <span className={`os-badge os-badge-${r.rights} ${mayCopy(r.rights) ? "os-copy" : "os-link"}`} data-testid="open-sources-badge">
+                  {t(`openSources.rights.${r.rights}`)}
+                </span>
+                {/* What Enter puts in the note: the rights decide, the user doesn't have to. */}
+                <span className="os-inserts" data-testid="open-sources-inserts" data-mode={mayCopy(r.rights) ? "copy" : "link"}>
+                  {t(mayCopy(r.rights) ? "openSources.inserts.copy" : "openSources.inserts.link")}
+                </span>
               </span>
               {r.terms && (
                 // R12.19: each register's licence light and its terms of use.

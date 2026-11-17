@@ -2958,6 +2958,8 @@
   "openSources.failed": "Suche fehlgeschlagen: {error}",
   "openSources.found": "{count} Online-Treffer",
   "openSources.hint": "Tippen, um auf dem Gerät zu suchen; „Online suchen“ fragt vor dem Senden.",
+  "openSources.inserts.copy": "Enter inserts the text itself, with its credit",
+  "openSources.inserts.link": "Enter inserts a link only: the licence allows no copy",
   "openSources.keys": "↑↓ wählen · Enter einfügen · Alt+O online · Esc schließen",
   "openSources.kind": "Art",
   "openSources.kind.all": "Alle",
