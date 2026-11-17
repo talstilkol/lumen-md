@@ -53,12 +53,15 @@ export const NOT_PRIVATE = new Set(["validate_json", "validate_mermaid", "valida
 
 /**
  * Whether a call's result can hold the user's own data (the vault, the
- * editor, a repo). Fail closed: every tool that is not a network call counts,
- * except those that only turn the model's own input around and a quote check
- * against a page this run fetched. The trust class of what it read does not
- * matter: a clipped page or an imported PDF in the vault is the user's data.
+ * editor, a repo, an account behind an MCP server). Fail closed: every tool
+ * that is not a network call counts, except those that only turn the model's
+ * own input around and a quote check against a page this run fetched; a
+ * network tool counts when it says so (`privateResult`: a remote MCP server
+ * the user connected). The trust class of what it read does not matter: a
+ * clipped page or an imported PDF in the vault is the user's data.
  */
 export function readsUserData(tool: AgentTool, args: Record<string, unknown>): boolean {
+  if (tool.privateResult) return true;
   if (tool.scope === "network" || NOT_PRIVATE.has(tool.name)) return false;
   if (tool.name === "extract_quotes" && typeof args.url === "string" && args.url.trim() && !(typeof args.path === "string" && args.path.trim())) return false;
   return true;
