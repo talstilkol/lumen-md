@@ -3760,6 +3760,7 @@
   "viz.arg.conclusion": "conclusion",
   "viz.arg.contradicts": "contredit",
   "viz.arg.empty": "Pas encore d’affirmations ni de sources : donnez aux notes `type: claim` ou `type: evidence`, et reliez-les avec supports:, contradicts: ou qualifies:.",
+  "viz.arg.findings": "{{n}} logic findings",
   "viz.arg.noSource": "sans source",
   "viz.arg.qualifies": "nuance",
   "viz.arg.save": "Enregistrer en canevas",

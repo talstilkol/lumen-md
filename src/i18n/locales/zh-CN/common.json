@@ -3760,6 +3760,7 @@
   "viz.arg.conclusion": "结论",
   "viz.arg.contradicts": "反驳",
   "viz.arg.empty": "还没有主张或来源：给笔记加上 `type: claim` 或 `type: evidence`，并用 supports:、contradicts: 或 qualifies: 关联。",
+  "viz.arg.findings": "{{n}} logic findings",
   "viz.arg.noSource": "无来源",
   "viz.arg.qualifies": "限定",
   "viz.arg.save": "保存为画布",

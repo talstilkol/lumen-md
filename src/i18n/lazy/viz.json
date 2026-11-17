@@ -6,6 +6,7 @@
   "viz.arg.conclusion": "conclusion",
   "viz.arg.contradicts": "contradicts",
   "viz.arg.empty": "No claims or sources yet: give notes `type: claim` or `type: evidence`, and link them with supports:, contradicts: or qualifies:.",
+  "viz.arg.findings": "{{n}} logic findings",
   "viz.arg.noSource": "no source",
   "viz.arg.qualifies": "qualifies",
   "viz.arg.save": "Save as a canvas",
