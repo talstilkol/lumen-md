@@ -1047,6 +1047,19 @@
     "W13.G12": "PARTIAL",
     "W13.G13": "PARTIAL"
    }
+  },
+  {
+   "name": "r5 17.11 (review14/verdicts.tsv, 6c942c49c8)",
+   "at": "2026-11-17",
+   "verdicts": {
+    "W13.S3": "DONE",
+    "W13.I3": "DONE",
+    "W13.E5": "DONE",
+    "W13.H2": "DONE",
+    "W13.V6": "DONE",
+    "W13.G2": "DONE"
+   },
+   "note": "Audit r5 (review 14, 17.11) audited 34 W13 tasks of wave g4 plus W13.G2 at 6c942c49c8; these are its six DONE rows (review14/verdicts.tsv). Its PARTIAL / NOT DONE rows for the other 28 were not in the file handed to lane F15, so they are not imported here: those tasks stay ⏳ and are judged again when the full table is imported."
   }
  ],
  "about": "Verdicts of the independent audits, by task id. plan:check refuses a ✅ the latest audit did not call DONE (W10.B12, scripts/plan/auditGuard.mjs). Append a new audit with --import; never edit a verdict by hand."
