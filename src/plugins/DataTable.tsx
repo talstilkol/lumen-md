@@ -57,7 +57,7 @@ export function DataTable({ data, maxRows = 200 }: Props) {
                 {c.name}
                 <span className="col-type">{c.type}</span>
                 {sortKey === c.key && (
-                  <span style={{ marginLeft: 6 }}>
+                  <span style={{ marginInlineStart: 6 }}>
                     {sortDir === "asc" ? "▲" : "▼"}
                   </span>
                 )}

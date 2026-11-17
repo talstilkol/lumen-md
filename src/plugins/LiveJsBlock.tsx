@@ -329,7 +329,7 @@ export default function LiveJsBlock({ source, meta }: Props) {
           marginBottom: 6,
           fontSize: 11,
           color: runState === "error" || runState === "timeout" ? "hsl(0 80% 65%)" : "hsl(var(--fg-muted))",
-          textAlign: "right",
+          textAlign: "end",
         }}
       >
         {t("block.liveJs.runStatus", { state: stateLabel })}
