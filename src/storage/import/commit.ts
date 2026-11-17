@@ -53,7 +53,7 @@ async function sha256(data: Uint8Array | string): Promise<string> {
 
 /** The free folder for an import called `name`. */
 export async function importFolderFor(name: string): Promise<string> {
-  const base = `${IMPORT_ROOT}/${safeName(name.replace(/\.(zip|bearbk|enex|mht|mhtml|json|textpack|textbundle)$/i, ""), "import")}`;
+  const base = `${IMPORT_ROOT}/${safeName(name.replace(/\.(zip|bearbk|enex|mht|mhtml|json|textpack|textbundle|csv|note|sdocx)$/i, ""), "import")}`;
   if (!(await workspaceHasEntry(base))) return base;
   let n = 2;
   while (await workspaceHasEntry(`${base} ${n}`)) n++;

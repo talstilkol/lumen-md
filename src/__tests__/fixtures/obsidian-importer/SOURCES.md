@@ -128,3 +128,76 @@ see their `tests/roam/README.md`), not real users' exports.
 | `textbundle/Ulysses Export.zip` | 7236 | `b00934917f4e9b701036caa680ee08182c3194dfcd9590635f01c6ab2093cd4a` |
 | `textbundle/example 2.textpack` | 4163 | `6daf48e529afaf77872058c6770ef012e584b74033458870ae3f921d40c4aae1` |
 | `textbundle/example.textpack` | 4569 | `9a359488031cb2ca6ec074ecda3948047974a0125ac2a433a62d23490b8efc61` |
+
+## Tomboy, Apple Journal, CSV and Airtable (plan W13.F2)
+
+Copied unchanged from the same commit (`fa9444a188459f227b07ec121ad03d26bd6b301a`, v3.2.0), for the
+Tomboy, Apple Journal and Airtable importers and their rows in `npm run import:diff`. Public examples
+written by the importer's authors (the Airtable base is hand-written to the API's shape, its values made
+up; see its `_comment`), not real users' data. MIT, © 2023 Obsidian.
+
+- `tests/tomboy/*.note` → `tomboy/`; `tests/tomboy/expected/` → `tomboy-expected/`
+- `tests/journal/*.html` → `journal/`; `tests/journal/expected/` → `journal-expected/`
+- `tests/csv/*.csv` → `csv/`; `tests/csv/expected/` → `csv-expected/` (Obsidian's CSV import: how it takes an Airtable CSV)
+- `tests/airtable/example-base.json` → `airtable/`; `tests/airtable/expected/example-base/` → `airtable-expected/example-base/`
+- Copied: 2026-11-17. Samsung Notes' `.sdocx` fixtures are not copied: lumen-md does not read `.sdocx` (see the importer's notes in src/storage/import/samsungNotes.ts).
+
+| file | bytes | sha256 |
+|---|---|---|
+| `airtable-expected/example-base/Airtable/Example base/Authors.base` | 327 | `50b6ff8d5818feb11ea98aec747e3404a0cf92656dc0765b75e7db0e8089f0f1` |
+| `airtable-expected/example-base/Airtable/Example base/Authors/Ada Lovelace.md` | 89 | `65b9852440c11715bfb285a2b74e40e0324a37dc6a1cbc1b66d2a8e6dc95d168` |
+| `airtable-expected/example-base/Airtable/Example base/Authors/Grace Hopper.md` | 64 | `7ccbce35ac2fb0299851281e820812b5f38a669546236147494d3879f5a57075` |
+| `airtable-expected/example-base/Airtable/Example base/Books.base` | 3208 | `e49d102db1d784c5beeb14fa680752e350ef911fbe05365783f79ad1ff12e0bb` |
+| `airtable-expected/example-base/Airtable/Example base/Books/Notes on quoting - naming.md` | 292 | `f9e8e20b9bdbdf90e82a1b2d3e9bb74347cb87a8cbc99b78277ccaf13492f20e` |
+| `airtable-expected/example-base/Airtable/Example base/Books/The Long Way 1.md` | 179 | `c076c1e1d2b4c4ebaecf95f31ebd43cfc928cad8202b82fb5927eb552be910c1` |
+| `airtable-expected/example-base/Airtable/Example base/Books/The Long Way.md` | 735 | `fd3ca6c860511e385fbcd3737d1505865e21eb8e0c79def57c1b8a4ceda1596f` |
+| `airtable/example-base.json` | 11284 | `4d987554c35ef92759ae66a271f50e6bb46ff0a16115c0842573d11247f3698f` |
+| `csv-expected/comprehensive-test/Boolean Test.md` | 226 | `c2406234e91b5d9e23d23320db09d96069a960304e973f343d846be6679768ab` |
+| `csv-expected/comprehensive-test/Empty Fields Test.md` | 175 | `8941809fa06010d734d601003a195ffef8c02bd1567ce1fde0a2dcc4044c38b8` |
+| `csv-expected/comprehensive-test/Meeting Notes.md` | 325 | `9a132b6ed965dfc94a751d633bac9a23885aa379f0d1291f64ecaa86e6adc8b7` |
+| `csv-expected/comprehensive-test/Multi-line Content.md` | 291 | `540893b2584f43a8c148a5854ee6274ab5f1c90e41eec3c4b12ab7b3fc689ed4` |
+| `csv-expected/comprehensive-test/Note with quotes.md` | 251 | `21a88ff2471c3a1fd7f842e261daf5530cac3a4bb410da578f341e4a829d3438` |
+| `csv-expected/comprehensive-test/Numbers Test.md` | 222 | `6fb1c66865edb50e1f8245bff5cdfed09b4dd903accfa9ebafe56a2a5f25b9a1` |
+| `csv-expected/comprehensive-test/Project Plan.md` | 343 | `6dc77ecbf78372e1fcf623f5560de61f71062e9d79f68a349120abdb149bba83` |
+| `csv-expected/comprehensive-test/Simple Note.md` | 220 | `23a02de41a42985c2b174a2e242f91b0abb249859a0553de2b651ff47bd556d4` |
+| `csv-expected/comprehensive-test/Special Chars.md` | 254 | `e48d1d8260ebf8f8429732906b4cea5215dc6ca5e56e71b09907d40ae38bbdb9` |
+| `csv-expected/comprehensive-test/Unicode Test.md` | 231 | `c05d51c48828b520b060b48e48792299498f02b1f3b1e6c6f8fc9e6493057df2` |
+| `csv-expected/sample/My First Note.md` | 166 | `bd46b9bfb7a4dd4fcbe71c94c0cb6f87d9d4b23059be69c4ee877c81f6fdc4f3` |
+| `csv-expected/sample/Note with, comma.md` | 154 | `a5e29954800a30eba9659b2ad8955e64c31af514a32521425535709fddd349f2` |
+| `csv-expected/sample/Planning Document.md` | 178 | `4a0a1cc43f465c5fb81f742cd2b4a81dc9e4413f0c3a066eddea92d2c671f672` |
+| `csv-expected/sample/Second Note.md` | 173 | `ad17198387d333131c6ef5c384a628e24e6cd2260255aa0a0feb4870b3a19671` |
+| `csv-expected/sample/Simple Note.md` | 141 | `adcd32b5e3af6be5da7622e0413db0d1b060b8f2e80a7de08d75cc61593fd061` |
+| `csv-expected/semicolon/Apple.md` | 82 | `9206b5357603c2ce2b0af6241fcef01203a32d173db60861d6bfd8bc98487807` |
+| `csv-expected/semicolon/Bread.md` | 98 | `67281c4834516149f28dbe906ef935ebc40abda54d1a525253927ac96c152a29` |
+| `csv-expected/semicolon/Cheese.md` | 84 | `f44579668b20b0dd088ca566e46b09f83b853eb410a2ce631bb3ec8f5904bdfc` |
+| `csv/comprehensive-test.csv` | 1498 | `12926d70134947312fe974321e679460276aabc56c833492d6fc3ec5ee7fc34e` |
+| `csv/sample.csv` | 489 | `e7b72b2996ef0e13aa7bba02524008c47b6286cda7b84198bdfa576a20c7693f` |
+| `csv/semicolon.csv` | 146 | `9d79617417e4cc74f93e9b3a19ab8cbf319f3068fd93e67a116219f2bef46222` |
+| `journal-expected/entry-complex-metadata.md` | 213 | `676d217f71b41455034d9310ae2c9d38796d75b349171485c4b3725d39279a86` |
+| `journal-expected/entry-with-assets.md` | 122 | `a7f36a39d0e845967329d7eeb870bd20add1932daa76f87346406c006c8c517a` |
+| `journal/entry-complex-metadata.html` | 1356 | `6d8889b9f432ad73dae5953dd59c19432a42eae6ba9fb66b22ea932accf29eb3` |
+| `journal/entry-with-assets.html` | 1178 | `a48a2579e3db2018da704ae5066226eb6987bc022bef7fa15407132d15905370` |
+| `tomboy-expected/2769c249-6cbb-4263-ae03-7c0a5be89ac1/TODO Liste.md` | 276 | `0666ee10c2a2a07cc02dcff9e79ac385b8a3238803c2962d9e4f2aadfd27048c` |
+| `tomboy-expected/410f9acd-09c9-4c19-8b27-29b69ef450d0/Neue Notizbuchvorlage.md` | 123 | `e3feac2adc412c6cd2a4792f66f0666d8b1bb5486f5045b20613d90158ba204a` |
+| `tomboy-expected/7300325c-9f4e-4eef-8686-1e905136a3a3/Einfache Beispielnotiz.md` | 104 | `3abb124c8c372d7e8684a756cccda03ca1e2ad7d6d752c09459569bd1365bdaf` |
+| `tomboy-expected/759b94f3-6587-4464-b24f-ebdd12f6e75c/Spätere Checkpunkte.md` | 181 | `4843501cde18c2917df7d892e931126eee02698c70ae53b650f9efec199f02a0` |
+| `tomboy-expected/84cd9ff6-ad59-4072-8f6e-9ce1952a9f4d/Böse Zeichen im Titel 1.md` | 382 | `3becfbd704d21c853698624a071752d209102b1e528a3344e7b9af9f936bd122` |
+| `tomboy-expected/8a97cb92-34fa-427e-ba01-b8dbf4dae71f/Aufzählung.md` | 303 | `bede46832e39356b0553e882c577a9378785bb807e0fad363be8dbda9d150efd` |
+| `tomboy-expected/919418ca-8d97-4722-8d62-85e6e17cef14/Unerlaubte Zeichen.md` | 241 | `8d5b921f04db38346bbc0216c90f925266e85e4cf6ef341e0c116f134c598802` |
+| `tomboy-expected/9322a3d0-0758-48ed-9d8b-342986d0bfdf/Formatierter Text.md` | 415 | `422edd1f1682455615e0b4701ba7bfc268ab946bd2df9af758ab096947eaecb1` |
+| `tomboy-expected/95750e8a-fd86-4966-a87b-12ac45de4b3a/Kleine Schrift.md` | 248 | `1c2bd1fd0f676bf082e635cd9678385672fc081f4839f7b221413ca916db5e47` |
+| `tomboy-expected/95f6e84f-d824-4194-a175-e8a9edbb97a4/Notiz mit internem Link.md` | 207 | `95ecae3e8bd304ed0760b1c1fd4824082aebf108ccfdca65d22ba4cb0bdd14cd` |
+| `tomboy-expected/d76cb57b-d566-4c2d-bd5e-41a866b25b11/ZugFerd - factur-x integration 4343.md` | 357 | `1c8a272b7d1c2e470760e2842a54f640502d8d8e320dab239275cbf089ac4889` |
+| `tomboy-expected/ee3b1318-b917-4aef-a0a9-237b8fe089f3/Überschriften.md` | 537 | `84aec22c7e6e024aa78e7ed88ae3fb0553570da5e5b4fd0af52fa78a0a54d203` |
+| `tomboy/2769c249-6cbb-4263-ae03-7c0a5be89ac1.note` | 1231 | `0205a068d713bca33b1d3242b2bf380ef542e27f83e23fbd6a718a62b47b6e7b` |
+| `tomboy/410f9acd-09c9-4c19-8b27-29b69ef450d0.note` | 877 | `3db8f330613d15a32b0131e375f7bafc71583eafcc7a99a5ca3946cd41253bd5` |
+| `tomboy/7300325c-9f4e-4eef-8686-1e905136a3a3.note` | 831 | `d384cfbd208b00c747dbb51033516aa6271a4897334012b1400fdc665c18f02e` |
+| `tomboy/759b94f3-6587-4464-b24f-ebdd12f6e75c.note` | 1020 | `808b6e1c5f902771674b0bc091d4925cb6e03b07c62a903cee037279c46db172` |
+| `tomboy/84cd9ff6-ad59-4072-8f6e-9ce1952a9f4d.note` | 1197 | `f3753270ad5a13a290ecefad429d1f6daf1458cf009f3d3d3c2624a2f11826bf` |
+| `tomboy/8a97cb92-34fa-427e-ba01-b8dbf4dae71f.note` | 1287 | `4dcaf8f7abeaf129b2496bffb08fdb7d3c3d21322016e9320d77aba0a701f4a1` |
+| `tomboy/919418ca-8d97-4722-8d62-85e6e17cef14.note` | 930 | `960acfec9adde1cefdea62239ed19d87a0c0f5df03a3f0574c7c473cdd9e3429` |
+| `tomboy/9322a3d0-0758-48ed-9d8b-342986d0bfdf.note` | 1566 | `3c5b1faf1ebf73991b98cce45bd0c5480672653fed4982001bb3f9f8143a580f` |
+| `tomboy/95750e8a-fd86-4966-a87b-12ac45de4b3a.note` | 986 | `925e7aad7a98de93ffddaeceba0a371ef07e641eda20fb2459181fe41d2b29df` |
+| `tomboy/95f6e84f-d824-4194-a175-e8a9edbb97a4.note` | 991 | `9f8e3229436faa564b6c7ca405e3a10be16e2e29e7fdbd460a2db38a5a4e2b3c` |
+| `tomboy/d76cb57b-d566-4c2d-bd5e-41a866b25b11.note` | 1244 | `4db878500f94a5232dd4646fb9d893a2f22875125ce50400416b63ba78631811` |
+| `tomboy/ee3b1318-b917-4aef-a0a9-237b8fe089f3.note` | 1475 | `4f81363e2cb80763a5c95ddd78ac1d15986c20edb3980d87e2e8061e1218a368` |

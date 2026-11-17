@@ -184,7 +184,7 @@ describe("golden: lumen-md's Hebrew Roam graph (synthetic)", () => {
     const all = [...v.notes.values()].join("\n");
     const src = readFileSync(`${GOLDEN}/Lumen-golden.json`, "utf8");
     for (const w of ["שִׁירָה", "עִבְרִית", "החלטה", "מרכזית"]) expect(all).toContain(w.normalize("NFC"));
-    expect((all.match(/‏/g) ?? []).length).toBe((src.match(/‏/g) ?? []).length);
+    expect((all.match(/\u200f/g) ?? []).length).toBe((src.match(/\u200f/g) ?? []).length);
     expect(v.notes.get("ספרים/שירה.md")).toContain("![[פרויקט אלפא#^blk-decision]]");
     expect(v.notes.get("פרויקט אלפא.md")).toMatch(/^---\nסטטוס: בעבודה\n/);
     expect(v.notes.get("journal/2026-11-03.md")).toContain("[[2026-11-10|November 10th, 2026]]");

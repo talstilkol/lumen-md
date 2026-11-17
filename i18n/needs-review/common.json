@@ -845,6 +845,24 @@
     "ru": "nir8qt",
     "zh-CN": "nir8qt"
   },
+  "importWizard.how.airtable": {
+    "ar": "315lki",
+    "de": "315lki",
+    "fr": "315lki",
+    "he": "315lki",
+    "ja": "315lki",
+    "ru": "315lki",
+    "zh-CN": "315lki"
+  },
+  "importWizard.how.appleJournal": {
+    "ar": "15g1ojz",
+    "de": "15g1ojz",
+    "fr": "15g1ojz",
+    "he": "15g1ojz",
+    "ja": "15g1ojz",
+    "ru": "15g1ojz",
+    "zh-CN": "15g1ojz"
+  },
   "importWizard.how.craft": {
     "ar": "1o7ykfz",
     "de": "1o7ykfz",
@@ -853,6 +871,15 @@
     "ja": "1o7ykfz",
     "ru": "1o7ykfz",
     "zh-CN": "1o7ykfz"
+  },
+  "importWizard.how.dayOne": {
+    "ar": "nbdbjw",
+    "de": "nbdbjw",
+    "fr": "nbdbjw",
+    "he": "nbdbjw",
+    "ja": "nbdbjw",
+    "ru": "nbdbjw",
+    "zh-CN": "nbdbjw"
   },
   "importWizard.how.roam": {
     "ar": "32pkhs",
@@ -863,6 +890,15 @@
     "ru": "32pkhs",
     "zh-CN": "32pkhs"
   },
+  "importWizard.how.samsungNotes": {
+    "ar": "1rrzct8",
+    "de": "1rrzct8",
+    "fr": "1rrzct8",
+    "he": "1rrzct8",
+    "ja": "1rrzct8",
+    "ru": "1rrzct8",
+    "zh-CN": "1rrzct8"
+  },
   "importWizard.how.textbundle": {
     "ar": "rzbnb1",
     "de": "rzbnb1",
@@ -872,6 +908,15 @@
     "ru": "rzbnb1",
     "zh-CN": "rzbnb1"
   },
+  "importWizard.how.tomboy": {
+    "ar": "1rzty74",
+    "de": "1rzty74",
+    "fr": "1rzty74",
+    "he": "1rzty74",
+    "ja": "1rzty74",
+    "ru": "1rzty74",
+    "zh-CN": "1rzty74"
+  },
   "importWizard.warn.craftLink": {
     "ar": "30x0oc",
     "de": "30x0oc",
@@ -880,6 +925,15 @@
     "ja": "30x0oc",
     "ru": "30x0oc",
     "zh-CN": "30x0oc"
+  },
+  "importWizard.warn.pdfOnly": {
+    "ar": "13choyw",
+    "de": "13choyw",
+    "fr": "13choyw",
+    "he": "13choyw",
+    "ja": "13choyw",
+    "ru": "13choyw",
+    "zh-CN": "13choyw"
   },
   "importWizard.warn.remoteAttachment": {
     "ar": "vd52j7",
