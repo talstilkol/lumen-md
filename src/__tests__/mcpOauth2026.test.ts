@@ -13,7 +13,7 @@ const MCP = "https://mcp.example.com/mcp";
 const AS = "https://auth.example.com";
 
 /** A mock MCP server + authorization server. Every request is logged. */
-function world(opts: { cimd?: boolean; dcr?: boolean; asIssuer?: string; prmResource?: string } = {}) {
+function world(opts: { cimd?: boolean; dcr?: boolean; asIssuer?: string; prmResource?: string; endpoints?: Record<string, string> } = {}) {
   const log: Array<{ url: string; method: string; body?: string; redirect?: string }> = [];
   const meta = {
     issuer: opts.asIssuer ?? AS,
@@ -23,6 +23,7 @@ function world(opts: { cimd?: boolean; dcr?: boolean; asIssuer?: string; prmReso
     code_challenge_methods_supported: ["S256"],
     ...(opts.cimd !== false ? { client_id_metadata_document_supported: true } : {}),
     ...(opts.dcr ? { registration_endpoint: `${AS}/register` } : {}),
+    ...opts.endpoints,
   };
   const fetchImpl: Fetch = async (url, init) => {
     log.push({ url, method: init?.method ?? "GET", body: init?.body as string | undefined, redirect: init?.redirect as string | undefined });
@@ -93,6 +94,39 @@ describe("discovery", () => {
     await expect(discover(MCP, world({ prmResource: "https://evil.example.com/mcp" }).fetchImpl)).rejects.toThrow(/not https:\/\/mcp\.example\.com\/mcp/);
     await expect(discover(MCP, world({ asIssuer: "https://evil.example.com" }).fetchImpl)).rejects.toThrow(/names https:\/\/evil\.example\.com/);
     await expect(discover(MCP, w.fetchImpl, 'Bearer resource_metadata="http://mcp.example.com/prm"')).rejects.toThrow(/https/);
+  });
+});
+
+describe("every authorization server endpoint is https (review 14, Low 1)", () => {
+  for (const [field, url] of [
+    ["authorization_endpoint", "http://auth.example.com/authorize"],
+    ["token_endpoint", "http://auth.example.com/token"],
+    ["registration_endpoint", "http://auth.example.com/register"],
+    ["token_endpoint", "http://127.0.0.1:9/token"],
+    ["authorization_endpoint", "javascript:alert(1)"],
+  ] as const) {
+    it(`refuses metadata whose ${field} is ${url}`, async () => {
+      const w = world({ endpoints: { [field]: url } });
+      await expect(discover(MCP, w.fetchImpl)).rejects.toThrow(/not on https: refused/);
+      await expect(startAuthorization(MCP, { fetchImpl: w.fetchImpl, surface: "desktop", registry: new ClientRegistry() })).rejects.toThrow(/https/);
+      expect(w.log.some((l) => l.url.startsWith("http:") || l.url.startsWith("javascript:"))).toBe(false);
+    });
+  }
+
+  it("never sends a code, a verifier or a refresh token to a plain-http token endpoint, even when the caller holds such metadata", async () => {
+    const w = world();
+    const s = await startAuthorization(MCP, { fetchImpl: w.fetchImpl, surface: "desktop", registry: new ClientRegistry() });
+    const http = { ...s.pending, tokenEndpoint: "http://auth.example.com/token" };
+    await expect(finishAuthorization(new URLSearchParams({ code: "c", state: s.pending.state, iss: AS }), http, { ...w.meta, token_endpoint: http.tokenEndpoint }, w.fetchImpl)).rejects.toThrow(/token endpoint is not on https/);
+    await expect(refresh({ issuer: AS, resource: MCP, accessToken: "a", refreshToken: "r" }, { ...w.meta, token_endpoint: "http://auth.example.com/token" }, CLIENT_ID, w.fetchImpl)).rejects.toThrow(/token endpoint is not on https/);
+    expect(w.log.some((l) => l.url.startsWith("http:"))).toBe(false);
+  });
+
+  it("never posts a dynamic registration to a plain-http endpoint", async () => {
+    const w = world({ cimd: false });
+    const meta = { ...w.meta, registration_endpoint: "http://auth.example.com/register" };
+    await expect(registrationFor(meta, { registry: new ClientRegistry(), fetchImpl: w.fetchImpl, redirectUri: LOOPBACK_REDIRECT, allowLegacyDcr: true })).rejects.toThrow(/registration endpoint is not on https/);
+    expect(w.log).toHaveLength(0);
   });
 });
 

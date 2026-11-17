@@ -14447,6 +14447,55 @@
       "vars": []
     },
     {
+      "key": "mcpServers.signIn.again",
+      "en": "Sign in again",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.signIn.cancel",
+      "en": "Cancel sign-in",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.signIn.desktopOnly",
+      "en": "Signing in to a server works in the desktop app only: the browser returns to a listener on this computer, which a web page cannot open.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.signIn.done",
+      "en": "Signed in with {issuer}.",
+      "vars": [
+        "issuer"
+      ]
+    },
+    {
+      "key": "mcpServers.signIn.failed",
+      "en": "Sign-in failed: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "mcpServers.signIn.needsCommand",
+      "en": "Sign-in is not available yet: it needs a desktop command that is not enabled in this build (owner: isolation allow-list).",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.signIn.note",
+      "en": "Opens the server's sign-in page in your browser. Lumen keeps the token for this session only and sends it to this server only.",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.signIn.start",
+      "en": "Sign in",
+      "vars": []
+    },
+    {
+      "key": "mcpServers.signIn.waiting",
+      "en": "Waiting for the browser to return…",
+      "vars": []
+    },
+    {
       "key": "mcpServers.stdio.changed",
       "en": "Not started: the program, or a file it is given, changed since you approved it. Approve it again to run it.",
       "vars": []

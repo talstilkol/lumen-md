@@ -25,6 +25,7 @@ import { appendServerLog } from "./log";
 import { blockedReason, readServers, type McpServerConfig, type ReachContext } from "./servers";
 import { serverAgentTools, type BridgeOptions } from "./tools";
 import { stdioTransport, tauriStdioBridge, type StdioBridge, type StdioTransport } from "./transports/stdio";
+import { authHeaders } from "./signIn";
 
 export interface RegistryOptions extends Partial<Pick<BridgeOptions, "confirmCall" | "elicit" | "approvals" | "onPin">> {
   servers?: McpServerConfig[];
@@ -108,7 +109,8 @@ export function transportFor(server: McpServerConfig, o: Pick<RegistryOptions, "
   const url = server.url ?? "";
   const listFetch = o.listFetch ?? (() => ((input: RequestInfo | URL, init?: RequestInit) => import("../../ai/privacyLedger").then(({ ledgerFetch }) => ledgerFetch({ force: { category: "network", reason: `MCP server ${server.label}` } })(input, init))) as typeof fetch);
   // A call to a remote server uses the fetch the network gate handed the tool (ledger, consent); a local one the page's.
-  return (ctx?: ToolContext) => httpTransport(url, () => ctx?.fetch ?? listFetch(server));
+  // W13.A1: a token from the server's sign-in (signIn.ts) goes to this server only, from its recorded issuer.
+  return (ctx?: ToolContext) => httpTransport(url, () => ctx?.fetch ?? listFetch(server), () => authHeaders(server));
 }
 
 /**
