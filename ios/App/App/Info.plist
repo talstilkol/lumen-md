@@ -66,6 +66,9 @@
 			</array>
 		</dict>
 	</dict>
+	<!-- W13.M2: the capture Live Activity (no note text in it; see CaptureActivity.swift). -->
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>com.lumen.editor.window</string>

@@ -8,3 +8,7 @@
 "lock.capture" = "לכידה";
 "lock.capture.hint" = "לתיבה ב-Lumen";
 "lock.capture.description" = "הקלדת שורה לתיבה ממסך הנעילה.";
+"live.capturing" = "לכידה פעילה";
+"live.recording" = "הקלטה";
+"live.stop" = "עצירה";
+"live.open" = "פתיחה";

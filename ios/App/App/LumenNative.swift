@@ -66,6 +66,10 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "captureFile", returnType: CAPPluginReturnPromise),
         // W13.M5: a second window on iPad, for a note or empty.
         CAPPluginMethod(name: "openWindow", returnType: CAPPluginReturnPromise),
+        // W13.M2: the capture Live Activity (Lock Screen, Dynamic Island).
+        CAPPluginMethod(name: "startCaptureActivity", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "updateCaptureActivity", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "endCaptureActivity", returnType: CAPPluginReturnPromise),
     ]
 
     override public func load() {
@@ -73,6 +77,36 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
         NotificationCenter.default.addObserver(self, selector: #selector(onResume), name: UIApplication.didBecomeActiveNotification, object: nil)
         // The native capture sheet saved while the app is open: drain now, not on the next resume.
         NotificationCenter.default.addObserver(self, selector: #selector(onResume), name: CaptureQueue.changed, object: nil)
+        // W13.M2: the Live Activity's Stop button.
+        NotificationCenter.default.addObserver(self, selector: #selector(onCaptureStop), name: .lumenCaptureStop, object: nil)
+    }
+
+    @objc func onCaptureStop() {
+        notifyListeners("captureStop", data: [:])
+    }
+
+    private static func mode(_ call: CAPPluginCall) -> String {
+        call.getString("mode") == "recording" ? "recording" : "capture"
+    }
+
+    private static func since(_ call: CAPPluginCall) -> Date {
+        let ms = call.getDouble("since") ?? Date().timeIntervalSince1970 * 1000
+        return Date(timeIntervalSince1970: min(ms, Date().timeIntervalSince1970 * 1000) / 1000)
+    }
+
+    @objc func startCaptureActivity(_ call: CAPPluginCall) {
+        let id = LiveCapture.start(mode: Self.mode(call), since: Self.since(call))
+        call.resolve(["id": id as Any])
+    }
+
+    @objc func updateCaptureActivity(_ call: CAPPluginCall) {
+        LiveCapture.update(mode: Self.mode(call), since: Self.since(call))
+        call.resolve()
+    }
+
+    @objc func endCaptureActivity(_ call: CAPPluginCall) {
+        LiveCapture.end(saved: call.getString("outcome") == "saved")
+        call.resolve()
     }
 
     @objc func onAction(_ n: Notification) {
