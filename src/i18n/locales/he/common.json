@@ -1606,6 +1606,7 @@
   "family.import.noteTitle": "ייבוא GEDCOM",
   "family.import.preview": "{file}: {people} אנשים, {families} משפחות, {problems} בעיות",
   "family.import.run": "ייבוא",
+  "family.import.unnamed": "ללא שם",
   "family.keys": "↑ הורה · ↓ ילד · ←/→ לאורך הדור · Enter ממרכז על אדם · לחיצה כפולה פותחת",
   "family.label": "עץ משפחה",
   "family.mode": "עץ משפחה",

@@ -49,7 +49,7 @@ export function GedcomImport({ files, taken, vault, onImported }: GedcomImportPr
       const { parseGedcom, planGedcomImport } = await import("../entities/gedcom");
       const ged = parseGedcom(await file.text());
       if (!ged.people.length) return setStatus(t("family.import.none", { file: file.name }));
-      const p = planGedcomImport(ged, { fileName: file.name, taken, labels: { title: t("family.import.noteTitle"), family: t("family.import.family"), children: t("family.import.children") } });
+      const p = planGedcomImport(ged, { fileName: file.name, taken, labels: { title: t("family.import.noteTitle"), family: t("family.import.family"), children: t("family.import.children"), unnamed: t("family.import.unnamed") } });
       setPlan({ plan: p, name: file.name, families: ged.families.length });
       setStatus("");
     } catch (e) {

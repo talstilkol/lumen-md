@@ -79,7 +79,11 @@ export interface GedPerson {
   name: string;
   given: string;
   surname: string;
+  /** The NAME as written, one line ("Maria /de la Cruz/"): kept so the export writes the surname the file had. Absent: no NAME. */
+  rawName?: string;
   sex?: "M" | "F" | "X" | "U";
+  /** PEDI of the person's FAMC links (family xref → BIRTH, ADOPTED, FOSTER, SEALING or OTHER), when the file gives one. */
+  pedigree?: Record<string, string>;
   born?: string;
   died?: string;
   birthPlace?: string;
@@ -111,10 +115,18 @@ export function parseGedcom(text: string): Gedcom {
   for (const r of records) {
     if (r.tag === "INDI" && r.xref) {
       const nameLine = sub(r, "NAME");
-      const raw = (nameLine?.value ?? "").trim();
-      const surname = (/\/([^/]*)\//.exec(raw)?.[1] ?? sub(nameLine ?? r, "SURN")?.value ?? "").trim();
-      const given = (raw.replace(/\/[^/]*\//, " ").replace(/\s+/g, " ").trim() || sub(nameLine ?? r, "GIVN")?.value || "").trim();
-      const name = [given, surname].filter(Boolean).join(" ") || r.xref.replace(/@/g, "");
+      // One line: a CONT inside a NAME (malformed, or crafted) must not become a line of the note (review-13 M5).
+      const oneLine = (v: string | undefined) => (v ?? "").replace(/\s+/g, " ").trim();
+      const raw = oneLine(nameLine?.value);
+      const surname = oneLine(/\/([^/]*)\//.exec(raw)?.[1] ?? sub(nameLine ?? r, "SURN")?.value);
+      const given = oneLine(raw.replace(/\/[^/]*\//, " ") || sub(nameLine ?? r, "GIVN")?.value);
+      // No name in the file: the importer names the person (never the xref, "P9").
+      const name = [given, surname].filter(Boolean).join(" ");
+      const pedigree: Record<string, string> = {};
+      for (const c of r.children) {
+        const pedi = c.tag === "FAMC" ? sub(c, "PEDI")?.value.trim().toUpperCase() : undefined;
+        if (pedi) pedigree[c.value.trim()] = pedi;
+      }
       const sex = sub(r, "SEX")?.value.trim().toUpperCase();
       const event = (tag: string) => {
         const e = sub(r, tag);
@@ -122,7 +134,7 @@ export function parseGedcom(text: string): Gedcom {
       };
       const b = event("BIRT");
       const d = event("DEAT");
-      people.push({ xref: r.xref, name, given, surname, ...(sex === "M" || sex === "F" || sex === "X" || sex === "U" ? { sex } : {}), ...(b.date ? { born: b.date } : {}), ...(b.place ? { birthPlace: b.place } : {}), ...(d.date ? { died: d.date } : {}), ...(d.place ? { deathPlace: d.place } : {}) });
+      people.push({ xref: r.xref, name, given, surname, ...(nameLine ? { rawName: raw } : {}), ...(Object.keys(pedigree).length ? { pedigree } : {}), ...(sex === "M" || sex === "F" || sex === "X" || sex === "U" ? { sex } : {}), ...(b.date ? { born: b.date } : {}), ...(b.place ? { birthPlace: b.place } : {}), ...(d.date ? { died: d.date } : {}), ...(d.place ? { deathPlace: d.place } : {}) });
     } else if (r.tag === "FAM" && r.xref) {
       families.push({
         xref: r.xref,
@@ -167,29 +179,71 @@ export interface ImportOptions {
   taken?: ReadonlySet<string>;
   date?: Date;
   /** Labels of the import note (localised by the caller). */
-  labels?: { title: string; family: string; children: string };
+  labels?: { title: string; family: string; children: string; unnamed?: string };
 }
 
-const yamlBlock = (props: Record<string, unknown>) => `---\n${stringify(props, { lineWidth: 0 }).trimEnd()}\n---\n`;
+/**
+ * A FAMC link the edges cannot carry, kept in the child's front matter
+ * (`gedcom-famc`) for the export: a family with children and no known
+ * partner (siblings of unknown parents), or a PEDI (adopted, foster, …).
+ * `parents` are the family's partners' xrefs (without @).
+ */
+export interface FamcLink {
+  family: string;
+  parents: string[];
+  pedigree?: string;
+}
+
+/** A string YAML reads back as the same string when written bare: a word-like name, a place, an ISO date. */
+const PLAIN = /^(?:\d{4}-\d{2}-\d{2}|[\p{L}][\p{L}\p{M}\p{N} ._'\u05F3\u05F4-]*[\p{L}\p{M}\p{N}.)]?)$/u;
+const RESERVED = /^(?:true|false|null|yes|no|on|off|y|n|~)$/i;
+/**
+ * The front matter block. Simple scalars are written directly; anything
+ * else goes through the YAML library. `stringify` per note was ~0.4 ms, the
+ * bulk of a 30,000-person import (review-13 M5).
+ */
+const yamlBlock = (props: Record<string, unknown>) => {
+  const lines: string[] = [];
+  for (const [k, v] of Object.entries(props)) {
+    if (typeof v === "string" && PLAIN.test(v) && !RESERVED.test(v) && !/\s$/.test(v)) lines.push(`${k}: ${v}`);
+    else if (typeof v === "string" && v === "") lines.push(`${k}: ""`);
+    else lines.push(stringify({ [k]: v }, { lineWidth: 0 }).trimEnd());
+  }
+  return `---\n${lines.join("\n")}\n---\n`;
+};
 
 /** What importing `ged` writes: an entity note per person, an import note, and the approved edges. */
 export function planGedcomImport(ged: Gedcom, opts: ImportOptions): ImportPlan {
-  const labels = opts.labels ?? { title: "GEDCOM import", family: "Family", children: "children" };
+  const labels = { title: "GEDCOM import", family: "Family", children: "children", unnamed: "Unnamed", ...opts.labels };
   const taken = new Set(opts.taken ?? []);
   const idOf = new Map<string, string>();
   const entities: Entity[] = [];
   const files = new Map<string, string>();
   const byXref = new Map(ged.people.map((p) => [p.xref, p]));
+  const bare = (x: string) => x.replace(/@/g, "");
+  // The FAMC links the edges cannot carry (see FamcLink): per child xref.
+  const famcOf = new Map<string, FamcLink[]>();
+  for (const f of ged.families) {
+    const parents = f.partners.filter((x) => byXref.has(x));
+    for (const c of f.children) {
+      const pedigree = byXref.get(c)?.pedigree?.[f.xref];
+      if (!byXref.has(c) || (parents.length && !pedigree)) continue;
+      (famcOf.get(c) ?? famcOf.set(c, []).get(c)!).push({ family: bare(f.xref), parents: parents.map(bare), ...(pedigree ? { pedigree } : {}) });
+    }
+  }
+  const entityOf = new Map<string, Entity>();
   for (const p of ged.people) {
     // A unique name: the name, then with the birth year, then numbered.
     const year = gedcomYear(p.born);
-    let name = p.name;
-    if (taken.has(entityId("person", name)) && year) name = `${p.name} (${year})`;
-    for (let k = 2; taken.has(entityId("person", name)); k++) name = `${p.name} (${year ? `${year}, ` : ""}${k})`;
+    const own = p.name || labels.unnamed;
+    let name = own;
+    if (taken.has(entityId("person", name)) && year) name = `${own} (${year})`;
+    for (let k = 2; taken.has(entityId("person", name)); k++) name = `${own} (${year ? `${year}, ` : ""}${k})`;
     const id = entityId("person", name);
     taken.add(id);
     idOf.set(p.xref, id);
-    const e: Entity = { id, type: "person", name, aliases: name !== p.name ? [p.name] : [] };
+    const e: Entity = { id, type: "person", name, aliases: name !== own ? [own] : [] };
+    entityOf.set(p.xref, e);
     entities.push(e);
     const props: Record<string, unknown> = { type: "person", "entity-type": "person" };
     if (e.aliases.length) props.aliases = e.aliases;
@@ -198,14 +252,21 @@ export function planGedcomImport(ged: Gedcom, opts: ImportOptions): ImportPlan {
     if (p.birthPlace) props["birth-place"] = p.birthPlace;
     if (p.died) props.died = gedcomIso(p.died) ?? p.died;
     if (p.deathPlace) props["death-place"] = p.deathPlace;
-    props.gedcom = p.xref.replace(/@/g, "");
+    props.gedcom = bare(p.xref);
+    // The NAME as the file wrote it (its /surname/), "" for none; a nameless person also keeps the label it was given.
+    props["gedcom-name"] = p.name ? (p.rawName ?? "") : "";
+    if (!p.name) props["gedcom-label"] = own;
+    const famc = famcOf.get(p.xref);
+    if (famc) props["gedcom-famc"] = famc;
     files.set(entityNotePath(e), `${yamlBlock(props)}\n# ${name}\n`);
   }
   // The import note: one paragraph per family, which every edge of that family quotes.
   const notePath = `ייבוא/GEDCOM ${opts.fileName.replace(/\.ged(com)?$/i, "").replace(/[\\/:*?"<>|#^[\]]/g, " ").trim() || "family"}.md`;
-  const nameOf = (x: string) => entities.find((e) => e.id === idOf.get(x))?.name ?? x;
+  // Maps, not finds (review-13 M5: the import was quadratic, ~minutes for 10,000 families).
+  const nameOf = (x: string) => entityOf.get(x)?.name ?? x;
   const paras: string[] = [];
   const edges: Edge[] = [];
+  const edgeIds = new Set<string>();
   const problems = [...ged.problems];
   const date = opts.date ?? new Date();
   for (const f of ged.families) {
@@ -221,7 +282,7 @@ export function planGedcomImport(ged: Gedcom, opts: ImportOptions): ImportPlan {
     const prov = makeProvenance({ note: notePath, anchor, paragraph: text, quote, extractor: "gedcom@7", model: null, date });
     const add = (s: string, p: string, o: string) => {
       const e: Edge = { id: edgeId(s, p, o, notePath, anchor), subject: s, predicate: p, object: o, provenance: prov, confidence: 1, status: "approved" };
-      if (!edges.some((x) => x.id === e.id)) edges.push(e);
+      if (!edgeIds.has(e.id)) (edgeIds.add(e.id), edges.push(e));
     };
     for (let i = 0; i < partners.length; i++) for (let j = i + 1; j < partners.length; j++) add(idOf.get(partners[i])!, "spouse", idOf.get(partners[j])!);
     for (const p of partners) for (const c of children) add(idOf.get(p)!, "child", idOf.get(c)!);
@@ -253,9 +314,37 @@ const line = (level: number, tag: string, value?: string, xref?: string): string
   return [head, ...parts.slice(1).map((p) => `${level + 1} CONT${p ? ` ${p.replace(/^@/, "@@")}` : ""}`)];
 };
 
+const PEDI = new Set(["ADOPTED", "BIRTH", "FOSTER", "SEALING", "OTHER"]);
+
+/** The NAME to write: the file's own (with its /surname/) while the person's name is still the one it gives, else "Given /Last/". Null: no NAME. */
+function nameValue(name: string, props: Record<string, unknown>): string | null {
+  const raw = props["gedcom-name"];
+  if (typeof raw === "string") {
+    if (raw === "") {
+      if (name === props["gedcom-label"]) return null; // nameless in the file, and not renamed since
+    } else {
+      const surname = /\/([^/]*)\//.exec(raw)?.[1]?.trim() ?? "";
+      const given = raw.replace(/\/[^/]*\//, " ").replace(/\s+/g, " ").trim();
+      if ([given, surname].filter(Boolean).join(" ") === name) return raw;
+    }
+  }
+  const parts = name.trim().split(/\s+/);
+  const surname = parts.length > 1 ? parts.pop()! : "";
+  return surname ? `${parts.join(" ")} /${surname}/` : parts.join(" ");
+}
+
+const famcLinks = (v: unknown): FamcLink[] =>
+  Array.isArray(v)
+    ? v.filter((x): x is FamcLink => !!x && typeof x === "object" && typeof (x as FamcLink).family === "string").map((x) => ({ family: String(x.family), parents: Array.isArray(x.parents) ? x.parents.map(String) : [], ...(typeof x.pedigree === "string" ? { pedigree: x.pedigree } : {}) }))
+    : [];
+
 /** GEDCOM 7.0 of the people and their spouse / child edges. */
 export function exportGedcom(people: readonly ExportPerson[], edges: readonly Edge[], opts: { date?: Date; source?: string } = {}): string {
   const ids = new Map(people.map((p, i) => [p.entity.id, `@I${i + 1}@`]));
+  const propsOf = new Map(people.map((p) => [p.entity.id, p.props ?? {}]));
+  // The xref each person had in the file it came from (front matter `gedcom`), for its kept FAMC links.
+  const byOldXref = new Map<string, string>();
+  for (const p of people) if (typeof p.props?.gedcom === "string" || typeof p.props?.gedcom === "number") byOldXref.set(String(p.props.gedcom), p.entity.id);
   const rel = edges.filter((e) => e.status === "approved" && ids.has(e.subject) && ids.has(e.object) && (e.predicate === "spouse" || e.predicate === "child"));
   const parentsOf = new Map<string, Set<string>>();
   for (const e of rel) if (e.predicate === "child") (parentsOf.get(e.object) ?? parentsOf.set(e.object, new Set()).get(e.object)!).add(e.subject);
@@ -272,8 +361,25 @@ export function exportGedcom(people: readonly ExportPerson[], edges: readonly Ed
     const k = key(list);
     (fams.get(k) ?? fams.set(k, { partners: list, children: new Set() }).get(k)!).children.add(child);
   }
-  const famList = [...fams.values()];
-  const famId = new Map(famList.map((f, i) => [f, `@F${i + 1}@`]));
+  // The links the edges cannot carry (audit r4 A3 #8): siblings of unknown parents (a FAM with CHIL only), and PEDI.
+  const pedigreeOf = new Map<string, string>(); // `${child}\u0000${family key}` → PEDI
+  for (const p of people) {
+    for (const l of famcLinks(p.props?.["gedcom-famc"])) {
+      const parents = l.parents.map((x) => byOldXref.get(x)).filter((x): x is string => !!x);
+      if (parents.length !== l.parents.length) continue; // a parent is not in this export
+      const k = parents.length ? key(parents) : `chil:${l.family}`;
+      if (!parents.length) (fams.get(k) ?? fams.set(k, { partners: [], children: new Set() }).get(k)!).children.add(p.entity.id);
+      if (l.pedigree && fams.get(k)?.children.has(p.entity.id)) pedigreeOf.set(`${p.entity.id}\u0000${k}`, l.pedigree.toUpperCase());
+    }
+  }
+  const famList = [...fams.entries()];
+  const famId = new Map(famList.map(([k], i) => [k, `@F${i + 1}@`]));
+  const famcOf = new Map<string, string[]>();
+  const famsOf = new Map<string, string[]>();
+  for (const [k, f] of famList) {
+    for (const c of f.children) (famcOf.get(c) ?? famcOf.set(c, []).get(c)!).push(k);
+    for (const p of f.partners) (famsOf.get(p) ?? famsOf.set(p, []).get(p)!).push(k);
+  }
   const out: string[] = [];
   out.push("0 HEAD", "1 GEDC", "2 VERS 7.0", "1 SOUR LUMEN", "2 NAME Lumen", "1 DATE " + gedDate((opts.date ?? new Date()).toISOString().slice(0, 10)));
   out.push("1 LANG he");
@@ -283,10 +389,9 @@ export function exportGedcom(people: readonly ExportPerson[], edges: readonly Ed
     out.push(...line(0, "INDI", undefined, id));
     // A name told apart on import ("דוד כהן (1900)") goes out as the person's own name, kept as the first alias.
     const own = p.entity.aliases[0];
-    const name = own && p.entity.name.startsWith(own) ? own : p.entity.name;
-    const parts = name.trim().split(/\s+/);
-    const surname = parts.length > 1 ? parts.pop()! : "";
-    out.push(...line(1, "NAME", surname ? `${parts.join(" ")} /${surname}/` : parts.join(" ")));
+    const name = (own && p.entity.name.startsWith(own) ? own : p.entity.name).replace(/\s+/g, " ").trim();
+    const nv = nameValue(name, pr);
+    if (nv !== null) out.push(...line(1, "NAME", nv));
     if (["M", "F", "X", "U"].includes(String(pr.sex ?? "").toUpperCase())) out.push(...line(1, "SEX", String(pr.sex).toUpperCase()));
     for (const [tag, d, pl] of [["BIRT", pr.born, pr["birth-place"]], ["DEAT", pr.died, pr["death-place"]]] as const) {
       const date = gedDate(d);
@@ -296,12 +401,19 @@ export function exportGedcom(people: readonly ExportPerson[], edges: readonly Ed
       if (date) out.push(...line(2, "DATE", date));
       if (place) out.push(...line(2, "PLAC", place));
     }
-    for (const f of famList) if (f.children.has(p.entity.id)) out.push(...line(1, "FAMC", famId.get(f)!));
-    for (const f of famList) if (f.partners.includes(p.entity.id)) out.push(...line(1, "FAMS", famId.get(f)!));
+    for (const k of famcOf.get(p.entity.id) ?? []) {
+      out.push(...line(1, "FAMC", famId.get(k)!));
+      const pedi = pedigreeOf.get(`${p.entity.id}\u0000${k}`);
+      if (pedi) {
+        out.push(...line(2, "PEDI", PEDI.has(pedi) ? pedi : "OTHER"));
+        if (!PEDI.has(pedi)) out.push(...line(3, "PHRASE", pedi));
+      }
+    }
+    for (const k of famsOf.get(p.entity.id) ?? []) out.push(...line(1, "FAMS", famId.get(k)!));
   }
-  for (const f of famList) {
-    out.push(...line(0, "FAM", undefined, famId.get(f)!));
-    const sexOf = (id: string) => String(people.find((p) => p.entity.id === id)?.props?.sex ?? "").toUpperCase();
+  const sexOf = (id: string) => String(propsOf.get(id)?.sex ?? "").toUpperCase();
+  for (const [k, f] of famList) {
+    out.push(...line(0, "FAM", undefined, famId.get(k)!));
     // GEDCOM 7: HUSB and WIFE are the two partner slots; a man goes first, a single mother is WIFE.
     const ordered = [...f.partners].sort((a, b) => Number(sexOf(b) === "M") - Number(sexOf(a) === "M") || Number(sexOf(a) === "F") - Number(sexOf(b) === "F"));
     if (ordered.length === 1) out.push(...line(1, sexOf(ordered[0]) === "F" ? "WIFE" : "HUSB", ids.get(ordered[0])!));
