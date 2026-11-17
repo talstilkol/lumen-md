@@ -7158,6 +7158,58 @@
       "vars": []
     },
     {
+      "key": "e2ee.shared.confirm",
+      "en": "Let {kind} from the other members reach this device? Their files of this kind will be written here. A plugin still runs only after you approve its permissions.",
+      "vars": [
+        "kind"
+      ]
+    },
+    {
+      "key": "e2ee.shared.intro",
+      "en": "Other people write to this vault. Code and settings from their devices could run on yours, so none of these kinds sync here until you turn it on, on this device. Settings that arrive anyway are kept as a .bak file to read, never loaded.",
+      "vars": []
+    },
+    {
+      "key": "e2ee.shared.kind.agents",
+      "en": "Agent skills",
+      "vars": []
+    },
+    {
+      "key": "e2ee.shared.kind.automations",
+      "en": "Automations",
+      "vars": []
+    },
+    {
+      "key": "e2ee.shared.kind.hotkeys",
+      "en": "Hotkeys",
+      "vars": []
+    },
+    {
+      "key": "e2ee.shared.kind.plugins",
+      "en": "Plugins",
+      "vars": []
+    },
+    {
+      "key": "e2ee.shared.kind.settings",
+      "en": "App settings",
+      "vars": []
+    },
+    {
+      "key": "e2ee.shared.kind.snippets",
+      "en": "CSS snippets",
+      "vars": []
+    },
+    {
+      "key": "e2ee.shared.kind.themes",
+      "en": "Themes",
+      "vars": []
+    },
+    {
+      "key": "e2ee.shared.title",
+      "en": "What this shared vault may carry",
+      "vars": []
+    },
+    {
       "key": "e2ee.state.conflict",
       "en": "Conflict",
       "vars": []
