@@ -6,3 +6,4 @@
 export { proofreaderHe, PROOFREADER_HE_ID } from "./proofreaderHe";
 export { styleCoach, coachRules, STYLE_COACH_ID } from "./styleCoach";
 export { toneShifter, TONE_SHIFTER_ID, TONES } from "./toneShifter";
+export { concisionAgent, CONCISION_ID } from "./concision";

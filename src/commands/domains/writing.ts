@@ -24,6 +24,8 @@ export function buildWritingCommands(ctx: CommandContext): Command[] {
     entry("toneFriendly", { agent: "toneShifter", options: { tone: "friendly" } }),
     entry("registerHigh", { agent: "toneShifter", options: { tone: "formal", register: "high" } }),
     entry("registerSpoken", { agent: "toneShifter", options: { tone: "neutral", register: "spoken" } }),
+    entry("shorten", { agent: "concision", options: { mode: "shorten", percent: 30 } }),
+    entry("expand", { agent: "concision", options: { mode: "expand" } }),
     {
       id: "writing.panel",
       label: t("cmd.writing.panel"),
