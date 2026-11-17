@@ -48,9 +48,10 @@ export interface LumenDocument {
    */
   getSelection(): Promise<{ from: number; to: number; text: string } | null>;
   /**
-   * Replace the open note's whole text (one undo step).
+   * Replace the open note's whole text (one undo step). It loses the cursor, the selection and the user's undo steps.
    * @capability document:write
    * @since 1
+   * @deprecated use document.applyEdits (apiVersion 1.1) — removed in apiVersion 2
    * @example
    * const text = await lumen.document.getText();
    * await lumen.document.setText(text.replace(/\s+$/g, "") + "\n");
@@ -73,6 +74,16 @@ export interface LumenDocument {
    * if (sel) await lumen.document.replaceSelection(sel.text.toUpperCase());
    */
   replaceSelection(text: string): Promise<void>;
+  /**
+   * Replacements `{ from, to, insert }`, in the coordinates of the text before the batch, applied as one undoable change; resolves to how many were applied (W13.L1).
+   * @capability document:write
+   * @since 1.1
+   * @example
+   * const text = await lumen.document.getText();
+   * const at = text.indexOf("world");
+   * if (at >= 0) await lumen.document.applyEdits([{ from: at, to: at + 5, insert: "עולם" }]);
+   */
+  applyEdits(edits: { from: number; to: number; insert: string }[]): Promise<number>;
 }
 
 export interface LumenVault {

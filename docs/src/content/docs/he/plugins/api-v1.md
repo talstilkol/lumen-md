@@ -94,10 +94,11 @@ if (sel) console.log(sel.text.length, "characters selected");
 setText(text: string): Promise<void>
 ```
 
-Replace the open note's whole text (one undo step).
+Replace the open note's whole text (one undo step). It loses the cursor, the selection and the user's undo steps.
 
 - הרשאה: `document:write`
 - מאז apiVersion: 1
+- **יוצא משימוש:** use document.applyEdits (apiVersion 1.1) — removed in apiVersion 2
 
 ```js illustrative
 const text = await lumen.document.getText();
@@ -133,6 +134,23 @@ Replace the selected text.
 ```js illustrative
 const sel = await lumen.document.getSelection();
 if (sel) await lumen.document.replaceSelection(sel.text.toUpperCase());
+```
+
+## `lumen.document.applyEdits`
+
+```ts illustrative
+applyEdits(edits: { from: number; to: number; insert: string }[]): Promise<number>
+```
+
+Replacements `{ from, to, insert }`, in the coordinates of the text before the batch, applied as one undoable change; resolves to how many were applied (W13.L1).
+
+- הרשאה: `document:write`
+- מאז apiVersion: 1.1
+
+```js illustrative
+const text = await lumen.document.getText();
+const at = text.indexOf("world");
+if (at >= 0) await lumen.document.applyEdits([{ from: at, to: at + 5, insert: "עולם" }]);
 ```
 
 ## `lumen.vault.list`

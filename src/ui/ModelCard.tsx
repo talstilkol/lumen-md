@@ -50,6 +50,7 @@ function formatDate(d: string | null): string {
 async function licenceOf(model: string): Promise<string | null> {
   const reg = (await import("../../models/registry.json")).default as { models: Array<{ id: string; license: string }> };
   const want = model.toLowerCase().replace(/[:@].*$/, "");
+  // filter-ok: model ids are ASCII registry keys (qwen3:8b), not text a user filters
   return reg.models.find((m) => m.id.toLowerCase() === model.toLowerCase())?.license ?? reg.models.find((m) => m.id.toLowerCase().includes(want) || want.includes(m.id.toLowerCase()))?.license ?? null;
 }
 

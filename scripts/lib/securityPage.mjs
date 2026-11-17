@@ -193,6 +193,8 @@ export function renderSecurityPage(findings, cards, lang, cryptoAudit = null, di
     "---",
     `title: ${t.title}`,
     `description: ${t.description}`,
+    // W13.D1 (#1247): the page's Diátaxis type.
+    "type: reference",
     "---",
     "",
     "<!-- Written by scripts/security-page.mjs from security/findings.json and the plugin scorecards. Do not edit by hand. -->",

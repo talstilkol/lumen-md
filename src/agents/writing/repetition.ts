@@ -31,7 +31,8 @@ import { proseTokens, type ProseToken } from "./proseMask";
 import { matchCliches, type ClicheOptions } from "./cliches";
 import type { WritingSuggestion } from "./writingSuggestion";
 import type { Lemmatizer } from "../../search/lemma/lemmatizer";
-import { compareNames } from "../../i18n/collate";
+/** Tie-break order for findings: by code point, the same in every language (no import beyond the agent allow-list, W13.W1). */
+const byCodePoint = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
 export const REPETITION_AGENT = "repetition";
 export const DEFAULT_WINDOW = 50;
@@ -213,7 +214,7 @@ export function detectRepetition(markdown: string, opts: RepetitionOptions = {})
   }
 
   if (!opts.noCliches) out.push(...matchCliches(toks, markdown, { ...opts, lang }));
-  return out.sort((a, b) => a.range.from - b.range.from || compareNames(a.kind, b.kind));
+  return out.sort((a, b) => a.range.from - b.range.from || byCodePoint(a.kind, b.kind));
 }
 
 /** The same, with lemmas from a lemmatizer (W11.H12) when one is loaded. */

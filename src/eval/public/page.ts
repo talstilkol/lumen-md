@@ -97,7 +97,8 @@ const fmt = (v: number, row: Row) => (row.format === "percent" ? `${(v * 100).to
 export function renderBenchmarkPage(results: readonly PublicResult[], comp: CompetitorData, lang: "en" | "he", rtl?: RtlLedger | null): string {
   const t = T[lang];
   const latest = latestResults(results.filter((r) => r.synthetic === false));
-  const L = ["---", `title: ${t.title}`, `description: ${t.description}`, "---", "", t.intro, ""];
+  // W13.D1 (#1247): the page's Diátaxis type.
+  const L = ["---", `title: ${t.title}`, `description: ${t.description}`, "type: how-to", "---", "", t.intro, ""];
   L.push(`| ${t.capability} | Lumen | ${comp.competitors.map((p) => comp.names[p][lang]).join(" | ")} |`, `|---|---|${comp.competitors.map(() => "---").join("|")}|`);
   const notes: string[] = [];
   for (const row of ROWS) {

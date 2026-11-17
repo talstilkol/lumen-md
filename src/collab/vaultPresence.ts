@@ -24,6 +24,7 @@ import { wireE2EAwareness, type AwarenessLike, type E2EAwarenessBridge } from ".
 import { setPresence, type PresencePeer } from "./presenceStore";
 import { swallowed } from "../lib/logger";
 import { compareNames } from "../i18n/collate";
+import { setVisibleInterval } from "../lib/visibleInterval";
 
 export const PRESENCE_TTL_MS = 30_000;
 export const PRESENCE_HEARTBEAT_MS = 15_000;
@@ -130,8 +131,9 @@ export function startVaultPresence(o: VaultPresenceOptions): VaultPresence | nul
   const device = cleanDeviceName(o.device);
   if (!enabled() || airplane() || !device) return null;
   const now = o.now ?? Date.now;
-  const every = o.setInterval ?? ((fn: () => void, ms: number) => setInterval(fn, ms));
-  const stop = o.clearInterval ?? ((h: unknown) => clearInterval(h as ReturnType<typeof setInterval>));
+  // W13.V4: the heartbeat sleeps while the app is hidden (peers then see this device go after the TTL).
+  const every = o.setInterval ?? ((fn: () => void, ms: number) => setVisibleInterval(fn, ms));
+  const stop = o.clearInterval ?? ((h: unknown) => (h as () => void)());
   const bridge: E2EAwarenessBridge = o.transport ? wireE2EAwareness(o.plain, o.transport, { password: o.password, room: o.room }) : { whenIdle: () => Promise.resolve(), destroy: () => undefined };
   /** When each peer was last heard from, by this device's clock (a peer's own clock is not trusted). */
   const heard = new Map<number, number>();

@@ -77,7 +77,8 @@ const link = (s, lang) => (s.startsWith("/") ? `[${T[lang].docs}](${lang === "he
 export function renderCompare(data, lang) {
   const t = T[lang];
   const name = (p) => data.names[p][lang];
-  const L = ["---", `title: ${t.title}`, `description: ${t.description}`, "---", "", t.intro, ""];
+  // W13.D1 (#1247): the page's Diátaxis type.
+  const L = ["---", `title: ${t.title}`, `description: ${t.description}`, "type: explanation", "---", "", t.intro, ""];
   const anyUnverified = data.claims.some((c) => !c.verified);
   for (const topic of data.topics) {
     L.push(`## ${topic[lang]}`, "", `| | ${lang === "he" ? "מה הוא עושה" : "What it does"} | ${t.sources} |`, "|---|---|---|");

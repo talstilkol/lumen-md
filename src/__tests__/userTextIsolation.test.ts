@@ -45,7 +45,8 @@ const SURFACES: [string, string, string][] = [
   ["tags panel: tag", "src/ui/TagsPanel.tsx", "b.tag"],
   ["tags panel: note name", "src/ui/TagsPanel.tsx", "name"],
   ["tags panel: note path", "src/ui/TagsPanel.tsx", "p"],
-  ["trash: original path", "src/ui/TrashPanel.tsx", "i.originalPath"],
+  // #1224 (W13.S1) rewrote the trash list: PathText isolates each segment of the original path.
+  ["trash: original path", "src/ui/TrashPanel.tsx", "p"],
   ["properties: key", "src/ui/PropertiesPanel.tsx", "p.key"],
   ["comments: author", "src/ui/CommentsPanel.tsx", "c.authorName"],
   ["comments: reply author", "src/ui/CommentsPanel.tsx", "r.authorName"],

@@ -231,7 +231,8 @@ describe("the whole dry run (W4.5)", () => {
   it("npm run release -- 0.2.0-beta.1 --dry-run --fake-build: every asset signed and verified, the tree left as it was", () => {
     const dir = mkdtempSync(join(tmpdir(), "lumen-release-run-"));
     try {
-      for (const p of ["package.json", "package-lock.json", "CHANGELOG.md", "src-tauri/tauri.conf.json", "src-tauri/Cargo.toml", "src-tauri/Cargo.lock", "src-tauri/src/updates.rs"]) {
+      // src/update/stagedRollout.ts: the release run sets the first rollout share through scripts/lib/rollout.mjs (W13.T1).
+      for (const p of ["package.json", "package-lock.json", "CHANGELOG.md", "src-tauri/tauri.conf.json", "src-tauri/Cargo.toml", "src-tauri/Cargo.lock", "src-tauri/src/updates.rs", "src/update/stagedRollout.ts"]) {
         mkdirSync(join(dir, p, ".."), { recursive: true });
         cpSync(join(ROOT, p), join(dir, p));
       }

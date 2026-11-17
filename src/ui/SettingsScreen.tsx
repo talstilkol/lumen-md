@@ -41,6 +41,7 @@ import { SettingsAbout } from "./AccessibilityLinks";
 // W5.11: the "keep photo metadata" switch's label ships with this lazy screen.
 import "../lib/journalistStrings";
 import { Modal } from "./Modal";
+import { setVisibleInterval } from "../lib/visibleInterval";
 
 const ThemeSettings = lazy(() => import("./ThemeSettings").then((m) => ({ default: m.ThemeSettings })));
 const AiSettingsPanel = lazy(() => import("./AiSettingsPanel").then((m) => ({ default: m.AiSettingsPanel })));
@@ -194,10 +195,11 @@ export function SettingsScreen({ tab: initialTab = "general", focus, onClose, on
       return;
     }
     let tries = 0;
-    const timer = window.setInterval(() => {
+    // W13.V4: a short poll for the row to render; it sleeps while the app is hidden.
+    const stopPoll: () => void = setVisibleInterval(() => {
       const el = panelRef.current?.querySelector<HTMLElement>(`[data-setting="${CSS.escape(pendingFocus)}"]`);
       if (el || ++tries > 10) {
-        window.clearInterval(timer);
+        stopPoll();
         const target = el ?? panelRef.current;
         target?.focus();
         target?.scrollIntoView?.({ block: "center" });
@@ -208,7 +210,7 @@ export function SettingsScreen({ tab: initialTab = "general", focus, onClose, on
         setPendingFocus(null);
       }
     }, 50);
-    return () => window.clearInterval(timer);
+    return stopPoll;
   }, [pendingFocus, tab, index, onClose]);
 
   const openHit = (h: SettingsHit) => {

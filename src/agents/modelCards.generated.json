@@ -53,7 +53,7 @@
         "tag": "dev",
         "model": "rules (no model)",
         "dataset": {
-          "name": "eval/writing/argumentChecker/synthetic",
+          "name": "src/__tests__/argumentChecker.test.ts (its synthetic set, built in the test)",
           "version": "1",
           "license": "MIT (written for lumen-md; synthetic)",
           "origin": "synthetic"
@@ -143,7 +143,7 @@
         "tag": "dev",
         "model": "rules (no model)",
         "dataset": {
-          "name": "eval/writing/consistency/synthetic-vault",
+          "name": "src/__tests__/vaultConsistency.test.ts (its synthetic vault, built in the test)",
           "version": "1",
           "license": "MIT (written for lumen-md; synthetic)",
           "origin": "synthetic"
@@ -176,7 +176,7 @@
         "tag": "dev",
         "model": "linear index, 4 features (hebrewModel.json v1)",
         "dataset": {
-          "name": "src/agents/writing/readability/corpusHe.ts (held-out split)",
+          "name": "src/agents/writing/readability/corpusHe.eval.ts (held-out split)",
           "version": "1",
           "license": "MIT (written for lumen-md; graded by intended reader)",
           "origin": "synthetic"
@@ -209,7 +209,7 @@
         "tag": "dev",
         "model": "rules (no model; the topic-sentence model is optional)",
         "dataset": {
-          "name": "eval/writing/structureCritic/synthetic",
+          "name": "src/__tests__/structureCritic.test.ts (its synthetic set, built in the test)",
           "version": "1",
           "license": "MIT (written for lumen-md; synthetic)",
           "origin": "synthetic"

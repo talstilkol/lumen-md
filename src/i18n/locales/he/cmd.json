@@ -327,7 +327,7 @@
   "cmd.insert.csv": "הוספת נתוני CSV",
   "cmd.insert.csv.hint": "טבלה אוטומטית + תרשים",
   "cmd.insert.embed": "הוספת הטבעה",
-  "cmd.insert.embed.hint": "YouTube · Vimeo · Figma · CodePen…",
+  "cmd.insert.embed.hint": "YouTube · Vimeo · Figma · CodePen ועוד",
   "cmd.insert.graphviz": "הוספת Graphviz / DOT",
   "cmd.insert.htmlpreview": "הוספת תצוגת HTML חיה",
   "cmd.insert.htmlpreview.hint": "HTML/CSS/JS ב-iframe מבודד",

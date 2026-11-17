@@ -86,7 +86,8 @@
     "fr": "1cxd5u4",
     "ja": "1cxd5u4",
     "ru": "1cxd5u4",
-    "zh-CN": "1cxd5u4"
+    "zh-CN": "1cxd5u4",
+    "fa": "1cxd5u4"
   },
   "toast.appLock.on": {
     "ar": "1md2hsi",
@@ -94,7 +95,8 @@
     "fr": "1md2hsi",
     "ja": "1md2hsi",
     "ru": "1md2hsi",
-    "zh-CN": "1md2hsi"
+    "zh-CN": "1md2hsi",
+    "fa": "1md2hsi"
   },
   "toast.appLock.off": {
     "ar": "18pz620",
@@ -102,7 +104,8 @@
     "fr": "18pz620",
     "ja": "18pz620",
     "ru": "18pz620",
-    "zh-CN": "18pz620"
+    "zh-CN": "18pz620",
+    "fa": "18pz620"
   },
   "toast.appLock.afterPrompt": {
     "ar": "14qbbs5",
@@ -110,7 +113,8 @@
     "fr": "14qbbs5",
     "ja": "14qbbs5",
     "ru": "14qbbs5",
-    "zh-CN": "14qbbs5"
+    "zh-CN": "14qbbs5",
+    "fa": "14qbbs5"
   },
   "toast.appLock.atOnce": {
     "ar": "vwzx3t",
@@ -118,7 +122,8 @@
     "fr": "vwzx3t",
     "ja": "vwzx3t",
     "ru": "vwzx3t",
-    "zh-CN": "vwzx3t"
+    "zh-CN": "vwzx3t",
+    "fa": "vwzx3t"
   },
   "toast.appLock.minutes": {
     "ar": "1m73tsr",
@@ -126,7 +131,8 @@
     "fr": "1m73tsr",
     "ja": "1m73tsr",
     "ru": "1m73tsr",
-    "zh-CN": "1m73tsr"
+    "zh-CN": "1m73tsr",
+    "fa": "1m73tsr"
   },
   "toast.cursorMovement.visual": {
     "ar": "13eyveq",
@@ -134,7 +140,8 @@
     "fr": "13eyveq",
     "ja": "13eyveq",
     "ru": "13eyveq",
-    "zh-CN": "13eyveq"
+    "zh-CN": "13eyveq",
+    "fa": "13eyveq"
   },
   "toast.cursorMovement.logical": {
     "ar": "ulxoyc",
@@ -142,6 +149,7 @@
     "fr": "ulxoyc",
     "ja": "ulxoyc",
     "ru": "ulxoyc",
-    "zh-CN": "ulxoyc"
+    "zh-CN": "ulxoyc",
+    "fa": "ulxoyc"
   }
 }

@@ -191,7 +191,7 @@
   "templates.clearFilter": "ניקוי הסינון",
   "templates.close": "סגור גלריה",
   "templates.contribute": "תרום תבנית:",
-  "templates.contributeLink": "lumen-templates-contrib →",
+  "templates.contributeLink": "lumen-templates-contrib ←",
   "templates.downloads": "{count} התקנות",
   "templates.empty": "אין תבניות שתואמות לסינון.",
   "templates.error": "שגיאה בטעינת מאגר: {error}",

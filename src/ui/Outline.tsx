@@ -215,11 +215,11 @@ export const Outline = React.memo(function Outline({ markdownText, sheet = false
                 if (sheet) useAppStore.getState().toggleOutline();
               }}
             >
-              <bdi>
-                {filter.trim()
-                  ? highlightParts(h.text, filter).map((p, j) => (p.hit ? <mark key={j} style={MARK}>{p.text}</mark> : <React.Fragment key={j}>{p.text}</React.Fragment>))
-                  : h.text}
-              </bdi>
+              {filter.trim() ? (
+                <bdi>{highlightParts(h.text, filter).map((p, j) => (p.hit ? <mark key={j} style={MARK}>{p.text}</mark> : <React.Fragment key={j}>{p.text}</React.Fragment>))}</bdi>
+              ) : (
+                <bdi>{h.text}</bdi>
+              )}
             </a>
           ))}
         </nav>

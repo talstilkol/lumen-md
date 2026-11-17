@@ -5,7 +5,8 @@
     "fr": "4e92qr",
     "ja": "4e92qr",
     "ru": "4e92qr",
-    "zh-CN": "4e92qr"
+    "zh-CN": "4e92qr",
+    "fa": "4e92qr"
   },
   "cmd.file.exportPdfUa.hint": {
     "ar": "1uz07l0",
@@ -13,7 +14,8 @@
     "fr": "1uz07l0",
     "ja": "1uz07l0",
     "ru": "1uz07l0",
-    "zh-CN": "1uz07l0"
+    "zh-CN": "1uz07l0",
+    "fa": "1uz07l0"
   },
   "cmd.file.finishPdfUa": {
     "ar": "1d4vebr",
@@ -21,7 +23,8 @@
     "fr": "1d4vebr",
     "ja": "1d4vebr",
     "ru": "1d4vebr",
-    "zh-CN": "1d4vebr"
+    "zh-CN": "1d4vebr",
+    "fa": "1d4vebr"
   },
   "cmd.file.finishPdfUa.hint": {
     "ar": "ntenfy",
@@ -29,7 +32,8 @@
     "fr": "ntenfy",
     "ja": "ntenfy",
     "ru": "ntenfy",
-    "zh-CN": "ntenfy"
+    "zh-CN": "ntenfy",
+    "fa": "ntenfy"
   },
   "cmd.mcp.ask": {
     "ar": "vubk2m",
@@ -613,7 +617,8 @@
     "fr": "1dpszxr",
     "ja": "1dpszxr",
     "ru": "1dpszxr",
-    "zh-CN": "1dpszxr"
+    "zh-CN": "1dpszxr",
+    "fa": "1dpszxr"
   },
   "cmd.help.safeMode.hint": {
     "ar": "9ektud",
@@ -621,7 +626,8 @@
     "fr": "9ektud",
     "ja": "9ektud",
     "ru": "9ektud",
-    "zh-CN": "9ektud"
+    "zh-CN": "9ektud",
+    "fa": "9ektud"
   },
   "cmd.mobile.spotlight": {
     "ar": "u0r0zj",
@@ -629,7 +635,8 @@
     "fr": "u0r0zj",
     "ja": "u0r0zj",
     "ru": "u0r0zj",
-    "zh-CN": "u0r0zj"
+    "zh-CN": "u0r0zj",
+    "fa": "u0r0zj"
   },
   "cmd.mobile.spotlight.hint": {
     "ar": "9tm0ab",
@@ -637,7 +644,8 @@
     "fr": "9tm0ab",
     "ja": "9tm0ab",
     "ru": "9tm0ab",
-    "zh-CN": "9tm0ab"
+    "zh-CN": "9tm0ab",
+    "fa": "9tm0ab"
   },
   "cmd.mobile.scan": {
     "ar": "1ctbhh6",
@@ -645,7 +653,8 @@
     "fr": "1ctbhh6",
     "ja": "1ctbhh6",
     "ru": "1ctbhh6",
-    "zh-CN": "1ctbhh6"
+    "zh-CN": "1ctbhh6",
+    "fa": "1ctbhh6"
   },
   "cmd.mobile.scan.hint": {
     "ar": "1mfccdh",
@@ -653,7 +662,8 @@
     "fr": "1mfccdh",
     "ja": "1mfccdh",
     "ru": "1mfccdh",
-    "zh-CN": "1mfccdh"
+    "zh-CN": "1mfccdh",
+    "fa": "1mfccdh"
   },
   "cmd.vaults.open": {
     "ar": "2u4tg6",
@@ -661,7 +671,8 @@
     "fr": "2u4tg6",
     "ja": "2u4tg6",
     "ru": "2u4tg6",
-    "zh-CN": "2u4tg6"
+    "zh-CN": "2u4tg6",
+    "fa": "2u4tg6"
   },
   "cmd.vaults.open.hint": {
     "ar": "138zp6l",
@@ -669,7 +680,8 @@
     "fr": "138zp6l",
     "ja": "138zp6l",
     "ru": "138zp6l",
-    "zh-CN": "138zp6l"
+    "zh-CN": "138zp6l",
+    "fa": "138zp6l"
   },
   "cmd.ai.organize": {
     "ja": "1fssnyf"
@@ -847,7 +859,8 @@
     "fr": "1whd33t",
     "ja": "1whd33t",
     "ru": "1whd33t",
-    "zh-CN": "1whd33t"
+    "zh-CN": "1whd33t",
+    "fa": "1whd33t"
   },
   "cmd.appLock.off": {
     "ar": "sapj48",
@@ -855,7 +868,8 @@
     "fr": "sapj48",
     "ja": "sapj48",
     "ru": "sapj48",
-    "zh-CN": "sapj48"
+    "zh-CN": "sapj48",
+    "fa": "sapj48"
   },
   "cmd.appLock.now": {
     "ar": "1ljuzee",
@@ -863,7 +877,8 @@
     "fr": "1ljuzee",
     "ja": "1ljuzee",
     "ru": "1ljuzee",
-    "zh-CN": "1ljuzee"
+    "zh-CN": "1ljuzee",
+    "fa": "1ljuzee"
   },
   "cmd.appLock.after": {
     "ar": "e1coge",
@@ -871,7 +886,8 @@
     "fr": "e1coge",
     "ja": "e1coge",
     "ru": "e1coge",
-    "zh-CN": "e1coge"
+    "zh-CN": "e1coge",
+    "fa": "e1coge"
   },
   "cmd.appLock.hint": {
     "ar": "1bb6whw",
@@ -879,7 +895,8 @@
     "fr": "1bb6whw",
     "ja": "1bb6whw",
     "ru": "1bb6whw",
-    "zh-CN": "1bb6whw"
+    "zh-CN": "1bb6whw",
+    "fa": "1bb6whw"
   },
   "cmd.privacy.localData": {
     "ar": "uzfx7n",
@@ -887,7 +904,8 @@
     "fr": "uzfx7n",
     "ja": "uzfx7n",
     "ru": "uzfx7n",
-    "zh-CN": "uzfx7n"
+    "zh-CN": "uzfx7n",
+    "fa": "uzfx7n"
   },
   "cmd.privacy.localData.hint": {
     "ar": "1fmc95s",
@@ -895,7 +913,8 @@
     "fr": "1fmc95s",
     "ja": "1fmc95s",
     "ru": "1fmc95s",
-    "zh-CN": "1fmc95s"
+    "zh-CN": "1fmc95s",
+    "fa": "1fmc95s"
   },
   "cmd.vault.exportEverything": {
     "ar": "1ij7bnn",
@@ -903,7 +922,8 @@
     "fr": "1ij7bnn",
     "ja": "1ij7bnn",
     "ru": "1ij7bnn",
-    "zh-CN": "1ij7bnn"
+    "zh-CN": "1ij7bnn",
+    "fa": "1ij7bnn"
   },
   "cmd.vault.exportEverything.hint": {
     "ar": "j6a11n",
@@ -911,7 +931,8 @@
     "fr": "j6a11n",
     "ja": "j6a11n",
     "ru": "j6a11n",
-    "zh-CN": "j6a11n"
+    "zh-CN": "j6a11n",
+    "fa": "j6a11n"
   },
   "cmd.edit.cursorMovement.toLogical": {
     "ar": "b4eiag",
@@ -919,7 +940,8 @@
     "fr": "b4eiag",
     "ja": "b4eiag",
     "ru": "b4eiag",
-    "zh-CN": "b4eiag"
+    "zh-CN": "b4eiag",
+    "fa": "b4eiag"
   },
   "cmd.edit.cursorMovement.toVisual": {
     "ar": "9js5b1",
@@ -927,7 +949,8 @@
     "fr": "9js5b1",
     "ja": "9js5b1",
     "ru": "9js5b1",
-    "zh-CN": "9js5b1"
+    "zh-CN": "9js5b1",
+    "fa": "9js5b1"
   },
   "cmd.edit.cursorMovement.hint": {
     "ar": "uernde",
@@ -935,7 +958,8 @@
     "fr": "uernde",
     "ja": "uernde",
     "ru": "uernde",
-    "zh-CN": "uernde"
+    "zh-CN": "uernde",
+    "fa": "uernde"
   },
   "cmd.edit.hebrewLists.on": {
     "ar": "8l18qn",
@@ -943,7 +967,8 @@
     "fr": "8l18qn",
     "ja": "8l18qn",
     "ru": "8l18qn",
-    "zh-CN": "8l18qn"
+    "zh-CN": "8l18qn",
+    "fa": "8l18qn"
   },
   "cmd.edit.hebrewLists.off": {
     "ar": "hh1olw",
@@ -951,7 +976,8 @@
     "fr": "hh1olw",
     "ja": "hh1olw",
     "ru": "hh1olw",
-    "zh-CN": "hh1olw"
+    "zh-CN": "hh1olw",
+    "fa": "hh1olw"
   },
   "cmd.edit.hebrewLists.hint": {
     "ar": "1u5q5a",
@@ -959,7 +985,8 @@
     "fr": "1u5q5a",
     "ja": "1u5q5a",
     "ru": "1u5q5a",
-    "zh-CN": "1u5q5a"
+    "zh-CN": "1u5q5a",
+    "fa": "1u5q5a"
   },
   "cmd.edit.hebrewLists.done.on": {
     "ar": "1vd8qss",
@@ -967,7 +994,8 @@
     "fr": "1vd8qss",
     "ja": "1vd8qss",
     "ru": "1vd8qss",
-    "zh-CN": "1vd8qss"
+    "zh-CN": "1vd8qss",
+    "fa": "1vd8qss"
   },
   "cmd.edit.hebrewLists.done.off": {
     "ar": "f4bxa5",
@@ -975,6 +1003,7 @@
     "fr": "f4bxa5",
     "ja": "f4bxa5",
     "ru": "f4bxa5",
-    "zh-CN": "f4bxa5"
+    "zh-CN": "f4bxa5",
+    "fa": "f4bxa5"
   }
 }

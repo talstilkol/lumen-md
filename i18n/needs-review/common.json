@@ -627,7 +627,8 @@
     "fr": "c22ayn",
     "ja": "c22ayn",
     "ru": "c22ayn",
-    "zh-CN": "c22ayn"
+    "zh-CN": "c22ayn",
+    "fa": "c22ayn"
   },
   "hl.scan": {
     "ar": "qb0k9u",
@@ -835,7 +836,8 @@
     "fr": "315lki",
     "ja": "315lki",
     "ru": "315lki",
-    "zh-CN": "315lki"
+    "zh-CN": "315lki",
+    "fa": "315lki"
   },
   "importWizard.how.appleJournal": {
     "ar": "15g1ojz",
@@ -843,7 +845,8 @@
     "fr": "15g1ojz",
     "ja": "15g1ojz",
     "ru": "15g1ojz",
-    "zh-CN": "15g1ojz"
+    "zh-CN": "15g1ojz",
+    "fa": "15g1ojz"
   },
   "importWizard.how.craft": {
     "ar": "1o7ykfz",
@@ -851,7 +854,8 @@
     "fr": "1o7ykfz",
     "ja": "1o7ykfz",
     "ru": "1o7ykfz",
-    "zh-CN": "1o7ykfz"
+    "zh-CN": "1o7ykfz",
+    "fa": "1o7ykfz"
   },
   "importWizard.how.dayOne": {
     "ar": "nbdbjw",
@@ -859,7 +863,8 @@
     "fr": "nbdbjw",
     "ja": "nbdbjw",
     "ru": "nbdbjw",
-    "zh-CN": "nbdbjw"
+    "zh-CN": "nbdbjw",
+    "fa": "nbdbjw"
   },
   "importWizard.how.roam": {
     "ar": "32pkhs",
@@ -867,7 +872,8 @@
     "fr": "32pkhs",
     "ja": "32pkhs",
     "ru": "32pkhs",
-    "zh-CN": "32pkhs"
+    "zh-CN": "32pkhs",
+    "fa": "32pkhs"
   },
   "importWizard.how.samsungNotes": {
     "ar": "1rrzct8",
@@ -875,7 +881,8 @@
     "fr": "1rrzct8",
     "ja": "1rrzct8",
     "ru": "1rrzct8",
-    "zh-CN": "1rrzct8"
+    "zh-CN": "1rrzct8",
+    "fa": "1rrzct8"
   },
   "importWizard.how.textbundle": {
     "ar": "rzbnb1",
@@ -883,7 +890,8 @@
     "fr": "rzbnb1",
     "ja": "rzbnb1",
     "ru": "rzbnb1",
-    "zh-CN": "rzbnb1"
+    "zh-CN": "rzbnb1",
+    "fa": "rzbnb1"
   },
   "importWizard.how.tomboy": {
     "ar": "1rzty74",
@@ -891,7 +899,8 @@
     "fr": "1rzty74",
     "ja": "1rzty74",
     "ru": "1rzty74",
-    "zh-CN": "1rzty74"
+    "zh-CN": "1rzty74",
+    "fa": "1rzty74"
   },
   "importWizard.warn.craftLink": {
     "ar": "30x0oc",
@@ -899,7 +908,8 @@
     "fr": "30x0oc",
     "ja": "30x0oc",
     "ru": "30x0oc",
-    "zh-CN": "30x0oc"
+    "zh-CN": "30x0oc",
+    "fa": "30x0oc"
   },
   "importWizard.warn.pdfOnly": {
     "ar": "13choyw",
@@ -907,7 +917,8 @@
     "fr": "13choyw",
     "ja": "13choyw",
     "ru": "13choyw",
-    "zh-CN": "13choyw"
+    "zh-CN": "13choyw",
+    "fa": "13choyw"
   },
   "importWizard.warn.remoteAttachment": {
     "ar": "vd52j7",
@@ -915,7 +926,8 @@
     "fr": "vd52j7",
     "ja": "vd52j7",
     "ru": "vd52j7",
-    "zh-CN": "vd52j7"
+    "zh-CN": "vd52j7",
+    "fa": "vd52j7"
   },
   "jewishLang.dict.pending": {
     "ar": "fstejs",
@@ -991,7 +1003,8 @@
     "fr": "1d9u2hv",
     "ja": "1d9u2hv",
     "ru": "1d9u2hv",
-    "zh-CN": "1d9u2hv"
+    "zh-CN": "1d9u2hv",
+    "fa": "1d9u2hv"
   },
   "map.tiles.allow": {
     "ar": "v4jucp",
@@ -999,7 +1012,8 @@
     "fr": "v4jucp",
     "ja": "v4jucp",
     "ru": "v4jucp",
-    "zh-CN": "v4jucp"
+    "zh-CN": "v4jucp",
+    "fa": "v4jucp"
   },
   "map.tiles.stop": {
     "ar": "x1qbdj",
@@ -1007,7 +1021,8 @@
     "fr": "x1qbdj",
     "ja": "x1qbdj",
     "ru": "x1qbdj",
-    "zh-CN": "x1qbdj"
+    "zh-CN": "x1qbdj",
+    "fa": "x1qbdj"
   },
   "map.tiles.why": {
     "ar": "hd79vv",
@@ -1015,7 +1030,8 @@
     "fr": "hd79vv",
     "ja": "hd79vv",
     "ru": "hd79vv",
-    "zh-CN": "hd79vv"
+    "zh-CN": "hd79vv",
+    "fa": "hd79vv"
   },
   "mcpServers.add": {
     "ar": "1df7h82",
@@ -1773,7 +1789,8 @@
     "fr": "1n0dmr3",
     "ja": "1n0dmr3",
     "ru": "1n0dmr3",
-    "zh-CN": "1n0dmr3"
+    "zh-CN": "1n0dmr3",
+    "fa": "1n0dmr3"
   },
   "pdfUa.finish": {
     "ar": "1tinfgu",
@@ -1781,7 +1798,8 @@
     "fr": "1tinfgu",
     "ja": "1tinfgu",
     "ru": "1tinfgu",
-    "zh-CN": "1tinfgu"
+    "zh-CN": "1tinfgu",
+    "fa": "1tinfgu"
   },
   "pdfUa.imageFallbackAlt": {
     "ar": "ophmze",
@@ -1789,7 +1807,8 @@
     "fr": "ophmze",
     "ja": "ophmze",
     "ru": "ophmze",
-    "zh-CN": "ophmze"
+    "zh-CN": "ophmze",
+    "fa": "ophmze"
   },
   "pdfUa.noAlt": {
     "ar": "1evyjdy",
@@ -1797,7 +1816,8 @@
     "fr": "1evyjdy",
     "ja": "1evyjdy",
     "ru": "1evyjdy",
-    "zh-CN": "1evyjdy"
+    "zh-CN": "1evyjdy",
+    "fa": "1evyjdy"
   },
   "pdfUa.notTagged": {
     "ar": "wv4so8",
@@ -1805,7 +1825,8 @@
     "fr": "wv4so8",
     "ja": "wv4so8",
     "ru": "wv4so8",
-    "zh-CN": "wv4so8"
+    "zh-CN": "wv4so8",
+    "fa": "wv4so8"
   },
   "pdfUa.notTaggedBody": {
     "ar": "1a8k53w",
@@ -1813,7 +1834,8 @@
     "fr": "1a8k53w",
     "ja": "1a8k53w",
     "ru": "1a8k53w",
-    "zh-CN": "1a8k53w"
+    "zh-CN": "1a8k53w",
+    "fa": "1a8k53w"
   },
   "pdfUa.problem.figureWithoutAlt": {
     "ar": "xblb39",
@@ -1821,7 +1843,8 @@
     "fr": "xblb39",
     "ja": "xblb39",
     "ru": "xblb39",
-    "zh-CN": "xblb39"
+    "zh-CN": "xblb39",
+    "fa": "xblb39"
   },
   "pdfUa.problem.headingSkipped": {
     "ar": "1qq1yvc",
@@ -1829,7 +1852,8 @@
     "fr": "1qq1yvc",
     "ja": "1qq1yvc",
     "ru": "1qq1yvc",
-    "zh-CN": "1qq1yvc"
+    "zh-CN": "1qq1yvc",
+    "fa": "1qq1yvc"
   },
   "pdfUa.problem.linkWithoutText": {
     "ar": "w6orcf",
@@ -1837,7 +1861,8 @@
     "fr": "w6orcf",
     "ja": "w6orcf",
     "ru": "w6orcf",
-    "zh-CN": "w6orcf"
+    "zh-CN": "w6orcf",
+    "fa": "w6orcf"
   },
   "pdfUa.problem.noDisplayDocTitle": {
     "ar": "1kwazf6",
@@ -1845,7 +1870,8 @@
     "fr": "1kwazf6",
     "ja": "1kwazf6",
     "ru": "1kwazf6",
-    "zh-CN": "1kwazf6"
+    "zh-CN": "1kwazf6",
+    "fa": "1kwazf6"
   },
   "pdfUa.problem.noLang": {
     "ar": "kz614v",
@@ -1853,7 +1879,8 @@
     "fr": "kz614v",
     "ja": "kz614v",
     "ru": "kz614v",
-    "zh-CN": "kz614v"
+    "zh-CN": "kz614v",
+    "fa": "kz614v"
   },
   "pdfUa.problem.noPdfUaId": {
     "ar": "1vlch4r",
@@ -1861,7 +1888,8 @@
     "fr": "1vlch4r",
     "ja": "1vlch4r",
     "ru": "1vlch4r",
-    "zh-CN": "1vlch4r"
+    "zh-CN": "1vlch4r",
+    "fa": "1vlch4r"
   },
   "pdfUa.problem.noStructTree": {
     "ar": "hzh7tx",
@@ -1869,7 +1897,8 @@
     "fr": "hzh7tx",
     "ja": "hzh7tx",
     "ru": "hzh7tx",
-    "zh-CN": "hzh7tx"
+    "zh-CN": "hzh7tx",
+    "fa": "hzh7tx"
   },
   "pdfUa.problem.noTitle": {
     "ar": "gakwtk",
@@ -1877,7 +1906,8 @@
     "fr": "gakwtk",
     "ja": "gakwtk",
     "ru": "gakwtk",
-    "zh-CN": "gakwtk"
+    "zh-CN": "gakwtk",
+    "fa": "gakwtk"
   },
   "pdfUa.problem.notTagged": {
     "ar": "mk0v7a",
@@ -1885,7 +1915,8 @@
     "fr": "mk0v7a",
     "ja": "mk0v7a",
     "ru": "mk0v7a",
-    "zh-CN": "mk0v7a"
+    "zh-CN": "mk0v7a",
+    "fa": "mk0v7a"
   },
   "pdfUa.problem.tableWithoutHeaders": {
     "ar": "gfc7l8",
@@ -1893,7 +1924,8 @@
     "fr": "gfc7l8",
     "ja": "gfc7l8",
     "ru": "gfc7l8",
-    "zh-CN": "gfc7l8"
+    "zh-CN": "gfc7l8",
+    "fa": "gfc7l8"
   },
   "pdfUa.saved": {
     "ar": "mq3vn5",
@@ -1901,7 +1933,8 @@
     "fr": "mq3vn5",
     "ja": "mq3vn5",
     "ru": "mq3vn5",
-    "zh-CN": "mq3vn5"
+    "zh-CN": "mq3vn5",
+    "fa": "mq3vn5"
   },
   "pdfUa.savedBody": {
     "ar": "4fijqw",
@@ -1909,7 +1942,8 @@
     "fr": "4fijqw",
     "ja": "4fijqw",
     "ru": "4fijqw",
-    "zh-CN": "4fijqw"
+    "zh-CN": "4fijqw",
+    "fa": "4fijqw"
   },
   "pdfUa.savedWithProblems": {
     "ar": "5ml7qv",
@@ -1917,7 +1951,8 @@
     "fr": "5ml7qv",
     "ja": "5ml7qv",
     "ru": "5ml7qv",
-    "zh-CN": "5ml7qv"
+    "zh-CN": "5ml7qv",
+    "fa": "5ml7qv"
   },
   "pdfUa.step2": {
     "ar": "1d541qt",
@@ -1925,7 +1960,8 @@
     "fr": "1d541qt",
     "ja": "1d541qt",
     "ru": "1d541qt",
-    "zh-CN": "1d541qt"
+    "zh-CN": "1d541qt",
+    "fa": "1d541qt"
   },
   "pdfUa.step2Body": {
     "ar": "1ovxijq",
@@ -1933,7 +1969,8 @@
     "fr": "1ovxijq",
     "ja": "1ovxijq",
     "ru": "1ovxijq",
-    "zh-CN": "1ovxijq"
+    "zh-CN": "1ovxijq",
+    "fa": "1ovxijq"
   },
   "query.tooLarge": {
     "ar": "3jwg13",
@@ -6115,7 +6152,8 @@
     "fr": "euldnh",
     "ja": "euldnh",
     "ru": "euldnh",
-    "zh-CN": "euldnh"
+    "zh-CN": "euldnh",
+    "fa": "syt4k1"
   },
   "wchk.kind.all": {
     "ar": "1rifvwq",
@@ -7299,7 +7337,8 @@
     "fr": "1hjon0e",
     "ja": "1hjon0e",
     "ru": "1hjon0e",
-    "zh-CN": "1hjon0e"
+    "zh-CN": "1hjon0e",
+    "fa": "1hjon0e"
   },
   "agentReview.listRegion": {
     "ar": "1g5431a",
@@ -7307,7 +7346,8 @@
     "fr": "1g5431a",
     "ja": "1g5431a",
     "ru": "1g5431a",
-    "zh-CN": "1g5431a"
+    "zh-CN": "1g5431a",
+    "fa": "1g5431a"
   },
   "xchg.absentBefore": {
     "ar": "1nnlmzz",
@@ -7315,7 +7355,8 @@
     "fr": "1nnlmzz",
     "ja": "1nnlmzz",
     "ru": "1nnlmzz",
-    "zh-CN": "1nnlmzz"
+    "zh-CN": "1nnlmzz",
+    "fa": "1nnlmzz"
   },
   "xchg.absentAfter": {
     "ar": "1k05wly",
@@ -7323,7 +7364,8 @@
     "fr": "1k05wly",
     "ja": "1k05wly",
     "ru": "1k05wly",
-    "zh-CN": "1k05wly"
+    "zh-CN": "1k05wly",
+    "fa": "1k05wly"
   },
   "goal.now.readabilityFk": {
     "ar": "i9o8re",
@@ -7331,7 +7373,8 @@
     "fr": "i9o8re",
     "ja": "i9o8re",
     "ru": "i9o8re",
-    "zh-CN": "i9o8re"
+    "zh-CN": "i9o8re",
+    "fa": "i9o8re"
   },
   "goal.now.readabilityHe5": {
     "ar": "tgorfa",
@@ -7339,7 +7382,8 @@
     "fr": "tgorfa",
     "ja": "tgorfa",
     "ru": "tgorfa",
-    "zh-CN": "tgorfa"
+    "zh-CN": "tgorfa",
+    "fa": "tgorfa"
   },
   "xchg.absent": {
     "ar": "14137kw",
@@ -7355,7 +7399,8 @@
     "fr": "9u081b",
     "ja": "9u081b",
     "ru": "9u081b",
-    "zh-CN": "9u081b"
+    "zh-CN": "9u081b",
+    "fa": "9u081b"
   },
   "calendar.candleMinutes": {
     "ar": "15uwgui",
@@ -7635,7 +7680,8 @@
     "fr": "pljtmt",
     "ja": "pljtmt",
     "ru": "pljtmt",
-    "zh-CN": "pljtmt"
+    "zh-CN": "pljtmt",
+    "fa": "pljtmt"
   },
   "sources.panel.hint": {
     "ar": "1a68fut",
@@ -7764,7 +7810,8 @@
     "fr": "1j705cg",
     "ja": "1j705cg",
     "ru": "1j705cg",
-    "zh-CN": "1j705cg"
+    "zh-CN": "1j705cg",
+    "fa": "1j705cg"
   },
   "graphClusters.basis.tfidf": {
     "ar": "1ruurci",
@@ -7772,7 +7819,8 @@
     "fr": "1ruurci",
     "ja": "1ruurci",
     "ru": "1ruurci",
-    "zh-CN": "1ruurci"
+    "zh-CN": "1ruurci",
+    "fa": "1ruurci"
   },
   "entityGraph.inverse.amends": {
     "ar": "ciqhv2",
@@ -7780,7 +7828,8 @@
     "fr": "ciqhv2",
     "ja": "ciqhv2",
     "ru": "ciqhv2",
-    "zh-CN": "ciqhv2"
+    "zh-CN": "ciqhv2",
+    "fa": "ciqhv2"
   },
   "entityGraph.inverse.author": {
     "ar": "2xifw7",
@@ -7788,7 +7837,8 @@
     "fr": "2xifw7",
     "ja": "2xifw7",
     "ru": "2xifw7",
-    "zh-CN": "2xifw7"
+    "zh-CN": "2xifw7",
+    "fa": "2xifw7"
   },
   "entityGraph.inverse.born_in": {
     "ar": "144lpzg",
@@ -7796,7 +7846,8 @@
     "fr": "144lpzg",
     "ja": "144lpzg",
     "ru": "144lpzg",
-    "zh-CN": "144lpzg"
+    "zh-CN": "144lpzg",
+    "fa": "144lpzg"
   },
   "entityGraph.inverse.child": {
     "ar": "1t5eby5",
@@ -7804,7 +7855,8 @@
     "fr": "1t5eby5",
     "ja": "1t5eby5",
     "ru": "1t5eby5",
-    "zh-CN": "1t5eby5"
+    "zh-CN": "1t5eby5",
+    "fa": "1t5eby5"
   },
   "entityGraph.inverse.cites": {
     "ar": "18qu5tf",
@@ -7812,7 +7864,8 @@
     "fr": "18qu5tf",
     "ja": "18qu5tf",
     "ru": "18qu5tf",
-    "zh-CN": "18qu5tf"
+    "zh-CN": "18qu5tf",
+    "fa": "18qu5tf"
   },
   "entityGraph.inverse.died_in": {
     "ar": "1m6kij7",
@@ -7820,7 +7873,8 @@
     "fr": "1m6kij7",
     "ja": "1m6kij7",
     "ru": "1m6kij7",
-    "zh-CN": "1m6kij7"
+    "zh-CN": "1m6kij7",
+    "fa": "1m6kij7"
   },
   "entityGraph.inverse.employer": {
     "ar": "5gxg69",
@@ -7828,7 +7882,8 @@
     "fr": "5gxg69",
     "ja": "5gxg69",
     "ru": "5gxg69",
-    "zh-CN": "5gxg69"
+    "zh-CN": "5gxg69",
+    "fa": "5gxg69"
   },
   "entityGraph.inverse.enacted_by": {
     "ar": "1318gd4",
@@ -7836,7 +7891,8 @@
     "fr": "1318gd4",
     "ja": "1318gd4",
     "ru": "1318gd4",
-    "zh-CN": "1318gd4"
+    "zh-CN": "1318gd4",
+    "fa": "1318gd4"
   },
   "entityGraph.inverse.founded_by": {
     "ar": "9a6j71",
@@ -7844,7 +7900,8 @@
     "fr": "9a6j71",
     "ja": "9a6j71",
     "ru": "9a6j71",
-    "zh-CN": "9a6j71"
+    "zh-CN": "9a6j71",
+    "fa": "9a6j71"
   },
   "entityGraph.inverse.headquarters": {
     "ar": "tazafi",
@@ -7852,7 +7909,8 @@
     "fr": "tazafi",
     "ja": "tazafi",
     "ru": "tazafi",
-    "zh-CN": "tazafi"
+    "zh-CN": "tazafi",
+    "fa": "tazafi"
   },
   "entityGraph.inverse.located_in": {
     "ar": "1rlj32l",
@@ -7860,7 +7918,8 @@
     "fr": "1rlj32l",
     "ja": "1rlj32l",
     "ru": "1rlj32l",
-    "zh-CN": "1rlj32l"
+    "zh-CN": "1rlj32l",
+    "fa": "1rlj32l"
   },
   "entityGraph.inverse.main_subject": {
     "ar": "1u7h2yy",
@@ -7868,7 +7927,8 @@
     "fr": "1u7h2yy",
     "ja": "1u7h2yy",
     "ru": "1u7h2yy",
-    "zh-CN": "1u7h2yy"
+    "zh-CN": "1u7h2yy",
+    "fa": "1u7h2yy"
   },
   "entityGraph.inverse.member_of": {
     "ar": "bwhupv",
@@ -7876,7 +7936,8 @@
     "fr": "bwhupv",
     "ja": "bwhupv",
     "ru": "bwhupv",
-    "zh-CN": "bwhupv"
+    "zh-CN": "bwhupv",
+    "fa": "bwhupv"
   },
   "entityGraph.inverse.part_of": {
     "ar": "7pafuv",
@@ -7884,7 +7945,8 @@
     "fr": "7pafuv",
     "ja": "7pafuv",
     "ru": "7pafuv",
-    "zh-CN": "7pafuv"
+    "zh-CN": "7pafuv",
+    "fa": "7pafuv"
   },
   "entityGraph.inverse.participant_in": {
     "ar": "1oryz0u",
@@ -7892,7 +7954,8 @@
     "fr": "1oryz0u",
     "ja": "1oryz0u",
     "ru": "1oryz0u",
-    "zh-CN": "1oryz0u"
+    "zh-CN": "1oryz0u",
+    "fa": "1oryz0u"
   },
   "entityGraph.inverse.point_in_time": {
     "ar": "4ic6x7",
@@ -7900,7 +7963,8 @@
     "fr": "4ic6x7",
     "ja": "4ic6x7",
     "ru": "4ic6x7",
-    "zh-CN": "4ic6x7"
+    "zh-CN": "4ic6x7",
+    "fa": "4ic6x7"
   },
   "entityGraph.inverse.position_held": {
     "ar": "1n64z2n",
@@ -7908,7 +7972,8 @@
     "fr": "1n64z2n",
     "ja": "1n64z2n",
     "ru": "1n64z2n",
-    "zh-CN": "1n64z2n"
+    "zh-CN": "1n64z2n",
+    "fa": "1n64z2n"
   },
   "entityGraph.inverse.related_to": {
     "ar": "wlzwg1",
@@ -7916,7 +7981,8 @@
     "fr": "wlzwg1",
     "ja": "wlzwg1",
     "ru": "wlzwg1",
-    "zh-CN": "wlzwg1"
+    "zh-CN": "wlzwg1",
+    "fa": "wlzwg1"
   },
   "entityGraph.inverse.spouse": {
     "ar": "lf5uze",
@@ -7924,7 +7990,8 @@
     "fr": "lf5uze",
     "ja": "lf5uze",
     "ru": "lf5uze",
-    "zh-CN": "lf5uze"
+    "zh-CN": "lf5uze",
+    "fa": "lf5uze"
   },
   "entityGraph.inverse.student_of": {
     "ar": "1x3j4",
@@ -7932,7 +7999,8 @@
     "fr": "1x3j4",
     "ja": "1x3j4",
     "ru": "1x3j4",
-    "zh-CN": "1x3j4"
+    "zh-CN": "1x3j4",
+    "fa": "1x3j4"
   },
   "tasks.view.gantt": {
     "ar": "1v4vqrx",
@@ -7940,7 +8008,8 @@
     "fr": "1v4vqrx",
     "ja": "1v4vqrx",
     "ru": "1v4vqrx",
-    "zh-CN": "1v4vqrx"
+    "zh-CN": "1v4vqrx",
+    "fa": "1v4vqrx"
   },
   "timeline.gantt.earlier": {
     "ar": "1ioa20r",
@@ -7948,7 +8017,8 @@
     "fr": "1ioa20r",
     "ja": "1ioa20r",
     "ru": "1ioa20r",
-    "zh-CN": "1ioa20r"
+    "zh-CN": "1ioa20r",
+    "fa": "1ioa20r"
   },
   "timeline.gantt.later": {
     "ar": "1wsths9",
@@ -7956,7 +8026,8 @@
     "fr": "1wsths9",
     "ja": "1wsths9",
     "ru": "1wsths9",
-    "zh-CN": "1wsths9"
+    "zh-CN": "1wsths9",
+    "fa": "1wsths9"
   },
   "timeline.gantt.showing": {
     "ar": "fpb1z0",
@@ -7964,7 +8035,8 @@
     "fr": "fpb1z0",
     "ja": "fpb1z0",
     "ru": "fpb1z0",
-    "zh-CN": "fpb1z0"
+    "zh-CN": "fpb1z0",
+    "fa": "fpb1z0"
   },
   "timeline.gantt.zoom": {
     "ar": "1fae0jj",
@@ -7972,7 +8044,8 @@
     "fr": "1fae0jj",
     "ja": "1fae0jj",
     "ru": "1fae0jj",
-    "zh-CN": "1fae0jj"
+    "zh-CN": "1fae0jj",
+    "fa": "1fae0jj"
   },
   "timeline.gantt.zoomFit": {
     "ar": "6cl4ap",
@@ -7980,7 +8053,8 @@
     "fr": "6cl4ap",
     "ja": "6cl4ap",
     "ru": "6cl4ap",
-    "zh-CN": "6cl4ap"
+    "zh-CN": "6cl4ap",
+    "fa": "6cl4ap"
   },
   "timeline.gantt.zoomIn": {
     "ar": "19blqjd",
@@ -7988,7 +8062,8 @@
     "fr": "19blqjd",
     "ja": "19blqjd",
     "ru": "19blqjd",
-    "zh-CN": "19blqjd"
+    "zh-CN": "19blqjd",
+    "fa": "19blqjd"
   },
   "timeline.gantt.zoomOut": {
     "ar": "110wpq2",
@@ -7996,7 +8071,8 @@
     "fr": "110wpq2",
     "ja": "110wpq2",
     "ru": "110wpq2",
-    "zh-CN": "110wpq2"
+    "zh-CN": "110wpq2",
+    "fa": "110wpq2"
   },
   "importWizard.how.pandoc": {
     "ar": "v6zpak",
@@ -8004,7 +8080,8 @@
     "fr": "v6zpak",
     "ja": "v6zpak",
     "ru": "v6zpak",
-    "zh-CN": "v6zpak"
+    "zh-CN": "v6zpak",
+    "fa": "v6zpak"
   },
   "pluginTrust.api.compat": {
     "ar": "2gast7",
@@ -8012,7 +8089,8 @@
     "fr": "2gast7",
     "ja": "2gast7",
     "ru": "2gast7",
-    "zh-CN": "2gast7"
+    "zh-CN": "2gast7",
+    "fa": "2gast7"
   },
   "pluginTrust.api.belowMin": {
     "ar": "1az9gul",
@@ -8020,7 +8098,8 @@
     "fr": "1az9gul",
     "ja": "1az9gul",
     "ru": "1az9gul",
-    "zh-CN": "1az9gul"
+    "zh-CN": "1az9gul",
+    "fa": "1az9gul"
   },
   "pluginTrust.api.newerMajor": {
     "ar": "13vo25n",
@@ -8028,7 +8107,8 @@
     "fr": "13vo25n",
     "ja": "13vo25n",
     "ru": "13vo25n",
-    "zh-CN": "13vo25n"
+    "zh-CN": "13vo25n",
+    "fa": "13vo25n"
   },
   "pluginTrust.api.unsupported": {
     "ar": "18sf16f",
@@ -8036,7 +8116,8 @@
     "fr": "18sf16f",
     "ja": "18sf16f",
     "ru": "18sf16f",
-    "zh-CN": "18sf16f"
+    "zh-CN": "18sf16f",
+    "fa": "18sf16f"
   },
   "pluginTrust.api.invalid": {
     "ar": "1o0jtym",
@@ -8044,7 +8125,8 @@
     "fr": "1o0jtym",
     "ja": "1o0jtym",
     "ru": "1o0jtym",
-    "zh-CN": "1o0jtym"
+    "zh-CN": "1o0jtym",
+    "fa": "1o0jtym"
   },
   "pluginDev.api": {
     "ar": "1mgjq6c",
@@ -8052,7 +8134,8 @@
     "fr": "1mgjq6c",
     "ja": "1mgjq6c",
     "ru": "1mgjq6c",
-    "zh-CN": "1mgjq6c"
+    "zh-CN": "1mgjq6c",
+    "fa": "1mgjq6c"
   },
   "pluginDev.apiCompat": {
     "ar": "1x4ui22",
@@ -8060,7 +8143,8 @@
     "fr": "1x4ui22",
     "ja": "1x4ui22",
     "ru": "1x4ui22",
-    "zh-CN": "1x4ui22"
+    "zh-CN": "1x4ui22",
+    "fa": "1x4ui22"
   },
   "pluginTrust.policy.unnamed": {
     "ar": "111ow2d",
@@ -8068,7 +8152,8 @@
     "fr": "111ow2d",
     "ja": "111ow2d",
     "ru": "111ow2d",
-    "zh-CN": "111ow2d"
+    "zh-CN": "111ow2d",
+    "fa": "111ow2d"
   },
   "pluginTrust.policy.denied": {
     "ar": "1wi1eiq",
@@ -8076,7 +8161,8 @@
     "fr": "1wi1eiq",
     "ja": "1wi1eiq",
     "ru": "1wi1eiq",
-    "zh-CN": "1wi1eiq"
+    "zh-CN": "1wi1eiq",
+    "fa": "1wi1eiq"
   },
   "pluginTrust.policy.notAllowed": {
     "ar": "1d8xhur",
@@ -8084,7 +8170,8 @@
     "fr": "1d8xhur",
     "ja": "1d8xhur",
     "ru": "1d8xhur",
-    "zh-CN": "1d8xhur"
+    "zh-CN": "1d8xhur",
+    "fa": "1d8xhur"
   },
   "pluginTrust.policy.registry": {
     "ar": "3olasi",
@@ -8092,7 +8179,8 @@
     "fr": "3olasi",
     "ja": "3olasi",
     "ru": "3olasi",
-    "zh-CN": "3olasi"
+    "zh-CN": "3olasi",
+    "fa": "3olasi"
   },
   "pluginTrust.policy.invalid": {
     "ar": "1reppb9",
@@ -8100,7 +8188,8 @@
     "fr": "1reppb9",
     "ja": "1reppb9",
     "ru": "1reppb9",
-    "zh-CN": "1reppb9"
+    "zh-CN": "1reppb9",
+    "fa": "1reppb9"
   },
   "pluginTrust.verifiedAuthor": {
     "ar": "o46ock",
@@ -8108,7 +8197,8 @@
     "fr": "o46ock",
     "ja": "o46ock",
     "ru": "o46ock",
-    "zh-CN": "o46ock"
+    "zh-CN": "o46ock",
+    "fa": "o46ock"
   },
   "link.confirm.title": {
     "ar": "mjttnc",
@@ -8116,7 +8206,8 @@
     "fr": "mjttnc",
     "ja": "mjttnc",
     "ru": "mjttnc",
-    "zh-CN": "mjttnc"
+    "zh-CN": "mjttnc",
+    "fa": "mjttnc"
   },
   "link.confirm.new": {
     "ar": "e01ya2",
@@ -8124,7 +8215,8 @@
     "fr": "e01ya2",
     "ja": "e01ya2",
     "ru": "e01ya2",
-    "zh-CN": "e01ya2"
+    "zh-CN": "e01ya2",
+    "fa": "e01ya2"
   },
   "link.confirm.capture": {
     "ar": "1s5e81z",
@@ -8132,7 +8224,8 @@
     "fr": "1s5e81z",
     "ja": "1s5e81z",
     "ru": "1s5e81z",
-    "zh-CN": "1s5e81z"
+    "zh-CN": "1s5e81z",
+    "fa": "1s5e81z"
   },
   "link.confirm.clip": {
     "ar": "x1qs1u",
@@ -8140,7 +8233,8 @@
     "fr": "x1qs1u",
     "ja": "x1qs1u",
     "ru": "x1qs1u",
-    "zh-CN": "x1qs1u"
+    "zh-CN": "x1qs1u",
+    "fa": "x1qs1u"
   },
   "link.confirm.open": {
     "ar": "11jvdr2",
@@ -8148,7 +8242,8 @@
     "fr": "11jvdr2",
     "ja": "11jvdr2",
     "ru": "11jvdr2",
-    "zh-CN": "11jvdr2"
+    "zh-CN": "11jvdr2",
+    "fa": "11jvdr2"
   },
   "link.confirm.openUnknown": {
     "ar": "wk6o64",
@@ -8156,7 +8251,8 @@
     "fr": "wk6o64",
     "ja": "wk6o64",
     "ru": "wk6o64",
-    "zh-CN": "wk6o64"
+    "zh-CN": "wk6o64",
+    "fa": "wk6o64"
   },
   "link.confirm.source": {
     "ar": "1w4mwiu",
@@ -8164,7 +8260,8 @@
     "fr": "1w4mwiu",
     "ja": "1w4mwiu",
     "ru": "1w4mwiu",
-    "zh-CN": "1w4mwiu"
+    "zh-CN": "1w4mwiu",
+    "fa": "1w4mwiu"
   },
   "link.warn.executable": {
     "ar": "y1raas",
@@ -8172,7 +8269,8 @@
     "fr": "y1raas",
     "ja": "y1raas",
     "ru": "y1raas",
-    "zh-CN": "y1raas"
+    "zh-CN": "y1raas",
+    "fa": "y1raas"
   },
   "link.warn.script": {
     "ar": "9j59bu",
@@ -8180,7 +8278,8 @@
     "fr": "9j59bu",
     "ja": "9j59bu",
     "ru": "9j59bu",
-    "zh-CN": "9j59bu"
+    "zh-CN": "9j59bu",
+    "fa": "9j59bu"
   },
   "link.warn.html": {
     "ar": "i919yl",
@@ -8188,7 +8287,8 @@
     "fr": "i919yl",
     "ja": "i919yl",
     "ru": "i919yl",
-    "zh-CN": "i919yl"
+    "zh-CN": "i919yl",
+    "fa": "i919yl"
   },
   "link.warn.htmlNetwork": {
     "ar": "1sw6v3x",
@@ -8196,7 +8296,8 @@
     "fr": "1sw6v3x",
     "ja": "1sw6v3x",
     "ru": "1sw6v3x",
-    "zh-CN": "1sw6v3x"
+    "zh-CN": "1sw6v3x",
+    "fa": "1sw6v3x"
   },
   "link.warn.unknown": {
     "ar": "d0i4w8",
@@ -8204,7 +8305,8 @@
     "fr": "d0i4w8",
     "ja": "d0i4w8",
     "ru": "d0i4w8",
-    "zh-CN": "d0i4w8"
+    "zh-CN": "d0i4w8",
+    "fa": "d0i4w8"
   },
   "link.always": {
     "ar": "l6esbn",
@@ -8212,7 +8314,8 @@
     "fr": "l6esbn",
     "ja": "l6esbn",
     "ru": "l6esbn",
-    "zh-CN": "l6esbn"
+    "zh-CN": "l6esbn",
+    "fa": "l6esbn"
   },
   "link.always.hint": {
     "ar": "vuns0i",
@@ -8220,7 +8323,8 @@
     "fr": "vuns0i",
     "ja": "vuns0i",
     "ru": "vuns0i",
-    "zh-CN": "vuns0i"
+    "zh-CN": "vuns0i",
+    "fa": "vuns0i"
   },
   "link.source.new": {
     "ar": "69gly1",
@@ -8228,7 +8332,8 @@
     "fr": "69gly1",
     "ja": "69gly1",
     "ru": "69gly1",
-    "zh-CN": "69gly1"
+    "zh-CN": "69gly1",
+    "fa": "69gly1"
   },
   "link.source.capture": {
     "ar": "1e0kcjw",
@@ -8236,7 +8341,8 @@
     "fr": "1e0kcjw",
     "ja": "1e0kcjw",
     "ru": "1e0kcjw",
-    "zh-CN": "1e0kcjw"
+    "zh-CN": "1e0kcjw",
+    "fa": "1e0kcjw"
   },
   "link.source.open": {
     "ar": "1mncl2p",
@@ -8244,7 +8350,8 @@
     "fr": "1mncl2p",
     "ja": "1mncl2p",
     "ru": "1mncl2p",
-    "zh-CN": "1mncl2p"
+    "zh-CN": "1mncl2p",
+    "fa": "1mncl2p"
   },
   "link.allow": {
     "ar": "nfb55e",
@@ -8252,7 +8359,8 @@
     "fr": "nfb55e",
     "ja": "nfb55e",
     "ru": "nfb55e",
-    "zh-CN": "nfb55e"
+    "zh-CN": "nfb55e",
+    "fa": "nfb55e"
   },
   "link.cancel": {
     "ar": "1u4gj3k",
@@ -8260,7 +8368,8 @@
     "fr": "1u4gj3k",
     "ja": "1u4gj3k",
     "ru": "1u4gj3k",
-    "zh-CN": "1u4gj3k"
+    "zh-CN": "1u4gj3k",
+    "fa": "1u4gj3k"
   },
   "link.blocked": {
     "ar": "dxkate",
@@ -8268,7 +8377,8 @@
     "fr": "dxkate",
     "ja": "dxkate",
     "ru": "dxkate",
-    "zh-CN": "dxkate"
+    "zh-CN": "dxkate",
+    "fa": "dxkate"
   },
   "e2ee.shared.confirm": {
     "ar": "74s250",
@@ -8276,7 +8386,8 @@
     "fr": "74s250",
     "ja": "74s250",
     "ru": "74s250",
-    "zh-CN": "74s250"
+    "zh-CN": "74s250",
+    "fa": "74s250"
   },
   "e2ee.shared.intro": {
     "ar": "ts0a3v",
@@ -8284,7 +8395,8 @@
     "fr": "ts0a3v",
     "ja": "ts0a3v",
     "ru": "ts0a3v",
-    "zh-CN": "ts0a3v"
+    "zh-CN": "ts0a3v",
+    "fa": "ts0a3v"
   },
   "e2ee.shared.kind.agents": {
     "ar": "1vcdk8w",
@@ -8292,7 +8404,8 @@
     "fr": "1vcdk8w",
     "ja": "1vcdk8w",
     "ru": "1vcdk8w",
-    "zh-CN": "1vcdk8w"
+    "zh-CN": "1vcdk8w",
+    "fa": "1vcdk8w"
   },
   "e2ee.shared.kind.automations": {
     "ar": "1qlte4b",
@@ -8300,7 +8413,8 @@
     "fr": "1qlte4b",
     "ja": "1qlte4b",
     "ru": "1qlte4b",
-    "zh-CN": "1qlte4b"
+    "zh-CN": "1qlte4b",
+    "fa": "1qlte4b"
   },
   "e2ee.shared.kind.hotkeys": {
     "ar": "1khciow",
@@ -8308,7 +8422,8 @@
     "fr": "1khciow",
     "ja": "1khciow",
     "ru": "1khciow",
-    "zh-CN": "1khciow"
+    "zh-CN": "1khciow",
+    "fa": "1khciow"
   },
   "e2ee.shared.kind.plugins": {
     "ar": "10renyj",
@@ -8316,7 +8431,8 @@
     "fr": "10renyj",
     "ja": "10renyj",
     "ru": "10renyj",
-    "zh-CN": "10renyj"
+    "zh-CN": "10renyj",
+    "fa": "10renyj"
   },
   "e2ee.shared.kind.settings": {
     "ar": "z81r9l",
@@ -8324,7 +8440,8 @@
     "fr": "z81r9l",
     "ja": "z81r9l",
     "ru": "z81r9l",
-    "zh-CN": "z81r9l"
+    "zh-CN": "z81r9l",
+    "fa": "z81r9l"
   },
   "e2ee.shared.kind.snippets": {
     "ar": "1fzoiua",
@@ -8332,7 +8449,8 @@
     "fr": "1fzoiua",
     "ja": "1fzoiua",
     "ru": "1fzoiua",
-    "zh-CN": "1fzoiua"
+    "zh-CN": "1fzoiua",
+    "fa": "1fzoiua"
   },
   "e2ee.shared.kind.themes": {
     "ar": "1h2ekoj",
@@ -8340,7 +8458,8 @@
     "fr": "1h2ekoj",
     "ja": "1h2ekoj",
     "ru": "1h2ekoj",
-    "zh-CN": "1h2ekoj"
+    "zh-CN": "1h2ekoj",
+    "fa": "1h2ekoj"
   },
   "e2ee.shared.title": {
     "ar": "1qv2mi4",
@@ -8348,7 +8467,8 @@
     "fr": "1qv2mi4",
     "ja": "1qv2mi4",
     "ru": "1qv2mi4",
-    "zh-CN": "1qv2mi4"
+    "zh-CN": "1qv2mi4",
+    "fa": "1qv2mi4"
   },
   "e2ee.presence.device": {
     "ar": "1pyvho1",
@@ -8356,7 +8476,8 @@
     "fr": "1pyvho1",
     "ja": "1pyvho1",
     "ru": "1pyvho1",
-    "zh-CN": "1pyvho1"
+    "zh-CN": "1pyvho1",
+    "fa": "1pyvho1"
   },
   "e2ee.presence.devicePlaceholder": {
     "ar": "1udd1ns",
@@ -8364,7 +8485,8 @@
     "fr": "1udd1ns",
     "ja": "1udd1ns",
     "ru": "1udd1ns",
-    "zh-CN": "1udd1ns"
+    "zh-CN": "1udd1ns",
+    "fa": "1udd1ns"
   },
   "e2ee.presence.intro": {
     "ar": "ly6tkf",
@@ -8372,7 +8494,8 @@
     "fr": "ly6tkf",
     "ja": "ly6tkf",
     "ru": "ly6tkf",
-    "zh-CN": "ly6tkf"
+    "zh-CN": "ly6tkf",
+    "fa": "ly6tkf"
   },
   "e2ee.presence.needName": {
     "ar": "izx72r",
@@ -8380,7 +8503,8 @@
     "fr": "izx72r",
     "ja": "izx72r",
     "ru": "izx72r",
-    "zh-CN": "izx72r"
+    "zh-CN": "izx72r",
+    "fa": "izx72r"
   },
   "e2ee.presence.on": {
     "ar": "1erqid8",
@@ -8388,7 +8512,8 @@
     "fr": "1erqid8",
     "ja": "1erqid8",
     "ru": "1erqid8",
-    "zh-CN": "1erqid8"
+    "zh-CN": "1erqid8",
+    "fa": "1erqid8"
   },
   "e2ee.presence.title": {
     "ar": "u1n6ly",
@@ -8396,7 +8521,8 @@
     "fr": "u1n6ly",
     "ja": "u1n6ly",
     "ru": "u1n6ly",
-    "zh-CN": "u1n6ly"
+    "zh-CN": "u1n6ly",
+    "fa": "u1n6ly"
   },
   "presence.openOn": {
     "ar": "stwc07",
@@ -8404,7 +8530,8 @@
     "fr": "stwc07",
     "ja": "stwc07",
     "ru": "stwc07",
-    "zh-CN": "stwc07"
+    "zh-CN": "stwc07",
+    "fa": "stwc07"
   },
   "a11y.sidebarResizerHint": {
     "ar": "1pftujp",
@@ -8412,7 +8539,8 @@
     "fr": "1pftujp",
     "ja": "1pftujp",
     "ru": "1pftujp",
-    "zh-CN": "1pftujp"
+    "zh-CN": "1pftujp",
+    "fa": "1pftujp"
   },
   "safeMode.title": {
     "ar": "msgg0r",
@@ -8420,7 +8548,8 @@
     "fr": "msgg0r",
     "ja": "msgg0r",
     "ru": "msgg0r",
-    "zh-CN": "msgg0r"
+    "zh-CN": "msgg0r",
+    "fa": "msgg0r"
   },
   "safeMode.reasonCrash": {
     "ar": "1sjej62",
@@ -8428,7 +8557,8 @@
     "fr": "1sjej62",
     "ja": "1sjej62",
     "ru": "1sjej62",
-    "zh-CN": "1sjej62"
+    "zh-CN": "1sjej62",
+    "fa": "1sjej62"
   },
   "safeMode.reasonManual": {
     "ar": "gv7tsz",
@@ -8436,7 +8566,8 @@
     "fr": "gv7tsz",
     "ja": "gv7tsz",
     "ru": "gv7tsz",
-    "zh-CN": "gv7tsz"
+    "zh-CN": "gv7tsz",
+    "fa": "gv7tsz"
   },
   "safeMode.whatIsOff": {
     "ar": "17oj2ff",
@@ -8444,7 +8575,8 @@
     "fr": "17oj2ff",
     "ja": "17oj2ff",
     "ru": "17oj2ff",
-    "zh-CN": "17oj2ff"
+    "zh-CN": "17oj2ff",
+    "fa": "17oj2ff"
   },
   "safeMode.rollbackHint": {
     "ar": "1hzracp",
@@ -8452,7 +8584,8 @@
     "fr": "1hzracp",
     "ja": "1hzracp",
     "ru": "1hzracp",
-    "zh-CN": "1hzracp"
+    "zh-CN": "1hzracp",
+    "fa": "1hzracp"
   },
   "safeMode.leave": {
     "ar": "khkcbm",
@@ -8460,7 +8593,8 @@
     "fr": "khkcbm",
     "ja": "khkcbm",
     "ru": "khkcbm",
-    "zh-CN": "khkcbm"
+    "zh-CN": "khkcbm",
+    "fa": "khkcbm"
   },
   "safeMode.chooseLegend": {
     "ar": "rq3djm",
@@ -8468,7 +8602,8 @@
     "fr": "rq3djm",
     "ja": "rq3djm",
     "ru": "rq3djm",
-    "zh-CN": "rq3djm"
+    "zh-CN": "rq3djm",
+    "fa": "rq3djm"
   },
   "safeMode.snippet": {
     "ar": "1yk7izq",
@@ -8476,7 +8611,8 @@
     "fr": "1yk7izq",
     "ja": "1yk7izq",
     "ru": "1yk7izq",
-    "zh-CN": "1yk7izq"
+    "zh-CN": "1yk7izq",
+    "fa": "1yk7izq"
   },
   "safeMode.agents": {
     "ar": "9b6k1z",
@@ -8484,7 +8620,8 @@
     "fr": "9b6k1z",
     "ja": "9b6k1z",
     "ru": "9b6k1z",
-    "zh-CN": "9b6k1z"
+    "zh-CN": "9b6k1z",
+    "fa": "9b6k1z"
   },
   "safeMode.pluginsNote": {
     "ar": "phqstx",
@@ -8492,7 +8629,8 @@
     "fr": "phqstx",
     "ja": "phqstx",
     "ru": "phqstx",
-    "zh-CN": "phqstx"
+    "zh-CN": "phqstx",
+    "fa": "phqstx"
   },
   "safeMode.leaveNow": {
     "ar": "1rsnvjk",
@@ -8500,7 +8638,8 @@
     "fr": "1rsnvjk",
     "ja": "1rsnvjk",
     "ru": "1rsnvjk",
-    "zh-CN": "1rsnvjk"
+    "zh-CN": "1rsnvjk",
+    "fa": "1rsnvjk"
   },
   "safeMode.back": {
     "ar": "1hzmxtu",
@@ -8508,7 +8647,8 @@
     "fr": "1hzmxtu",
     "ja": "1hzmxtu",
     "ru": "1hzmxtu",
-    "zh-CN": "1hzmxtu"
+    "zh-CN": "1hzmxtu",
+    "fa": "1hzmxtu"
   },
   "safeMode.hide": {
     "ar": "1qfy6dp",
@@ -8516,7 +8656,8 @@
     "fr": "1qfy6dp",
     "ja": "1qfy6dp",
     "ru": "1qfy6dp",
-    "zh-CN": "1qfy6dp"
+    "zh-CN": "1qfy6dp",
+    "fa": "1qfy6dp"
   },
   "safeMode.badge": {
     "ar": "msgg0r",
@@ -8524,7 +8665,8 @@
     "fr": "msgg0r",
     "ja": "msgg0r",
     "ru": "msgg0r",
-    "zh-CN": "msgg0r"
+    "zh-CN": "msgg0r",
+    "fa": "msgg0r"
   },
   "safeMode.show": {
     "ar": "1loqxt2",
@@ -8532,7 +8674,8 @@
     "fr": "1loqxt2",
     "ja": "1loqxt2",
     "ru": "1loqxt2",
-    "zh-CN": "1loqxt2"
+    "zh-CN": "1loqxt2",
+    "fa": "1loqxt2"
   },
   "safeMode.rolledBack": {
     "ar": "65bami",
@@ -8540,7 +8683,8 @@
     "fr": "65bami",
     "ja": "65bami",
     "ru": "65bami",
-    "zh-CN": "65bami"
+    "zh-CN": "65bami",
+    "fa": "65bami"
   },
   "update.held.staged": {
     "ar": "1ei543q",
@@ -8548,7 +8692,8 @@
     "fr": "1ei543q",
     "ja": "1ei543q",
     "ru": "1ei543q",
-    "zh-CN": "1ei543q"
+    "zh-CN": "1ei543q",
+    "fa": "1ei543q"
   },
   "update.held.halted": {
     "ar": "1bslmi7",
@@ -8556,7 +8701,8 @@
     "fr": "1bslmi7",
     "ja": "1bslmi7",
     "ru": "1bslmi7",
-    "zh-CN": "1bslmi7"
+    "zh-CN": "1bslmi7",
+    "fa": "1bslmi7"
   },
   "supportNotice.title": {
     "ar": "wzzlt3",
@@ -8564,7 +8710,8 @@
     "fr": "wzzlt3",
     "ja": "wzzlt3",
     "ru": "wzzlt3",
-    "zh-CN": "wzzlt3"
+    "zh-CN": "wzzlt3",
+    "fa": "wzzlt3"
   },
   "supportNotice.body": {
     "ar": "1we15xx",
@@ -8572,7 +8719,8 @@
     "fr": "1we15xx",
     "ja": "1we15xx",
     "ru": "1we15xx",
-    "zh-CN": "1we15xx"
+    "zh-CN": "1we15xx",
+    "fa": "1we15xx"
   },
   "supportNotice.policy": {
     "ar": "85wb4y",
@@ -8580,7 +8728,8 @@
     "fr": "85wb4y",
     "ja": "85wb4y",
     "ru": "85wb4y",
-    "zh-CN": "85wb4y"
+    "zh-CN": "85wb4y",
+    "fa": "85wb4y"
   },
   "supportNotice.missing": {
     "ar": "1k4qagh",
@@ -8588,7 +8737,8 @@
     "fr": "1k4qagh",
     "ja": "1k4qagh",
     "ru": "1k4qagh",
-    "zh-CN": "1k4qagh"
+    "zh-CN": "1k4qagh",
+    "fa": "1k4qagh"
   },
   "supportNotice.ok": {
     "ar": "l8hqi2",
@@ -8596,7 +8746,8 @@
     "fr": "l8hqi2",
     "ja": "l8hqi2",
     "ru": "l8hqi2",
-    "zh-CN": "l8hqi2"
+    "zh-CN": "l8hqi2",
+    "fa": "l8hqi2"
   },
   "ipad.key.smartPaste": {
     "ar": "uwpqsx",
@@ -8604,7 +8755,8 @@
     "fr": "uwpqsx",
     "ja": "uwpqsx",
     "ru": "uwpqsx",
-    "zh-CN": "uwpqsx"
+    "zh-CN": "uwpqsx",
+    "fa": "uwpqsx"
   },
   "ipad.key.closeTab": {
     "ar": "732qw0",
@@ -8612,7 +8764,8 @@
     "fr": "732qw0",
     "ja": "732qw0",
     "ru": "732qw0",
-    "zh-CN": "732qw0"
+    "zh-CN": "732qw0",
+    "fa": "732qw0"
   },
   "spotlight.mode.off": {
     "ar": "3dbdv3",
@@ -8620,7 +8773,8 @@
     "fr": "3dbdv3",
     "ja": "3dbdv3",
     "ru": "3dbdv3",
-    "zh-CN": "3dbdv3"
+    "zh-CN": "3dbdv3",
+    "fa": "3dbdv3"
   },
   "spotlight.mode.recent": {
     "ar": "11575za",
@@ -8628,7 +8782,8 @@
     "fr": "11575za",
     "ja": "11575za",
     "ru": "11575za",
-    "zh-CN": "11575za"
+    "zh-CN": "11575za",
+    "fa": "11575za"
   },
   "spotlight.mode.all": {
     "ar": "b80r3q",
@@ -8636,7 +8791,8 @@
     "fr": "b80r3q",
     "ja": "b80r3q",
     "ru": "b80r3q",
-    "zh-CN": "b80r3q"
+    "zh-CN": "b80r3q",
+    "fa": "b80r3q"
   },
   "spotlight.notSaved": {
     "ar": "awl5zq",
@@ -8644,7 +8800,8 @@
     "fr": "awl5zq",
     "ja": "awl5zq",
     "ru": "awl5zq",
-    "zh-CN": "awl5zq"
+    "zh-CN": "awl5zq",
+    "fa": "awl5zq"
   },
   "docScan.title": {
     "ar": "1fyfeew",
@@ -8652,7 +8809,8 @@
     "fr": "1fyfeew",
     "ja": "1fyfeew",
     "ru": "1fyfeew",
-    "zh-CN": "1fyfeew"
+    "zh-CN": "1fyfeew",
+    "fa": "1fyfeew"
   },
   "docScan.page": {
     "ar": "1x80kqe",
@@ -8660,7 +8818,8 @@
     "fr": "1x80kqe",
     "ja": "1x80kqe",
     "ru": "1x80kqe",
-    "zh-CN": "1x80kqe"
+    "zh-CN": "1x80kqe",
+    "fa": "1x80kqe"
   },
   "docScan.uncertain": {
     "ar": "hgmdat",
@@ -8668,7 +8827,8 @@
     "fr": "hgmdat",
     "ja": "hgmdat",
     "ru": "hgmdat",
-    "zh-CN": "hgmdat"
+    "zh-CN": "hgmdat",
+    "fa": "hgmdat"
   },
   "docScan.empty": {
     "ar": "1dqddr4",
@@ -8676,7 +8836,8 @@
     "fr": "1dqddr4",
     "ja": "1dqddr4",
     "ru": "1dqddr4",
-    "zh-CN": "1dqddr4"
+    "zh-CN": "1dqddr4",
+    "fa": "1dqddr4"
   },
   "docScan.source": {
     "ar": "1ltrdus",
@@ -8684,7 +8845,8 @@
     "fr": "1ltrdus",
     "ja": "1ltrdus",
     "ru": "1ltrdus",
-    "zh-CN": "1ltrdus"
+    "zh-CN": "1ltrdus",
+    "fa": "1ltrdus"
   },
   "docScan.reading": {
     "ar": "3c7g0u",
@@ -8692,7 +8854,8 @@
     "fr": "3c7g0u",
     "ja": "3c7g0u",
     "ru": "3c7g0u",
-    "zh-CN": "3c7g0u"
+    "zh-CN": "3c7g0u",
+    "fa": "3c7g0u"
   },
   "docScan.saved": {
     "ar": "pxopbc",
@@ -8700,7 +8863,8 @@
     "fr": "pxopbc",
     "ja": "pxopbc",
     "ru": "pxopbc",
-    "zh-CN": "pxopbc"
+    "zh-CN": "pxopbc",
+    "fa": "pxopbc"
   },
   "docScan.failed": {
     "ar": "2cw9fd",
@@ -8708,7 +8872,8 @@
     "fr": "2cw9fd",
     "ja": "2cw9fd",
     "ru": "2cw9fd",
-    "zh-CN": "2cw9fd"
+    "zh-CN": "2cw9fd",
+    "fa": "2cw9fd"
   },
   "vaults.title": {
     "ar": "jv8dis",
@@ -8716,7 +8881,8 @@
     "fr": "jv8dis",
     "ja": "jv8dis",
     "ru": "jv8dis",
-    "zh-CN": "jv8dis"
+    "zh-CN": "jv8dis",
+    "fa": "jv8dis"
   },
   "vaults.intro": {
     "ar": "14nkmm2",
@@ -8724,7 +8890,8 @@
     "fr": "14nkmm2",
     "ja": "14nkmm2",
     "ru": "14nkmm2",
-    "zh-CN": "14nkmm2"
+    "zh-CN": "14nkmm2",
+    "fa": "14nkmm2"
   },
   "vaults.empty": {
     "ar": "xbf3us",
@@ -8732,7 +8899,8 @@
     "fr": "xbf3us",
     "ja": "xbf3us",
     "ru": "xbf3us",
-    "zh-CN": "xbf3us"
+    "zh-CN": "xbf3us",
+    "fa": "xbf3us"
   },
   "vaults.open": {
     "ar": "1ij6jol",
@@ -8740,7 +8908,8 @@
     "fr": "1ij6jol",
     "ja": "1ij6jol",
     "ru": "1ij6jol",
-    "zh-CN": "1ij6jol"
+    "zh-CN": "1ij6jol",
+    "fa": "1ij6jol"
   },
   "vaults.notes": {
     "ar": "cl67bp",
@@ -8748,7 +8917,8 @@
     "fr": "cl67bp",
     "ja": "cl67bp",
     "ru": "cl67bp",
-    "zh-CN": "cl67bp"
+    "zh-CN": "cl67bp",
+    "fa": "cl67bp"
   },
   "vaults.plugins": {
     "ar": "15s3o1j",
@@ -8756,7 +8926,8 @@
     "fr": "15s3o1j",
     "ja": "15s3o1j",
     "ru": "15s3o1j",
-    "zh-CN": "15s3o1j"
+    "zh-CN": "15s3o1j",
+    "fa": "15s3o1j"
   },
   "vaults.sync.off": {
     "ar": "le5tlw",
@@ -8764,7 +8935,8 @@
     "fr": "le5tlw",
     "ja": "le5tlw",
     "ru": "le5tlw",
-    "zh-CN": "le5tlw"
+    "zh-CN": "le5tlw",
+    "fa": "le5tlw"
   },
   "vaults.sync.on": {
     "ar": "1j3fnt7",
@@ -8772,7 +8944,8 @@
     "fr": "1j3fnt7",
     "ja": "1j3fnt7",
     "ru": "1j3fnt7",
-    "zh-CN": "1j3fnt7"
+    "zh-CN": "1j3fnt7",
+    "fa": "1j3fnt7"
   },
   "vaults.sync.error": {
     "ar": "8i1ned",
@@ -8780,7 +8953,8 @@
     "fr": "8i1ned",
     "ja": "8i1ned",
     "ru": "8i1ned",
-    "zh-CN": "8i1ned"
+    "zh-CN": "8i1ned",
+    "fa": "8i1ned"
   },
   "vaults.failedLastOpen": {
     "ar": "q0lgno",
@@ -8788,7 +8962,8 @@
     "fr": "q0lgno",
     "ja": "q0lgno",
     "ru": "q0lgno",
-    "zh-CN": "q0lgno"
+    "zh-CN": "q0lgno",
+    "fa": "q0lgno"
   },
   "vaults.menu": {
     "ar": "1r2o9ew",
@@ -8796,7 +8971,8 @@
     "fr": "1r2o9ew",
     "ja": "1r2o9ew",
     "ru": "1r2o9ew",
-    "zh-CN": "1r2o9ew"
+    "zh-CN": "1r2o9ew",
+    "fa": "1r2o9ew"
   },
   "vaults.safeMode": {
     "ar": "1pqa4lk",
@@ -8804,7 +8980,8 @@
     "fr": "1pqa4lk",
     "ja": "1pqa4lk",
     "ru": "1pqa4lk",
-    "zh-CN": "1pqa4lk"
+    "zh-CN": "1pqa4lk",
+    "fa": "1pqa4lk"
   },
   "vaults.rename": {
     "ar": "1jhzhtf",
@@ -8812,7 +8989,8 @@
     "fr": "1jhzhtf",
     "ja": "1jhzhtf",
     "ru": "1jhzhtf",
-    "zh-CN": "1jhzhtf"
+    "zh-CN": "1jhzhtf",
+    "fa": "1jhzhtf"
   },
   "vaults.renameLabel": {
     "ar": "1cn0new",
@@ -8820,7 +8998,8 @@
     "fr": "1cn0new",
     "ja": "1cn0new",
     "ru": "1cn0new",
-    "zh-CN": "1cn0new"
+    "zh-CN": "1cn0new",
+    "fa": "1cn0new"
   },
   "vaults.save": {
     "ar": "lewgh4",
@@ -8828,7 +9007,8 @@
     "fr": "lewgh4",
     "ja": "lewgh4",
     "ru": "lewgh4",
-    "zh-CN": "lewgh4"
+    "zh-CN": "lewgh4",
+    "fa": "lewgh4"
   },
   "vaults.cancel": {
     "ar": "ew9em3",
@@ -8836,7 +9016,8 @@
     "fr": "ew9em3",
     "ja": "ew9em3",
     "ru": "ew9em3",
-    "zh-CN": "ew9em3"
+    "zh-CN": "ew9em3",
+    "fa": "ew9em3"
   },
   "vaults.renamed": {
     "ar": "1wpa093",
@@ -8844,7 +9025,8 @@
     "fr": "1wpa093",
     "ja": "1wpa093",
     "ru": "1wpa093",
-    "zh-CN": "1wpa093"
+    "zh-CN": "1wpa093",
+    "fa": "1wpa093"
   },
   "vaults.move": {
     "ar": "xbyo5o",
@@ -8852,7 +9034,8 @@
     "fr": "xbyo5o",
     "ja": "xbyo5o",
     "ru": "xbyo5o",
-    "zh-CN": "xbyo5o"
+    "zh-CN": "xbyo5o",
+    "fa": "xbyo5o"
   },
   "vaults.moveOpenFirst": {
     "ar": "1hu5uum",
@@ -8860,7 +9043,8 @@
     "fr": "1hu5uum",
     "ja": "1hu5uum",
     "ru": "1hu5uum",
-    "zh-CN": "1hu5uum"
+    "zh-CN": "1hu5uum",
+    "fa": "1hu5uum"
   },
   "vaults.moved": {
     "ar": "1mrm4jb",
@@ -8868,7 +9052,8 @@
     "fr": "1mrm4jb",
     "ja": "1mrm4jb",
     "ru": "1mrm4jb",
-    "zh-CN": "1mrm4jb"
+    "zh-CN": "1mrm4jb",
+    "fa": "1mrm4jb"
   },
   "vaults.trash": {
     "ar": "wttfza",
@@ -8876,7 +9061,8 @@
     "fr": "wttfza",
     "ja": "wttfza",
     "ru": "wttfza",
-    "zh-CN": "wttfza"
+    "zh-CN": "wttfza",
+    "fa": "wttfza"
   },
   "vaults.trashed": {
     "ar": "nwu0le",
@@ -8884,7 +9070,8 @@
     "fr": "nwu0le",
     "ja": "nwu0le",
     "ru": "nwu0le",
-    "zh-CN": "nwu0le"
+    "zh-CN": "nwu0le",
+    "fa": "nwu0le"
   },
   "vaults.trashTitle": {
     "ar": "1i3fhow",
@@ -8892,7 +9079,8 @@
     "fr": "1i3fhow",
     "ja": "1i3fhow",
     "ru": "1i3fhow",
-    "zh-CN": "1i3fhow"
+    "zh-CN": "1i3fhow",
+    "fa": "1i3fhow"
   },
   "vaults.trashIntro": {
     "ar": "vamga7",
@@ -8900,7 +9088,8 @@
     "fr": "vamga7",
     "ja": "vamga7",
     "ru": "vamga7",
-    "zh-CN": "vamga7"
+    "zh-CN": "vamga7",
+    "fa": "vamga7"
   },
   "vaults.daysLeft": {
     "ar": "m0xdrf",
@@ -8908,7 +9097,8 @@
     "fr": "m0xdrf",
     "ja": "m0xdrf",
     "ru": "m0xdrf",
-    "zh-CN": "m0xdrf"
+    "zh-CN": "m0xdrf",
+    "fa": "m0xdrf"
   },
   "vaults.restore": {
     "ar": "4fiyr5",
@@ -8916,7 +9106,8 @@
     "fr": "4fiyr5",
     "ja": "4fiyr5",
     "ru": "4fiyr5",
-    "zh-CN": "4fiyr5"
+    "zh-CN": "4fiyr5",
+    "fa": "4fiyr5"
   },
   "vaults.restored": {
     "ar": "ubtnpj",
@@ -8924,7 +9115,8 @@
     "fr": "ubtnpj",
     "ja": "ubtnpj",
     "ru": "ubtnpj",
-    "zh-CN": "ubtnpj"
+    "zh-CN": "ubtnpj",
+    "fa": "ubtnpj"
   },
   "vaults.close": {
     "ar": "1l0xxoj",
@@ -8932,7 +9124,8 @@
     "fr": "1l0xxoj",
     "ja": "1l0xxoj",
     "ru": "1l0xxoj",
-    "zh-CN": "1l0xxoj"
+    "zh-CN": "1l0xxoj",
+    "fa": "1l0xxoj"
   },
   "vaults.error.name-empty": {
     "ar": "1e44hi1",
@@ -8940,7 +9133,8 @@
     "fr": "1e44hi1",
     "ja": "1e44hi1",
     "ru": "1e44hi1",
-    "zh-CN": "1e44hi1"
+    "zh-CN": "1e44hi1",
+    "fa": "1e44hi1"
   },
   "vaults.error.name-long": {
     "ar": "1tv5ee6",
@@ -8948,7 +9142,8 @@
     "fr": "1tv5ee6",
     "ja": "1tv5ee6",
     "ru": "1tv5ee6",
-    "zh-CN": "1tv5ee6"
+    "zh-CN": "1tv5ee6",
+    "fa": "1tv5ee6"
   },
   "vaults.error.name-chars": {
     "ar": "w7q606",
@@ -8956,7 +9151,8 @@
     "fr": "w7q606",
     "ja": "w7q606",
     "ru": "w7q606",
-    "zh-CN": "w7q606"
+    "zh-CN": "w7q606",
+    "fa": "w7q606"
   },
   "vaults.error.name-taken": {
     "ar": "1v268vr",
@@ -8964,7 +9160,8 @@
     "fr": "1v268vr",
     "ja": "1v268vr",
     "ru": "1v268vr",
-    "zh-CN": "1v268vr"
+    "zh-CN": "1v268vr",
+    "fa": "1v268vr"
   },
   "vaults.error.not-found": {
     "ar": "fwbt97",
@@ -8972,7 +9169,8 @@
     "fr": "fwbt97",
     "ja": "fwbt97",
     "ru": "fwbt97",
-    "zh-CN": "fwbt97"
+    "zh-CN": "fwbt97",
+    "fa": "fwbt97"
   },
   "vaults.error.is-open": {
     "ar": "1bxov3a",
@@ -8980,7 +9178,8 @@
     "fr": "1bxov3a",
     "ja": "1bxov3a",
     "ru": "1bxov3a",
-    "zh-CN": "1bxov3a"
+    "zh-CN": "1bxov3a",
+    "fa": "1bxov3a"
   },
   "vaults.where.browser": {
     "ar": "c3cs0i",
@@ -8988,7 +9187,8 @@
     "fr": "c3cs0i",
     "ja": "c3cs0i",
     "ru": "c3cs0i",
-    "zh-CN": "c3cs0i"
+    "zh-CN": "c3cs0i",
+    "fa": "c3cs0i"
   },
   "vaults.where.files": {
     "ar": "1o116lo",
@@ -8996,7 +9196,8 @@
     "fr": "1o116lo",
     "ja": "1o116lo",
     "ru": "1o116lo",
-    "zh-CN": "1o116lo"
+    "zh-CN": "1o116lo",
+    "fa": "1o116lo"
   },
   "vaults.where.device": {
     "ar": "1n4zbh6",
@@ -9004,7 +9205,8 @@
     "fr": "1n4zbh6",
     "ja": "1n4zbh6",
     "ru": "1n4zbh6",
-    "zh-CN": "1n4zbh6"
+    "zh-CN": "1n4zbh6",
+    "fa": "1n4zbh6"
   },
   "vaults.where.thisDevice": {
     "ar": "1lu1ipf",
@@ -9012,7 +9214,8 @@
     "fr": "1lu1ipf",
     "ja": "1lu1ipf",
     "ru": "1lu1ipf",
-    "zh-CN": "1lu1ipf"
+    "zh-CN": "1lu1ipf",
+    "fa": "1lu1ipf"
   },
   "vaults.where.folder": {
     "ar": "15ukavi",
@@ -9020,7 +9223,8 @@
     "fr": "15ukavi",
     "ja": "15ukavi",
     "ru": "15ukavi",
-    "zh-CN": "15ukavi"
+    "zh-CN": "15ukavi",
+    "fa": "15ukavi"
   },
   "graphAlt.kind.concept": {
     "ar": "fo5mtu",
@@ -9721,7 +9925,8 @@
     "fr": "8gy32m",
     "ja": "8gy32m",
     "ru": "8gy32m",
-    "zh-CN": "8gy32m"
+    "zh-CN": "8gy32m",
+    "fa": "8gy32m"
   },
   "appLock.checking": {
     "ar": "vyewnp",
@@ -9729,7 +9934,8 @@
     "fr": "vyewnp",
     "ja": "vyewnp",
     "ru": "vyewnp",
-    "zh-CN": "vyewnp"
+    "zh-CN": "vyewnp",
+    "fa": "vyewnp"
   },
   "appLock.failed": {
     "ar": "vnv4ak",
@@ -9737,7 +9943,8 @@
     "fr": "vnv4ak",
     "ja": "vnv4ak",
     "ru": "vnv4ak",
-    "zh-CN": "vnv4ak"
+    "zh-CN": "vnv4ak",
+    "fa": "vnv4ak"
   },
   "appLock.failedMany": {
     "ar": "1pdevtf",
@@ -9745,7 +9952,8 @@
     "fr": "1pdevtf",
     "ja": "1pdevtf",
     "ru": "1pdevtf",
-    "zh-CN": "1pdevtf"
+    "zh-CN": "1pdevtf",
+    "fa": "1pdevtf"
   },
   "appLock.title": {
     "ar": "1ap3poo",
@@ -9753,7 +9961,8 @@
     "fr": "1ap3poo",
     "ja": "1ap3poo",
     "ru": "1ap3poo",
-    "zh-CN": "1ap3poo"
+    "zh-CN": "1ap3poo",
+    "fa": "1ap3poo"
   },
   "appLock.unlock": {
     "ar": "17ezgqd",
@@ -9761,7 +9970,8 @@
     "fr": "17ezgqd",
     "ja": "17ezgqd",
     "ru": "17ezgqd",
-    "zh-CN": "17ezgqd"
+    "zh-CN": "17ezgqd",
+    "fa": "17ezgqd"
   },
   "localData.title": {
     "ar": "1fb2803",
@@ -9769,7 +9979,8 @@
     "fr": "1fb2803",
     "ja": "1fb2803",
     "ru": "1fb2803",
-    "zh-CN": "1fb2803"
+    "zh-CN": "1fb2803",
+    "fa": "1fb2803"
   },
   "localData.total": {
     "ar": "1qjdj1",
@@ -9777,7 +9988,8 @@
     "fr": "1qjdj1",
     "ja": "1qjdj1",
     "ru": "1qjdj1",
-    "zh-CN": "1qjdj1"
+    "zh-CN": "1qjdj1",
+    "fa": "1qjdj1"
   },
   "localData.loading": {
     "ar": "2cvtae",
@@ -9785,7 +9997,8 @@
     "fr": "2cvtae",
     "ja": "2cvtae",
     "ru": "2cvtae",
-    "zh-CN": "2cvtae"
+    "zh-CN": "2cvtae",
+    "fa": "2cvtae"
   },
   "localData.unknown": {
     "ar": "1n2tcpi",
@@ -9793,7 +10006,8 @@
     "fr": "1n2tcpi",
     "ja": "1n2tcpi",
     "ru": "1n2tcpi",
-    "zh-CN": "1n2tcpi"
+    "zh-CN": "1n2tcpi",
+    "fa": "1n2tcpi"
   },
   "localData.kb": {
     "ar": "1qsq80c",
@@ -9801,7 +10015,8 @@
     "fr": "1qsq80c",
     "ja": "1qsq80c",
     "ru": "1qsq80c",
-    "zh-CN": "1qsq80c"
+    "zh-CN": "1qsq80c",
+    "fa": "1qsq80c"
   },
   "localData.mb": {
     "ar": "dywoiy",
@@ -9809,7 +10024,8 @@
     "fr": "dywoiy",
     "ja": "dywoiy",
     "ru": "dywoiy",
-    "zh-CN": "dywoiy"
+    "zh-CN": "dywoiy",
+    "fa": "dywoiy"
   },
   "localData.empty": {
     "ar": "mvz8ui",
@@ -9817,7 +10033,8 @@
     "fr": "mvz8ui",
     "ja": "mvz8ui",
     "ru": "mvz8ui",
-    "zh-CN": "mvz8ui"
+    "zh-CN": "mvz8ui",
+    "fa": "mvz8ui"
   },
   "localData.cat.notes": {
     "ar": "nkvwwx",
@@ -9825,7 +10042,8 @@
     "fr": "nkvwwx",
     "ja": "nkvwwx",
     "ru": "nkvwwx",
-    "zh-CN": "nkvwwx"
+    "zh-CN": "nkvwwx",
+    "fa": "nkvwwx"
   },
   "localData.cat.history": {
     "ar": "1dzbo4v",
@@ -9833,7 +10051,8 @@
     "fr": "1dzbo4v",
     "ja": "1dzbo4v",
     "ru": "1dzbo4v",
-    "zh-CN": "1dzbo4v"
+    "zh-CN": "1dzbo4v",
+    "fa": "1dzbo4v"
   },
   "localData.cat.models": {
     "ar": "p68pnn",
@@ -9841,7 +10060,8 @@
     "fr": "p68pnn",
     "ja": "p68pnn",
     "ru": "p68pnn",
-    "zh-CN": "p68pnn"
+    "zh-CN": "p68pnn",
+    "fa": "p68pnn"
   },
   "localData.cat.caches": {
     "ar": "izmopg",
@@ -9849,7 +10069,8 @@
     "fr": "izmopg",
     "ja": "izmopg",
     "ru": "izmopg",
-    "zh-CN": "izmopg"
+    "zh-CN": "izmopg",
+    "fa": "izmopg"
   },
   "localData.cat.keyring": {
     "ar": "18ayclp",
@@ -9857,7 +10078,8 @@
     "fr": "18ayclp",
     "ja": "18ayclp",
     "ru": "18ayclp",
-    "zh-CN": "18ayclp"
+    "zh-CN": "18ayclp",
+    "fa": "18ayclp"
   },
   "localData.cat.settings": {
     "ar": "ktdb8o",
@@ -9865,7 +10087,8 @@
     "fr": "ktdb8o",
     "ja": "ktdb8o",
     "ru": "ktdb8o",
-    "zh-CN": "ktdb8o"
+    "zh-CN": "ktdb8o",
+    "fa": "ktdb8o"
   },
   "localData.about.notes": {
     "ar": "mn5fcx",
@@ -9873,7 +10096,8 @@
     "fr": "mn5fcx",
     "ja": "mn5fcx",
     "ru": "mn5fcx",
-    "zh-CN": "mn5fcx"
+    "zh-CN": "mn5fcx",
+    "fa": "mn5fcx"
   },
   "localData.about.history": {
     "ar": "11tvxhh",
@@ -9881,7 +10105,8 @@
     "fr": "11tvxhh",
     "ja": "11tvxhh",
     "ru": "11tvxhh",
-    "zh-CN": "11tvxhh"
+    "zh-CN": "11tvxhh",
+    "fa": "11tvxhh"
   },
   "localData.about.models": {
     "ar": "mno3v9",
@@ -9889,7 +10114,8 @@
     "fr": "mno3v9",
     "ja": "mno3v9",
     "ru": "mno3v9",
-    "zh-CN": "mno3v9"
+    "zh-CN": "mno3v9",
+    "fa": "mno3v9"
   },
   "localData.about.caches": {
     "ar": "od4w20",
@@ -9897,7 +10123,8 @@
     "fr": "od4w20",
     "ja": "od4w20",
     "ru": "od4w20",
-    "zh-CN": "od4w20"
+    "zh-CN": "od4w20",
+    "fa": "od4w20"
   },
   "localData.about.keyring": {
     "ar": "96ta1k",
@@ -9905,7 +10132,8 @@
     "fr": "96ta1k",
     "ja": "96ta1k",
     "ru": "96ta1k",
-    "zh-CN": "96ta1k"
+    "zh-CN": "96ta1k",
+    "fa": "96ta1k"
   },
   "localData.about.settings": {
     "ar": "17m3tdw",
@@ -9913,7 +10141,8 @@
     "fr": "17m3tdw",
     "ja": "17m3tdw",
     "ru": "17m3tdw",
-    "zh-CN": "17m3tdw"
+    "zh-CN": "17m3tdw",
+    "fa": "17m3tdw"
   },
   "localData.delete": {
     "ar": "oay2cq",
@@ -9921,7 +10150,8 @@
     "fr": "oay2cq",
     "ja": "oay2cq",
     "ru": "oay2cq",
-    "zh-CN": "oay2cq"
+    "zh-CN": "oay2cq",
+    "fa": "oay2cq"
   },
   "localData.deleteWhat": {
     "ar": "piikiq",
@@ -9929,7 +10159,8 @@
     "fr": "piikiq",
     "ja": "piikiq",
     "ru": "piikiq",
-    "zh-CN": "piikiq"
+    "zh-CN": "piikiq",
+    "fa": "piikiq"
   },
   "localData.deleteAll": {
     "ar": "ovrh3r",
@@ -9937,7 +10168,8 @@
     "fr": "ovrh3r",
     "ja": "ovrh3r",
     "ru": "ovrh3r",
-    "zh-CN": "ovrh3r"
+    "zh-CN": "ovrh3r",
+    "fa": "ovrh3r"
   },
   "localData.export": {
     "ar": "1dapwf8",
@@ -9945,7 +10177,8 @@
     "fr": "1dapwf8",
     "ja": "1dapwf8",
     "ru": "1dapwf8",
-    "zh-CN": "1dapwf8"
+    "zh-CN": "1dapwf8",
+    "fa": "1dapwf8"
   },
   "localData.close": {
     "ar": "1l0xxoj",
@@ -9953,7 +10186,8 @@
     "fr": "1l0xxoj",
     "ja": "1l0xxoj",
     "ru": "1l0xxoj",
-    "zh-CN": "1l0xxoj"
+    "zh-CN": "1l0xxoj",
+    "fa": "1l0xxoj"
   },
   "localData.confirmTitle": {
     "ar": "9tnawx",
@@ -9961,7 +10195,8 @@
     "fr": "9tnawx",
     "ja": "9tnawx",
     "ru": "9tnawx",
-    "zh-CN": "9tnawx"
+    "zh-CN": "9tnawx",
+    "fa": "9tnawx"
   },
   "localData.confirm": {
     "ar": "1veacwd",
@@ -9969,7 +10204,8 @@
     "fr": "1veacwd",
     "ja": "1veacwd",
     "ru": "1veacwd",
-    "zh-CN": "1veacwd"
+    "zh-CN": "1veacwd",
+    "fa": "1veacwd"
   },
   "localData.confirmKeyring": {
     "ar": "1mcckgk",
@@ -9977,7 +10213,8 @@
     "fr": "1mcckgk",
     "ja": "1mcckgk",
     "ru": "1mcckgk",
-    "zh-CN": "1mcckgk"
+    "zh-CN": "1mcckgk",
+    "fa": "1mcckgk"
   },
   "localData.confirmAll": {
     "ar": "18dg8bt",
@@ -9985,7 +10222,8 @@
     "fr": "18dg8bt",
     "ja": "18dg8bt",
     "ru": "18dg8bt",
-    "zh-CN": "18dg8bt"
+    "zh-CN": "18dg8bt",
+    "fa": "18dg8bt"
   },
   "localData.deleted": {
     "ar": "1dgmi12",
@@ -9993,7 +10231,8 @@
     "fr": "1dgmi12",
     "ja": "1dgmi12",
     "ru": "1dgmi12",
-    "zh-CN": "1dgmi12"
+    "zh-CN": "1dgmi12",
+    "fa": "1dgmi12"
   },
   "nativeMenu.app": {
     "ar": "1o4q8ca",
@@ -10001,7 +10240,8 @@
     "fr": "1o4q8ca",
     "ja": "1o4q8ca",
     "ru": "1o4q8ca",
-    "zh-CN": "1o4q8ca"
+    "zh-CN": "1o4q8ca",
+    "fa": "1o4q8ca"
   },
   "nativeMenu.file": {
     "ar": "bygjtv",
@@ -10009,7 +10249,8 @@
     "fr": "bygjtv",
     "ja": "bygjtv",
     "ru": "bygjtv",
-    "zh-CN": "bygjtv"
+    "zh-CN": "bygjtv",
+    "fa": "bygjtv"
   },
   "nativeMenu.edit": {
     "ar": "1i1lcq9",
@@ -10017,7 +10258,8 @@
     "fr": "1i1lcq9",
     "ja": "1i1lcq9",
     "ru": "1i1lcq9",
-    "zh-CN": "1i1lcq9"
+    "zh-CN": "1i1lcq9",
+    "fa": "1i1lcq9"
   },
   "nativeMenu.view": {
     "ar": "q5w460",
@@ -10025,7 +10267,8 @@
     "fr": "q5w460",
     "ja": "q5w460",
     "ru": "q5w460",
-    "zh-CN": "q5w460"
+    "zh-CN": "q5w460",
+    "fa": "q5w460"
   },
   "nativeMenu.window": {
     "ar": "1s8mpdp",
@@ -10033,7 +10276,8 @@
     "fr": "1s8mpdp",
     "ja": "1s8mpdp",
     "ru": "1s8mpdp",
-    "zh-CN": "1s8mpdp"
+    "zh-CN": "1s8mpdp",
+    "fa": "1s8mpdp"
   },
   "nativeMenu.help": {
     "ar": "1f8350a",
@@ -10041,7 +10285,8 @@
     "fr": "1f8350a",
     "ja": "1f8350a",
     "ru": "1f8350a",
-    "zh-CN": "1f8350a"
+    "zh-CN": "1f8350a",
+    "fa": "1f8350a"
   },
   "nativeMenu.role.about": {
     "ar": "bervp7",
@@ -10049,7 +10294,8 @@
     "fr": "bervp7",
     "ja": "bervp7",
     "ru": "bervp7",
-    "zh-CN": "bervp7"
+    "zh-CN": "bervp7",
+    "fa": "bervp7"
   },
   "nativeMenu.role.services": {
     "ar": "rnv8lx",
@@ -10057,7 +10303,8 @@
     "fr": "rnv8lx",
     "ja": "rnv8lx",
     "ru": "rnv8lx",
-    "zh-CN": "rnv8lx"
+    "zh-CN": "rnv8lx",
+    "fa": "rnv8lx"
   },
   "nativeMenu.role.hide": {
     "ar": "1q79kyc",
@@ -10065,7 +10312,8 @@
     "fr": "1q79kyc",
     "ja": "1q79kyc",
     "ru": "1q79kyc",
-    "zh-CN": "1q79kyc"
+    "zh-CN": "1q79kyc",
+    "fa": "1q79kyc"
   },
   "nativeMenu.role.hideOthers": {
     "ar": "1dd51w0",
@@ -10073,7 +10321,8 @@
     "fr": "1dd51w0",
     "ja": "1dd51w0",
     "ru": "1dd51w0",
-    "zh-CN": "1dd51w0"
+    "zh-CN": "1dd51w0",
+    "fa": "1dd51w0"
   },
   "nativeMenu.role.showAll": {
     "ar": "190ilu7",
@@ -10081,7 +10330,8 @@
     "fr": "190ilu7",
     "ja": "190ilu7",
     "ru": "190ilu7",
-    "zh-CN": "190ilu7"
+    "zh-CN": "190ilu7",
+    "fa": "190ilu7"
   },
   "nativeMenu.role.quit": {
     "ar": "dciiir",
@@ -10089,7 +10339,8 @@
     "fr": "dciiir",
     "ja": "dciiir",
     "ru": "dciiir",
-    "zh-CN": "dciiir"
+    "zh-CN": "dciiir",
+    "fa": "dciiir"
   },
   "nativeMenu.role.undo": {
     "ar": "vmlwpb",
@@ -10097,7 +10348,8 @@
     "fr": "vmlwpb",
     "ja": "vmlwpb",
     "ru": "vmlwpb",
-    "zh-CN": "vmlwpb"
+    "zh-CN": "vmlwpb",
+    "fa": "vmlwpb"
   },
   "nativeMenu.role.redo": {
     "ar": "w7fg15",
@@ -10105,7 +10357,8 @@
     "fr": "w7fg15",
     "ja": "w7fg15",
     "ru": "w7fg15",
-    "zh-CN": "w7fg15"
+    "zh-CN": "w7fg15",
+    "fa": "w7fg15"
   },
   "nativeMenu.role.cut": {
     "ar": "onu7hf",
@@ -10113,7 +10366,8 @@
     "fr": "onu7hf",
     "ja": "onu7hf",
     "ru": "onu7hf",
-    "zh-CN": "onu7hf"
+    "zh-CN": "onu7hf",
+    "fa": "onu7hf"
   },
   "nativeMenu.role.copy": {
     "ar": "s6g5lw",
@@ -10121,7 +10375,8 @@
     "fr": "s6g5lw",
     "ja": "s6g5lw",
     "ru": "s6g5lw",
-    "zh-CN": "s6g5lw"
+    "zh-CN": "s6g5lw",
+    "fa": "s6g5lw"
   },
   "nativeMenu.role.paste": {
     "ar": "1dqva14",
@@ -10129,7 +10384,8 @@
     "fr": "1dqva14",
     "ja": "1dqva14",
     "ru": "1dqva14",
-    "zh-CN": "1dqva14"
+    "zh-CN": "1dqva14",
+    "fa": "1dqva14"
   },
   "nativeMenu.role.selectAll": {
     "ar": "1l0m2oi",
@@ -10137,7 +10393,8 @@
     "fr": "1l0m2oi",
     "ja": "1l0m2oi",
     "ru": "1l0m2oi",
-    "zh-CN": "1l0m2oi"
+    "zh-CN": "1l0m2oi",
+    "fa": "1l0m2oi"
   },
   "nativeMenu.role.minimize": {
     "ar": "1uva1ct",
@@ -10145,7 +10402,8 @@
     "fr": "1uva1ct",
     "ja": "1uva1ct",
     "ru": "1uva1ct",
-    "zh-CN": "1uva1ct"
+    "zh-CN": "1uva1ct",
+    "fa": "1uva1ct"
   },
   "nativeMenu.role.zoom": {
     "ar": "r953rm",
@@ -10153,7 +10411,8 @@
     "fr": "r953rm",
     "ja": "r953rm",
     "ru": "r953rm",
-    "zh-CN": "r953rm"
+    "zh-CN": "r953rm",
+    "fa": "r953rm"
   },
   "nativeMenu.role.fullscreen": {
     "ar": "cxbrdm",
@@ -10161,7 +10420,8 @@
     "fr": "cxbrdm",
     "ja": "cxbrdm",
     "ru": "cxbrdm",
-    "zh-CN": "cxbrdm"
+    "zh-CN": "cxbrdm",
+    "fa": "cxbrdm"
   },
   "nativeMenu.role.closeWindow": {
     "ar": "1jos4bt",
@@ -10169,7 +10429,8 @@
     "fr": "1jos4bt",
     "ja": "1jos4bt",
     "ru": "1jos4bt",
-    "zh-CN": "1jos4bt"
+    "zh-CN": "1jos4bt",
+    "fa": "1jos4bt"
   },
   "nativeMenu.cmd.app.checkUpdates": {
     "ar": "12h7gqo",
@@ -10177,7 +10438,8 @@
     "fr": "12h7gqo",
     "ja": "12h7gqo",
     "ru": "12h7gqo",
-    "zh-CN": "12h7gqo"
+    "zh-CN": "12h7gqo",
+    "fa": "12h7gqo"
   },
   "nativeMenu.cmd.file.new": {
     "ar": "1x0essj",
@@ -10185,7 +10447,8 @@
     "fr": "1x0essj",
     "ja": "1x0essj",
     "ru": "1x0essj",
-    "zh-CN": "1x0essj"
+    "zh-CN": "1x0essj",
+    "fa": "1x0essj"
   },
   "nativeMenu.cmd.note.today": {
     "ar": "1gqfglg",
@@ -10193,7 +10456,8 @@
     "fr": "1gqfglg",
     "ja": "1gqfglg",
     "ru": "1gqfglg",
-    "zh-CN": "1gqfglg"
+    "zh-CN": "1gqfglg",
+    "fa": "1gqfglg"
   },
   "nativeMenu.cmd.file.open": {
     "ar": "n287h9",
@@ -10201,7 +10465,8 @@
     "fr": "n287h9",
     "ja": "n287h9",
     "ru": "n287h9",
-    "zh-CN": "n287h9"
+    "zh-CN": "n287h9",
+    "fa": "n287h9"
   },
   "nativeMenu.cmd.file.save": {
     "ar": "lewgh4",
@@ -10209,7 +10474,8 @@
     "fr": "lewgh4",
     "ja": "lewgh4",
     "ru": "lewgh4",
-    "zh-CN": "lewgh4"
+    "zh-CN": "lewgh4",
+    "fa": "lewgh4"
   },
   "nativeMenu.cmd.file.saveAs": {
     "ar": "1beuu7u",
@@ -10217,7 +10483,8 @@
     "fr": "1beuu7u",
     "ja": "1beuu7u",
     "ru": "1beuu7u",
-    "zh-CN": "1beuu7u"
+    "zh-CN": "1beuu7u",
+    "fa": "1beuu7u"
   },
   "nativeMenu.cmd.file.exportPdf": {
     "ar": "nskpwf",
@@ -10225,7 +10492,8 @@
     "fr": "nskpwf",
     "ja": "nskpwf",
     "ru": "nskpwf",
-    "zh-CN": "nskpwf"
+    "zh-CN": "nskpwf",
+    "fa": "nskpwf"
   },
   "nativeMenu.cmd.file.exportHtml": {
     "ar": "3jf5x4",
@@ -10233,7 +10501,8 @@
     "fr": "3jf5x4",
     "ja": "3jf5x4",
     "ru": "3jf5x4",
-    "zh-CN": "3jf5x4"
+    "zh-CN": "3jf5x4",
+    "fa": "3jf5x4"
   },
   "nativeMenu.cmd.file.exportDocx": {
     "ar": "m8aj3v",
@@ -10241,7 +10510,8 @@
     "fr": "m8aj3v",
     "ja": "m8aj3v",
     "ru": "m8aj3v",
-    "zh-CN": "m8aj3v"
+    "zh-CN": "m8aj3v",
+    "fa": "m8aj3v"
   },
   "nativeMenu.cmd.file.print": {
     "ar": "15c76kq",
@@ -10249,7 +10519,8 @@
     "fr": "15c76kq",
     "ja": "15c76kq",
     "ru": "15c76kq",
-    "zh-CN": "15c76kq"
+    "zh-CN": "15c76kq",
+    "fa": "15c76kq"
   },
   "nativeMenu.cmd.edit.toggleDirection": {
     "ar": "akkdci",
@@ -10257,7 +10528,8 @@
     "fr": "akkdci",
     "ja": "akkdci",
     "ru": "akkdci",
-    "zh-CN": "akkdci"
+    "zh-CN": "akkdci",
+    "fa": "akkdci"
   },
   "nativeMenu.cmd.edit.hebrewTypography": {
     "ar": "3aklaj",
@@ -10265,7 +10537,8 @@
     "fr": "3aklaj",
     "ja": "3aklaj",
     "ru": "3aklaj",
-    "zh-CN": "3aklaj"
+    "zh-CN": "3aklaj",
+    "fa": "3aklaj"
   },
   "nativeMenu.cmd.view.source": {
     "ar": "r5qyuw",
@@ -10273,7 +10546,8 @@
     "fr": "r5qyuw",
     "ja": "r5qyuw",
     "ru": "r5qyuw",
-    "zh-CN": "r5qyuw"
+    "zh-CN": "r5qyuw",
+    "fa": "r5qyuw"
   },
   "nativeMenu.cmd.view.preview": {
     "ar": "1yfnwtz",
@@ -10281,7 +10555,8 @@
     "fr": "1yfnwtz",
     "ja": "1yfnwtz",
     "ru": "1yfnwtz",
-    "zh-CN": "1yfnwtz"
+    "zh-CN": "1yfnwtz",
+    "fa": "1yfnwtz"
   },
   "nativeMenu.cmd.view.wysiwyg": {
     "ar": "1f6ny",
@@ -10289,7 +10564,8 @@
     "fr": "1f6ny",
     "ja": "1f6ny",
     "ru": "1f6ny",
-    "zh-CN": "1f6ny"
+    "zh-CN": "1f6ny",
+    "fa": "1f6ny"
   },
   "nativeMenu.cmd.view.split": {
     "ar": "6a1ocj",
@@ -10297,7 +10573,8 @@
     "fr": "6a1ocj",
     "ja": "6a1ocj",
     "ru": "6a1ocj",
-    "zh-CN": "6a1ocj"
+    "zh-CN": "6a1ocj",
+    "fa": "6a1ocj"
   },
   "nativeMenu.cmd.view.sideBySide": {
     "ar": "1udh7qq",
@@ -10305,7 +10582,8 @@
     "fr": "1udh7qq",
     "ja": "1udh7qq",
     "ru": "1udh7qq",
-    "zh-CN": "1udh7qq"
+    "zh-CN": "1udh7qq",
+    "fa": "1udh7qq"
   },
   "nativeMenu.cmd.view.reading": {
     "ar": "1havj1a",
@@ -10313,7 +10591,8 @@
     "fr": "1havj1a",
     "ja": "1havj1a",
     "ru": "1havj1a",
-    "zh-CN": "1havj1a"
+    "zh-CN": "1havj1a",
+    "fa": "1havj1a"
   },
   "nativeMenu.cmd.view.readingOptions": {
     "ar": "1hskq5p",
@@ -10321,7 +10600,8 @@
     "fr": "1hskq5p",
     "ja": "1hskq5p",
     "ru": "1hskq5p",
-    "zh-CN": "1hskq5p"
+    "zh-CN": "1hskq5p",
+    "fa": "1hskq5p"
   },
   "nativeMenu.cmd.view.backlinks": {
     "ar": "1mppi0b",
@@ -10329,7 +10609,8 @@
     "fr": "1mppi0b",
     "ja": "1mppi0b",
     "ru": "1mppi0b",
-    "zh-CN": "1mppi0b"
+    "zh-CN": "1mppi0b",
+    "fa": "1mppi0b"
   },
   "nativeMenu.cmd.view.graphView": {
     "ar": "qexq07",
@@ -10337,7 +10618,8 @@
     "fr": "qexq07",
     "ja": "qexq07",
     "ru": "qexq07",
-    "zh-CN": "qexq07"
+    "zh-CN": "qexq07",
+    "fa": "qexq07"
   },
   "nativeMenu.cmd.view.typewriter": {
     "ar": "1h9kvsx",
@@ -10345,7 +10627,8 @@
     "fr": "1h9kvsx",
     "ja": "1h9kvsx",
     "ru": "1h9kvsx",
-    "zh-CN": "1h9kvsx"
+    "zh-CN": "1h9kvsx",
+    "fa": "1h9kvsx"
   },
   "nativeMenu.cmd.help.open": {
     "ar": "7sbuc1",
@@ -10353,7 +10636,8 @@
     "fr": "7sbuc1",
     "ja": "7sbuc1",
     "ru": "7sbuc1",
-    "zh-CN": "7sbuc1"
+    "zh-CN": "7sbuc1",
+    "fa": "7sbuc1"
   },
   "nativeMenu.cmd.help.whatsNew": {
     "ar": "1a7uheb",
@@ -10361,7 +10645,8 @@
     "fr": "1a7uheb",
     "ja": "1a7uheb",
     "ru": "1a7uheb",
-    "zh-CN": "1a7uheb"
+    "zh-CN": "1a7uheb",
+    "fa": "1a7uheb"
   },
   "nativeMenu.cmd.help.feedback": {
     "ar": "zr1fic",
@@ -10369,7 +10654,8 @@
     "fr": "zr1fic",
     "ja": "zr1fic",
     "ru": "zr1fic",
-    "zh-CN": "zr1fic"
+    "zh-CN": "zr1fic",
+    "fa": "zr1fic"
   },
   "nativeMenu.cmd.help.diagnostics": {
     "ar": "10ud9k3",
@@ -10377,7 +10663,8 @@
     "fr": "10ud9k3",
     "ja": "10ud9k3",
     "ru": "10ud9k3",
-    "zh-CN": "10ud9k3"
+    "zh-CN": "10ud9k3",
+    "fa": "10ud9k3"
   },
   "nativeMenu.cmd.window.new": {
     "ar": "1uhnl5n",
@@ -10385,7 +10672,8 @@
     "fr": "1uhnl5n",
     "ja": "1uhnl5n",
     "ru": "1uhnl5n",
-    "zh-CN": "1uhnl5n"
+    "zh-CN": "1uhnl5n",
+    "fa": "1uhnl5n"
   },
   "nativeMenu.cmd.file.insertText": {
     "ar": "1ro7u6z",
@@ -10393,7 +10681,8 @@
     "fr": "1ro7u6z",
     "ja": "1ro7u6z",
     "ru": "1ro7u6z",
-    "zh-CN": "1ro7u6z"
+    "zh-CN": "1ro7u6z",
+    "fa": "1ro7u6z"
   },
   "nativeMenu.cmd.file.quickCapture": {
     "ar": "zapknk",
@@ -10401,7 +10690,8 @@
     "fr": "zapknk",
     "ja": "zapknk",
     "ru": "zapknk",
-    "zh-CN": "zapknk"
+    "zh-CN": "zapknk",
+    "fa": "zapknk"
   },
   "nativeMenu.cmd.file.toggleWorkspace": {
     "ar": "hsrhvh",
@@ -10409,7 +10699,8 @@
     "fr": "hsrhvh",
     "ja": "hsrhvh",
     "ru": "hsrhvh",
-    "zh-CN": "hsrhvh"
+    "zh-CN": "hsrhvh",
+    "fa": "hsrhvh"
   },
   "nativeMenu.cmd.edit.find": {
     "ar": "paoevn",
@@ -10417,7 +10708,8 @@
     "fr": "paoevn",
     "ja": "paoevn",
     "ru": "paoevn",
-    "zh-CN": "paoevn"
+    "zh-CN": "paoevn",
+    "fa": "paoevn"
   },
   "nativeMenu.cmd.edit.workspaceSearch": {
     "ar": "836lyu",
@@ -10425,7 +10717,8 @@
     "fr": "836lyu",
     "ja": "836lyu",
     "ru": "836lyu",
-    "zh-CN": "836lyu"
+    "zh-CN": "836lyu",
+    "fa": "836lyu"
   },
   "nativeMenu.cmd.view.toggleOutline": {
     "ar": "4l1jz1",
@@ -10433,7 +10726,8 @@
     "fr": "4l1jz1",
     "ja": "4l1jz1",
     "ru": "4l1jz1",
-    "zh-CN": "4l1jz1"
+    "zh-CN": "4l1jz1",
+    "fa": "4l1jz1"
   },
   "nativeMenu.cmd.view.focusMode": {
     "ar": "lvmzmu",
@@ -10441,7 +10735,8 @@
     "fr": "lvmzmu",
     "ja": "lvmzmu",
     "ru": "lvmzmu",
-    "zh-CN": "lvmzmu"
+    "zh-CN": "lvmzmu",
+    "fa": "lvmzmu"
   },
   "nativeMenu.cmd.view.toggleTheme": {
     "ar": "d6cq19",
@@ -10449,7 +10744,8 @@
     "fr": "d6cq19",
     "ja": "d6cq19",
     "ru": "d6cq19",
-    "zh-CN": "d6cq19"
+    "zh-CN": "d6cq19",
+    "fa": "d6cq19"
   },
   "nativeMenu.cmd.help.commandPalette": {
     "ar": "pn013p",
@@ -10457,7 +10753,8 @@
     "fr": "pn013p",
     "ja": "pn013p",
     "ru": "pn013p",
-    "zh-CN": "pn013p"
+    "zh-CN": "pn013p",
+    "fa": "pn013p"
   },
   "nativeMenu.cmd.help.shortcuts": {
     "ar": "1fp3al3",
@@ -10465,7 +10762,8 @@
     "fr": "1fp3al3",
     "ja": "1fp3al3",
     "ru": "1fp3al3",
-    "zh-CN": "1fp3al3"
+    "zh-CN": "1fp3al3",
+    "fa": "1fp3al3"
   },
   "nativeMenu.cmd.help.tour": {
     "ar": "1bmspzp",
@@ -10473,7 +10771,8 @@
     "fr": "1bmspzp",
     "ja": "1bmspzp",
     "ru": "1bmspzp",
-    "zh-CN": "1bmspzp"
+    "zh-CN": "1bmspzp",
+    "fa": "1bmspzp"
   },
   "nativeMenu.cmd.help.github": {
     "ar": "o696fm",
@@ -10481,7 +10780,8 @@
     "fr": "o696fm",
     "ja": "o696fm",
     "ru": "o696fm",
-    "zh-CN": "o696fm"
+    "zh-CN": "o696fm",
+    "fa": "o696fm"
   },
   "serverTasks.title": {
     "ar": "1auefzq",
@@ -10489,7 +10789,8 @@
     "fr": "1auefzq",
     "ja": "1auefzq",
     "ru": "1auefzq",
-    "zh-CN": "1auefzq"
+    "zh-CN": "1auefzq",
+    "fa": "1auefzq"
   },
   "serverTasks.status.working": {
     "ar": "1pyssg8",
@@ -10497,7 +10798,8 @@
     "fr": "1pyssg8",
     "ja": "1pyssg8",
     "ru": "1pyssg8",
-    "zh-CN": "1pyssg8"
+    "zh-CN": "1pyssg8",
+    "fa": "1pyssg8"
   },
   "serverTasks.status.input_required": {
     "ar": "qbvh2g",
@@ -10505,7 +10807,8 @@
     "fr": "qbvh2g",
     "ja": "qbvh2g",
     "ru": "qbvh2g",
-    "zh-CN": "qbvh2g"
+    "zh-CN": "qbvh2g",
+    "fa": "qbvh2g"
   },
   "serverTasks.status.completed": {
     "ar": "13cn9g1",
@@ -10513,7 +10816,8 @@
     "fr": "13cn9g1",
     "ja": "13cn9g1",
     "ru": "13cn9g1",
-    "zh-CN": "13cn9g1"
+    "zh-CN": "13cn9g1",
+    "fa": "13cn9g1"
   },
   "serverTasks.status.failed": {
     "ar": "npsixg",
@@ -10521,7 +10825,8 @@
     "fr": "npsixg",
     "ja": "npsixg",
     "ru": "npsixg",
-    "zh-CN": "npsixg"
+    "zh-CN": "npsixg",
+    "fa": "npsixg"
   },
   "serverTasks.status.cancelled": {
     "ar": "1a3t1vg",
@@ -10529,7 +10834,8 @@
     "fr": "1a3t1vg",
     "ja": "1a3t1vg",
     "ru": "1a3t1vg",
-    "zh-CN": "1a3t1vg"
+    "zh-CN": "1a3t1vg",
+    "fa": "1a3t1vg"
   },
   "serverTasks.cancel": {
     "ar": "ew9em3",
@@ -10537,7 +10843,8 @@
     "fr": "ew9em3",
     "ja": "ew9em3",
     "ru": "ew9em3",
-    "zh-CN": "ew9em3"
+    "zh-CN": "ew9em3",
+    "fa": "ew9em3"
   },
   "serverTasks.cancelLabel": {
     "ar": "15apgft",
@@ -10545,7 +10852,8 @@
     "fr": "15apgft",
     "ja": "15apgft",
     "ru": "15apgft",
-    "zh-CN": "15apgft"
+    "zh-CN": "15apgft",
+    "fa": "15apgft"
   },
   "outcomes.title": {
     "ar": "1a0exr2",
@@ -10553,7 +10861,8 @@
     "fr": "1a0exr2",
     "ja": "1a0exr2",
     "ru": "1a0exr2",
-    "zh-CN": "1a0exr2"
+    "zh-CN": "1a0exr2",
+    "fa": "1a0exr2"
   },
   "outcomes.intro": {
     "ar": "1o0sguy",
@@ -10561,7 +10870,8 @@
     "fr": "1o0sguy",
     "ja": "1o0sguy",
     "ru": "1o0sguy",
-    "zh-CN": "1o0sguy"
+    "zh-CN": "1o0sguy",
+    "fa": "1o0sguy"
   },
   "outcomes.col.agent": {
     "ar": "1w5o8jq",
@@ -10569,7 +10879,8 @@
     "fr": "1w5o8jq",
     "ja": "1w5o8jq",
     "ru": "1w5o8jq",
-    "zh-CN": "1w5o8jq"
+    "zh-CN": "1w5o8jq",
+    "fa": "1w5o8jq"
   },
   "outcomes.col.proposed": {
     "ar": "1bv6k83",
@@ -10577,7 +10888,8 @@
     "fr": "1bv6k83",
     "ja": "1bv6k83",
     "ru": "1bv6k83",
-    "zh-CN": "1bv6k83"
+    "zh-CN": "1bv6k83",
+    "fa": "1bv6k83"
   },
   "outcomes.col.accepted": {
     "ar": "i9emhs",
@@ -10585,7 +10897,8 @@
     "fr": "i9emhs",
     "ja": "i9emhs",
     "ru": "i9emhs",
-    "zh-CN": "i9emhs"
+    "zh-CN": "i9emhs",
+    "fa": "i9emhs"
   },
   "outcomes.col.edited": {
     "ar": "1fl6sme",
@@ -10593,7 +10906,8 @@
     "fr": "1fl6sme",
     "ja": "1fl6sme",
     "ru": "1fl6sme",
-    "zh-CN": "1fl6sme"
+    "zh-CN": "1fl6sme",
+    "fa": "1fl6sme"
   },
   "outcomes.col.rejected": {
     "ar": "1uofzaf",
@@ -10601,7 +10915,8 @@
     "fr": "1uofzaf",
     "ja": "1uofzaf",
     "ru": "1uofzaf",
-    "zh-CN": "1uofzaf"
+    "zh-CN": "1uofzaf",
+    "fa": "1uofzaf"
   },
   "outcomes.col.cancelled": {
     "ar": "1a3t1vg",
@@ -10609,7 +10924,8 @@
     "fr": "1a3t1vg",
     "ja": "1a3t1vg",
     "ru": "1a3t1vg",
-    "zh-CN": "1a3t1vg"
+    "zh-CN": "1a3t1vg",
+    "fa": "1a3t1vg"
   },
   "outcomes.col.median": {
     "ar": "g6e2tz",
@@ -10617,7 +10933,8 @@
     "fr": "g6e2tz",
     "ja": "g6e2tz",
     "ru": "g6e2tz",
-    "zh-CN": "g6e2tz"
+    "zh-CN": "g6e2tz",
+    "fa": "g6e2tz"
   },
   "outcomes.seconds": {
     "ar": "fij59q",
@@ -10625,7 +10942,8 @@
     "fr": "fij59q",
     "ja": "fij59q",
     "ru": "fij59q",
-    "zh-CN": "fij59q"
+    "zh-CN": "fij59q",
+    "fa": "fij59q"
   },
   "outcomes.flagged": {
     "ar": "exmwwa",
@@ -10633,7 +10951,8 @@
     "fr": "exmwwa",
     "ja": "exmwwa",
     "ru": "exmwwa",
-    "zh-CN": "exmwwa"
+    "zh-CN": "exmwwa",
+    "fa": "exmwwa"
   },
   "outcomes.share": {
     "ar": "1vsk4nh",
@@ -10641,7 +10960,8 @@
     "fr": "1vsk4nh",
     "ja": "1vsk4nh",
     "ru": "1vsk4nh",
-    "zh-CN": "1vsk4nh"
+    "zh-CN": "1vsk4nh",
+    "fa": "1vsk4nh"
   },
   "outcomes.clear": {
     "ar": "hyvwx3",
@@ -10649,7 +10969,8 @@
     "fr": "hyvwx3",
     "ja": "hyvwx3",
     "ru": "hyvwx3",
-    "zh-CN": "hyvwx3"
+    "zh-CN": "hyvwx3",
+    "fa": "hyvwx3"
   },
   "modelCard.open": {
     "ar": "plw9bw",
@@ -10657,7 +10978,8 @@
     "fr": "plw9bw",
     "ja": "plw9bw",
     "ru": "plw9bw",
-    "zh-CN": "plw9bw"
+    "zh-CN": "plw9bw",
+    "fa": "plw9bw"
   },
   "modelCard.title": {
     "ar": "1rfs5tf",
@@ -10665,7 +10987,8 @@
     "fr": "1rfs5tf",
     "ja": "1rfs5tf",
     "ru": "1rfs5tf",
-    "zh-CN": "1rfs5tf"
+    "zh-CN": "1rfs5tf",
+    "fa": "1rfs5tf"
   },
   "modelCard.model": {
     "ar": "107rbay",
@@ -10673,7 +10996,8 @@
     "fr": "107rbay",
     "ja": "107rbay",
     "ru": "107rbay",
-    "zh-CN": "107rbay"
+    "zh-CN": "107rbay",
+    "fa": "107rbay"
   },
   "modelCard.modelFromSettings": {
     "ar": "1e9yo23",
@@ -10681,7 +11005,8 @@
     "fr": "1e9yo23",
     "ja": "1e9yo23",
     "ru": "1e9yo23",
-    "zh-CN": "1e9yo23"
+    "zh-CN": "1e9yo23",
+    "fa": "1e9yo23"
   },
   "modelCard.licence": {
     "ar": "omi8k4",
@@ -10689,7 +11014,8 @@
     "fr": "omi8k4",
     "ja": "omi8k4",
     "ru": "omi8k4",
-    "zh-CN": "omi8k4"
+    "zh-CN": "omi8k4",
+    "fa": "omi8k4"
   },
   "modelCard.licenceUnknown": {
     "ar": "1qtm4yx",
@@ -10697,7 +11023,8 @@
     "fr": "1qtm4yx",
     "ja": "1qtm4yx",
     "ru": "1qtm4yx",
-    "zh-CN": "1qtm4yx"
+    "zh-CN": "1qtm4yx",
+    "fa": "1qtm4yx"
   },
   "modelCard.notMeasured": {
     "ar": "19ox30n",
@@ -10705,7 +11032,8 @@
     "fr": "19ox30n",
     "ja": "19ox30n",
     "ru": "19ox30n",
-    "zh-CN": "19ox30n"
+    "zh-CN": "19ox30n",
+    "fa": "19ox30n"
   },
   "modelCard.tag.dev": {
     "ar": "1039p39",
@@ -10713,7 +11041,8 @@
     "fr": "1039p39",
     "ja": "1039p39",
     "ru": "1039p39",
-    "zh-CN": "1039p39"
+    "zh-CN": "1039p39",
+    "fa": "1039p39"
   },
   "modelCard.tag.heldout": {
     "ar": "1a91gsv",
@@ -10721,7 +11050,8 @@
     "fr": "1a91gsv",
     "ja": "1a91gsv",
     "ru": "1a91gsv",
-    "zh-CN": "1a91gsv"
+    "zh-CN": "1a91gsv",
+    "fa": "1a91gsv"
   },
   "modelCard.tag.public": {
     "ar": "ev1djj",
@@ -10729,7 +11059,8 @@
     "fr": "ev1djj",
     "ja": "ev1djj",
     "ru": "ev1djj",
-    "zh-CN": "ev1djj"
+    "zh-CN": "ev1djj",
+    "fa": "ev1djj"
   },
   "modelCard.measuredOn": {
     "ar": "1gfoio3",
@@ -10737,7 +11068,8 @@
     "fr": "1gfoio3",
     "ja": "1gfoio3",
     "ru": "1gfoio3",
-    "zh-CN": "1gfoio3"
+    "zh-CN": "1gfoio3",
+    "fa": "1gfoio3"
   },
   "modelCard.dateUnknown": {
     "ar": "1421ezf",
@@ -10745,7 +11077,8 @@
     "fr": "1421ezf",
     "ja": "1421ezf",
     "ru": "1421ezf",
-    "zh-CN": "1421ezf"
+    "zh-CN": "1421ezf",
+    "fa": "1421ezf"
   },
   "modelCard.n": {
     "ar": "1693zyw",
@@ -10753,7 +11086,8 @@
     "fr": "1693zyw",
     "ja": "1693zyw",
     "ru": "1693zyw",
-    "zh-CN": "1693zyw"
+    "zh-CN": "1693zyw",
+    "fa": "1693zyw"
   },
   "modelCard.dataset": {
     "ar": "1lx8q2r",
@@ -10761,7 +11095,8 @@
     "fr": "1lx8q2r",
     "ja": "1lx8q2r",
     "ru": "1lx8q2r",
-    "zh-CN": "1lx8q2r"
+    "zh-CN": "1lx8q2r",
+    "fa": "1lx8q2r"
   },
   "modelCard.evalModel": {
     "ar": "wor716",
@@ -10769,7 +11104,8 @@
     "fr": "wor716",
     "ja": "wor716",
     "ru": "wor716",
-    "zh-CN": "wor716"
+    "zh-CN": "wor716",
+    "fa": "wor716"
   },
   "modelCard.ci": {
     "ar": "1jcipkq",
@@ -10777,7 +11113,8 @@
     "fr": "1jcipkq",
     "ja": "1jcipkq",
     "ru": "1jcipkq",
-    "zh-CN": "1jcipkq"
+    "zh-CN": "1jcipkq",
+    "fa": "1jcipkq"
   },
   "modelCard.benchmark": {
     "ar": "19q68j4",
@@ -10785,7 +11122,8 @@
     "fr": "19q68j4",
     "ja": "19q68j4",
     "ru": "19q68j4",
-    "zh-CN": "19q68j4"
+    "zh-CN": "19q68j4",
+    "fa": "19q68j4"
   },
   "agentMemory.title": {
     "ar": "12unaal",
@@ -10793,7 +11131,8 @@
     "fr": "12unaal",
     "ja": "12unaal",
     "ru": "12unaal",
-    "zh-CN": "12unaal"
+    "zh-CN": "12unaal",
+    "fa": "12unaal"
   },
   "agentMemory.intro": {
     "ar": "16urxh9",
@@ -10801,7 +11140,8 @@
     "fr": "16urxh9",
     "ja": "16urxh9",
     "ru": "16urxh9",
-    "zh-CN": "16urxh9"
+    "zh-CN": "16urxh9",
+    "fa": "16urxh9"
   },
   "agentMemory.readers": {
     "ar": "199f02s",
@@ -10809,7 +11149,8 @@
     "fr": "199f02s",
     "ja": "199f02s",
     "ru": "199f02s",
-    "zh-CN": "199f02s"
+    "zh-CN": "199f02s",
+    "fa": "199f02s"
   },
   "agentMemory.reads.title": {
     "ar": "1ip9bps",
@@ -10817,7 +11158,8 @@
     "fr": "1ip9bps",
     "ja": "1ip9bps",
     "ru": "1ip9bps",
-    "zh-CN": "1ip9bps"
+    "zh-CN": "1ip9bps",
+    "fa": "1ip9bps"
   },
   "agentMemory.reads.none": {
     "ar": "afnkks",
@@ -10825,7 +11167,8 @@
     "fr": "afnkks",
     "ja": "afnkks",
     "ru": "afnkks",
-    "zh-CN": "afnkks"
+    "zh-CN": "afnkks",
+    "fa": "afnkks"
   },
   "agentMemory.reads.row": {
     "ar": "oh037m",
@@ -10833,7 +11176,8 @@
     "fr": "oh037m",
     "ja": "oh037m",
     "ru": "oh037m",
-    "zh-CN": "oh037m"
+    "zh-CN": "oh037m",
+    "fa": "oh037m"
   },
   "settingsSearch.count": {
     "ar": "no66k",
@@ -10841,7 +11185,8 @@
     "fr": "no66k",
     "ja": "no66k",
     "ru": "no66k",
-    "zh-CN": "no66k"
+    "zh-CN": "no66k",
+    "fa": "no66k"
   },
   "settingsSearch.none": {
     "ar": "16whdop",
@@ -10849,7 +11194,8 @@
     "fr": "16whdop",
     "ja": "16whdop",
     "ru": "16whdop",
-    "zh-CN": "16whdop"
+    "zh-CN": "16whdop",
+    "fa": "16whdop"
   },
   "settingsSearch.results": {
     "ar": "1dfbndn",
@@ -10857,7 +11203,8 @@
     "fr": "1dfbndn",
     "ja": "1dfbndn",
     "ru": "1dfbndn",
-    "zh-CN": "1dfbndn"
+    "zh-CN": "1dfbndn",
+    "fa": "1dfbndn"
   },
   "settingsSearch.hint": {
     "ar": "1ogv9iz",
@@ -10865,7 +11212,8 @@
     "fr": "1ogv9iz",
     "ja": "1ogv9iz",
     "ru": "1ogv9iz",
-    "zh-CN": "1ogv9iz"
+    "zh-CN": "1ogv9iz",
+    "fa": "1ogv9iz"
   },
   "settingsSearch.tabHit": {
     "ar": "1ee0zvr",
@@ -10873,7 +11221,8 @@
     "fr": "1ee0zvr",
     "ja": "1ee0zvr",
     "ru": "1ee0zvr",
-    "zh-CN": "1ee0zvr"
+    "zh-CN": "1ee0zvr",
+    "fa": "1ee0zvr"
   },
   "settingsSearch.pluginHit": {
     "ar": "1vepso5",
@@ -10881,7 +11230,8 @@
     "fr": "1vepso5",
     "ja": "1vepso5",
     "ru": "1vepso5",
-    "zh-CN": "1vepso5"
+    "zh-CN": "1vepso5",
+    "fa": "1vepso5"
   },
   "settingsSearch.kw.tab.general": {
     "ar": "1v7hrc",
@@ -10889,7 +11239,8 @@
     "fr": "1v7hrc",
     "ja": "1v7hrc",
     "ru": "1v7hrc",
-    "zh-CN": "1v7hrc"
+    "zh-CN": "1v7hrc",
+    "fa": "1v7hrc"
   },
   "settingsSearch.kw.tab.appearance": {
     "ar": "t6zml8",
@@ -10897,7 +11248,8 @@
     "fr": "t6zml8",
     "ja": "t6zml8",
     "ru": "t6zml8",
-    "zh-CN": "t6zml8"
+    "zh-CN": "t6zml8",
+    "fa": "t6zml8"
   },
   "settingsSearch.kw.tab.ai": {
     "ar": "bzn6dc",
@@ -10905,7 +11257,8 @@
     "fr": "bzn6dc",
     "ja": "bzn6dc",
     "ru": "bzn6dc",
-    "zh-CN": "bzn6dc"
+    "zh-CN": "bzn6dc",
+    "fa": "bzn6dc"
   },
   "settingsSearch.kw.tab.privacy": {
     "ar": "11rr6yd",
@@ -10913,7 +11266,8 @@
     "fr": "11rr6yd",
     "ja": "11rr6yd",
     "ru": "11rr6yd",
-    "zh-CN": "11rr6yd"
+    "zh-CN": "11rr6yd",
+    "fa": "11rr6yd"
   },
   "settingsSearch.kw.tab.security": {
     "ar": "1b45k8w",
@@ -10921,7 +11275,8 @@
     "fr": "1b45k8w",
     "ja": "1b45k8w",
     "ru": "1b45k8w",
-    "zh-CN": "1b45k8w"
+    "zh-CN": "1b45k8w",
+    "fa": "1b45k8w"
   },
   "settingsSearch.kw.tab.sync": {
     "ar": "1s5k1wk",
@@ -10929,7 +11284,8 @@
     "fr": "1s5k1wk",
     "ja": "1s5k1wk",
     "ru": "1s5k1wk",
-    "zh-CN": "1s5k1wk"
+    "zh-CN": "1s5k1wk",
+    "fa": "1s5k1wk"
   },
   "settingsSearch.kw.theme": {
     "ar": "12pdcl4",
@@ -10937,7 +11293,8 @@
     "fr": "12pdcl4",
     "ja": "12pdcl4",
     "ru": "12pdcl4",
-    "zh-CN": "12pdcl4"
+    "zh-CN": "12pdcl4",
+    "fa": "12pdcl4"
   },
   "settingsSearch.kw.locale": {
     "ar": "1wspp7x",
@@ -10945,7 +11302,8 @@
     "fr": "1wspp7x",
     "ja": "1wspp7x",
     "ru": "1wspp7x",
-    "zh-CN": "1wspp7x"
+    "zh-CN": "1wspp7x",
+    "fa": "1wspp7x"
   },
   "settingsSearch.kw.rtl": {
     "ar": "1k7omjd",
@@ -10953,7 +11311,8 @@
     "fr": "1k7omjd",
     "ja": "1k7omjd",
     "ru": "1k7omjd",
-    "zh-CN": "1k7omjd"
+    "zh-CN": "1k7omjd",
+    "fa": "1k7omjd"
   },
   "settingsSearch.kw.mode": {
     "ar": "myhtt1",
@@ -10961,7 +11320,8 @@
     "fr": "myhtt1",
     "ja": "myhtt1",
     "ru": "myhtt1",
-    "zh-CN": "myhtt1"
+    "zh-CN": "myhtt1",
+    "fa": "myhtt1"
   },
   "settingsSearch.kw.vimEnabled": {
     "ar": "12nghpd",
@@ -10969,7 +11329,8 @@
     "fr": "12nghpd",
     "ja": "12nghpd",
     "ru": "12nghpd",
-    "zh-CN": "12nghpd"
+    "zh-CN": "12nghpd",
+    "fa": "12nghpd"
   },
   "settingsSearch.kw.spellCheck": {
     "ar": "sw6due",
@@ -10977,7 +11338,8 @@
     "fr": "sw6due",
     "ja": "sw6due",
     "ru": "sw6due",
-    "zh-CN": "sw6due"
+    "zh-CN": "sw6due",
+    "fa": "sw6due"
   },
   "settingsSearch.kw.grammarCheck": {
     "ar": "6iv5vf",
@@ -10985,7 +11347,8 @@
     "fr": "6iv5vf",
     "ja": "6iv5vf",
     "ru": "6iv5vf",
-    "zh-CN": "6iv5vf"
+    "zh-CN": "6iv5vf",
+    "fa": "6iv5vf"
   },
   "settingsSearch.kw.autoSave": {
     "ar": "1lr5n1p",
@@ -10993,7 +11356,8 @@
     "fr": "1lr5n1p",
     "ja": "1lr5n1p",
     "ru": "1lr5n1p",
-    "zh-CN": "1lr5n1p"
+    "zh-CN": "1lr5n1p",
+    "fa": "1lr5n1p"
   },
   "settingsSearch.kw.typewriterMode": {
     "ar": "wm4064",
@@ -11001,7 +11365,8 @@
     "fr": "wm4064",
     "ja": "wm4064",
     "ru": "wm4064",
-    "zh-CN": "wm4064"
+    "zh-CN": "wm4064",
+    "fa": "wm4064"
   },
   "settingsSearch.kw.writingGoalWords": {
     "ar": "1i2jscj",
@@ -11009,7 +11374,8 @@
     "fr": "1i2jscj",
     "ja": "1i2jscj",
     "ru": "1i2jscj",
-    "zh-CN": "1i2jscj"
+    "zh-CN": "1i2jscj",
+    "fa": "1i2jscj"
   },
   "settingsSearch.kw.themeSettings": {
     "ar": "1ri6cpo",
@@ -11017,7 +11383,8 @@
     "fr": "1ri6cpo",
     "ja": "1ri6cpo",
     "ru": "1ri6cpo",
-    "zh-CN": "1ri6cpo"
+    "zh-CN": "1ri6cpo",
+    "fa": "1ri6cpo"
   },
   "settingsSearch.kw.lumen.telemetry.optOut": {
     "ar": "1as32ck",
@@ -11025,7 +11392,8 @@
     "fr": "1as32ck",
     "ja": "1as32ck",
     "ru": "1as32ck",
-    "zh-CN": "1as32ck"
+    "zh-CN": "1as32ck",
+    "fa": "1as32ck"
   },
   "settingsSearch.kw.lumen.images.keepMetadata": {
     "ar": "141mowv",
@@ -11033,7 +11401,8 @@
     "fr": "141mowv",
     "ja": "141mowv",
     "ru": "141mowv",
-    "zh-CN": "141mowv"
+    "zh-CN": "141mowv",
+    "fa": "141mowv"
   },
   "settingsSearch.kw.lumen.ollama.baseUrl": {
     "ar": "1nsgyod",
@@ -11041,7 +11410,8 @@
     "fr": "1nsgyod",
     "ja": "1nsgyod",
     "ru": "1nsgyod",
-    "zh-CN": "1nsgyod"
+    "zh-CN": "1nsgyod",
+    "fa": "1nsgyod"
   },
   "settingsSearch.kw.lumen.ollama.model": {
     "ar": "18pxlwj",
@@ -11049,7 +11419,8 @@
     "fr": "18pxlwj",
     "ja": "18pxlwj",
     "ru": "18pxlwj",
-    "zh-CN": "18pxlwj"
+    "zh-CN": "18pxlwj",
+    "fa": "18pxlwj"
   },
   "settingsSearch.kw.lumen.ai.policy": {
     "ar": "1bh3o8y",
@@ -11057,7 +11428,8 @@
     "fr": "1bh3o8y",
     "ja": "1bh3o8y",
     "ru": "1bh3o8y",
-    "zh-CN": "1bh3o8y"
+    "zh-CN": "1bh3o8y",
+    "fa": "1bh3o8y"
   },
   "settingsSearch.kw.syncScroll": {
     "ar": "1toy1ru",
@@ -11065,7 +11437,8 @@
     "fr": "1toy1ru",
     "ja": "1toy1ru",
     "ru": "1toy1ru",
-    "zh-CN": "1toy1ru"
+    "zh-CN": "1toy1ru",
+    "fa": "1toy1ru"
   },
   "settingsSearch.kw.showOutline": {
     "ar": "1mc72l9",
@@ -11073,7 +11446,8 @@
     "fr": "1mc72l9",
     "ja": "1mc72l9",
     "ru": "1mc72l9",
-    "zh-CN": "1mc72l9"
+    "zh-CN": "1mc72l9",
+    "fa": "1mc72l9"
   },
   "settingsSearch.kw.showBacklinks": {
     "ar": "1vwunu3",
@@ -11081,7 +11455,8 @@
     "fr": "1vwunu3",
     "ja": "1vwunu3",
     "ru": "1vwunu3",
-    "zh-CN": "1vwunu3"
+    "zh-CN": "1vwunu3",
+    "fa": "1vwunu3"
   },
   "settingsSearch.kw.useLocalAi": {
     "ar": "1vsbwr",
@@ -11089,7 +11464,8 @@
     "fr": "1vsbwr",
     "ja": "1vsbwr",
     "ru": "1vsbwr",
-    "zh-CN": "1vsbwr"
+    "zh-CN": "1vsbwr",
+    "fa": "1vsbwr"
   },
   "settingsSearch.kw.pageView": {
     "ar": "79ey31",
@@ -11097,7 +11473,8 @@
     "fr": "79ey31",
     "ja": "79ey31",
     "ru": "79ey31",
-    "zh-CN": "79ey31"
+    "zh-CN": "79ey31",
+    "fa": "79ey31"
   },
   "status.indexing": {
     "ar": "12kmpny",
@@ -11105,7 +11482,8 @@
     "fr": "12kmpny",
     "ja": "12kmpny",
     "ru": "12kmpny",
-    "zh-CN": "12kmpny"
+    "zh-CN": "12kmpny",
+    "fa": "12kmpny"
   },
   "status.indexing.title": {
     "ar": "1si91v2",
@@ -11113,7 +11491,8 @@
     "fr": "1si91v2",
     "ja": "1si91v2",
     "ru": "1si91v2",
-    "zh-CN": "1si91v2"
+    "zh-CN": "1si91v2",
+    "fa": "1si91v2"
   },
   "status.indexing.sr": {
     "ar": "veiynm",
@@ -11121,7 +11500,8 @@
     "fr": "veiynm",
     "ja": "veiynm",
     "ru": "veiynm",
-    "zh-CN": "veiynm"
+    "zh-CN": "veiynm",
+    "fa": "veiynm"
   },
   "settings.indexIgnore": {
     "ar": "jyp9ab",
@@ -11129,6 +11509,7 @@
     "fr": "jyp9ab",
     "ja": "jyp9ab",
     "ru": "jyp9ab",
-    "zh-CN": "jyp9ab"
+    "zh-CN": "jyp9ab",
+    "fa": "jyp9ab"
   }
 }

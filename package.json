@@ -138,7 +138,7 @@
     "ci:real-model-pins": "node scripts/real-model-pins.mjs",
     "docs:complete": "node scripts/docs-complete.mjs && node scripts/docs-parity.mjs --strict",
     "docs:parity": "node scripts/docs-parity.mjs --strict",
-    "docs:audit": "node scripts/docs-audit.mjs",
+    "docs:audit": "node scripts/docs-audit.mjs && node scripts/rtl-benchmark-audit.mjs",
     "docs:api": "node scripts/plugin-api-docs.mjs",
     "docs:doctest": "node scripts/docs-doctest.mjs",
     "docs:known-issues": "node scripts/known-issues.mjs",
