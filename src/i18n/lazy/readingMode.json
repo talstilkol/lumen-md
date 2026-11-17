@@ -64,5 +64,7 @@
   "readingMode.focusUnit.paragraph": "The paragraph",
   "readingMode.layout.single": "One column",
   "readingMode.layout.sideBySide": "Beside its translation",
-  "readingMode.layout.spread": "Two-page spread"
+  "readingMode.layout.spread": "Two-page spread",
+  "readingMode.mode.rsvp": "One word at a time (RSVP)",
+  "readingMode.mode.rsvp.hint": "Each word at a fixed point, with its recognition letter marked; slows at punctuation; rewind a sentence any time."
 }

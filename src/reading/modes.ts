@@ -42,6 +42,15 @@ export const MODE_DEFS: ReadingModeDef[] = [
       window.dispatchEvent(new Event("lumen-open-focus"));
     },
   },
+  {
+    id: "rsvp",
+    label: "readingMode.mode.rsvp",
+    hint: "readingMode.mode.rsvp.hint",
+    // W13.R3: comprehension falls without look-backs (Schotter, Rayner et al.), hence rewind.
+    experimental: { research: "https://www.psychologicalscience.org/news/releases/speed-reading-apps-may-impair-reading-comprehension-by-limiting-ability-to-backtrack.html" },
+    fields: ["wpm"],
+    open: async (p) => (await import("../ui/RsvpReader")).openRsvpReader(p.wpm),
+  },
 ];
 
 export const modeDef = (id: ReadingModeId): ReadingModeDef => MODE_DEFS.find((m) => m.id === id) ?? MODE_DEFS[0];

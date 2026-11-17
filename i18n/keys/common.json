@@ -15736,6 +15736,16 @@
       "vars": []
     },
     {
+      "key": "readingMode.mode.rsvp",
+      "en": "One word at a time (RSVP)",
+      "vars": []
+    },
+    {
+      "key": "readingMode.mode.rsvp.hint",
+      "en": "Each word at a fixed point, with its recognition letter marked; slows at punctuation; rewind a sentence any time.",
+      "vars": []
+    },
+    {
       "key": "readingMode.modeOptions",
       "en": "{mode}: options",
       "vars": [
@@ -16068,6 +16078,75 @@
       "vars": [
         "n"
       ]
+    },
+    {
+      "key": "rsvp.back",
+      "en": "Previous word",
+      "vars": []
+    },
+    {
+      "key": "rsvp.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "rsvp.empty",
+      "en": "This note has no words to read.",
+      "vars": []
+    },
+    {
+      "key": "rsvp.forward",
+      "en": "Next word",
+      "vars": []
+    },
+    {
+      "key": "rsvp.keys",
+      "en": "Space: play / pause · arrows: a word back or forward · Shift+arrow: back a sentence · ↑ ↓: speed · Esc: close",
+      "vars": []
+    },
+    {
+      "key": "rsvp.pause",
+      "en": "Pause",
+      "vars": []
+    },
+    {
+      "key": "rsvp.play",
+      "en": "Play",
+      "vars": []
+    },
+    {
+      "key": "rsvp.progress",
+      "en": "Word {n} of {total} · about {min} min left",
+      "vars": [
+        "n",
+        "total",
+        "min"
+      ]
+    },
+    {
+      "key": "rsvp.research",
+      "en": "Why it has rewind: the research",
+      "vars": []
+    },
+    {
+      "key": "rsvp.rewind",
+      "en": "Back a sentence",
+      "vars": []
+    },
+    {
+      "key": "rsvp.rewind.hint",
+      "en": "Back to the start of the sentence (again: the one before). Shift+arrow or Backspace.",
+      "vars": []
+    },
+    {
+      "key": "rsvp.title",
+      "en": "One word at a time",
+      "vars": []
+    },
+    {
+      "key": "rsvp.wpm",
+      "en": "Words per minute",
+      "vars": []
     },
     {
       "key": "screenshotNote.byModel",
