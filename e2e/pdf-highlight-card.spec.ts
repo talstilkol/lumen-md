@@ -15,7 +15,10 @@ import { createPdfAnnotation, upsertAnnotationsNote } from "../src/pdf/annotatio
  * then selected and its link followed through Excalidraw's own link popup,
  * which calls the app's onLinkOpen.
  *
- * Not covered here (owed): a scanned PDF with an OCR layer (W6.47).
+ * A scanned PDF with an OCR layer (W6.47, acceptance 2) runs the same chain
+ * on the 20 real scanned pages in src/__tests__/pdfHighlightCardScanned.test.tsx
+ * (OCR layer as the reader renders it, a second OCR run before the link is
+ * followed); a scanned PDF in this browser flow needs the OCR models (Mac).
  */
 
 const PDF = readFileSync(new URL("./fixtures/bilingual.pdf", import.meta.url));
