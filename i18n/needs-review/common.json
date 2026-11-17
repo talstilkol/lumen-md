@@ -10634,5 +10634,69 @@
     "ja": "o696fm",
     "ru": "o696fm",
     "zh-CN": "o696fm"
+  },
+  "serverTasks.title": {
+    "ar": "1auefzq",
+    "de": "1auefzq",
+    "fr": "1auefzq",
+    "ja": "1auefzq",
+    "ru": "1auefzq",
+    "zh-CN": "1auefzq"
+  },
+  "serverTasks.status.working": {
+    "ar": "1pyssg8",
+    "de": "1pyssg8",
+    "fr": "1pyssg8",
+    "ja": "1pyssg8",
+    "ru": "1pyssg8",
+    "zh-CN": "1pyssg8"
+  },
+  "serverTasks.status.input_required": {
+    "ar": "qbvh2g",
+    "de": "qbvh2g",
+    "fr": "qbvh2g",
+    "ja": "qbvh2g",
+    "ru": "qbvh2g",
+    "zh-CN": "qbvh2g"
+  },
+  "serverTasks.status.completed": {
+    "ar": "13cn9g1",
+    "de": "13cn9g1",
+    "fr": "13cn9g1",
+    "ja": "13cn9g1",
+    "ru": "13cn9g1",
+    "zh-CN": "13cn9g1"
+  },
+  "serverTasks.status.failed": {
+    "ar": "npsixg",
+    "de": "npsixg",
+    "fr": "npsixg",
+    "ja": "npsixg",
+    "ru": "npsixg",
+    "zh-CN": "npsixg"
+  },
+  "serverTasks.status.cancelled": {
+    "ar": "1a3t1vg",
+    "de": "1a3t1vg",
+    "fr": "1a3t1vg",
+    "ja": "1a3t1vg",
+    "ru": "1a3t1vg",
+    "zh-CN": "1a3t1vg"
+  },
+  "serverTasks.cancel": {
+    "ar": "ew9em3",
+    "de": "ew9em3",
+    "fr": "ew9em3",
+    "ja": "ew9em3",
+    "ru": "ew9em3",
+    "zh-CN": "ew9em3"
+  },
+  "serverTasks.cancelLabel": {
+    "ar": "15apgft",
+    "de": "15apgft",
+    "fr": "15apgft",
+    "ja": "15apgft",
+    "ru": "15apgft",
+    "zh-CN": "15apgft"
   }
 }
