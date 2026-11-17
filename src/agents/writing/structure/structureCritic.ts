@@ -23,7 +23,7 @@
  * that opens on a connective or a question, or whose first sentence shares
  * no content word with the rest).
  */
-import { analyse } from "../../../text/outline";
+import { analyse } from "../../../text/outlineCore";
 import { RULES_MODEL, conf, type WritingSuggestion } from "../suggestionShape";
 import { STOP, isHebrewText, plain, sentences, stem, throwIfAborted, wordCount, words } from "../textTools";
 

@@ -13,9 +13,6 @@
  *    fails on an agent that writes directly.
  */
 import { describe, expect, it } from "vitest";
-import ts from "typescript";
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, posix, relative } from "node:path";
 import { EditorState, type Transaction } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { Schema } from "@milkdown/prose/model";
@@ -26,6 +23,7 @@ import { acceptInView, showSuggestions, suggestionsIn } from "../agents/writing/
 import { acceptInPm, pmRange, pmSuggestions, pmTextIndex, showPmSuggestions } from "../agents/writing/pmBridge";
 import { aiAuthored } from "../editor/aiAuthorship";
 import { suggestionsFromIssues } from "../agents/writing/adapters";
+import { diskModules, directWritesIn, writingSources, type ModuleLoader } from "./helpers/writingStatic";
 
 const sug = (text: string, from: number, to: number, replacement: string | null, o: Partial<WritingSuggestion> = {}) =>
   makeSuggestion(text, { range: { from, to }, kind: "concision", message: "m", rationale: "r", confidence: 0.7, replacement, agentId: "test", model: "rules", ...o });
@@ -250,71 +248,36 @@ describe("accept in the WYSIWYG editor: one transaction (W13.W1)", () => {
 
 /* ── The static check: writing agents propose, they never write ────────── */
 
-const ROOT = join(__dirname, "..");
-const WRITING = join(ROOT, "agents/writing");
-/** The editor bridges: the only files here that change a document, and only on the user's accept. */
-const APPLIERS = new Set(["cmBridge.ts", "pmBridge.ts"]);
-/** What a writing agent may import (besides its own folder, minus the appliers). */
-const IMPORT_ALLOW = ["agents/types", "agents/runtime", "ai/hebrewGrammar", "collab/wordDiff", "text/hebrew", "book/wordCount"];
-/** Calls that change a document, the store or a file. */
-const WRITE_CALLS = new Set(["dispatch", "setContent", "writeAiContent", "insertText", "replaceWith", "replaceRangeWith", "writeFile", "writeTextFile", "writeBinaryFile", "saveFile", "saveNote", "writeNote", "createFile", "openTab", "invoke", "updateDoc", "setState", "appendFile", "rename", "remove", "unlink", "mkdir"]);
-
-function tsFiles(dir: string): string[] {
-  return readdirSync(dir).flatMap((f) => {
-    const p = join(dir, f);
-    return statSync(p).isDirectory() ? tsFiles(p) : /\.tsx?$/.test(f) ? [p] : [];
-  });
-}
-
-/** Every direct write or forbidden import in these sources (path → text), as `file:line what`. */
-export function directWritesIn(sources: ReadonlyMap<string, string>): string[] {
-  const out: string[] = [];
-  for (const [file, src] of sources) {
-    const base = file.split("/").pop()!;
-    if (APPLIERS.has(base)) continue;
-    const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, file.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
-    const at = (n: ts.Node) => `${file}:${sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1}`;
-    const checkSpec = (spec: string, n: ts.Node, typeOnly: boolean) => {
-      if (spec.startsWith(".")) {
-        const target = posix.normalize(posix.join(posix.dirname(file), spec));
-        if (target.startsWith("agents/writing/")) {
-          if (APPLIERS.has(`${posix.basename(target).replace(/\.tsx?$/, "")}.ts`) && !typeOnly) out.push(`${at(n)} imports the editor bridge ${spec}`);
-          return;
-        }
-        if (typeOnly) return;
-        if (!IMPORT_ALLOW.includes(target)) out.push(`${at(n)} imports ${spec}`);
-        return;
-      }
-      if (!typeOnly) out.push(`${at(n)} imports the package ${spec}`);
-    };
-    const visit = (n: ts.Node): void => {
-      if (ts.isImportDeclaration(n) && ts.isStringLiteral(n.moduleSpecifier)) checkSpec(n.moduleSpecifier.text, n, !!n.importClause?.isTypeOnly);
-      if (ts.isExportDeclaration(n) && n.moduleSpecifier && ts.isStringLiteral(n.moduleSpecifier)) checkSpec(n.moduleSpecifier.text, n, n.isTypeOnly);
-      if (ts.isCallExpression(n)) {
-        const e = n.expression;
-        if (e.kind === ts.SyntaxKind.ImportKeyword && n.arguments[0] && ts.isStringLiteral(n.arguments[0])) checkSpec(n.arguments[0].text, n, false);
-        if (e.kind === ts.SyntaxKind.ImportKeyword && n.arguments[0] && !ts.isStringLiteral(n.arguments[0])) out.push(`${at(n)} dynamic import of a computed module`);
-        const name = ts.isIdentifier(e) ? e.text : ts.isPropertyAccessExpression(e) ? e.name.text : ts.isElementAccessExpression(e) ? "[computed]" : null;
-        if (name && WRITE_CALLS.has(name)) out.push(`${at(n)} ${name}(…)`);
-        if (name === "[computed]") out.push(`${at(n)} computed call`);
-      }
-      if (ts.isIdentifier(n) && ["useAppStore", "globalThis", "window", "document", "localStorage", "indexedDB", "require"].includes(n.text)) out.push(`${at(n)} uses ${n.text}`);
-      ts.forEachChild(n, visit);
-    };
-    visit(sf);
-  }
-  return out;
-}
-
 describe("static: no writing agent writes to a document or a file (W13.W1)", () => {
-  const sources = new Map(tsFiles(WRITING).map((f) => [relative(ROOT, f), readFileSync(f, "utf8")]));
+  const sources = writingSources();
 
   it("src/agents/writing has the base and at least one agent", () => {
     expect([...sources.keys()].some((f) => f.endsWith("suggestion.ts"))).toBe(true);
   });
 
   it("every file under src/agents/writing (except the two editor bridges) only proposes", () => {
-    expect(directWritesIn(sources)).toEqual([]);
+    expect(directWritesIn(sources, diskModules)).toEqual([]);
+  });
+
+  it("an import outside the allow-list passes only when it and all it imports only compute (INT7: one check for W13.W1–W15)", () => {
+    const files: Record<string, string> = {
+      "lib/pure.ts": 'import { twice } from "./pureToo";\nexport const f = (s: string) => twice(s);',
+      "lib/pureToo.ts": "export const twice = (s: string) => s + s;",
+      "lib/sneaky.ts": 'import { save } from "./deeper";\nexport const g = (s: string) => save(s);',
+      "lib/deeper.ts": 'import { writeWorkspaceFile } from "../storage/workspace";\nexport const save = (s: string) => writeWorkspaceFile("x.md", s);',
+      "storage/workspace.ts": "export const writeWorkspaceFile = async (p: string, c: string) => { localStorage.setItem(p, c); };",
+      "lib/pkg.ts": 'import { parse } from "yaml";\nexport const h = (s: string) => parse(s);',
+    };
+    const load: ModuleLoader = (m) => (files[`${m}.ts`] !== undefined ? { file: `${m}.ts`, text: files[`${m}.ts`] } : null);
+    const agent = (spec: string) => new Map([["agents/writing/agents/x.ts", `import { f } from "${spec}";\nexport const run = (t: string) => f(t);`]]);
+    expect(directWritesIn(agent("../../../lib/pure"), load)).toEqual([]);
+    const deep = directWritesIn(agent("../../../lib/sneaky"), load);
+    expect(deep).toHaveLength(1);
+    expect(deep[0]).toMatch(/imports \.\.\/\.\.\/\.\.\/lib\/sneaky \(lib\/sneaky → lib\/deeper → storage\/workspace\.ts:1 uses localStorage\)/);
+    expect(directWritesIn(agent("../../../lib/pkg"), load)[0]).toMatch(/lib\/pkg\.ts:1 imports the package yaml/);
+    expect(directWritesIn(agent("../../../lib/missing"), load)[0]).toMatch(/not found/);
+    // Without a loader nothing outside the allow-list is accepted (W13.W1's rule).
+    expect(directWritesIn(agent("../../../lib/pure"))[0]).toMatch(/not in the allow-list/);
   });
 
   it("the check fails on an agent that writes directly", () => {

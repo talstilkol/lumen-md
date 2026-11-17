@@ -15,7 +15,7 @@ import { proseMask, proseTokens } from "../agents/writing/proseMask";
 import { isFunctionWord } from "../agents/writing/functionWords";
 import { builtinCliches, parseCliches } from "../agents/writing/cliches";
 import { CLICHES_LICENSE } from "../agents/writing/data/cliches";
-import { toRangeProposal } from "../agents/writing/writingSuggestion";
+import { toRangeProposal } from "../agents/writingReview";
 
 /** [text, words that should be flagged (as written, the later occurrence)] */
 const GOLD: Array<[string, string[]]> = [
@@ -104,7 +104,7 @@ describe("W13.W11 repetition detector", () => {
     // Numbers count as words for the window but are never flagged themselves.
     const filler = Array.from({ length: 60 }, (_, i) => String(i)).join(" ");
     expect(detectRepetition(`החלון נפתח. ${filler}. החלון נסגר.`, { noCliches: true }).filter((s) => s.kind === "repetition")).toEqual([]);
-    expect(detectRepetition(`החלון נפתח. ${filler}. החלון נסגר.`, { noCliches: true, window: 70 }).filter((s) => s.kind === "repetition")).toHaveLength(1);
+    expect(detectRepetition(`החלון נפתח. ${filler}. החלון נסגר.`, { noCliches: true, windowWords: 70 }).filter((s) => s.kind === "repetition")).toHaveLength(1);
   });
 
   it("a topic word needs three uses in the window", () => {

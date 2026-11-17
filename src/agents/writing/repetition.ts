@@ -37,7 +37,7 @@ export const DEFAULT_WINDOW = 50;
 
 export interface RepetitionOptions extends ClicheOptions {
   /** Words between two uses that still count as "too soon" (default 50). */
-  window?: number;
+  windowWords?: number;
   /** Lemmas (comparison form) the user switched off. */
   ignoredLemmas?: readonly string[];
   /** One lemma per prose token, from a lemmatizer; overrides the rules. */
@@ -141,7 +141,7 @@ const msg = {
 export function detectRepetition(markdown: string, opts: RepetitionOptions = {}): WritingSuggestion[] {
   const lang = opts.lang ?? "en";
   const M = msg[lang];
-  const window = Math.max(5, opts.window ?? DEFAULT_WINDOW);
+  const windowSpan = Math.max(5, opts.windowWords ?? DEFAULT_WINDOW);
   const ignored = new Set(opts.ignoredLemmas ?? []);
   const toks = proseTokens(markdown);
   const out: WritingSuggestion[] = [];
@@ -183,7 +183,7 @@ export function detectRepetition(markdown: string, opts: RepetitionOptions = {})
   for (const c of content) {
     let best: { key: string; prev: Content[] } | null = null;
     for (const k of c.keys) {
-      const prev = (seen.get(k) ?? []).filter((p) => c.at - p.at <= window && p.tok.sentence !== -1);
+      const prev = (seen.get(k) ?? []).filter((p) => c.at - p.at <= windowSpan && p.tok.sentence !== -1);
       seen.set(k, [...prev, c]);
       if (!prev.length) continue;
       const need = (docFreq.get(k) ?? 0) >= topicMin ? 2 : 1;
@@ -203,7 +203,7 @@ export function detectRepetition(markdown: string, opts: RepetitionOptions = {})
       message: M.rep(first.tok.text, n, span),
       rationale: M.repWhy,
       // Closer = more noticeable.
-      confidence: Math.round((0.6 + 0.35 * (1 - (c.at - best.prev[best.prev.length - 1].at) / window)) * 100) / 100,
+      confidence: Math.round((0.6 + 0.35 * (1 - (c.at - best.prev[best.prev.length - 1].at) / windowSpan)) * 100) / 100,
       replacement: null,
       agentId: REPETITION_AGENT,
       model: "rules",

@@ -8,7 +8,8 @@
 import { describe, expect, it } from "vitest";
 import { act, fireEvent, render } from "@testing-library/react";
 import axe from "axe-core";
-import { argumentBoxes, argumentGraph, argumentToJsonCanvas, argumentTypes, layoutArgument, linkTargets, readingOrder, unsupportedClaims, type ArgNoteInput } from "../argument/argumentMap";
+import { argumentTypes } from "../argument/argumentTypes";
+import { argumentBoxes, argumentGraph, argumentToJsonCanvas, layoutArgument, linkTargets, readingOrder, unsupportedClaims, type ArgNoteInput } from "../argument/argumentMap";
 import { ArgumentMapView, frontmatterOf, parseArgumentBlock, relationLabels } from "../viz/ArgumentMapBlock";
 import { loadTypeRegistry, typesOfNote } from "../types/typeRegistry";
 import { parseJsonCanvas, jsonCanvasToExcalidraw } from "../canvas/jsonCanvas";

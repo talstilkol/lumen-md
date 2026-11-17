@@ -11,7 +11,7 @@ import { explainError } from "../../lib/userError";
 import { useAppStore } from "../../store/useStore";
 import { cancellable, type CommandContext } from "./context";
 import type { WritingSuggestion } from "../../agents/writing/suggestionShape";
-import type { ReportLabels } from "../../agents/writing/stage";
+import type { ReportLabels } from "../../agents/writingReview";
 import "./writingChecksStrings";
 
 type Ctx = Pick<CommandContext, "getEditorView" | "liveDoc">;
@@ -47,7 +47,7 @@ async function stageAndTell(sugs: WritingSuggestion[], texts: Map<string, string
     showAiToast(t("writingCheck.none"), "success");
     return;
   }
-  const [{ stageWritingSuggestions, REPORT_DIR }, ws] = await Promise.all([import("../../agents/writing/stage"), import("../../storage/workspace")]);
+  const [{ stageWritingSuggestions, REPORT_DIR }, ws] = await Promise.all([import("../../agents/writingReview"), import("../../storage/workspace")]);
   const path = `${REPORT_DIR}/${agentId}-${today()}.md`;
   const before = (await ws.workspaceHasFile(path).catch(() => false)) ? await ws.readWorkspaceFile(path) : null;
   const r = stageWritingSuggestions({ suggestions: sugs, texts, agentId, tool: `writing.${agentId}`, labels, today: today(), reportBefore: before });
@@ -73,7 +73,7 @@ export function consistencyFlow(_ctx: Ctx): Promise<void> {
       import("../../entities/graphData"),
       import("../../agents/writing/consistency/vaultConsistency"),
       import("../../entities/model"),
-      import("../../agents/writing/stage"),
+      import("../../agents/writingReview"),
     ]);
     const g = await loadEntityGraph();
     const texts = new Map([...g.texts].filter(([p]) => p.endsWith(".md") && !p.startsWith(`${ENTITY_ROOT}/`) && !p.startsWith(`${REPORT_DIR}/`)));
@@ -171,7 +171,7 @@ export function harperFlow(ctx: Ctx): Promise<void> {
     return Promise.resolve();
   }
   return run(async (signal) => {
-    const { harperLints, harperSuggestions } = await import("../../agents/writing/harper/harperService");
+    const { harperLints, harperSuggestions } = await import("../../ai/harper/harperService");
     if ((await harperLints("Harper check.", { signal })) === null) {
       showAiToast(t("writingCheck.harperMissing"), "info");
       return;

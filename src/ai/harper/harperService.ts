@@ -4,10 +4,14 @@
  * `harperLints` resolves to null when harper.js is not installed in this
  * build (the editor keeps its other English checks).
  */
-import type { GrammarMatch } from "../../../ai/grammar";
-import { englishSpans, toGrammarMatches, toSuggestions, type LintData } from "./harperEngine";
-import type { WorkerReply, WorkerRequest } from "./harperWorkerCore";
-import type { WritingSuggestion } from "../suggestionShape";
+import type { GrammarMatch } from "../grammar";
+import { detectLanguage } from "../../text/langId";
+import { englishSpans, toGrammarMatches, toSuggestions, type LintData } from "../../agents/writing/harper/harperEngine";
+import type { WorkerReply, WorkerRequest } from "../../agents/writing/harper/harperWorkerCore";
+
+/** The language id this host gives the engine (the engine itself loads no package: W1's static check). */
+const englishGuess = (run: string) => detectLanguage(run, { prefer: ["en"] });
+import type { WritingSuggestion } from "../../agents/writing/suggestionShape";
 
 type Post = (req: WorkerRequest) => void;
 
@@ -82,7 +86,7 @@ export const __deliver = (r: WorkerReply): void => {
 /** Harper's suggestions for the English runs of `text` (empty when Harper is not installed). */
 export async function harperSuggestions(text: string, opts: { signal?: AbortSignal; send?: Post } = {}): Promise<WritingSuggestion[]> {
   const out: WritingSuggestion[] = [];
-  for (const span of englishSpans(text)) {
+  for (const span of englishSpans(text, 3, englishGuess)) {
     const part = text.slice(span.from, span.to);
     const r = await harperLints(part, opts);
     if (!r) return [];

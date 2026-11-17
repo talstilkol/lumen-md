@@ -9,7 +9,8 @@ import { createRoot } from "react-dom/client";
 import { t, getLocale } from "../i18n";
 import { Modal } from "./Modal";
 import { useAppStore } from "../store/useStore";
-import { goalProgress, loadGoalLog, parseGoal, removeGoal, weeklyReport, type NoteGoal } from "../agents/writing/goals/goals";
+import { goalProgress, parseGoal, removeGoal, weeklyReport, type NoteGoal } from "../agents/writing/goals/goals";
+import { loadGoalLog } from "./writingGoalLog";
 import { setFrontmatterField } from "../ai/batchWrites";
 import "./goalsDialogStrings";
 

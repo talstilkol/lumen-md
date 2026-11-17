@@ -26,7 +26,7 @@
  * 0.39·(words/sentences) + 11.8·(syllables/words) − 15.59, with a rule-based
  * syllable count. Used by W13.R2 (focus overlay) and W13.W14 (goals).
  */
-import { frequencyKnown, type FrequencyList } from "../../../ai/hebrewFreq";
+import { frequencyKnown, type FrequencyList } from "../../../ai/hebrewFreqKnown";
 import { STOP, plain, sentences } from "../textTools";
 import model from "./hebrewModel.json";
 

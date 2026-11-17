@@ -13,49 +13,29 @@
  *    returns valid suggestions — and no trap fired.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import ts from "typescript";
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
 import { writingAgents } from "../agents/writing/agent";
 import "../agents/writing/agents";
 import { LOCAL_EXECUTORS, writingDefinition, type LocalModel } from "../agents/writing/model";
 import { validateSuggestion } from "../agents/writing/suggestion";
-
-const ROOT = join(__dirname, "..");
-const WRITING = join(ROOT, "agents/writing");
-const NET_IDS = new Set(["fetch", "XMLHttpRequest", "WebSocket", "EventSource", "sendBeacon", "Worker", "SharedWorker", "importScripts", "RTCPeerConnection", "navigator"]);
-const NET_MODULES = [/(^|\/)ai\/llm$/, /(^|\/)ai\/(?:anthropic|gemini|mistral|openai)Provider$/, /^node:(?:http|https|net|dgram|tls)$/, /^(?:axios|ky|got|node-fetch|undici)$/, /(^|\/)lib\/net/, /(^|\/)plugin-http$/];
-
-function tsFiles(dir: string): string[] {
-  return readdirSync(dir).flatMap((f) => {
-    const p = join(dir, f);
-    return statSync(p).isDirectory() ? tsFiles(p) : /\.tsx?$/.test(f) ? [p] : [];
-  });
-}
-
-/** Every network use in these sources (path → text), as `file:line what`. */
-export function networkUsesIn(sources: ReadonlyMap<string, string>): string[] {
-  const out: string[] = [];
-  for (const [file, src] of sources) {
-    const sf = ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true, file.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
-    const at = (n: ts.Node) => `${file}:${sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1}`;
-    const visit = (n: ts.Node): void => {
-      if (ts.isIdentifier(n) && NET_IDS.has(n.text)) out.push(`${at(n)} ${n.text}`);
-      if ((ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n) || ts.isTemplateHead(n)) && /\b(?:https?|wss?):\/\//.test(n.text)) out.push(`${at(n)} URL ${n.text.slice(0, 40)}`);
-      const spec = ts.isImportDeclaration(n) && ts.isStringLiteral(n.moduleSpecifier) && !n.importClause?.isTypeOnly ? n.moduleSpecifier.text : ts.isCallExpression(n) && n.expression.kind === ts.SyntaxKind.ImportKeyword && n.arguments[0] && ts.isStringLiteral(n.arguments[0]) ? n.arguments[0].text : null;
-      if (spec && NET_MODULES.some((re) => re.test(spec))) out.push(`${at(n)} imports ${spec}`);
-      ts.forEachChild(n, visit);
-    };
-    visit(sf);
-  }
-  return out;
-}
+import { diskModules, networkUsesIn, writingSources, type ModuleLoader } from "./helpers/writingStatic";
 
 describe("static: no network from src/agents/writing (W13.W1)", () => {
   it("no file names a network API or a network module", () => {
-    const sources = new Map(tsFiles(WRITING).map((f) => [relative(ROOT, f), readFileSync(f, "utf8")]));
+    const sources = writingSources();
     expect(sources.size).toBeGreaterThan(5);
-    expect(networkUsesIn(sources)).toEqual([]);
+    expect(networkUsesIn(sources, diskModules)).toEqual([]);
+  });
+
+  it("a helper an agent imports is held to it too, down the chain (INT7: one check for W13.W1–W15)", () => {
+    const files: Record<string, string> = {
+      "lib/pure.ts": "export const f = (s: string) => s.trim();",
+      "lib/leaky.ts": 'import { send } from "./wire";\nexport const f = (s: string) => send(s);',
+      "lib/wire.ts": 'export const send = (s: string) => fetch("/log", { method: "POST", body: s });',
+    };
+    const load: ModuleLoader = (m) => (files[`${m}.ts`] !== undefined ? { file: `${m}.ts`, text: files[`${m}.ts`] } : null);
+    const agent = (spec: string) => new Map([["agents/writing/agents/x.ts", `import { f } from "${spec}";\nexport const run = (t: string) => f(t);`]]);
+    expect(networkUsesIn(agent("../../../lib/pure"), load)).toEqual([]);
+    expect(networkUsesIn(agent("../../../lib/leaky"), load)).toEqual(["agents/writing/agents/x.ts:1 imports ../../../lib/leaky (lib/leaky → lib/wire.ts:1 fetch)"]);
   });
 
   it("the check fails on an agent that fetches", () => {

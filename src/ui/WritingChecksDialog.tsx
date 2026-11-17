@@ -2,7 +2,7 @@
  * The local writing checks dialog (W13.W11 repetition and clichés, W13.W15
  * loanwords): every finding of the open note with the sentence it is in;
  * "Go to" selects it in the editor, "Ignore" switches the word / phrase /
- * term off for good (the user's lists, ../agents/writing/checkSettings),
+ * term off for good (the user's lists, ./writingCheckSettings),
  * and a finding with a fix is *proposed*, never applied: it goes to the
  * review panel, where it is accepted or rejected on its own, with its diff,
  * as one undo step. No model and no network: rule engines on this device.
@@ -16,9 +16,8 @@ import { t } from "../i18n";
 import { showAiToast } from "./AiToast";
 import { Modal } from "./Modal";
 import type { WritingSuggestion } from "../agents/writing/writingSuggestion";
-import { toRangeProposal } from "../agents/writing/writingSuggestion";
-import { loadWritingChecks, saveWritingChecks, type WritingCheckSettings } from "../agents/writing/checkSettings";
-import { stageChange } from "../agents/staging";
+import { loadWritingChecks, saveWritingChecks, type WritingCheckSettings } from "./writingCheckSettings";
+import { stageFinding } from "../agents/writingReview";
 import "./writingChecksDialogStrings";
 
 export type WritingCheckId = "repetition" | "loanwords";
@@ -93,10 +92,9 @@ export function WritingChecksDialogImpl({ target, onClose }: { target: WritingCh
     let n = 0;
     const done = new Set(staged);
     for (const s of list) {
-      const p = toRangeProposal(s, text, target.path);
-      if (!p) continue;
       try {
-        stageChange(p, { tool: `writing.${target.check}`, agentId: s.agentId });
+        // The one review path: the finding is made a W1 suggestion, then staged (agents/writingReview).
+        if (!stageFinding(s, text, target.path, { tool: `writing.${target.check}` })) continue;
         done.add(`${s.range.from}:${s.kind}`);
         n++;
       } catch (e) {
@@ -145,7 +143,7 @@ export function WritingChecksDialogImpl({ target, onClose }: { target: WritingCh
           {target.check === "repetition" && (
             <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
               {t("wchk.window")}
-              <input type="number" min={5} max={500} step={5} value={settings.window} style={{ width: 70 }} onChange={(e) => update({ ...settings, window: Math.min(500, Math.max(5, Number(e.target.value) || 50)) })} />
+              <input type="number" min={5} max={500} step={5} value={settings.windowWords} style={{ width: 70 }} onChange={(e) => update({ ...settings, windowWords: Math.min(500, Math.max(5, Number(e.target.value) || 50)) })} />
             </label>
           )}
           {target.check === "loanwords" && (

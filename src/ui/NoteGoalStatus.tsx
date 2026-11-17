@@ -8,7 +8,8 @@
 import { useEffect, useMemo } from "react";
 import { t, getLocale } from "../i18n";
 import { useAppStore } from "../store/useStore";
-import { goalProgress, loadGoalLog, parseGoal, recordProgress, saveGoalLog } from "../agents/writing/goals/goals";
+import { goalProgress, parseGoal, recordProgress } from "../agents/writing/goals/goals";
+import { loadGoalLog, saveGoalLog } from "./writingGoalLog";
 import "./goalsDialogStrings";
 
 export default function NoteGoalStatus({ text }: { text: string }) {

@@ -6,7 +6,8 @@
  * work with the defaults when storage is unavailable.
  */
 export interface WritingCheckSettings {
-  window: number;
+  /** Words between two uses that still count as too soon (the repetition check's window). */
+  windowWords: number;
   ignoredLemmas: string[];
   userCliches: string[];
   disabledCliches: string[];
@@ -17,7 +18,7 @@ export interface WritingCheckSettings {
 
 export const WRITING_CHECKS_KEY = "lumen.writingChecks.v1";
 
-export const DEFAULT_WRITING_CHECKS: WritingCheckSettings = { window: 50, ignoredLemmas: [], userCliches: [], disabledCliches: [], register: "everyday", disabledTerms: [] };
+export const DEFAULT_WRITING_CHECKS: WritingCheckSettings = { windowWords: 50, ignoredLemmas: [], userCliches: [], disabledCliches: [], register: "everyday", disabledTerms: [] };
 
 const strings = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === "string").slice(0, 2000) : []);
 
@@ -25,9 +26,9 @@ export function loadWritingChecks(): WritingCheckSettings {
   try {
     const raw = JSON.parse(localStorage.getItem(WRITING_CHECKS_KEY) ?? "null") as Partial<WritingCheckSettings> | null;
     if (!raw || typeof raw !== "object") return { ...DEFAULT_WRITING_CHECKS };
-    const w = Number(raw.window);
+    const w = Number(raw.windowWords ?? (raw as { window?: unknown }).window);
     return {
-      window: Number.isFinite(w) && w >= 5 && w <= 500 ? Math.round(w) : 50,
+      windowWords: Number.isFinite(w) && w >= 5 && w <= 500 ? Math.round(w) : 50,
       ignoredLemmas: strings(raw.ignoredLemmas),
       userCliches: strings(raw.userCliches),
       disabledCliches: strings(raw.disabledCliches),

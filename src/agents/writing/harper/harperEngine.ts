@@ -15,11 +15,10 @@
  * - `harperCheck`: both together, over any linter with harper.js's
  *   `lint(text)` → `Lint[]` interface, with an AbortSignal.
  *
- * The linter itself runs in a worker (./harper.worker.ts) that loads
+ * The linter itself runs in a worker (src/ai/harper/harper.worker.ts) that loads
  * harper.js from the app's own origin (vendor/harper/, put there on the Mac
  * by scripts/writing/vendor-harper.mjs): no network beyond the app's files.
  */
-import { detectLanguage } from "../../../text/langId";
 import type { GrammarMatch } from "../../../ai/grammar";
 import { conf, type WritingSuggestion } from "../suggestionShape";
 import { throwIfAborted } from "../textTools";
@@ -95,13 +94,17 @@ const CODE = /```[\s\S]*?```|`[^`\n]*`|https?:\/\/\S+|\[\[[^\]]*\]\]|\]\([^)]*\)
  * of at least three words that the language id calls English (or that has
  * no other reading). A whole English paragraph is one run.
  */
-export function englishSpans(text: string, minWords = 3): Span[] {
+/** A language guess for a Latin run (the host passes text/langId's; without one every run counts as English). */
+export type LangGuess = (run: string) => { lang: string; confident: boolean };
+const noGuess: LangGuess = () => ({ lang: "und", confident: false });
+
+export function englishSpans(text: string, minWords = 3, guess: LangGuess = noGuess): Span[] {
   const masked = text.replace(CODE, (m) => " ".repeat(m.length));
   const out: Span[] = [];
   for (const m of masked.matchAll(LATIN_RUN)) {
     const run = m[0];
     if (run.split(/\s+/).filter((w) => /[A-Za-z]/.test(w)).length < minWords) continue;
-    const g = detectLanguage(run, { prefer: ["en"] });
+    const g = guess(run);
     if (g.lang !== "en" && g.confident) continue;
     const from = m.index ?? 0;
     out.push({ from, to: from + run.length });
@@ -154,9 +157,9 @@ export function toGrammarMatches(sugs: readonly WritingSuggestion[]): GrammarMat
 }
 
 /** Lint the English runs of `text` with `linter`; offsets are into `text`. */
-export async function harperCheck(text: string, linter: HarperLinterLike, opts: { signal?: AbortSignal; model?: string } = {}): Promise<WritingSuggestion[]> {
+export async function harperCheck(text: string, linter: HarperLinterLike, opts: { signal?: AbortSignal; model?: string; guess?: LangGuess } = {}): Promise<WritingSuggestion[]> {
   const out: WritingSuggestion[] = [];
-  for (const span of englishSpans(text)) {
+  for (const span of englishSpans(text, 3, opts.guess)) {
     throwIfAborted(opts.signal);
     const part = text.slice(span.from, span.to);
     const lints = (await linter.lint(part, { language: "plaintext" })).map(lintData);

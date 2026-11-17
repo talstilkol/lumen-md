@@ -1,46 +1,21 @@
 /**
- * The suggestion shape the wave-13 checkers of lane L5 (W13.W6–W10) emit.
+ * The suggestion shape the wave-13 checkers of lane L5 (W13.W6–W10) emit:
+ * W13.W1's `CheckerFinding` (src/agents/writing/suggestion.ts) — W1's
+ * fields with the checker's own finding kind, the note's path and the
+ * paragraph links. It reaches the user only as a W1 suggestion, through
+ * the one review path (src/agents/writingReview.ts: `fromFinding`, then the
+ * review panel).
  *
- * It is the W13.W1 contract as its plan entry states it —
- * `{range, kind, message, rationale, confidence, replacement, agentId, model}` —
- * written down here because W13.W1 (`src/agents/writing/suggestion.ts`) is
- * being built in parallel. It is structural on purpose: once W1 lands, its
- * `Suggestion` type accepts these objects unchanged, and this file becomes a
- * re-export.
- *
- * Rules every checker here keeps (W1's static ban, asserted in each test):
+ * Rules every checker here keeps (W1's static checks, one helper for every
+ * writing agent: src/__tests__/helpers/writingStatic.ts):
  * - a checker returns suggestions; it never writes a file;
  * - `replacement` is null for a comment (W7, W8 and most of W6 are comments);
  * - `rationale` always says why, in the language of the text.
  */
+import type { CheckerFinding, TextRange } from "./suggestion";
 
-export interface SuggestionRange {
-  /** Offset of the first character, in the note's text. */
-  from: number;
-  /** Offset after the last character. */
-  to: number;
-}
-
-export interface WritingSuggestion {
-  range: SuggestionRange;
-  /** What the checker found ("fact-conflict", "heading-skip", "unsupported-claim" …). */
-  kind: string;
-  /** One short line for the underline's tooltip. */
-  message: string;
-  /** Why: the evidence, both sources, the rule. Never empty. */
-  rationale: string;
-  /** 0..1. */
-  confidence: number;
-  /** The text to put in `range` on accept; null = a comment only (no rewrite). */
-  replacement: string | null;
-  agentId: string;
-  /** The model that took part, or "rules" when none did. */
-  model: string;
-  /** Vault path of the note `range` is in (vault-wide checkers). */
-  path?: string;
-  /** Paragraph links (`path#^anchor`) the suggestion rests on: W6 gives two. */
-  links?: string[];
-}
+export type SuggestionRange = TextRange;
+export type WritingSuggestion = CheckerFinding;
 
 export const RULES_MODEL = "rules";
 

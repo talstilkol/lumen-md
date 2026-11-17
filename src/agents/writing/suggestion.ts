@@ -112,6 +112,71 @@ export function makeSuggestion(text: string, d: SuggestionDraft): WritingSuggest
   return s;
 }
 
+/**
+ * What a rule-based checker of W13.W6–W15 emits (L5's `suggestionShape`,
+ * L6's `writingSuggestion` are this type): W1's fields with the checker's
+ * own finding kind ("fact-conflict", "heading-skip", "cliche" …), and where
+ * it points. `fromFinding` makes it a W1 suggestion — the finding kind
+ * becomes `ruleId`, the W1 kind comes from it (or from the agent) — and that
+ * is the only form a finding reaches the review (agents/writingReview.ts).
+ */
+export interface CheckerFinding extends Omit<SuggestionDraft, "kind" | "ruleId" | "id"> {
+  kind: string;
+  /** Vault path of the note `range` is in (vault-wide checkers). */
+  path?: string;
+  /** Paragraph links (`path#^anchor`) the finding rests on. */
+  links?: string[];
+  /** Check-specific details (the lemma, the phrase, the term …). */
+  data?: Record<string, unknown>;
+}
+
+/** A W1 suggestion that came from a checker finding, with where it points. */
+export type FindingSuggestion = WritingSuggestion & Pick<CheckerFinding, "path" | "links" | "data">;
+
+const LOGIC = ["ad-hominem", "appeal-to-popularity", "false-dilemma", "hasty-generalization", "logical-leap", "map-unsupported", "post-hoc", "slippery-slope", "straw-man", "unsupported-claim"];
+const STRUCTURE = ["duplicate-heading", "empty-section", "heading-skip", "lone-subheading", "long-paragraph", "no-conclusion", "no-intro", "topic-sentence"];
+const CONSISTENCY = ["fact-conflict", "foreign-script-name", "name-variant", "term-variant"];
+/** The finding kinds of W13.W6–W15, as W1 kinds. */
+export const FINDING_KINDS: Readonly<Record<string, SuggestionKind>> = {
+  ...Object.fromEntries(LOGIC.map((k) => [k, "logic"])),
+  ...Object.fromEntries(STRUCTURE.map((k) => [k, "structure"])),
+  ...Object.fromEntries(CONSISTENCY.map((k) => [k, "consistency"])),
+  readability: "readability",
+  repetition: "repetition",
+  doubled: "redundancy",
+  cliche: "wordChoice",
+  loanword: "wordChoice",
+};
+/** A checker's group, as a W1 kind, for a finding kind not listed above. */
+export const CHECKER_KINDS: Readonly<Record<string, SuggestionKind>> = {
+  consistency: "consistency",
+  structureCritic: "structure",
+  argumentChecker: "logic",
+  readability: "readability",
+  harperGrammar: "grammar",
+  repetition: "repetition",
+  loanwords: "wordChoice",
+};
+
+/** The W1 kind of a finding (Harper's `grammar:<lint>` is grammar); undefined = not a known finding. */
+export function findingKind(f: Pick<CheckerFinding, "kind" | "agentId">): SuggestionKind | undefined {
+  if (isKind(f.kind)) return f.kind;
+  if (f.kind.startsWith("grammar:")) return "grammar";
+  return FINDING_KINDS[f.kind] ?? CHECKER_KINDS[f.agentId];
+}
+
+/** The finding as a checked W1 suggestion for `text` (throws SuggestionError when it does not fit it). */
+export function fromFinding(text: string, f: CheckerFinding): FindingSuggestion {
+  const kind = findingKind(f);
+  if (!kind) throw new SuggestionError(`${f.agentId}: ${f.kind} is not a known finding kind`);
+  const { path, links, data, kind: ruleId, ...rest } = f;
+  const s: FindingSuggestion = makeSuggestion(text, { ...rest, kind, ruleId, id: `${f.agentId}:${ruleId}:${path ?? ""}:${f.range.from}-${f.range.to}` });
+  if (path !== undefined) s.path = path;
+  if (links) s.links = links;
+  if (data) s.data = data;
+  return s;
+}
+
 /** One word-level change inside a suggestion, which the user can take or leave on its own. */
 export interface Hunk {
   index: number;

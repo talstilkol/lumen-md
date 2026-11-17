@@ -6,7 +6,8 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { countWords } from "../book/wordCount";
-import { GOAL_LOG_KEY, goalProgress, loadGoalLog, parseGoal, recordProgress, removeGoal, saveGoalLog, weeklyReport, type GoalLog } from "../agents/writing/goals/goals";
+import { goalProgress, parseGoal, recordProgress, removeGoal, weeklyReport, type GoalLog } from "../agents/writing/goals/goals";
+import { GOAL_LOG_KEY, loadGoalLog, saveGoalLog } from "../ui/writingGoalLog";
 import { fleschKincaid, readabilityOf, setReadabilityEngine, syllables, toneOf } from "../agents/writing/goals/readability";
 import { goalValue } from "../ui/GoalsDialog";
 import { readFileSync } from "node:fs";
@@ -153,7 +154,7 @@ describe("W13.W14 stays on this device", () => {
   });
 
   it("no network API in the goal modules or their UI", () => {
-    for (const f of ["agents/writing/goals/goals.ts", "agents/writing/goals/readability.ts", "ui/NoteGoalStatus.tsx", "ui/GoalsDialog.tsx"]) {
+    for (const f of ["agents/writing/goals/goals.ts", "agents/writing/goals/readability.ts", "ui/NoteGoalStatus.tsx", "ui/GoalsDialog.tsx", "ui/writingGoalLog.ts"]) {
       const src = readFileSync(join(__dirname, "..", f), "utf8");
       expect(src, f).not.toMatch(/\bfetch\(|XMLHttpRequest|WebSocket|sendBeacon|EventSource/);
     }

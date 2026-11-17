@@ -116,7 +116,6 @@ const ORDER: Record<Level, number> = { easy: 0, medium: 1, hard: 2 };
 
 // ── The local log and the weekly report ─────────────────────────────────
 
-export const GOAL_LOG_KEY = "lumen.writingGoals.log.v1";
 /** Edits further apart than this are not counted as writing time. */
 export const IDLE_MS = 60_000;
 const KEEP_DAYS = 62;
@@ -148,24 +147,6 @@ export function recordProgress(log: GoalLog, note: string, words: number, now: D
   const cutoff = dayKey(new Date(t - KEEP_DAYS * 86_400_000));
   for (const d of Object.keys(next)) if (d < cutoff) delete next[d];
   return next;
-}
-
-export function loadGoalLog(): GoalLog {
-  try {
-    const v = JSON.parse(localStorage.getItem(GOAL_LOG_KEY) ?? "{}");
-    return v && typeof v === "object" && !Array.isArray(v) ? (v as GoalLog) : {};
-  } catch {
-    // why: storage blocked or corrupt: start a new log
-    return {};
-  }
-}
-
-export function saveGoalLog(log: GoalLog): void {
-  try {
-    localStorage.setItem(GOAL_LOG_KEY, JSON.stringify(log));
-  } catch {
-    // why: storage blocked (private window): progress lasts for this session only
-  }
 }
 
 export interface WeeklyReport {

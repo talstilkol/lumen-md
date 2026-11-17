@@ -7,7 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { detectLoanwords, loanwordEntries, noteRegister, parseLoanwords } from "../agents/writing/loanwords";
 import { LOANWORDS_LICENSE } from "../agents/writing/data/loanwords";
-import { toRangeProposal } from "../agents/writing/writingSuggestion";
+import { toRangeProposal } from "../agents/writingReview";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 

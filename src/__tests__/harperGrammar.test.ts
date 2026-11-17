@@ -16,7 +16,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { codePointOffsets, englishSpans, harperCheck, lintLatency, recallOn, toGrammarMatches, type HarperLint, type HarperLinterLike } from "../agents/writing/harper/harperEngine";
 import { createHarperHost, type HarperModule } from "../agents/writing/harper/harperWorkerCore";
-import { __deliver, __setHarperTransport, harperGrammarMatches, harperSuggestions } from "../agents/writing/harper/harperService";
+import { __deliver, __setHarperTransport, harperGrammarMatches, harperSuggestions } from "../ai/harper/harperService";
 import { checkGrammar, clearGrammarCache } from "../ai/grammar";
 import { harperSet } from "./fixtures/writing/harperSet";
 

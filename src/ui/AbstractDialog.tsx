@@ -13,7 +13,8 @@ import { Modal } from "./Modal";
 import { showAiToast } from "./AiToast";
 import { abstractMarkdown, type AbstractResult, type AnchoredSentence } from "../agents/writing/abstractWriter";
 import { noteParagraphs } from "../ai/paragraphAnchors";
-import { rangeContext, stageChange, textFingerprint } from "../agents/staging";
+import { makeSuggestion } from "../agents/writing/suggestion";
+import { stageSuggestion } from "../agents/writingReview";
 import "./abstractDialogStrings";
 
 export interface AbstractTarget {
@@ -30,10 +31,12 @@ export function insertionPoint(text: string): number {
   return h1 ? at + h1[0].length : at;
 }
 
-function stage(target: AbstractTarget, from: number, to: number, after: string, summary: string): boolean {
+/** The one review path (agents/writingReview): a W1 suggestion for the range, staged; nothing is written here. */
+function stage(target: AbstractTarget, from: number, to: number, after: string, summary: string, engine: AbstractResult["engine"]): boolean {
   const text = target.getContent();
   try {
-    stageChange({ kind: "range", path: target.path, from, to, before: text.slice(from, to), after, context: rangeContext(text, from, to), basis: textFingerprint(text), summary } as never, { tool: "writing.abstract", agentId: "abstractWriter" });
+    const s = makeSuggestion(text, { range: { from, to }, kind: "structure", message: summary, rationale: summary, confidence: 1, replacement: after, agentId: "abstractWriter", model: engine === "model" ? "abstractWriter" : "rules", ruleId: "abstract" });
+    if (!stageSuggestion(s, text, target.path, { tool: "writing.abstract" })) return false;
     window.dispatchEvent(new Event("lumen-open-agent-review"));
     return true;
   } catch (e) {
@@ -64,13 +67,13 @@ export function AbstractView({ r, target, onClose }: { r: AbstractResult; target
     const text = target.getContent();
     const fm = /^---\r?\n[\s\S]*?\r?\n---[ \t]*\r?\n/.exec(text)?.[0].length ?? 0;
     const h1 = /^#\s[^\n]*/m.exec(text.slice(fm));
-    const ok = h1 && text.slice(fm, fm + h1.index).trim() === "" ? stage(target, fm + h1.index, fm + h1.index + h1[0].length, `# ${title}`, t("abs.titleSummary", { title })) : stage(target, fm, fm, `# ${title}\n\n`, t("abs.titleSummary", { title }));
+    const ok = h1 && text.slice(fm, fm + h1.index).trim() === "" ? stage(target, fm + h1.index, fm + h1.index + h1[0].length, `# ${title}`, t("abs.titleSummary", { title }), r.engine) : stage(target, fm, fm, `# ${title}\n\n`, t("abs.titleSummary", { title }), r.engine);
     if (ok) setDone(new Set([...done, `t:${title}`]));
   };
   const insert = () => {
     const text = target.getContent();
     const at = insertionPoint(text);
-    if (stage(target, at, at, `${at && text[at - 1] !== "\n" ? "\n" : ""}\n${abstractMarkdown(r, target.lang)}\n\n`, t("abs.insertSummary"))) setDone(new Set([...done, "abstract"]));
+    if (stage(target, at, at, `${at && text[at - 1] !== "\n" ? "\n" : ""}\n${abstractMarkdown(r, target.lang)}\n\n`, t("abs.insertSummary"), r.engine)) setDone(new Set([...done, "abstract"]));
   };
   const part = (k: "background" | "method" | "findings") =>
     r.parts && r.parts[k].length > 0 && (

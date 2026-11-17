@@ -131,7 +131,7 @@ export async function checkGrammar(
     const { checkEnglishParagraphs } = await import("./englishSpellService");
     const spelling = await checkEnglishParagraphs(trimmed).catch(() => [] as GrammarMatch[]);
     // W13.W10: Harper's English grammar on this device, when it is installed in this build ([] otherwise).
-    const harper = await import("../agents/writing/harper/harperService").then((m) => m.harperGrammarMatches(trimmed, opts.signal));
+    const harper = await import("./harper/harperService").then((m) => m.harperGrammarMatches(trimmed, opts.signal));
     const local = mergeMatches(harper, spelling);
     const matches = opts.allowModel ? mergeMatches(local, await checkWithModel(trimmed, language, opts.signal)) : local;
     remember(cacheKey, matches);

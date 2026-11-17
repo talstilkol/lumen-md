@@ -39,7 +39,7 @@ vi.mock("../ui/AiToast", () => ({ showAiToast: (m: string) => toasts.push(m) }))
 import { approveStagedChange, clearStagedChanges, listStagedChanges } from "../agents/staging";
 import { argumentFlow, consistencyFlow, harperFlow, readabilityFlow, readabilityLine, reportLabels, structureFlow } from "../commands/domains/writingChecksActions";
 import { buildWritingCheckCommands } from "../commands/domains/writingChecks";
-import { MAX_STAGED, REPORT_DIR, renderLink, stageWritingSuggestions } from "../agents/writing/stage";
+import { MAX_STAGED, REPORT_DIR, renderLink, stageWritingSuggestions } from "../agents/writingReview";
 import { AgentReviewPanel } from "../ui/AgentReviewPanel";
 import { entityNotePath } from "../entities/model";
 import type { CommandContext } from "../commands/domains/context";
@@ -56,10 +56,10 @@ beforeEach(() => {
 afterEach(() => clearStagedChanges());
 
 describe("the palette", () => {
-  it("five commands, each one lazy (the action loads its chunk)", () => {
+  it("L5's five commands, then L6's four, in one builder; each one lazy (the action loads its chunk)", () => {
     const cmds = buildWritingCheckCommands({ getEditorView: () => null, liveDoc: () => ({}) } as unknown as CommandContext);
-    expect(cmds.map((c) => c.id)).toEqual(["writing.consistency", "writing.structure", "writing.argument", "writing.readability", "writing.harper"]);
-    for (const c of cmds) {
+    expect(cmds.map((c) => c.id)).toEqual(["writing.consistency", "writing.structure", "writing.argument", "writing.readability", "writing.harper", "writing.repetition", "writing.loanwords", "writing.explainChange", "writing.goals"]);
+    for (const c of cmds.slice(0, 5)) {
       expect(c.label).toMatch(/^Writing: /);
       expect(c.hint?.length).toBeGreaterThan(20);
     }
