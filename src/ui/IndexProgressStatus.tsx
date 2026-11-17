@@ -10,15 +10,20 @@ import { indexProgress, subscribeIndexProgress } from "../storage/indexProgress"
 
 export function IndexProgressStatus() {
   const p = useSyncExternalStore(subscribeIndexProgress, indexProgress, () => null);
-  if (!p) return null;
   const locale = getLocale();
-  const pct = Math.floor((p.done * 100) / Math.max(1, p.total));
+  const pct = p ? Math.floor((p.done * 100) / Math.max(1, p.total)) : 0;
+  // The live region is there before anything is said in it (review 14 Low 8): a region mounted together
+  // with its first text is often not announced.
   return (
-    <span className="sb-item" data-testid="index-progress" title={t("status.indexing.title")}>
-      <span aria-hidden="true">{t("status.indexing", { done: p.done.toLocaleString(locale), total: p.total.toLocaleString(locale) })}</span>
-      <span className="sr-only" role="status">
-        {t("status.indexing.sr", { pct: Math.floor(pct / 25) * 25 })}
+    <>
+      {p && (
+        <span className="sb-item" data-testid="index-progress" title={t("status.indexing.title")}>
+          <span aria-hidden="true">{t("status.indexing", { done: p.done.toLocaleString(locale), total: p.total.toLocaleString(locale) })}</span>
+        </span>
+      )}
+      <span className="sr-only" role="status" data-testid="index-progress-sr">
+        {p ? t("status.indexing.sr", { pct: Math.floor(pct / 25) * 25 }) : ""}
       </span>
-    </span>
+    </>
   );
 }

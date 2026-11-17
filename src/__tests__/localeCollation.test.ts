@@ -26,7 +26,9 @@ describe("name order (acceptance)", () => {
   it("“פתק 2” before “פתק 10”, and “שָׁלוֹם” next to “שלום”", () => {
     applyLocale("he");
     expect(compareNames("פתק 2", "פתק 10")).toBeLessThan(0);
-    expect(compareNames("שָׁלוֹם", "שלום")).toBe(0);
+    // The collator puts them together; compareNames then orders them by code point (review 14 Low 6).
+    expect(nameCollator().compare("שָׁלוֹם", "שלום")).toBe(0);
+    expect(compareNames("שָׁלוֹם", "שלום")).toBe(-compareNames("שלום", "שָׁלוֹם"));
     const sorted = sortByName(["שלום עליכם", "פתק 10", "שלג", "שָׁלוֹם", "פתק 2", "אבא", "שלום"]);
     expect(sorted).toEqual(["אבא", "פתק 2", "פתק 10", "שלג", "שָׁלוֹם", "שלום", "שלום עליכם"]);
     // Code-unit order (what .sort() and the old tree did) puts 10 before 2 and niqqud far away.
@@ -34,7 +36,8 @@ describe("name order (acceptance)", () => {
   });
 
   it("case and accents don't separate names; the UI language's rules apply (ö in German vs Swedish)", () => {
-    expect(compareNames("note", "Note")).toBe(0);
+    expect(nameCollator().compare("note", "Note")).toBe(0);
+    expect(["note", "Zeta", "Note", "alpha"].sort((x, y) => compareNames(x, y))).toEqual(["alpha", "Note", "note", "Zeta"]);
     expect(compareNames("Note 9", "note 10")).toBeLessThan(0);
     expect(compareNames("ö", "z", "de")).toBeLessThan(0);
     expect(compareNames("ö", "z", "sv")).toBeGreaterThan(0);
@@ -156,5 +159,19 @@ describe("the scan: 0 calls without a locale (acceptance)", () => {
     expect(files.length).toBeGreaterThan(1000);
     const found = files.flatMap((f) => localeLessCalls(f, readFileSync(join(ROOT, f), "utf8")));
     expect(found).toEqual([]);
+  });
+});
+
+describe("review 14 Low 6: compareNames has a tie-break", () => {
+  it("names the collator calls equal get one order whatever the input order, and 0 only for the same string", async () => {
+    const { compareNames } = await import("../i18n/collate");
+    for (const [a, b] of [["Note", "note"], ["שָׁלוֹם", "שלום"], ["file1", "file01"], ["résumé", "resume"]]) {
+      expect(compareNames(a, b, "en"), `${a}/${b}`).not.toBe(0);
+      expect(Math.sign(compareNames(a, b, "en"))).toBe(-Math.sign(compareNames(b, a, "en")));
+      expect([b, a].sort((x, y) => compareNames(x, y, "en"))).toEqual([a, b].sort((x, y) => compareNames(x, y, "en")));
+    }
+    expect(compareNames("Note", "Note", "he")).toBe(0);
+    // The collator still decides first: "a2" before "a10", "b" after "A".
+    expect(["a10", "b", "A", "a2"].sort((x, y) => compareNames(x, y, "en"))).toEqual(["A", "a2", "a10", "b"]);
   });
 });
