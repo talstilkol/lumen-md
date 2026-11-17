@@ -18649,6 +18649,79 @@
       "vars": []
     },
     {
+      "key": "timeline.gantt.after",
+      "en": "after {items}",
+      "vars": [
+        "items"
+      ]
+    },
+    {
+      "key": "timeline.gantt.afterCol",
+      "en": "After",
+      "vars": []
+    },
+    {
+      "key": "timeline.gantt.asTable",
+      "en": "Show as a table",
+      "vars": []
+    },
+    {
+      "key": "timeline.gantt.cycle",
+      "en": "{n} items depend on each other in a circle",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "timeline.gantt.done",
+      "en": "done",
+      "vars": []
+    },
+    {
+      "key": "timeline.gantt.end",
+      "en": "End",
+      "vars": []
+    },
+    {
+      "key": "timeline.gantt.group",
+      "en": "Of",
+      "vars": []
+    },
+    {
+      "key": "timeline.gantt.item",
+      "en": "Item",
+      "vars": []
+    },
+    {
+      "key": "timeline.gantt.list",
+      "en": "Items in time order",
+      "vars": []
+    },
+    {
+      "key": "timeline.gantt.show",
+      "en": "Gantt",
+      "vars": []
+    },
+    {
+      "key": "timeline.gantt.start",
+      "en": "Start",
+      "vars": []
+    },
+    {
+      "key": "timeline.gantt.title",
+      "en": "Gantt chart: {n} items",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "timeline.gantt.undated",
+      "en": "{n} without a date are not on the chart",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "timeline.gap.after-death",
       "en": "After the death date",
       "vars": []

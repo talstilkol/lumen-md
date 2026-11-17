@@ -12,11 +12,15 @@
  * Clean reimplementation (design reference only: israelconnect's
  * uncertainty timeline and time slider, AGPL; no code taken).
  */
-import { useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { lazy, Suspense, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { getLocale, t } from "../../i18n";
 import { buildTimeline, checkTimeline, knownOn, spanWords, type TimelineClaim } from "../../entities/temporal";
 import "./timelineStrings";
 import { EmptyState, learnHow } from "../../ui/EmptyState";
+import { ganttFromClaims } from "./gantt";
+
+// W13.G5: ranges and dependencies, on demand.
+const GanttView = lazy(() => import("./GanttView"));
 
 export interface TimelineViewProps {
   claims: readonly TimelineClaim[];
@@ -30,6 +34,7 @@ const btn: React.CSSProperties = { padding: "4px 10px", fontSize: 12, borderRadi
 export function TimelineView({ claims, names, onOpenSource }: TimelineViewProps) {
   const lang = getLocale() === "he" ? "he" : "en";
   const [asOf, setAsOf] = useState("");
+  const [gantt, setGantt] = useState(false);
   const shown = useMemo(() => (asOf ? knownOn(claims, asOf) : [...claims]), [claims, asOf]);
   const line = useMemo(() => buildTimeline(shown), [shown]);
   const gaps = useMemo(() => checkTimeline(shown), [shown]);
@@ -72,13 +77,20 @@ export function TimelineView({ claims, names, onOpenSource }: TimelineViewProps)
             {t("timeline.asOf.clear")}
           </button>
         )}
+        <button type="button" style={btn} aria-pressed={gantt} onClick={() => setGantt((v) => !v)} data-testid="timeline-gantt">
+          {t("timeline.gantt.show")}
+        </button>
       </div>
       {asOf && (
         <p role="status" style={{ margin: 0, color: "hsl(var(--fg-muted))" }}>
           {t("timeline.asOf.note", { day: asOf })}
         </p>
       )}
-      {line.rows.length === 0 && line.undated.length === 0 ? (
+      {gantt && (line.rows.length > 0 || line.undated.length > 0) ? (
+        <Suspense fallback={null}>
+          <GanttView items={ganttFromClaims(shown, names)} onOpen={(i) => i.source && onOpenSource(i.source.note, i.source.anchor)} />
+        </Suspense>
+      ) : line.rows.length === 0 && line.undated.length === 0 ? (
         <EmptyState style={{ padding: 0 }} message={t("timeline.empty")} action={learnHow("workspace/hebrew-calendar")} />
       ) : (
         <ol aria-label={t("timeline.list")} onKeyDown={onKey} data-testid="timeline-rows" style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
