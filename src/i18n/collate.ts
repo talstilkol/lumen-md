@@ -43,9 +43,13 @@ export function nameCollator(locale: string = uiLocale()): Intl.Collator {
   return c;
 }
 
-/** Compare two names for display order in the UI language (or `locale`). */
+/**
+ * Compare two names for display order in the UI language (or `locale`). Names the collator calls equal
+ * ("Note" and "note", "שָׁלוֹם" and "שלום") stay next to each other and are ordered by code point, so a
+ * sort never depends on the order it was given (review 14 Low 6); 0 means the very same string.
+ */
 export function compareNames(a: string, b: string, locale?: string): number {
-  return nameCollator(locale).compare(a ?? "", b ?? "");
+  return nameCollator(locale).compare(a ?? "", b ?? "") || compareCodePoints(a ?? "", b ?? "");
 }
 
 /** A copy of `items` sorted by name (`key` picks it; default: the item itself). Stable. */
