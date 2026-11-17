@@ -1,8 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { testHooks, type LumenTestWindow } from "./_lumen";
 import { axeBlocking, freshApp, runCommand, setNote } from "./_wave12";
+
+// The specs are ES modules (package.json "type": "module"): this file's folder comes from import.meta.url.
+const HERE = fileURLToPath(new URL(".", import.meta.url));
 
 /**
  * W13.R10: the page view shows as many pages as the PDF export prints. Ten
@@ -12,7 +16,7 @@ import { axeBlocking, freshApp, runCommand, setNote } from "./_wave12";
  * document (PrintExport.buildPrintHtml) is printed to PDF by the same
  * Chromium and its pages counted. PDF printing is Chromium-only.
  */
-const FIXTURES = join(__dirname, "fixtures", "paged");
+const FIXTURES = join(HERE, "fixtures", "paged");
 const files = readdirSync(FIXTURES).filter((f) => f.endsWith(".md")).sort();
 
 const pdfPages = (pdf: Buffer) => (pdf.toString("latin1").match(/\/Type\s*\/Page(?![s\w])/g) ?? []).length;

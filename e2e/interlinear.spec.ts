@@ -1,7 +1,11 @@
 import { expect, test } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { axeBlocking, freshApp, runCommand, setNote } from "./_wave12";
+
+// The specs are ES modules (package.json "type": "module"): this file's folder comes from import.meta.url.
+const HERE = fileURLToPath(new URL(".", import.meta.url));
 
 /**
  * W13.R12: the bilingual reader on a bilingual chapter — a Sefaria source
@@ -11,7 +15,7 @@ import { axeBlocking, freshApp, runCommand, setNote } from "./_wave12";
  * interlinear; the keys 1/2/3 switch layouts; source only hides the
  * translation; axe clean; no request.
  */
-const MD = readFileSync(join(__dirname, "fixtures", "interlinear", "bilingual-chapter.md"), "utf8");
+const MD = readFileSync(join(HERE, "fixtures", "interlinear", "bilingual-chapter.md"), "utf8");
 
 for (const locale of ["he", "en"] as const) {
   test(`bilingual chapter (${locale} UI): verse alignment 100%, three layouts, axe`, async ({ page, browserName }) => {

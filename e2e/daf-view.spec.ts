@@ -1,7 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { axeBlocking, freshApp, runCommand, setNote } from "./_wave12";
+
+// The specs are ES modules (package.json "type": "module"): this file's folder comes from import.meta.url.
+const HERE = fileURLToPath(new URL(".", import.meta.url));
 
 /**
  * W13.R11: the page of the Talmud. Berakhot 2a (e2e/fixtures/daf: the
@@ -10,7 +14,7 @@ import { axeBlocking, freshApp, runCommand, setNote } from "./_wave12";
  * right on amud a and on the left on amud b, Tosafot on the other side; the
  * linear alternative passes axe; no request is made.
  */
-const MD = readFileSync(join(__dirname, "fixtures", "daf", "berakhot-2a.md"), "utf8");
+const MD = readFileSync(join(HERE, "fixtures", "daf", "berakhot-2a.md"), "utf8");
 
 async function sides(page: Page) {
   return page.evaluate(() => {
