@@ -8,14 +8,14 @@
  *   1. every JSX element in src/ that sets aria-label and shows text is read
  *      with the TypeScript parser, both strings are resolved from the
  *      English and Hebrew catalogues, and the name must contain the text;
- *   2. the DOM check the browser runs use (src/a11y/wcag22.ts) is tested
+ *   2. the DOM check the browser runs use (src/__tests__/helpers/wcag22.ts) is tested
  *      on real markup here.
  */
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import ts from "typescript";
-import { labelInName, labelInNameViolations, normalizeLabel } from "../a11y/wcag22";
+import { labelInName, labelInNameViolations, normalizeLabel } from "./helpers/wcag22";
 
 const SRC = resolve(__dirname, "..");
 
@@ -131,7 +131,7 @@ describe("2.5.3 Label in Name, over the source (English and Hebrew)", () => {
   }
 });
 
-describe("the DOM check (src/a11y/wcag22.ts)", () => {
+describe("the DOM check (src/__tests__/helpers/wcag22.ts)", () => {
   it("normalises like speech input hears: case, spacing, niqqud, decoration", () => {
     expect(normalizeLabel("  Restore…  ")).toBe("restore");
     expect(normalizeLabel("שָׁלוֹם")).toBe("שלום");

@@ -316,7 +316,7 @@
       },
       "evidence": [
         "src/__tests__/labelInName.test.ts",
-        "src/a11y/wcag22.ts",
+        "src/__tests__/helpers/wcag22.ts",
         "e2e/a11y.spec.ts",
         "docs/a11y/voice-control-protocol.md"
       ]
@@ -668,11 +668,11 @@
       "name": "Target Size (Minimum)",
       "status": "partially-supports",
       "remarks": {
-        "en": "Tab close buttons, the tab menu and a notification's dismiss button are 24 px or larger (W6.30, W13.Y5). A target-size scan with WCAG's spacing exception (src/a11y/wcag22.ts) runs on ten surfaces in the browser gate; it found and fixed the notification's dismiss button.",
-        "he": "כפתורי הסגירה של הלשוניות, תפריט הלשונית וכפתור הסגירה של הודעה הם 24 פיקסלים לפחות (W6.30, W13.Y5). סריקת גודל מטרה עם חריגת הריווח של WCAG (src/a11y/wcag22.ts) רצה על עשרה משטחים בשער הדפדפן; היא מצאה ותיקנה את כפתור הסגירה של ההודעה."
+        "en": "Tab close buttons, the tab menu and a notification's dismiss button are 24 px or larger (W6.30, W13.Y5). A target-size scan with WCAG's spacing exception (src/__tests__/helpers/wcag22.ts) runs on ten surfaces in the browser gate; it found and fixed the notification's dismiss button.",
+        "he": "כפתורי הסגירה של הלשוניות, תפריט הלשונית וכפתור הסגירה של הודעה הם 24 פיקסלים לפחות (W6.30, W13.Y5). סריקת גודל מטרה עם חריגת הריווח של WCAG (src/__tests__/helpers/wcag22.ts) רצה על עשרה משטחים בשער הדפדפן; היא מצאה ותיקנה את כפתור הסגירה של ההודעה."
       },
       "evidence": [
-        "src/a11y/wcag22.ts",
+        "src/__tests__/helpers/wcag22.ts",
         "src/__tests__/wcag22New.test.ts",
         "e2e/a11y.spec.ts"
       ],

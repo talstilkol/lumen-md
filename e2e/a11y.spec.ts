@@ -132,7 +132,7 @@ test("keyboard only: palette, a dialog that keeps focus and gives it back, the s
 });
 
 /**
- * Plan W13.Y3 / W13.Y5: the WCAG 2.2 checks axe can't make (src/a11y/wcag22.ts),
+ * Plan W13.Y3 / W13.Y5: the WCAG 2.2 checks axe can't make (src/__tests__/helpers/wcag22.ts),
  * on the ten surfaces of e2e/_surfaces.ts, in English and Hebrew:
  * 2.5.3 label in name, 2.5.8 target size, 2.4.11 focus not obscured while tabbing.
  */
@@ -145,7 +145,7 @@ for (const lang of ["en", "he"] as const) {
       const close = await openSurface(page, s);
       const scope = s.modal ? '[role="dialog"][aria-modal="true"]' : "body";
       const r = await page.evaluate(async (sel) => {
-        const w = await import("/src/a11y/wcag22.ts");
+        const w = await import("/src/__tests__/helpers/wcag22.ts");
         const root = document.querySelector(sel) ?? document.body;
         return {
           label: w.labelInNameViolations(root).map((v: { visible: string; name: string }) => `“${v.visible}” named “${v.name}”`),
@@ -155,7 +155,7 @@ for (const lang of ["en", "he"] as const) {
       for (let i = 0; i < 10; i++) {
         await page.keyboard.press("Tab");
         const hidden = await page.evaluate(async () => {
-          const w = await import("/src/a11y/wcag22.ts");
+          const w = await import("/src/__tests__/helpers/wcag22.ts");
           const el = document.activeElement;
           return el && el !== document.body && w.focusObscured(el) ? el.outerHTML.slice(0, 90) : null;
         });

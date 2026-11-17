@@ -2,7 +2,7 @@
  * Plan W13.Y5 — the four criteria WCAG 2.2 added (and EN 301 549 v4.1.1
  * adopted) that axe mostly can't check, as tests:
  *
- *   2.5.8 Target Size (Minimum)   the 24 px rule with its spacing exception (src/a11y/wcag22.ts)
+ *   2.5.8 Target Size (Minimum)   the 24 px rule with its spacing exception (src/__tests__/helpers/wcag22.ts)
  *   2.5.7 Dragging Movements      every drag has a single-pointer alternative: tabs (a menu), the sidebar edge (a click)
  *   2.4.11 Focus Not Obscured     notifications move away from the focused control
  *   3.3.8 Accessible Authentication   unlocking E2EE: paste and password managers allowed, a passkey or recovery key instead
@@ -12,7 +12,7 @@ import { createElement as h, Fragment } from "react";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { TARGET_MIN, undersizedTargets, focusObscured } from "../a11y/wcag22";
+import { TARGET_MIN, undersizedTargets, focusObscured } from "./helpers/wcag22";
 import { DocTabs } from "../ui/DocTabs";
 import { CLICK_WIDTHS, nextClickWidth, SidebarResizer } from "../ui/SidebarResizer";
 import { AiToastContainer, overlaps, showAiToast } from "../ui/AiToast";
