@@ -3198,6 +3198,7 @@
   "readingMode.field.nikud": "Niqqud",
   "readingMode.field.pos": "Colour the parts of speech",
   "readingMode.field.rate": "Read-aloud speed",
+  "readingMode.field.sidenotes": "Notes in the margins",
   "readingMode.field.size": "Text size",
   "readingMode.field.spacedHebrew": "Spaced Hebrew (room for niqqud)",
   "readingMode.field.syllables": "Syllables (English) and niqqud (Hebrew)",

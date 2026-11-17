@@ -28,7 +28,8 @@
 .cmp-seg button:last-child { border-start-start-radius: 0; border-end-start-radius: 0; margin-inline-start: -1px; }
 .cmp-opt { display: inline-flex; align-items: center; gap: 4px; }
 .cmp-count { color: hsl(var(--fg-muted)); min-width: 8ch; }
-.cmp-body { flex: 1; min-height: 0; overflow: auto; font-size: 15px; line-height: 1.7; }
+/* Audit r4 A1.6: the note's reading profile (face, size, line height, Hebrew spacing), else the view's own. */
+.cmp-body { flex: 1; min-height: 0; overflow: auto; font-family: var(--reading-font, inherit); font-size: var(--reading-size, 15px); line-height: var(--reading-line-height, 1.7); word-spacing: var(--reading-word-spacing, normal); letter-spacing: var(--reading-letter-spacing, normal); }
 .cmp-grid { display: grid; grid-template-columns: 1fr 1fr; }
 .cmp-row { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
 .cmp-cell { padding: 6px 16px; white-space: pre-wrap; overflow-wrap: anywhere; border-bottom: 1px solid hsl(var(--border) / 0.6); min-width: 0; }

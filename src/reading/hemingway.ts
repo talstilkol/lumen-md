@@ -86,9 +86,22 @@ const HE_COMPLEX: Record<string, string> = {
 const EN_ADVERB_OK = new Set(["only", "early", "family", "reply", "apply", "supply", "fly", "july", "italy", "holy", "ugly", "belly", "jelly", "rally", "ally", "bully", "daily", "weekly", "monthly", "yearly", "likely", "friendly", "lonely", "lovely", "silly", "elderly", "curly", "costly", "holly", "lily", "billy", "emily", "sally", "kelly", "molly", "assembly", "anomaly", "reply", "imply", "rely", "comply", "multiply", "butterfly", "firefly"]);
 const EN_IRREGULAR_PARTICIPLES = "been|done|made|given|taken|seen|known|shown|written|built|found|held|kept|left|lost|paid|said|sold|sent|spent|told|thought|bought|brought|caught|taught|chosen|driven|eaten|forgotten|frozen|hidden|ridden|spoken|stolen|woken|worn|torn|born|drawn|grown|thrown|begun|broken|run|put|set|cut|hit|hurt|let|read|shut|split|spread|understood|won|led|fed|met|felt";
 const EN_PASSIVE = new RegExp(`\\b(am|is|are|was|were|be|been|being|get|gets|got|gotten)\\s+(?:\\w+ly\\s+)?(\\w+ed|${EN_IRREGULAR_PARTICIPLES})\\b`, "gi");
+/**
+ * Audit r4 A1.3: an -ed word after be/get that is an adjective, not a passive ("is red", "am tired",
+ * "is interested in") — unless "by" follows ("was frightened by the noise" is a passive).
+ */
+const EN_ED_NOT_PASSIVE = new Set("red bed fed led wed shed need seed feed speed weed deed greed breed hundred sacred naked wicked rugged ragged beloved aged crooked tired bored interested excited scared worried married surprised pleased satisfied concerned confused embarrassed exhausted frightened amazed annoyed disappointed relaxed ashamed shocked used supposed advanced talented skilled qualified experienced related limited detailed varied complicated sophisticated dedicated determined committed".split(" "));
 // "נכתב על ידי", "הוחלט ע״י", "בוצע ע"י".
 const HE_PASSIVE = /(?:^|[\s(])([א-ת]+)\s+(?:על[\s-]ידי|ע["״]י)(?=[\sא-ת])/g;
-const HE_PASSIVE_VERB = /(?:^|[\s(])((?:ו|ש|כש)?(?:נעשה|נעשתה|נעשו|בוצע|בוצעה|בוצעו|הוחלט|הוחלטה|הוחלטו|הוגש|הוגשה|הוגשו|נקבע|נקבעה|נקבעו|הועבר|הועברה|הועברו|נמסר|נמסרה|נמסרו))(?=[\s.,;:!?]|$)/g;
+/**
+ * Hebrew passive verbs: pu'al/huf'al past forms, and (audit r4 A1.3) common nif'al past verbs —
+ * נשלח, נבנה, נפתחה — inflected (m., f., pl.; ל״ה: נבנה, נבנתה, נבנו). A list, not the pattern נ+root:
+ * נכון, נושא, נקודה start the same way and are not verbs.
+ */
+const HE_NIFAL = "נשלח נבנה נפתח נכתב נאמר נבחר נגנב נהרס נחתם נלקח נמכר נפגע נפצע נרצח נשבר נשמר נתפס נבדק נבחן נדחה נסגר נפתר נקרא נשאל נעצר נחשף נאסר נוצר נערך נכלל נמסר נקבע נעשה נגזר נשכח נזרק נדרש נתבקש נאסף נפרסם".split(" ");
+const heInflect = (v: string) => (v.endsWith("ה") ? [v, `${v.slice(0, -1)}תה`, `${v.slice(0, -1)}ו`] : [v, `${v}ה`, `${v}ו`]);
+const HE_PASSIVE_FORMS = [...new Set(["בוצע", "בוצעה", "בוצעו", "הוחלט", "הוחלטה", "הוחלטו", "הוגש", "הוגשה", "הוגשו", "הועבר", "הועברה", "הועברו", ...HE_NIFAL.flatMap(heInflect)])];
+const HE_PASSIVE_VERB = new RegExp(`(?:^|[\\s(])((?:ו|ש|כש)?(?:${HE_PASSIVE_FORMS.join("|")}))(?=[\\s.,;:!?]|$)`, "g");
 const HE_ADVERB = /(?:^|[\s(])((?:ו)?(?:באופן|בצורה)\s+[א-ת]+)/g;
 
 const wordsOf = (s: string) => s.match(/[\p{L}\p{M}\p{N}'׳״"-]+/gu) ?? [];
@@ -151,7 +164,11 @@ export function analyzeReadability(text: string, range: Span = { from: 0, to: te
           out.push({ from: para.from + at, to: para.from + at + m[1].length, kind: "adverb" });
         }
       } else {
-        for (const m of body.matchAll(EN_PASSIVE)) out.push({ from: para.from + (m.index ?? 0), to: para.from + (m.index ?? 0) + m[0].length, kind: "passive" });
+        for (const m of body.matchAll(EN_PASSIVE)) {
+          const end = (m.index ?? 0) + m[0].length;
+          if (EN_ED_NOT_PASSIVE.has(m[2].toLowerCase()) && !/^\s+by\b/i.test(body.slice(end))) continue;
+          out.push({ from: para.from + (m.index ?? 0), to: para.from + end, kind: "passive" });
+        }
         for (const m of body.matchAll(/\b[A-Za-z]{3,}ly\b/g)) {
           if (!EN_ADVERB_OK.has(m[0].toLowerCase())) out.push({ from: para.from + (m.index ?? 0), to: para.from + (m.index ?? 0) + m[0].length, kind: "adverb" });
         }

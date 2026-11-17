@@ -20,6 +20,7 @@ import { immersiveParagraphs, lexiconTranslation, syllables, POS_COLORS } from "
 import type { LineFocusLines, ReadingProfile } from "../reading/settings";
 import type { Pos } from "../text/hebrewPos";
 import { Modal } from "./Modal";
+import { HelpButton } from "./HelpButton";
 
 type Shown = Record<Exclude<Pos, "other">, boolean>;
 const ctl: CSSProperties = { border: "1px solid hsl(var(--border-strong))", borderRadius: 8, padding: "4px 10px", background: "hsl(var(--bg))", color: "hsl(var(--fg))", font: "inherit", fontSize: 13, cursor: "pointer" };
@@ -148,6 +149,7 @@ export function ImmersiveReader({ content, profile, close, translate = localTran
     <Modal onClose={() => (open ? setOpen(null) : close())} aria-labelledby="immersive-title" data-testid="immersive-reader" data-reading-mode="immersive" style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", maxWidth: "none", maxHeight: "none", margin: 0, padding: 0, border: 0, background: "hsl(var(--bg))", color: "hsl(var(--fg))" }}>
       <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <header style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", padding: "10px 16px", borderBottom: "1px solid hsl(var(--border))", fontSize: 13 }}>
+          <HelpButton topic="editor/reading-modes#immersive-reader" size={20} />
           <h2 id="immersive-title" style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>
             {t("immersive.title")}
           </h2>

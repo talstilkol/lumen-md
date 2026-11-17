@@ -3,10 +3,10 @@
  * the cursor bright (Intl.Segmenter, Hebrew and English) and dims the rest.
  */
 import { describe, it, expect } from "vitest";
-import { EditorState } from "@codemirror/state";
+import { EditorState, Text } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { focusSpan, lineAt, paragraphAt, sentencesIn, langOf } from "../reading/focusUnits";
-import { dimRanges, setFocusLayer } from "../editor/focusLayer";
+import { dimRanges, focusSpanIn, setFocusLayer } from "../editor/focusLayer";
 
 const at = (text: string, needle: string) => text.indexOf(needle) + 1;
 const spanText = (text: string, s: { from: number; to: number }) => text.slice(s.from, s.to);
@@ -75,3 +75,18 @@ describe("dimming in the editor", () => {
     view.destroy();
   });
 });
+
+describe("review 13 M4: the focus span on a long note", () => {
+  it("is read from a window around the caret — the same span, without turning the document into one string", () => {
+    const para = "The report was long. It was written by the team. הדו״ח היה ארוך. הוא נכתב על ידי הצוות.\n\n";
+    const full = para.repeat(8000);
+    const doc = Text.of(full.split("\n"));
+    let whole = 0;
+    const spy = { length: doc.length, sliceString: (a: number, b?: number) => doc.sliceString(a, b), toString: () => (whole++, doc.toString()) };
+    for (const pos of [0, 37, Math.floor(full.length / 2), full.length - 5]) {
+      for (const unit of ["line", "sentence", "paragraph"] as const) expect(focusSpanIn(spy, pos, unit)).toEqual(focusSpan(full, pos, unit));
+    }
+    expect(whole).toBe(0);
+  });
+});
+

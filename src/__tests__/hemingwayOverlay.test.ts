@@ -27,6 +27,12 @@ describe("English rules", () => {
     expect(f?.simpler).toBe("to");
   });
 
+  it("audit r4 A1.3: an -ed adjective after be/get is not a passive, unless by follows", () => {
+    expect(kinds("The car is red. I am tired. She was interested in art. He got married.").filter((k) => k.startsWith("passive"))).toEqual([]);
+    expect(kinds("The dog was frightened by the noise.")).toContain("passive:was frightened");
+    expect(kinds("The window was opened slowly.")).toContain("passive:was opened");
+  });
+
   it("words ending in -ly that are not adverbs are left alone", () => {
     expect(kinds("The family will apply early in July.")).toEqual([]);
   });
@@ -49,6 +55,12 @@ describe("Hebrew rules", () => {
     expect(k).toContain("adverb:באופן יסודי");
     expect(k).toContain("complex:במסגרת");
     expect(k).toContain("complex:על מנת ל");
+  });
+
+  it("audit r4 A1.3: nif'al passives (נשלח, נבנה, נפתחה) are found; nouns that start with נ are not", () => {
+    const k = kinds("המכתב נשלח אתמול. הבית נבנה בשנה שעברה. החנות נפתחה והספרים נבנו מחדש. זה נכון. הנושא חשוב. נקודה טובה.");
+    expect(k).toEqual(expect.arrayContaining(["passive:נשלח", "passive:נבנה", "passive:נפתחה", "passive:נבנו"]));
+    expect(k.some((x) => /נכון|הנושא|נקודה/.test(x))).toBe(false);
   });
 
   it("long Hebrew sentences use the lower limits (16 / 25 words)", () => {
@@ -162,3 +174,18 @@ describe("wired to the real W13.W1 type and the W13.W3 coach (INT7)", () => {
     for (const f of got) expect(HEMINGWAY_KINDS).toContain(f.kind);
   });
 });
+
+describe("review 13 M4: a long note", () => {
+  it("analyzeReadability on ~960k characters is linear (it was quadratic: 7.7 s), and a fenced block is still not prose", () => {
+    const para = "The report was very long and it was written by the committee in a way that was hard to follow. הדו״ח היה ארוך מאוד ונכתב על ידי הוועדה בצורה שקשה לעקוב אחריה.\n\n";
+    const text = para.repeat(6000);
+    const t = performance.now();
+    const f = analyzeReadability(text);
+    const ms = performance.now() - t;
+    expect(f.length).toBeGreaterThanOrEqual(6000);
+    expect(ms).toBeLessThan(3000);
+    const fenced = "Intro was written.\n\n```\nThe code was written by me.\n```\n\nThe end was written.";
+    expect(kinds(fenced).filter((k) => k.startsWith("passive"))).toEqual(["passive:was written", "passive:was written"]);
+  });
+});
+

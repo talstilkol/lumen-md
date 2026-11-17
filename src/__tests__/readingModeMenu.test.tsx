@@ -35,11 +35,17 @@ describe("Reading mode menu", () => {
 
   it("“on this device only” keeps the profile and leaves the file's bytes alone", () => {
     const before = sha(useAppStore.getState().doc.content);
+    // The only way the menu writes the note is the store's setContent: it must not be called (audit r4 A1.6).
+    const real = useAppStore.getState().setContent;
+    const writes: string[] = [];
+    useAppStore.setState({ setContent: (c: string) => void writes.push(c) } as never);
     render(<ReadingModeMenu close={() => undefined} />);
     fireEvent.change(screen.getByTestId("rm-width"), { target: { value: "56" } });
     fireEvent.click(screen.getByTestId("rm-where-device"));
     fireEvent.click(screen.getByTestId("rm-save-note"));
     expect(sha(useAppStore.getState().doc.content)).toBe(before);
+    expect(writes).toEqual([]);
+    useAppStore.setState({ setContent: real } as never);
     expect(localNoteProfile("notes/a.md")).toEqual({ width: 56 });
   });
 
@@ -92,4 +98,15 @@ describe("Reading mode menu", () => {
     fireEvent.click(screen.getByTestId("rm-reset"));
     expect(loadNotePlace("ws:notes/a.md")).toMatchObject({ on: true, block: 5 });
   });
+
+  it("audit r4 A1.6: the page mode offers book pages (layout: spread) and the margins (sidenotes)", () => {
+    render(<ReadingModeMenu close={() => undefined} />);
+    const layout = screen.getByTestId("rm-layout") as HTMLSelectElement;
+    expect([...layout.options].map((o) => o.value)).toEqual(["single", "sideBySide", "spread"]);
+    expect(screen.getByLabelText("Notes in the margins")).toBeTruthy();
+    fireEvent.click(screen.getByTestId("rm-sidenotes"));
+    fireEvent.click(screen.getByTestId("rm-save-all"));
+    expect(globalProfile().sidenotes).toBe(true);
+  });
 });
+
