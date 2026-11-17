@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { listNumberingOf } from "../lib/listNumberingOf";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter, RenderSuperseded } from "./pipeline";
 import { registerLineBases } from "./sourceLineRegistry";
 import { useSidenotes } from "../reading/sidenotesSetting";
@@ -279,6 +280,11 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
   );
   // W12.V6: `layout: dashboard` lays the note's embeds out as a grid.
   const layout = useMemo(() => dashboardProps(dashboardLayout(frontmatter)), [frontmatter]);
+  // W13.H5: `listNumbering: hebrew` numbers ordered lists א. ב. ג. (the Markdown keeps 1. 2. 3.).
+  const listNumbering = listNumberingOf(frontmatter);
+  useEffect(() => {
+    if (listNumbering === "hebrew") void import("../lib/hebrewListNumbering").then((m) => m.ensureHebrewListStyle());
+  }, [listNumbering]);
 
   // The note's language tag (plan W7.9): Yiddish, Ladino… from the front matter or the text.
   const [noteLang, setNoteLang] = useState<string | null>(null);
@@ -302,6 +308,7 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
     <div
       className="flex-1 min-h-0 overflow-y-auto"
       data-preview-root
+      data-list-numbering={listNumbering === "hebrew" ? "hebrew" : undefined}
       ref={rootRef}
       // The document the displayed tree belongs to (it lags behind while a
       // newly opened note renders) — lets callers wait for the right one.

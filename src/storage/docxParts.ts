@@ -108,7 +108,7 @@ export function buildStyles(academic?: AcademicTemplate): string {
   );
 }
 
-export function buildNumbering(orderedNumIds: number[]): string {
+export function buildNumbering(orderedNumIds: number[], ordered: "decimal" | "hebrew" = "decimal"): string {
   const bulletGlyphs = ["•", "◦", "▪"]; // • ◦ ▪
   const levels = (kind: "bullet" | "decimal") =>
     Array.from({ length: MAX_LIST_LEVEL + 1 }, (_, l) => {
@@ -122,7 +122,8 @@ export function buildNumbering(orderedNumIds: number[]): string {
         );
       }
       return (
-        `<w:lvl w:ilvl="${l}"><w:start w:val="1"/><w:numFmt w:val="decimal"/>` +
+        // W13.H5: Word's own Hebrew letters (א. ב. … ט"ו) when the note asks for them.
+        `<w:lvl w:ilvl="${l}"><w:start w:val="1"/><w:numFmt w:val="${ordered === "hebrew" ? "hebrew1" : "decimal"}"/>` +
         `<w:lvlText w:val="%${l + 1}."/><w:lvlJc w:val="left"/>` +
         `<w:pPr><w:ind w:left="${left}" w:hanging="360"/></w:pPr></w:lvl>`
       );

@@ -878,6 +878,31 @@
       "vars": []
     },
     {
+      "key": "cmd.edit.hebrewLists.done.off",
+      "en": "Lists in this note are numbered 1. 2. 3.",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.hebrewLists.done.on",
+      "en": "Lists in this note are numbered א. ב. ג.",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.hebrewLists.hint",
+      "en": "For this note, in the preview, PDF and Word; the Markdown keeps 1. 2. 3.",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.hebrewLists.off",
+      "en": "Number lists with digits (1. 2. 3.)",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.hebrewLists.on",
+      "en": "Number lists with Hebrew letters (א. ב. ג.)",
+      "vars": []
+    },
+    {
       "key": "cmd.edit.hebrewTypography",
       "en": "Hebrew typography…",
       "vars": []

@@ -31,6 +31,7 @@ import { inlineMathSpans } from "../lib/mathIsolate";
 import { zip } from "./zip";
 import { BIBLIOGRAPHY_HEADING, COVER_LABELS, splitCover, type AcademicTemplate, type CoverFields, type PageNumberFormat } from "./academicTemplates";
 import { exportReadyText } from "./exportReady";
+import { listNumberingOfMarkdown } from "../lib/hebrewListNumbering";
 import { BULLET_NUM_ID, buildDocumentRels, buildFootnotes, buildNumbering, buildPageFooter, buildSettings, buildStyles, esc, FIRST_ORDERED_NUM_ID, FOOTER_REL, M, MAX_LIST_LEVEL, R, sectionBreak, sectPrXml, W, type ExtraRel } from "./docxParts";
 import { swallowed } from "../lib/logger";
 
@@ -698,7 +699,7 @@ function buildDocxParts(content: string, opts: DocxOptions = {}): { name: string
     { name: "word/document.xml", data: documentXml },
     { name: "word/_rels/document.xml.rels", data: buildDocumentRels(ctx.hyperlinks, extra) },
     { name: "word/styles.xml", data: buildStyles(academic?.template) },
-    { name: "word/numbering.xml", data: buildNumbering(ctx.orderedNumIds) },
+    { name: "word/numbering.xml", data: buildNumbering(ctx.orderedNumIds, listNumberingOfMarkdown(content)) },
     ...parts,
   ];
 }

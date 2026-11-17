@@ -949,5 +949,45 @@
     "ja": "uernde",
     "ru": "uernde",
     "zh-CN": "uernde"
+  },
+  "cmd.edit.hebrewLists.on": {
+    "ar": "8l18qn",
+    "de": "8l18qn",
+    "fr": "8l18qn",
+    "ja": "8l18qn",
+    "ru": "8l18qn",
+    "zh-CN": "8l18qn"
+  },
+  "cmd.edit.hebrewLists.off": {
+    "ar": "hh1olw",
+    "de": "hh1olw",
+    "fr": "hh1olw",
+    "ja": "hh1olw",
+    "ru": "hh1olw",
+    "zh-CN": "hh1olw"
+  },
+  "cmd.edit.hebrewLists.hint": {
+    "ar": "1u5q5a",
+    "de": "1u5q5a",
+    "fr": "1u5q5a",
+    "ja": "1u5q5a",
+    "ru": "1u5q5a",
+    "zh-CN": "1u5q5a"
+  },
+  "cmd.edit.hebrewLists.done.on": {
+    "ar": "1vd8qss",
+    "de": "1vd8qss",
+    "fr": "1vd8qss",
+    "ja": "1vd8qss",
+    "ru": "1vd8qss",
+    "zh-CN": "1vd8qss"
+  },
+  "cmd.edit.hebrewLists.done.off": {
+    "ar": "f4bxa5",
+    "de": "f4bxa5",
+    "fr": "f4bxa5",
+    "ja": "f4bxa5",
+    "ru": "f4bxa5",
+    "zh-CN": "f4bxa5"
   }
 }

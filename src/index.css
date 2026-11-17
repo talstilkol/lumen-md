@@ -2415,3 +2415,7 @@ dialog.lumen-modal:is([data-reading-mode="side-by-side"], [data-reading-mode="da
    code) never does. `scale` composes with a rotate transform, and :dir() follows
    the nearest dir, so an icon inside an LTR island (code, an English note) stays. */
 .icon-dir:dir(rtl) { scale: -1 1; }
+
+/* W13.H5: a note with `listNumbering: hebrew` numbers its ordered lists א. ב. ג.;
+   the browser's `hebrew` style until lib/hebrewListNumbering adds the exact one (ט״ו, ער). */
+[data-list-numbering="hebrew"] ol { list-style-type: hebrew; }
