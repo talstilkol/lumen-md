@@ -58,6 +58,18 @@ export type EnglishPhonemizer = (text: string) => Promise<number[]>;
  */
 export const ENGLISH_PHONEMIZER: EnglishPhonemizer | null = null;
 
+/**
+ * Plan 6.2: the English G2P that ships with a pinned voice — misaki's
+ * lexicon (./englishG2P.ts, a port) over the pack's dictionaries
+ * (scripts/tts/build-misaki-dict.mjs), into the voice's token ids. Loaded
+ * with the voice, never at startup.
+ */
+export async function misakiPhonemizer(pack: { gold: Record<string, unknown>; silver: Record<string, unknown> }, vocab: Readonly<Record<string, number>>): Promise<EnglishPhonemizer> {
+  const g2p = await import("./englishG2P");
+  const lex = new g2p.EnglishLexicon(pack.gold as import("./englishG2P").LexMap, pack.silver as import("./englishG2P").LexMap);
+  return async (text) => g2p.kokoroTokens(g2p.phonemizeEnglish(text, lex).phonemes, vocab);
+}
+
 /** The engine the reader drives: text in, audio at `sampleRate` out. */
 export interface KokoroEngine {
   sampleRate: number;

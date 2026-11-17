@@ -1,0 +1,4 @@
+us-subset.json: 53 entries of misaki's us_gold.json (hexgrad/misaki @fba1236595f2d2bf21d414ba6e57d25256afada3,
+misaki/data/us_gold.json), Copyright hexgrad, licensed under the Apache License 2.0
+(https://www.apache.org/licenses/LICENSE-2.0). Selected, not modified. "derived": entries of
+misaki's us_silver.json for the same words' -s / -ed / -ing forms, used as the expected output of the port.
