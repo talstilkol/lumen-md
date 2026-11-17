@@ -16,7 +16,7 @@
     "tag": "dev",
     "model": {
       "name": "rules (styleCoach, no model)",
-      "digest": "sha256:aa333c36d0352da0eb0df915d99373cad19e86534db1360cefeec23df2129826"
+      "digest": "sha256:9df2f6c12a2c242f4c1b073bb2dd4f65ee39ab5e96e7a2f625ec2fe29b1ad857"
     },
     "seed": 13,
     "temperature": 0,
