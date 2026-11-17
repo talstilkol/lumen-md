@@ -10,7 +10,7 @@
  * meets a browser without WebGL 2. The toolbar can force one.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { filteredGraph, graphTimeDomain, groupsOf, type GraphDateField, type GraphFilter, type GroupBy } from "../graph/graphModel";
 import { chooseEngine, layoutWithEngine, probeCaps, type GraphEngineKind, type GraphEnginePref } from "../graph/engine";
 import { readWorkspaceFile } from "../storage/workspace";
@@ -22,6 +22,12 @@ import { TimeSlider, untilOf } from "./graph/TimeSlider";
 import { EmptyState, runCommand } from "./EmptyState";
 import { groupColor, nodeStyle, resolveColor, useVaultGraph } from "./graph/graphData";
 import "./graphViewStrings";
+import "./graph/clusterGapsStrings";
+import type { ClusterAnalysis } from "../graph/clusterGaps";
+import { convexHull } from "../graph/hull";
+
+// W13.G8: clusters and structural gaps, loaded when asked for.
+const ClusterGapsPanel = lazy(() => import("./graph/ClusterGapsPanel"));
 
 const ENGINE_KEY = "lumen.graph.engine";
 const ENGINES: readonly GraphEnginePref[] = ["auto", "gpu", "standard", "list"];
@@ -62,7 +68,22 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
   const [ran, setRan] = useState<GraphEngineKind | null>(null);
   const engineKind = choice.kind;
   const groups = useMemo(() => (graph ? groupsOf(graph, groupBy) : null), [graph, groupBy]);
-  const style = useMemo(() => (graph && sub ? nodeStyle(graph, sub.nodes, groupBy === "none" ? null : groups!.group) : null), [graph, sub, groups, groupBy]);
+  // W13.G8: with an analysis on screen, nodes take their cluster's colour (grey outside every cluster) and clusters get hulls.
+  const [gapsOpen, setGapsOpen] = useState(false);
+  const [analysis, setAnalysis] = useState<ClusterAnalysis | null>(null);
+  const baseStyle = useMemo(() => (graph && sub ? nodeStyle(graph, sub.nodes, groupBy === "none" ? null : groups!.group) : null), [graph, sub, groups, groupBy]);
+  const style = useMemo(() => {
+    if (!baseStyle || !analysis || !graph || !sub) return baseStyle;
+    const colors = new Float32Array(baseStyle.colors);
+    const grey = resolveColor("hsl(var(--fg-muted))", 0.6);
+    const palette = new Map<number, [number, number, number, number]>();
+    Array.from(sub.nodes, (i: number, k: number) => {
+      const c = analysis.clusterOf.get(graph.paths[i]) ?? -1;
+      if (c >= 0 && !palette.has(c)) palette.set(c, resolveColor(groupColor(c)));
+      colors.set(c >= 0 ? palette.get(c)! : grey, 4 * k);
+    });
+    return { colors, sizes: baseStyle.sizes };
+  }, [baseStyle, analysis, graph, sub]);
   const labels = useMemo(() => (graph && sub ? Array.from(sub.nodes, (i: number) => graph.labels[i]) : []), [graph, sub]);
   const adjacency = useMemo(() => {
     if (!sub) return [] as number[][];
@@ -73,6 +94,29 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
     }
     return adj;
   }, [sub]);
+
+  // W13.G8: a convex hull per cluster, in its colour, under the labels.
+  const underlay = useCallback(
+    (ctx: CanvasRenderingContext2D, at: (x: number, y: number) => { x: number; y: number }) => {
+      if (!analysis || !positions || !graph || !sub) return;
+      const index = new Map(Array.from(sub.nodes, (i: number, k: number) => [graph.paths[i], k] as const));
+      for (const c of analysis.clusters) {
+        const pts = c.members.map((p) => index.get(p)).filter((k): k is number => k !== undefined).map((k) => at(positions[2 * k], positions[2 * k + 1]));
+        if (pts.length < 3) continue;
+        const hull = convexHull(pts.map((p) => [p.x, p.y] as [number, number]));
+        ctx.beginPath();
+        hull.forEach(([x, y], j) => (j ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+        ctx.closePath();
+        const color = groupColor(c.index);
+        ctx.fillStyle = color.replace(")", " / 0.10)");
+        ctx.strokeStyle = color.replace(")", " / 0.55)");
+        ctx.lineWidth = 1.5;
+        ctx.fill();
+        ctx.stroke();
+      }
+    },
+    [analysis, positions, graph, sub],
+  );
 
   // Lay out in the worker; draw every few steps while it settles.
   useEffect(() => {
@@ -181,6 +225,9 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
           </select>
         </label>
         <TimeSlider domain={domain} value={at} onChange={setUntil} labels={{ until: t("graph.time.until"), play: t("graph.time.play"), pause: t("graph.time.pause") }} testId="graph-time" style={{ ...field, inlineSize: "auto" }} />
+        <button type="button" className="icon-btn" aria-pressed={gapsOpen} onClick={() => setGapsOpen((v) => !v)} data-testid="graph-clusters" style={{ inlineSize: "auto", paddingInline: 8, fontSize: 12 }}>
+          {t("graphClusters.toggle")}
+        </button>
         <button type="button" className="icon-btn" aria-pressed={tableView} disabled={engineKind === "list"} onClick={() => setAsTable((v) => !v)} data-testid="graph-as-table" style={{ inlineSize: "auto", paddingInline: 8, fontSize: 12 }}>
           {t("graph.table.toggle")}
         </button>
@@ -201,6 +248,18 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
             {t("graph.engine.noGpu", { nodes: String(sub.nodes.length) })}
           </p>
         )}
+        {gapsOpen && graph && sub && (
+          <Suspense fallback={null}>
+            <ClusterGapsPanel
+              nodes={Array.from(sub.nodes, (i: number) => ({ id: graph.paths[i], label: graph.labels[i] }))}
+              edges={Array.from({ length: sub.edges.length / 2 }, (_, e) => ({ source: graph.paths[sub.nodes[sub.edges[2 * e]]], target: graph.paths[sub.nodes[sub.edges[2 * e + 1]]] }))}
+              onAnalysis={setAnalysis}
+              onFocus={(path) => void readWorkspaceFile(path).then((text) => onOpenFile(path, text), (err: unknown) => log.warn("graph view: failed to open file", path, err))}
+              colorOf={groupColor}
+              onClose={() => setGapsOpen(false)}
+            />
+          </Suspense>
+        )}
         {sub && tableView && <GraphTable labels={labels} neighbors={(i) => adjacency[i] ?? []} onOpen={(k) => void open(k)} />}
         {sub && style && !tableView && (
           <GraphCanvas
@@ -216,6 +275,7 @@ export function GraphView({ onOpenFile, initialTable = false }: { onOpenFile: (p
             onOpen={(k) => void open(k)}
             ariaLabel={t("graph.ariaLabel", { nodes: sub.nodes.length })}
             fitKey={`${sub.nodes.length}:${sub.edges.length}:${JSON.stringify(timed)}`}
+            underlay={analysis ? underlay : undefined}
           />
         )}
       </div>

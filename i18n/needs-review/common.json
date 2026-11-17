@@ -1922,6 +1922,174 @@
     "zh-CN": "vuco",
     "he": "vuco"
   },
+  "graphClusters.again": {
+    "ar": "112qn3u",
+    "de": "112qn3u",
+    "fr": "112qn3u",
+    "ja": "112qn3u",
+    "ru": "112qn3u",
+    "zh-CN": "112qn3u"
+  },
+  "graphClusters.bridge": {
+    "ar": "aczsb9",
+    "de": "aczsb9",
+    "fr": "aczsb9",
+    "ja": "aczsb9",
+    "ru": "aczsb9",
+    "zh-CN": "aczsb9"
+  },
+  "graphClusters.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "graphClusters.clusters": {
+    "ar": "6jbe7u",
+    "de": "6jbe7u",
+    "fr": "6jbe7u",
+    "ja": "6jbe7u",
+    "ru": "6jbe7u",
+    "zh-CN": "6jbe7u"
+  },
+  "graphClusters.done": {
+    "ar": "y0eu5s",
+    "de": "y0eu5s",
+    "fr": "y0eu5s",
+    "ja": "y0eu5s",
+    "ru": "y0eu5s",
+    "zh-CN": "y0eu5s"
+  },
+  "graphClusters.failed": {
+    "ar": "i2mqy1",
+    "de": "i2mqy1",
+    "fr": "i2mqy1",
+    "ja": "i2mqy1",
+    "ru": "i2mqy1",
+    "zh-CN": "i2mqy1"
+  },
+  "graphClusters.gapWhy": {
+    "ar": "sruhsb",
+    "de": "sruhsb",
+    "fr": "sruhsb",
+    "ja": "sruhsb",
+    "ru": "sruhsb",
+    "zh-CN": "sruhsb"
+  },
+  "graphClusters.gaps": {
+    "ar": "j8zfi4",
+    "de": "j8zfi4",
+    "fr": "j8zfi4",
+    "ja": "j8zfi4",
+    "ru": "j8zfi4",
+    "zh-CN": "j8zfi4"
+  },
+  "graphClusters.intro": {
+    "ar": "4gaamg",
+    "de": "4gaamg",
+    "fr": "4gaamg",
+    "ja": "4gaamg",
+    "ru": "4gaamg",
+    "zh-CN": "4gaamg"
+  },
+  "graphClusters.modularity": {
+    "ar": "1ek42rh",
+    "de": "1ek42rh",
+    "fr": "1ek42rh",
+    "ja": "1ek42rh",
+    "ru": "1ek42rh",
+    "zh-CN": "1ek42rh"
+  },
+  "graphClusters.noGaps": {
+    "ar": "uz5pnu",
+    "de": "uz5pnu",
+    "fr": "uz5pnu",
+    "ja": "uz5pnu",
+    "ru": "uz5pnu",
+    "zh-CN": "uz5pnu"
+  },
+  "graphClusters.propose": {
+    "ar": "1pljfwy",
+    "de": "1pljfwy",
+    "fr": "1pljfwy",
+    "ja": "1pljfwy",
+    "ru": "1pljfwy",
+    "zh-CN": "1pljfwy"
+  },
+  "graphClusters.run": {
+    "ar": "1cn9fex",
+    "de": "1cn9fex",
+    "fr": "1cn9fex",
+    "ja": "1cn9fex",
+    "ru": "1cn9fex",
+    "zh-CN": "1cn9fex"
+  },
+  "graphClusters.seeAlso": {
+    "ar": "zs705o",
+    "de": "zs705o",
+    "fr": "zs705o",
+    "ja": "zs705o",
+    "ru": "zs705o",
+    "zh-CN": "zs705o"
+  },
+  "graphClusters.size": {
+    "ar": "58ef86",
+    "de": "58ef86",
+    "fr": "58ef86",
+    "ja": "58ef86",
+    "ru": "58ef86",
+    "zh-CN": "58ef86"
+  },
+  "graphClusters.staged": {
+    "ar": "r1qim",
+    "de": "r1qim",
+    "fr": "r1qim",
+    "ja": "r1qim",
+    "ru": "r1qim",
+    "zh-CN": "r1qim"
+  },
+  "graphClusters.summary": {
+    "ar": "kkbec",
+    "de": "kkbec",
+    "fr": "kkbec",
+    "ja": "kkbec",
+    "ru": "kkbec",
+    "zh-CN": "kkbec"
+  },
+  "graphClusters.title": {
+    "ar": "mk8c90",
+    "de": "mk8c90",
+    "fr": "mk8c90",
+    "ja": "mk8c90",
+    "ru": "mk8c90",
+    "zh-CN": "mk8c90"
+  },
+  "graphClusters.toggle": {
+    "ar": "mk8c90",
+    "de": "mk8c90",
+    "fr": "mk8c90",
+    "ja": "mk8c90",
+    "ru": "mk8c90",
+    "zh-CN": "mk8c90"
+  },
+  "graphClusters.unnamed": {
+    "ar": "x5q8lr",
+    "de": "x5q8lr",
+    "fr": "x5q8lr",
+    "ja": "x5q8lr",
+    "ru": "x5q8lr",
+    "zh-CN": "x5q8lr"
+  },
+  "graphClusters.working": {
+    "ar": "19hv1se",
+    "de": "19hv1se",
+    "fr": "19hv1se",
+    "ja": "19hv1se",
+    "ru": "19hv1se",
+    "zh-CN": "19hv1se"
+  },
   "hl.scan": {
     "ar": "qb0k9u",
     "de": "qb0k9u",
