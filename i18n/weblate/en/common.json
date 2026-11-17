@@ -1608,6 +1608,7 @@
   "family.import.noteTitle": "GEDCOM import",
   "family.import.preview": "{file}: {people} people, {families} families, {problems} problems",
   "family.import.run": "Import",
+  "family.import.unnamed": "Unnamed",
   "family.keys": "↑ parent · ↓ child · ←/→ along the generation · Enter centres on a person · double-click opens",
   "family.label": "Family tree",
   "family.mode": "Family tree",

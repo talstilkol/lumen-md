@@ -123,7 +123,7 @@ describe("W13.G7 reading GEDCOM", () => {
     expect(g.version).toBe("5.5.1");
     expect(g.people).toHaveLength(8);
     expect(g.families).toHaveLength(3);
-    expect(g.people[0]).toEqual({ xref: "@I1@", name: "אברהם כהן", given: "אברהם", surname: "כהן", sex: "M", born: "12 MAR 1900", birthPlace: "ירושלים", died: "ABT 1980" });
+    expect(g.people[0]).toEqual({ xref: "@I1@", name: "אברהם כהן", given: "אברהם", surname: "כהן", rawName: "אברהם /כהן/", sex: "M", born: "12 MAR 1900", birthPlace: "ירושלים", died: "ABT 1980" });
     expect(g.people[1].born).toBe("@#DHEBREW@ 1 TSH 5665");
     expect(g.people[7].name).toBe("דינה");
     expect(g.problems).toEqual(["@F3@: @I99@ is not an individual"]);
@@ -273,5 +273,118 @@ describe("W13.G7 the screen's import", () => {
       expect(readEdges(disk.get(EDGES_PATH)!).edges).toHaveLength(9 * round);
       unmount();
     }
+  });
+});
+
+/** Import a GEDCOM file into a vault graph and export it again (the screen's two paths). */
+function roundTrip(text: string, labels?: { title: string; family: string; children: string; unnamed?: string }) {
+  const plan = planGedcomImport(parseGedcom(text), { fileName: "x.ged", date: DATE, labels });
+  const files = new Map(plan.files);
+  files.set(EDGES_PATH, plan.edges.map((e) => JSON.stringify(e)).join("\n") + "\n");
+  const graph = graphFromFiles(files);
+  const out = exportGedcom(peopleOf(graph.entities, graph.noteOf, graph.texts), graph.edges, { date: DATE });
+  return { plan, out, back: parseGedcom(out) };
+}
+
+describe("audit r4 A3 #8: GEDCOM round trip", () => {
+  const FILE = [
+    "0 HEAD", "1 GEDC", "2 VERS 5.5.1",
+    "0 @I1@ INDI", "1 NAME María /de la Cruz/", "1 SEX F", "1 FAMS @F1@",
+    "0 @I2@ INDI", "1 NAME José /García López/", "1 SEX M", "1 FAMS @F1@",
+    "0 @I3@ INDI", "1 NAME Ana /García/", "1 FAMC @F1@", "2 PEDI adopted",
+    "0 @I4@ INDI", "1 NAME דוד /בן דוד/", "1 FAMC @F2@",
+    "0 @I5@ INDI", "1 NAME רות /בן דוד/", "1 FAMC @F2@", "2 PEDI FOSTER",
+    "0 @P9@ INDI", "1 SEX U", "1 FAMC @F2@",
+    "0 @F1@ FAM", "1 HUSB @I2@", "1 WIFE @I1@", "1 CHIL @I3@",
+    "0 @F2@ FAM", "1 CHIL @I4@", "1 CHIL @I5@", "1 CHIL @P9@",
+    "0 TRLR",
+  ].join("\n");
+
+  it("a surname of several words keeps its /slashes/", () => {
+    const { out, back } = roundTrip(FILE);
+    expect(gedcom7Problems(out)).toEqual([]);
+    expect(out).toContain("1 NAME María /de la Cruz/");
+    expect(out).toContain("1 NAME José /García López/");
+    expect(out).toContain("1 NAME דוד /בן דוד/");
+    expect(back.people.find((p) => p.given === "María")!.surname).toBe("de la Cruz");
+    // An edited name goes out as written: the file's /surname/ only while the name is the file's.
+    const people = [{ entity: { id: "person:a", type: "person" as const, name: "María Cruz", aliases: [] }, props: { "gedcom-name": "María /de la Cruz/" } }];
+    expect(exportGedcom(people, [])).toContain("1 NAME María /Cruz/");
+  });
+
+  it("a family with children only (siblings of unknown parents) is not dropped", () => {
+    const { out, back } = roundTrip(FILE);
+    const sib = back.families.find((f) => !f.partners.length)!;
+    expect(sib).toBeTruthy();
+    const name = new Map(back.people.map((p) => [p.xref, p.name]));
+    expect(sib.children.map((x) => name.get(x)).sort()).toEqual(["", "דוד בן דוד", "רות בן דוד"].sort()); // the nameless one stays nameless
+    expect(gedcom7Problems(out)).toEqual([]);
+  });
+
+  it("PEDI survives (adopted, foster)", () => {
+    const { out, back } = roundTrip(FILE);
+    expect(back.people.find((p) => p.given === "Ana")!.pedigree).toEqual({ [back.families.find((f) => f.partners.length === 2)!.xref]: "ADOPTED" });
+    expect(Object.values(back.people.find((p) => p.given === "רות")!.pedigree ?? {})).toEqual(["FOSTER"]);
+    expect(back.people.find((p) => p.given === "דוד")!.pedigree).toBeUndefined();
+    expect(out).toMatch(/1 FAMC @F\d+@\n2 PEDI ADOPTED/);
+  });
+
+  it("a person with no name is named by the importer, never by the xref (\"P9\"), and goes out with no NAME", () => {
+    const { plan, out } = roundTrip(FILE, { title: "ייבוא", family: "משפחה", children: "ילדים", unnamed: "ללא שם" });
+    expect(plan.entities.map((e) => e.name)).toContain("ללא שם");
+    expect(plan.entities.map((e) => e.name).join(" ")).not.toMatch(/P9/);
+    const indi = out.split("\n0 ").find((r) => r.includes("SEX U"))!;
+    expect(indi).not.toMatch(/NAME/);
+    // Renamed in the vault: the new name goes out.
+    const files = new Map(plan.files);
+    const [path, note] = [...files].find(([, t]) => t.includes("gedcom: P9"))!;
+    files.set(path, note.replace("gedcom-label: ללא שם", "gedcom-label: x"));
+    files.set(EDGES_PATH, plan.edges.map((e) => JSON.stringify(e)).join("\n") + "\n");
+    const g = graphFromFiles(files);
+    expect(exportGedcom(peopleOf(g.entities, g.noteOf, g.texts), g.edges)).toContain("1 NAME ללא /שם/");
+  });
+
+});
+
+describe("review-13 M5: GEDCOM import at scale, and no line injection", () => {
+  function ged(nFam: number): string {
+    const L = ["0 HEAD", "1 GEDC", "2 VERS 7.0"];
+    let p = 0;
+    for (let f = 0; f < nFam; f++) {
+      const a = ++p, b = ++p, c = ++p;
+      for (const x of [a, b, c]) L.push(`0 @I${x}@ INDI`, `1 NAME P${x} /S${x}/`);
+      L.push(`0 @F${f}@ FAM`, `1 HUSB @I${a}@`, `1 WIFE @I${b}@`, `1 CHIL @I${c}@`);
+    }
+    L.push("0 TRLR");
+    return L.join("\n");
+  }
+  it("10,000 families (30,000 people): linear time — the time per family does not grow with the file", () => {
+    const perFamily = (n: number) => {
+      const g = parseGedcom(ged(n));
+      const t0 = performance.now();
+      const plan = planGedcomImport(g, { fileName: "x.ged", date: DATE });
+      const t1 = performance.now();
+      const out = exportGedcom(plan.entities.map((entity) => ({ entity, props: {} })), plan.edges, { date: DATE });
+      const t2 = performance.now();
+      expect(plan.edges.length).toBe(3 * n);
+      expect(out.split("\n0 @F").length - 1).toBe(n);
+      return { imp: (t1 - t0) / n, exp: (t2 - t1) / n, ms: t2 - t0 };
+    };
+    perFamily(500); // warm up
+    const small = perFamily(1000);
+    const big = perFamily(10_000);
+    console.log(`[review-13 M5] per family: import ${small.imp.toFixed(3)} → ${big.imp.toFixed(3)} ms, export ${small.exp.toFixed(3)} → ${big.exp.toFixed(3)} ms; 10,000 families ${big.ms.toFixed(0)} ms`);
+    // Quadratic (a find per family) grew ~3× per family from 1,000 to 10,000 families, and took over 30 s.
+    expect(big.imp).toBeLessThan(small.imp * 2 + 0.05);
+    expect(big.exp).toBeLessThan(small.exp * 2 + 0.05);
+    expect(big.ms).toBeLessThan(15_000);
+  }, 120_000);
+  it("a CONT inside a NAME does not become a line of the person's note or the import note", () => {
+    const g = parseGedcom(["0 HEAD", "0 @I1@ INDI", "1 NAME Dana /Levi", "2 CONT ## injected/", "0 @F1@ FAM", "1 CHIL @I1@", "0 TRLR"].join("\n"));
+    expect(g.people[0].name).not.toContain("\n");
+    const plan = planGedcomImport(g, { fileName: "x.ged", date: DATE });
+    for (const [, text] of plan.files) expect(text).not.toMatch(/^## injected/m);
+    const note = [...plan.files.values()].find((t) => t.includes("gedcom: I1"))!;
+    expect(splitFrontmatter(note).body.trim().split("\n")).toHaveLength(1);
   });
 });

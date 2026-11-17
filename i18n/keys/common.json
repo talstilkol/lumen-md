@@ -8877,6 +8877,11 @@
       "vars": []
     },
     {
+      "key": "family.import.unnamed",
+      "en": "Unnamed",
+      "vars": []
+    },
+    {
       "key": "family.keys",
       "en": "↑ parent · ↓ child · ←/→ along the generation · Enter centres on a person · double-click opens",
       "vars": []
