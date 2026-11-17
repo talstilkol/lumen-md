@@ -1,0 +1,12 @@
+# Who may sign release tags (plan W13.T4). git's allowed signers format:
+#   <principal> namespaces="git" ssh-ed25519 <base64 key> <comment>
+# release:verify (scripts/supply-chain/verify-release.mjs) accepts a tag v<version> only when it is
+# SSH-signed by one of these keys for the "git" namespace and points at the release commit; where
+# ssh-keygen is installed, `git -c gpg.ssh.allowedSignersFile=security/allowed_signers verify-tag`
+# must agree. A change to this file is a change to who can release: it goes through review like code.
+#
+# The owner's line goes here (W10.O1), made once on the Mac:
+#   ssh-keygen -t ed25519 -f ~/.ssh/lumen-release-tag -C "lumen-md release tags"
+#   echo "tal namespaces=\"git\" $(cut -d' ' -f1,2 ~/.ssh/lumen-release-tag.pub) lumen-md release tags" >> security/allowed_signers
+# and LUMEN_TAG_SIGNING_KEY=~/.ssh/lumen-release-tag for `npm run release -- X --publish`.
+# Until then no tag verifies, so release:verify fails: by design.

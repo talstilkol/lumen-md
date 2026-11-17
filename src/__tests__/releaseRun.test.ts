@@ -263,7 +263,14 @@ describe("the whole dry run (W4.5)", () => {
       expect(out.filter((n) => /\.(AppImage|dmg|exe|deb|app\.tar\.gz)$/.test(n)).length).toBeGreaterThanOrEqual(3);
       expect(readFileSync(join(dir, "release/DRY-RUN.md"), "utf8")).toMatch(/gh release create v0\.2\.0-beta\.1/);
       const v = spawnSync(process.execPath, ["scripts/supply-chain/verify-release.mjs", "release", "--pub", "release/release-key.pub"], { cwd: dir, encoding: "utf8" });
-      expect(v.stdout).toMatch(/^OK: \d+ files match SHA256SUMS/);
+      // W13.T3/T4: every file verifies; what a dry run cannot have — a tag signed by an allowed signer and a
+      // source VSA by a trusted key at level 2 — is what release:verify refuses, and nothing else.
+      expect(v.status).toBe(1);
+      expect(v.stdout).toMatch(/tag v0\.2\.0-beta\.1 is not in this repository/);
+      expect(v.stdout).toMatch(/no trusted source key|source VSA/);
+      expect(v.stdout).not.toMatch(/does not match SHA256SUMS|is missing|minisig/);
+      expect(out).toContain("source-vsa.json");
+      expect(r.stdout).toMatch(/source: the VSA names this commit and verifies with the TEST key/);
       // Nothing committed, tagged or left changed.
       expect(git("status", "--porcelain")).toBe(before);
       expect(git("tag", "-l")).toBe("");

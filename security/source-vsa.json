@@ -1,0 +1,6 @@
+{
+  "$comment": "Plan W13.T3 (SLSA 1.2 Source track, level 2): the public keys whose source VSAs release:verify trusts (Ed25519, SPKI PEM). Empty until the owner makes the source key: `node -e \"const {generateKeyPairSync:g}=require('crypto');const k=g('ed25519');require('fs').writeFileSync(process.env.HOME+'/.lumen-release/source-vsa.key.pem',k.privateKey.export({type:'pkcs8',format:'pem'}),{mode:0o600});console.log(k.publicKey.export({type:'spki',format:'pem'}))\"`, then paste the printed public key into keys (one string) and set LUMEN_SOURCE_VSA_KEY to the private file. With no key here no VSA verifies, so release:verify fails: by design.",
+  "keys": [],
+  "refs": ["refs/heads/main", "refs/heads/verify/*"],
+  "minLevel": "SLSA_SOURCE_LEVEL_2"
+}

@@ -157,6 +157,7 @@
     "sbom": "node scripts/supply-chain/sbom.mjs",
     "release:sign": "node scripts/supply-chain/release.mjs",
     "release:verify": "node scripts/supply-chain/verify-release.mjs",
+    "release:source-vsa": "node scripts/supply-chain/source-vsa.mjs",
     "release:attest": "node scripts/supply-chain/attest.mjs",
     "provenance:verify": "node scripts/supply-chain/verify.mjs",
     "supply:selftest": "bash scripts/supply-chain/selftest.sh",
