@@ -33,7 +33,7 @@ describe("ci:local steps", () => {
 
   it("a full run has every CI step; tools this branch lacks are 'not here', not failures", () => {
     const s = byId(plan(null));
-    expect(Object.keys(s)).toEqual(["typecheck", "hygiene", "lint", "unused", "knip", "i18n", "licenses", "headers", "plan-ratchet", "pr-check", "gitleaks", "semgrep", "cargo-audit", "test", "build", "budget", "ocr", "public-eval", "bidi-conformance", "e2e"]);
+    expect(Object.keys(s)).toEqual(["typecheck", "hygiene", "lint", "unused", "knip", "i18n", "licenses", "lockfile", "headers", "plan-ratchet", "pr-check", "gitleaks", "semgrep", "cargo-audit", "test", "build", "budget", "ocr", "public-eval", "bidi-conformance", "e2e"]);
     // W10.E24: this fake package has no `unused` script, and knip is installed only where `exists` says so.
     expect(s.unused.skipReason).toMatch(/not here/);
     for (const id of ["typecheck", "hygiene", "i18n", "licenses", "test", "build", "budget", "ocr", "public-eval", "bidi-conformance", "e2e"]) expect(s[id].skipReason, id).toBeUndefined();

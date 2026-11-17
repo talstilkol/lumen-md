@@ -51,6 +51,8 @@
     "test:e2e:ui": "playwright test --ui",
     "e2e:gate": "node scripts/e2e-gate.mjs",
     "lockfile:drift": "node scripts/lockfile-drift.mjs",
+    "lockfile:check": "node scripts/supply/lockfile-check.mjs",
+    "supply:allowed-scripts": "node scripts/supply/allowed-scripts.mjs",
     "e2e:flake": "node scripts/e2e-flake.mjs",
     "perf:inp": "playwright test --project=inp && node scripts/perf/inp-gate.mjs",
     "perf:inp:gate": "node scripts/perf/inp-gate.mjs",

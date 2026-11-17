@@ -1,0 +1,515 @@
+{
+  "$comment": "W13.X4: answers for the OpenSSF Best Practices badge, Baseline series (OSPS Baseline, criteria v2025.10.10; follow v2026.02.19). Each criterion has a status (Met / Unmet / Unknown), a justification and the files that are its evidence; src/__tests__/ospsBaseline.test.ts fails when an evidence file is missing. The ids and titles were written offline from the OSPS Baseline as this lane knows it (baseline.openssf.org was not reachable): check them against the published list when registering (owner task W13.X3). `owner`: a repository setting only the owner can confirm. `gap`: a Level 2 gap, proposed as a task.",
+  "project": "talstilkol/lumen-md",
+  "baseline_version": "2025.10.10",
+  "baseline_next": "2026.02.19",
+  "criteria": {
+    "OSPS-AC-01.01": {
+      "level": 1,
+      "title": "Multi-factor authentication for whoever can change the repository's settings",
+      "status": "Unknown",
+      "justification": "A repository setting on GitHub, not a file: the owner confirms 2FA on the only admin account (owner task W13.X3).",
+      "evidence": [],
+      "owner": "W13.X3: confirm 2FA on the admin account on bestpractices.dev"
+    },
+    "OSPS-AC-02.01": {
+      "level": 1,
+      "title": "New collaborators get the lowest privileges by default",
+      "status": "Unknown",
+      "justification": "A repository setting on GitHub: the owner confirms the default role for collaborators (owner task W13.X3). CODEOWNERS routes every review.",
+      "evidence": [
+        ".github/CODEOWNERS"
+      ],
+      "owner": "W13.X3: confirm collaborator default permissions"
+    },
+    "OSPS-AC-03.01": {
+      "level": 1,
+      "title": "No direct commits to the primary branch",
+      "status": "Met",
+      "justification": "Rulesets as code: main and verify/* need a pull request, status checks and signed commits; drift is checked by security:ruleset-drift.",
+      "evidence": [
+        "security/github-ruleset.json",
+        "scripts/security/ruleset-drift.mjs"
+      ]
+    },
+    "OSPS-AC-03.02": {
+      "level": 1,
+      "title": "The primary branch cannot be deleted",
+      "status": "Met",
+      "justification": "The same rulesets carry a `deletion` rule for main and verify/*.",
+      "evidence": [
+        "security/github-ruleset.json"
+      ]
+    },
+    "OSPS-BR-01.01": {
+      "level": 1,
+      "title": "CI/CD input parameters are sanitized before use",
+      "status": "Met",
+      "justification": "No GitHub Actions; the Buildkite pipeline and ci:local take no free-form parameters into shells; check-no-workflows keeps it so.",
+      "evidence": [
+        ".buildkite/pipeline.yml",
+        "scripts/ci-local.mjs",
+        "scripts/check-no-workflows.mjs"
+      ]
+    },
+    "OSPS-BR-01.02": {
+      "level": 1,
+      "title": "Branch names are sanitized before CI uses them",
+      "status": "Met",
+      "justification": "ci:local and the PR gate read refs through git with argument arrays (no shell interpolation).",
+      "evidence": [
+        "scripts/lib/ciLocal.mjs",
+        "scripts/pr-check.mjs"
+      ]
+    },
+    "OSPS-BR-03.01": {
+      "level": 1,
+      "title": "The project's official channels use encrypted transport",
+      "status": "Met",
+      "justification": "The app is served over https only, with Strict-Transport-Security in public/_headers; headers --check keeps the security headers as declared.",
+      "evidence": [
+        "public/_headers",
+        "scripts/headers.mjs"
+      ]
+    },
+    "OSPS-BR-03.02": {
+      "level": 1,
+      "title": "Distribution channels use encrypted transport",
+      "status": "Met",
+      "justification": "Releases, the plugin registry and the updater are https; downloads are verified (signature, provenance).",
+      "evidence": [
+        "RELEASE.md",
+        "scripts/supply-chain/verify.mjs"
+      ]
+    },
+    "OSPS-BR-07.01": {
+      "level": 1,
+      "title": "No unencrypted secrets in version control",
+      "status": "Met",
+      "justification": "gitleaks with the project's config runs in ci:local and on every PR in Buildkite.",
+      "evidence": [
+        ".gitleaks.toml",
+        "scripts/security-scan.mjs"
+      ]
+    },
+    "OSPS-DO-01.01": {
+      "level": 1,
+      "title": "User guides for every basic function",
+      "status": "Met",
+      "justification": "The documentation site, in English and Hebrew.",
+      "evidence": [
+        "docs/src/content/docs/index.mdx",
+        "docs/src/content/docs/getting-started"
+      ]
+    },
+    "OSPS-DO-02.01": {
+      "level": 1,
+      "title": "A guide to reporting defects",
+      "status": "Met",
+      "justification": "COMMUNITY.md: bugs go to GitHub Discussions → Beta feedback (a form); accessibility has an issue form.",
+      "evidence": [
+        "COMMUNITY.md",
+        ".github/DISCUSSION_TEMPLATE/beta-feedback.yml",
+        ".github/ISSUE_TEMPLATE/accessibility.yml"
+      ]
+    },
+    "OSPS-GV-02.01": {
+      "level": 1,
+      "title": "A public way to discuss changes and obstacles",
+      "status": "Met",
+      "justification": "GitHub Discussions with forms, described in COMMUNITY.md (English and Hebrew).",
+      "evidence": [
+        "COMMUNITY.md",
+        "COMMUNITY.he.md",
+        ".github/DISCUSSION_TEMPLATE"
+      ]
+    },
+    "OSPS-GV-03.01": {
+      "level": 1,
+      "title": "The contribution process is documented",
+      "status": "Met",
+      "justification": "CONTRIBUTING.md (English and Hebrew) and the contributor docs.",
+      "evidence": [
+        "CONTRIBUTING.md",
+        "CONTRIBUTING.he.md",
+        "docs/src/content/docs/contributing"
+      ]
+    },
+    "OSPS-LE-02.01": {
+      "level": 1,
+      "title": "The source code is under an OSI-approved licence",
+      "status": "Met",
+      "justification": "LICENSE at the root; the licence gate checks every dependency against licenses.allow.json.",
+      "evidence": [
+        "LICENSE",
+        "licenses.allow.json"
+      ]
+    },
+    "OSPS-LE-02.02": {
+      "level": 1,
+      "title": "Released software assets are under an OSI-approved licence",
+      "status": "Met",
+      "justification": "Releases are built from this repository under LICENSE; THIRD_PARTY_NOTICES.md ships with them.",
+      "evidence": [
+        "LICENSE",
+        "THIRD_PARTY_NOTICES.md"
+      ]
+    },
+    "OSPS-LE-03.01": {
+      "level": 1,
+      "title": "The licence is in the repository as LICENSE",
+      "status": "Met",
+      "justification": "LICENSE at the root.",
+      "evidence": [
+        "LICENSE"
+      ]
+    },
+    "OSPS-LE-03.02": {
+      "level": 1,
+      "title": "The licence is shipped with released assets",
+      "status": "Unmet",
+      "justification": "Gap: the release records the licence's SHA-256 (scripts/release.mjs) but no check shows LICENSE inside every release artefact.",
+      "evidence": [
+        "scripts/release.mjs"
+      ],
+      "gap": "Ship LICENSE and THIRD_PARTY_NOTICES.md in every release artefact, and make release-gate check it"
+    },
+    "OSPS-QA-01.01": {
+      "level": 1,
+      "title": "The source code is publicly readable at a static URL",
+      "status": "Met",
+      "justification": "github.com/talstilkol/lumen-md (package.json repository).",
+      "evidence": [
+        "package.json"
+      ]
+    },
+    "OSPS-QA-01.02": {
+      "level": 1,
+      "title": "A public record of changes: who and when",
+      "status": "Met",
+      "justification": "Git history on GitHub, plus CHANGELOG.md and the release notes.",
+      "evidence": [
+        "CHANGELOG.md",
+        "release-notes"
+      ]
+    },
+    "OSPS-QA-02.01": {
+      "level": 1,
+      "title": "Direct dependencies are listed in a standard file",
+      "status": "Met",
+      "justification": "package.json and package-lock.json (and Cargo.toml for the desktop app); lockfile-check keeps the lockfiles clean (W13.X6).",
+      "evidence": [
+        "package.json",
+        "package-lock.json",
+        "src-tauri/Cargo.toml",
+        "scripts/supply/lockfile-check.mjs"
+      ]
+    },
+    "OSPS-QA-04.01": {
+      "level": 1,
+      "title": "Subprojects are listed",
+      "status": "Met",
+      "justification": "README.en.md lists the sub-projects (the MCP server, the sync server) in its layout section.",
+      "evidence": [
+        "README.en.md",
+        "sync-server",
+        "mcp-server"
+      ]
+    },
+    "OSPS-QA-05.01": {
+      "level": 1,
+      "title": "No generated executables in version control",
+      "status": "Met",
+      "justification": "The hygiene check and .gitignore keep build output out.",
+      "evidence": [
+        ".gitignore",
+        ".gitattributes",
+        "scripts/check-code-hygiene.mjs"
+      ]
+    },
+    "OSPS-QA-05.02": {
+      "level": 1,
+      "title": "No unreviewable binary artefacts in version control",
+      "status": "Met",
+      "justification": "THIRD_PARTY_NOTICES.md lists the bundled third-party assets; datasets are fetched, not committed (eval:public fails on a dataset file in the repo).",
+      "evidence": [
+        "THIRD_PARTY_NOTICES.md",
+        "scripts/eval-public.mjs"
+      ]
+    },
+    "OSPS-VM-02.01": {
+      "level": 1,
+      "title": "Security contacts are documented",
+      "status": "Met",
+      "justification": "SECURITY.md and /.well-known/security.txt (RFC 9116, W13.X2).",
+      "evidence": [
+        "SECURITY.md",
+        "public/.well-known/security.txt"
+      ]
+    },
+    "OSPS-AC-04.01": {
+      "level": 2,
+      "title": "CI/CD tasks get the lowest permissions by default",
+      "status": "Met",
+      "justification": "No GitHub Actions at all (check-no-workflows), so there is no workflow token to scope.",
+      "evidence": [
+        "scripts/check-no-workflows.mjs"
+      ]
+    },
+    "OSPS-BR-02.01": {
+      "level": 2,
+      "title": "Each release has a unique version",
+      "status": "Met",
+      "justification": "Semantic versions from the commits; each release is the git tag vX.Y.Z (scripts/release.mjs prepare --tag), and a tag name exists once.",
+      "evidence": [
+        "scripts/release.mjs",
+        "RELEASE.md"
+      ]
+    },
+    "OSPS-BR-04.01": {
+      "level": 2,
+      "title": "Each release has a log of functional and security changes",
+      "status": "Met",
+      "justification": "CHANGELOG.md and release-notes/ per release.",
+      "evidence": [
+        "CHANGELOG.md",
+        "release-notes"
+      ]
+    },
+    "OSPS-BR-05.01": {
+      "level": 2,
+      "title": "Standard tooling installs the dependencies",
+      "status": "Met",
+      "justification": "npm ci with a lockfile, ignore-scripts by default (W13.X6).",
+      "evidence": [
+        "package-lock.json",
+        ".npmrc"
+      ]
+    },
+    "OSPS-BR-06.01": {
+      "level": 2,
+      "title": "Releases are signed, or have a signed manifest of hashes",
+      "status": "Met",
+      "justification": "Sigstore signatures and SLSA provenance for every release file; verify.mjs checks both.",
+      "evidence": [
+        "scripts/supply-chain/sign.sh",
+        "scripts/supply-chain/provenance-lib.mjs",
+        "scripts/supply-chain/verify.mjs",
+        "security/sigstore-identity.json"
+      ]
+    },
+    "OSPS-DO-06.01": {
+      "level": 2,
+      "title": "How dependencies are chosen, obtained and tracked is documented",
+      "status": "Met",
+      "justification": "CONTRIBUTING.md and the licence policy; renovate and dependabot configs; the install-script list (W13.X6).",
+      "evidence": [
+        "CONTRIBUTING.md",
+        "renovate.json",
+        ".github/dependabot.yml",
+        "scripts/supply/allow-scripts.json"
+      ]
+    },
+    "OSPS-GV-01.01": {
+      "level": 2,
+      "title": "A list of members with access to sensitive resources",
+      "status": "Met",
+      "justification": "CODEOWNERS and security/reviewers.json; SECURITY.md lists the maintainers and their keys.",
+      "evidence": [
+        ".github/CODEOWNERS",
+        "security/reviewers.json",
+        "SECURITY.md"
+      ]
+    },
+    "OSPS-GV-01.02": {
+      "level": 2,
+      "title": "Roles and responsibilities are documented",
+      "status": "Met",
+      "justification": "The second-maintainer and independent-review docs say who may do what.",
+      "evidence": [
+        "docs/src/content/docs/contributing/second-maintainer.md",
+        "docs/src/content/docs/contributing/independent-review.md"
+      ]
+    },
+    "OSPS-GV-03.02": {
+      "level": 2,
+      "title": "Contribution requirements (style, tests, review) are documented",
+      "status": "Met",
+      "justification": "CONTRIBUTING.md and the contributor checks docs.",
+      "evidence": [
+        "CONTRIBUTING.md",
+        "docs/src/content/docs/contributing/checks.md"
+      ]
+    },
+    "OSPS-LE-01.01": {
+      "level": 2,
+      "title": "Contributors assert they may contribute (DCO or CLA)",
+      "status": "Unmet",
+      "justification": "Gap: no DCO or CLA is required today.",
+      "evidence": [],
+      "gap": "Require a DCO sign-off (Signed-off-by) on every commit, checked by pr:check"
+    },
+    "OSPS-QA-03.01": {
+      "level": 2,
+      "title": "Status checks must pass before merging",
+      "status": "Met",
+      "justification": "Required status checks in the rulesets; pr:check is the gate (no Actions).",
+      "evidence": [
+        "security/github-ruleset.json",
+        "scripts/pr-check.mjs"
+      ]
+    },
+    "OSPS-QA-06.01": {
+      "level": 2,
+      "title": "Automated tests run before merging",
+      "status": "Met",
+      "justification": "Vitest, e2e and the gates in ci:local and Buildkite's pr-check job.",
+      "evidence": [
+        "scripts/ci-local.mjs",
+        ".buildkite/pipeline.yml"
+      ]
+    },
+    "OSPS-SA-01.01": {
+      "level": 2,
+      "title": "Design documentation of the system's actions and actors",
+      "status": "Met",
+      "justification": "SECURITY.md, Security architecture: data at rest and in transit, the plugin sandbox, telemetry, authentication.",
+      "evidence": [
+        "SECURITY.md"
+      ]
+    },
+    "OSPS-SA-02.01": {
+      "level": 2,
+      "title": "Documentation of external software interfaces",
+      "status": "Met",
+      "justification": "The plugin documentation (and the plugin API report of W13.L1).",
+      "evidence": [
+        "docs/src/content/docs/plugins"
+      ]
+    },
+    "OSPS-SA-03.01": {
+      "level": 2,
+      "title": "A security assessment of the likely and high-impact threats",
+      "status": "Met",
+      "justification": "Threat cases and findings under security/ (attacks, findings.json, the crypto audit).",
+      "evidence": [
+        "security/findings.json",
+        "security/attacks",
+        "security/crypto-audit.json"
+      ]
+    },
+    "OSPS-VM-01.01": {
+      "level": 2,
+      "title": "A coordinated vulnerability disclosure policy with response times",
+      "status": "Met",
+      "justification": "SECURITY.md: CRA Article 14 timelines (24 h / 72 h / 14 days), safe harbour; security:page.",
+      "evidence": [
+        "SECURITY.md",
+        "security/disclosure.json"
+      ]
+    },
+    "OSPS-VM-03.01": {
+      "level": 2,
+      "title": "A private way to report vulnerabilities",
+      "status": "Unknown",
+      "justification": "GitHub private vulnerability reporting must be turned on by the owner (the API call was refused to lanes, D1 16.11); until then security.txt points to a public issue.",
+      "evidence": [
+        "public/.well-known/security.txt"
+      ],
+      "owner": "W13.X3/X2: turn on private vulnerability reporting"
+    },
+    "OSPS-VM-04.01": {
+      "level": 2,
+      "title": "Vulnerability data is published (advisories, CVE via GHSA)",
+      "status": "Met",
+      "justification": "SECURITY.md: advisories are GitHub Security Advisories with CVE ids; the hall of fame credits reporters.",
+      "evidence": [
+        "SECURITY.md"
+      ]
+    }
+  },
+  "osps_ac_01_01_status": "Unknown",
+  "osps_ac_01_01_justification": "A repository setting on GitHub, not a file: the owner confirms 2FA on the only admin account (owner task W13.X3).",
+  "osps_ac_02_01_status": "Unknown",
+  "osps_ac_02_01_justification": "A repository setting on GitHub: the owner confirms the default role for collaborators (owner task W13.X3). CODEOWNERS routes every review. Evidence: .github/CODEOWNERS.",
+  "osps_ac_03_01_status": "Met",
+  "osps_ac_03_01_justification": "Rulesets as code: main and verify/* need a pull request, status checks and signed commits; drift is checked by security:ruleset-drift. Evidence: security/github-ruleset.json, scripts/security/ruleset-drift.mjs.",
+  "osps_ac_03_02_status": "Met",
+  "osps_ac_03_02_justification": "The same rulesets carry a `deletion` rule for main and verify/*. Evidence: security/github-ruleset.json.",
+  "osps_br_01_01_status": "Met",
+  "osps_br_01_01_justification": "No GitHub Actions; the Buildkite pipeline and ci:local take no free-form parameters into shells; check-no-workflows keeps it so. Evidence: .buildkite/pipeline.yml, scripts/ci-local.mjs, scripts/check-no-workflows.mjs.",
+  "osps_br_01_02_status": "Met",
+  "osps_br_01_02_justification": "ci:local and the PR gate read refs through git with argument arrays (no shell interpolation). Evidence: scripts/lib/ciLocal.mjs, scripts/pr-check.mjs.",
+  "osps_br_03_01_status": "Met",
+  "osps_br_03_01_justification": "The app is served over https only, with Strict-Transport-Security in public/_headers; headers --check keeps the security headers as declared. Evidence: public/_headers, scripts/headers.mjs.",
+  "osps_br_03_02_status": "Met",
+  "osps_br_03_02_justification": "Releases, the plugin registry and the updater are https; downloads are verified (signature, provenance). Evidence: RELEASE.md, scripts/supply-chain/verify.mjs.",
+  "osps_br_07_01_status": "Met",
+  "osps_br_07_01_justification": "gitleaks with the project's config runs in ci:local and on every PR in Buildkite. Evidence: .gitleaks.toml, scripts/security-scan.mjs.",
+  "osps_do_01_01_status": "Met",
+  "osps_do_01_01_justification": "The documentation site, in English and Hebrew. Evidence: docs/src/content/docs/index.mdx, docs/src/content/docs/getting-started.",
+  "osps_do_02_01_status": "Met",
+  "osps_do_02_01_justification": "COMMUNITY.md: bugs go to GitHub Discussions → Beta feedback (a form); accessibility has an issue form. Evidence: COMMUNITY.md, .github/DISCUSSION_TEMPLATE/beta-feedback.yml, .github/ISSUE_TEMPLATE/accessibility.yml.",
+  "osps_gv_02_01_status": "Met",
+  "osps_gv_02_01_justification": "GitHub Discussions with forms, described in COMMUNITY.md (English and Hebrew). Evidence: COMMUNITY.md, COMMUNITY.he.md, .github/DISCUSSION_TEMPLATE.",
+  "osps_gv_03_01_status": "Met",
+  "osps_gv_03_01_justification": "CONTRIBUTING.md (English and Hebrew) and the contributor docs. Evidence: CONTRIBUTING.md, CONTRIBUTING.he.md, docs/src/content/docs/contributing.",
+  "osps_le_02_01_status": "Met",
+  "osps_le_02_01_justification": "LICENSE at the root; the licence gate checks every dependency against licenses.allow.json. Evidence: LICENSE, licenses.allow.json.",
+  "osps_le_02_02_status": "Met",
+  "osps_le_02_02_justification": "Releases are built from this repository under LICENSE; THIRD_PARTY_NOTICES.md ships with them. Evidence: LICENSE, THIRD_PARTY_NOTICES.md.",
+  "osps_le_03_01_status": "Met",
+  "osps_le_03_01_justification": "LICENSE at the root. Evidence: LICENSE.",
+  "osps_le_03_02_status": "Unmet",
+  "osps_le_03_02_justification": "Gap: the release records the licence's SHA-256 (scripts/release.mjs) but no check shows LICENSE inside every release artefact. Evidence: scripts/release.mjs.",
+  "osps_qa_01_01_status": "Met",
+  "osps_qa_01_01_justification": "github.com/talstilkol/lumen-md (package.json repository). Evidence: package.json.",
+  "osps_qa_01_02_status": "Met",
+  "osps_qa_01_02_justification": "Git history on GitHub, plus CHANGELOG.md and the release notes. Evidence: CHANGELOG.md, release-notes.",
+  "osps_qa_02_01_status": "Met",
+  "osps_qa_02_01_justification": "package.json and package-lock.json (and Cargo.toml for the desktop app); lockfile-check keeps the lockfiles clean (W13.X6). Evidence: package.json, package-lock.json, src-tauri/Cargo.toml, scripts/supply/lockfile-check.mjs.",
+  "osps_qa_04_01_status": "Met",
+  "osps_qa_04_01_justification": "README.en.md lists the sub-projects (the MCP server, the sync server) in its layout section. Evidence: README.en.md, sync-server, mcp-server.",
+  "osps_qa_05_01_status": "Met",
+  "osps_qa_05_01_justification": "The hygiene check and .gitignore keep build output out. Evidence: .gitignore, .gitattributes, scripts/check-code-hygiene.mjs.",
+  "osps_qa_05_02_status": "Met",
+  "osps_qa_05_02_justification": "THIRD_PARTY_NOTICES.md lists the bundled third-party assets; datasets are fetched, not committed (eval:public fails on a dataset file in the repo). Evidence: THIRD_PARTY_NOTICES.md, scripts/eval-public.mjs.",
+  "osps_vm_02_01_status": "Met",
+  "osps_vm_02_01_justification": "SECURITY.md and /.well-known/security.txt (RFC 9116, W13.X2). Evidence: SECURITY.md, public/.well-known/security.txt.",
+  "osps_ac_04_01_status": "Met",
+  "osps_ac_04_01_justification": "No GitHub Actions at all (check-no-workflows), so there is no workflow token to scope. Evidence: scripts/check-no-workflows.mjs.",
+  "osps_br_02_01_status": "Met",
+  "osps_br_02_01_justification": "Semantic versions from the commits; each release is the git tag vX.Y.Z (scripts/release.mjs prepare --tag), and a tag name exists once. Evidence: scripts/release.mjs, RELEASE.md.",
+  "osps_br_04_01_status": "Met",
+  "osps_br_04_01_justification": "CHANGELOG.md and release-notes/ per release. Evidence: CHANGELOG.md, release-notes.",
+  "osps_br_05_01_status": "Met",
+  "osps_br_05_01_justification": "npm ci with a lockfile, ignore-scripts by default (W13.X6). Evidence: package-lock.json, .npmrc.",
+  "osps_br_06_01_status": "Met",
+  "osps_br_06_01_justification": "Sigstore signatures and SLSA provenance for every release file; verify.mjs checks both. Evidence: scripts/supply-chain/sign.sh, scripts/supply-chain/provenance-lib.mjs, scripts/supply-chain/verify.mjs, security/sigstore-identity.json.",
+  "osps_do_06_01_status": "Met",
+  "osps_do_06_01_justification": "CONTRIBUTING.md and the licence policy; renovate and dependabot configs; the install-script list (W13.X6). Evidence: CONTRIBUTING.md, renovate.json, .github/dependabot.yml, scripts/supply/allow-scripts.json.",
+  "osps_gv_01_01_status": "Met",
+  "osps_gv_01_01_justification": "CODEOWNERS and security/reviewers.json; SECURITY.md lists the maintainers and their keys. Evidence: .github/CODEOWNERS, security/reviewers.json, SECURITY.md.",
+  "osps_gv_01_02_status": "Met",
+  "osps_gv_01_02_justification": "The second-maintainer and independent-review docs say who may do what. Evidence: docs/src/content/docs/contributing/second-maintainer.md, docs/src/content/docs/contributing/independent-review.md.",
+  "osps_gv_03_02_status": "Met",
+  "osps_gv_03_02_justification": "CONTRIBUTING.md and the contributor checks docs. Evidence: CONTRIBUTING.md, docs/src/content/docs/contributing/checks.md.",
+  "osps_le_01_01_status": "Unmet",
+  "osps_le_01_01_justification": "Gap: no DCO or CLA is required today.",
+  "osps_qa_03_01_status": "Met",
+  "osps_qa_03_01_justification": "Required status checks in the rulesets; pr:check is the gate (no Actions). Evidence: security/github-ruleset.json, scripts/pr-check.mjs.",
+  "osps_qa_06_01_status": "Met",
+  "osps_qa_06_01_justification": "Vitest, e2e and the gates in ci:local and Buildkite's pr-check job. Evidence: scripts/ci-local.mjs, .buildkite/pipeline.yml.",
+  "osps_sa_01_01_status": "Met",
+  "osps_sa_01_01_justification": "SECURITY.md, Security architecture: data at rest and in transit, the plugin sandbox, telemetry, authentication. Evidence: SECURITY.md.",
+  "osps_sa_02_01_status": "Met",
+  "osps_sa_02_01_justification": "The plugin documentation (and the plugin API report of W13.L1). Evidence: docs/src/content/docs/plugins.",
+  "osps_sa_03_01_status": "Met",
+  "osps_sa_03_01_justification": "Threat cases and findings under security/ (attacks, findings.json, the crypto audit). Evidence: security/findings.json, security/attacks, security/crypto-audit.json.",
+  "osps_vm_01_01_status": "Met",
+  "osps_vm_01_01_justification": "SECURITY.md: CRA Article 14 timelines (24 h / 72 h / 14 days), safe harbour; security:page. Evidence: SECURITY.md, security/disclosure.json.",
+  "osps_vm_03_01_status": "Unknown",
+  "osps_vm_03_01_justification": "GitHub private vulnerability reporting must be turned on by the owner (the API call was refused to lanes, D1 16.11); until then security.txt points to a public issue. Evidence: public/.well-known/security.txt.",
+  "osps_vm_04_01_status": "Met",
+  "osps_vm_04_01_justification": "SECURITY.md: advisories are GitHub Security Advisories with CVE ids; the hall of fame credits reporters. Evidence: SECURITY.md."
+}

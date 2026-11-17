@@ -1,0 +1,15 @@
+{
+  "about": "W13.X6: every dependency with an install script (package-lock.json `hasInstallScript`) in every lockfile of the repo, and what happens to it now that .npmrc sets ignore-scripts=true. `allow`: run on purpose by `npm run supply:allowed-scripts`. `skip`: reviewed, not run, and why that is safe. scripts/supply/lockfile-check.mjs fails when a lockfile gains a package with an install script that is on neither list.",
+  "allow": [
+    { "name": "esbuild", "why": "postinstall swaps the JavaScript launcher for the platform binary from @esbuild/<platform> (faster start). esbuild also works without it." }
+  ],
+  "skip": [
+    { "name": "fsevents", "why": "macOS only; ships a prebuilt binary, and the install script only rebuilds with node-gyp when that is missing." },
+    { "name": "leveldown", "why": "node-gyp-build loads the prebuilt binary at run time; the install script only compiles when no prebuild fits." },
+    { "name": "classic-level", "why": "as leveldown: prebuilt binaries, node-gyp-build at run time." },
+    { "name": "@parcel/watcher", "why": "prebuilt binaries through optionalDependencies; the install script is a node-gyp fallback." },
+    { "name": "onnxruntime-node", "why": "downloads CUDA binaries from nuget.org (.npmrc already skips it: onnxruntime-node-install=skip); unused in the browser build." },
+    { "name": "protobufjs", "why": "postinstall only checks the version scheme of its dependents; nothing is built." },
+    { "name": "tesseract.js", "why": "postinstall prints a funding message; OCR runs in the browser with its own wasm." }
+  ]
+}

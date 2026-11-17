@@ -23,6 +23,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describeDrift, flattenNpmLs, lockDrift, manifestDrift, treeDrift } from "./lib/lockfile-drift.mjs";
+import { checkLockfile } from "./supply/lockfile-check.mjs";
 
 const argv = process.argv.slice(2);
 const opt = (n) => {
@@ -38,6 +39,15 @@ function main() {
   const pkg = readJson(join(root, "package.json"));
   const findings = manifestDrift(pkg, lock);
   let checked = "package.json against the lockfile's root entry";
+  // W13.X6: the lockfile itself — npm registry over https, sha512 integrity, install scripts reviewed.
+  // (A project without the install-script list, such as a test fixture, is not this repository: only the drift is checked.)
+  const allowFile = join(root, "scripts/supply/allow-scripts.json");
+  if (existsSync(allowFile)) {
+    const hygiene = checkLockfile(lock, { allowScripts: readJson(allowFile) });
+    for (const p of hygiene.problems) console.error(`✗ lockfile-check: ${p}`);
+    if (hygiene.problems.length) return 1;
+    checked += `; ${hygiene.checked} lockfile entries from the npm registry over https with sha512 integrity`;
+  }
 
   if (!flag("lock-only")) {
     if (!existsSync(join(root, "node_modules"))) {
