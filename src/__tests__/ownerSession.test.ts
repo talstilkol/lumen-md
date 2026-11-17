@@ -4,6 +4,7 @@
  * scripts/owner/{steps,session,collect,receipt}.mjs.
  */
 import { describe, it, expect, afterAll } from "vitest";
+import { spawnSync } from "node:child_process";
 import { createHash, createPublicKey, generateKeyPairSync, sign, verify } from "node:crypto";
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -11,7 +12,7 @@ import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs script without type declarations
 import { STEPS, SESSIONS, secretLooking } from "../../scripts/owner/steps.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
-import { OFF_LIST, loadState, receiptPath, runChecks, runStep, statusLines } from "../../scripts/owner/session.mjs";
+import { OFF_LIST, loadState, receiptPath, requireProblems, runChecks, runStep, statusLines } from "../../scripts/owner/session.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
 import { assign, collect, itemsOf, normalise, ownerSections } from "../../scripts/owner/collect.mjs";
 // @ts-expect-error — plain .mjs script without type declarations
@@ -261,5 +262,46 @@ describe("collecting owner commands from PR bodies", () => {
     const valid = new Set([...STEPS.map((s: Obj) => s.id), "agent", "recurring", "coordinator", "people", "deferred", "obsolete", "none"]);
     expect(inbox.items.length).toBeGreaterThan(100);
     for (const x of inbox.items) expect(valid.has(x.to)).toBe(true);
+  });
+});
+
+/**
+ * F14: a plan dod `owner:session -- status` exited 0 whatever the state, so the
+ * owner tasks' dods (W13.X3, W13.R14, …) passed with nothing done.
+ * `status --require <id>` exits 1 until every step the id names is done.
+ */
+describe("status --require (F14)", () => {
+  const k = keys();
+  const dir = join(tmp, "require");
+  mkdirSync(join(dir, "devices"), { recursive: true });
+  writeFileSync(join(dir, "PUBLIC_KEY.pem"), k.pub);
+  const study = STEPS.find((s: Obj) => s.id === "devices/reading-study");
+  const receipt = (done: boolean) =>
+    seal({ kind: "owner", step: study.id, session: study.session, title: study.en, plan: study.plan, prs: study.prs, commit: null, startedAt: "2026-11-17T09:00:00.000Z", finishedAt: "2026-11-17T13:00:00.000Z", minutes: { estimated: study.minutes, actual: 240 }, actions: [], checks: [{ id: "sessions", ok: done, detail: "" }, { id: "consent", ok: done, attested: done, detail: "" }], done }, k.priv);
+  const cli = (...args: string[]) => spawnSync(process.execPath, [join(ROOT, "scripts/owner/session.mjs"), "status", "--dir", dir, ...args], { encoding: "utf8" });
+
+  it("refuses with no receipt, an open receipt, and an id no step carries", () => {
+    expect(requireProblems({}, ["W13.R14"]).join()).toContain("devices/reading-study has no sealed receipt yet");
+    expect(requireProblems({ [study.id]: receipt(false) }, ["W13.R14"]).join()).toContain("devices/reading-study is open (sessions, consent)");
+    expect(requireProblems({}, ["W13.X3"]).join()).toContain("no owner-session step carries it");
+    expect(requireProblems({ [study.id]: receipt(true) }, ["W13.R14", "devices/reading-study"])).toEqual([]);
+    // A session needs every one of its steps.
+    expect(requireProblems({ [study.id]: receipt(true) }, ["devices"]).length).toBe(STEPS.filter((s: Obj) => s.session === "devices").length - 1);
+  });
+
+  it("the command exits 1 until the step is done with a valid sealed receipt, and plain status still exits 0", () => {
+    expect(cli().status).toBe(0);
+    expect(cli("--require", "W13.R14").status).toBe(1);
+    expect(cli("--require", "W13.X3").status).toBe(1);
+    expect(cli("--require").status).toBe(2);
+    writeFileSync(receiptPath(dir, study.id), JSON.stringify(receipt(false)));
+    expect(cli("--require", "W13.R14").status).toBe(1);
+    const done = receipt(true);
+    writeFileSync(receiptPath(dir, study.id), JSON.stringify({ ...done, done: true, minutes: { estimated: 1, actual: 1 } })); // changed by hand: not valid
+    expect(cli("--require", "W13.R14").status).toBe(1);
+    writeFileSync(receiptPath(dir, study.id), JSON.stringify(done));
+    const r = cli("--require", "W13.R14");
+    expect(r.status, r.stderr).toBe(0);
+    expect(r.stdout).toContain("required done: W13.R14");
   });
 });

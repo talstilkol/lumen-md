@@ -6,6 +6,10 @@
  *                                                   offers to run its commands, checks the result
  *                                                   and records a signed receipt; resumes where it stopped
  *   npm run owner:session -- status                 every step: done / open, estimated vs actual minutes
+ *   npm run owner:session -- status --require <id>  the same, and exit 1 unless every step that <id> names is done
+ *                                                   with a valid sealed receipt (<id>: a step id, a session, or a
+ *                                                   plan task the steps carry, e.g. W13.R14; repeatable). A plan
+ *                                                   dod uses this: plain `status` exits 0 whatever the state (F14)
  *   npm run owner:session -- check [session]        run the automatic checks only (no prompts, no receipts)
  *   npm run owner:session -- collect [--write]      gather every owner command from the open PRs, dedupe,
  *                                                   assign; exit 1 if any is unassigned
@@ -235,6 +239,29 @@ export function statusLines(state, lang = "en") {
   return lines;
 }
 
+/**
+ * `status --require <id>`: what keeps each id from being done. An id names a
+ * step (devices/reading-study), a session (devices), or a plan task the steps
+ * carry (W13.R14). An id no step carries is a problem too: nothing could ever
+ * record it done, so a dod that requires it must not pass.
+ */
+export function requireProblems(state, ids) {
+  const out = [];
+  for (const id of ids) {
+    const steps = STEPS.filter((s) => s.id === id || s.session === id || s.plan.includes(id));
+    if (!steps.length) {
+      out.push(`${id}: no owner-session step carries it (scripts/owner/steps.mjs), so nothing can record it done`);
+      continue;
+    }
+    for (const s of steps) {
+      const r = state[s.id];
+      if (!r) out.push(`${id}: ${s.id} has no sealed receipt yet`);
+      else if (!r.done) out.push(`${id}: ${s.id} is open (${r.checks.filter((c) => c.ok !== true).map((c) => c.id).join(", ") || "not done"})`);
+    }
+  }
+  return out;
+}
+
 function ghPulls() {
   const all = [];
   for (let page = 1; page < 20; page++) {
@@ -251,7 +278,8 @@ async function main(argv) {
   const opt = (n) => (argv.includes(`--${n}`) ? argv[argv.indexOf(`--${n}`) + 1] : undefined);
   const lang = opt("lang") ?? (/^he/i.test(process.env.LANG ?? "") ? "he" : "en");
   const dir = resolve(opt("dir") ?? join(ROOT, "reports/owner"));
-  const cmd = argv.find((a) => !a.startsWith("--") && ![opt("lang"), opt("dir"), opt("redo"), opt("from")].includes(a));
+  const requires = argv.flatMap((a, i) => (a === "--require" ? [argv[i + 1] ?? ""] : []));
+  const cmd = argv.find((a, i) => !a.startsWith("--") && ![opt("lang"), opt("dir"), opt("redo"), opt("from")].includes(a) && argv[i - 1] !== "--require");
   if (cmd === "collect") {
     const prs = opt("from") ? JSON.parse(readFileSync(opt("from"), "utf8")) : ghPulls();
     const r = collect(prs);
@@ -271,7 +299,14 @@ async function main(argv) {
   if (cmd === "status" || !cmd) {
     for (const l of statusLines(state, lang)) console.log(l);
     if (!cmd) console.log("\nnpm run owner:session -- accounts|gpu|devices|status|check|collect");
-    return 0;
+    if (requires.some((id) => !id || id.startsWith("--"))) {
+      console.error("owner: --require needs an id (a step, a session or a plan task)");
+      return 2;
+    }
+    const problems = requireProblems(state, requires);
+    for (const p of problems) console.error(`✗ ${p}`);
+    if (requires.length && !problems.length) console.log(`✓ required done: ${requires.join(", ")}`);
+    return problems.length ? 1 : 0;
   }
   if (cmd === "check") {
     const which = argv.find((a) => SESSIONS[a]);

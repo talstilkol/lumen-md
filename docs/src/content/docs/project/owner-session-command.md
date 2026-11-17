@@ -11,6 +11,7 @@ npm run owner:session -- accounts    # session 1: accounts, keys and switches (a
 npm run owner:session -- gpu         # session 2: models and data (the cloud GPU, the Mac as fallback)
 npm run owner:session -- devices     # session 3: devices, releases and the merge
 npm run owner:session -- status      # what is done, estimated against actual minutes
+npm run owner:session -- status --require W13.R14   # exit 1 until every step carrying W13.R14 is done with a valid receipt
 npm run owner:session -- check       # only the automatic checks: no prompts, nothing recorded
 npm run owner:session -- collect     # every owner command in the open PRs, deduplicated and assigned
 ```
