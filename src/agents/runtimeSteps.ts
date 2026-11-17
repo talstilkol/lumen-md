@@ -66,10 +66,12 @@ const SEFARIA_TOOL = /^sefaria_[a-z_]+$/;
  * network tools (PUBLIC_NETWORK, Sefaria). A tool an outside server offers
  * (MCP, `offeredBy`) always counts, whatever its scope: a stdio server not
  * marked offline is "network" here and can still read the disk (review 12,
- * M4). The trust class of what it read does not matter: a clipped page or
- * an imported PDF in the vault is the user's data.
+ * M4). A tool that says so (`privateResult`: a remote MCP server the user
+ * connected, W11.I2) counts too. The trust class of what it read does not
+ * matter: a clipped page or an imported PDF in the vault is the user's data.
  */
 export function readsUserData(tool: AgentTool, args: Record<string, unknown>): boolean {
+  if (tool.privateResult) return true;
   if (tool.offeredBy?.length) return true;
   if (NOT_PRIVATE.has(tool.name)) return false;
   if (tool.scope === "network" && (PUBLIC_NETWORK.has(tool.name) || SEFARIA_TOOL.test(tool.name))) return false;

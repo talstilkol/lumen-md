@@ -10,6 +10,10 @@
  *   • The answer is outside content: `untrusted` makes the runtime
  *     pass it through the injection guard and taint the run (2.7), so a
  *     later write or network call needs the user's approval.
+ *   • The answer is also the user's data (`privateResult`, W11.I2
+ *     follow-up): a server reads the account the user connected it to, so
+ *     after a call the run holds something private and a network call of
+ *     the tainted run asks, as after a vault read.
  *   • Airplane mode is checked again on every call, not only when the
  *     tools were listed.
  *   • Pinning (approvals.ts, W10.C2): each tool's definition is hashed when
@@ -119,6 +123,7 @@ export async function serverAgentTools(server: McpServerConfig, makeTransport: (
       scope,
       offeredBy: [source],
       ...(reach === "remote" && target ? { networkTarget: target } : {}),
+      privateResult: true,
       untrusted: () => [source],
       async run(args: Record<string, unknown>, ctx: ToolContext) {
         const transport = makeTransport(ctx);

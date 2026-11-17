@@ -221,6 +221,13 @@ export interface AgentTool<A = Record<string, unknown>, R = unknown> {
   offeredBy?: string[];
   /** A network tool that talks to its own server (an MCP server's URL), not the research service (review 21, C2). */
   networkTarget?: string;
+  /**
+   * The result can hold the user's own data although the tool is a network
+   * call: an MCP server the user connected reads their account (mail,
+   * calendar, drive). Under the Rule of Two the run is then private, like
+   * after a vault read (W11.I2 follow-up, FA).
+   */
+  privateResult?: boolean;
 }
 
 export interface ToolCall {
