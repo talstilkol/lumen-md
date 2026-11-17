@@ -271,6 +271,28 @@ export class E2eeSync extends E2eeSyncPairing {
     return res;
   }
 
+  /**
+   * Plan W13.S2: an excluded arrival a shared vault keeps for the user to
+   * read (settings as `<path>.bak`, never at `path`, never loaded). Written
+   * once per version: a `.bak` that already holds it is left alone. Best
+   * effort: a failure only loses the copy, never touches `path`.
+   */
+  private async quarantine(path: string, r: ManifestEntry, local: Map<string, string>): Promise<void> {
+    const target = this.o.quarantine(path);
+    if (!target || target === path) return;
+    const have = local.get(target) ?? null;
+    if (have !== null && have === liveHash(r)) return;
+    try {
+      const data = await this.fetchBlob(path, r);
+      if (await this.o.local.write(target, data, have)) {
+        local.set(target, liveHash(r) as string);
+        this.emit({ kind: "excluded", at: this.o.now(), path: target, reason: "quarantined", direction: "down" });
+      }
+    } catch (e) {
+      this.emit({ kind: "error", at: this.o.now(), message: `could not keep ${path} as ${target}: ${e instanceof Error ? e.message : String(e)}` });
+    }
+  }
+
   /** Step 2: bring every path the manifest changed into this device. */
   private async pull(remote: Manifest, res: SyncResult, held: Set<string>): Promise<void> {
     const s = await this.loadState();
@@ -287,6 +309,7 @@ export class E2eeSync extends E2eeSyncPairing {
       if (why) {
         excluded.add(path);
         this.emit({ kind: "excluded", at: this.o.now(), path, reason: why, direction: "down" });
+        if (!r.deleted) await this.quarantine(path, r, local);
       } else if (!r.deleted && liveHash(r) !== (local.get(path) ?? null)) {
         planFiles++;
         planBytes += r.size;

@@ -437,5 +437,15 @@
   "e2ee.roles.fresh.confirm": "Yes, it's current",
   "e2ee.roles.fresh.done": "Confirmed. You won't be asked again on this device.",
   "e2ee.roles.readOnly": "This device reads the vault. Its changes outside a personal folder aren't sent.",
-  "e2ee.rules.unreadable": "This device's sync rules can't be read, so nothing was synced: open Sync → What syncs on this device and save them again."
+  "e2ee.rules.unreadable": "This device's sync rules can't be read, so nothing was synced: open Sync → What syncs on this device and save them again.",
+  "e2ee.shared.title": "What this shared vault may carry",
+  "e2ee.shared.intro": "Other people write to this vault. Code and settings from their devices could run on yours, so none of these kinds sync here until you turn it on, on this device. Settings that arrive anyway are kept as a .bak file to read, never loaded.",
+  "e2ee.shared.confirm": "Let {kind} from the other members reach this device? Their files of this kind will be written here. A plugin still runs only after you approve its permissions.",
+  "e2ee.shared.kind.plugins": "Plugins",
+  "e2ee.shared.kind.themes": "Themes",
+  "e2ee.shared.kind.snippets": "CSS snippets",
+  "e2ee.shared.kind.hotkeys": "Hotkeys",
+  "e2ee.shared.kind.settings": "App settings",
+  "e2ee.shared.kind.automations": "Automations",
+  "e2ee.shared.kind.agents": "Agent skills"
 }

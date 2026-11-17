@@ -15,6 +15,7 @@
  * family's vault by joining it.
  */
 
+import { loadConsent, sharedExclude, sharedQuarantine } from "../../sharedVault";
 import { E2eeSync, createVault, unlockVault, unlockWithDevice } from "../../engine";
 import { idbStateStore, type SyncStateStore } from "../../state";
 import type { VaultKeys } from "../../keys";
@@ -120,7 +121,10 @@ export type Pending = { name: string; request: JoinRequest; invite: Invite };
 async function engine(deps: RoleDeps, id: string, provider: RoleProvider, keys: VaultKeys, access?: { device: string; identity: string }): Promise<E2eeSync> {
   const local = folderFiles(await (deps.local ?? defaultLocal)(), folderOf(id));
   const store = await (deps.stateStore ?? idbStateStore)(keys.vaultId);
-  return new E2eeSync({ provider, keys, local, store, ...(access ? { access } : {}) });
+  // Plan W13.S2: a role vault has more than one person — no plugins, themes, snippets, hotkeys, settings,
+  // automations or skills cross it unless this device said yes to that kind; settings that arrive are kept as .bak.
+  const consent = () => loadConsent(id);
+  return new E2eeSync({ provider, keys, local, store, exclude: sharedExclude(consent), quarantine: sharedQuarantine(consent), ...(access ? { access } : {}) });
 }
 
 /** Admin: a new role space and its vault, this device as the admin. */
