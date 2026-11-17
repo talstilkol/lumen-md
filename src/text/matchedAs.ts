@@ -65,6 +65,25 @@ export function matchTier(queryWord: string, docWord: string): { tier: MatchTier
   return null;
 }
 
+/**
+ * matchTier per (query word, note word), kept for the query being shown: the
+ * results of one search repeat most of their words, and each tier check
+ * (prefixes, ktiv, lemmas, transliteration) is far dearer than a lookup. A
+ * new query word starts a new table; the table stops growing at MEMO_MAX.
+ * (R12.16 bench: the line under 20 results cost ~13% of a 10k-note search
+ * without this.)
+ */
+const MEMO_MAX = 5000;
+const memo = new Map<string, Map<string, { tier: MatchTier; prefix?: string } | null>>();
+function memoFor(queryWord: string) {
+  let m = memo.get(queryWord);
+  if (!m) {
+    if (memo.size >= 8) memo.clear(); // the words of the last few queries only
+    memo.set(queryWord, (m = new Map()));
+  }
+  return m;
+}
+
 const RANK: Record<MatchTier, number> = { exact: 0, niqqud: 1, finals: 2, prefix: 3, ktiv: 4, lemma: 5, synonym: 6, english: 7, translit: 8 };
 
 /**
@@ -76,8 +95,13 @@ export function explainMatch(query: string, text: string): Array<MatchedAs | nul
   const docWords = [...new Set(words(text))];
   return words(query).map((qw) => {
     let best: MatchedAs | null = null;
+    const memo = memoFor(qw);
     for (const dw of docWords) {
-      const m = matchTier(qw, dw);
+      let m = memo.get(dw);
+      if (m === undefined) {
+        m = matchTier(qw, dw);
+        if (memo.size < MEMO_MAX) memo.set(dw, m);
+      }
       if (m && (!best || RANK[m.tier] < RANK[best.tier])) best = { query: qw, word: dw, ...m };
       if (best?.tier === "exact") break;
     }

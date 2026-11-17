@@ -303,5 +303,8 @@ describe("the block", () => {
     });
     expect(written.split("\n")[0]).toBe("| Evidence | Weight | A | B |");
     expect(container.querySelector("[data-ach-deception]")!.textContent).toContain("B");
+    // the result is said once to a screen reader (a polite status), and the button is a styled app control
+    expect(container.querySelector('[data-ach-copied-status][role="status"]')!.textContent).toBe("Copied");
+    expect(container.querySelector("[data-ach-copy]")!.className).toContain("chart-block-tab");
   });
 });

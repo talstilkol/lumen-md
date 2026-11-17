@@ -44,9 +44,13 @@ export default function AchBlock({ source }: { source: string }) {
         <span style={{ fontWeight: 600 }} dir="auto">
           {title}
         </span>
-        <button type="button" onClick={copy} style={{ fontSize: 11 }} data-ach-copy="">
+        <button type="button" onClick={copy} className="chart-block-tab" data-ach-copy="">
           {copied ? t("ach.copied") : t("ach.copy")}
         </button>
+        {/* the button's new label is not announced by itself: a polite live region says it once */}
+        <span className="sr-only" role="status" aria-live="polite" data-ach-copied-status="">
+          {copied ? t("ach.copied") : ""}
+        </span>
       </div>
       <div style={{ padding: 8, fontSize: 13 }}>
         {model.problems.length > 0 && (

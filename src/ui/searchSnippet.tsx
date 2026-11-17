@@ -1,6 +1,6 @@
 /** A search hit's snippet with the matched part marked (src/ui/SearchDialog.tsx; moved out unchanged for max-lines). */
 import type { SearchHit } from "../storage/workspaceIndex";
-import { t } from "../i18n";
+import { isRTL, t } from "../i18n";
 import { looseMatches, type MatchedAs } from "../text/matchedAs";
 
 /** The snippet line's style (one line, cut with an ellipsis). */
@@ -36,6 +36,20 @@ function how(m: MatchedAs): string {
   }
 }
 
+const FSI = "\u2068";
+const PDI = "\u2069";
+
+/**
+ * One "how: query → word" part. The two words are bidi-isolated (FSI … PDI),
+ * so a Latin query next to a Hebrew word ("Kohen", "כהן") keeps its order,
+ * and the arrow points from the query to the word in the line's reading
+ * direction: "→" in an LTR interface, "←" in an RTL one (no mirrored glyph
+ * exists for the arrow, so it is chosen, not left to the bidi algorithm).
+ */
+export function matchedAsPart(how: string, query: string, word: string, rtl: boolean): string {
+  return `${how}: ${FSI}${query}${PDI} ${rtl ? "←" : "→"} ${FSI}${word}${PDI}`;
+}
+
 /**
  * "Matched as …" under a result (plan R12.16): for each query word the note
  * did not contain as typed, how it matched — "without the prefix (ו)",
@@ -44,9 +58,9 @@ function how(m: MatchedAs): string {
 export function MatchedAsLine({ query, hit }: { query: string; hit: SearchHit }) {
   const loose = looseMatches(query, `${hit.name} ${hit.snippet ?? ""}`);
   if (!loose.length) return null;
-  const parts = loose.map((m) => `${how(m)}: ${m.query} → ${m.word}`);
+  const parts = loose.map((m) => matchedAsPart(how(m), m.query, m.word, isRTL()));
   return (
-    <div data-testid="search-matched-as" dir="auto" style={{ ...SNIPPET_STYLE, fontSize: 10.5 }}>
+    <div data-testid="search-matched-as" dir={isRTL() ? "rtl" : "ltr"} style={{ ...SNIPPET_STYLE, fontSize: 10.5 }}>
       {t("searchDialog.matchedAs", { how: parts.join(" · ") })}
     </div>
   );
