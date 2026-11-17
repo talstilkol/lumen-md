@@ -11,6 +11,7 @@
  */
 import { DYSLEXIA_FONT, HEBREW_FONTS, loadReadingFont, type ReadingFont, type ReadingFontId } from "./fonts";
 import { loadAids, AIDS_KEY, AIDS_TINTS, AIDS_LIMITS, type AidsTint } from "./readingAids";
+import { READING_KEY, readStored, writeStored, type StoredReading } from "./profileCore";
 
 export interface ReadingSettings {
   font: ReadingFontId;
@@ -41,15 +42,9 @@ export const DEFAULT_READING: Readonly<ReadingSettings> = Object.freeze({
   spacedHebrew: false,
 });
 
-const KEY = "lumen-reading";
 const FONT_IDS = new Set<string>(["default", ...HEBREW_FONTS.map((f) => f.id)]);
 
-interface Stored {
-  /** The global settings (and, plan W13.R1, the global reading profile's other fields). */
-  global?: Partial<ReadingProfile>;
-  /** Per-note overrides kept on this device only — sparse: only the keys the note changes. */
-  notes?: Record<string, Partial<ReadingProfile>>;
-}
+type Stored = StoredReading;
 
 const TYPO_KEYS = ["font", "size", "lineHeight", "width", "dyslexiaLatin", "spacedHebrew"] as const;
 const hasTypography = (v: Partial<ReadingProfile> | undefined) => !!v && TYPO_KEYS.some((k) => k in v);
@@ -69,25 +64,8 @@ export function normalize(v: Partial<ReadingSettings> | undefined, base: Readonl
   };
 }
 
-function read(): Stored {
-  try {
-    const raw = localStorage.getItem(KEY);
-    const v = raw ? (JSON.parse(raw) as unknown) : null;
-    return v && typeof v === "object" ? (v as Stored) : {};
-  } catch {
-    return {};
-  }
-}
-
-function write(s: Stored): void {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(s));
-  } catch {
-    // why: storage is blocked or full (private mode, quota): the setting holds for this session only
-    /* private mode: the settings last for this visit */
-  }
-  if (typeof window !== "undefined") window.dispatchEvent(new Event("lumen-reading-changed"));
-}
+const read = readStored;
+const write = writeStored;
 
 export function globalReading(): ReadingSettings {
   return normalize(read().global);
@@ -139,7 +117,7 @@ export function moveNoteReading(from: string, to: string): void {
 /** Has the person ever changed a reading option? (App skips loading this module until then.) */
 export function hasReadingSettings(): boolean {
   try {
-    return localStorage.getItem(KEY) !== null;
+    return localStorage.getItem(READING_KEY) !== null;
   } catch {
     return false;
   }

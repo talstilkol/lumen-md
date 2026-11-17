@@ -12,7 +12,7 @@ import { createRoot } from "react-dom/client";
 import "../reading/rsvpStrings";
 import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
-import { RSVP_RESEARCH, WPM, keyAction, minutesLeft, rewindSentence, rsvpWords, sentenceAround, wordDuration } from "../reading/rsvp";
+import { RSVP_RESEARCH, WPM, keyAction, minutesLeft, paragraphDirections, rewindSentence, rsvpWords, sentenceAround, wordDuration } from "../reading/rsvp";
 import { Modal } from "./Modal";
 // The palette's dialog look (.cmd-palette): loaded with this dialog too, which can open before the palette ever has (INT7).
 import "./CommandPalette.css";
@@ -26,7 +26,10 @@ export function RsvpReader({ content, initialWpm, close }: { content: string; in
   const [wpm, setWpm] = useState(Math.min(WPM.max, Math.max(WPM.min, initialWpm)));
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const word = words[Math.min(i, words.length - 1)];
-  const rtl = word?.rtl ?? false;
+  // The keys and arrows follow the paragraph's direction, not the word's (audit r4 A1.2); the word keeps its own.
+  const dirs = useMemo(() => paragraphDirections(words), [words]);
+  const rtl = dirs[Math.min(i, words.length - 1)] ?? false;
+  const wordRtl = word?.rtl ?? false;
 
   useEffect(() => {
     if (!playing || !word) return;
@@ -89,7 +92,7 @@ export function RsvpReader({ content, initialWpm, close }: { content: string; in
   const left = Math.max(0, Math.ceil(minutesLeft(words, i, wpm)));
 
   return (
-    <Modal onClose={close} aria-labelledby="rsvp-title" data-testid="rsvp-reader" style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", maxWidth: "none", maxHeight: "none", margin: 0, padding: 0, border: 0, background: "hsl(var(--bg))", color: "hsl(var(--fg))" }}>
+    <Modal onClose={close} aria-labelledby="rsvp-title" data-testid="rsvp-reader" data-reading-mode="rsvp" style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", maxWidth: "none", maxHeight: "none", margin: 0, padding: 0, border: 0, background: "hsl(var(--bg))", color: "hsl(var(--fg))" }}>
       <div onKeyDown={onKey} style={{ display: "flex", flexDirection: "column", height: "100%", padding: 16, boxSizing: "border-box" }}>
         <header style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <h2 id="rsvp-title" style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>
@@ -112,8 +115,8 @@ export function RsvpReader({ content, initialWpm, close }: { content: string; in
             <div style={{ position: "absolute", insetInlineStart: "50%", bottom: -14, height: 10, borderInlineStart: "2px solid hsl(var(--fg-muted))" }} />
             <div
               data-testid="rsvp-word"
-              dir={rtl ? "rtl" : "ltr"}
-              lang={rtl ? "he" : undefined}
+              dir={wordRtl ? "rtl" : "ltr"}
+              lang={wordRtl ? "he" : undefined}
               style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "baseline", fontSize: "clamp(32px, 6vw, 56px)", fontFamily: "var(--reading-font, var(--font-serif))", lineHeight: 1.4, whiteSpace: "pre" }}
             >
               <span style={{ textAlign: "end" }}>{before}</span>

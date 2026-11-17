@@ -18,6 +18,7 @@ import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { HEMINGWAY_KINDS, countByKind, swatchStyle, type HemingwayFinding } from "../reading/hemingway";
 import type { FocusUnit } from "../reading/focusUnits";
+import { HelpButton } from "./HelpButton";
 
 type Unit = FocusUnit | "off";
 const UNITS: Unit[] = ["off", "line", "sentence", "paragraph"];
@@ -107,6 +108,7 @@ export function FocusLayerBar({ area }: { area: RefObject<HTMLElement | null> })
   return (
     <>
       <div role="group" aria-label={t("focusLayer.controls")} data-reading-mode="focus-layer" style={{ display: "flex", gap: 10, alignItems: "center", fontSize: 12, color: "hsl(var(--fg))" }}>
+        <HelpButton topic="editor/reading-modes#focus-sentence-focus-and-readability-highlights" size={18} />
         <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
           {t("focusLayer.unit")}
           <select style={control} value={unit ?? "off"} onChange={(e) => setUnit(e.currentTarget.value as Unit)} data-testid="focus-unit">

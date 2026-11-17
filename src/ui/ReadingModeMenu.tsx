@@ -16,8 +16,9 @@ import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { HEBREW_FONTS } from "../reading/fonts";
 import { AIDS_TINTS } from "../reading/readingAids";
-import { DEFAULT_PROFILE, FOCUS_UNITS, LINE_FOCUS, NIKUD_DISPLAY, PROFILE_LIMITS, READING_LIMITS, globalProfile, profileDiff, saveGlobalProfile, saveLocalNoteProfile, type ReadingModeId, type ReadingProfile } from "../reading/settings";
+import { DEFAULT_PROFILE, FOCUS_UNITS, LINE_FOCUS, NIKUD_DISPLAY, PROFILE_LIMITS, READING_LIMITS, globalProfile, localNoteProfile, profileDiff, saveGlobalProfile, saveLocalNoteProfile, type ReadingModeId, type ReadingProfile } from "../reading/settings";
 import { applyProfile, noteProfile, writeFileProfile } from "../reading/profileStore";
+import { PLACE_KEYS } from "../reading/profileCore";
 import { COMMON_FIELDS, MODE_DEFS, modeDef } from "../reading/modes";
 import { Modal } from "./Modal";
 import { HelpButton } from "./HelpButton";
@@ -26,6 +27,18 @@ import { showAiToast } from "./AiToast";
 import "./CommandPalette.css";
 
 type Where = "file" | "device";
+
+/** Review 13 M6: the note's reading place (W13.R6) is this device's, per note — never written to the file or the global profile. */
+function withoutPlace<T extends Partial<ReadingProfile>>(v: T): T {
+  const out = { ...v };
+  for (const k of PLACE_KEYS) delete out[k];
+  return out;
+}
+function placeOf(v: Partial<ReadingProfile> | null): Partial<ReadingProfile> | null {
+  const out: Partial<ReadingProfile> = {};
+  for (const k of PLACE_KEYS) if (v && k in v) (out as Record<string, unknown>)[k] = v[k];
+  return Object.keys(out).length ? out : null;
+}
 
 type FieldUi = { kind: "bool" } | { kind: "range"; min: number; max: number; step: number; unit?: string } | { kind: "select"; options: ReadonlyArray<string | number>; label?: (v: string | number) => string };
 
@@ -60,9 +73,9 @@ function fieldUi(k: keyof ReadingProfile): FieldUi | null {
       return { kind: "select", options: AIDS_TINTS };
     case "focusUnit":
       return { kind: "select", options: FOCUS_UNITS };
-    // A two-page spread comes with plan W13.R6; until then the menu offers the layouts that exist.
+    // Audit r4 A1.6: the two-page spread (W13.R6, book pages) is a layout the menu offers.
     case "layout":
-      return { kind: "select", options: ["single", "sideBySide"] };
+      return { kind: "select", options: ["single", "sideBySide", "spread"] };
     case "voice": {
       const names = voices().map((v) => v.name);
       return { kind: "select", options: ["", ...names], label: (v) => (v === "" ? t("readingMode.voice.auto") : String(v)) };
@@ -160,13 +173,14 @@ export function ReadingModeMenu({ close }: { close: () => void }) {
     if (where === "file") {
       let next: string;
       try {
-        next = writeFileProfile(content, profileDiff(p, global));
+        next = writeFileProfile(content, withoutPlace(profileDiff(p, global)));
       } catch {
         showAiToast(t("readingMode.saved.invalidFrontmatter"), "error");
         setWhere("device");
         return;
       }
-      if (path) saveLocalNoteProfile(path, null);
+      // The file now says it all — but the note's place stays on this device.
+      if (path) saveLocalNoteProfile(path, placeOf(localNoteProfile(path)));
       if (next !== content) useAppStore.getState().setContent(next);
     } else {
       if (!path) {
@@ -181,14 +195,15 @@ export function ReadingModeMenu({ close }: { close: () => void }) {
   };
 
   const saveForAll = () => {
-    saveGlobalProfile(p);
+    const global = globalProfile();
+    saveGlobalProfile({ ...p, ...Object.fromEntries(PLACE_KEYS.map((k) => [k, global[k]])) });
     setSaved(true);
     showAiToast(t("readingMode.saved.global"), "info");
   };
 
   const resetNote = () => {
     const content = useAppStore.getState().doc.content;
-    if (path) saveLocalNoteProfile(path, null);
+    if (path) saveLocalNoteProfile(path, placeOf(localNoteProfile(path)));
     if (hasOwnFile) {
       try {
         const next = writeFileProfile(content, null);

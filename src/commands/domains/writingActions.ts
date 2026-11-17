@@ -209,8 +209,25 @@ export async function runWritingAgent(ctx: Pick<CommandContext, "getEditorView">
       openWritingPanel(panelHost, { agentLabel: label, ...prefs });
       return;
     }
-    const error = agent.needsModel ? t("writing.noModel", { error: explainError(e) }) : t("writing.failed", { error: explainError(e) });
+    let error = agent.needsModel ? t("writing.noModel", { error: explainError(e) }) : t("writing.failed", { error: explainError(e) });
+    if (agent.needsModel) error += ` ${await suggestedModel(agentId, langOf(target.text))}`;
     openWritingPanel(panelHost, { agentLabel: label, error, ...prefs });
+  }
+}
+
+/**
+ * W13.W16's table (agents/writing/modelDefaults): which local model this agent defaults to on
+ * a device of this size, so "no model" says what to install. Loaded only on that error.
+ */
+export async function suggestedModel(agentId: string, lang: string): Promise<string> {
+  try {
+    const { writingDefault } = await import("../../agents/writing/modelDefaults");
+    const ram = typeof navigator !== "undefined" ? (navigator as Navigator & { deviceMemory?: number }).deviceMemory : undefined;
+    const pick = writingDefault(agentId, ram ?? null, lang === "he" ? "he" : "en");
+    if (!pick || pick.kind !== "llm" || !pick.model) return "";
+    return t("writing.suggestModel", { model: pick.model, licence: pick.licence });
+  } catch {
+    return "";
   }
 }
 

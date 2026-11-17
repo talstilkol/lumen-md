@@ -1,14 +1,15 @@
 /**
  * The margins reading mode's switch (plan W13.R9) and the hook that turns
  * it on for a preview. The switch is the reading profile's `sidenotes`
- * field (W13.R1, ./settings.ts: the global profile); a switch saved before
- * that (`lumen.reading.sidenotes`) is moved in on first read. Tiny on
- * purpose: the preview is in the startup bundle, the mode (./sidenotes.ts)
- * loads on first use.
+ * field (W13.R1: the global profile); a switch saved before that
+ * (`lumen.reading.sidenotes`) is moved in on first read. Tiny on purpose:
+ * the preview is in the startup bundle, so the field is read and written
+ * through ./profileCore.ts, not ./settings.ts (review 13 H2), and the mode
+ * (./sidenotes.ts) loads on first use.
  */
 import { useEffect, type RefObject } from "react";
 import type { LineNote } from "./sidenotes";
-import { globalProfile, saveGlobalProfile } from "./settings";
+import { patchGlobal, readStored } from "./profileCore";
 
 const LEGACY = "lumen.reading.sidenotes";
 const EVENT = "lumen-sidenotes-change";
@@ -18,7 +19,7 @@ function legacyOn(): boolean {
     if (localStorage.getItem(LEGACY) === null) return false;
     const on = localStorage.getItem(LEGACY) === "1";
     localStorage.removeItem(LEGACY);
-    if (on) saveGlobalProfile({ ...globalProfile(), sidenotes: true });
+    if (on) patchGlobal({ sidenotes: true });
     return on;
   } catch {
     return false;
@@ -26,12 +27,12 @@ function legacyOn(): boolean {
 }
 
 export function sidenotesOn(): boolean {
-  return legacyOn() || globalProfile().sidenotes;
+  return legacyOn() || readStored().global?.sidenotes === true;
 }
 
 export function setSidenotes(on: boolean): void {
   // The profile's write is guarded (blocked storage: the switch still applies until reload).
-  saveGlobalProfile({ ...globalProfile(), sidenotes: on });
+  patchGlobal({ sidenotes: on });
   memo = on;
   window.dispatchEvent(new CustomEvent(EVENT, { detail: on }));
 }

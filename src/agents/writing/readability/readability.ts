@@ -16,7 +16,7 @@
  *             ("ספר", "דבר", "מלך"); a pointed word is never ambiguous.
  *
  * A linear model on the standardised features is fitted (ridge, closed form)
- * to a graded corpus (./corpusHe) and the coefficients are committed
+ * to a graded corpus (./corpusHe.eval.ts) and the coefficients are committed
  * (./hebrewModel.json); the test refits and refuses a drift. The output is a
  * score on the corpus's 1–5 scale, a band (easy / medium / hard), an
  * approximate school stage, and what raises it: each feature's share of the

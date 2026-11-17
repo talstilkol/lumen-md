@@ -4,7 +4,7 @@
  * sentence, keys that follow the text's direction, and the reader UI.
  */
 import { describe, it, expect } from "vitest";
-import { graphemes, hebrewPrefixLength, keyAction, orpIndex, plainForRsvp, rewindSentence, rsvpWords, sentenceAround, wordDuration, WPM } from "../reading/rsvp";
+import { graphemes, hebrewPrefixLength, keyAction, orpIndex, paragraphDirections, plainForRsvp, rewindSentence, rsvpWords, sentenceAround, wordDuration, WPM } from "../reading/rsvp";
 
 const pivot = (w: string) => graphemes(w)[orpIndex(w)].normalize("NFD")[0];
 
@@ -18,12 +18,13 @@ const EN: Array<[string, string]> = [
 ];
 
 // 50 Hebrew words: the same table counted from the word's start (its right), from the stem in words of 5+ letters.
+// Audit r4 A1.4: a root letter is never peeled (מחשבה, ממשלה, השמים, ההחלטה, בכנסת keep it); see hebrewPrefixLength.
 const HE: Array<[string, string]> = [
   ["של", "ל"], ["את", "ת"], ["ו", "ו"], ["בית", "י"], ["שלום", "ל"], ["ספר", "פ"], ["ילדים", "ל"], ["הבית", "ב"], ["בבית", "ב"], ["ובבית", "י"],
-  ["וכשהבית", "ב"], ["מחשבה", "ש"], ["ירושלים", "ו"], ["לירושלים", "ו"], ["תודה", "ו"], ["ממשלה", "ל"], ["הממשלה", "ל"], ["אהבה", "ה"], ["כתיבה", "י"], ["שמחה", "מ"],
-  ["עברית", "ב"], ["בעברית", "ב"], ["המחשב", "ש"], ["תלמידים", "מ"], ["והתלמידים", "מ"], ["אני", "נ"], ["אתה", "ת"], ["הוא", "ו"], ["היא", "י"], ["אנחנו", "נ"],
-  ["בְּרֵאשִׁית", "א"], ["בָּרָא", "ר"], ["אֱלֹהִים", "ל"], ["הַשָּׁמַיִם", "י"], ["וְאֵת", "א"], ["הָאָרֶץ", "א"], ["צה״ל", "ה"], ["ע״י", "י"], ["(שלום,", "ל"], ["סוף.", "ו"],
-  ["מה?", "ה"], ["לכן", "כ"], ["כשהגעתי", "ע"], ["שהספר", "פ"], ["ספרייה", "ר"], ["ההחלטה", "ל"], ["התפתחות", "ת"], ["מדע", "ד"], ["כנסת", "נ"], ["בכנסת", "ס"],
+  ["וכשהבית", "ב"], ["מחשבה", "ח"], ["ירושלים", "ו"], ["לירושלים", "ו"], ["תודה", "ו"], ["ממשלה", "מ"], ["הממשלה", "מ"], ["אהבה", "ה"], ["כתיבה", "י"], ["שמחה", "מ"],
+  ["עברית", "ב"], ["בעברית", "ב"], ["המחשב", "ח"], ["תלמידים", "מ"], ["והתלמידים", "מ"], ["אני", "נ"], ["אתה", "ת"], ["הוא", "ו"], ["היא", "י"], ["אנחנו", "נ"],
+  ["בְּרֵאשִׁית", "א"], ["בָּרָא", "ר"], ["אֱלֹהִים", "ל"], ["הַשָּׁמַיִם", "מ"], ["וְאֵת", "א"], ["הָאָרֶץ", "א"], ["צה״ל", "ה"], ["ע״י", "י"], ["(שלום,", "ל"], ["סוף.", "ו"],
+  ["מה?", "ה"], ["לכן", "כ"], ["כשהגעתי", "ע"], ["שהספר", "פ"], ["ספרייה", "ר"], ["ההחלטה", "ח"], ["התפתחות", "ת"], ["מדע", "ד"], ["כנסת", "נ"], ["בכנסת", "נ"],
 ];
 
 describe("recognition point", () => {
@@ -85,3 +86,26 @@ describe("words, sentences and timing", () => {
     expect(keyAction("q", { rtl: false })).toBeNull();
   });
 });
+
+describe("audit r4 A1.2 and A1.4", () => {
+  it("nouns that start with מ or ש keep their first letter; a real prefix chain is still peeled", () => {
+    for (const w of ["משפחה", "שולחן", "ממשלה", "מלכות", "שמשון"]) expect([w, hebrewPrefixLength([...w])]).toEqual([w, 0]);
+    expect(hebrewPrefixLength([..."מהבית"])).toBe(2);
+    expect(hebrewPrefixLength([..."שהספר"])).toBe(2);
+    expect(hebrewPrefixLength([..."וכשהבית"])).toBe(3);
+    expect(hebrewPrefixLength([..."ובמשפחה"])).toBe(2);
+  });
+
+  it("the keys follow the paragraph's direction: a Latin word inside a Hebrew paragraph does not flip the arrows", () => {
+    const words = rsvpWords("הלכנו לראות את Google היום בבוקר.\n\nThen we met שרה at noon today.");
+    const dirs = paragraphDirections(words);
+    const g = words.findIndex((w) => w.text.startsWith("Google"));
+    const sara = words.findIndex((w) => w.text.startsWith("שרה"));
+    expect(words[g].rtl).toBe(false);
+    expect(dirs[g]).toBe(true);
+    expect(keyAction("ArrowLeft", { rtl: dirs[g], shift: false })).toBe(keyAction("ArrowLeft", { rtl: dirs[0], shift: false }));
+    expect(words[sara].rtl).toBe(true);
+    expect(dirs[sara]).toBe(false);
+  });
+});
+

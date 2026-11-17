@@ -4,7 +4,7 @@
  * highlight, so the DOM (and the note) are untouched. Off by default.
  */
 import { describe, it, expect, beforeEach } from "vitest";
-import { anchorLetters, anchorRanges, applyAnchor, clearAnchor, collectAnchorRanges, anchorRoots, ANCHOR_HIGHLIGHT } from "../reading/anchorEmphasis";
+import { anchorLetters, anchorRanges, applyAnchor, clearAnchor, collectAnchorRanges, anchorRoots, ANCHOR_HIGHLIGHT, watchAnchor } from "../reading/anchorEmphasis";
 import { DEFAULT_PROFILE } from "../reading/settings";
 
 const parts = (text: string) => anchorRanges(text).map(([a, b]) => text.slice(a, b));
@@ -114,3 +114,24 @@ describe("from the reading profile", () => {
     expect(anchorOn()).toBe(false);
   });
 });
+
+describe("review 13 M4: the watcher is scoped to the reading roots", () => {
+  it("observes the roots and their parents, not the whole body; before any root, the body until one appears", async () => {
+    document.body.innerHTML = '<div id="editor" contenteditable="true"><p>typing here</p></div><main id="pane"><div class="prose-lumen"><p>A reading root.</p></div></main>';
+    const w = watchAnchor(document, 5);
+    const root = document.querySelector(".prose-lumen")!;
+    expect(w.targets()).toEqual([root, document.getElementById("pane")]);
+    expect(w.targets()).not.toContain(document.body);
+    w.stop();
+    document.body.innerHTML = '<div id="editor"></div>';
+    const w2 = watchAnchor(document, 5);
+    expect(w2.targets()).toEqual([document.body]);
+    const pane = document.createElement("main");
+    pane.innerHTML = '<div class="reading-page"><p>Now a root.</p></div>';
+    document.body.append(pane);
+    await new Promise((r) => setTimeout(r, 30));
+    expect(w2.targets()).toEqual([pane.firstElementChild, pane]);
+    w2.stop();
+  });
+});
+

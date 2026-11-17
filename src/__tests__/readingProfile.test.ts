@@ -3,12 +3,10 @@
  * frontmatter (or this device only) over the global profile, key by key.
  */
 import { describe, it, expect, beforeEach } from "vitest";
-import { createHash } from "node:crypto";
 import { DEFAULT_PROFILE, globalProfile, localNoteProfile, normalizeProfile, profileDiff, resolveProfile, saveGlobalProfile, saveLocalNoteProfile, saveNoteReading, noteReading, sparseProfile, DEFAULT_READING } from "../reading/settings";
 import { fileProfile, mayHaveFileProfile, noteProfile, profileYaml, writeFileProfile, PROFILE_KEY } from "../reading/profileStore";
 import { FrontmatterError } from "../properties/frontmatter";
 
-const sha = (s: string) => createHash("sha256").update(s, "utf8").digest("hex");
 
 beforeEach(() => localStorage.clear());
 
@@ -102,16 +100,16 @@ describe("writing the file", () => {
   });
 });
 
-describe("“this device only” never changes the file", () => {
-  it("the hash is the same before and after", () => {
+describe("“this device only” reads over the file", () => {
+  // Audit r4 A1.6: this used to hash a string it never handed to anything (a tautology). That the
+  // file's bytes stay the same is checked where a save could write them: readingModeMenu.test.tsx
+  // hashes the open note before and after "on this device only" and spies on the store's setContent.
+  it("the device's keys win over the file's, and the file's still show", () => {
     const md = "---\ntitle: שלום\nlumen-reading: {width: 60}\n---\n\nבְּרֵאשִׁית בָּרָא\n";
-    const before = sha(md);
     saveLocalNoteProfile("n.md", { mode: "rsvp", wpm: 420, nikud: "show" });
     const n = noteProfile("n.md", md);
     expect(n.profile).toMatchObject({ mode: "rsvp", wpm: 420, width: 60 });
-    expect(sha(md)).toBe(before);
-    // The file path would have changed it: the check can tell.
-    expect(sha(writeFileProfile(md, { mode: "rsvp", wpm: 420, nikud: "show", width: 60 }))).not.toBe(before);
+    expect(n.from).toMatchObject({ mode: "device", width: "file" });
   });
 });
 

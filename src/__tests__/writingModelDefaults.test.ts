@@ -109,3 +109,17 @@ describe("W13.W16 defaults per RAM", () => {
     for (const [agent, scores] of Object.entries(WRITING_TABLE.measured)) for (const m of Object.keys(scores)) expect(WRITING_TABLE.digests[m], `${agent}/${m}`).toMatch(/^sha256:[0-9a-f]{64}$/);
   });
 });
+
+describe("W13.W16 in the app (F13: modelDefaults was reachable from tests only)", () => {
+  it("the 'needs a model' error names this agent's default for the device and the note's language", async () => {
+    const { suggestedModel } = await import("../commands/domains/writingActions");
+    const pick = writingDefault("styleCoach", null, "he")!;
+    expect(pick.kind).toBe("llm");
+    const said = await suggestedModel("styleCoach", "he");
+    expect(said).toContain(pick.model);
+    expect(said).toContain(`ollama pull ${pick.model}`);
+    // A rule engine needs no model: nothing to suggest.
+    expect(await suggestedModel("readability", "en")).toBe("");
+    expect(await suggestedModel("noSuchAgent", "en")).toBe("");
+  });
+});

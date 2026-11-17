@@ -12,7 +12,7 @@
  * It lives in its own compartment, added to a running editor with
  * `StateEffect.appendConfig` — Editor.tsx does not know about it.
  */
-import { Compartment, StateEffect, StateField, type EditorState, type Extension, type Range } from "@codemirror/state";
+import { Compartment, RangeSet, StateEffect, StateField, type EditorState, type Extension, type Range } from "@codemirror/state";
 import { Decoration, EditorView, ViewPlugin, type DecorationSet, type ViewUpdate } from "@codemirror/view";
 import { focusSpan, type FocusUnit } from "../reading/focusUnits";
 import { analyzeReadability, HW_STYLES, type HemingwayFinding, type HemingwayKind } from "../reading/hemingway";
@@ -42,6 +42,20 @@ const marks: Record<HemingwayKind, Decoration> = {
   complex: Decoration.mark({ class: "cm-hw cm-hw-complex", attributes: { "data-hw": "complex" } }),
 };
 
+/** How far around the cursor the focus span is looked for: a paragraph longer than this is cut there. */
+export const FOCUS_WINDOW = 20_000;
+
+/**
+ * The focus span read from a window of the document around `pos`, never the whole text (review 13 M4:
+ * every keystroke and caret move turned a 960k-character note into one string).
+ */
+export function focusSpanIn(doc: { length: number; sliceString(from: number, to?: number): string }, pos: number, unit: FocusUnit): { from: number; to: number } {
+  const from = Math.max(0, pos - FOCUS_WINDOW);
+  const to = Math.min(doc.length, pos + FOCUS_WINDOW);
+  const s = focusSpan(doc.sliceString(from, to), pos - from, unit);
+  return { from: s.from + from, to: s.to + from };
+}
+
 /** The dimmed ranges: everything outside the focus span (pure; tests). */
 export function dimRanges(text: string, pos: number, unit: FocusUnit): Array<{ from: number; to: number }> {
   const s = focusSpan(text, pos, unit);
@@ -59,15 +73,29 @@ export function layerFindings(state: EditorState): HemingwayFinding[] {
   return cfg.findings ? cfg.findings(text) : analyzeReadability(text);
 }
 
-function build(view: EditorView, findings: HemingwayFinding[]): DecorationSet {
+/** The dimmed text around the focus span (read from a window: focusSpanIn). */
+function dims(view: EditorView): DecorationSet {
   const cfg = view.state.field(configField, false) ?? OFF;
-  const ranges: Range<Decoration>[] = [];
-  if (cfg.unit) {
-    for (const r of dimRanges(view.state.doc.toString(), view.state.selection.main.head, cfg.unit)) if (r.to > r.from) ranges.push(dim.range(r.from, r.to));
-  }
+  if (!cfg.unit) return Decoration.none;
   const len = view.state.doc.length;
+  const s = focusSpanIn(view.state.doc, view.state.selection.main.head, cfg.unit);
+  const ranges: Range<Decoration>[] = [];
+  if (s.from > 0) ranges.push(dim.range(0, s.from));
+  if (s.to < len) ranges.push(dim.range(s.to, len));
+  return Decoration.set(ranges, true);
+}
+
+/** The findings' marks: rebuilt only when the findings change, not on every caret move (review 13 M4). */
+function markSet(view: EditorView, findings: HemingwayFinding[]): DecorationSet {
+  const len = view.state.doc.length;
+  const ranges: Range<Decoration>[] = [];
   for (const f of findings) if (f.to > f.from && f.to <= len) ranges.push(marks[f.kind].range(f.from, f.to));
   return Decoration.set(ranges, true);
+}
+
+function build(view: EditorView, findings: HemingwayFinding[], hw?: DecorationSet): { all: DecorationSet; hw: DecorationSet } {
+  const h = hw ?? markSet(view, findings);
+  return { all: RangeSet.join([dims(view), h]), hw: h };
 }
 
 /** Listeners for the legend's counters. */
@@ -84,11 +112,12 @@ export function onFindings(view: EditorView, fn: Listener): () => void {
 const plugin = ViewPlugin.fromClass(
   class {
     decorations: DecorationSet;
+    hw: DecorationSet;
     findings: HemingwayFinding[] = [];
     timer: ReturnType<typeof setTimeout> | null = null;
     constructor(readonly view: EditorView) {
       this.findings = layerFindings(view.state);
-      this.decorations = build(view, this.findings);
+      ({ all: this.decorations, hw: this.hw } = build(view, this.findings));
       queueMicrotask(() => this.emit());
     }
     emit() {
@@ -102,16 +131,19 @@ const plugin = ViewPlugin.fromClass(
       } else if (u.docChanged) {
         // Typing: keep the old findings mapped, re-analyse when the typing pauses.
         this.findings = this.findings.map((f) => ({ ...f, from: u.changes.mapPos(f.from, 1), to: u.changes.mapPos(f.to, -1) })).filter((f) => f.to > f.from);
+        this.hw = this.hw.map(u.changes);
         if (this.timer) clearTimeout(this.timer);
         this.timer = setTimeout(() => {
           this.timer = null;
           this.findings = layerFindings(this.view.state);
-          this.decorations = build(this.view, this.findings);
+          ({ all: this.decorations, hw: this.hw } = build(this.view, this.findings));
           this.view.dispatch({ effects: [] });
           this.emit();
         }, 250);
       }
-      if (cfgChanged || u.docChanged || u.selectionSet) this.decorations = build(u.view, this.findings);
+      // A caret move redraws the dimming only; the marks are rebuilt when the findings change.
+      if (cfgChanged) ({ all: this.decorations, hw: this.hw } = build(u.view, this.findings));
+      else if (u.docChanged || u.selectionSet) this.decorations = build(u.view, this.findings, this.hw).all;
     }
     destroy() {
       if (this.timer) clearTimeout(this.timer);

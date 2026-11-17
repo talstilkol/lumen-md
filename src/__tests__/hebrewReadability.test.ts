@@ -11,7 +11,7 @@
 import { describe, expect, it } from "vitest";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { HE_CORPUS, isHeldOut } from "../agents/writing/readability/corpusHe";
+import { HE_CORPUS, isHeldOut } from "../agents/writing/readability/corpusHe.eval";
 import { syllables as goalsSyllables } from "../agents/writing/goals/readability";
 import { englishReadability, fitHebrewModel, fleschKincaid, hebrewFeatures, hebrewReadability, readability, spearman, syllables, topList } from "../agents/writing/readability/readability";
 import committed from "../agents/writing/readability/hebrewModel.json";
@@ -37,7 +37,7 @@ describe("the graded corpus", () => {
 
 describe("W13.W9 Hebrew index", () => {
   it("the committed coefficients are a refit on the training split", () => {
-    const m = fitHebrewModel(train, freq, "src/agents/writing/readability/corpusHe.ts (train split)");
+    const m = fitHebrewModel(train, freq, "src/agents/writing/readability/corpusHe.eval.ts (train split)");
     expect(m).toEqual(committed);
   });
 
@@ -104,7 +104,7 @@ describe("W13.W9 Hebrew index", () => {
       model: { name: "linear index, 4 features (hebrewModel.json v1)", digest: "n/a (coefficients in the repository)" },
       seed: 9,
       temperature: 0,
-      dataset: { name: "src/agents/writing/readability/corpusHe.ts (held-out split)", version: "1", license: "MIT (written for lumen-md; graded by intended reader)", origin: "synthetic" },
+      dataset: { name: "src/agents/writing/readability/corpusHe.eval.ts (held-out split)", version: "1", license: "MIT (written for lumen-md; graded by intended reader)", origin: "synthetic" },
       n: held.length,
       metrics: {
         spearman: rho,

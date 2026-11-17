@@ -108,24 +108,50 @@ export function clearAnchor(doc: Document = document): void {
   win?.CSS?.highlights?.delete(ANCHOR_HIGHLIGHT);
 }
 
-let watching: { stop: () => void; doc: Document } | null = null;
+let watching: { stop: () => void; doc: Document; targets: () => Node[] } | null = null;
 
-/** Keep the emphasis on while the preview re-renders. Idempotent. */
-export function watchAnchor(doc: Document = document, delayMs = 150): { stop: () => void } {
+/**
+ * Keep the emphasis on while the preview re-renders. Idempotent.
+ * Review 13 M4: it observes the reading roots (their subtree) and the roots' parents (a root replaced),
+ * not the whole of document.body — typing in the editor no longer wakes it. Only while there is no root
+ * yet does it watch the body, and it narrows as soon as one appears.
+ */
+export function watchAnchor(doc: Document = document, delayMs = 150): { stop: () => void; targets: () => Node[] } {
   if (watching?.doc === doc) return watching;
   watching?.stop();
   let timer: ReturnType<typeof setTimeout> | null = null;
+  let targets: Node[] = [];
+  const scope = () => {
+    observer.disconnect();
+    const roots = anchorRoots(doc);
+    targets = [];
+    if (!roots.length) {
+      observer.observe(doc.body, { childList: true, subtree: true });
+      targets.push(doc.body);
+      return;
+    }
+    for (const r of roots) {
+      observer.observe(r, { childList: true, subtree: true, characterData: true });
+      targets.push(r);
+      if (r.parentNode && !targets.includes(r.parentNode)) {
+        observer.observe(r.parentNode, { childList: true });
+        targets.push(r.parentNode);
+      }
+    }
+  };
   const observer = new MutationObserver(() => {
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => {
       timer = null;
       applyAnchor(doc);
+      scope();
     }, delayMs);
   });
   applyAnchor(doc);
-  observer.observe(doc.body, { childList: true, subtree: true, characterData: true });
+  scope();
   const w = {
     doc,
+    targets: () => [...targets],
     stop: () => {
       if (timer) clearTimeout(timer);
       observer.disconnect();
