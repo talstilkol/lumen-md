@@ -25,7 +25,7 @@ function readSetting(): string | null {
   try {
     return localStorage.getItem(IGNORE_SETTING_KEY);
   } catch (e) {
-    swallowed("vault/ignore: no localStorage", e);
+    swallowed("vault/ignore: setting unreadable", e);
     return null;
   }
 }
@@ -38,7 +38,7 @@ export function ignoreRule(raw: string | null = readSetting()): { names: Set<str
     const v = raw ? JSON.parse(raw) : [];
     if (Array.isArray(v)) extra = v.filter((x): x is string => typeof x === "string");
   } catch (e) {
-    swallowed("vault/ignore: setting not JSON", e);
+    swallowed("vault/ignore: setting unreadable", e);
     extra = (raw ?? "").split(/[\n,]/);
   }
   const all = new Set<string>(DEFAULT_IGNORED_DIRS);
