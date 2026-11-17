@@ -1,17 +1,23 @@
 /**
- * Argon2id (RFC 9106, version 0x13) in plain TypeScript, so a vault can use
- * a memory-hard KDF in every browser without a package (plan W1.7). A faster
- * implementation (hash-wasm's WebAssembly) can replace it through
- * `setArgon2idImplementation` in ../kdf.ts; both must give the same bytes,
- * which the test vectors (docs/sync-protocol-vectors.json) and the
- * independent Python check (scripts/sync-protocol/check_vectors.py) hold
- * them to.
+ * Argon2id (RFC 9106, version 0x13), so a vault can use a memory-hard KDF in
+ * every browser without a package (plan W1.7). The memory fill — every block
+ * compression, nearly all of the cost — runs in WebAssembly built in this
+ * repository (./wasm/argon2fill.c, plan W4.20), where 64-bit words are
+ * native: m = 64 MiB, t = 3 in about 0.5 s instead of 4–5 s. Where
+ * WebAssembly is unavailable the TypeScript fill below runs instead; it is
+ * the same algorithm, and both give the same bytes, which the test vectors
+ * (docs/sync-protocol-vectors.json), RFC 9106 §5.3 and the independent
+ * Python check (scripts/sync-protocol/check_vectors.py) hold them to.
+ * Another implementation can still replace the whole function through
+ * `setArgon2idImplementation` in ../kdf.ts.
  *
- * Memory: one Uint32Array of memoryKiB × 256 words. 64-bit words are
- * (low, high) pairs of 32-bit halves.
+ * Memory: memoryKiB × 256 32-bit words, in the WebAssembly instance's memory
+ * (a fresh instance per derivation, so the memory is released with it) or a
+ * Uint32Array. 64-bit words are (low, high) pairs of 32-bit halves.
  */
 
 import { blake2b } from "./blake2b";
+import { argon2FillWasm } from "./wasm/argon2fillLoader";
 
 export interface Argon2Input {
   password: Uint8Array;
@@ -162,7 +168,9 @@ export function argon2id(input: Argon2Input): Uint8Array {
   const segment = Math.floor(input.memoryKiB / (4 * p));
   const q = segment * 4; // columns per lane
   const blocks = q * p;
-  const mem = new Uint32Array(blocks * BLOCK_WORDS);
+  // WebAssembly when there is one (null otherwise, or past its 4 GiB); the TypeScript fill below otherwise.
+  const wasm = argon2FillWasm(blocks * BLOCK_WORDS * 4);
+  const mem = wasm ? wasm.words : new Uint32Array(blocks * BLOCK_WORDS);
   const at = (lane: number, col: number) => (lane * q + col) * BLOCK_WORDS;
   const toWords = (bytes: Uint8Array, dst: Uint32Array, off: number) => {
     for (let k = 0; k < BLOCK_WORDS; k++) dst[off + k] = bytes[4 * k] | (bytes[4 * k + 1] << 8) | (bytes[4 * k + 2] << 16) | (bytes[4 * k + 3] << 24);
@@ -172,6 +180,28 @@ export function argon2id(input: Argon2Input): Uint8Array {
     toWords(hPrime([h0, le32(1), le32(l)], 1024), mem, at(l, 1));
   }
 
+  if (wasm) wasm.fill(p, segment, t);
+  else fillTs(mem, p, segment, t);
+  const c = new Uint32Array(BLOCK_WORDS);
+  for (let l = 0; l < p; l++) {
+    const o = at(l, q - 1);
+    for (let k = 0; k < BLOCK_WORDS; k++) c[k] ^= mem[o + k];
+  }
+  const cb = new Uint8Array(1024);
+  for (let k = 0; k < BLOCK_WORDS; k++) {
+    cb[4 * k] = c[k] & 255;
+    cb[4 * k + 1] = (c[k] >>> 8) & 255;
+    cb[4 * k + 2] = (c[k] >>> 16) & 255;
+    cb[4 * k + 3] = c[k] >>> 24;
+  }
+  return hPrime([cb], tagLength);
+}
+
+/** The memory fill (RFC 9106 §3.4) in TypeScript: passes 0 … t-1 over p lanes of 4 × segment blocks. */
+function fillTs(mem: Uint32Array, p: number, segment: number, t: number): void {
+  const q = segment * 4;
+  const blocks = q * p;
+  const at = (lane: number, col: number) => (lane * q + col) * BLOCK_WORDS;
   const addr = new Uint32Array(BLOCK_WORDS);
   const inputBlock = new Uint32Array(BLOCK_WORDS);
   const tmp = new Uint32Array(BLOCK_WORDS);
@@ -228,19 +258,6 @@ export function argon2id(input: Argon2Input): Uint8Array {
       }
     }
   }
-  const c = new Uint32Array(BLOCK_WORDS);
-  for (let l = 0; l < p; l++) {
-    const o = at(l, q - 1);
-    for (let k = 0; k < BLOCK_WORDS; k++) c[k] ^= mem[o + k];
-  }
-  const cb = new Uint8Array(1024);
-  for (let k = 0; k < BLOCK_WORDS; k++) {
-    cb[4 * k] = c[k] & 255;
-    cb[4 * k + 1] = (c[k] >>> 8) & 255;
-    cb[4 * k + 2] = (c[k] >>> 16) & 255;
-    cb[4 * k + 3] = c[k] >>> 24;
-  }
-  return hPrime([cb], tagLength);
 }
 
 /** floor(a · b / 2^32) for 32-bit unsigned a, b. */
