@@ -59,6 +59,29 @@ from the current page instead.
   (`1:`) can come out of some PDF readers swapped (`:1`). This happens in the
   PDF's text layer, not in what is printed.
 
+## Accessible PDF (PDF/UA)
+
+**Export accessible PDF (PDF/UA)…** in the command palette prints the note
+ready for a *tagged* PDF: headings never skip a level, every image has a
+description (its alt text, title or caption; one without gets its file name
+and the export lists it so you can describe it), table header cells say
+whether they head a column or a row, and English inside a Hebrew note is
+marked as English so a screen reader switches voice. In Chrome or Edge,
+choose **Save as PDF**: the browser writes the headings, figures, tables,
+links, language and bookmarks into the PDF's structure.
+
+Then **Finish the saved PDF…** (or **Make a saved PDF accessible
+(PDF/UA)…** for any tagged PDF) reads the saved file on your device and adds
+what PDF/UA-1 asks for on top: the PDF/UA identification, the title shown
+in the window, the language (`he-IL` for Hebrew) and a text for every link.
+It then checks the file and tells you what, if anything, is still missing.
+Nothing is sent anywhere. Safari and Firefox do not write tagged PDFs: the
+finishing step says so.
+
+`node scripts/verapdf-check.mjs` checks ten Hebrew golden notes printed this
+way: a first gate here, and veraPDF's PDF/UA-1 profile where veraPDF is
+installed.
+
 ## Tested
 
 Ten golden notes are printed on every test run: a Hebrew report, a long

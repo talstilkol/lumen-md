@@ -1,0 +1,49 @@
+<!doctype html><html class="" dir="rtl" lang="he"><head><title>טבלה</title><meta charset="utf-8"><style>
+@page {
+  size: A4;
+  margin: 22mm 18mm 20mm 18mm;
+  @top-center { content: "טבלה"; font: 9pt var(--font-sans, Heebo, Inter, sans-serif); color: #666; }
+  @bottom-center { content: counter(page, decimal) " / " counter(pages, decimal); font: 9pt var(--font-sans, Heebo, Inter, sans-serif); color: #666; direction: rtl; }
+}
+@page :first { @top-center { content: ""; } }
+html { direction: rtl; }
+body {
+  margin: 0;
+  font-family: Inter, Heebo, "Source Serif 4", "Frank Ruhl Libre", system-ui, sans-serif;
+  font-size: 11.5pt;
+  line-height: 1.55;
+  orphans: 3;
+  widows: 3;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+:lang(he), :lang(ar) { font-family: Heebo, "Frank Ruhl Libre", Inter, system-ui, sans-serif; }
+h1, h2, h3, h4, h5, h6 { break-after: avoid-page; break-inside: avoid; }
+table, figure, img, svg, pre, .code-block, .callout, .admonition, .katex-display, .mermaid-block, .chart-block, blockquote { break-inside: avoid; }
+tr, li { break-inside: avoid; }
+thead { display: table-header-group; }
+tfoot { display: table-footer-group; }
+img { max-width: 100%; height: auto; }
+.page-break { break-after: page; height: 0; }
+a { color: inherit; text-decoration: underline; }
+.print-title { font-size: 22pt; margin: 0 0 6mm; }
+.print-toc { break-after: page; }
+.print-toc ol { list-style: none; padding-inline-start: 0; }
+.print-toc ol ol { padding-inline-start: 1.25em; }
+.print-toc li { margin: 0.2em 0; }
+.print-toc a { text-decoration: none; }
+section.footnotes, section[data-footnotes] { break-before: auto; font-size: 9.5pt; border-top: 1px solid #ccc; margin-top: 8mm; }
+.print-page { display: flow-root; position: relative; height: 253.0mm; break-after: page; }
+.print-page:last-child, .print-page .print-toc { break-after: auto; }
+.print-page.print-page-tall { height: auto; }
+.page-footnotes { position: absolute; inset-inline: 0; bottom: 0; font-size: 9.5pt; line-height: 1.4; }
+.print-page-tall .page-footnotes { position: static; }
+.page-footnotes::before { content: ""; display: block; width: 33%; border-top: 1px solid #999; margin-bottom: 1.5mm; }
+.page-footnote { margin: 0 0 1mm; }
+.page-footnote > p { display: inline; margin: 0; }
+.page-footnote .fn-num { text-decoration: none; margin-inline-end: 0.35em; font-weight: 600; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+@media screen { body { max-width: 190mm; margin: 12mm auto; padding: 0 8mm; } }
+</style></head><body><div class="prose-lumen" id="lumen-print-content"><h1 id="דוח-רבעוני">דוח רבעוני</h1>
+<table><thead><tr><th>חודש</th><th>הכנסות</th><th>הוצאות</th></tr></thead><tbody><tr><td>ינואר</td><td>120</td><td>80</td></tr><tr><td>פברואר</td><td>135</td><td>90</td></tr><tr><td>מרץ</td><td>150</td><td>95</td></tr></tbody></table>
+<p>הסכומים באלפי ש״ח.</p></div></body></html>

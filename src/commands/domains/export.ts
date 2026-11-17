@@ -353,6 +353,28 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       },
     },
     {
+      // W13.F3: a tagged PDF (headings, alt text, table headers, language), then finished as PDF/UA-1.
+      id: "file.exportPdfUa",
+      label: t("cmd.file.exportPdfUa"),
+      hint: t("cmd.file.exportPdfUa.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: async () => {
+        // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+        const doc = liveDoc();
+        await (await import("../../print/pdfUaFinish")).exportAccessiblePdf(doc);
+      },
+    },
+    {
+      // W13.F3: any tagged PDF (Chrome's "Save as PDF", Word's) finished as PDF/UA-1, on the device.
+      id: "file.finishPdfUa",
+      label: t("cmd.file.finishPdfUa"),
+      hint: t("cmd.file.finishPdfUa.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: async () => (await import("../../print/pdfUaFinish")).finishPickedPdf(),
+    },
+    {
       // W5.11: the note as Markdown, without what is marked <redact> and without hidden comments.
       id: "file.exportMarkdown",
       label: t("cmd.file.exportMarkdown"),
