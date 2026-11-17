@@ -48,5 +48,5 @@
    0.116056
   ]
  },
- "corpus": "src/agents/writing/readability/corpusHe.ts (train split)"
+ "corpus": "src/agents/writing/readability/corpusHe.eval.ts (train split)"
 }

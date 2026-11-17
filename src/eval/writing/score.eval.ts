@@ -1,4 +1,7 @@
 /**
+ * Eval-only (review 13 / F13: the scorer of the writing eval sets is not app code; *.eval.ts is the
+ * unused-files gate's name for eval support).
+ *
  * Plan W13.W2 — scoring the writing agents on their eval sets
  * (eval/writing/<agent>/{he,en}.jsonl, scripts/eval/writing-sets.mjs).
  *

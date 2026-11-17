@@ -20,7 +20,6 @@ import { immersiveParagraphs, lexiconTranslation, syllables, POS_COLORS } from "
 import type { LineFocusLines, ReadingProfile } from "../reading/settings";
 import type { Pos } from "../text/hebrewPos";
 import { Modal } from "./Modal";
-import { speakWordLocally } from "../ai/tts";
 
 type Shown = Record<Exclude<Pos, "other">, boolean>;
 const ctl: CSSProperties = { border: "1px solid hsl(var(--border-strong))", borderRadius: 8, padding: "4px 10px", background: "hsl(var(--bg))", color: "hsl(var(--fg))", font: "inherit", fontSize: 13, cursor: "pointer" };
@@ -40,9 +39,22 @@ async function localTranslate(word: string, rtl: boolean): Promise<string> {
   return r.texts[0] ?? "";
 }
 
-/** On-device voices only, through the audited speech route (ai/tts.ts; INT7: cloud-routes gate). */
-function speak(word: string, rtl: boolean): boolean {
-  return speakWordLocally(word, rtl ? "he" : "en");
+/**
+ * On-device voices only, through the audited speech route (ai/tts.ts; INT7: cloud-routes gate).
+ * Loaded on demand (review 13 M1: a static import put ai/tts, and its English, in this
+ * dialog's chunk): fetched when a word's card opens, so the click itself still speaks at once.
+ */
+type SpeakFn = (word: string, lang: string) => boolean;
+let speakFn: SpeakFn | null = null;
+const loadSpeak = (): Promise<SpeakFn> => (speakFn ? Promise.resolve(speakFn) : import("../ai/tts").then((m) => (speakFn = m.speakWordLocally)));
+async function speak(word: string, rtl: boolean): Promise<boolean> {
+  const lang = rtl ? "he" : "en";
+  if (speakFn) return speakFn(word, lang);
+  try {
+    return (await loadSpeak())(word, lang);
+  } catch {
+    return false;
+  }
 }
 
 export function ImmersiveReader({ content, profile, close, translate = localTranslate }: Props) {
@@ -90,6 +102,7 @@ export function ImmersiveReader({ content, profile, close, translate = localTran
     if (!el) return;
     setCurrent(i);
     setOpen({ word: el.dataset.w ?? "", pos: (el.dataset.pos as Pos) ?? null, rtl: el.dataset.rtl === "1" });
+    void loadSpeak().catch(() => undefined);
   };
 
   const moveLine = (dir: 1 | -1) => {
@@ -256,7 +269,7 @@ export function ImmersiveReader({ content, profile, close, translate = localTran
                   {t("immersive.translate")}
                 </button>
               )}
-              <button type="button" style={ctl} data-testid="immersive-speak" onClick={() => !speak(open.word, open.rtl) && setGloss((g) => ({ ...g, state: g.text.length ? g.state : "idle", text: g.text.length ? g.text : [t("immersive.noVoice")] }))}>
+              <button type="button" style={ctl} data-testid="immersive-speak" onClick={() => void speak(open.word, open.rtl).then((ok) => !ok && setGloss((g) => ({ ...g, state: g.text.length ? g.state : "idle", text: g.text.length ? g.text : [t("immersive.noVoice")] })))}>
                 {t("immersive.speak")}
               </button>
               <button type="button" style={ctl} onClick={() => setOpen(null)}>

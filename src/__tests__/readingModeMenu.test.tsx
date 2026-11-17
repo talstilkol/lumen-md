@@ -9,6 +9,7 @@ import { useAppStore } from "../store/useStore";
 import { ReadingModeMenu } from "../ui/ReadingModeMenu";
 import { localNoteProfile, globalProfile } from "../reading/settings";
 import { fileProfile } from "../reading/profileStore";
+import { loadNotePlace, saveNotePlace } from "../reading/notePlace";
 
 const sha = (s: string) => createHash("sha256").update(s, "utf8").digest("hex");
 const MD = "---\ntitle: שלום\n---\n\nבְּרֵאשִׁית בָּרָא\n";
@@ -76,5 +77,19 @@ describe("Reading mode menu", () => {
     fireEvent.click(screen.getByTestId("rm-save-note"));
     expect(useAppStore.getState().doc.content).toBe("---\na: [\n---\nx");
     expect((screen.getByTestId("rm-where-device") as HTMLInputElement).checked).toBe(true);
+  });
+
+  it("review 13 M6: the note's reading place never goes to the file or the global profile, and saving to the file keeps it", () => {
+    saveNotePlace("ws:notes/a.md", { on: true, mode: "even", block: 5, scrollTop: 200 });
+    render(<ReadingModeMenu close={() => undefined} />);
+    fireEvent.change(screen.getByTestId("rm-nikud"), { target: { value: "show" } });
+    fireEvent.click(screen.getByTestId("rm-where-file"));
+    fireEvent.click(screen.getByTestId("rm-save-note"));
+    expect(fileProfile(useAppStore.getState().doc.content)).toEqual({ nikud: "show" });
+    expect(loadNotePlace("ws:notes/a.md")).toMatchObject({ on: true, mode: "even", block: 5, scrollTop: 200 });
+    fireEvent.click(screen.getByTestId("rm-save-all"));
+    expect(globalProfile()).toMatchObject({ spread: false, spreadMode: "odd", spreadBlock: -1, spreadTop: -1 });
+    fireEvent.click(screen.getByTestId("rm-reset"));
+    expect(loadNotePlace("ws:notes/a.md")).toMatchObject({ on: true, block: 5 });
   });
 });

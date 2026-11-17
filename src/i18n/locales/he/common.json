@@ -4295,6 +4295,7 @@
   "writing.statusAccepted": "הוחלו {{n}}. ביטול אחד (Ctrl+Z) מחזיר הכול.",
   "writing.statusAcceptedSkipped": "הוחלו {{n}}; {{skipped}} דולגו (הטקסט השתנה או שהן חופפות).",
   "writing.statusRejected": "נדחה.",
+  "writing.suggestModel": "לסוכן הזה במכשיר הזה: {{model}} ‏({{licence}}), למשל `ollama pull {{model}}`.",
   "writing.title": "הצעות כתיבה",
   "writing.version": "גרסה {{n}}",
   "writing.versions": "גרסאות",
