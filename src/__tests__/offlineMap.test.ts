@@ -9,6 +9,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import axe from "axe-core";
+import { createElement as h } from "react";
 import { buildArchive, encodeDirectory, encodeTile, israelTile, gzip } from "./helpers/pmtilesFixture";
 import { bytesSource, findEntry, parseDirectory, parseHeader, PMTiles, readVarint, tileIdToZxy, zxyToTileId, TileType } from "../map/pmtiles";
 import { decodeGeometry, decodeTile, GeomType } from "../map/mvt";
@@ -356,7 +357,7 @@ describe("the panel", () => {
   });
   it("shows none, imports a picked file, lists it, refuses a wrong one, removes it; axe clean", async () => {
     const vault = memVault();
-    const { container } = render(<OfflineMapPanel vault={vault} />);
+    const { container } = render(h(OfflineMapPanel, { vault }));
     await screen.findByTestId("offline-map-none");
     const good = new File([(await buildArchive(new Map([["7/76/52", israelTile()]]), { gzipDirs: true })) as BlobPart], "israel.pmtiles");
     await act(async () => {
