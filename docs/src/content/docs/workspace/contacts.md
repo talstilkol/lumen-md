@@ -1,6 +1,8 @@
 ---
 title: Contacts (vCard)
 description: Import a .vcf from your phone or Google into person notes, merge it with people already in the vault, and export people back as vCard 4.0.
+type: how-to
+tasks: ["W12.F6"]
 ---
 
 **Import contacts (vCard)…** reads a `.vcf` file and makes a person note

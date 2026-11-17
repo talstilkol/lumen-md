@@ -1,6 +1,8 @@
 ---
 title: All highlights
 description: Every highlight from PDFs, books and clipped pages in one place: search them, tag them, export them to a note with links back, or drag one into a note.
+type: reference
+tasks: ["W12.R1", "W12.R3", "W7.2"]
 ---
 
 **Command palette → All highlights** lists every highlight in your vault:

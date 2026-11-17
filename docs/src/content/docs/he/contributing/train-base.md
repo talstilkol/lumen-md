@@ -1,6 +1,7 @@
 ---
 title: כל PR על ראש הרכבת
 description: ‏pull request מבוסס על הרכבת הנוכחית או על main, ולעולם לא על ענף של PR אחר. ‏pr:check מכשיל בסיס מוערם וערימה בעומק גדול מ־1, מזהיר על רכבת ישנה ועל סחיפה, ומכשיל בסיס מיזוג ישן או criss-cross. ‏scripts/restack.mjs מדפיס איך להעביר PR מוערם אל הרכבת.
+type: how-to
 ---
 
 ב־Lumen נהגנו לערום pull requests: הבסיס של כל PR היה הענף של ה־PR שמתחתיו.

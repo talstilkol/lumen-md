@@ -1,6 +1,8 @@
 ---
 title: Accessibility
 description: Keyboard use, screen readers, contrast and reduced motion in Lumen — and how each is checked.
+type: how-to
+tasks: ["W10.E5", "10.1"]
 ---
 
 Lumen is meant to be used without a mouse, with a screen reader, in Hebrew

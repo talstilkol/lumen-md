@@ -1,6 +1,7 @@
 ---
 title: Data-safety drill
 description: Every way Lumen saves a note to a folder, driven through kill -9, a full disk, lost permissions and another program editing at the same time, with a report per release.
+type: reference
 ---
 
 The drill checks the claim that a note is never half-saved. It drives

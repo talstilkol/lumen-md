@@ -1,6 +1,8 @@
 ---
 title: Smart Insert (⌘⇧V)
 description: Paste anything into one dialog — Lumen detects the type and wraps it in the right block.
+type: how-to
+untracked: "shipped before the plan (release 9.4); no plan task covers it"
 ---
 
 `⌘⇧V` opens a single dialog with one big text area. Paste **anything**

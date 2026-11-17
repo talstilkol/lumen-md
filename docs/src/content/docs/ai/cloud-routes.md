@@ -1,6 +1,8 @@
 ---
 title: Cloud only by choice
 description: Every AI feature has an engine on this device; a cloud service is used only when you choose it. The full list of cloud routes and what each needs.
+type: reference
+tasks: ["W7.19", "W7.24", "W7.7", "W7.6", "W7.5", "W5.1"]
 ---
 
 Lumen's AI runs on this device by default. A cloud service is contacted

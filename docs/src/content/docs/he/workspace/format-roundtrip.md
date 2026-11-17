@@ -1,6 +1,8 @@
 ---
 title: "פורמטי טקסט: מה שורד הלוך-חזור"
 description: תוצאות מדודות של Markdown ← Org, ‏AsciiDoc, ‏LaTeX, ‏OPML, ‏RST ו-Jupyter ← Markdown על 652 דוגמאות CommonMark ו-50 פתקים עבריים.
+type: how-to
+tasks: ["W1.2"]
 ---
 
 לומן מייצא פתק ל-Org-mode, ‏AsciiDoc, ‏LaTeX, ‏OPML, ‏reStructuredText ו-Jupyter,

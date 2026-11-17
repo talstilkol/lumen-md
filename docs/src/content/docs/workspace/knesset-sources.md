@@ -1,6 +1,8 @@
 ---
 title: Laws and Knesset records
 description: Cite a law by its name, a bill and a committee protocol from the Knesset's open data, keep laws for offline use, and ask the laws you saved.
+type: how-to
+tasks: ["W10.B10", "W7.5"]
 ---
 
 Write a law's name the way you usually do: `חוק הגנת הפרטיות`,

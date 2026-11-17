@@ -1,6 +1,8 @@
 ---
 title: Read-mode publishing
 description: Publishing a note as a read-only web page — what exists today, the server it needs, and what is not built yet.
+type: how-to
+tasks: ["9.3"]
 ---
 
 :::caution[Not in the app yet]

@@ -1,6 +1,8 @@
 ---
 title: Sheet block
 description: A small spreadsheet inside a note, stored as CSV, with A1 formulas on the app's formula engine.
+type: how-to
+tasks: ["W12.X1"]
 ---
 
 A ` ```sheet ` block is a small spreadsheet. Its content is CSV, so the note

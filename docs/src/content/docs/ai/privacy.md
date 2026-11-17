@@ -1,6 +1,8 @@
 ---
 title: Privacy and the AI policy
 description: What stays on your device, the one setting that decides whether AI may ever use the cloud, and the ledger that records every AI network request.
+type: reference
+tasks: ["W6.29"]
 ---
 
 By default nothing you write leaves this device. Notes are kept in the

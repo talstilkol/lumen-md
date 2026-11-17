@@ -1,6 +1,8 @@
 ---
 title: Import from other apps
 description: Bring notes from Obsidian, Notion, Evernote, Bear, Apple Notes, Google Keep, Logseq, OneNote, Roam, Craft, Day One, Apple Journal, Samsung Notes, Airtable, Tomboy or any TextBundle app — into a new folder, with a report, undone in one click.
+type: how-to
+tasks: ["W4.19", "W10.E49", "W10.E48", "W1.26"]
 ---
 
 **File → Import notes from another app…** (or the command palette) opens

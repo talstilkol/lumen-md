@@ -1,6 +1,8 @@
 ---
 title: On-device OCR (Hebrew, English, columns)
 description: How Lumen reads text from images and scanned PDF pages on your device — Latin words inside Hebrew lines, multi-column pages, and the reading order of the result.
+type: how-to
+tasks: ["7.5"]
 ---
 
 When you import a scanned PDF, or an image that is mostly text, Lumen reads

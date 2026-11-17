@@ -1,6 +1,8 @@
 ---
 title: Research and citation checks
 description: Ask a question and get a note with a quoted source for every claim; check the citations in any note.
+type: reference
+tasks: ["R12.11", "W10.E36", "7.6", "R12.9", "5.4"]
 ---
 
 ## Research: Ask a Question

@@ -1,6 +1,8 @@
 ---
 title: Reliable tool calls on small local models
 description: How Lumen keeps a 7–12B local model's tool calls valid. Every call is held to a JSON schema, common slips are repaired, and an invalid call gets one retry before Lumen asks you.
+type: reference
+tasks: ["W4.31"]
 ---
 
 Agents use tools to do their work: they search your notes, read a file,

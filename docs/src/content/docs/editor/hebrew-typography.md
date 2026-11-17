@@ -1,6 +1,8 @@
 ---
 title: Hebrew typography
 description: Gershayim, geresh, maqaf, Hebrew quotation marks and numbers, fixed as you type or for a whole note. Each rule can be turned off.
+type: how-to
+tasks: ["W2.9"]
 ---
 
 Word has fixed Hebrew punctuation automatically for decades. In Lumen, the

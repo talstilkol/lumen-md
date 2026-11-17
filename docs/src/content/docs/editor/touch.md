@@ -1,6 +1,8 @@
 ---
 title: Touch and phones
 description: Using Lumen with a finger or a pen — dragging, touch targets, the notch and the outline sheet — and how each is tested.
+type: how-to
+tasks: ["W1.25", "10.2"]
 ---
 
 Lumen works by touch on phones and tablets, in Hebrew and in English.

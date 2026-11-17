@@ -1,6 +1,7 @@
 ---
 title: Send feedback
 description: Report a bug, an idea or a question as a GitHub issue or as text to copy. Lumen has no feedback server, and nothing is sent until you click.
+type: how-to
 ---
 
 Open it with `⌘K → Help: Send feedback`, or with **Report a problem…** at the

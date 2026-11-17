@@ -1,6 +1,8 @@
 ---
 title: Reading aids
 description: Niqqud for reading that never changes the note, a dyslexia-friendly layout, and read-aloud that highlights each word.
+type: how-to
+tasks: ["W5.6"]
 ---
 
 Open the command palette (**⌘K / Ctrl+K**) and run **Reading aids…**. Everything here

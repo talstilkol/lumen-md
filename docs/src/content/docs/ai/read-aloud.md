@@ -1,6 +1,8 @@
 ---
 title: Read aloud (Hebrew included)
 description: Listen to a note on this device — the word being read is highlighted, the position is kept, and you choose the speed and voice.
+type: how-to
+tasks: ["W10.E65", "W2.6"]
 ---
 
 **Command palette → Read aloud** reads the open note on this device. Run it

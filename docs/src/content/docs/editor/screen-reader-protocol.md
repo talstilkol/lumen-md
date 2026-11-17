@@ -1,6 +1,8 @@
 ---
 title: Screen reader protocol
 description: The fixed Hebrew journey run with NVDA, VoiceOver and TalkBack before a release, and its results.
+type: how-to
+tasks: ["W11.Q6"]
 ---
 
 Automated checks such as axe find only part of what blocks a screen reader

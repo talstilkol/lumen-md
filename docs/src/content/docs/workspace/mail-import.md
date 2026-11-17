@@ -1,6 +1,8 @@
 ---
 title: Mail and Google Takeout into notes
 description: Import .eml and .mbox mail and a Google Takeout archive (Keep, Docs) into notes, from files only, with Hebrew mail in every old encoding.
+type: reference
+tasks: ["W5.18"]
 ---
 
 **⌘K → Import mail (.eml, .mbox) or Google Takeout…** reads mail and Google

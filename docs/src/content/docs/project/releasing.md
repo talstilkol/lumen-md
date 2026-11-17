@@ -1,6 +1,7 @@
 ---
 title: Releasing a version
 description: One local command builds, signs and checks a release, and with --publish puts it on GitHub Releases with signed desktop updates. No GitHub Actions.
+type: how-to
 ---
 
 A release is one command on the release owner's computer. GitHub Actions

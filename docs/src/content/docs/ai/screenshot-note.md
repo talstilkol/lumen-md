@@ -1,6 +1,8 @@
 ---
 title: Screenshot to note
 description: Turn a screenshot into Markdown you can edit — tables, lists, code and error messages — with a vision model on your own computer.
+type: how-to
+tasks: ["W10.B11", "W7.16"]
 ---
 
 :::note[Status]

@@ -1,6 +1,8 @@
 ---
 title: ערכת פיתוח לתוספים
 description: בונים תוסף Lumen משלכם בתוך 60 שניות עם create-lumen-plugin.
+type: reference
+tasks: ["W3.10"]
 ---
 
 תוספים של Lumen הם מודולי ESM קטנים שרושמים בלוקים, פקודות וחלוניות צד

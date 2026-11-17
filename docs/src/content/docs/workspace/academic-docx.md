@@ -1,6 +1,8 @@
 ---
 title: Academic submission (Word)
 description: Export a note as a Word file formatted to an Israeli university's written guideline, with a title page, a table of contents, page numbers, footnotes and a bibliography.
+type: reference
+tasks: ["W5.16"]
 ---
 
 Students write in Lumen and submit in Word. **Export for academic submission**

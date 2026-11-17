@@ -1,6 +1,8 @@
 ---
 title: Single sign-on (SSO)
 description: Sign in with your company's identity provider through WorkOS.
+type: how-to
+untracked: "shipped before the plan (the organization release); no plan task covers it"
 ---
 
 Lumen supports SAML and OIDC single sign-on through

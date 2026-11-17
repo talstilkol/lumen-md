@@ -1,6 +1,7 @@
 ---
 title: Translating on Weblate
 description: Review and fix Lumen's six machine-translated languages on Hosted Weblate, in the browser, with every change coming back to the repository as a pull request.
+type: how-to
 ---
 
 Lumen's interface strings can be reviewed on **Hosted Weblate**, a translation platform

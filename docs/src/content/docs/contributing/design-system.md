@@ -1,6 +1,7 @@
 ---
 title: Design system
 description: Lumen's tokens for colour, space, radius, type, elevation and motion, the rules the code is held to, and the shared components.
+type: how-to
 ---
 
 Every surface of Lumen draws from one set of tokens. They are CSS custom

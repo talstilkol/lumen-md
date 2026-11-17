@@ -1,6 +1,8 @@
 ---
 title: Calendar sync (CalDAV and ICS)
 description: Keep the vault's dated tasks in sync with a CalDAV calendar (Fastmail, Nextcloud, iCloud), and see subscribed calendars' events in the daily note.
+type: how-to
+tasks: ["W7.20"]
 ---
 
 :::note[Status]

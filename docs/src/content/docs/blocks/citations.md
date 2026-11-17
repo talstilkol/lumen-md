@@ -1,6 +1,8 @@
 ---
 title: Citations (BibTeX)
 description: A ```bibtex block becomes a reference list in APA 7, Chicago author-date or MLA 9 — in English or Hebrew, with nothing sent anywhere.
+type: reference
+tasks: ["W2.16"]
 ---
 
 Paste BibTeX into a ` ```bibtex ` (or ` ```bib `) block and Lumen shows a

@@ -1,6 +1,8 @@
 ---
 title: Student mode
 description: Record a lecture, tap Important at the moments that matter, and get a transcript with a ▶ for every sentence, a summary taken from what was said, and review cards linked to their moments. All on this device.
+type: reference
+tasks: ["W12.H5", "W5.13"]
 ---
 
 `⌘K` → **Student mode: record a lecture**:

@@ -1,6 +1,8 @@
 ---
 title: ייצוא Typst (עברית)
 description: ייצוא פתק כמקור Typst שמסדר עברית מימין לשמאל, וקומפילציה ל-PDF עם typst.
+type: how-to
+tasks: ["W12.F2"]
 ---
 
 [Typst](https://typst.app) היא שפת סדר מודרנית, חלופה ל-LaTeX עם תמיכה טובה

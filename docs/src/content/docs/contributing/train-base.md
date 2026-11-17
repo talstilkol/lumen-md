@@ -1,6 +1,7 @@
 ---
 title: Every PR on the train head
 description: A pull request is based on the current train or on main, never on another PR's branch. pr:check fails a stacked base and a stack deeper than 1, warns about an older train and about drift, and fails an old merge base or a criss-cross. scripts/restack.mjs prints how to move a stacked PR onto the train.
+type: how-to
 ---
 
 Lumen used to stack pull requests: each PR's base was the branch of the

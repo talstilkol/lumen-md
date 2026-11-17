@@ -1,6 +1,8 @@
 ---
 title: Agent skills
 description: Your own AI workflows as files in the vault — run them with "/" in the AI prompt or the command palette, with only the tools they declare and every change waiting for your approval.
+type: reference
+tasks: ["W11.I22", "W7.1"]
 ---
 
 A **skill** is a workflow you write once and run with `/`: "summarise what I

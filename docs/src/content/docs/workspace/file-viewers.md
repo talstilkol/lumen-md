@@ -1,6 +1,8 @@
 ---
 title: Notebooks, data files and maps
 description: Jupyter notebooks, CSV/TSV/JSON/YAML/XLSX files and GeoJSON/GPX tracks open in a viewer of their own, without converting them.
+type: how-to
+tasks: ["W12.F4"]
 ---
 
 Some files in your vault open in a viewer instead of the editor. Each viewer

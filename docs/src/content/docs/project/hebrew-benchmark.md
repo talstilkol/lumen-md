@@ -1,6 +1,7 @@
 ---
 title: Hebrew in notes, measured
 description: Lumen on public Hebrew benchmarks — bidi, dictation, niqqud, handwriting — next to Obsidian, Notion and Apple Notes where they were measured too.
+type: how-to
 ---
 
 Every number here is measured on a public benchmark that anyone can download, and each comes with the command that reproduces it. The other apps get a number only where someone ran the same benchmark on them; otherwise their cell says “not tested”. Nothing is estimated.

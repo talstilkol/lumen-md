@@ -1,6 +1,8 @@
 ---
 title: Sync on the local network
 description: Sync two devices directly over your own network, end-to-end encrypted, with no cloud and no internet.
+type: how-to
+tasks: ["W10.E45", "W2.19"]
 ---
 
 Next to WebDAV, S3, Dropbox and Google Drive, the [encrypted sync](/sync/e2ee/)

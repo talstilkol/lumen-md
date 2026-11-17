@@ -1,6 +1,8 @@
 ---
 title: AI doctor
 description: One check of the whole local-AI stack, from Ollama to the on-device engines, with the exact fix for each row.
+type: how-to
+tasks: ["7.4"]
 ---
 
 Open it with `⌘K → AI: Doctor (diagnose local AI)`. Each row shows what the doctor found, and

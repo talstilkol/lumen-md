@@ -1,6 +1,8 @@
 ---
 title: Suggestions and named versions
 description: Suggest edits that change nothing until someone accepts them, accept or reject one person's suggestions at a time, see who wrote what (the AI included), and name versions to compare word by word.
+type: how-to
+tasks: ["W3.11"]
 ---
 
 ## Suggesting, alone or together

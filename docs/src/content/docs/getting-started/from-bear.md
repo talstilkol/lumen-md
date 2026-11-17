@@ -1,6 +1,7 @@
 ---
 title: Moving from Bear
 description: Export Bear notes as Markdown and bring them, with their images, into Lumen.
+type: how-to
 ---
 
 ## Export from Bear

@@ -1,6 +1,8 @@
 ---
 title: Side panels
 description: The file tree, outline, backlinks, tags, comments, trash and version history — what each side panel shows and how to use it.
+type: how-to
+tasks: ["W12.S2"]
 ---
 
 Each panel has a **?** button that opens this help at its own section.

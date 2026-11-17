@@ -1,6 +1,8 @@
 ---
 title: ייבוא מאפליקציות אחרות
 description: להביא פתקים מ-Obsidian, ‏Notion, ‏Evernote, ‏Bear, ‏Apple Notes, ‏Google Keep, ‏Logseq, ‏OneNote, ‏Roam, ‏Craft, ‏Day One, ‏Apple Journal, ‏Samsung Notes, ‏Airtable, ‏Tomboy או כל אפליקציה של TextBundle — לתיקייה חדשה, עם דוח, וביטול בלחיצה.
+type: how-to
+tasks: ["W4.19", "W10.E49", "W10.E48", "W1.26"]
 ---
 
 **קובץ ← ייבוא פתקים מאפליקציה אחרת…** (או מפלטת הפקודות) פותח את אשף

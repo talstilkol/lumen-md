@@ -1,6 +1,8 @@
 ---
 title: Links, embeds and block references
 description: Link notes with [[ and its completion, preview a link by hovering, turn plain mentions into links, embed a note or one of its sections, and link to a single paragraph with ^id.
+type: how-to
+tasks: ["4.5", "4.6", "4.7", "4.8"]
 ---
 
 Notes link to each other with `[[Note name]]`, as in Obsidian. The links

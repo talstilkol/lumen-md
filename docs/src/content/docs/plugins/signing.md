@@ -1,6 +1,8 @@
 ---
 title: Plugin signing keys
 description: Decide which publishers' plugins Lumen trusts.
+type: how-to
+untracked: "shipped before the plan (plugin signing, release 9.4); no plan task covers it"
 ---
 
 Registry plugins can be signed with an **Ed25519** key. Before installing,

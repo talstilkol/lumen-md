@@ -1,6 +1,7 @@
 ---
 title: התחלה מהירה
 description: מגיעים למסמך Lumen יפה ראשון תוך 60 שניות.
+type: how-to
 ---
 
 ## 1. פותחים את Lumen

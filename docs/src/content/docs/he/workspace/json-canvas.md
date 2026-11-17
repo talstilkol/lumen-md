@@ -1,6 +1,8 @@
 ---
 title: JSON Canvas (קובצי ‎.canvas של Obsidian)
 description: פתיחת קנבסים של Obsidian בקנבס ה-Excalidraw של Lumen וכתיבתם בחזרה כקובצי ‎.canvas. JSON Canvas הוא פורמט פתוח ברישיון MIT.
+type: how-to
+tasks: ["W4.30", "4.17"]
 ---
 
 [JSON Canvas](https://jsoncanvas.org) הוא הפורמט הפתוח שבו Obsidian שומר קנבסים

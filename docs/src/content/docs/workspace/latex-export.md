@@ -1,6 +1,8 @@
 ---
 title: Academic LaTeX export (Hebrew)
 description: Export a note as a LaTeX project — Hebrew right to left with babel, math, Pandoc-style [@key] citations from the vault's BibTeX, and images — that compiles with LuaLaTeX or XeLaTeX.
+type: how-to
+tasks: ["W10.E14", "W5.22"]
 ---
 
 **Export LaTeX project (academic, Hebrew)…** in the command palette

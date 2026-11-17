@@ -1,6 +1,7 @@
 ---
 title: Open PR triage
 description: One decision table for every open pull request — in main, in a train, superseded, dependabot, or still needed — and the commands that close each category with a comment.
+type: how-to
 ---
 
 Most pull requests here are stacked: each one is built on the branch of the

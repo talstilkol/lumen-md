@@ -1,6 +1,7 @@
 ---
 title: איפה Lumen רץ
 description: מה עובד באיזה אירוח — Cloudflare Pages, Netlify, Vercel ותמונת ה-Docker — ואיך כל אחד מוגדר.
+type: how-to
 ---
 
 Lumen היא אפליקציה סטטית: `npm run build` מייצר `dist/`, וכל אירוח שמגיש

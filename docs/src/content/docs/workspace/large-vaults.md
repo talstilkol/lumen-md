@@ -1,6 +1,8 @@
 ---
 title: Large vaults and long notes
 description: How Lumen stays fast with 10,000 notes and with a single 2 MB note — and how that is measured.
+type: how-to
+tasks: ["W10.E1", "W6.45", "W1.22", "8.4"]
 ---
 
 Lumen is built to stay responsive with a vault of **10,000 notes** and with a

@@ -1,6 +1,7 @@
 ---
 title: The PR check
 description: npm run pr:check is the local PR gate that replaces Danger.js and size-limit. It reports bundle size against the base, PR body sections, [skip ci] commits, unregistered network calls, licences and the domain rule.
+type: how-to
 ---
 
 Lumen runs no GitHub Actions on pull requests. Danger.js and size-limit

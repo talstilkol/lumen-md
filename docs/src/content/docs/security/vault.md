@@ -1,6 +1,7 @@
 ---
 title: Secrets and encryption
 description: How Lumen stores API keys and tokens, and how to encrypt a document.
+type: how-to
 ---
 
 Lumen keeps the secrets it needs — AI provider keys, Git and cloud tokens,

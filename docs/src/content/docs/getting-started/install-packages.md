@@ -1,6 +1,7 @@
 ---
 title: Install with a package manager
 description: Install the Lumen desktop app with Homebrew, winget, Flatpak or the AUR, and where those packages come from.
+type: how-to
 ---
 
 Each release of the desktop app is published as a GitHub release. The

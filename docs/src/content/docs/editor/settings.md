@@ -1,6 +1,8 @@
 ---
 title: Settings
 description: One screen for every setting — tabs, search, and export / import of your choices.
+type: reference
+tasks: ["W13.E4"]
 ---
 
 Open **Settings** with `⌘,` (`Ctrl+,` on Windows and Linux), or from the

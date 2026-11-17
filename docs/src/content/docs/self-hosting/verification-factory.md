@@ -1,6 +1,7 @@
 ---
 title: The verification factory
 description: A free second machine that runs every test of every verify/* head each night in Chromium, Firefox and WebKit, signs a receipt per commit and posts the result to GitHub as commit statuses, without GitHub Actions.
+type: how-to
 ---
 
 Lumen doesn't use GitHub Actions, and until now every real check depended on

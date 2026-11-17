@@ -1,6 +1,8 @@
 ---
 title: Hebrew grammar and style
 description: Hebrew grammar and style checks that run on this device, beyond spelling, with three writing levels and a short explanation for each suggestion.
+type: how-to
+tasks: ["W10.B9", "W10.B8", "W5.3"]
 ---
 
 With grammar checking on (`⌘K` → **Enable grammar check (LanguageTool)**), Hebrew

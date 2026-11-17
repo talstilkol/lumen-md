@@ -1,6 +1,8 @@
 ---
 title: Data analyst
 description: Ask a question about a table in your note; a short Python program answers it on this device, checked by a second run.
+type: how-to
+tasks: ["6.15"]
 ---
 
 Put a table in the note: a ```` ```csv ```` block, a Markdown table, or

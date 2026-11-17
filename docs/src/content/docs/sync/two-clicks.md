@@ -1,6 +1,8 @@
 ---
 title: Sync in two clicks
 description: A guided setup that picks the best place for your encrypted notes on this device, makes the key for you, and shows every file's state.
+type: reference
+tasks: ["W4.19"]
 ---
 
 Run **Set up sync (two clicks)** from the command palette.

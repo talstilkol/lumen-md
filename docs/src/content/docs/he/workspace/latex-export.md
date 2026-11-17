@@ -1,6 +1,8 @@
 ---
 title: ייצוא LaTeX אקדמי (עברית)
 description: ייצוא פתק כפרויקט LaTeX — עברית מימין לשמאל עם babel, מתמטיקה, ציטוטי [@key] בסגנון Pandoc מה-BibTeX שבכספת, ותמונות — שמתקמפל ב-LuaLaTeX או ב-XeLaTeX.
+type: how-to
+tasks: ["W10.E14", "W5.22"]
 ---
 
 **ייצוא פרויקט LaTeX (אקדמי, עברית)…** בלוח הפקודות מוריד

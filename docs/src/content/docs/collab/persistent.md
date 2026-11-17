@@ -1,6 +1,8 @@
 ---
 title: Persistent rooms
 description: Keep a collaboration room alive when every peer has left, with a small y-websocket server you run yourself.
+type: reference
+tasks: ["3.6"]
 ---
 
 A plain [WebRTC room](/collab/webrtc/) lives only in the browsers that are

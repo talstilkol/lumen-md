@@ -1,6 +1,8 @@
 ---
 title: Outline mode and block operations
 description: Fold headings and lists, zoom into one block, and move, indent, duplicate or delete whole blocks — on a plain Markdown file, in both editors.
+type: how-to
+tasks: ["W2.13"]
 ---
 
 Logseq, Tana and Workflowy made writing in an outline its own way of

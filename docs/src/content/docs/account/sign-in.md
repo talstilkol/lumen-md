@@ -1,6 +1,8 @@
 ---
 title: Signing in
 description: What each sign-in status means and how to fix the common errors.
+type: how-to
+untracked: "shipped before the plan (the organization release); no plan task covers it"
 ---
 
 Signing in is optional — Lumen works fully offline without an account.

@@ -1,6 +1,8 @@
 ---
 title: Git sync
 description: Clone, pull and push a git repository from Lumen — safely. A pull merges, never deletes, and never overwrites a note you are editing.
+type: how-to
+tasks: ["3.3"]
 ---
 
 Lumen can keep a folder of your vault in step with a git repository. Everything runs in the app (via [isomorphic-git](https://isomorphic-git.org)); there is no Lumen server in between.

@@ -1,6 +1,8 @@
 ---
 title: Safe saves and the vault check
 description: Every save lands whole, even if the app is killed half way; the vault check finds damaged files and repairs them with a backup first.
+type: reference
+tasks: ["W1.5"]
 ---
 
 Your notes are real files. A save that stops half way — the battery dies,

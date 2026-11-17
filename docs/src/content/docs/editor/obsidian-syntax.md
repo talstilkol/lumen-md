@@ -1,6 +1,8 @@
 ---
 title: Obsidian syntax
 description: Callouts, comments, coloured highlights, footnotes with hover, math and image sizes, written the way Obsidian writes them, so a vault moves to Lumen without changing a line.
+type: reference
+tasks: ["W12.U1", "W1.3"]
 ---
 
 A vault that comes from Obsidian uses this syntax every day. Lumen reads it,

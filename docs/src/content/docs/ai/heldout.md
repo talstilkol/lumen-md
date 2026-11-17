@@ -1,6 +1,8 @@
 ---
 title: Held-out sets
 description: Eval sets the feature authors never see — encrypted, scored by a separate evaluator that reports aggregates only, with a contamination check on the repo and every PR.
+type: reference
+tasks: ["W6.18", "W6.17"]
 ---
 
 Lumen's dev sets and probes are written by the same agents that write the

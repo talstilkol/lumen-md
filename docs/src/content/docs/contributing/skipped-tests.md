@@ -1,6 +1,7 @@
 ---
 title: Skipped tests
 description: Every skipped test says why, for which task and until when; npm run hygiene fails on one that does not, and npm run skips lists them all.
+type: how-to
 ---
 
 A skipped test looks like coverage but checks nothing. So every call that

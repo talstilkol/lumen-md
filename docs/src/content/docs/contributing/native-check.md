@@ -1,6 +1,7 @@
 ---
 title: Compiling the native code offline
 description: How Lumen's Rust, Java and Swift code is compiled without crates.io, the Android SDK or Xcode — what the check proves, what it cannot, and what still needs a Mac.
+type: how-to
 ---
 
 Lumen has native code next to the web app: the Tauri desktop shell in

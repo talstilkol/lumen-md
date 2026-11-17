@@ -1,6 +1,7 @@
 ---
 title: Security
 description: Lumen's security status in public: the external audit (none yet), the threat model, fuzzing, release provenance, every open finding, and a review scorecard with a privacy label for each plugin.
+type: reference
 ---
 
 <!-- Written by scripts/security-page.mjs from security/findings.json and the plugin scorecards. Do not edit by hand. -->

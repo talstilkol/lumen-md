@@ -1,6 +1,8 @@
 ---
 title: Your vault in a folder
 description: Keep your notes in a real folder on your computer, in the browser or the desktop app, move them there and back without losing a byte, and see changes other programs make.
+type: how-to
+tasks: ["4.2", "4.3", "4.4"]
 ---
 
 By default the web app keeps your notes in the browser's private storage

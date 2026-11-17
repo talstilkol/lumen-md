@@ -1,6 +1,8 @@
 ---
 title: Obsidian Bases (.base files)
 description: Open, embed and edit Obsidian Bases files — what is supported, what is not, and how the golden set is checked.
+type: how-to
+tasks: ["W12.V1", "W4.30", "W1.12"]
 ---
 
 A vault that comes from Obsidian keeps its **Bases**: `.base` files (YAML)

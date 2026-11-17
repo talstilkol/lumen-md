@@ -1,6 +1,8 @@
 ---
 title: Sync providers
 description: Where the encrypted vault can live — WebDAV, S3-compatible storage, Dropbox, Google Drive — how to connect each, what each server must support, and how notes from the old plain-text sync are moved into the vault.
+type: how-to
+tasks: ["W8.3", "W6.27", "3.5"]
 ---
 
 [Encrypted sync](/sync/e2ee/) keeps a copy of your vault at a storage

@@ -1,6 +1,8 @@
 ---
 title: Notion's formulas in Bases
 description: Notion's formula functions (dates, text, numbers, lists with current and index, lookups through relations) inside .base formulas and filters, plus two for Hebrew.
+type: reference
+tasks: ["W6.46"]
 ---
 
 A `.base` formula or filter can use Notion's formula functions next to

@@ -1,6 +1,8 @@
 ---
 title: Ask a PDF
 description: Questions about a PDF answered on this device from its own pages — every answer with quotes you can open at their page and line.
+type: reference
+tasks: ["6.8"]
 ---
 
 In the [PDF reader](/workspace/pdf-reader/), **Ask** opens a question box

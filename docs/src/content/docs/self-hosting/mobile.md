@@ -1,6 +1,7 @@
 ---
 title: Android and iOS builds
 description: How the Android APK and iOS IPA are built on every pull request, what is unsigned until the store accounts exist, and which secrets sign them.
+type: how-to
 ---
 
 Lumen's mobile apps are the same web build wrapped by Capacitor: `android/`

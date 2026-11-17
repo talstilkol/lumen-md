@@ -1,6 +1,8 @@
 ---
 title: מודל שפה מקומי (web-llm + WebGPU)
 description: להריץ בקשות AI כולן במכשיר — פרטי, עובד בלי רשת, בלי עלות לכל טוקן.
+type: how-to
+tasks: ["5.7"]
 ---
 
 Lumen מעבירה כל פקודת AI דרך `chat()`. כש-`useLocalAi` מופעל (ובדפדפן עם

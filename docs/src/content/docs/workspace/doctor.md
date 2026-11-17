@@ -1,6 +1,8 @@
 ---
 title: Vault Doctor
 description: Find broken links, orphans and near-duplicate notes across the workspace, without AI.
+type: how-to
+tasks: ["7.4"]
 ---
 
 Command: `🩺 Vault Doctor: Check Workspace` (`⌘K`).

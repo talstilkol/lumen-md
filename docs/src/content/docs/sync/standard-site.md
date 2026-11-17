@@ -1,6 +1,8 @@
 ---
 title: Publish to Bluesky and the fediverse
 description: Publish a note as a Standard.site document in your own AT Protocol account, so Bluesky shows it with a rich preview, readers like Leaflet show it in full, and Bridgy Fed can bring it to Mastodon.
+type: how-to
+tasks: ["W7.19"]
 ---
 
 Open a note and run **Publish to Bluesky (Standard.site)…** from the command

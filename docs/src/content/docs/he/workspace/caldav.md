@@ -1,6 +1,8 @@
 ---
 title: סנכרון יומן (CalDAV ו-ICS)
 description: סנכרון משימות הכספת שיש להן תאריך עם יומן CalDAV (‏Fastmail, ‏Nextcloud, ‏iCloud), ואירועים של יומנים מנויים בפתק היומי.
+type: how-to
+tasks: ["W7.20"]
 ---
 
 :::note[מצב]

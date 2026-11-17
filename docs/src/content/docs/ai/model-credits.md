@@ -1,6 +1,8 @@
 ---
 title: Model credits
 description: Where Lumen credits the models it ships or downloads, ivrit.ai and Dicta first, with each licence's requirements.
+type: how-to
+tasks: ["1.7"]
 ---
 
 `⌘K` → **Credits & model licences** opens the credits. Under **Model credits**, every model

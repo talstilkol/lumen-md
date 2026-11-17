@@ -1,6 +1,7 @@
 ---
 title: The open Hebrew voice (recording kit)
 description: How to record, check and train the first neural Hebrew voice released as CC0, so read-aloud in Hebrew is open to every app.
+type: how-to
 ---
 
 There is no neural Hebrew voice under a permissive licence today. MMS,

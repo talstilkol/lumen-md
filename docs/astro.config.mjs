@@ -1,6 +1,7 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import rehypeHebrewSearch from "./src/plugins/rehype-hebrew-search.mjs";
+import remarkVerifiedBanner from "./src/plugins/remark-verified-banner.mjs";
 
 // Lumen's user docs. Hosted at docs.lumen.app — point your CNAME there.
 //
@@ -10,7 +11,8 @@ import rehypeHebrewSearch from "./src/plugins/rehype-hebrew-search.mjs";
 export default defineConfig({
   site: "https://docs.lumen.app",
   // Search finds Hebrew words with and without their prefixes (plan W1.28).
-  markdown: { rehypePlugins: [rehypeHebrewSearch] },
+  // W13.D2: a page whose tasks are not verified in a browser yet opens with a beta notice.
+  markdown: { rehypePlugins: [rehypeHebrewSearch], remarkPlugins: [remarkVerifiedBanner] },
   integrations: [
     starlight({
       title: "Lumen Docs",
@@ -28,14 +30,29 @@ export default defineConfig({
       // the root locale; Hebrew pages fall back to English until translated.
       locales: {
         root: { label: "English", lang: "en" },
-        he: { label: "עברית", lang: "he" },
+        // W13.D5: said outright, so the sidebar and the table of contents mirror on every Hebrew page.
+        he: { label: "עברית", lang: "he", dir: "rtl" },
       },
       sidebar: [
+        // W13.D1: the four Diátaxis kinds first — written by `node scripts/docs-meta.mjs --index`.
+        {
+          label: "By kind",
+          translations: { he: "לפי סוג" },
+          items: [
+            { label: "Tutorials", slug: "tutorials", translations: { he: "מדריכים" } },
+            { label: "How-to guides", slug: "how-to", translations: { he: "איך עושים" } },
+            { label: "Reference", slug: "reference", translations: { he: "עיון" } },
+            { label: "Explanation", slug: "explanation", translations: { he: "הסבר" } },
+          ],
+        },
         {
           label: "Getting Started",
           items: [
             { label: "Welcome to Lumen", slug: "getting-started/welcome" },
             { label: "Quickstart", slug: "getting-started/quickstart" },
+            { label: "Tutorial: your first Hebrew note", slug: "getting-started/first-note", translations: { he: "מדריך: הפתק העברי הראשון" } },
+            { label: "Tutorial: find anything", slug: "getting-started/find-anything", translations: { he: "מדריך: למצוא כל דבר" } },
+            { label: "Tutorial: link two notes", slug: "getting-started/link-notes", translations: { he: "מדריך: לקשר שני פתקים" } },
             { label: "What's new", slug: "getting-started/whats-new", translations: { he: "מה חדש" } },
             { label: "Desktop app updates", slug: "getting-started/desktop-updates" },
             { label: "Install Lumen", slug: "getting-started/install", translations: { he: "התקנת Lumen" } },
@@ -244,6 +261,7 @@ export default defineConfig({
             { label: "Developing a plugin", slug: "plugins/develop", translations: { he: "פיתוח תוסף" } },
             { label: "Sandbox and permissions", slug: "plugins/sandbox" },
             { label: "Plugin API", slug: "plugins/api" },
+            { label: "API reference (apiVersion 1)", slug: "plugins/api-v1", translations: { he: "עיון ב-API (גרסה 1)" } },
             { label: "Permissions and safety scan", slug: "plugins/permissions" },
             { label: "Plugin gallery", slug: "plugins/gallery" },
             { label: "Plugin registry and the built-in ten", slug: "plugins/registry", translations: { he: "רישום התוספים ועשרת התוספים" } },
@@ -352,6 +370,7 @@ export default defineConfig({
           translations: { he: "הפרויקט" },
           items: [
             { label: "Public roadmap", slug: "project/roadmap", translations: { he: "מפת דרכים ציבורית" } },
+            { label: "Known issues", slug: "project/known-issues", translations: { he: "בעיות ידועות" } },
             { label: "Usability tests with Hebrew speakers", slug: "project/usability", translations: { he: "בדיקות שימושיות עם דוברי עברית" } },
             { label: "Performance gate", slug: "self-hosting/perf-gate", translations: { he: "שער הביצועים" } },
           ],

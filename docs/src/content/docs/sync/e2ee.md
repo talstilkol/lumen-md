@@ -1,6 +1,8 @@
 ---
 title: Encrypted sync (E2EE)
 description: The end-to-end encrypted sync protocol — what is encrypted, what the sync service sees, rollback protection and its trust-on-first-use limit.
+type: how-to
+tasks: ["W11.S1", "W1.8", "3.5", "3.4"]
 ---
 
 :::caution[Experimental — not externally security-audited]

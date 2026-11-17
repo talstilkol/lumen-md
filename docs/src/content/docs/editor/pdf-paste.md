@@ -1,6 +1,8 @@
 ---
 title: Hebrew pasted from a PDF
 description: Hebrew copied out of a PDF often comes out backwards or with the wrong final letters. Lumen notices and offers the fix.
+type: how-to
+tasks: ["W5.5"]
 ---
 
 Copy a paragraph out of a Hebrew court ruling, government form or article in

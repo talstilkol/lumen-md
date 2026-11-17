@@ -1,6 +1,8 @@
 ---
 title: Hebrew keyboard layout
 description: Shortcuts that work with the Hebrew layout on, and search that understands text typed with the wrong layout.
+type: reference
+tasks: ["W2.8"]
 ---
 
 ## Shortcuts work in any layout

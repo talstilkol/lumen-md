@@ -3,6 +3,8 @@ title: Math inside Hebrew text
 description: Formulas in a right-to-left sentence keep their order in the editor, the preview, PDF and Word.
 sidebar:
   label: Math inside Hebrew text
+type: how-to
+tasks: ["W10.E77", "W1.3", "W5.14"]
 ---
 
 A formula in the middle of a Hebrew sentence breaks in almost every editor.

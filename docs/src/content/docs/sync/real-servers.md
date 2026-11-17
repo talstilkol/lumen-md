@@ -1,6 +1,8 @@
 ---
 title: Real servers and conditional writes
 description: Which WebDAV and S3 servers keep compare-and-swap, measured against the real servers, and how to run the same check against yours.
+type: how-to
+tasks: ["W6.27"]
 ---
 
 Encrypted sync replaces the manifest and the keyring only with a

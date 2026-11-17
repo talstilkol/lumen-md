@@ -1,6 +1,7 @@
 ---
 title: Photo metadata
 description: Photos you paste or drop into a note lose their GPS position, time, device and text metadata before they are stored.
+type: how-to
 ---
 
 A photo from a phone or a camera usually says **where** it was taken (GPS),

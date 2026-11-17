@@ -1,6 +1,8 @@
 ---
 title: English spelling on this device
 description: Spell-check English notes with a dictionary that ships with Lumen — no LanguageTool account, no request leaves the device.
+type: how-to
+tasks: ["6.10"]
 ---
 
 Lumen's grammar check (`⌘K → Check grammar (LanguageTool)`, and the background

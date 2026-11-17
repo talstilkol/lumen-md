@@ -1,6 +1,7 @@
 ---
 title: Self-hosting with Docker
 description: Run Lumen on your own infrastructure with the docker-compose bundle.
+type: how-to
 ---
 
 > Lumen is a **local-first** editor — by default everything runs inside

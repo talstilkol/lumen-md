@@ -1,6 +1,7 @@
 ---
 title: מעבר מ-Notion
 description: מייצאים סביבת עבודה מ-Notion ומביאים את הדפים, הקישורים והקבצים המצורפים ל-Lumen.
+type: how-to
 ---
 
 ## ייצוא מ-Notion

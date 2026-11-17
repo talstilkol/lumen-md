@@ -1,6 +1,8 @@
 ---
 title: Developing a plugin
 description: Scaffold a sandboxed plugin with create-lumen-plugin, run it with hot reload in developer mode, test it in Node with the test kit, and see what it does in the Developer panel.
+type: how-to
+tasks: ["W3.10"]
 ---
 
 ## Five minutes from nothing to a running plugin

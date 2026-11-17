@@ -1,6 +1,8 @@
 ---
 title: ייבוא הדגשות (Kindle,‏ Kobo,‏ Readwise,‏ Zotero)
 description: הבאת ההדגשות מ־Kindle,‏ Kobo,‏ Readwise ו־Zotero לכספת, פתק לכל ספר, בלי כפילויות בייבוא חוזר.
+type: how-to
+tasks: ["W2.15"]
 ---
 
 מריצים `⌘K ← "ייבוא הדגשות (Kindle,‏ Kobo,‏ Readwise,‏ Zotero)…"`, בוחרים

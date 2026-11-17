@@ -1,6 +1,8 @@
 ---
 title: MCP וה-CLI של lumen
 description: לתת ל-Claude Desktop, ל-Claude Code או ל-IDE לחפש ולקרוא בכספת — כבוי כברירת מחדל, הרשאות לכל לקוח, וכל שינוי מחכה לאישורך.
+type: reference
+tasks: ["W13.X1", "W12.T4", "W11.I7", "W11.I8", "W7.18", "W8.1"]
 ---
 
 אפשר להשתמש בכספת של Lumen מחוץ לאפליקציה בשתי דרכים:

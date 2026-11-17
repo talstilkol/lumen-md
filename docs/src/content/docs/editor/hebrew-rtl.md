@@ -1,6 +1,8 @@
 ---
 title: Hebrew and right-to-left
 description: How Lumen decides the direction of every block — paragraphs, tables, lists, quotes and code — in the editor, the preview, WYSIWYG and the export.
+type: reference
+tasks: ["9.7"]
 ---
 
 Lumen doesn't make a whole note right-to-left or left-to-right. Each block

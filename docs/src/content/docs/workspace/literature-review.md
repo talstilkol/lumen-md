@@ -1,6 +1,8 @@
 ---
 title: Literature review matrix
 description: One table of every PDF in the vault, with question, method, sample, findings and limitations, and each value backed by a quote verified on its page. Runs on this device.
+type: reference
+tasks: ["W12.V4", "R12.20", "W5.12"]
 ---
 
 `⌘K` → **Literature review from the vault's PDFs** reads every PDF in the

@@ -1,6 +1,7 @@
 ---
 title: Keyboard shortcuts
 description: Every shortcut Lumen binds, where it works, and how to find the rest in the command palette.
+type: reference
 ---
 
 On Windows and Linux, `⌘` is **Ctrl**, `⌥` is **Alt** and `⇧` is

@@ -1,6 +1,7 @@
 ---
 title: Desktop app updates
 description: How the Lumen desktop app checks for, verifies and installs updates, and what it sends.
+type: how-to
 ---
 
 The desktop app (Windows, macOS, Linux) updates itself from the project's

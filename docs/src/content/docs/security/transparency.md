@@ -1,6 +1,7 @@
 ---
 title: Transparency report
 description: Every six months: the requests for user data the encrypted sync relay and the share server received, answered and rejected, and what they could hand over at all.
+type: explanation
 ---
 
 <!-- Written by scripts/privacy/transparency.mjs from security/transparency/. Do not edit by hand. -->

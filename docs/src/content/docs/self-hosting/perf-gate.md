@@ -1,6 +1,7 @@
 ---
 title: Performance gate
 description: npm run perf:gate measures FCP, LCP, TBT, TTI and CLS of a production build in Chromium, on desktop and a throttled phone, and fails on the error thresholds, without GitHub Actions.
+type: how-to
 ---
 
 The gate (plan 8.3) checks that a build loads fast enough before it ships.

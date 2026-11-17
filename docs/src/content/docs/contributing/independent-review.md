@@ -1,6 +1,7 @@
 ---
 title: Independent review
 description: Every change to a sensitive path needs a review receipt for its head commit from a reviewer that did not write it, with attack tests, before it is merged — integration trains included.
+type: how-to
 ---
 
 A change to a sensitive path — the paths `.github/CODEOWNERS` lists:

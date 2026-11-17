@@ -1,6 +1,7 @@
 ---
 title: Nightly runs and receipts
 description: npm run nightly runs the flake hunt, the perf checks, the review triage and the weekly health on your own machine, and writes a signed report for each, without GitHub Actions.
+type: how-to
 ---
 
 Lumen doesn't use GitHub Actions, so the scheduled runs (plan 0.11) and the

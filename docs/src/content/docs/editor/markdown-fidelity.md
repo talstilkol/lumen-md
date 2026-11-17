@@ -1,6 +1,8 @@
 ---
 title: Markdown fidelity
 description: How closely Lumen follows the CommonMark and GFM specs, and the promise that opening and saving a file in either editor gives you back the same bytes.
+type: how-to
+tasks: ["W11.Q8", "W1.2"]
 ---
 
 A Markdown editor should never rewrite your files behind your back. Lumen is

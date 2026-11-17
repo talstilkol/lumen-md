@@ -1,6 +1,7 @@
 ---
 title: Supply chain
 description: Fuzzed decoders, a reproducible build, an SBOM and offline-signed checksums for every release — and how anyone can check them.
+type: reference
 ---
 
 The [threat model](/security/threat-model/) assumes the code you run is the

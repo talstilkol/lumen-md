@@ -1,6 +1,8 @@
 ---
 title: דוח תאימות נגישות (ACR) — WCAG 2.2 ו-EN 301 549
 description: כל קריטריון הצלחה של WCAG 2.2 ברמות A ו-AA, עם הסטטוס של Lumen 0.1.0, הערות, ראיות ותוכנית תיקון.
+type: reference
+tasks: ["W11.Q7", "W3.8"]
 ---
 
 <!-- נוצר על ידי scripts/acr.mjs מתוך docs/acr/wcag22.json — לערוך שם. -->

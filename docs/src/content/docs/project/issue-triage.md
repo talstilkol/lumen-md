@@ -1,6 +1,7 @@
 ---
 title: Issue triage
 description: How new GitHub issues are labelled, checked for duplicates and linked to the plan within 24 hours.
+type: how-to
 ---
 
 Every new issue on [talstilkol/lumen-md](https://github.com/talstilkol/lumen-md/issues)

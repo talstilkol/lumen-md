@@ -1,6 +1,7 @@
 ---
 title: Secret scan of the build
 description: Why no secret may be a VITE_* variable, the gate that fails a build that sets one, and the scan of the live deployments.
+type: explanation
 ---
 
 Vite copies the value of every `VITE_*` variable the app reads into the

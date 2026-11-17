@@ -1,6 +1,8 @@
 ---
 title: Note properties
 description: The note's front matter as typed fields — text, number, date, list, checkbox and link — where an edit changes only that value.
+type: how-to
+tasks: ["4.9"]
 ---
 
 **⌘K → Properties: edit this note's frontmatter** opens a side panel with the

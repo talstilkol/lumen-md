@@ -1,6 +1,8 @@
 ---
 title: "Havruta: study with a partner"
 description: A shared, end-to-end encrypted study room on a Sefaria reference. Your notes travel, the text stays on each device, and the room is deleted when you finish.
+type: reference
+tasks: ["W12.H2"]
 ---
 
 A havruta room is a study session for two on one reference, such as a daf, a

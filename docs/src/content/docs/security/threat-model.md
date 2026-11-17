@@ -1,6 +1,7 @@
 ---
 title: Threat model
 description: What Lumen protects, from whom, at each of its boundaries — vault, sync, sharing, plugins, agents and the web clipper — and where each defence is tested.
+type: explanation
 ---
 
 Privacy is Lumen's central claim, so it has to be checkable from the

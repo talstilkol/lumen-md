@@ -1,6 +1,8 @@
 ---
 title: Reading views
 description: Source, preview and outline side by side with linked scrolling, and the keyboard between the columns.
+type: how-to
+tasks: ["W13.R8"]
 ---
 
 ## Source + preview + outline

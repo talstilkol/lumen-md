@@ -1,6 +1,8 @@
 ---
 title: Israeli academic calendar
 description: Semesters, Moed A and Moed B, breaks and make-up days of your institution in the daily note, and the year as an ICS file.
+type: how-to
+tasks: ["W7.8"]
 ---
 
 Every Israeli institution publishes its academic calendar as a different

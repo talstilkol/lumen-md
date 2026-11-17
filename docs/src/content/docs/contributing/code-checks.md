@@ -1,6 +1,7 @@
 ---
 title: "Code checks: strings, coverage, vault backends"
 description: Three checks a contributor meets in the code itself — no user-visible string outside t(), test coverage over all of src/, and one contract suite every vault backend passes.
+type: how-to
 ---
 
 These checks guard the code rather than a feature. Each one names the

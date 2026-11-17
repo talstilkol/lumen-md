@@ -1,6 +1,8 @@
 ---
 title: Israeli time
 description: A Sunday–Thursday work week, the Hebrew date next to dates, and deadlines that move off Shabbat and chagim with a note saying why.
+type: explanation
+tasks: ["W5.15"]
 ---
 
 Lumen's calendar knows the Israeli week and the Jewish holidays (from its own

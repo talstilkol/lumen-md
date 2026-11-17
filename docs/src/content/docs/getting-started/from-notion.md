@@ -1,6 +1,7 @@
 ---
 title: Moving from Notion
 description: Export a Notion workspace and bring its pages, links and attachments into Lumen.
+type: how-to
 ---
 
 ## Export from Notion

@@ -1,6 +1,8 @@
 ---
 title: Open sources
 description: One search over Sefaria, the Knesset, data.gov.il and the CBS, and the Ben-Yehuda library, with the rights of every result and the right way to quote it.
+type: reference
+tasks: ["W7.24"]
 ---
 
 Every open Hebrew source comes with its own terms. The **Open sources**

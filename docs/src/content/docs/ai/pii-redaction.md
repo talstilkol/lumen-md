@@ -1,6 +1,8 @@
 ---
 title: Personal data before the cloud
 description: When your AI policy lets a request leave this device, Lumen hides e-mails, phone numbers, ID numbers, cards, IBANs, plates and birth dates on the device first, and puts them back in the answer.
+type: how-to
+tasks: ["2.6"]
 ---
 
 Under the **local only** policy nothing leaves your device, so there is

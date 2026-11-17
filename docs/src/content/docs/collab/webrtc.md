@@ -1,6 +1,8 @@
 ---
 title: Real-time WebRTC collaboration
 description: Multi-cursor editing over a peer-to-peer mesh — no server account, no central log of your doc.
+type: how-to
+tasks: ["3.6"]
 ---
 
 Lumen ships a real-time collab mode powered by [Yjs](https://yjs.dev)

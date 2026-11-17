@@ -1,6 +1,8 @@
 ---
 title: Dynamic blocks reference
 description: The fenced code-block languages that Lumen renders as live, interactive previews.
+type: reference
+tasks: ["W12.X1", "W4.15", "W1.34"]
 ---
 
 Lumen's killer feature is **dynamic blocks**: write a fenced code block in markdown, and the preview renders it as a chart, diagram, table, map, or live sandbox. Every block degrades gracefully — if rendering fails, you still see the source.

@@ -1,6 +1,7 @@
 ---
 title: קיצורי מקלדת
 description: כל קיצור ש-Lumen מגדירה, איפה הוא עובד, ואיך למצוא את השאר בלוח הפקודות.
+type: reference
 ---
 
 ב-Windows וב-Linux‏ `⌘` הוא **Ctrl**,‏ `⌥` הוא **Alt** ו-`⇧` הוא **Shift**;

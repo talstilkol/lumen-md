@@ -1,6 +1,7 @@
 ---
 title: Owner session command
 description: One command per owner session. It prints exactly what to do in the browser, runs the commands for you after asking, verifies the result through the APIs, records a signed receipt per step and resumes where you stopped.
+type: how-to
 ---
 
 Plan W6.20. The [owner sessions](/project/owner-sessions/) as a command:

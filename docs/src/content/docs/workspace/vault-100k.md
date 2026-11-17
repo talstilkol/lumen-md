@@ -1,6 +1,8 @@
 ---
 title: Very large vaults
 description: How Lumen stays fast with 100,000 notes. The search index holds one copy of the text, is kept between sessions, and is updated one note at a time, and big embedding indexes are stored compactly.
+type: how-to
+tasks: ["W6.36", "W2.22"]
 ---
 
 This page picks up where [Large vaults and long notes](/workspace/large-vaults/) leaves off. Heavy users reach 50,000 to 100,000 notes, which is where most note apps

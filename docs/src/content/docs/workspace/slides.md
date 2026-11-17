@@ -1,6 +1,8 @@
 ---
 title: Slides from notes and the canvas
 description: Present a note or a canvas as slides, right to left when it's Hebrew, with speaker notes, a presenter view on a second screen, and PDF export.
+type: how-to
+tasks: ["W2.17"]
 ---
 
 ## From a note

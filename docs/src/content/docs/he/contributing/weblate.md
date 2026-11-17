@@ -1,6 +1,7 @@
 ---
 title: תרגום ב-Weblate
 description: סקירה ותיקון של שש השפות של Lumen שתורגמו במכונה, ב-Hosted Weblate, בדפדפן, וכל שינוי חוזר למאגר כבקשת משיכה.
+type: how-to
 ---
 
 את מחרוזות הממשק של Lumen אפשר לסקור ב-**Hosted Weblate**, פלטפורמת תרגום שמארחת

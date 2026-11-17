@@ -1,6 +1,7 @@
 ---
 title: מפת דרכים ציבורית
 description: דף מפת הדרכים ב-/roadmap — נוצר מ-plan/plan.json, רק כותרות וסטטוס, ונבדק ב-CI כך שלא יכול לסטות.
+type: explanation
 ---
 
 כל פריסה של Lumen מגישה מפת דרכים פתוחה ב-`/roadmap.html` (וגם ב-`/roadmap`

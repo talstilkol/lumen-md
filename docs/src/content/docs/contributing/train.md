@@ -1,6 +1,7 @@
 ---
 title: The weekly train
 description: How Lumen's integration trains are built, checked and promoted, every week. npm run train:build merges the PRs and resolves what it can, npm run train:status shows the ledger and the gates, and main moves at least once a week.
+type: how-to
 ---
 
 A train is an integration branch, `verify/train-N`. It starts from the

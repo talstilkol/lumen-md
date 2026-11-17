@@ -1,6 +1,8 @@
 ---
 title: Audio and video with a transcript
 description: Embed a recording, read its WebVTT or SRT transcript beside the player, and click a line to jump there.
+type: how-to
+tasks: ["W2.7"]
 ---
 
 Write `![[rec.m4a]]` (or `.mp3`, `.wav`, `.ogg`, `.webm`, `.mp4`, `.mov`…)

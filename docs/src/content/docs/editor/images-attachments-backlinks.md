@@ -1,6 +1,8 @@
 ---
 title: Images, attachments, copy and backlinks
 description: Resize an image by dragging, reset it with a double-click, delete a note's own attachments with it, copy as formatted text, and search the backlinks.
+type: how-to
+tasks: ["W7.3"]
 ---
 
 Four everyday actions people moving from Obsidian 1.12 or Heptabase expect. All of them work

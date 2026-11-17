@@ -1,6 +1,8 @@
 ---
 title: Writing tools
 description: Theme settings, voice memos and dictation, the canvas, sync conflicts and the app's dialogs.
+type: how-to
+tasks: ["W12.S3"]
 ---
 
 Each of these has a **?** button that opens this help at its own section.

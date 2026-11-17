@@ -1,6 +1,8 @@
 ---
 title: Database formulas and map view
 description: Computed columns for the database block — syntax, every function, limits — and the map view for notes with coordinates.
+type: reference
+tasks: ["4.11"]
 ---
 
 A `database` block can add **formula columns**: values computed from each

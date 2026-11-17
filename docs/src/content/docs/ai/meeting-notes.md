@@ -1,6 +1,8 @@
 ---
 title: Meeting notes on this device
 description: Record a meeting, transcribe it on this device, and get its decisions, tasks with owner and date, and open questions — tasks in the task panel, dates in a calendar file.
+type: how-to
+tasks: ["W11.I19"]
 ---
 
 `⌘K → "🎙 Meeting notes (record on this device)"`, or **Meeting** in the

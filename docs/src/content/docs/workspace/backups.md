@@ -1,6 +1,8 @@
 ---
 title: Backups to a second drive
 description: A daily backup of the whole vault to another drive or folder, plain or encrypted with age, kept 7 days, 4 weeks and 6 months, and a restore you can check.
+type: how-to
+tasks: ["W1.6"]
 ---
 
 Version history protects you from your own edits, but it lives on the same

@@ -1,6 +1,8 @@
 ---
 title: Handwriting and ink
 description: Write or draw with a pen, an Apple Pencil, a finger or a mouse inside a note. The ink is saved as SVG in the Markdown file, so the note still opens in Obsidian and other editors.
+type: how-to
+tasks: ["W12.R4", "W7.11", "W5.27"]
 ---
 
 Lumen lets you write by hand inside a note: a sketch next to lecture notes,
