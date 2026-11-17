@@ -57,7 +57,6 @@ import { useAuth } from "./auth/useAuth";
 import { useConfigHealth } from "./hooks/useConfigHealth";
 import { docIdentity } from "./renderer/previewDoc";
 import { auditScope } from "./ui/auditScope";
-import { useAppStore, isNarrowScreen } from "./store/useStore";
 import { narrowQuery } from "./mobile/windowClass";
 import { useAppStore, isNarrowScreen, tabIdOf } from "./store/useStore";
 import { t } from "./i18n";
@@ -471,6 +470,7 @@ export default function App() {
               id: t.id,
               name: t.name,
               dirty: t.dirty,
+              workspaceName: t.workspaceName,
             }))}
             activeId={tabId(doc)}
             onSelect={(id) => {

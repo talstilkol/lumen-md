@@ -67,7 +67,7 @@ export async function pandocStatus(deps: { desktop?: boolean; invoke?: Invoke } 
 /** The reader for a file, by its extension; `xml` only when it looks like DocBook. Null: not Pandoc's to read here. */
 export function readerFor(path: string, head: string, readers: readonly string[]): string | null {
   const ext = /\.([a-z0-9]+)$/i.exec(path)?.[1]?.toLowerCase() ?? "";
-  let r = PANDOC_READERS[ext] ?? null;
+  let r: string | null = PANDOC_READERS[ext] ?? null;
   if (ext === "xml" && !/<(article|book|chapter|section)\b[^>]*(docbook|version="5)|<!DOCTYPE (article|book)[^>]*DocBook/i.test(head)) r = null;
   return r && readers.includes(r) ? r : null;
 }

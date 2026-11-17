@@ -5,7 +5,7 @@
  * without kashida, and the first-run, welcome note and templates in Arabic.
  */
 import { describe, it, expect, afterEach } from "vitest";
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { applyLocale, formatNumber, loadLocale, t } from "../i18n";
 import { formatDate } from "../i18n/format";

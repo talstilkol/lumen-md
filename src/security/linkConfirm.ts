@@ -128,7 +128,7 @@ export function allowedSources(store: Store | null = defaultStore()): Record<str
   try {
     const v = JSON.parse(store?.getItem(ALLOW_KEY) ?? "{}") as unknown;
     if (!v || typeof v !== "object" || Array.isArray(v)) return {};
-    return Object.fromEntries(Object.entries(v as Record<string, unknown>).filter(([k, t]) => /^(link:[a-z]+|clip:https?:\/\/[^\s/]+)$/.test(k) && typeof t === "number"));
+    return Object.fromEntries(Object.entries(v as Record<string, unknown>).filter(([k, t]) => /^(link:[a-z]+|clip:https?:\/\/[^\s/]+)$/.test(k) && typeof t === "number")) as Record<string, number>;
   } catch {
     return {};
   }

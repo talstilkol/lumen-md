@@ -11,6 +11,8 @@ export interface TabItem {
   id: string;
   name: string;
   dirty: boolean;
+  /** The note's vault path (W13.S6: the presence dot shows who else has it open). */
+  workspaceName?: string | null;
 }
 
 interface Props {

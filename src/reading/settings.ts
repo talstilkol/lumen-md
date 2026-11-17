@@ -44,8 +44,6 @@ export const DEFAULT_READING: Readonly<ReadingSettings> = Object.freeze({
 
 const FONT_IDS = new Set<string>(["default", ...HEBREW_FONTS.map((f) => f.id)]);
 
-type Stored = StoredReading;
-
 const TYPO_KEYS = ["font", "size", "lineHeight", "width", "dyslexiaLatin", "spacedHebrew"] as const;
 const hasTypography = (v: Partial<ReadingProfile> | undefined) => !!v && TYPO_KEYS.some((k) => k in v);
 

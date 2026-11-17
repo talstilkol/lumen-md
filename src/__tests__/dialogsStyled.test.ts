@@ -34,7 +34,7 @@ describe("the shared dialog look (F13)", () => {
   it("every dialog that borrows the palette's look gets it without the palette (35+ files)", () => {
     const users = walk(SRC).filter((f) => /className="cmd-palette(?:-backdrop)?"/.test(readFileSync(f, "utf8")));
     expect(users.length).toBeGreaterThanOrEqual(35);
-    const unstyled = users.filter((f) => !/\.cmd-palette\b/.test(css)).map((f) => relative(SRC, f));
+    const unstyled = users.filter((_f) => !/\.cmd-palette\b/.test(css)).map((f) => relative(SRC, f));
     expect(unstyled).toEqual([]);
   });
 
