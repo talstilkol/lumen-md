@@ -13,6 +13,7 @@ import { t } from "../i18n";
 import { explainError } from "../lib/userError";
 import { AiError } from "../ai/llm";
 import { markAiInsert } from "./wysiwygAiAuthorship";
+import { matchesAnyFilter } from "../text/filterMatch";
 
 export interface SlashItem {
   label: string;
@@ -313,12 +314,8 @@ export function buildSlashItems(): SlashItem[] {
  * Empty query returns the full list.
  */
 export function filterSlashItems(items: SlashItem[], query: string): SlashItem[] {
-  const q = query.trim().toLowerCase();
-  if (!q) return items;
-  return items.filter((it) => {
-    if (it.label.toLowerCase().includes(q)) return true;
-    return it.keywords?.some((k) => k.toLowerCase().includes(q)) ?? false;
-  });
+  if (!query.trim()) return items;
+  return items.filter((it) => matchesAnyFilter([it.label, ...(it.keywords ?? [])], query));
 }
 
 /**

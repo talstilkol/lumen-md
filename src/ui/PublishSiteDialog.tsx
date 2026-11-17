@@ -18,6 +18,7 @@ import "./publishSiteDialogStrings";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
 import { Modal } from "./Modal";
+import { matchesFilter } from "../text/filterMatch";
 
 const SETTINGS_KEY = "lumen.publishSite.v1";
 const TOKEN_SECRET = "lumen.publish.github.token";
@@ -101,7 +102,7 @@ export function PublishSiteDialog({ onClose }: { onClose: () => void }) {
     };
   }, []);
 
-  const shown = useMemo(() => (notes ?? []).filter((n) => !filter || n.path.toLowerCase().includes(filter.toLowerCase())), [notes, filter]);
+  const shown = useMemo(() => (notes ?? []).filter((n) => matchesFilter(n.path, filter)), [notes, filter]);
   const update = (patch: Partial<Settings>) => setSettings((s) => ({ ...s, ...patch }));
 
   const publish = async () => {

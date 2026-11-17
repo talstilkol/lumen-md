@@ -21,6 +21,7 @@ import { headingSlug, headingSlugger, noteKey } from "../lib/slug";
 import { noteHeadings, stripCode } from "../lint/vaultDoctor";
 // W6.36: in their own module, so the index worker reads aliases without the rest of this file.
 import { frontmatterAliases } from "./frontmatterAliases";
+import { normalizeForFilter } from "../text/filterMatch";
 
 export { frontmatterAliases };
 
@@ -83,6 +84,12 @@ export interface NoteEntry {
   full: string;
   key: string;
   fullKey: string;
+  /**
+   * The name as a filter box folds it (W13.E3: accents, geresh, compatibility
+   * forms off), so `cafe` suggests Café; the same string as `key` when that
+   * changes nothing. Links still resolve by `key`.
+   */
+  filterKey: string;
   aliases: string[];
   aliasKeys: string[];
   modified: number;
@@ -118,6 +125,12 @@ function folderKey(dir: string): string {
   return k;
 }
 
+/** Only a key with a character outside plain ASCII and the Hebrew letters can fold further (cheap on 10,000 notes). */
+const PLAIN_KEY = /^[\x00-\x21\x23-\x26\x28-\x7F\u05D0-\u05EA]*$/;
+function filterKeyOf(key: string): string {
+  return PLAIN_KEY.test(key) ? key : normalizeForFilter(key);
+}
+
 function entryOf(f: CatalogFile): NoteEntry {
   const full = f.path.replace(MD, "");
   const slash = full.lastIndexOf("/");
@@ -129,6 +142,7 @@ function entryOf(f: CatalogFile): NoteEntry {
     stem,
     full,
     key,
+    filterKey: filterKeyOf(key),
     fullKey: slash < 0 ? key : `${folderKey(full.slice(0, slash))}/${key}`,
     aliases,
     aliasKeys: aliases.map(noteKey),
@@ -258,8 +272,11 @@ export function suggestNotes(catalog: NoteCatalog, typed: string, opts: SuggestO
   const buckets = new Map<number, NoteEntry[]>();
   const viaAlias = new Map<NoteEntry, string>();
   let exact = false;
+  const qf = filterKeyOf(q);
   for (const e of catalog.notes) {
     let score = rank(e.key, q);
+    // Accent- and geresh-blind (W13.E3): `cafe` finds Café, `צהל` finds צה״ל.
+    if (score < 5 && (e.filterKey !== e.key || qf !== q)) score = Math.max(score, rank(e.filterKey, qf));
     // A path match (`folder/na`) ranks just below the same match on the name.
     if (score < 5 && e.fullKey !== e.key) {
       const p = rank(e.fullKey, q);

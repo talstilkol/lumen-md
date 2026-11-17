@@ -26,6 +26,7 @@ import { tasksInNote, type Task } from "../tasks/taskParser";
 import { parseQuery as parseTaskQuery, runQuery, type QueryResult } from "../tasks/taskQuery";
 import { noteKey } from "../lib/slug";
 import { hasHebrew, hebrewFind, normalizeForMatch, prefixVariants } from "../text/hebrew";
+import { normalizeForFilter } from "../text/filterMatch";
 import { WIKI_RE } from "./wikiTargets";
 import { Bm25Index } from "../search/bm25";
 import type { Lemmatizer } from "../search/lemma/lemmatizer";
@@ -137,6 +138,8 @@ interface Entry {
   nameLower: string;
   /** The name folded for search, for Hebrew name matches without normalising per query. */
   nameFolded: string | null;
+  /** The name as a filter folds it (W13.E3: accents, geresh), only when that differs from `nameLower`. */
+  nameAccentless: string | null;
   pathLower: string;
   // W2.22: no lower-cased or folded copy of the text per note — content is
   // ranked by BM25, and a snippet lower-cases only the hits it shows.
@@ -281,6 +284,7 @@ export class VaultIndex {
       order: prev ? prev.order : this.nextOrder++,
       nameLower: input.name.toLowerCase(),
       nameFolded: MAY_FOLD_TO_HEBREW.test(input.name) ? foldForSearch(input.name) : null,
+      nameAccentless: accentless(input.name),
       pathLower: input.path.toLowerCase(),
       links,
       tags: noteTags(content),
@@ -586,9 +590,32 @@ export const PHRASE_BONUS = 4;
 export const bm25Name = (name: string) => name.replace(/\.(md|markdown|txt)$/i, "");
 
 /** Points for the query in a note's name or path (file-name search stays first-class). */
+/** Only a name with a character beyond ASCII letters, digits and plain punctuation can fold further (W13.E3). */
+const PLAIN_NAME = /^[\x20\x21\x23-\x26\x28-\x7E]*$/;
+function accentless(name: string): string | null {
+  if (PLAIN_NAME.test(name)) return null;
+  const f = normalizeForFilter(name);
+  return f === name.toLowerCase() ? null : f;
+}
+/** The query folded once per search, not once per note. */
+let lastQuery = "";
+let lastFolded = "";
+function foldQuery(q: string): string {
+  if (q !== lastQuery) {
+    lastQuery = q;
+    lastFolded = normalizeForFilter(q);
+  }
+  return lastFolded;
+}
+
 function nameScore(e: Entry, q: string, hebrewQuery: boolean, forms: string[]): number {
   let score = 0;
-  const inName = e.nameLower.includes(q);
+  let inName = e.nameLower.includes(q);
+  // The note switcher is a filter box too (W13.E3): `cafe` finds Café.md, `lodz` Łódź.md, `צהל` צה״ל.md.
+  if (!inName && e.nameAccentless !== null) {
+    const qf = foldQuery(q);
+    inName = !!qf && e.nameAccentless.includes(qf);
+  }
   if (inName) score += 10;
   if (e.nameLower === q) score += 20;
   if (e.nameLower.startsWith(q)) score += 5;

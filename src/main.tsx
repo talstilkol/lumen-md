@@ -112,6 +112,7 @@ void import("./lib/webVitals").then((m) => m.startLocalVitals()).catch(() => {
 // ─── Native Sync Dialog Capture (Milkdown overrides) ────────────────────
 const nativePrompt = window.prompt;
 window.prompt = function(message?: string, _defaultText?: string): string | null {
+  // filter-ok: matches Milkdown's own English prompt text, not a filter box.
   if (message?.toLowerCase().includes("link") || message?.toLowerCase().includes("image") || message?.toLowerCase().includes("url")) {
     setTimeout(() => {
       showAiToast(t("toast.useTheFloatingMenuOr"), "info");
