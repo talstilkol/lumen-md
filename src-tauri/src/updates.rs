@@ -86,7 +86,15 @@ pub fn valid_endpoint(url: &str) -> bool {
 pub enum UpdateStatus {
     /// This build has no update key / server (plan 15.7 not done yet).
     NotConfigured,
-    UpToDate { current: String },
+    /// W13.T1: `held` ("staged" or "halted") and `version` when a newer
+    /// release exists but its staged rollout has not reached this device.
+    UpToDate {
+        current: String,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        held: Option<&'static str>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        version: Option<String>,
+    },
     Available { current: String, version: String, notes: Option<String> },
 }
 
@@ -108,7 +116,7 @@ pub fn build_channel() -> Channel {
 #[cfg(desktop)]
 pub mod imp {
     use super::{build_channel, configured, minisign_check, Channel, UpdateStatus};
-    use crate::{manifest_sig, update_guard};
+    use crate::{boot_sentinel, manifest_sig, rollout, update_guard};
     use std::sync::Mutex;
     use tauri::Manager;
     use tauri_plugin_updater::UpdaterExt;
@@ -179,7 +187,19 @@ pub mod imp {
         let Some(version) = verified.get("version").and_then(|v| v.as_str()) else { return Err("the signed update manifest has no version".into()) };
         let recorded = highest_installed(&app);
         if !update_guard::accept(&current, version, recorded.as_deref()) {
-            return Ok(UpdateStatus::UpToDate { current });
+            return Ok(UpdateStatus::UpToDate { current, held: None, version: None });
+        }
+        // W13.T1: the staged rollout, decided here from the verified bytes and this device's own id.
+        let r = verified.get("rollout").filter(|v| !v.is_null());
+        let fields = rollout::Fields {
+            rollout_present: r.is_some(),
+            percent: r.and_then(|r| r.get("percent")).and_then(|v| v.as_f64()),
+            salt: r.and_then(|r| r.get("salt")).and_then(|v| v.as_str()),
+            halt: verified.get("halt").map(|v| v.as_bool().ok_or(())),
+        };
+        match rollout::admit(&fields, &install_id(&app)) {
+            rollout::Verdict::Admit => {}
+            held => return Ok(UpdateStatus::UpToDate { current, held: Some(if held == rollout::Verdict::Halted { "halted" } else { "staged" }), version: Some(version.to_string()) }),
         }
         let endpoint = url.parse().map_err(|e| format!("{e}"))?;
         let u = app
@@ -203,7 +223,7 @@ pub mod imp {
                 *pending.0.lock().map_err(|e| e.to_string())? = Some(up);
                 Ok(status)
             }
-            None => Ok(UpdateStatus::UpToDate { current }),
+            None => Ok(UpdateStatus::UpToDate { current, held: None, version: None }),
         }
     }
 
@@ -215,8 +235,102 @@ pub mod imp {
     pub async fn lumen_install_update(app: tauri::AppHandle, pending: tauri::State<'_, PendingUpdate>) -> Result<(), String> {
         let up = pending.0.lock().map_err(|e| e.to_string())?.take();
         let Some(up) = up else { return Err("no verified update: check for updates first".into()) };
+        // W13.T1: keep a copy of this build first, so two failed starts of the new one can come back to it.
+        keep_running_build(&app);
         up.download_and_install(|_, _| {}, || {}).await.map_err(|e| e.to_string())?;
         app.restart();
+    }
+
+    /// W13.T1: this device's install id for the staged rollout: 128 random
+    /// bits made here on first use, kept in the app data folder, never sent.
+    fn install_id(app: &tauri::AppHandle) -> String {
+        let Ok(dir) = app.path().app_data_dir() else { return rollout::install_id_from(rollout::random_bytes()) };
+        let file = dir.join("install-id");
+        if let Ok(s) = std::fs::read_to_string(&file) {
+            if rollout::valid_install_id(s.trim()) {
+                return s.trim().to_string();
+            }
+        }
+        let id = rollout::install_id_from(rollout::random_bytes());
+        let _ = std::fs::create_dir_all(&dir);
+        let _ = std::fs::write(&file, &id);
+        id
+    }
+
+    /// W13.T1: copy the running build aside before an update replaces it (see boot_sentinel.rs).
+    fn keep_running_build(app: &tauri::AppHandle) {
+        let (Ok(dir), Ok(exe)) = (app.path().app_data_dir(), std::env::current_exe()) else { return };
+        let appimage = std::env::var_os("APPIMAGE").map(std::path::PathBuf::from);
+        let Some(root) = boot_sentinel::install_root(&exe, appimage.as_deref(), std::env::consts::OS) else { return };
+        let version = app.package_info().version.to_string();
+        if let Err(e) = boot_sentinel::keep_copy(&dir, &root, &version) {
+            eprintln!("lumen: could not keep a copy of {version} for rollback: {e}");
+        }
+    }
+
+    fn sentinel_file(app: &tauri::AppHandle) -> Option<std::path::PathBuf> {
+        app.path().app_data_dir().ok().map(|d| d.join(boot_sentinel::STATE_FILE))
+    }
+
+    fn read_sentinel(app: &tauri::AppHandle) -> Option<boot_sentinel::State> {
+        std::fs::read_to_string(sentinel_file(app)?).ok().map(|t| boot_sentinel::State::parse(&t))
+    }
+
+    fn write_sentinel(app: &tauri::AppHandle, s: &boot_sentinel::State) {
+        if let Some(f) = sentinel_file(app) {
+            if let Some(d) = f.parent() {
+                let _ = std::fs::create_dir_all(d);
+            }
+            let _ = std::fs::write(f, s.serialize());
+        }
+    }
+
+    /// W13.T1: called first in setup. Counts this start; after two failed
+    /// starts of a version that is not the last good one, restores the kept
+    /// copy of the last good version and relaunches it (a local act: the
+    /// manifest can still never offer an older build).
+    pub fn boot_launch(app: &tauri::AppHandle) {
+        let current = app.package_info().version.to_string();
+        let Ok(dir) = app.path().app_data_dir() else { return };
+        let prev = read_sentinel(app);
+        let kept = boot_sentinel::kept_version(&dir);
+        let (mut next, action) = boot_sentinel::on_launch(prev.as_ref(), &current, kept.as_deref());
+        if let boot_sentinel::Action::Rollback { to } = &action {
+            match boot_sentinel::restore(&dir) {
+                Ok(root) => {
+                    next = boot_sentinel::State { version: to.clone(), pending: false, failures: 0, good: Some(to.clone()), rolled_back: Some((current.clone(), to.clone())) };
+                    write_sentinel(app, &next);
+                    let exe = if root.extension().is_some_and(|e| e == "app") { std::path::PathBuf::from("/usr/bin/open") } else if root.is_dir() { std::env::current_exe().unwrap_or(root.clone()) } else { root.clone() };
+                    let mut cmd = std::process::Command::new(&exe);
+                    if exe.ends_with("open") {
+                        cmd.arg("-n").arg(&root);
+                    }
+                    if cmd.spawn().is_ok() {
+                        std::process::exit(0);
+                    }
+                    return;
+                }
+                Err(e) => eprintln!("lumen: rollback to {to} failed, starting {current}: {e}"),
+            }
+        }
+        if let boot_sentinel::Action::NoRollback { reason } = &action {
+            eprintln!("lumen: {current} failed to start twice; no rollback: {reason}");
+        }
+        // A rollback's notice waits for the restored version's first ready window.
+        next.rolled_back = prev.and_then(|p| p.rolled_back).filter(|_| next.failures == 0);
+        write_sentinel(app, &next);
+    }
+
+    /// W13.T1: the main window is up (shell_ready): this start is good. Returns
+    /// a rollback notice (from, to) once, right after a rollback.
+    pub fn boot_ready(app: &tauri::AppHandle) -> Option<(String, String)> {
+        let current = app.package_info().version.to_string();
+        let prev = read_sentinel(app);
+        let notice = prev.as_ref().and_then(|p| p.rolled_back.clone());
+        let mut s = boot_sentinel::on_ready(prev.as_ref(), &current);
+        s.rolled_back = None;
+        write_sentinel(app, &s);
+        notice
     }
 
     /// The user's update channel (BetaPanel, plan 14.4): "beta" or "stable"

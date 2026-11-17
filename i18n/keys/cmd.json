@@ -1466,6 +1466,16 @@
       "vars": []
     },
     {
+      "key": "cmd.help.safeMode",
+      "en": "Restart in safe mode",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.safeMode.hint",
+      "en": "no plugins, CSS snippets or AI agents until you leave it — for when something you added keeps Lumen from working",
+      "vars": []
+    },
+    {
       "key": "cmd.help.setup",
       "en": "Set up Lumen…",
       "vars": []

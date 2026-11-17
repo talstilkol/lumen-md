@@ -7,6 +7,9 @@ mod shell;
 mod updates;
 mod update_guard;
 mod manifest_sig;
+// W13.T1: staged rollout and the boot sentinel (std only; the glue is in updates.rs).
+mod rollout;
+mod boot_sentinel;
 
 mod whisper_core;
 mod tectonic;
@@ -779,6 +782,9 @@ pub fn run() {
             mcp_stdio::mcp_open_url,
         ])
         .setup(|app| {
+            // W13.T1: count this start; after two failed starts of a new version, the kept previous one comes back.
+            #[cfg(desktop)]
+            updates::imp::boot_launch(app.handle());
             // The folder chosen on an earlier run (plan 4.3).
             let granted = desktop_vault::load(app.handle());
             if let Ok(mut slot) = app.state::<desktop_vault::VaultState>().0.lock() {

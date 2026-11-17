@@ -5,7 +5,8 @@
  * e2e test surface, the web clipper bridge, a note shared from iOS, the
  * history quota warnings and the model critic.
  */
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import { isSafeMode, onSafeModeChange } from "../boot/bootSentinel";
 import { wirePluginAPI, registerPlugin, unregisterPlugin, wordCountPlugin } from "../plugins/pluginSystem";
 import { showAiToast } from "../ui/AiToast";
 import { ledgerEntries } from "../ai/privacyLedger";
@@ -51,8 +52,11 @@ export function useAppBootEffects(): void {
   }, [readingPath, fileProfileLine]);
 
   const enabledSnippets = useAppStore((s) => s.enabledSnippets);
+  // W13.T5: in safe mode no snippet is applied; leaving it re-runs this without a restart.
+  const safeMode = useSyncExternalStore(onSafeModeChange, isSafeMode, isSafeMode);
   // CSS snippets from the vault (plan W1.21): sanitized, applied, kept in step with the files.
   useEffect(() => {
+    if (safeMode) return;
     if (!enabledSnippets.length && !document.querySelector("style[data-lumen-snippet]")) return;
     let off: (() => void) | undefined;
     let cancelled = false;
@@ -66,7 +70,7 @@ export function useAppBootEffects(): void {
       cancelled = true;
       off?.();
     };
-  }, [enabledSnippets]);
+  }, [enabledSnippets, safeMode]);
 
   // Plan 14.4: the beta flag update.checkOnLaunch — once a day, desktop only,
   // never in local-only; says something only when there is an update.

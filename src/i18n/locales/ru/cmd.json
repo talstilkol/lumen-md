@@ -289,6 +289,8 @@
   "cmd.help.diagnostics.hint": "версия, настройки, размер хранилища и недавние ошибки — без текста заметок и ключей — чтобы приложить к обращению",
   "cmd.help.open": "Справка",
   "cmd.help.open.hint": "документация на этом устройстве: поиск и чтение без сети",
+  "cmd.help.safeMode": "Restart in safe mode",
+  "cmd.help.safeMode.hint": "no plugins, CSS snippets or AI agents until you leave it — for when something you added keeps Lumen from working",
   "cmd.help.setup": "Настроить Lumen…",
   "cmd.help.setup.hint": "Язык, место хранилища, оформление и пример хранилища: начальная настройка заново",
   "cmd.help.whatsNew": "Что нового в этой версии",

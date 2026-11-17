@@ -1,0 +1,80 @@
+{
+  "about": "W13.T1: bucket = first 4 bytes (big-endian) of SHA-256(UTF-8 salt + \":\" + installId) mod 10000; admitted when bucket < round(percent * 100). Checked by src/__tests__/stagedRollout.test.ts, scripts/lib/rollout.mjs and src-tauri/src/rollout.rs.",
+  "vectors": [
+    {
+      "salt": "v1.5.0",
+      "installId": "00000000000000000000000000000000",
+      "bucket": 6182
+    },
+    {
+      "salt": "v1.5.0",
+      "installId": "ffffffffffffffffffffffffffffffff",
+      "bucket": 7082
+    },
+    {
+      "salt": "v1.5.0",
+      "installId": "5f2b8c1e9a4d47c3b0e16a7d2c9f8e01",
+      "bucket": 3656
+    },
+    {
+      "salt": "v1.5.0",
+      "installId": "install-α-עברית",
+      "bucket": 7509
+    },
+    {
+      "salt": "v1.5.0",
+      "installId": "a",
+      "bucket": 725
+    },
+    {
+      "salt": "v1.5.0-r2",
+      "installId": "00000000000000000000000000000000",
+      "bucket": 9789
+    },
+    {
+      "salt": "v1.5.0-r2",
+      "installId": "ffffffffffffffffffffffffffffffff",
+      "bucket": 7987
+    },
+    {
+      "salt": "v1.5.0-r2",
+      "installId": "5f2b8c1e9a4d47c3b0e16a7d2c9f8e01",
+      "bucket": 1890
+    },
+    {
+      "salt": "v1.5.0-r2",
+      "installId": "install-α-עברית",
+      "bucket": 4075
+    },
+    {
+      "salt": "v1.5.0-r2",
+      "installId": "a",
+      "bucket": 9754
+    },
+    {
+      "salt": "s",
+      "installId": "00000000000000000000000000000000",
+      "bucket": 2973
+    },
+    {
+      "salt": "s",
+      "installId": "ffffffffffffffffffffffffffffffff",
+      "bucket": 7836
+    },
+    {
+      "salt": "s",
+      "installId": "5f2b8c1e9a4d47c3b0e16a7d2c9f8e01",
+      "bucket": 7723
+    },
+    {
+      "salt": "s",
+      "installId": "install-α-עברית",
+      "bucket": 1376
+    },
+    {
+      "salt": "s",
+      "installId": "a",
+      "bucket": 4995
+    }
+  ]
+}

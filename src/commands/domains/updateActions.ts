@@ -15,6 +15,8 @@ export const checkUpdates = async (): Promise<void> => {
     const r = await checkForUpdate();
     if (r.state === "blocked-local-only") return showAiToast(t("update.localOnly"), "info");
     if (r.state === "not-configured") return showAiToast(t("update.notConfigured"), "info");
+    // W13.T1: a newer release is rolling out in stages (or was paused); this device gets it in its turn.
+    if (r.state === "up-to-date" && r.held && r.version) return showAiToast(t(r.held === "halted" ? "update.held.halted" : "update.held.staged", { version: r.version, current: r.current }), "info");
     if (r.state === "up-to-date") return showAiToast(t("update.upToDate", { version: r.current }), "success");
     if (r.state !== "available") return;
     const ok = await uiConfirm({ title: t("update.available.title", { version: r.version }), message: r.notes || t("update.available.body", { current: r.current, version: r.version }), okLabel: t("update.install") });

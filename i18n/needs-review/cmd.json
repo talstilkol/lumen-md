@@ -539,5 +539,23 @@
     "ja": "12myrs1",
     "ru": "12myrs1",
     "zh-CN": "12myrs1"
+  },
+  "cmd.help.safeMode": {
+    "ar": "1dpszxr",
+    "de": "1dpszxr",
+    "fr": "1dpszxr",
+    "he": "1dpszxr",
+    "ja": "1dpszxr",
+    "ru": "1dpszxr",
+    "zh-CN": "1dpszxr"
+  },
+  "cmd.help.safeMode.hint": {
+    "ar": "9ektud",
+    "de": "9ektud",
+    "fr": "9ektud",
+    "he": "9ektud",
+    "ja": "9ektud",
+    "ru": "9ektud",
+    "zh-CN": "9ektud"
   }
 }

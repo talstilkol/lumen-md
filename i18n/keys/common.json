@@ -18483,6 +18483,95 @@
       "vars": []
     },
     {
+      "key": "safeMode.agents",
+      "en": "AI agents",
+      "vars": []
+    },
+    {
+      "key": "safeMode.back",
+      "en": "Back",
+      "vars": []
+    },
+    {
+      "key": "safeMode.badge",
+      "en": "Safe mode",
+      "vars": []
+    },
+    {
+      "key": "safeMode.chooseLegend",
+      "en": "Turn back on",
+      "vars": []
+    },
+    {
+      "key": "safeMode.hide",
+      "en": "Hide",
+      "vars": []
+    },
+    {
+      "key": "safeMode.leave",
+      "en": "Leave safe mode…",
+      "vars": []
+    },
+    {
+      "key": "safeMode.leaveNow",
+      "en": "Leave safe mode",
+      "vars": []
+    },
+    {
+      "key": "safeMode.pluginsNote",
+      "en": "Plugins stay off until you start each one in Settings → Plugins.",
+      "vars": []
+    },
+    {
+      "key": "safeMode.reasonCrash",
+      "en": "Lumen did not finish starting last time ({count}×), so it opened in safe mode.",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "safeMode.reasonManual",
+      "en": "You opened Lumen in safe mode.",
+      "vars": []
+    },
+    {
+      "key": "safeMode.rollbackHint",
+      "en": "This version failed to start twice. The desktop app goes back to {version}, the last version that worked, by itself.",
+      "vars": [
+        "version"
+      ]
+    },
+    {
+      "key": "safeMode.rolledBack",
+      "en": "Lumen {from} failed to start twice, so the previous version, {to}, was restored. {from} will not be offered again; a fixed version will be.",
+      "vars": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "key": "safeMode.show",
+      "en": "Safe mode: show details",
+      "vars": []
+    },
+    {
+      "key": "safeMode.snippet",
+      "en": "CSS snippet: {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "safeMode.title",
+      "en": "Safe mode",
+      "vars": []
+    },
+    {
+      "key": "safeMode.whatIsOff",
+      "en": "Plugins, CSS snippets and AI agents are off. Your notes are untouched.",
+      "vars": []
+    },
+    {
       "key": "screenshotNote.byModel",
       "en": "Read by the vision model {model} on this computer. Check it before you insert it.",
       "vars": [
@@ -21332,6 +21421,22 @@
       "en": "Update failed: {message}",
       "vars": [
         "message"
+      ]
+    },
+    {
+      "key": "update.held.halted",
+      "en": "Lumen {version} was paused by its makers while a problem is checked. You have {current}, which keeps working.",
+      "vars": [
+        "version",
+        "current"
+      ]
+    },
+    {
+      "key": "update.held.staged",
+      "en": "Lumen {version} is rolling out in stages; this device gets it in its turn. You have {current}.",
+      "vars": [
+        "version",
+        "current"
       ]
     },
     {

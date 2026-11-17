@@ -173,6 +173,7 @@
   "cmd.help.credits": "Credits & model licences",
   "cmd.help.diagnostics": "Save a diagnostics file",
   "cmd.help.open": "Help",
+  "cmd.help.safeMode": "Restart in safe mode",
   "cmd.help.setup": "Set up Lumen…",
   "cmd.help.whatsNew": "What's new in this version",
   "cmd.highlights.all": "All highlights",

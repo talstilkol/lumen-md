@@ -151,6 +151,11 @@ pub fn shell_ready(window: tauri::Window, state: State<Shell>) -> Result<Vec<Ope
     if window.label() != windows::MAIN {
         return Ok(vec![]);
     }
+    // W13.T1: the main window is up, so this start is good; right after a rollback, say so once.
+    #[cfg(desktop)]
+    if let Some((from, to)) = crate::updates::imp::boot_ready(window.app_handle()) {
+        let _ = window.emit("lumen-boot-rollback", serde_json::json!({ "from": from, "to": to }));
+    }
     let mut s = lock(&state)?;
     s.main_ready = true;
     Ok(std::mem::take(&mut s.pending))

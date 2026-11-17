@@ -289,6 +289,8 @@
   "cmd.help.diagnostics.hint": "Version, Einstellungen, Vault-Größe und letzte Fehler — kein Notiztext, keine Schlüssel — zum Anhängen an ein Issue",
   "cmd.help.open": "Hilfe",
   "cmd.help.open.hint": "die Dokumentation auf diesem Gerät: offline suchen und lesen",
+  "cmd.help.safeMode": "Restart in safe mode",
+  "cmd.help.safeMode.hint": "no plugins, CSS snippets or AI agents until you leave it — for when something you added keeps Lumen from working",
   "cmd.help.setup": "Lumen einrichten…",
   "cmd.help.setup.hint": "Sprache, Speicherort, Aussehen und Beispiel-Tresor: die Ersteinrichtung noch einmal",
   "cmd.help.whatsNew": "Neu in dieser Version",

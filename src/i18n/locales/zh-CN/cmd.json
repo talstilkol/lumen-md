@@ -289,6 +289,8 @@
   "cmd.help.diagnostics.hint": "版本、设置、库大小和最近的错误——不含笔记文本和密钥——用于附加到问题报告",
   "cmd.help.open": "帮助",
   "cmd.help.open.hint": "本设备上的文档：离线搜索和阅读",
+  "cmd.help.safeMode": "Restart in safe mode",
+  "cmd.help.safeMode.hint": "no plugins, CSS snippets or AI agents until you leave it — for when something you added keeps Lumen from working",
   "cmd.help.setup": "设置 Lumen…",
   "cmd.help.setup.hint": "语言、库位置、外观和示例库：重新进行首次设置",
   "cmd.help.whatsNew": "此版本的新功能",

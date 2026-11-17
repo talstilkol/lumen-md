@@ -289,6 +289,8 @@
   "cmd.help.diagnostics.hint": "バージョン、設定、保管庫のサイズ、最近のエラー（ノート本文や鍵は含みません）— Issue に添付するため",
   "cmd.help.open": "ヘルプ",
   "cmd.help.open.hint": "この端末にあるドキュメント：オフラインで検索・閲覧",
+  "cmd.help.safeMode": "Restart in safe mode",
+  "cmd.help.safeMode.hint": "no plugins, CSS snippets or AI agents until you leave it — for when something you added keeps Lumen from working",
   "cmd.help.setup": "Lumen をセットアップ…",
   "cmd.help.setup.hint": "言語、保管場所、見た目、サンプルの保管庫: 初回セットアップをもう一度",
   "cmd.help.whatsNew": "このバージョンの新機能",

@@ -244,6 +244,19 @@ export function buildAiControlCommands({ getEditorView }: CommandContext): Comma
       action: () => void import("../../ui/diagnosticsActions").then((m) => m.saveDiagnostics()),
     },
     {
+      // W13.T5: no plugins, snippets or agents until the person leaves safe mode (the banner).
+      id: "help.safeMode",
+      label: t("cmd.help.safeMode"),
+      hint: t("cmd.help.safeMode.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.tools"),
+      action: () =>
+        void import("../../boot/bootSentinel").then((m) => {
+          m.requestSafeModeNextStart();
+          location.reload();
+        }),
+    },
+    {
       // Plan 1.7 / W10.B20: the model credits and licences sit with the other
       // help commands, not inside the voice section.
       id: "help.credits",
