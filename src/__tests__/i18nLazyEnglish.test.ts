@@ -30,6 +30,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "learning.json": { module: "learning/learningStrings.ts", users: ["learning/LearningPlansDialog.tsx"], prefixes: ["learning."] },
   // The native menu bar (plan W13.K5): desktop/shell.ts loads nativeMenu.ts with a dynamic import, on the desktop only.
   "nativeMenu.json": { module: "desktop/nativeMenuStrings.ts", users: ["desktop/nativeMenu.ts"], prefixes: ["nativeMenu."] },
+  // The system-search switch in Settings → Privacy (plan W13.K3): SettingsScreen loads it with React.lazy.
+  "osSearch.json": { module: "ui/osSearchStrings.ts", users: ["ui/settings/OsSearchIndexSwitch.tsx"], prefixes: ["osSearch."] },
   // MCP server tasks in the batch panel (plan W13.A2): BatchPanel loads ServerTasksSection with React.lazy.
   "serverTasks.json": { module: "ui/serverTasksStrings.ts", users: ["ui/ServerTasksSection.tsx"], prefixes: ["serverTasks."] },
   // Settings > AI's suggestion report (plan W13.A4): AiSettingsPanel loads the section with React.lazy.
@@ -178,8 +180,6 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "israeliTime.json": { module: "daily/israeliTimeStrings.ts", users: ["daily/DateHint.tsx", "views/DatabaseBlock.tsx"], prefixes: ["israeliTime."] },
   "vaultFolderBanner.json": { module: "ui/vaultFolderBannerStrings.ts", users: ["ui/VaultFolderBanner.tsx"], prefixes: ["vault.desktop.choose", "vault.desktop.firstRunBody", "vault.desktop.notNow", "vault.folder.browserStorage", "vault.folder.cancelMove", "vault.folder.interrupted", "vault.folder.moving", "vault.folder.resume", "vault.folder.useBrowser"] },
   "screenshotNote.json": { module: "ai/screenshotNoteStrings.ts", users: ["ai/ScreenshotNoteDialog.tsx"], prefixes: ["screenshotNote."] },
-  // The system-search switch in Settings → Privacy (plan W13.K3): SettingsScreen loads it with React.lazy.
-  "osSearch.json": { module: "ui/osSearchStrings.ts", users: ["ui/settings/OsSearchIndexSwitch.tsx"], prefixes: ["osSearch."] },
   "mcpServers.json": { module: "ui/mcpServersStrings.ts", users: ["ui/McpDialogs.tsx", "ui/settings/McpServers.tsx"], prefixes: ["mcpServers."] },
   "collabSettings.json": { module: "ui/collabSettingsStrings.ts", users: ["ui/CollabSettings.tsx"], prefixes: ["collab.persistent.hint", "collab.persistent.token", "collab.settings.cancel", "collab.settings.cspBlocked", "collab.settings.publicSignaling.hint", "collab.settings.save", "billing.upgrade.persistentCollab"] },
   "liveLuaBlock.json": { module: "plugins/liveLuaBlockStrings.ts", users: ["plugins/LiveLuaBlock.tsx"], prefixes: ["block.liveLua.clear", "block.liveLua.loadFailed", "block.liveLua.prompt", "block.liveLua.run", "block.liveLua.state.error", "block.liveLua.state.idle", "block.liveLua.state.running", "block.liveLua.state.success", "block.liveLua.state.timeout", "block.liveLua.stop", "block.liveLua.stopped", "block.liveLua.timedOut", "block.liveLua.title", "block.liveLua.workerUnavailable"] },
