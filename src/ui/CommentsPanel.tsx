@@ -205,7 +205,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                     flexShrink: 0,
                   }}
                 />
-                <span style={{ fontWeight: 600 }}>{c.authorName}</span>
+                <bdi style={{ fontWeight: 600 }}>{c.authorName}</bdi>
                 <span style={{ fontSize: 10, color: "hsl(var(--fg-muted))" }}>
                   {new Date(c.createdAt).toLocaleString(getLocale())}
                 </span>
@@ -265,7 +265,7 @@ export function CommentsPanel({ open, onClose, collab, onJump }: Props) {
                 <ul style={{ margin: "8px 0 0", padding: 0, listStyle: "none", borderInlineStart: "2px solid hsl(var(--border))" }}>
                   {c.replies.map((r) => (
                     <li key={r.id} style={{ paddingInlineStart: 10, marginTop: 6, fontSize: 12 }}>
-                      <strong style={{ color: r.authorColor }}>{r.authorName}</strong>{" "}
+                      <strong style={{ color: r.authorColor }}><bdi>{r.authorName}</bdi></strong>{" "}
                       <span style={{ color: "hsl(var(--fg-muted))", fontSize: 10 }}>
                         {new Date(r.createdAt).toLocaleTimeString(getLocale())}
                       </span>

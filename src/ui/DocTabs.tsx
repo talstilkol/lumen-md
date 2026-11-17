@@ -239,7 +239,7 @@ export const DocTabs = React.memo(function DocTabs({
                 }}
               >
                 {tab.dirty ? "● " : ""}
-                {tab.name}
+                <bdi>{tab.name}</bdi>
               </span>
             </button>
             <button

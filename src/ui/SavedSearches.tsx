@@ -38,7 +38,7 @@ export default function SavedSearches() {
               style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "none", color: "hsl(var(--fg))", cursor: "pointer", padding: "3px 4px", fontSize: 12, textAlign: "start" }}
             >
               <Search size={12} style={{ flexShrink: 0, opacity: 0.6 }} />
-              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
+              <bdi style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</bdi>
             </button>
             <button
               type="button"

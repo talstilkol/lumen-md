@@ -181,7 +181,7 @@ export function rowOf(node: WorkspaceNode, depth: number, ctx: RenderCtx): React
             title={node.path}
             aria-checked={isSelected ? true : undefined}
           >
-            {node.name}
+            <bdi>{node.name}</bdi>
           </button>
         )}
 

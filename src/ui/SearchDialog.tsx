@@ -654,10 +654,10 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
               <FileText size={14} style={{ opacity: 0.7, marginTop: 1, flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div className="cmd-palette-label" style={{ fontWeight: 500 }}>
-                  {hit.name}
+                  <bdi>{hit.name}</bdi>
                   {hit.path !== hit.name && (
                     <span style={{ color: "hsl(var(--fg-muted))", fontWeight: 400, marginInlineStart: 6, fontSize: 11 }}>
-                      {hit.path}
+                      <bdi>{hit.path}</bdi>
                     </span>
                   )}
                 </div>
@@ -681,10 +681,10 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
                 <Wand2 size={14} style={{ opacity: 0.7, marginTop: 1, flexShrink: 0, color: "hsl(var(--accent))" }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="cmd-palette-label" style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
-                    <span>{name}</span>
+                    <bdi>{name}</bdi>
                     {hit.path !== name && (
                       <span style={{ color: "hsl(var(--fg-muted))", fontWeight: 400, fontSize: 11 }}>
-                        {hit.path}
+                        <bdi>{hit.path}</bdi>
                       </span>
                     )}
                     <span style={{ marginInlineStart: "auto", fontSize: 10, color: "hsl(var(--fg-muted))" }}>
@@ -702,7 +702,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {hit.snippet}
+                      <bdi>{hit.snippet}</bdi>
                     </div>
                   )}
                   {hit.path in translations && (
@@ -753,7 +753,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
                         title={t("searchDialog.relevance", { pct: (s.score * 100).toFixed(0) })}
                       >
                         <FileCode2 size={11} />
-                        <span>[{i + 1}] {s.path}</span>
+                        <span>[{i + 1}] <bdi>{s.path}</bdi></span>
                         <span style={{ color: "hsl(var(--fg-muted))", marginInlineStart: "auto" }}>{(s.score * 100).toFixed(0)}%</span>
                       </div>
                     ))}

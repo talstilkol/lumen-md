@@ -143,7 +143,7 @@ export const Outline = React.memo(function Outline({ markdownText, sheet = false
                 if (sheet) useAppStore.getState().toggleOutline();
               }}
             >
-              {h.text}
+              <bdi>{h.text}</bdi>
             </a>
           ))}
         </nav>
