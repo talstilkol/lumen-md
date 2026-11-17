@@ -635,6 +635,8 @@
   "cmd.voice.meetingFile": "🎙 Besprechungsaufnahme transkribieren (wer hat was gesagt)…",
   "cmd.window.new": "Neues Fenster",
   "cmd.window.new.hint": "Ein weiteres Editorfenster; Tabs zwischen Fenstern ziehen",
+  "cmd.writing.abstract": "Schreiben: Titel, Abstract und TL;DR",
+  "cmd.writing.abstract.hint": "Drei Titel, ein Abstract mit 150–250 Wörtern und ein TL;DR – jeder Satz an einen Absatz der Notiz gebunden, auf diesem Gerät",
   "cmd.writing.argument": "Writing: Check the argument",
   "cmd.writing.argument.hint": "Claims without a source, logical leaps and common fallacies, each with its reason",
   "cmd.writing.coach": "Writing: Clarity & Style Coach",

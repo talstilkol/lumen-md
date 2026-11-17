@@ -1,4 +1,28 @@
 {
+  "toast.abstractFailed": {
+    "ar": "hhva1b",
+    "de": "hhva1b",
+    "fr": "hhva1b",
+    "ja": "hhva1b",
+    "ru": "hhva1b",
+    "zh-CN": "hhva1b"
+  },
+  "toast.abstractNoModel": {
+    "ar": "1j8n66m",
+    "de": "1j8n66m",
+    "fr": "1j8n66m",
+    "ja": "1j8n66m",
+    "ru": "1j8n66m",
+    "zh-CN": "1j8n66m"
+  },
+  "toast.abstractWorking": {
+    "ar": "1s7uye1",
+    "de": "1s7uye1",
+    "fr": "1s7uye1",
+    "ja": "1s7uye1",
+    "ru": "1s7uye1",
+    "zh-CN": "1s7uye1"
+  },
   "toast.explainChangeFailed": {
     "ar": "kbrs3p",
     "de": "kbrs3p",

@@ -1,4 +1,164 @@
 {
+  "abs.abstract": {
+    "ar": "tq5spf",
+    "de": "tq5spf",
+    "fr": "tq5spf",
+    "ja": "tq5spf",
+    "ru": "tq5spf",
+    "zh-CN": "tq5spf"
+  },
+  "abs.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "abs.deleted": {
+    "ar": "eugoaw",
+    "de": "eugoaw",
+    "fr": "eugoaw",
+    "ja": "eugoaw",
+    "ru": "eugoaw",
+    "zh-CN": "eugoaw"
+  },
+  "abs.empty": {
+    "ar": "1ka3oj1",
+    "de": "1ka3oj1",
+    "fr": "1ka3oj1",
+    "ja": "1ka3oj1",
+    "ru": "1ka3oj1",
+    "zh-CN": "1ka3oj1"
+  },
+  "abs.engine.extractive": {
+    "ar": "231u5m",
+    "de": "231u5m",
+    "fr": "231u5m",
+    "ja": "231u5m",
+    "ru": "231u5m",
+    "zh-CN": "231u5m"
+  },
+  "abs.engine.model": {
+    "ar": "4zj4fr",
+    "de": "4zj4fr",
+    "fr": "4zj4fr",
+    "ja": "4zj4fr",
+    "ru": "4zj4fr",
+    "zh-CN": "4zj4fr"
+  },
+  "abs.goto": {
+    "ar": "qlrj9q",
+    "de": "qlrj9q",
+    "fr": "qlrj9q",
+    "ja": "qlrj9q",
+    "ru": "qlrj9q",
+    "zh-CN": "qlrj9q"
+  },
+  "abs.insert": {
+    "ar": "vpe41j",
+    "de": "vpe41j",
+    "fr": "vpe41j",
+    "ja": "vpe41j",
+    "ru": "vpe41j",
+    "zh-CN": "vpe41j"
+  },
+  "abs.insertSummary": {
+    "ar": "x1ofrq",
+    "de": "x1ofrq",
+    "fr": "x1ofrq",
+    "ja": "x1ofrq",
+    "ru": "x1ofrq",
+    "zh-CN": "x1ofrq"
+  },
+  "abs.lengthOff": {
+    "ar": "1m2mbel",
+    "de": "1m2mbel",
+    "fr": "1m2mbel",
+    "ja": "1m2mbel",
+    "ru": "1m2mbel",
+    "zh-CN": "1m2mbel"
+  },
+  "abs.part.background": {
+    "ar": "1fvqif1",
+    "de": "1fvqif1",
+    "fr": "1fvqif1",
+    "ja": "1fvqif1",
+    "ru": "1fvqif1",
+    "zh-CN": "1fvqif1"
+  },
+  "abs.part.findings": {
+    "ar": "1hbzpbj",
+    "de": "1hbzpbj",
+    "fr": "1hbzpbj",
+    "ja": "1hbzpbj",
+    "ru": "1hbzpbj",
+    "zh-CN": "1hbzpbj"
+  },
+  "abs.part.method": {
+    "ar": "16cmxjk",
+    "de": "16cmxjk",
+    "fr": "16cmxjk",
+    "ja": "16cmxjk",
+    "ru": "16cmxjk",
+    "zh-CN": "16cmxjk"
+  },
+  "abs.proposed": {
+    "ar": "1bv6k83",
+    "de": "1bv6k83",
+    "fr": "1bv6k83",
+    "ja": "1bv6k83",
+    "ru": "1bv6k83",
+    "zh-CN": "1bv6k83"
+  },
+  "abs.title": {
+    "ar": "13qptyi",
+    "de": "13qptyi",
+    "fr": "13qptyi",
+    "ja": "13qptyi",
+    "ru": "13qptyi",
+    "zh-CN": "13qptyi"
+  },
+  "abs.titleSummary": {
+    "ar": "t89e5d",
+    "de": "t89e5d",
+    "fr": "t89e5d",
+    "ja": "t89e5d",
+    "ru": "t89e5d",
+    "zh-CN": "t89e5d"
+  },
+  "abs.titles": {
+    "ar": "10580sy",
+    "de": "10580sy",
+    "fr": "10580sy",
+    "ja": "10580sy",
+    "ru": "10580sy",
+    "zh-CN": "10580sy"
+  },
+  "abs.tldr": {
+    "ar": "2y6ths",
+    "de": "2y6ths",
+    "fr": "2y6ths",
+    "ja": "2y6ths",
+    "ru": "2y6ths",
+    "zh-CN": "2y6ths"
+  },
+  "abs.useTitle": {
+    "ar": "1qtiyvi",
+    "de": "1qtiyvi",
+    "fr": "1qtiyvi",
+    "ja": "1qtiyvi",
+    "ru": "1qtiyvi",
+    "zh-CN": "1qtiyvi"
+  },
+  "abs.words": {
+    "ar": "5h27by",
+    "de": "5h27by",
+    "fr": "5h27by",
+    "ja": "5h27by",
+    "ru": "5h27by",
+    "zh-CN": "5h27by"
+  },
   "academic.chosen": {
     "ar": "dp8jvj",
     "de": "dp8jvj",

@@ -635,6 +635,8 @@
   "cmd.voice.meetingFile": "🎙 Расшифровать запись встречи (кто что сказал)…",
   "cmd.window.new": "Новое окно",
   "cmd.window.new.hint": "Ещё одно окно редактора; вкладки можно перетаскивать между окнами",
+  "cmd.writing.abstract": "Письмо: заголовки, аннотация и TL;DR",
+  "cmd.writing.abstract.hint": "Три заголовка, аннотация на 150–250 слов и TL;DR — каждое предложение привязано к абзацу заметки, на этом устройстве",
   "cmd.writing.argument": "Writing: Check the argument",
   "cmd.writing.argument.hint": "Claims without a source, logical leaps and common fallacies, each with its reason",
   "cmd.writing.coach": "Writing: Clarity & Style Coach",

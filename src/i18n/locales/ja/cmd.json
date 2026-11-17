@@ -635,6 +635,8 @@
   "cmd.voice.meetingFile": "🎙 会議の録音を文字起こし（誰が何を言ったか）…",
   "cmd.window.new": "新しいウィンドウ",
   "cmd.window.new.hint": "別の編集ウィンドウ。タブをウィンドウ間でドラッグできます",
+  "cmd.writing.abstract": "執筆：タイトル・要旨・TL;DR",
+  "cmd.writing.abstract.hint": "タイトル3案、150〜250語の要旨、一行のTL;DR — 各文はノートの段落に紐づく。この端末上で",
   "cmd.writing.argument": "Writing: Check the argument",
   "cmd.writing.argument.hint": "Claims without a source, logical leaps and common fallacies, each with its reason",
   "cmd.writing.coach": "Writing: Clarity & Style Coach",

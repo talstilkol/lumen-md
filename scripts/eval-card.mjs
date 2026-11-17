@@ -11,7 +11,8 @@
  *                                           current card: its dataset version is the set's manifest, and the
  *                                           set has ≥ 150 items in Hebrew and in English
  *                                           an agent without an eval set (eval/writing/<id>): its card in
- *                                           eval/cards/writing/<id>.json, or any report whose card.agent is <id>
+ *                                           eval/cards/writing/<id>.json, or any report whose card.agent or
+ *                                           top-level agent is <id> (W13.W6–W12); exit 2 without an id
  *
  * Exit 1 when any report has no card or its card is missing a field
  * (scripts/lib/evalCard.mjs lists them). Exit 0 with nothing to check.
@@ -95,7 +96,8 @@ export function agentReports(agent, { root = ROOT } = {}) {
   const own = join(root, "eval/cards/writing", `${agent}.json`);
   const named = DEFAULT_DIRS.flatMap((d) => jsonFiles(resolve(root, d))).filter((f) => {
     try {
-      return JSON.parse(readFileSync(f, "utf8"))?.card?.agent === agent;
+      const j = JSON.parse(readFileSync(f, "utf8"));
+      return j?.card?.agent === agent || j?.agent === agent;
     } catch {
       return false;
     }
@@ -111,7 +113,7 @@ export function main(argv, { root = ROOT, log = console.log, err = console.error
   const suite = at("--suite");
   if (ai >= 0 && (!agent || agent.startsWith("--"))) {
     err("eval:card: --agent needs an agent id");
-    return 1;
+    return 2;
   }
   if (suite !== undefined && suite !== "writing") {
     err(`eval:card: unknown suite ${suite} (known: writing)`);

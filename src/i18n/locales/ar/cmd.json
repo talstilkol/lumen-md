@@ -635,6 +635,8 @@
   "cmd.voice.meetingFile": "🎙 تفريغ تسجيل اجتماع (من قال ماذا)…",
   "cmd.window.new": "نافذة جديدة",
   "cmd.window.new.hint": "نافذة تحرير أخرى؛ اسحب علامات التبويب بين النوافذ",
+  "cmd.writing.abstract": "الكتابة: عناوين وملخص وخلاصة",
+  "cmd.writing.abstract.hint": "ثلاثة عناوين وملخص من 150–250 كلمة وسطر خلاصة — كل جملة مرتبطة بفقرة من الملاحظة، على هذا الجهاز",
   "cmd.writing.argument": "Writing: Check the argument",
   "cmd.writing.argument.hint": "Claims without a source, logical leaps and common fallacies, each with its reason",
   "cmd.writing.coach": "Writing: Clarity & Style Coach",

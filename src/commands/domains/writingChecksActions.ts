@@ -228,3 +228,42 @@ export async function explainChangeFlow(tg: Target): Promise<void> {
     showAiToast(t("toast.explainChangeFailed", { error: explainError(e) }), "error");
   }
 }
+
+/** W13.W12: titles, abstract and TL;DR of the open note, every sentence anchored. */
+export async function abstractFlow(tg: Target & { getView: () => import("@codemirror/view").EditorView | null }): Promise<void> {
+  const note = tg.getContent();
+  if (!note.trim()) return;
+  try {
+    const [{ writeAbstract, abstractWriterAgent }, { runAgent, AgentRunError }] = await Promise.all([import("../../agents/writing/abstractWriter"), import("../../agents/runtime")]);
+    showAiToast(t("toast.abstractWorking"), "info");
+    let failed = false;
+    const run = (signal: AbortSignal) =>
+      writeAbstract(note, {
+        path: tg.path ?? "note.md",
+        lang: tg.lang,
+        signal,
+        model: async (input) => {
+          const r = await runAgent(abstractWriterAgent, input, { signal, document: note });
+          if (r.status !== "ok" || !r.output) throw new AgentRunError(r, r.error ?? r.status);
+          return r.output;
+        },
+      });
+    const r = await cancellable(async (signal) => {
+      try {
+        return await run(signal);
+      } catch (e) {
+        if (isAbort(e)) throw e;
+        // No local model (or it failed): the extractive baseline, still anchored.
+        failed = true;
+        const { writeAbstract: w } = await import("../../agents/writing/abstractWriter");
+        return w(note, { path: tg.path ?? "note.md", lang: tg.lang, signal });
+      }
+    });
+    if (failed) showAiToast(t("toast.abstractNoModel"), "info");
+    const { openAbstractDialog } = await import("../../ui/AbstractDialog");
+    openAbstractDialog(r, tg);
+  } catch (e) {
+    if (isAbort(e)) return;
+    showAiToast(t("toast.abstractFailed", { error: explainError(e) }), "error");
+  }
+}

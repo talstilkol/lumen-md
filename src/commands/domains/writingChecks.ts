@@ -69,6 +69,14 @@ export function buildWritingCheckCommands(ctx: CommandContext): Command[] {
       action: () => import("./writingChecksActions").then((m) => m.explainChangeFlow(target())),
     },
     {
+      id: "writing.abstract",
+      label: t("cmd.writing.abstract"),
+      hint: t("cmd.writing.abstract.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.edit"),
+      action: () => import("./writingChecksActions").then((m) => m.abstractFlow(target())),
+    },
+    {
       id: "writing.goals",
       label: t("cmd.writing.goals"),
       hint: t("cmd.writing.goals.hint"),

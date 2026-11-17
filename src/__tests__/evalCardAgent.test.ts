@@ -45,7 +45,7 @@ describe("eval:card --agent", () => {
     expect(evalCard(["--agent", "named"], { root, ...quiet })).toBe(0);
     expect(evalCard(["--agent", "bad"], { root, ...quiet })).toBe(1);
     expect(evalCard(["--agent", "none"], { root, ...quiet })).toBe(1);
-    expect(evalCard(["--agent"], { root, ...quiet })).toBe(1);
+    expect(evalCard(["--agent"], { root, ...quiet })).toBe(2); // a usage error (W13.W12 shares --agent)
   });
 
   it("checks only that agent, not every report", () => {

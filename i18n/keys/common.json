@@ -36,6 +36,114 @@
       ]
     },
     {
+      "key": "abs.abstract",
+      "en": "Abstract",
+      "vars": []
+    },
+    {
+      "key": "abs.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "abs.deleted",
+      "en": "{count} sentences were deleted: the note does not say them.",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "abs.empty",
+      "en": "No sentence could be tied to the note.",
+      "vars": []
+    },
+    {
+      "key": "abs.engine.extractive",
+      "en": "No local model: sentences taken from the note",
+      "vars": []
+    },
+    {
+      "key": "abs.engine.model",
+      "en": "Drafted by a local model; every sentence checked against the note",
+      "vars": []
+    },
+    {
+      "key": "abs.goto",
+      "en": "Go to paragraph {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "abs.insert",
+      "en": "Insert the abstract",
+      "vars": []
+    },
+    {
+      "key": "abs.insertSummary",
+      "en": "Insert the abstract at the top of the note",
+      "vars": []
+    },
+    {
+      "key": "abs.lengthOff",
+      "en": "outside 150–250 words (the deleted sentences shortened it)",
+      "vars": []
+    },
+    {
+      "key": "abs.part.background",
+      "en": "Background",
+      "vars": []
+    },
+    {
+      "key": "abs.part.findings",
+      "en": "Findings",
+      "vars": []
+    },
+    {
+      "key": "abs.part.method",
+      "en": "Method",
+      "vars": []
+    },
+    {
+      "key": "abs.proposed",
+      "en": "Proposed",
+      "vars": []
+    },
+    {
+      "key": "abs.title",
+      "en": "Titles, abstract and TL;DR",
+      "vars": []
+    },
+    {
+      "key": "abs.titleSummary",
+      "en": "Title: {title}",
+      "vars": [
+        "title"
+      ]
+    },
+    {
+      "key": "abs.titles",
+      "en": "Three titles",
+      "vars": []
+    },
+    {
+      "key": "abs.tldr",
+      "en": "TL;DR",
+      "vars": []
+    },
+    {
+      "key": "abs.useTitle",
+      "en": "Use this title",
+      "vars": []
+    },
+    {
+      "key": "abs.words",
+      "en": "{n} words",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "academic.chosen",
       "en": "Academic calendar: {name}",
       "vars": [

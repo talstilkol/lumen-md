@@ -398,6 +398,8 @@
   "cmd.voice.meeting": "🎙 Meeting notes (record on this device)",
   "cmd.voice.meetingFile": "🎙 Transcribe a meeting recording (who said what)…",
   "cmd.window.new": "New window",
+  "cmd.writing.abstract": "Writing: titles, abstract and TL;DR",
+  "cmd.writing.abstract.hint": "Three titles, a 150–250 word abstract and a one-line TL;DR — every sentence tied to a paragraph of the note, on this device",
   "cmd.writing.argument": "Writing: Check the argument",
   "cmd.writing.coach": "Writing: Clarity & Style Coach",
   "cmd.writing.coach.hint": "Long sentences, passives, action nouns, hedges and wordy phrases, on this device",

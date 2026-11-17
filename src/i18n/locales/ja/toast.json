@@ -1,4 +1,7 @@
 {
+  "toast.abstractFailed": "Could not write the abstract: {error}",
+  "toast.abstractNoModel": "No local model answered: showing sentences taken from the note.",
+  "toast.abstractWorking": "Writing the titles and the abstract…",
   "toast.actionItemsAdded": "✅ アクションアイテムを追加しました",
   "toast.actionItemsFailed": "アクションアイテムの抽出に失敗しました: {error}",
   "toast.addedTag": "✅ 追加したタグ: {count}",

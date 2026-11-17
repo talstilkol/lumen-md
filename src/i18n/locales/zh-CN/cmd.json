@@ -635,6 +635,8 @@
   "cmd.voice.meetingFile": "🎙 转写会议录音（谁说了什么）…",
   "cmd.window.new": "新建窗口",
   "cmd.window.new.hint": "另一个编辑窗口；可在窗口之间拖动标签页",
+  "cmd.writing.abstract": "写作：标题、摘要与 TL;DR",
+  "cmd.writing.abstract.hint": "三个标题、150–250 词的摘要和一句话 TL;DR——每句都对应笔记中的段落，在本设备上",
   "cmd.writing.argument": "Writing: Check the argument",
   "cmd.writing.argument.hint": "Claims without a source, logical leaps and common fallacies, each with its reason",
   "cmd.writing.coach": "Writing: Clarity & Style Coach",
