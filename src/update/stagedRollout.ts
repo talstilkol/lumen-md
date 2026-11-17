@@ -26,10 +26,13 @@ export interface Rollout {
   salt: string;
 }
 
+/** Any manifest object: only `rollout` and `halt` are read. */
+export type Manifestish = { rollout?: unknown; halt?: unknown; [field: string]: unknown };
+
 export type RolloutVerdict = { admit: true } | { admit: false; reason: "halted" | "staged" | "invalid" };
 
 /** The rollout fields of a manifest, or null when there are none (a full release). Throws on a malformed one. */
-export function parseRollout(manifest: { rollout?: unknown; halt?: unknown }): { rollout: Rollout | null; halt: boolean } {
+export function parseRollout(manifest: Manifestish): { rollout: Rollout | null; halt: boolean } {
   const halt = manifest.halt === true;
   if (manifest.halt !== undefined && typeof manifest.halt !== "boolean") throw new Error("halt must be true or false");
   if (manifest.rollout === undefined || manifest.rollout === null) return { rollout: null, halt };
@@ -51,7 +54,7 @@ export async function bucketOf(installId: string, salt: string, digest: (data: U
 }
 
 /** Whether this device takes the release the manifest names. */
-export async function admit(manifest: { rollout?: unknown; halt?: unknown }, installId: string): Promise<RolloutVerdict> {
+export async function admit(manifest: Manifestish, installId: string): Promise<RolloutVerdict> {
   let parsed: ReturnType<typeof parseRollout>;
   try {
     parsed = parseRollout(manifest);

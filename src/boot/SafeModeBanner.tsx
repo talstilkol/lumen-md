@@ -12,7 +12,7 @@
  * banner's heading when it opens, into the list when "Leave…" opens, and
  * back to the editor (or the page's main region) when safe mode ends.
  */
-import { useId, useRef, useState, useSyncExternalStore, useEffect } from "react";
+import { useId, useRef, useState, useSyncExternalStore, useEffect, type RefObject } from "react";
 import { t } from "../i18n";
 import "./safeModeStrings";
 import { bootDecision, exitSafeMode, isSafeMode, onSafeModeChange } from "./bootSentinel";
@@ -91,7 +91,7 @@ export function SafeModeBanner() {
           {snippets.map((name, i) => (
             <label key={name} style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <input
-                ref={i === 0 ? (firstRef as React.RefObject<HTMLInputElement>) : undefined}
+                ref={i === 0 ? (firstRef as RefObject<HTMLInputElement>) : undefined}
                 type="checkbox"
                 checked={keep.has(name)}
                 onChange={(e) => setKeep((cur) => {
@@ -105,7 +105,7 @@ export function SafeModeBanner() {
             </label>
           ))}
           <label style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <input ref={snippets.length ? undefined : (firstRef as React.RefObject<HTMLInputElement>)} type="checkbox" checked={agents} onChange={(e) => setAgents(e.target.checked)} />
+            <input ref={snippets.length ? undefined : (firstRef as RefObject<HTMLInputElement>)} type="checkbox" checked={agents} onChange={(e) => setAgents(e.target.checked)} />
             <span>{t("safeMode.agents")}</span>
           </label>
           <p style={{ margin: 0, fontSize: 12, opacity: 0.8 }}>{t("safeMode.pluginsNote")}</p>
@@ -120,7 +120,7 @@ export function SafeModeBanner() {
         </fieldset>
       ) : (
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button ref={firstRef as React.RefObject<HTMLButtonElement>} type="button" className="vault-folder-btn" onClick={() => setChoosing(true)} data-testid="safe-mode-choose">
+          <button ref={firstRef as RefObject<HTMLButtonElement>} type="button" className="vault-folder-btn" onClick={() => setChoosing(true)} data-testid="safe-mode-choose">
             {t("safeMode.leave")}
           </button>
           <button type="button" className="vault-folder-btn secondary" onClick={() => void import("../ui/diagnosticsActions").then((m) => m.saveDiagnostics())}>

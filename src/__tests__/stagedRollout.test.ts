@@ -34,7 +34,7 @@ describe("the bucket rule", () => {
     expect(vectors.vectors.length).toBeGreaterThanOrEqual(15);
     for (const v of vectors.vectors) expect(await bucketOf(v.installId, v.salt, digest)).toBe(v.bucket);
     // and with WebCrypto, as the app runs it
-    for (const v of vectors.vectors.slice(0, 3)) expect(await bucketOf(v.installId, v.salt, (d) => webcrypto.subtle.digest("SHA-256", d))).toBe(v.bucket);
+    for (const v of vectors.vectors.slice(0, 3)) expect(await bucketOf(v.installId, v.salt, (d) => webcrypto.subtle.digest("SHA-256", d as BufferSource))).toBe(v.bucket);
   });
 
   it("threshold in buckets", () => {
