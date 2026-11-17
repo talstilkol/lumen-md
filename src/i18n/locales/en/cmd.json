@@ -177,6 +177,8 @@
   "cmd.file.exportLatex.hint": "Article-class LaTeX with hyperref + listings",
   "cmd.file.exportMarkdown": "Export Markdown",
   "cmd.file.exportMarkdown.hint": "without the redacted passages",
+  "cmd.file.exportOdt": "Export to OpenDocument (ODT)",
+  "cmd.file.exportOdt.hint": "LibreOffice text document, right-to-left paragraphs kept",
   "cmd.file.exportOpml": "Export to OPML",
   "cmd.file.exportOpml.hint": "Outline interchange format (RSS readers, mind-maps)",
   "cmd.file.exportOrg": "Export to Org-mode",

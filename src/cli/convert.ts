@@ -24,6 +24,7 @@ import {
   markdownToEpubBytes,
 } from "../storage/exportFormats";
 import { markdownToDocxBytes } from "../storage/exportDocx";
+import { markdownToOdtBytes } from "../storage/exportOdt";
 import { markdownToPptxBytes } from "../storage/exportPptx";
 import {
   latexToMarkdown,
@@ -65,6 +66,7 @@ const extOf = (name: string): string => (name.split(".").pop() || "").toLowerCas
 const BINARY_EXPORTERS: Record<string, (md: string, title: string) => Promise<Uint8Array>> = {
   docx: (md) => markdownToDocxBytes(md),
   epub: (md) => markdownToEpubBytes(md),
+  odt: (md, title) => markdownToOdtBytes(md, { title }),
   pptx: (md, title) => markdownToPptxBytes(md, title),
 };
 

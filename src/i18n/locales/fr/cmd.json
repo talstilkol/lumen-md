@@ -178,6 +178,8 @@
   "cmd.file.exportLatex.hint": "LaTeX de classe article avec hyperref + listings",
   "cmd.file.exportMarkdown": "Exporter en Markdown",
   "cmd.file.exportMarkdown.hint": "sans les passages caviardés",
+  "cmd.file.exportOdt": "Exporter to OpenDocument (ODT)",
+  "cmd.file.exportOdt.hint": "Document texte LibreOffice, paragraphes de droite à gauche conservés",
   "cmd.file.exportOpml": "Exporter to OPML",
   "cmd.file.exportOpml.hint": "Format d'échange de plans (lecteurs RSS, cartes mentales)",
   "cmd.file.exportOrg": "Exporter to Org-mode",

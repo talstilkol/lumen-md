@@ -178,6 +178,8 @@
   "cmd.file.exportLatex.hint": "LaTeX класса article с hyperref и listings",
   "cmd.file.exportMarkdown": "Экспорт в Markdown",
   "cmd.file.exportMarkdown.hint": "без скрытых фрагментов",
+  "cmd.file.exportOdt": "Экспорт to OpenDocument (ODT)",
+  "cmd.file.exportOdt.hint": "Текстовый документ LibreOffice, абзацы справа налево сохраняются",
   "cmd.file.exportOpml": "Экспорт to OPML",
   "cmd.file.exportOpml.hint": "Формат обмена структурами (RSS-читалки, ментальные карты)",
   "cmd.file.exportOrg": "Экспорт to Org-mode",

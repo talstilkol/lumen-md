@@ -178,6 +178,8 @@
   "cmd.file.exportLatex.hint": "מסמך article עם hyperref + listings",
   "cmd.file.exportMarkdown": "ייצוא Markdown",
   "cmd.file.exportMarkdown.hint": "בלי הקטעים המושחרים",
+  "cmd.file.exportOdt": "ייצוא ל-OpenDocument ‏(ODT)",
+  "cmd.file.exportOdt.hint": "מסמך טקסט של LibreOffice, עם פסקאות מימין לשמאל",
   "cmd.file.exportOpml": "ייצוא ל-OPML",
   "cmd.file.exportOpml.hint": "פורמט outline (קוראי RSS, מפות חשיבה)",
   "cmd.file.exportOrg": "ייצוא ל-Org-mode",

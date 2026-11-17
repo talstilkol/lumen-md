@@ -178,6 +178,8 @@
   "cmd.file.exportLatex.hint": "hyperref と listings を使った article クラスの LaTeX",
   "cmd.file.exportMarkdown": "Markdown をエクスポート",
   "cmd.file.exportMarkdown.hint": "黒塗り部分を除く",
+  "cmd.file.exportOdt": "エクスポート to OpenDocument (ODT)",
+  "cmd.file.exportOdt.hint": "LibreOffice のテキスト文書 (右から左の段落を保持)",
   "cmd.file.exportOpml": "エクスポート to OPML",
   "cmd.file.exportOpml.hint": "アウトライン交換形式 (RSS リーダー、マインドマップ)",
   "cmd.file.exportOrg": "エクスポート to Org-mode",

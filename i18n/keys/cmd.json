@@ -901,6 +901,16 @@
       "vars": []
     },
     {
+      "key": "cmd.file.exportOdt",
+      "en": "Export to OpenDocument (ODT)",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportOdt.hint",
+      "en": "LibreOffice text document, right-to-left paragraphs kept",
+      "vars": []
+    },
+    {
       "key": "cmd.file.exportOpml",
       "en": "Export to OPML",
       "vars": []

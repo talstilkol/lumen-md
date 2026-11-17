@@ -178,6 +178,8 @@
   "cmd.file.exportLatex.hint": "使用 hyperref 和 listings 的 article 类 LaTeX",
   "cmd.file.exportMarkdown": "导出 Markdown",
   "cmd.file.exportMarkdown.hint": "不含已涂黑的段落",
+  "cmd.file.exportOdt": "导出 to OpenDocument (ODT)",
+  "cmd.file.exportOdt.hint": "LibreOffice 文本文档,保留从右到左的段落",
   "cmd.file.exportOpml": "导出 to OPML",
   "cmd.file.exportOpml.hint": "大纲交换格式(RSS 阅读器、思维导图)",
   "cmd.file.exportOrg": "导出 to Org-mode",

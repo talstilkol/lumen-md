@@ -178,6 +178,8 @@
   "cmd.file.exportLatex.hint": "LaTeX من فئة article مع hyperref وlistings",
   "cmd.file.exportMarkdown": "تصدير Markdown",
   "cmd.file.exportMarkdown.hint": "بدون المقاطع المحجوبة",
+  "cmd.file.exportOdt": "تصدير to OpenDocument (ODT)",
+  "cmd.file.exportOdt.hint": "مستند نصي لـ LibreOffice مع الحفاظ على الفقرات من اليمين إلى اليسار",
   "cmd.file.exportOpml": "تصدير to OPML",
   "cmd.file.exportOpml.hint": "صيغة تبادل المخططات (قارئات RSS، الخرائط الذهنية)",
   "cmd.file.exportOrg": "تصدير to Org-mode",
