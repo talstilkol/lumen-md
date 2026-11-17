@@ -1277,6 +1277,39 @@
       ]
     },
     {
+      "key": "trash.noMatch",
+      "en": "Nothing matches “{q}”.",
+      "vars": [
+        "q"
+      ]
+    },
+    {
+      "key": "trash.noRenames",
+      "en": "Nothing was renamed or moved in the last 30 days.",
+      "vars": []
+    },
+    {
+      "key": "trash.renamedTo",
+      "en": "now {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "trash.renamesSkipped",
+      "en": "{n} could not be moved back: the file is gone, or something new has its old name",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "trash.renamesUndone",
+      "en": "{n} moved back to their old names",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "trash.restore",
       "en": "Restore",
       "vars": []
@@ -1286,6 +1319,20 @@
       "en": "Couldn't restore from the trash: {error}",
       "vars": [
         "error"
+      ]
+    },
+    {
+      "key": "trash.restoreFailedMany",
+      "en": "{n} could not be restored and stay in the trash",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "trash.restoreSelected",
+      "en": "Restore selected ({n})",
+      "vars": [
+        "n"
       ]
     },
     {
@@ -1303,9 +1350,160 @@
       ]
     },
     {
+      "key": "trash.restoring",
+      "en": "Restoring {done} of {total}…",
+      "vars": [
+        "done",
+        "total"
+      ]
+    },
+    {
+      "key": "trash.retention.applied",
+      "en": "Removed {n} old versions ({size})",
+      "vars": [
+        "n",
+        "size"
+      ]
+    },
+    {
+      "key": "trash.retention.apply",
+      "en": "Apply now",
+      "vars": []
+    },
+    {
+      "key": "trash.retention.attachments",
+      "en": "Keep versions of attachments",
+      "vars": []
+    },
+    {
+      "key": "trash.retention.bytes",
+      "en": "{n} B",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "trash.retention.days",
+      "en": "{n} days",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "trash.retention.failed",
+      "en": "The old versions could not be removed; nothing was changed",
+      "vars": []
+    },
+    {
+      "key": "trash.retention.kb",
+      "en": "{n} KB",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "trash.retention.mb",
+      "en": "{n} MB",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "trash.retention.measuring",
+      "en": "Measuring what this would free…",
+      "vars": []
+    },
+    {
+      "key": "trash.retention.notes",
+      "en": "Keep versions of notes",
+      "vars": []
+    },
+    {
+      "key": "trash.retention.notes.1y",
+      "en": "1 year",
+      "vars": []
+    },
+    {
+      "key": "trash.retention.notes.30d",
+      "en": "30 days",
+      "vars": []
+    },
+    {
+      "key": "trash.retention.notes.forever",
+      "en": "Forever",
+      "vars": []
+    },
+    {
+      "key": "trash.retention.nothing",
+      "en": "Nothing to free: every version is inside the period. The newest version of every file is always kept.",
+      "vars": []
+    },
+    {
+      "key": "trash.retention.saving",
+      "en": "Frees {size}: {n} old versions (files: {docs}). The newest version of every file is always kept.",
+      "vars": [
+        "size",
+        "n",
+        "docs"
+      ]
+    },
+    {
+      "key": "trash.retention.title",
+      "en": "Version history in this vault",
+      "vars": []
+    },
+    {
+      "key": "trash.search",
+      "en": "Search by name or folder",
+      "vars": []
+    },
+    {
+      "key": "trash.selectAll",
+      "en": "Select all shown",
+      "vars": []
+    },
+    {
+      "key": "trash.selectRow",
+      "en": "Select {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "trash.tab.deleted",
+      "en": "Deleted ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "trash.tab.renamed",
+      "en": "Renamed and moved ({n})",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "trash.title",
       "en": "Trash",
       "vars": []
+    },
+    {
+      "key": "trash.titleFull",
+      "en": "Deleted and renamed files",
+      "vars": []
+    },
+    {
+      "key": "trash.undoRename",
+      "en": "Move back",
+      "vars": []
+    },
+    {
+      "key": "trash.undoSelected",
+      "en": "Move back selected ({n})",
+      "vars": [
+        "n"
+      ]
     },
     {
       "key": "trash.undoShortcut",
