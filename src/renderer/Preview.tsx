@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter, RenderSuperseded } from "./pipeline";
+import { registerLineBases } from "./sourceLineRegistry";
 import { dashboardLayout, dashboardProps } from "./dashboard";
 import { nextVersion, renderWorkerWarm } from "./renderClient";
 import { subscribePluginLangs } from "../plugins/runtime/rendererRegistry";
@@ -49,7 +50,7 @@ let fullPipelineWarm = false;
 /** Synchronous plain-text pass; null if it throws (the full pass reports). */
 function safeFastRender(markdownText: string): React.ReactElement | null {
   try {
-    return renderMarkdownFast(markdownText);
+    return renderMarkdownFast(markdownText, { lines: true });
   } catch {
     return null;
   }
@@ -174,10 +175,12 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
     const stale = () => seq !== seqRef.current;
     const channel = () => ({ id: channelRef.current!, version: nextVersion(channelRef.current!) });
     const render = async (): Promise<React.ReactElement | null> => {
-      if (markdownText.length < LARGE_DOC_CHARS) return renderMarkdown(markdownText, isDark, { channel: channel() });
+      if (markdownText.length < LARGE_DOC_CHARS) return renderMarkdown(markdownText, isDark, { channel: channel(), lines: true });
       const m = await import("./incrementalPreview");
-      if (!m.canRenderInBlocks(markdownText)) return renderMarkdown(markdownText, isDark, { channel: channel() });
+      if (!m.canRenderInBlocks(markdownText)) return renderMarkdown(markdownText, isDark, { channel: channel(), lines: true });
       const inc = (incrementalRef.current ??= new m.IncrementalPreview());
+      // Scroll sync (plan W13.R7) turns a block's key into its first line.
+      if (rootRef.current) registerLineBases(rootRef.current, () => inc.lineBases());
       // Viewport first (plan 8.1 step 3): the blocks in view, then the rest while idle.
       const el = await inc.render(markdownText, isDark, stale, {
         focusOffset: focusRef.current,
@@ -200,7 +203,7 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
         ? import("./embedContext")
             .then((m) => m.loadEmbedContext(markdownText, renderedFor))
             .catch(() => undefined)
-            .then(async (embeds) => ({ el: await renderMarkdown(markdownText, isDark, { embeds, channel: channel() }), embeds }))
+            .then(async (embeds) => ({ el: await renderMarkdown(markdownText, isDark, { embeds, channel: channel(), lines: true }), embeds }))
         : render().then((el) => ({ el, embeds: undefined }));
       rendered
         .then(({ el, embeds }) => {

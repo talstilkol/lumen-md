@@ -147,7 +147,8 @@ export function rehypeShiki(opts: ShikiOpts) {
             type: "element",
             tagName: "div",
             // Code reads left-to-right whatever the note's direction (T25).
-            properties: { className: ["code-block"], dir: "ltr" },
+            // Its source lines (W13.R7, ./rehypeSourceLines.ts) stay with the block.
+            properties: { className: ["code-block"], dir: "ltr", ...(node.properties?.dataSl !== undefined ? { dataSl: node.properties.dataSl, dataSle: node.properties.dataSle } : {}) },
             children: [
               {
                 type: "element",

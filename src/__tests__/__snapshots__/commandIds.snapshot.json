@@ -2257,6 +2257,25 @@
       "icon": "Download"
     },
     {
+      "id": "view.tripleLinked",
+      "label": "View: source + preview + outline, scroll linked",
+      "group": "View",
+      "hint": "Three columns that follow each other: scrolling and the caret stay on the same line",
+      "icon": "Columns2"
+    },
+    {
+      "id": "view.columnNext",
+      "label": "View: focus the next column",
+      "group": "View",
+      "hint": "Ctrl+Alt+Shift+→ (mirrored in a right-to-left layout)"
+    },
+    {
+      "id": "view.columnPrev",
+      "label": "View: focus the previous column",
+      "group": "View",
+      "hint": "Ctrl+Alt+Shift+← (mirrored in a right-to-left layout)"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -4674,6 +4693,25 @@
       "icon": "Download"
     },
     {
+      "id": "view.tripleLinked",
+      "label": "View: source + preview + outline, scroll linked",
+      "group": "View",
+      "hint": "Three columns that follow each other: scrolling and the caret stay on the same line",
+      "icon": "Columns2"
+    },
+    {
+      "id": "view.columnNext",
+      "label": "View: focus the next column",
+      "group": "View",
+      "hint": "Ctrl+Alt+Shift+→ (mirrored in a right-to-left layout)"
+    },
+    {
+      "id": "view.columnPrev",
+      "label": "View: focus the previous column",
+      "group": "View",
+      "hint": "Ctrl+Alt+Shift+← (mirrored in a right-to-left layout)"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -5020,6 +5058,9 @@
     "spell.yiddishDictionary",
     "academic.choose",
     "academic.ics",
+    "view.tripleLinked",
+    "view.columnNext",
+    "view.columnPrev",
     "types.page",
     "types.studio"
   ]

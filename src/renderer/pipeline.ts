@@ -79,6 +79,8 @@ export interface RenderOptions {
    * this one stale, and it rejects with `RenderSuperseded`.
    */
   channel?: { id: string; version: number };
+  /** Stamp source lines on the blocks for scroll sync (plan W13.R7): the preview pane only. */
+  lines?: boolean;
 }
 
 /** A render a newer one on its channel replaced: the caller shows the newer one. */
@@ -121,6 +123,7 @@ export async function renderMarkdownHast(markdownText: string, isDark: () => boo
     markdown: markdownText,
     variant,
     embeds: opts.embeds ? embedData(opts.embeds) : undefined,
+    lines: opts.lines,
   });
   if (fromWorker === STALE) throw new RenderSuperseded();
   if (fromWorker) {
@@ -129,7 +132,7 @@ export async function renderMarkdownHast(markdownText: string, isDark: () => boo
     return fromWorker.hast;
   }
   renderStats.mainThread++;
-  return renderHast(markdownText, isDark, opts.embeds, variant);
+  return renderHast(markdownText, isDark, opts.embeds, variant, undefined, opts.lines);
 }
 
 /**
@@ -144,8 +147,8 @@ export async function renderMarkdownHast(markdownText: string, isDark: () => boo
  * triggers a vendor import. The preview uses it only until the render
  * worker has answered once (./Preview.tsx).
  */
-export function renderMarkdownFast(markdownText: string, opts: { embeds?: EmbedContext } = {}): ReactElement {
-  return hastToReact(renderHastFast(markdownText, opts.embeds));
+export function renderMarkdownFast(markdownText: string, opts: { embeds?: EmbedContext; lines?: boolean } = {}): ReactElement {
+  return hastToReact(renderHastFast(markdownText, opts.embeds, undefined, opts.lines));
 }
 
 /**

@@ -2788,6 +2788,26 @@
       "vars": []
     },
     {
+      "key": "cmd.view.columnNext",
+      "en": "View: focus the next column",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.columnNext.hint",
+      "en": "Ctrl+Alt+Shift+→ (mirrored in a right-to-left layout)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.columnPrev",
+      "en": "View: focus the previous column",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.columnPrev.hint",
+      "en": "Ctrl+Alt+Shift+← (mirrored in a right-to-left layout)",
+      "vars": []
+    },
+    {
       "key": "cmd.view.findReplace",
       "en": "Find & Replace",
       "vars": []
@@ -3017,6 +3037,16 @@
     {
       "key": "cmd.view.theme.toLight",
       "en": "Switch to light theme",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.tripleLinked",
+      "en": "View: source + preview + outline, scroll linked",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.tripleLinked.hint",
+      "en": "Three columns that follow each other: scrolling and the caret stay on the same line",
       "vars": []
     },
     {

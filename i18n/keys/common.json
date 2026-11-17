@@ -15449,6 +15449,26 @@
       "vars": []
     },
     {
+      "key": "readingViews.column.editor",
+      "en": "Source column",
+      "vars": []
+    },
+    {
+      "key": "readingViews.column.outline",
+      "en": "Outline column",
+      "vars": []
+    },
+    {
+      "key": "readingViews.column.preview",
+      "en": "Preview column",
+      "vars": []
+    },
+    {
+      "key": "readingViews.triple.on",
+      "en": "Three columns: source, preview and outline, scroll linked",
+      "vars": []
+    },
+    {
       "key": "redact.empty",
       "en": "Select the text to redact first.",
       "vars": []

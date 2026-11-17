@@ -46,5 +46,53 @@
     "ja": "l899cf",
     "ru": "l899cf",
     "zh-CN": "l899cf"
+  },
+  "cmd.view.columnNext": {
+    "ar": "1ko4af8",
+    "de": "1ko4af8",
+    "fr": "1ko4af8",
+    "ja": "1ko4af8",
+    "ru": "1ko4af8",
+    "zh-CN": "1ko4af8"
+  },
+  "cmd.view.columnNext.hint": {
+    "ar": "1smdqlf",
+    "de": "1smdqlf",
+    "fr": "1smdqlf",
+    "ja": "1smdqlf",
+    "ru": "1smdqlf",
+    "zh-CN": "1smdqlf"
+  },
+  "cmd.view.columnPrev": {
+    "ar": "1vjvpog",
+    "de": "1vjvpog",
+    "fr": "1vjvpog",
+    "ja": "1vjvpog",
+    "ru": "1vjvpog",
+    "zh-CN": "1vjvpog"
+  },
+  "cmd.view.columnPrev.hint": {
+    "ar": "3tcta1",
+    "de": "3tcta1",
+    "fr": "3tcta1",
+    "ja": "3tcta1",
+    "ru": "3tcta1",
+    "zh-CN": "3tcta1"
+  },
+  "cmd.view.tripleLinked": {
+    "ar": "12bs96p",
+    "de": "12bs96p",
+    "fr": "12bs96p",
+    "ja": "12bs96p",
+    "ru": "12bs96p",
+    "zh-CN": "12bs96p"
+  },
+  "cmd.view.tripleLinked.hint": {
+    "ar": "1wfkeuq",
+    "de": "1wfkeuq",
+    "fr": "1wfkeuq",
+    "ja": "1wfkeuq",
+    "ru": "1wfkeuq",
+    "zh-CN": "1wfkeuq"
   }
 }
