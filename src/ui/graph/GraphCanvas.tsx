@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent a
 import { stepFrom } from "../../graph/graphModel";
 import { PointGrid } from "../../graph/layout";
 import { createRenderer, fitView, toScreen, toWorld, type GraphRenderer, type GraphView } from "../../graph/renderer";
+import { prepareLabel, type LabelDir, type PreparedLabel } from "../../graph/labels";
 import { t } from "../../i18n";
 
 export interface GraphCanvasProps {
@@ -37,7 +38,6 @@ export interface GraphCanvasProps {
 
 /** While zooming or panning a graph with more links than this, frames draw a sample of them. */
 const MOTION_EDGES = 8000;
-const RTL = /[֐-׿؀-ۿݐ-ݿ]/;
 const MAX_LABELS = 400;
 
 export function GraphCanvas(props: GraphCanvasProps) {
@@ -58,6 +58,16 @@ export function GraphCanvas(props: GraphCanvasProps) {
   const n = labels.length;
   const grid = useMemo(() => (positions ? new PointGrid(positions, 24) : null), [positions]);
   const fitted = useRef<string | number | null>(null);
+  // W13.G2: each label's direction, isolates and grapheme-safe shortening, worked out once per label.
+  const prepared = useMemo(() => {
+    const cache = new Map<number, PreparedLabel>();
+    const uiDir: LabelDir = typeof document !== "undefined" && document.documentElement.dir === "rtl" ? "rtl" : "ltr";
+    return (i: number) => {
+      let p = cache.get(i);
+      if (!p) cache.set(i, (p = prepareLabel(labels[i] ?? "", { maxGraphemes: 40, fallback: uiDir })));
+      return p;
+    };
+  }, [labels]);
 
   // One renderer per canvas.
   useEffect(() => {
@@ -101,14 +111,14 @@ export function GraphCanvas(props: GraphCanvasProps) {
     ctx.fillStyle = labelColor;
     for (const i of list) {
       const p = toScreen(v, w, h, positions[2 * i], positions[2 * i + 1]);
-      const label = labels[i];
+      const label = prepared(i);
       const strong = i === focus || i === hover;
       ctx.font = `${strong ? 600 : 400} ${strong ? 13 : 11}px system-ui, -apple-system, "Segoe UI", "Noto Sans Hebrew", sans-serif`;
-      // Hebrew (and Arabic) labels run right to left: the canvas shapes and orders them itself.
-      ctx.direction = RTL.test(label) ? "rtl" : "ltr";
-      ctx.fillText(label.length > 40 ? `${label.slice(0, 38)}…` : label, p.x, p.y - Math.max(3, sizes[i] * v.scale) - 2);
+      // The label's own direction (first strong letter); its other-direction runs are isolated (W13.G2).
+      ctx.direction = label.dir;
+      ctx.fillText(label.text, p.x, p.y - Math.max(3, sizes[i] * v.scale) - 2);
     }
-  }, [positions, labels, sizes, neighbors, focus, hover, n, compact, labelColor]);
+  }, [positions, prepared, sizes, neighbors, focus, hover, n, compact, labelColor]);
 
   const schedule = useCallback(() => {
     if (frame.current) return;
