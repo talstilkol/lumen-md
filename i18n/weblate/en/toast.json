@@ -27,6 +27,8 @@
   "toast.claimsFailed": "Could not extract claims: {{error}}",
   "toast.claimsNoParagraph": "Put the cursor in a paragraph first.",
   "toast.completed": "✅ {name} completed",
+  "toast.cursorMovement.logical": "Cursor movement: logical — arrows follow the text order",
+  "toast.cursorMovement.visual": "Cursor movement: visual — arrows follow the screen",
   "toast.diagramFailed": "Diagram failed: {error}",
   "toast.diagramInserted": "✅ Diagram inserted",
   "toast.dictate.localFailed": "On-device dictation stopped: {error}",

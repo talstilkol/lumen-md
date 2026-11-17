@@ -539,5 +539,29 @@
     "ja": "12myrs1",
     "ru": "12myrs1",
     "zh-CN": "12myrs1"
+  },
+  "cmd.edit.cursorMovement.toLogical": {
+    "ar": "b4eiag",
+    "de": "b4eiag",
+    "fr": "b4eiag",
+    "ja": "b4eiag",
+    "ru": "b4eiag",
+    "zh-CN": "b4eiag"
+  },
+  "cmd.edit.cursorMovement.toVisual": {
+    "ar": "9js5b1",
+    "de": "9js5b1",
+    "fr": "9js5b1",
+    "ja": "9js5b1",
+    "ru": "9js5b1",
+    "zh-CN": "9js5b1"
+  },
+  "cmd.edit.cursorMovement.hint": {
+    "ar": "uernde",
+    "de": "uernde",
+    "fr": "uernde",
+    "ja": "uernde",
+    "ru": "uernde",
+    "zh-CN": "uernde"
   }
 }

@@ -11,7 +11,8 @@
  * direction rule leaves out like inline code (W5.14). A table takes the
  * direction of its first cell, else the note's (plan 9.5).
  *
- * Arrow keys move in logical order inside a block (plan 9.7): the key that
+ * Arrow keys follow the cursor-movement setting (W13.H1): visual by default
+ * (the browser's own movement), or logical inside a block (plan 9.7): the key that
  * points toward the end of the block — Left in a right-to-left block,
  * Right in a left-to-right one — goes to the next character in the text,
  * through runs of the other direction, numbers and brackets; Shift extends
@@ -24,6 +25,7 @@ import { Decoration, DecorationSet, type EditorView } from "@milkdown/prose/view
 import type { Node as PMNode } from "@milkdown/prose/model";
 import { firstStrong, type LineDirection } from "../lib/bidiDirection";
 import { LRM, RLM, type Dir } from "../lib/paragraphDirection";
+import { cursorMovement } from "./cursorMovementSetting";
 
 export const wysiwygBidiKey = new PluginKey<DecorationSet>("lumen-bidi");
 
@@ -193,6 +195,8 @@ export function wysiwygBidiPlugin(opts: { pinned?: () => Dir | null } = {}): Plu
         }
         if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return false;
         if (event.ctrlKey || event.metaKey || event.altKey || event.isComposing) return false;
+        // Visual (the default, W13.H1): the browser moves the caret the way it draws the line.
+        if (cursorMovement() !== "logical") return false;
         return logicalArrow(view, event.key === "ArrowRight", event.shiftKey);
       },
     },

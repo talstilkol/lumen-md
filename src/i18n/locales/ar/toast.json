@@ -27,6 +27,8 @@
   "toast.claimsFailed": "تعذّر استخراج الادعاءات: {{error}}",
   "toast.claimsNoParagraph": "ضع المؤشر في فقرة أولاً.",
   "toast.completed": "✅ اكتمل {name}",
+  "toast.cursorMovement.logical": "Cursor movement: logical — arrows follow the text order",
+  "toast.cursorMovement.visual": "Cursor movement: visual — arrows follow the screen",
   "toast.diagramFailed": "فشل إنشاء المخطط: {error}",
   "toast.diagramInserted": "✅ تم إدراج المخطط",
   "toast.dictate.localFailed": "توقف الإملاء على الجهاز: {error}",

@@ -54,5 +54,21 @@
     "ja": "195476t",
     "ru": "195476t",
     "zh-CN": "195476t"
+  },
+  "toast.cursorMovement.visual": {
+    "ar": "13eyveq",
+    "de": "13eyveq",
+    "fr": "13eyveq",
+    "ja": "13eyveq",
+    "ru": "13eyveq",
+    "zh-CN": "13eyveq"
+  },
+  "toast.cursorMovement.logical": {
+    "ar": "ulxoyc",
+    "de": "ulxoyc",
+    "fr": "ulxoyc",
+    "ja": "ulxoyc",
+    "ru": "ulxoyc",
+    "zh-CN": "ulxoyc"
   }
 }

@@ -3,11 +3,15 @@
  *   - "Show direction marks" / "Hide direction marks";
  *   - "Clean direction marks and fix brackets": one undoable change in
  *     whichever editor is open; in the preview the note text is rewritten
- *     and the toast offers Undo.
+ *     and the toast offers Undo;
+ *   - "Cursor movement: switch to logical / visual" (W13.H1): Word's
+ *     cursor-movement option, for both editors, kept on this device.
  */
 import type { EditorView } from "@codemirror/view";
 import { t } from "../i18n";
 import { bidiMarksShown, toggleBidiMarks } from "./bidiMarksSetting";
+import { cursorMovement, toggleCursorMovement } from "./cursorMovementSetting";
+import { toast } from "../store/useToastStore";
 
 export interface BidiMarksCommandDeps {
   getView: () => EditorView | null;
@@ -48,6 +52,18 @@ export function buildBidiMarksCommands(deps: BidiMarksCommandDeps): BidiMarksPal
       group,
       action: async () => {
         await runBidiFix(deps);
+      },
+    },
+    {
+      id: "edit.cursorMovement",
+      label: cursorMovement() === "visual" ? t("cmd.edit.cursorMovement.toLogical") : t("cmd.edit.cursorMovement.toVisual"),
+      hint: t("cmd.edit.cursorMovement.hint"),
+      group,
+      action: () => {
+        const mode = toggleCursorMovement();
+        toast.info(t(mode === "logical" ? "toast.cursorMovement.logical" : "toast.cursorMovement.visual"));
+        // The palette has closed: the caret goes back to the editor, where the new arrows apply.
+        deps.getView()?.focus();
       },
     },
   ];

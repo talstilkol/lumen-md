@@ -27,6 +27,8 @@
   "toast.claimsFailed": "לא הצלחנו לחלץ טענות: {{error}}",
   "toast.claimsNoParagraph": "קודם שימו את הסמן בתוך פסקה.",
   "toast.completed": "✅ {name} הושלם",
+  "toast.cursorMovement.logical": "תזוזת סמן: לוגית — החצים לפי סדר הטקסט",
+  "toast.cursorMovement.visual": "תזוזת סמן: חזותית — החצים לפי המסך",
   "toast.diagramFailed": "יצירת הדיאגרמה נכשלה: {error}",
   "toast.diagramInserted": "✅ הדיאגרמה נוספה",
   "toast.dictate.localFailed": "ההכתבה במכשיר נעצרה: {error}",

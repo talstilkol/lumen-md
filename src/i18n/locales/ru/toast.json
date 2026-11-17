@@ -27,6 +27,8 @@
   "toast.claimsFailed": "Не удалось извлечь утверждения: {{error}}",
   "toast.claimsNoParagraph": "Сначала поставьте курсор в абзац.",
   "toast.completed": "✅ {name}: готово",
+  "toast.cursorMovement.logical": "Cursor movement: logical — arrows follow the text order",
+  "toast.cursorMovement.visual": "Cursor movement: visual — arrows follow the screen",
   "toast.diagramFailed": "Не удалось создать диаграмму: {error}",
   "toast.diagramInserted": "✅ Диаграмма вставлена",
   "toast.dictate.localFailed": "Диктовка на устройстве остановлена: {error}",

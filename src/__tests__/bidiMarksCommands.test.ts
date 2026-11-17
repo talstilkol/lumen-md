@@ -30,7 +30,7 @@ beforeEach(() => {
 describe("direction-mark commands", () => {
   it("offers a show/hide switch and the fix, with labels that follow the switch", () => {
     const off = buildBidiMarksCommands(deps({ value: "" }));
-    expect(off.map((c) => c.id)).toEqual(["view.bidiMarks", "edit.bidiFix"]);
+    expect(off.map((c) => c.id)).toEqual(["view.bidiMarks", "edit.bidiFix", "edit.cursorMovement"]);
     const label = off[0].label;
     let heard = 0;
     const unsub = onBidiMarksChange(() => heard++);

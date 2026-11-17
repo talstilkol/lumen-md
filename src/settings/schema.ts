@@ -263,6 +263,14 @@ export const SETTINGS: readonly SettingEntry[] = [
   local("lumen.nikud.quality", { kind: "setting", tab: "general", type: "text" }),
   local("lumen.tts.settings", { kind: "setting", tab: "general", type: "json" }),
   local("lumen.bidiMarks", { kind: "setting", tab: "general", type: "boolean", values: ["", "1"] }),
+  // W13.H1: Word's cursor movement (visual by default); this device only, never synced.
+  local("lumen.cursorMovement", {
+    kind: "setting", tab: "general", label: "editor.cursorMovement", type: "choice",
+    options: [
+      { value: "visual", label: "editor.cursorMovement.visual" },
+      { value: "logical", label: "editor.cursorMovement.logical" },
+    ],
+  }),
   local("lumen-reading", { kind: "setting", tab: "general", type: "json" }),
   local("lumen-reading-aids", { kind: "setting", tab: "general", type: "json" }),
   local("lumen-hebrew-typography", { kind: "setting", tab: "general", type: "json" }),

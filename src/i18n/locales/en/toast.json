@@ -11,6 +11,8 @@
   "toast.chartInserted": "✅ Chart inserted",
   "toast.checkingGrammar": "📝 Checking grammar…",
   "toast.completed": "✅ {name} completed",
+  "toast.cursorMovement.logical": "Cursor movement: logical — arrows follow the text order",
+  "toast.cursorMovement.visual": "Cursor movement: visual — arrows follow the screen",
   "toast.dismiss": "Dismiss",
   "toast.documentRefactoredSuccessfully": "Document refactored successfully!",
   "toast.documentTooShortForOutline": "Document too short for outline generation",

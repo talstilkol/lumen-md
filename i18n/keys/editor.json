@@ -1633,6 +1633,21 @@
       "vars": []
     },
     {
+      "key": "editor.cursorMovement",
+      "en": "Cursor movement in mixed Hebrew and English text",
+      "vars": []
+    },
+    {
+      "key": "editor.cursorMovement.logical",
+      "en": "Logical — arrows follow the order of the text",
+      "vars": []
+    },
+    {
+      "key": "editor.cursorMovement.visual",
+      "en": "Visual — arrows move the way the line looks (like Word)",
+      "vars": []
+    },
+    {
       "key": "editor.line",
       "en": "Line {n}",
       "vars": [

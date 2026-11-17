@@ -27,6 +27,8 @@
   "toast.claimsFailed": "Aussagen konnten nicht extrahiert werden: {{error}}",
   "toast.claimsNoParagraph": "Setzen Sie den Cursor zuerst in einen Absatz.",
   "toast.completed": "✅ {name} abgeschlossen",
+  "toast.cursorMovement.logical": "Cursor movement: logical — arrows follow the text order",
+  "toast.cursorMovement.visual": "Cursor movement: visual — arrows follow the screen",
   "toast.diagramFailed": "Diagramm fehlgeschlagen: {error}",
   "toast.diagramInserted": "✅ Diagramm eingefügt",
   "toast.dictate.localFailed": "Diktat auf dem Gerät gestoppt: {error}",

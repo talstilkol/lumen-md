@@ -22,8 +22,11 @@ import { test, expect, type Page } from "@playwright/test";
  *
  * The arrows are logical (plan 9.7: the arrow that points toward the end of
  * the line goes to the next character in the text), so "toward the end" is
- * Left in an RTL line and Right in an LTR one.
+ * Left in an RTL line and Right in an LTR one. These scenarios run in the
+ * logical cursor-movement mode; W13.H1 made visual the default, and the last
+ * block runs the 40 in both modes against e2e/cursor-scenarios.ts.
  */
+import { CARET_SCENARIOS, type CursorMode } from "./cursor-scenarios";
 
 type Dir = "rtl" | "ltr";
 type View = {
@@ -42,6 +45,7 @@ test.beforeAll(async ({ browser }) => {
   await page.addInitScript(() => {
     localStorage.setItem("lumen-tour-done", "1");
     localStorage.removeItem("lumen-md");
+    localStorage.setItem("lumen.cursorMovement", "logical");
   });
   await page.goto("/");
   await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
@@ -221,3 +225,79 @@ test.describe("caret: 12 Obsidian forum scenarios", () => {
     expect(Math.abs(s.caretX - s.endEdge)).toBeLessThanOrEqual(PX);
   });
 });
+
+/* ── W13.H1: the 40 scenarios in both cursor-movement modes ─────────────── */
+
+async function setMode(mode: CursorMode): Promise<void> {
+  await page.evaluate((m) => {
+    localStorage.setItem("lumen.cursorMovement", m);
+    window.dispatchEvent(new CustomEvent("lumen-local-setting", { detail: { id: "lumen.cursorMovement" } }));
+  }, mode);
+}
+
+/** The drawn caret (CodeMirror's drawSelection) and the line's text extent. */
+function drawn(): Promise<{ x: number; startEdge: number; endEdge: number; head: number; anchor: number }> {
+  return page.evaluate(
+    () =>
+      new Promise((done) =>
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => {
+            const el = document.querySelector(".cm-content") as (HTMLElement & { cmTile?: { root?: { view?: View } } }) | null;
+            const view = el?.cmTile?.root?.view;
+            const line = document.querySelector(".cm-content .cm-line") as HTMLElement;
+            const r = document.createRange();
+            r.selectNodeContents(line);
+            const b = r.getBoundingClientRect();
+            const rtl = getComputedStyle(line).direction === "rtl";
+            const c = document.querySelector(".cm-cursor-primary, .cm-cursor") as HTMLElement | null;
+            done({ x: c ? c.getBoundingClientRect().left : Number.NaN, startEdge: rtl ? b.right : b.left, endEdge: rtl ? b.left : b.right, head: view?.state.selection.main.head ?? -1, anchor: view?.state.selection.main.anchor ?? -1 });
+          }),
+        ),
+      ),
+  );
+}
+
+for (const mode of ["logical", "visual"] as const) {
+  test.describe(`caret table, ${mode} mode (W13.H1)`, () => {
+    test.beforeAll(() => setMode(mode));
+    for (const sc of CARET_SCENARIOS) {
+      const e = sc[mode];
+      test(`${mode} home: ${sc.text}`, async () => {
+        await load(sc.text, sc.text.length);
+        await page.keyboard.press("Home");
+        const d = await drawn();
+        expect(d.head).toBe(e.home.head);
+        if (e.home.edge) expect(Math.abs(d.x - d.startEdge)).toBeLessThanOrEqual(PX);
+      });
+      test(`${mode} end: ${sc.text}`, async () => {
+        await load(sc.text, 0);
+        await page.keyboard.press("End");
+        const d = await drawn();
+        expect(d.head).toBe(e.end.head);
+        if (e.end.edge) expect(Math.abs(d.x - d.endEdge)).toBeLessThanOrEqual(PX);
+        await load(sc.text, 0);
+        await page.keyboard.press("Shift+End");
+        const s = await drawn();
+        expect([s.anchor, s.head], "Shift+End selects the whole line").toEqual([0, sc.text.length]);
+      });
+      test(`${mode} trip: ${sc.text}`, async () => {
+        await load(sc.text, e.trip[0]);
+        const heads = [(await drawn()).head];
+        for (let i = 0; i < 6; i++) {
+          await page.keyboard.press(i < 3 ? forwardKey(sc.dir) : backKey(sc.dir));
+          heads.push((await drawn()).head);
+        }
+        expect(heads).toEqual(e.trip);
+      });
+      test(`${mode} word: ${sc.text}`, async () => {
+        await load(sc.text, 0);
+        const mod = process.platform === "darwin" ? "Alt" : "Control";
+        await page.keyboard.press(`${mod}+${forwardKey(sc.dir)}`);
+        const w = (await drawn()).head;
+        await page.keyboard.press(`${mod}+${backKey(sc.dir)}`);
+        expect([w, (await drawn()).head]).toEqual(e.word);
+      });
+    }
+  });
+}
+

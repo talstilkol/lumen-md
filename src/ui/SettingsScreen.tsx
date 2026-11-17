@@ -176,6 +176,8 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
     else {
       writeLocal(entry.id, String(value));
       setLocalVersion((v) => v + 1);
+      // Modules that cache a local setting (the cursor movement, W13.H1) pick the change up at once.
+      window.dispatchEvent(new CustomEvent("lumen-local-setting", { detail: { id: entry.id } }));
     }
   };
 

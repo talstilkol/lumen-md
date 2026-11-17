@@ -22,6 +22,12 @@ import { bidi } from "../scripts/golden/sets/small.mjs";
  *      through Latin tokens, numbers, brackets and marks (logical order);
  *   3. the opposite arrow walks back the same way;
  *   4. Shift + that arrow selects the first characters of the text, in order.
+ *
+ * Those are the logical cursor-movement mode's rules (plan 9.7), so the page
+ * runs in that mode. W13.H1 made visual movement the default; the block at
+ * the end runs the same lines in visual mode, where the rule is the screen:
+ * every press of an arrow moves the caret toward that side (or it stays at
+ * that edge of the line), and Shift + the arrow selects in the same model.
  */
 
 type Item = { id: string; line: string; dir: "rtl" | "ltr" | "neutral" };
@@ -46,6 +52,8 @@ test.beforeAll(async ({ browser }) => {
   await page.addInitScript(() => {
     localStorage.setItem("lumen-tour-done", "1");
     localStorage.removeItem("lumen-md");
+    // The logical mode's rules (plan 9.7); the visual default is checked at the end (W13.H1).
+    if (!sessionStorage.getItem("lumen-e2e-visual")) localStorage.setItem("lumen.cursorMovement", "logical");
   });
   await page.goto("/");
   await expect(page.locator(".cm-content").first()).toContainText("Welcome to", { timeout: 15_000 });
@@ -257,3 +265,60 @@ for (const it of ITEMS) {
     expect((await wysiwygState()).selected, `Shift+${forward} selects in order`).toBe(s0.text.slice(0, stops[k - 1]));
   });
 }
+
+/* ── W13.H1: the same lines in visual mode (the default) ───────────────── */
+
+/** Where CodeMirror draws the caret (drawSelection), in CSS px from the left. */
+function drawnCaretX(): Promise<number> {
+  return page.evaluate(
+    () =>
+      new Promise<number>((done) =>
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => {
+            const c = document.querySelector(".cm-cursor-primary, .cm-cursor") as HTMLElement | null;
+            done(c ? c.getBoundingClientRect().left : Number.NaN);
+          }),
+        ),
+      ),
+  );
+}
+
+test.describe("visual cursor movement (W13.H1 default)", () => {
+  test.beforeAll(async () => {
+    await page.evaluate(() => {
+      sessionStorage.setItem("lumen-e2e-visual", "1");
+      localStorage.removeItem("lumen.cursorMovement");
+    });
+    await page.reload();
+    await expect(page.locator(".cm-content").first()).toBeVisible({ timeout: 15_000 });
+  });
+
+  for (const it of ITEMS.slice(0, 12)) {
+    test(`source, visual: ${it.id} ${JSON.stringify(it.line)}`, async () => {
+      await loadLine(it.line);
+      const dir = (await sourceState()).css as "rtl" | "ltr";
+      const key = dir === "rtl" ? "ArrowLeft" : "ArrowRight";
+      const sign = key === "ArrowLeft" ? -1 : 1;
+      let x = await drawnCaretX();
+      const box = await page.locator(".cm-content .cm-line").first().evaluate((l) => {
+        const r = document.createRange();
+        r.selectNodeContents(l);
+        const b = r.getBoundingClientRect();
+        return { left: b.left, right: b.right };
+      });
+      const n = Math.min(boundaries(it.line).length, 12);
+      for (let i = 0; i < n; i++) {
+        await page.keyboard.press(key);
+        const nx = await drawnCaretX();
+        const atEdge = sign < 0 ? nx - box.left <= 3 : box.right - nx <= 3;
+        expect(Math.sign(Math.round(nx - x)) === sign || (Math.round(nx - x) === 0 && atEdge), `press ${i + 1}: the caret moves toward ${key} (x ${x} → ${nx})`).toBe(true);
+        x = nx;
+      }
+      // Shift + the other arrow selects in the same model: the drawn head moves back toward the other side.
+      await page.keyboard.press(`Shift+${key === "ArrowLeft" ? "ArrowRight" : "ArrowLeft"}`);
+      const s = await sourceState();
+      expect(s.anchor, "Shift extends the selection").not.toBe(s.head);
+    });
+  }
+});
+
