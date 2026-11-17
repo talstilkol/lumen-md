@@ -552,6 +552,8 @@
   "cmd.view.bidiMarks.hint": "テキストの方向を決める見えない文字（RLM、LRM、アイソレートなど）にタグを付ける",
   "cmd.view.bidiMarks.off": "方向マークを非表示",
   "cmd.view.bidiMarks.on": "方向マークを表示",
+  "cmd.view.bilingual": "📖 Bilingual reader (columns / line under line)",
+  "cmd.view.bilingual.hint": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
   "cmd.view.calendar": "カレンダーの表示 / 非表示",
   "cmd.view.calendar.hint": "ファイルツリーの下に表示するデイリーノートの月間カレンダー",
   "cmd.view.canvas": "🎨 キャンバス / ホワイトボード",

@@ -552,6 +552,8 @@
   "cmd.view.bidiMarks.hint": "Unsichtbare Zeichen markieren, die die Textrichtung bestimmen (RLM, LRM, Isolates …)",
   "cmd.view.bidiMarks.off": "Richtungszeichen ausblenden",
   "cmd.view.bidiMarks.on": "Richtungszeichen anzeigen",
+  "cmd.view.bilingual": "📖 Bilingual reader (columns / line under line)",
+  "cmd.view.bilingual.hint": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
   "cmd.view.calendar": "Kalender ein- / ausblenden",
   "cmd.view.calendar.hint": "Monatskalender der Tagesnotizen unter dem Dateibaum",
   "cmd.view.canvas": "🎨 Canvas / Whiteboard",

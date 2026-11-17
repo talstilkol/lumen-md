@@ -2350,6 +2350,106 @@
       "vars": []
     },
     {
+      "key": "bilingual.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "bilingual.layout",
+      "en": "Layout",
+      "vars": []
+    },
+    {
+      "key": "bilingual.machine",
+      "en": "Machine translation made on this device ({layer}). Check it against the source.",
+      "vars": [
+        "layer"
+      ]
+    },
+    {
+      "key": "bilingual.makeOne",
+      "en": "Open side-by-side translation",
+      "vars": []
+    },
+    {
+      "key": "bilingual.missing",
+      "en": "(not translated yet)",
+      "vars": []
+    },
+    {
+      "key": "bilingual.mode.columns",
+      "en": "Columns",
+      "vars": []
+    },
+    {
+      "key": "bilingual.mode.interlinear",
+      "en": "Line under line",
+      "vars": []
+    },
+    {
+      "key": "bilingual.mode.source",
+      "en": "Source only",
+      "vars": []
+    },
+    {
+      "key": "bilingual.none",
+      "en": "This note has no translation to read beside it: it is not a Sefaria source with two versions, and it has no translation file. Side-by-side translation can make one on this device.",
+      "vars": []
+    },
+    {
+      "key": "bilingual.official",
+      "en": "Official versions: {source} · {target} ({license}). Not a machine translation.",
+      "vars": [
+        "source",
+        "target",
+        "license"
+      ]
+    },
+    {
+      "key": "bilingual.source",
+      "en": "Source",
+      "vars": []
+    },
+    {
+      "key": "bilingual.stale",
+      "en": "out of date",
+      "vars": []
+    },
+    {
+      "key": "bilingual.table",
+      "en": "Source and translation, verse by verse",
+      "vars": []
+    },
+    {
+      "key": "bilingual.title",
+      "en": "Bilingual reader",
+      "vars": []
+    },
+    {
+      "key": "bilingual.translation",
+      "en": "Translation",
+      "vars": []
+    },
+    {
+      "key": "bilingual.unmatched",
+      "en": "{count} verse(s) have no counterpart in the other version.",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "bilingual.verse",
+      "en": "Verse",
+      "vars": []
+    },
+    {
+      "key": "bilingual.verseN",
+      "en": "Verse {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "blockLink.copied",
       "en": "Copied {link}",
       "vars": [

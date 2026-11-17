@@ -87,6 +87,22 @@
     "ru": "l899cf",
     "zh-CN": "l899cf"
   },
+  "cmd.view.bilingual": {
+    "ar": "1r6brfh",
+    "de": "1r6brfh",
+    "fr": "1r6brfh",
+    "ja": "1r6brfh",
+    "ru": "1r6brfh",
+    "zh-CN": "1r6brfh"
+  },
+  "cmd.view.bilingual.hint": {
+    "ar": "rki0be",
+    "de": "rki0be",
+    "fr": "rki0be",
+    "ja": "rki0be",
+    "ru": "rki0be",
+    "zh-CN": "rki0be"
+  },
   "cmd.view.columnNext": {
     "ar": "1ko4af8",
     "de": "1ko4af8",

@@ -552,6 +552,8 @@
   "cmd.view.bidiMarks.hint": "Étiqueter les caractères invisibles qui fixent la direction du texte (RLM, LRM, isolats…)",
   "cmd.view.bidiMarks.off": "Masquer les marques de direction",
   "cmd.view.bidiMarks.on": "Afficher les marques de direction",
+  "cmd.view.bilingual": "📖 Bilingual reader (columns / line under line)",
+  "cmd.view.bilingual.hint": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
   "cmd.view.calendar": "Afficher / masquer le calendrier",
   "cmd.view.calendar.hint": "Calendrier mensuel des notes quotidiennes, sous l'arborescence",
   "cmd.view.canvas": "🎨 Canevas / Tableau blanc",

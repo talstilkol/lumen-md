@@ -339,6 +339,8 @@
   "cmd.view.backlinks": "Toggle backlinks",
   "cmd.view.bidiMarks.off": "Hide direction marks",
   "cmd.view.bidiMarks.on": "Show direction marks",
+  "cmd.view.bilingual": "📖 Bilingual reader (columns / line under line)",
+  "cmd.view.bilingual.hint": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
   "cmd.view.calendar": "Show / hide the calendar",
   "cmd.view.canvas": "🎨 Canvas / Whiteboard",
   "cmd.view.columnNext": "View: focus the next column",

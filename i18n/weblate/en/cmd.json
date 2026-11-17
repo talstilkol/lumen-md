@@ -547,6 +547,8 @@
   "cmd.view.bidiMarks.hint": "Tag the invisible characters that set text direction (RLM, LRM, isolates…)",
   "cmd.view.bidiMarks.off": "Hide direction marks",
   "cmd.view.bidiMarks.on": "Show direction marks",
+  "cmd.view.bilingual": "📖 Bilingual reader (columns / line under line)",
+  "cmd.view.bilingual.hint": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
   "cmd.view.calendar": "Show / hide the calendar",
   "cmd.view.calendar.hint": "Month calendar of daily notes under the file tree",
   "cmd.view.canvas": "🎨 Canvas / Whiteboard",

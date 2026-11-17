@@ -2783,6 +2783,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.bilingual",
+      "en": "📖 Bilingual reader (columns / line under line)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.bilingual.hint",
+      "en": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
+      "vars": []
+    },
+    {
       "key": "cmd.view.calendar",
       "en": "Show / hide the calendar",
       "vars": []
