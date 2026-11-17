@@ -99,6 +99,12 @@ export interface QueryHooks {
 
 export interface SearchOptions {
   limit?: number;
+  /**
+   * Skip the first `offset` results (W13.V3: the search streams its results a
+   * page at a time). A later page keeps the order the first page was cut from,
+   * so a result never moves once it is on screen.
+   */
+  offset?: number;
   /** Only these paths (applied before `limit`). Serialisable, unlike a filter function. */
   paths?: string[];
 }
@@ -492,6 +498,7 @@ export class VaultIndex {
 
   private rank(rawQuery: string, opts: SearchOptions, onRegexSkip: () => void, hooks: QueryHooks, onTimeout: () => void): SearchHit[] {
     const limit = opts.limit ?? 30;
+    const offset = Math.max(0, opts.offset ?? 0);
     // Operators (plan 11.3): tag:, path:, "phrase", /regex/, -term. The rest ranks.
     const { text: query, ops, invalid } = parseQuery(rawQuery);
     // A /regex/ that does not compile matches nothing, rather than being dropped (which would list every note).
@@ -518,7 +525,7 @@ export class VaultIndex {
       return [...this.files.values()]
         .filter((f) => !allow || allow.has(f.path))
         .sort((a, b) => b.modified - a.modified || (a.path < b.path ? -1 : 1))
-        .slice(0, limit)
+        .slice(offset, offset + limit)
         .map((f) => {
           // An operator-only query shows where it matched.
           const at = ops.length ? opLocation(ops, matchable(f)) : null;
@@ -536,7 +543,7 @@ export class VaultIndex {
     const filter = allow ? (id: string) => allow.has(id) : undefined;
     const lemma = this.lemma;
     const expand = lemma ? (base: QueryTerm[]) => lemma.mod.expandWithLemmas(base, lemma.lexicon) : undefined;
-    for (const h of this.bm25.search(query, { limit: Math.max(limit * 3, 100), filter, prefix: true, expand })) content.set(h.id, h);
+    for (const h of this.bm25.search(query, { limit: Math.max((offset + limit) * 3, 100), filter, prefix: true, expand })) content.set(h.id, h);
     // The whole query as a phrase only means something for several words,
     // and only in a note that has every one of them.
     const multiWord = /\s/.test(q);
@@ -553,7 +560,8 @@ export class VaultIndex {
     // for the leading candidates — but for every one the phrase bonus could
     // still lift into the first `limit`.
     const cutoff = ranked.length > limit ? ranked[limit - 1].score : -Infinity;
-    const candidates = ranked.filter((r, i) => i < limit || (r.phraseable && r.score + PHRASE_BONUS >= cutoff));
+    // W13.V3: a later page is the next slice of the same order; the phrase bonus reorders inside it only.
+    const candidates = offset > 0 ? ranked.slice(offset, offset + limit) : ranked.filter((r, i) => i < limit || (r.phraseable && r.score + PHRASE_BONUS >= cutoff));
     const out: SearchHit[] = [];
     for (const { e, score: base, matched, phraseable } of candidates) {
       let score = base;
@@ -572,6 +580,9 @@ export class VaultIndex {
       out.push(hit);
     }
     out.sort((a, b) => b.score - a.score || (a.path < b.path ? -1 : 1));
+    // Paged (W13.V3): nothing is cut, so a result the phrase bonus pushed down is not lost between pages;
+    // one it lifted from below the cut comes again on a later page, and the stream keeps the first.
+    if (opts.offset !== undefined) return out;
     return out.slice(0, limit);
   }
 }

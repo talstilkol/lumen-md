@@ -13,6 +13,8 @@
  *   6. idle CPU    process CPU over an idle window after load (default 60 s), as % of one core,
  *                  and the longest event-loop stall in that window (Obsidian's 280 ms / 2 s bug class)
  *   7. peak RSS    process.resourceUsage().maxRSS
+ *   8. streaming   W13.V3: a query that matches thousands of notes, streamed a page at a time
+ *                  (src/storage/searchStream.ts): first page p95 and all of up to 5,000 results p95
  *
  *   npm run perf:large-vault -- --vault /tmp/vault-100k [--idle 60] [--cold-cache yes|no] [--report docs/perf/large-vault.md] [--targets]
  *
@@ -31,8 +33,9 @@ import { readdirSync, readFileSync, statSync, writeFileSync, mkdirSync, existsSy
 import { dirname, join, relative } from "node:path";
 import { monitorEventLoopDelay } from "node:perf_hooks";
 import { VaultIndex } from "../../src/storage/vaultIndexCore";
+import { streamSearch } from "../../src/storage/searchStream";
 
-export const TARGETS = Object.freeze({ warmOpenMs: 2000, coldOpenMs: 8000, searchP95Ms: 200, saveToIndexMs: 50, idleCpuPct: 2, idleMaxStallMs: 50 });
+export const TARGETS = Object.freeze({ warmOpenMs: 2000, coldOpenMs: 8000, searchP95Ms: 200, saveToIndexMs: 50, idleCpuPct: 2, idleMaxStallMs: 50, streamFirstP95Ms: 50, streamAllP95Ms: 1000 });
 
 export interface Query {
   q: string;
@@ -54,6 +57,8 @@ export interface Result {
   backlinks: { p50Ms: number; p95Ms: number; hits: number };
   idle: { seconds: number; cpuPct: number; maxStallMs: number };
   peakRssMB: number;
+  /** W13.V3: the broad query, how many it matched (up to 5,000), first page and all, p95 over 20 runs. */
+  stream?: { query: string; results: number; firstP95Ms: number; allP95Ms: number };
   machine: { platform: string; release: string; arch: string; cpu: string; cores: number; memGB: number; node: string };
   date: string;
   targets: typeof TARGETS;
@@ -138,6 +143,8 @@ export async function measure(vault: string, opts: { idleSeconds?: number; coldC
     bl.push(performance.now() - t);
   }
 
+  const stream = await measureStream(idx);
+
   const h = monitorEventLoopDelay({ resolution: 10 });
   h.enable();
   const cpu0 = process.cpuUsage();
@@ -164,6 +171,7 @@ export async function measure(vault: string, opts: { idleSeconds?: number; coldC
     backlinks: { p50Ms: r1(percentile(bl, 50)), p95Ms: r1(percentile(bl, 95)), hits: blHits },
     idle: { seconds: idleSeconds, cpuPct: Math.round(cpuPct * 100) / 100, maxStallMs: r1(maxStallMs) },
     peakRssMB: Math.round(process.resourceUsage().maxRSS / 1024),
+    stream,
     machine: { platform: platform(), release: release(), arch: arch(), cpu: c[0]?.model ?? "?", cores: c.length, memGB: Math.round(totalmem() / 2 ** 30), node: process.version },
     date: new Date().toISOString(),
     targets: TARGETS,
@@ -171,6 +179,31 @@ export async function measure(vault: string, opts: { idleSeconds?: number; coldC
   };
   res.missed = missedTargets(res);
   return res;
+}
+
+/** The word that matches the most notes, of a few common ones in each language. */
+const BROAD = ["the", "and", "של", "את", "על", "a"];
+
+/** W13.V3: the streamed search of a broad query, as the search dialog runs it. */
+export async function measureStream(idx: VaultIndex, runs = 20): Promise<Result["stream"]> {
+  let query = BROAD[0];
+  let most = -1;
+  for (const q of BROAD) {
+    const n = idx.search(q, { limit: 5000 }).length;
+    if (n > most) [query, most] = [q, n];
+  }
+  const page = async (q: string, o: { limit: number; offset: number }) => idx.search(q, o);
+  const first: number[] = [];
+  const all: number[] = [];
+  let results = 0;
+  for (let i = 0; i < runs; i++) {
+    const t = performance.now();
+    let f = -1;
+    results = (await streamSearch(page, query, { onPage: () => void (f < 0 && (f = performance.now() - t)) })).length;
+    first.push(f < 0 ? performance.now() - t : f);
+    all.push(performance.now() - t);
+  }
+  return { query, results, firstP95Ms: r1(percentile(first, 95)), allP95Ms: r1(percentile(all, 95)) };
 }
 
 export function missedTargets(r: Result): string[] {
@@ -181,6 +214,8 @@ export function missedTargets(r: Result): string[] {
   if (r.saveToIndexMs > TARGETS.saveToIndexMs || !r.saveFound) m.push(`save→index ${r.saveToIndexMs} ms${r.saveFound ? "" : " (edit not found)"} > ${TARGETS.saveToIndexMs}`);
   if (r.idle.cpuPct > TARGETS.idleCpuPct) m.push(`idle CPU ${r.idle.cpuPct}% > ${TARGETS.idleCpuPct}%`);
   if (r.idle.maxStallMs > TARGETS.idleMaxStallMs) m.push(`idle stall ${r.idle.maxStallMs} ms > ${TARGETS.idleMaxStallMs}`);
+  if (r.stream && r.stream.firstP95Ms > TARGETS.streamFirstP95Ms) m.push(`streamed search first page p95 ${r.stream.firstP95Ms} ms > ${TARGETS.streamFirstP95Ms}`);
+  if (r.stream && r.stream.allP95Ms > TARGETS.streamAllP95Ms) m.push(`streamed search, all ${r.stream.results}, p95 ${r.stream.allP95Ms} ms > ${TARGETS.streamAllP95Ms}`);
   return m;
 }
 
@@ -188,7 +223,7 @@ export function missedTargets(r: Result): string[] {
 export function renderReport(runs: Result[]): string {
   const rows = runs.map(
     (r) =>
-      `| ${r.date.slice(0, 10)} | ${r.notes.toLocaleString("en")} | ${r.origin} | ${r.coldOpenMs} (${r.coldCache === "yes" ? "cache purged" : r.coldCache === "no" ? "cache warm" : "cache ?"}) | ${r.warmOpenMs} | ${r.search.p50Ms} / ${r.search.p95Ms} (${r.search.found}/${r.search.queries} found) | ${r.saveToIndexMs}${r.saveFound ? "" : " ✗"} | ${r.backlinks.p50Ms} / ${r.backlinks.p95Ms} | ${r.idle.cpuPct}% over ${r.idle.seconds} s, max stall ${r.idle.maxStallMs} ms | ${r.peakRssMB} | ${r.machine.cpu}, ${r.machine.cores} cores, ${r.machine.memGB} GB, ${r.machine.platform} ${r.machine.release} ${r.machine.arch}, Node ${r.machine.node} | ${r.missed.length ? r.missed.join("; ") : "—"} |`,
+      `| ${r.date.slice(0, 10)} | ${r.notes.toLocaleString("en")} | ${r.origin} | ${r.coldOpenMs} (${r.coldCache === "yes" ? "cache purged" : r.coldCache === "no" ? "cache warm" : "cache ?"}) | ${r.warmOpenMs} | ${r.search.p50Ms} / ${r.search.p95Ms} (${r.search.found}/${r.search.queries} found) | ${r.saveToIndexMs}${r.saveFound ? "" : " ✗"} | ${r.backlinks.p50Ms} / ${r.backlinks.p95Ms} | ${r.idle.cpuPct}% over ${r.idle.seconds} s, max stall ${r.idle.maxStallMs} ms | ${r.peakRssMB} | ${r.stream ? `${r.stream.firstP95Ms} / ${r.stream.allP95Ms} (“${r.stream.query}”, ${r.stream.results.toLocaleString("en")})` : "—"} | ${r.machine.cpu}, ${r.machine.cores} cores, ${r.machine.memGB} GB, ${r.machine.platform} ${r.machine.release} ${r.machine.arch}, Node ${r.machine.node} | ${r.missed.length ? r.missed.join("; ") : "—"} |`,
   );
   return [
     "# Large-vault benchmark",
@@ -199,10 +234,10 @@ export function renderReport(runs: Result[]): string {
     "",
     "It measures lumen-md's index core (`src/storage/vaultIndexCore.ts`, what the vault worker runs) in Node. The app window and Obsidian 1.15.1 are measured by hand on the same machine and folder: [large-vault-obsidian.md](./large-vault-obsidian.md).",
     "",
-    `Targets at 100k (W11.Q2, fixed): warm open ≤ ${TARGETS.warmOpenMs} ms, cold ≤ ${TARGETS.coldOpenMs} ms, search p95 ≤ ${TARGETS.searchP95Ms} ms, save→index ≤ ${TARGETS.saveToIndexMs} ms, idle CPU ≤ ${TARGETS.idleCpuPct}%, no stall over ${TARGETS.idleMaxStallMs} ms when idle.`,
+    `Targets at 100k (W11.Q2, fixed): warm open ≤ ${TARGETS.warmOpenMs} ms, cold ≤ ${TARGETS.coldOpenMs} ms, search p95 ≤ ${TARGETS.searchP95Ms} ms, save→index ≤ ${TARGETS.saveToIndexMs} ms, idle CPU ≤ ${TARGETS.idleCpuPct}%, no stall over ${TARGETS.idleMaxStallMs} ms when idle; streamed search (W13.V3) first page p95 ≤ ${TARGETS.streamFirstP95Ms} ms, all results p95 ≤ ${TARGETS.streamAllP95Ms} ms.`,
     "",
-    "| date | notes | origin | cold open ms | warm open ms | search p50 / p95 ms | save→index ms | backlinks p50 / p95 ms | idle | peak RSS MB | machine | missed targets |",
-    "|---|---|---|---|---|---|---|---|---|---|---|---|",
+    "| date | notes | origin | cold open ms | warm open ms | search p50 / p95 ms | save→index ms | backlinks p50 / p95 ms | idle | peak RSS MB | streamed search first / all p95 ms | machine | missed targets |",
+    "|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ...rows,
     "",
   ].join("\n");

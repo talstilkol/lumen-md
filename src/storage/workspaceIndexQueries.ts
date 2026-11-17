@@ -51,6 +51,8 @@ export async function searchWorkspace(
   /** `filter`: only these paths — applied before `limit`. */
   opts: {
     limit?: number;
+    /** W13.V3: skip this many results (the next page of a streamed search). */
+    offset?: number;
     filter?: (path: string) => boolean;
     /** Told what a /regex/ could not check (2.39): notes too long for it, or a search stopped at the time limit. */
     onRegexInfo?: (info: Omit<SearchResult, "hits">) => void;
@@ -72,13 +74,13 @@ export async function searchWorkspace(
  * search answers with no hits and `regexTimedOut`. The in-thread engine (no worker) keeps the same budget between
  * notes (./vaultIndexLocal.ts); the size cap (REGEX_MAX_CHARS) bounds one note.
  */
-async function searchDetailed(query: string, opts: { limit?: number; filter?: (path: string) => boolean; timeLimitMs?: number }): Promise<SearchResult> {
+async function searchDetailed(query: string, opts: { limit?: number; offset?: number; filter?: (path: string) => boolean; timeLimitMs?: number }): Promise<SearchResult> {
   await checkedIndex();
   if (!cache.byPath.size) return { hits: [], regexSkipped: 0 };
   const filter = opts.filter;
   // A function cannot cross into the worker: send the paths it allows.
   const paths = filter ? [...cache.byPath.keys()].filter((p) => filter(p)) : undefined;
-  const req = { limit: opts.limit ?? 30, paths };
+  const req = { limit: opts.limit ?? 30, paths, ...(opts.offset !== undefined ? { offset: opts.offset } : {}) };
   const limitMs = opts.timeLimitMs ?? REGEX_TIME_LIMIT_MS;
   return withEngine((e, current) => (e.kind === "worker" ? timedQuery(e, current, query, req, limitMs) : e.query(query, req, { regexTimeLimitMs: limitMs })));
 }
