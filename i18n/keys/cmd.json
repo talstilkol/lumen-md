@@ -1961,6 +1961,11 @@
       "vars": []
     },
     {
+      "key": "cmd.reading.profile",
+      "en": "Reading mode…",
+      "vars": []
+    },
+    {
       "key": "cmd.related.folderOff",
       "en": "Related notes: on / off for this folder",
       "vars": []
@@ -3322,6 +3327,11 @@
     {
       "key": "desc.print",
       "en": "Open browser print dialog",
+      "vars": []
+    },
+    {
+      "key": "desc.reading.profile",
+      "en": "Choose how this note is read — page, focus and more — and save it for this note or for all notes",
       "vars": []
     },
     {

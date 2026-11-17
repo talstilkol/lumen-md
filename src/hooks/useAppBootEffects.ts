@@ -16,10 +16,16 @@ import { onHistoryQuota, onQuotaWarning } from "../storage/history";
 import { explainError } from "../lib/userError";
 import { openNewDoc } from "../commands/useCommands";
 
+let readingApplied = false;
+
 export function useAppBootEffects(): void {
-  // Reading options (plan W3.5): the open note's face, size and spacing.
-  // The module (and any face) loads only once the person has set one.
+  // Reading options (plan W3.5) and the note's reading profile (W13.R1):
+  // the open note's face, size, spacing and aids. The modules (and any face)
+  // load only once the person has set one, or the note's frontmatter has a
+  // `lumen-reading:` line — the line itself is the dependency, so typing in
+  // the body does not re-apply it.
   const readingPath = useAppStore((s) => s.doc.workspaceName ?? null);
+  const fileProfileLine = useAppStore((s) => profileLine(s.doc.content));
   useEffect(() => {
     let live = true;
     const apply = () => {
@@ -29,9 +35,11 @@ export function useAppBootEffects(): void {
       } catch {
         /* why: no storage: nothing set */
       }
-      if (!stored) return;
-      void import("../reading/settings").then((m) => {
-        if (live) void m.applyReading(m.effectiveReading(readingPath));
+      // why: once a profile was applied, a note without one must put the page back
+      if (!stored && !fileProfileLine && !readingApplied) return;
+      readingApplied = true;
+      void import("../reading/profileStore").then((m) => {
+        if (live) void m.applyProfile(m.noteProfile(readingPath, useAppStore.getState().doc.content).profile);
       });
     };
     apply();
@@ -40,7 +48,7 @@ export function useAppBootEffects(): void {
       live = false;
       window.removeEventListener("lumen-reading-changed", apply);
     };
-  }, [readingPath]);
+  }, [readingPath, fileProfileLine]);
 
   const enabledSnippets = useAppStore((s) => s.enabledSnippets);
   // CSS snippets from the vault (plan W1.21): sanitized, applied, kept in step with the files.
@@ -183,4 +191,13 @@ export function useAppBootEffects(): void {
   useEffect(() => {
     void import("../agents/modelCritic").then((m) => m.installModelCritic());
   }, []);
+}
+
+/** The frontmatter's `lumen-reading:` line (plan W13.R1), or null — a cheap test that needs no YAML parser at startup. */
+export function profileLine(content: string): string | null {
+  if (!content.startsWith("---") && !content.startsWith("\uFEFF---")) return null;
+  const head = content.slice(0, 4096);
+  const end = head.indexOf("\n---", 3);
+  const m = /(?:^|\n)(lumen-reading\s*:[^\n]*(?:\n[ \t]+[^\n]*)*)/.exec(end < 0 ? head : head.slice(0, end + 1));
+  return m ? m[1] : null;
 }

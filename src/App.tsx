@@ -183,6 +183,7 @@ export default function App() {
   const [runtimeMetricsOpen, setRuntimeMetricsOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
+  useWindowEvent("lumen-open-focus", () => setFocusMode(true));
   const [tourOpen, setTourOpen] = useState(false);
   const [setupOpen, setSetupOpen] = useState(false);
 

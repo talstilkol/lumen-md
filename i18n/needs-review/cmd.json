@@ -31,6 +31,14 @@
     "ru": "1b01jxe",
     "zh-CN": "1b01jxe"
   },
+  "cmd.reading.profile": {
+    "ar": "juohqg",
+    "de": "juohqg",
+    "fr": "juohqg",
+    "ja": "juohqg",
+    "ru": "juohqg",
+    "zh-CN": "juohqg"
+  },
   "cmd.screenshotToNote": {
     "ar": "11kn380",
     "de": "11kn380",
@@ -206,5 +214,13 @@
     "ja": "h89fnm",
     "ru": "h89fnm",
     "zh-CN": "h89fnm"
+  },
+  "desc.reading.profile": {
+    "ar": "12myrs1",
+    "de": "12myrs1",
+    "fr": "12myrs1",
+    "ja": "12myrs1",
+    "ru": "12myrs1",
+    "zh-CN": "12myrs1"
   }
 }
