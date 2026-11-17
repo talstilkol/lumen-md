@@ -58,7 +58,7 @@ describe("encrypted sync: bulk rounds save the device state in batches (FC1)", (
       delete: (n) => inner.delete(n),
       put: (n, d, c) => {
         const saved = a?.store.state?.pending ?? [];
-        const meta = n === HEADER_NAME || n === KEYRING_NAME || !c || c.ifNoneMatch !== "*";
+        const meta = n === HEADER_NAME || n === KEYRING_NAME || !c || !("ifNoneMatch" in c) || c.ifNoneMatch !== "*";
         if (a && !meta && !saved.includes(n)) unsaved.push(n);
         return inner.put(n, d, c);
       },
