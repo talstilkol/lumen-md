@@ -7,6 +7,8 @@
  *   npm run perf:vault100k -- --soak 1440   # 24 hours of random edits and queries
  *   npm run perf:vault100k -- --attachments /tmp/v100k --attachments-gb 5
  *                                           # + 5 GB of sparse attachments (W10.E17)
+ *   npm run perf:vault100k -- --graph       # W13.G13: the graph, 100k nodes / 500k links in
+ *                                           # Chromium, Firefox and WebKit (scripts/perf/graph-100k.mjs)
  *
  * W10.E17: "open < 2 s" is the open from the stored snapshot, measured
  * apart from the build (scripts/perf/vaultOpen.ts), and it is a limit.
@@ -15,6 +17,12 @@
  * links. Run with `--expose-gc` for exact heap numbers (the npm script does).
  * Prints one JSON line and exits non-zero when a limit is broken.
  */
+// W13.G13: `--graph` runs the graph's performance day instead of the index's.
+if (process.argv.includes("--graph")) {
+  // @ts-expect-error — plain .mjs module without type declarations
+  const { main } = await import("./graph-100k.mjs");
+  process.exit(await main(process.argv.slice(2).filter((a: string) => a !== "--graph")));
+}
 import { VaultIndex } from "../../src/storage/vaultIndexCore";
 import { measureOpen, OPEN_LIMIT_MS } from "./vaultOpen";
 // @ts-expect-error — plain .mjs module without type declarations
