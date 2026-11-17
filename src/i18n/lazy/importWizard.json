@@ -70,5 +70,10 @@
   "importWizard.onenote.clientIdSave": "Use this app",
   "importWizard.onenote.clientIdHint": "To import straight from your OneNote account, register a free app in Microsoft Entra and paste its client ID here. It is kept in this browser only.",
   "importWizard.onenote.clientIdInvalid": "That is not a client ID. It looks like 00000000-0000-0000-0000-000000000000.",
-  "importWizard.onenote.noClientId": "no Microsoft app client ID is set"
+  "importWizard.onenote.noClientId": "no Microsoft app client ID is set",
+  "importWizard.how.roam": "In Roam: ⋯ (top right) → Export All → JSON. Pick the .json, or the .zip as it came. Blocks stay an outline, block references become ^ids, daily notes go to journal/.",
+  "importWizard.how.craft": "In Craft: select the documents or the space → Export → Markdown (or TextBundle). Pick the .zip or the folder. Links between documents become wikilinks.",
+  "importWizard.how.textbundle": "TextBundle or TextPack from Ulysses, iA Writer and other editors: pick the .textbundle folders, the .textpack files, or a .zip of them. Images in assets/ come along.",
+  "importWizard.warn.remoteAttachment": "a file the app keeps on its own servers: the link to it is kept, nothing was downloaded",
+  "importWizard.warn.craftLink": "a link into Craft points at something not in the export: its text is kept"
 }

@@ -20,7 +20,9 @@ export function linkTargets(md: string): { kind: "wiki" | "md"; target: string }
   const out: { kind: "wiki" | "md"; target: string }[] = [];
   const text = prose(md);
   for (const m of text.matchAll(/!?\[\[([^\]|#^\n]*)(?:[#^][^\]|\n]*)?(?:\|[^\]\n]*)?\]\]/g)) {
-    if (m[1].trim()) out.push({ kind: "wiki", target: m[1].trim() });
+    // `[[a\|b]]`: the pipe escaped inside a table cell (W13.F1) — the target is `a`.
+    const target = m[1].trim().replace(/\\$/, "");
+    if (target) out.push({ kind: "wiki", target });
   }
   for (const m of text.matchAll(/!?\[(?:[^\]\n]|\\\])*\]\((<[^>\n]+>|[^)\s]+)(?:\s+"[^"]*")?\)/g)) {
     const dest = m[1].replace(/^<|>$/g, "");

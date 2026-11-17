@@ -15,7 +15,7 @@
  */
 import { createWorkspaceFolder, deleteWorkspaceFile, listWorkspace, listWorkspaceFolder, listWorkspaceTree, readWorkspaceBlob, workspaceHasEntry, writeWorkspaceBlob, writeWorkspaceFile } from "../workspace";
 import { moveToTrash } from "../trash";
-import { convertExport, detectImportSource, expandArchives, stripWrapper } from "./convert";
+import { convertExport, detectImportSource, openExport } from "./convert";
 import { linkStats } from "./links";
 import { safeName } from "./names";
 import { TYPES_DIR, typeFilePath } from "../../types/typeSchema";
@@ -53,7 +53,7 @@ async function sha256(data: Uint8Array | string): Promise<string> {
 
 /** The free folder for an import called `name`. */
 export async function importFolderFor(name: string): Promise<string> {
-  const base = `${IMPORT_ROOT}/${safeName(name.replace(/\.(zip|bearbk|enex|mht|mhtml|json)$/i, ""), "import")}`;
+  const base = `${IMPORT_ROOT}/${safeName(name.replace(/\.(zip|bearbk|enex|mht|mhtml|json|textpack|textbundle)$/i, ""), "import")}`;
   if (!(await workspaceHasEntry(base))) return base;
   let n = 2;
   while (await workspaceHasEntry(`${base} ${n}`)) n++;
@@ -74,10 +74,8 @@ export async function readPicked(list: ArrayLike<File>): Promise<{ files: Map<st
 
 /** Convert without writing. `source` null: detect it. */
 export async function prepareImport(picked: Map<string, Uint8Array>, name: string, source: ImportSourceId | null, opts: { notionTypes?: boolean } = {}): Promise<PreparedImport> {
-  const opened = stripWrapper(await expandArchives(picked));
-  const junk = [...opened.keys()].filter((p) => /(^|\/)__MACOSX(\/|$)|(^|\/)\.DS_Store$/.test(p));
-  for (const p of junk) opened.delete(p);
-  const detected = detectImportSource([...opened.keys()]);
+  const { opened, junk } = await openExport(picked);
+  const detected = detectImportSource([...opened.keys()], opened);
   const chosen = source ?? detected;
   const folder = await importFolderFor(name);
   // Apple Notes' own database (W10.E48) needs an async read (gzip'd bodies); its HTML exports go the usual way.

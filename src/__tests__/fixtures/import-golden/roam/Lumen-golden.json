@@ -1,0 +1,211 @@
+[
+ {
+  "title": "פרויקט אלפא",
+  "uid": "pg-alpha",
+  "create-time": 1762000000000,
+  "edit-time": 1762000001000,
+  "children": [
+   {
+    "string": "סטטוס:: בעבודה",
+    "uid": "attr-status",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000
+   },
+   {
+    "string": "אחראית:: [[דנה לוי]]",
+    "uid": "attr-owner",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000
+   },
+   {
+    "string": "מטרות",
+    "uid": "h-goals",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000,
+    "children": [
+     {
+      "string": "לסיים את טיוטת המחקר עד [[November 3rd, 2026]]",
+      "uid": "goal-draft",
+      "create-time": 1762000000000,
+      "edit-time": 1762000000000
+     },
+     {
+      "string": "{{[[TODO]]}} לשלוח ל[[דנה לוי]] את הפרק השני",
+      "uid": "goal-send",
+      "create-time": 1762000000000,
+      "edit-time": 1762000000000
+     },
+     {
+      "string": "{{[[DONE]]}} לאסוף מקורות על ^^שִׁירָה עִבְרִית^^",
+      "uid": "goal-sources",
+      "create-time": 1762000000000,
+      "edit-time": 1762000000000
+     }
+    ],
+    "heading": 2
+   },
+   {
+    "string": "החלטה מרכזית: נכתוב בעברית, עם מונחים ב‏English‏ כשצריך",
+    "uid": "blk-decision",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000
+   },
+   {
+    "string": "{{[[table]]}}",
+    "uid": "tbl",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000,
+    "children": [
+     {
+      "string": "שלב",
+      "uid": "c1",
+      "create-time": 1762000000000,
+      "edit-time": 1762000000000,
+      "children": [
+       {
+        "string": "תאריך",
+        "uid": "c2",
+        "create-time": 1762000000000,
+        "edit-time": 1762000000000
+       }
+      ]
+     },
+     {
+      "string": "טיוטה",
+      "uid": "c3",
+      "create-time": 1762000000000,
+      "edit-time": 1762000000000,
+      "children": [
+       {
+        "string": "[[November 3rd, 2026]]",
+        "uid": "c4",
+        "create-time": 1762000000000,
+        "edit-time": 1762000000000
+       }
+      ]
+     },
+     {
+      "string": "הגשה",
+      "uid": "c5",
+      "create-time": 1762000000000,
+      "edit-time": 1762000000000,
+      "children": [
+       {
+        "string": "[[November 10th, 2026]]",
+        "uid": "c6",
+        "create-time": 1762000000000,
+        "edit-time": 1762000000000
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "string": "קוד לדוגמה:\n```js\nconst א = 1;\n```",
+    "uid": "blk-code",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000
+   }
+  ]
+ },
+ {
+  "title": "דנה לוי",
+  "uid": "pg-dana",
+  "create-time": 1762000000000,
+  "edit-time": 1762000000000,
+  "children": [
+   {
+    "string": "חוקרת ב#[[ספרים/שירה]] ומנהלת את [[פרויקט אלפא]]",
+    "uid": "dana-1",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000
+   },
+   {
+    "string": "ההחלטה שלה: ((blk-decision))",
+    "uid": "dana-2",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000
+   },
+   {
+    "string": "[המטרה](((goal-draft))) נקבעה בפגישה",
+    "uid": "dana-3",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000
+   }
+  ]
+ },
+ {
+  "title": "ספרים/שירה",
+  "uid": "pg-poetry",
+  "create-time": 1762000000000,
+  "edit-time": 1762000000000,
+  "children": [
+   {
+    "string": "{{embed: ((blk-decision))}}",
+    "uid": "poe-1",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000
+   },
+   {
+    "string": "{{[[embed]]: [[דנה לוי]]}}",
+    "uid": "poe-2",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000
+   },
+   {
+    "string": "__נטוי__ ו**מודגש** ו[[פרויקט אלפא]]",
+    "uid": "poe-3",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000,
+    "children": [
+     {
+      "string": "ילד מקונן עם ((goal-sources))",
+      "uid": "poe-4",
+      "create-time": 1762000000000,
+      "edit-time": 1762000000000
+     }
+    ]
+   },
+   {
+    "string": "תמונה: ![](https://firebasestorage.googleapis.com/v0/b/example/o/img.png)",
+    "uid": "poe-5",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000
+   }
+  ]
+ },
+ {
+  "title": "November 3rd, 2026",
+  "uid": "11-03-2026",
+  "create-time": 1762000000000,
+  "edit-time": 1762000000000,
+  "children": [
+   {
+    "string": "פגישה עם [[דנה לוי]] על [[פרויקט אלפא]]",
+    "uid": "dn-1",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000
+   },
+   {
+    "string": "[[November 10th, 2026]] הוא מועד ההגשה",
+    "uid": "dn-2",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000
+   }
+  ]
+ },
+ {
+  "title": "November 10th, 2026",
+  "uid": "11-10-2026",
+  "create-time": 1762000000000,
+  "edit-time": 1762000000000,
+  "children": [
+   {
+    "string": "הגשה של [[ספרים/שירה]]",
+    "uid": "dn-3",
+    "create-time": 1762000000000,
+    "edit-time": 1762000000000
+   }
+  ]
+ }
+]

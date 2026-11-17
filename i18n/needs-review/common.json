@@ -836,6 +836,51 @@
     "ru": "nir8qt",
     "zh-CN": "nir8qt"
   },
+  "importWizard.how.craft": {
+    "ar": "1o7ykfz",
+    "de": "1o7ykfz",
+    "fr": "1o7ykfz",
+    "he": "1o7ykfz",
+    "ja": "1o7ykfz",
+    "ru": "1o7ykfz",
+    "zh-CN": "1o7ykfz"
+  },
+  "importWizard.how.roam": {
+    "ar": "32pkhs",
+    "de": "32pkhs",
+    "fr": "32pkhs",
+    "he": "32pkhs",
+    "ja": "32pkhs",
+    "ru": "32pkhs",
+    "zh-CN": "32pkhs"
+  },
+  "importWizard.how.textbundle": {
+    "ar": "rzbnb1",
+    "de": "rzbnb1",
+    "fr": "rzbnb1",
+    "he": "rzbnb1",
+    "ja": "rzbnb1",
+    "ru": "rzbnb1",
+    "zh-CN": "rzbnb1"
+  },
+  "importWizard.warn.craftLink": {
+    "ar": "30x0oc",
+    "de": "30x0oc",
+    "fr": "30x0oc",
+    "he": "30x0oc",
+    "ja": "30x0oc",
+    "ru": "30x0oc",
+    "zh-CN": "30x0oc"
+  },
+  "importWizard.warn.remoteAttachment": {
+    "ar": "vd52j7",
+    "de": "vd52j7",
+    "fr": "vd52j7",
+    "he": "vd52j7",
+    "ja": "vd52j7",
+    "ru": "vd52j7",
+    "zh-CN": "vd52j7"
+  },
   "jewishLang.dict.pending": {
     "ar": "fstejs",
     "de": "fstejs",

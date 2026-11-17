@@ -49,3 +49,82 @@ exports (made by its authors, not real users' data), so they are
 | `keep-expected/Rich checklist note.md` | 73 | `c3e44faa1d07654160d3f65103a84282f517241a1f05065c80f70abc8dc8b385` |
 | `keep-expected/Rich text note.md` | 89 | `1153f2eeb2d0c5faf5eeb93e1eee3611c2bb17151f73006cd0ba119893f1afd0` |
 | `keep-expected/Voice recording.md` | 126 | `48bcbfd4e86a14e8580743f08763a81c99b3c1b7785e079a9ea90ed7088a01f6` |
+
+## Roam and TextBundle (plan W13.F1)
+
+Copied unchanged from the same repository, for the Roam and TextBundle
+importers and the golden table of `npm run import:diff`
+(scripts/lib/importDiffCases.mjs). Public examples written or excerpted by
+the importer's authors (the Roam Help-graph excerpt is anonymised by them;
+see their `tests/roam/README.md`), not real users' exports.
+
+- Repository: https://github.com/obsidianmd/obsidian-importer
+- Version `3.2.0`, commit `fa9444a188459f227b07ec121ad03d26bd6b301a` (2026-11-12)
+- `tests/roam/*.json` → `roam/`; `tests/roam/expected/<graph>/` → `roam-expected/<graph>/` (the importer's output with `roamDefaults`)
+- `tests/textbundle/` (the two bundles, the two .textpack files, `Ulysses Export.zip`) → `textbundle/`; `tests/textbundle/expected/` → `textbundle-expected/`
+  (the importer's own recording names one Ulysses note `Search ΓÇô and Find.md`, the en dash read as CP437; kept as it is)
+- Licence: MIT, © 2023 Obsidian (`LICENSE` in this folder)
+- Copied: 2026-11-17. No code of the importer is copied into lumen-md; its outputs are the oracle only.
+
+| file | bytes | sha256 |
+|---|---|---|
+| `roam-expected/help-graph-excerpt/2021-02-01.md` | 109 | `bf038027875a0e77a03f1ed36a7057c93739687a10cc72a4666caab0737211be` |
+| `roam-expected/help-graph-excerpt/2021-03-02.md` | 0 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `roam-expected/help-graph-excerpt/2021-10-07.md` | 24 | `c794d6b1541d1fcd0ef3f699b955eb1d8fbac5bc4ee121c02df171dd68f6504a` |
+| `roam-expected/help-graph-excerpt/2023-02-10.md` | 5102 | `5b06cb9088fdc913500b492343b34985d8e42f4f95cd029a7f2aee6a7720a9ba` |
+| `roam-expected/help-graph-excerpt/Code Block.md` | 686 | `82d90ba80d8a8d14fee7090989468d810823e6eb482105e363b825324cdf35d9` |
+| `roam-expected/help-graph-excerpt/Community Videos.md` | 177 | `008ecf417f6d2331efcf0ab3b57102906d246edf403d2dc001fadd7dd887710a` |
+| `roam-expected/help-graph-excerpt/Customizable Hotkeys.md` | 152 | `5792d5bdd6bbdf7fbae6b90ea58d1ac4ff168321b7917b0bb1406e24bc848f20` |
+| `roam-expected/help-graph-excerpt/H/L Temp.md` | 0 | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `roam-expected/help-graph-excerpt/How to write a 21st Century Proof.md` | 65 | `13391c4b6628c65608bb18fdaac7b8954fc8ee6c2d2eb0c346c626c2457b6bd9` |
+| `roam-expected/help-graph-excerpt/Latex.md` | 291 | `d40a2d227d35fc00c7b3265411ffba6418fc82b666ac00335f254cef456368a8` |
+| `roam-expected/help-graph-excerpt/Plugins.md` | 207 | `a23a868c0d4b83c2a0520c24b2eb44d0969df9425212ba0835b8af7feb613145` |
+| `roam-expected/help-graph-excerpt/Query.md` | 2234 | `abe5c9d83cc008f7c35492598122be71f3bf93ab64e993f56660f4172a9602ef` |
+| `roam-expected/help-graph-excerpt/Secret Feature.md` | 70 | `c32423fa41d8d92ad177b152ce87c25ce3ebc9201f00ea1889a42faf54b61fc1` |
+| `roam-expected/help-graph-excerpt/TODO.md` | 115 | `6f0f5091b5b35c266e543b9164d1b271f2c7bb58ca0c231f343c9e02fe280952` |
+| `roam-expected/help-graph-excerpt/Table.md` | 563 | `c489fcba042e034893ec99b287032893ce88d3f388dd8085dfaf21705e052406` |
+| `roam-expected/help-graph-excerpt/Unlinked References.md` | 69 | `45b0119b2cafae3105889a48777a00858c4172589729f5dbae6b5986b58963d7` |
+| `roam-expected/help-graph-excerpt/Welcome to Roam v2.md` | 1534 | `a974194d3ea3fcfbce1be53926924c12259fc1494cffd90f920beef5a78e85f2` |
+| `roam-expected/shapes-outline/2021-01-01.md` | 110 | `50bbaa8e903ff728b4451d29417d876c41034de523f2b8ce73744f3337508578` |
+| `roam-expected/shapes-outline/Colliding name 1.md` | 58 | `4e41cacf37d0a66af71cfe1ff67fa7fb9005c1b89d3f0c1b1654e7cc598bbeff` |
+| `roam-expected/shapes-outline/Colliding name.md` | 57 | `8efae87d679433bc429721ebd87b2f6c67e179bb9d1d7a5b3feb77197808f2f9` |
+| `roam-expected/shapes-outline/Dune.md` | 52 | `4879137d8ab93005325847cd12e3167d066d179682ca6c5c2407efd3cd65245a` |
+| `roam-expected/shapes-outline/Embeds.md` | 137 | `5c8dbff7e0eb170a9958108ef960e47d02c4e2dc46276043ed6db971cc84972e` |
+| `roam-expected/shapes-outline/Headings.md` | 240 | `bf0bb0cfd71eefecb3023c98df036de00050ddc681859c73e3b11e59e36d5f4a` |
+| `roam-expected/shapes-outline/Queries.md` | 317 | `46c5886d86924356d1c8ec5f9fdcaf55b586aadd3232e2bd2c4949d851dad5aa` |
+| `roam-expected/shapes-outline/References.md` | 562 | `4d30316429fccd55a8ae041b2e6417747eb94de89b57edd0d46c89ebcce05055` |
+| `roam-expected/shapes-outline/Sapiens.md` | 265 | `6e23b31cd336ddacaf358a893a5c781f90db1080fc0fc358f6354e2c6850e5de` |
+| `roam-expected/shapes-outline/Source.md` | 173 | `348b4b115531e273b9f56364a0be13ab30bd651b41ae20818918c95a25a0437e` |
+| `roam-expected/shapes-outline/Tables.md` | 435 | `b600770b0afa295ab961c9e1c15a4ad0774098bfb9daed360586cca828698519` |
+| `roam-expected/shapes-outline/roam/css.md` | 130 | `d7de241aa9a85cc112752b19e0ed178d965abc7c04a9072b154e1a3dd216b4fc` |
+| `roam-expected/shapes/2021-01-01.md` | 107 | `dc0ea6cc699d6b2055336e66ab79b9c80ac50fbd67130f1c393c5819f851a88b` |
+| `roam-expected/shapes/Colliding name 1.md` | 56 | `46da9736cb296236924d6874ae71816973febf19b84cfc0c989e66649669908c` |
+| `roam-expected/shapes/Colliding name.md` | 55 | `f8f9c610c416595d27d16926a77c23ec50f6d4c5604882c261fba327c0063323` |
+| `roam-expected/shapes/Dune.md` | 52 | `4879137d8ab93005325847cd12e3167d066d179682ca6c5c2407efd3cd65245a` |
+| `roam-expected/shapes/Embeds.md` | 131 | `27b09d2d564226da32444546a78a1b3056017ec090fdc9c372d33db8612f1d87` |
+| `roam-expected/shapes/Headings.md` | 210 | `315ac878ad6c55ae5f7f9c47a8b350d486ceb745c31ce6c6255080d19c262a0d` |
+| `roam-expected/shapes/Queries.md` | 294 | `03cc91e0a1a462f8b3f6c8b5b91f27791d7efe2a93978c89f4e1c007489396df` |
+| `roam-expected/shapes/References.md` | 554 | `84db4dd91da96a85515e917eaa2515333c42194f3a8d53a9626c490c02261f75` |
+| `roam-expected/shapes/Sapiens.md` | 246 | `658741bffb0703e3e9504e9a357def3ab6f4ea353f04aba4ad5e6935406f1111` |
+| `roam-expected/shapes/Source.md` | 155 | `2b4161a0ca2f7019ecfedff0f8ff61b50aefcc8c80d121dae886764ca5372523` |
+| `roam-expected/shapes/Tables.md` | 414 | `017f27eed5c0eb13d9745844ea682812950688bd16d06d37d17ff55e53997c75` |
+| `roam-expected/shapes/roam/css.md` | 127 | `9f41543aa917104ee28eef82a41cbaffc23c7e341f4e72e612ad5d21a5622d4a` |
+| `roam-expected/small-test-graph/Theme Tester.md` | 3590 | `1bc9960aefd6117cf53ab75ff44ff63c460dd55ad2877abf476f8cd0c9c52c8e` |
+| `roam/help-graph-excerpt.json` | 71403 | `33133a6a1a553b513bfe15c39984858d3d07499085f6399a95e830d84e23f59e` |
+| `roam/shapes.json` | 8884 | `f6c3cf969e3c4f29bbd01f9ab2eaa988b319f0767fd273373ae922c1914e2638` |
+| `roam/small-test-graph.json` | 114060 | `d92ec3a3b438cffdbd6bc2a354ea6c7edfb503d2a430ee71f4b390ed98039fbf` |
+| `textbundle-expected/Textbundle Example v1/Textbundle Example v1.md` | 243 | `8b06425496362ec4c8a69dcbd73fd5663fe8360233cdbfac874f75a474580c53` |
+| `textbundle-expected/Textbundle Example v2/Textbundle Example v2.md` | 243 | `8b06425496362ec4c8a69dcbd73fd5663fe8360233cdbfac874f75a474580c53` |
+| `textbundle-expected/Ulysses Export/A Super-Quick Markup Primer.md` | 5758 | `f12c23e7e6b348a17bc3cf16509abc3112eb51a7af043c130c3ac9eea39bdf7e` |
+| `textbundle-expected/Ulysses Export/Search ΓÇô and Find.md` | 831 | `e7276f400d63a779c79be57543b67e795e5edbc223e6bbecb44cc6055a3a0bc3` |
+| `textbundle-expected/example 2/Textpack Example.md` | 243 | `f3ffb5c4fcf41407741c298e7fb9eee451f0502a3790bfbaa855001d5b6820fc` |
+| `textbundle-expected/example/Textbundle Example.md` | 243 | `8b06425496362ec4c8a69dcbd73fd5663fe8360233cdbfac874f75a474580c53` |
+| `textbundle/Textbundle Example v1.textbundle/assets/textbundle.png` | 3319 | `5897c340d6f0a2fcd404359629e4b6e21f4eed16b023fdaa8775ce96a94f8c6e` |
+| `textbundle/Textbundle Example v1.textbundle/info.json` | 146 | `fc3be58481781d81234e853eae0e1b2397e4b7ec2e80e618b59e8457acde1b6a` |
+| `textbundle/Textbundle Example v1.textbundle/text.md` | 221 | `ef466c9508c494047144b2a1941d760afbb8e16a592e7de518f9702ea91d1915` |
+| `textbundle/Textbundle Example v2.textbundle/assets/textbundle.png` | 3319 | `5897c340d6f0a2fcd404359629e4b6e21f4eed16b023fdaa8775ce96a94f8c6e` |
+| `textbundle/Textbundle Example v2.textbundle/info.json` | 262 | `cd6e78904e1dcb79678159c9d6d246481fcc370733af8e11ef1ad6d99c5e228f` |
+| `textbundle/Textbundle Example v2.textbundle/text.markdown` | 221 | `ef466c9508c494047144b2a1941d760afbb8e16a592e7de518f9702ea91d1915` |
+| `textbundle/Ulysses Export.zip` | 7236 | `b00934917f4e9b701036caa680ee08182c3194dfcd9590635f01c6ab2093cd4a` |
+| `textbundle/example 2.textpack` | 4163 | `6daf48e529afaf77872058c6770ef012e584b74033458870ae3f921d40c4aae1` |
+| `textbundle/example.textpack` | 4569 | `9a359488031cb2ca6ec074ecda3948047974a0125ac2a433a62d23490b8efc61` |
