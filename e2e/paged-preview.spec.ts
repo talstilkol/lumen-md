@@ -22,6 +22,7 @@ const files = readdirSync(FIXTURES).filter((f) => f.endsWith(".md")).sort();
 const pdfPages = (pdf: Buffer) => (pdf.toString("latin1").match(/\/Type\s*\/Page(?![s\w])/g) ?? []).length;
 
 test.describe("page view = PDF pages (W13.R10)", () => {
+  // skip-reason: page.pdf() exists only in Chromium; the page count is compared with a printed PDF | task: W13.R10 | until: 2027-05-17
   test.skip(({ browserName }) => browserName !== "chromium", "page.pdf() is Chromium-only");
 
   test("ten notes: the page view's count is the PDF's", async ({ page, browser, browserName }) => {

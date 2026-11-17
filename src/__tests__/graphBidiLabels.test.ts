@@ -94,6 +94,7 @@ const hasLayout = (() => {
 })();
 
 // Needs a real layout engine: in Node (happy-dom) there is none, so these run in Chromium (the shim's V4=browser).
+// skip-reason: measures rendered label widths, which only a real layout engine reports (Chromium); happy-dom has no layout | task: W13.G2 | until: 2027-05-17
 describe.runIf(hasLayout)("the 30-label baseline (visual, real layout engine only)", () => {
   for (const [label, , , visual] of BASELINE) {
     it(`${label} reads ${visual}`, () => {

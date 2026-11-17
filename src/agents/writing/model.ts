@@ -86,7 +86,7 @@ export function jsonIn<T = unknown>(text: string): T | null {
     try {
       return JSON.parse(body.slice(start, end)) as T;
     } catch {
-      /* try a shorter span */
+      /* why: not JSON up to here — try a shorter span */
     }
   }
   return null;

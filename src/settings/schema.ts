@@ -324,6 +324,18 @@ export const SETTINGS: readonly SettingEntry[] = [
   local("lumen.attachmentCleanup", { kind: "setting", tab: "general", type: "choice", options: [{ value: "ask" }, { value: "always" }, { value: "never" }] }),
   local("lumen.sync.conflictMode.v1", { kind: "setting", tab: "sync", type: "choice", options: [{ value: "merge" }, { value: "file" }] }),
   local("lumen.backlinks.sort", { kind: "setting", tab: "general", type: "choice", options: [{ value: "name" }, { value: "modified" }] }),
+  // Wave g3 (W13), added by INT7 at integration: what the reading, writing and graph lanes keep on this device.
+  local("lumen.writing.level", { kind: "setting", tab: "general", type: "choice", options: [{ value: "everyday" }, { value: "professional" }, { value: "academic" }] }),
+  local("lumen.writing.rankWithModel", { kind: "setting", tab: "ai", type: "boolean", values: ["0", "1"] }),
+  local("lumen.writingChecks.v1", { kind: "setting", tab: "general", type: "json" }),
+  data("lumen.writingGoals.log.v1"),
+  local("lumen.map.offline", { kind: "setting", tab: "privacy", type: "boolean", values: ["", "1"] }),
+  local("lumen-paged", { kind: "setting", tab: "general", type: "json" }),
+  local("lumen.compare", { kind: "setting", tab: "general", type: "json" }),
+  local("lumen-bilingual-mode", { kind: "setting", tab: "general", type: "text" }),
+  local("lumen.graph.engine", { kind: "setting", tab: "general", type: "choice", options: [{ value: "auto" }, { value: "gpu" }, { value: "standard" }, { value: "list" }] }),
+  // W13.R9's switch before it moved into the reading profile (lumen-reading): read once, then removed.
+  data("lumen.reading.sidenotes"),
   // Secrets: the LM Studio API key, and the OneNote sign-in kept for one OAuth round trip.
   secret("lumen.ai.lmstudio.key", "ai"),
   secret("lumen-onenote-signin", "general"),
