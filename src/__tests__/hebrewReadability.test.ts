@@ -12,6 +12,7 @@ import { describe, expect, it } from "vitest";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { HE_CORPUS, isHeldOut } from "../agents/writing/readability/corpusHe.eval";
+import { syllables as goalsSyllables } from "../agents/writing/goals/readability";
 import { englishReadability, fitHebrewModel, fleschKincaid, hebrewFeatures, hebrewReadability, readability, spearman, syllables, topList } from "../agents/writing/readability/readability";
 import committed from "../agents/writing/readability/hebrewModel.json";
 import { parseFrequencyList } from "../ai/hebrewFreq";
@@ -143,6 +144,9 @@ const EXTRA_EN = [
 describe("Flesch–Kincaid (English)", () => {
   it("syllables by rule", () => {
     expect(["cat", "cake", "table", "wanted", "jumped", "boxes", "makes", "readability", "the", "yellow"].map(syllables)).toEqual([1, 1, 2, 2, 1, 2, 1, 5, 1, 2]);
+    // Audit r4 A2.9: a vowel pair is not always two syllables, nor always one.
+    expect(["beautiful", "museum", "media", "radio", "nation", "actual", "quiet", "science", "poem", "going", "society", "player", "friend", "whole", "special"].map(syllables)).toEqual([3, 3, 3, 3, 2, 3, 2, 2, 2, 2, 4, 2, 1, 1, 2]);
+    expect(goalsSyllables("beautiful")).toBe(3);
   });
   it("the formula: 'The cat sat on the mat.' = 0.39·6 + 11.8·1 − 15.59", () => {
     const r = fleschKincaid("The cat sat on the mat.");

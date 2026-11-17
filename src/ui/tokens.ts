@@ -55,7 +55,7 @@ export function transition(props: ReadonlyArray<"transform" | "opacity">, speed:
   return props.map((p) => `${p} ${duration[speed]} ${ease.out}`).join(", ");
 }
 
-/** An entrance animation (keyframes in src/ui/CommandPalette.css / src/index.css). */
+/** An entrance animation (keyframes in src/index.css). */
 export function enter(keyframes: "cmdFadeIn" | "cmdSlideIn" | "toast-slide-in" | "in", speed: Speed = "fast"): string {
   return `${keyframes} ${duration[speed]} ${ease.out}`;
 }

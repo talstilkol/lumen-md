@@ -82,7 +82,7 @@ function outcomeText(c: StagedChange): string {
 function InlineDiff({ before, after }: { before: string; after: string }) {
   const parts = useMemo(() => inlineDiff(before, after), [before, after]);
   return (
-    <div dir="auto" data-testid="agent-change-inline" style={{ ...code, whiteSpace: "pre-wrap", wordBreak: "break-word", padding: "6px 8px", borderRadius: 6, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", maxHeight: 260, overflowY: "auto" }}>
+    <div dir="auto" data-testid="agent-change-inline" tabIndex={0} role="group" aria-label={t("agentReview.changeRegion")} style={{ ...code, whiteSpace: "pre-wrap", wordBreak: "break-word", padding: "6px 8px", borderRadius: 6, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", maxHeight: 260, overflowY: "auto" }}>
       {parts.map((p, i) =>
         p.op === "eq" ? (
           <span key={i}>{p.text}</span>
@@ -100,7 +100,7 @@ function LineDiff({ before, after }: { before: string | null; after: string }) {
   const rows = useMemo(() => lineDiffRows(before, after), [before, after]);
   if (!rows) return <div style={muted}>{t("agentReview.tooBig")}</div>;
   return (
-    <div data-testid="agent-change-lines" style={{ ...code, borderRadius: 6, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", maxHeight: 320, overflow: "auto" }}>
+    <div data-testid="agent-change-lines" tabIndex={0} role="group" aria-label={t("agentReview.changeRegion")} style={{ ...code, borderRadius: 6, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", maxHeight: 320, overflow: "auto" }}>
       {rows.map((r, i) =>
         r.op === "gap" ? (
           <div key={i} style={{ ...muted, padding: "2px 8px", fontStyle: "italic" }}>
@@ -224,7 +224,8 @@ export function AgentReviewPanel({ open, onClose }: Props) {
           </button>
         </header>
 
-        <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 12, fontSize: 13, lineHeight: 1.5, overflowY: "auto" }}>
+        {/* Audit r4 A2.6: a scrollable region must be reachable by keyboard (axe scrollable-region-focusable). */}
+        <div tabIndex={0} role="region" aria-label={t("agentReview.listRegion")} data-testid="agent-review-body" style={{ padding: 18, display: "flex", flexDirection: "column", gap: 12, fontSize: 13, lineHeight: 1.5, overflowY: "auto" }}>
           {/* W12.E5: the entity graph's proposals sit above the agents' staged changes (nothing when the vault has no graph). */}
           <EntityReviewHost />
           <p style={{ ...muted, margin: 0 }}>{t("agentReview.intro")}</p>

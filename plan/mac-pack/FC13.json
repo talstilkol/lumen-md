@@ -1,0 +1,15 @@
+[
+ {
+  "id": "FC13-W13.W1-real-undo",
+  "task": "W13.W1",
+  "cmd": "npx vitest run src/__tests__/writingSuggestions.test.ts -t \"with the real history\"",
+  "expect": {
+   "exit": 0,
+   "after": "1 passed: ten accepted suggestions are one CodeMirror history event; one undo restores the text (audit r4 A2.11: the test no longer skips itself where @codemirror/commands is missing, so the cloud overlays cannot run it)"
+  },
+  "needs": [
+   "the train head with F13's PRs checked out, npm ci done"
+  ],
+  "minutes": 2
+ }
+]

@@ -13,6 +13,7 @@
  * casual (slang, "אחלה", "סבבה", contractions, exclamation runs, emoji).
  */
 import { proseOf } from "../../../book/wordCount";
+import { syllables } from "../readability/syllables";
 
 export type Level = "easy" | "medium" | "hard";
 export type Tone = "formal" | "neutral" | "casual";
@@ -21,6 +22,11 @@ export interface Readability {
   level: Level;
   /** Grade-like number (English: Flesch–Kincaid grade). */
   score: number;
+  /**
+   * Which scale `score` is on (review 13 L6: the scales were shown unlabelled): "fk" the English
+   * Flesch–Kincaid grade, "he5" W13.W9's Hebrew index (1–5, by intended reader), "provisional" the stand-in.
+   */
+  scale?: "fk" | "he5" | "provisional";
   /** The Hebrew stand-in until W13.W9. */
   provisional: boolean;
 }
@@ -35,13 +41,7 @@ export function setReadabilityEngine(fn: Engine | null): void {
 const sentences = (s: string) => s.split(/(?<=[.!?؟。])\s+|\n\s*\n/).map((x) => x.trim()).filter((x) => /\p{L}/u.test(x));
 const wordsOf = (s: string) => s.match(/[\p{L}\p{M}]+(?:['’׳״"-][\p{L}\p{M}]+)*/gu) ?? [];
 
-export function syllables(word: string): number {
-  const w = word.toLowerCase().replace(/[^a-z]/g, "");
-  if (!w) return 0;
-  if (w.length <= 3) return 1;
-  const groups = w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, "").replace(/^y/, "").match(/[aeiouy]{1,2}/g);
-  return Math.max(1, groups?.length ?? 1);
-}
+export { syllables };
 
 export function fleschKincaid(text: string): number {
   const ss = sentences(text);
@@ -64,10 +64,10 @@ export function readabilityOf(markdown: string): Readability | null {
     const perSentence = ws.length / Math.max(1, ss.length);
     // Provisional: scaled so a children's text (≈4 letters, ≈8 words) is ~3 and dense prose (≈5.5, ≈25) ~14.
     const score = Math.round((4.2 * (letters - 3.6) + 0.33 * perSentence + 0.5) * 10) / 10;
-    return { level: score < 7 ? "easy" : score < 11 ? "medium" : "hard", score, provisional: true };
+    return { level: score < 7 ? "easy" : score < 11 ? "medium" : "hard", score, provisional: true, scale: "provisional" };
   }
   const score = fleschKincaid(text);
-  return { level: score < 7 ? "easy" : score < 11 ? "medium" : "hard", score, provisional: false };
+  return { level: score < 7 ? "easy" : score < 11 ? "medium" : "hard", score, provisional: false, scale: "fk" };
 }
 
 const CASUAL = /(?:^|[\s"'(])(?:אחלה|סבבה|יאללה|וואלה|בקיצר|כאילו|חבל"?״?על הזמן|תכלס|אחי|לול|lol|gonna|wanna|gotta|kinda|yeah|hey|awesome|cool|stuff)(?=$|[\s.,!?)"'])/giu;

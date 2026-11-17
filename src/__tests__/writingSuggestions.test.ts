@@ -161,16 +161,11 @@ describe("accept in the source editor: one transaction, one undo (W13.W1)", () =
     view.destroy();
   });
 
-  // skip-reason: @codemirror/commands (history, undo) is not installed in the offline overlay; the real vitest run (Mac / CI) has it | task: W13.W1 | until: 2027-05-17
-  it("with the real history: one undo restores all ten (where @codemirror/commands is installed)", async () => {
-    let cmds: typeof import("@codemirror/commands") | null = null;
-    try {
-      cmds = await import("@codemirror/commands");
-      if (typeof cmds.history !== "function") cmds = null;
-    } catch {
-      cmds = null;
-    }
-    if (!cmds) return void console.log("skip: @codemirror/commands not installed here; the transaction-count proof above stands");
+  // Audit r4 A2.11: no silent skip. @codemirror/commands is a dependency of the app (package.json): where it is
+  // missing the install is broken, and this test fails (offline here: run with the g3w/L4nm overlay).
+  it("with the real history: one undo restores all ten", async () => {
+    const cmds = await import("@codemirror/commands");
+    expect(typeof cmds.history, "@codemirror/commands.history").toBe("function");
     const { loadHistoryIsolation } = await import("../agents/writing/cmBridge");
     await loadHistoryIsolation();
     const view = new EditorView({ state: EditorState.create({ doc: TEN, extensions: [cmds.history()] }) });

@@ -46,7 +46,7 @@ export function ExplainChangeView({ r, versionLabel, lang }: { r: ChangeExplanat
                 {r.meaning.map((m, i) => (
                   <li key={i} dir="auto">
                     <span style={{ display: "inline-block", minWidth: 64, padding: "0 6px", marginInlineEnd: 6, borderRadius: 4, color: "white", background: `hsl(${KIND_COLOR[m.kind]})`, fontSize: 12, textAlign: "center" }}>{t(`xchg.kind.${m.kind}`)}</span>
-                    {m.before ? <del>{m.before}</del> : <em>{t("xchg.absent")}</em>} → {m.after ? <ins>{m.after}</ins> : <em>{t("xchg.absent")}</em>}
+                    {m.before ? <del>{m.before}</del> : <em>{t("xchg.absentBefore")}</em>} → {m.after ? <ins>{m.after}</ins> : <em>{t("xchg.absentAfter")}</em>}
                     <span style={{ opacity: 0.7 }}> — {r.hunks[m.hunk]?.context}</span>
                   </li>
                 ))}

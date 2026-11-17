@@ -12,7 +12,7 @@ import { setReadabilityEngine, type Readability } from "./readability";
 /** W9's index as the goals' Hebrew engine (null for a text the index reads as English). */
 export function hebrewIndexEngine(text: string): Readability | null {
   const r = readability(text);
-  return r.lang === "he" ? { level: r.band, score: r.score, provisional: false } : null;
+  return r.lang === "he" ? { level: r.band, score: r.score, provisional: false, scale: "he5" } : null;
 }
 
 setReadabilityEngine(hebrewIndexEngine);

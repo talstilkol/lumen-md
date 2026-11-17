@@ -17,7 +17,7 @@ import { autoPickable, hebrewSupportOf, prefersHebrew, thinkDefaultFor } from ".
 import { useAppStore } from "../../store/useStore";
 import type { AgentTool, Availability, Executor, ExecutorMessage, ExecutorRequest, ExecutorResponse, ModelTier, ToolCall } from "../types";
 import { getBaseUrl } from "../../ai/ollamaProvider";
-import { AiPolicyError, getAiPolicy, isLocalOrigin } from "../../ai/policy";
+import { AiPolicyError, getAiPolicy, isLocalOrigin, isLoopbackOrigin } from "../../ai/policy";
 import { draftOptions } from "../../ai/speculative";
 
 /** Under local-only, an Ollama on another machine is a third party: the prompt must not go there. */
@@ -308,6 +308,7 @@ export const ollamaExecutor: Executor = {
   },
   async chat(req: ExecutorRequest): Promise<ExecutorResponse> {
     if (remoteRefused()) throw new AiPolicyError(`The AI policy is "local only": the Ollama server at ${getBaseUrl()} is not on this machine or network.`);
+    if (req.loopbackOnly && !isLoopbackOrigin(getBaseUrl())) throw new AiPolicyError(`This agent uses only an Ollama on this computer; ${getBaseUrl()} is not (writing agents send no text off the machine).`);
     const base = getBaseUrl();
     const model = req.model ?? this.modelFor(req.tier ?? "small", { tools: !!req.tools?.length });
     const useTools = !!req.tools?.length && this.supportsTools(model);

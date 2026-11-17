@@ -12,8 +12,8 @@
  */
 import { beforeEach, describe, expect, it } from "vitest";
 import { fromFinding, findingKind, SUGGESTION_KINDS, SuggestionError, validateSuggestion, type CheckerFinding } from "../agents/writing/suggestion";
-import { stageFinding, stageWritingSuggestions, toRangeProposal } from "../agents/writingReview";
-import { clearStagedChanges, listStagedChanges } from "../agents/staging";
+import { hunkProposals, stageFinding, stageWritingSuggestions, toRangeProposal } from "../agents/writingReview";
+import { applyRangeToText, clearStagedChanges, listStagedChanges, recordEdit } from "../agents/staging";
 import { detectRepetition } from "../agents/writing/repetition";
 import { detectLoanwords } from "../agents/writing/loanwords";
 import { critiqueStructure } from "../agents/writing/structure/structureCritic";
@@ -137,3 +137,37 @@ describe("one review path: only valid W1 suggestions are staged (INT7)", () => {
     expect(listStagedChanges()).toHaveLength(1);
   });
 });
+
+describe("review 13 M9: the review queue offers the per-hunk choice too", () => {
+  beforeEach(() => clearStagedChanges());
+  const text = "The report was very long and was written by Dana in 2024.";
+  const tone: CheckerFinding = { range: { from: 0, to: text.length }, kind: "tone", message: "Formal tone", rationale: "r", confidence: 0.7, replacement: "The report was long and was written by Dina in 2024.", agentId: "toneShifter", model: "local-m", path: "n.md" };
+
+  it("a suggestion with two separate word changes is staged as two range changes, each with its own words", () => {
+    const r = stageWritingSuggestions({ suggestions: [tone], texts: new Map([["n.md", text]]), agentId: "toneShifter", tool: "writing.toneShifter", labels, today: "2026-11-17" });
+    expect(r.staged.map((c) => c.kind === "range" && [c.before, c.after, c.summary])).toEqual([
+      ["very ", "", "Formal tone (1/2)"],
+      ["Dana", "Dina", "Formal tone (2/2)"],
+    ]);
+  });
+
+  it("either hunk applies alone, and the other still applies after it (its offsets mapped through the approval)", () => {
+    const [h1, h2] = hunkProposals(fromFinding(text, tone), text, "n.md") as Array<{ from: number; to: number; before: string; after: string; context: never; basis: string }>;
+    const only2 = applyRangeToText(text, h2)!;
+    expect(only2).toBe("The report was very long and was written by Dina in 2024.");
+    recordEdit(text, only2, { from: h2.from, to: h2.to, insert: h2.after });
+    expect(applyRangeToText(only2, h1)).toBe("The report was long and was written by Dina in 2024.");
+    expect(applyRangeToText(text, h1)).toBe("The report was long and was written by Dana in 2024.");
+  });
+});
+
+describe("review 13 L5: finding ids", () => {
+  it("two findings of one rule on one range get different ids; the same finding twice gets the same id", () => {
+    const text = "We met Dana and Dana left.";
+    const f = (replacement: string | null, message = "m"): CheckerFinding => ({ range: { from: 7, to: 11 }, kind: "name-variant", message, rationale: "r", confidence: 0.8, replacement, agentId: "consistency", model: "rules", path: "n.md" });
+    const ids = [fromFinding(text, f("Dina")), fromFinding(text, f("Dena")), fromFinding(text, f(null, "a comment"))].map((s) => s.id);
+    expect(new Set(ids).size).toBe(3);
+    expect(fromFinding(text, f("Dina")).id).toBe(ids[0]);
+  });
+});
+

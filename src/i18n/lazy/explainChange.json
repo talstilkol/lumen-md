@@ -1,5 +1,6 @@
 {
-  "xchg.absent": "(none)",
+  "xchg.absentAfter": "(dropped from the new text)",
+  "xchg.absentBefore": "(not in the old text)",
   "xchg.against": "Compared with the version of {version}",
   "xchg.changes": "All {count} changes",
   "xchg.close": "Close",

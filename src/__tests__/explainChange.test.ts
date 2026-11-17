@@ -64,6 +64,15 @@ describe("W13.W13 meaning changes by rule", () => {
     expect(entitiesIn("Yesterday we met Dana in Haifa.")).toEqual(["Dana", "Haifa"]);
   });
 
+  it("audit r4 A2.8: a number written another way is not a number change (3 → three, שלושה → 3); a different value is", () => {
+    const nums = (o: string, n: string) => found(o, n).filter((g) => g.startsWith("number:"));
+    expect(nums("We tested 3 phones.", "We tested three phones.")).toEqual([]);
+    expect(nums("בדקנו שלושה מכשירים.", "בדקנו 3 מכשירים.")).toEqual([]);
+    expect(nums("It took 20 minutes.", "It took twenty minutes.")).toEqual([]);
+    expect(nums("We tested 3 phones.", "We tested four phones.")).toEqual(["number:3→four"]);
+    expect(nums("We tested three phones.", "We tested 30 phones.")).toEqual(["number:three→30"]);
+  });
+
   it("two changes in one sentence report a changed name once; the context is the whole sentence", () => {
     const h = changeHunks("הצוות יבוא עם ד״ר כהן.", "הצוות לא יבוא עם ד״ר לוי.");
     const m = meaningChanges(h);

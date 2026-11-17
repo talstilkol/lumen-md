@@ -165,12 +165,26 @@ export function findingKind(f: Pick<CheckerFinding, "kind" | "agentId">): Sugges
   return FINDING_KINDS[f.kind] ?? CHECKER_KINDS[f.agentId];
 }
 
-/** The finding as a checked W1 suggestion for `text` (throws SuggestionError when it does not fit it). */
+/** FNV-1a, base 36: a short, stable tag of a finding's content. */
+function contentTag(s: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(36);
+}
+
+/**
+ * The finding as a checked W1 suggestion for `text` (throws SuggestionError when it does not fit it).
+ * Review 13 L5: the id also carries a tag of the replacement and message, so two findings of one rule on one
+ * range (two fixes, a fix and a comment) never share an id — a session keyed by id kept only one of them.
+ */
 export function fromFinding(text: string, f: CheckerFinding): FindingSuggestion {
   const kind = findingKind(f);
   if (!kind) throw new SuggestionError(`${f.agentId}: ${f.kind} is not a known finding kind`);
   const { path, links, data, kind: ruleId, ...rest } = f;
-  const s: FindingSuggestion = makeSuggestion(text, { ...rest, kind, ruleId, id: `${f.agentId}:${ruleId}:${path ?? ""}:${f.range.from}-${f.range.to}` });
+  const s: FindingSuggestion = makeSuggestion(text, { ...rest, kind, ruleId, id: `${f.agentId}:${ruleId}:${path ?? ""}:${f.range.from}-${f.range.to}:${contentTag(`${f.replacement ?? "\u0000"}\u0001${f.message}`)}` });
   if (path !== undefined) s.path = path;
   if (links) s.links = links;
   if (data) s.data = data;

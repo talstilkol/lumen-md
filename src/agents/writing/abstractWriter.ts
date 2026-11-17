@@ -183,6 +183,7 @@ export const abstractWriterAgent: AgentDefinition<AbstractWriterInput, AbstractD
   ],
   // A note's content never goes to a cloud provider for this; no tools.
   executorPreference: ["ollama", "webllm"],
+  loopbackOnly: true,
   language: "any",
   maxRetries: 1,
   tier: "small",

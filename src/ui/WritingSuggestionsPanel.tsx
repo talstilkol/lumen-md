@@ -19,6 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent }
 import { createRoot, type Root } from "react-dom/client";
 import { t } from "../i18n";
 import "./writingPanelStrings";
+import { HelpButton } from "./HelpButton";
 import { hunksOf, suggestionDiff, type WritingSuggestion } from "../agents/writing/suggestion";
 import type { AcceptChoice, ChangePlan } from "../agents/writing/engine";
 
@@ -229,7 +230,24 @@ export function WritingPanel({ host, state, onClose }: { host: WritingHost; stat
   const [status, setStatus] = useState("");
   const [active, setActive] = useState<string | null>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
+  /** Audit r4 A2.4: after a keyboard accept or reject the card is gone; focus goes to the card now in its place (or the panel), never to <body>. */
+  const refocus = useRef<number | null>(null);
   useEffect(() => host.subscribe(setList), [host]);
+  useEffect(() => {
+    const at = refocus.current;
+    if (at === null) return;
+    refocus.current = null;
+    const panel = panelRef.current;
+    if (!panel || (document.activeElement && document.activeElement !== document.body && panel.contains(document.activeElement))) return;
+    const cards = [...(listRef.current?.querySelectorAll<HTMLLIElement>("[data-testid=ws-card]") ?? [])];
+    (cards[Math.min(at, cards.length - 1)] ?? panel).focus();
+  }, [list]);
+  const keepFocus = (el: Element | null) => {
+    const cards = [...(listRef.current?.querySelectorAll<HTMLLIElement>("[data-testid=ws-card]") ?? [])];
+    const i = cards.findIndex((c) => c === el || c.contains(el));
+    refocus.current = i < 0 ? 0 : i;
+  };
   const say = useCallback((plan: ChangePlan | null, rejected?: boolean) => {
     if (rejected) return setStatus(t("writing.statusRejected"));
     if (!plan) return;
@@ -254,6 +272,8 @@ export function WritingPanel({ host, state, onClose }: { host: WritingHost; stat
   const ui = typeof document !== "undefined" ? document.documentElement.dir || "ltr" : "ltr";
   return (
     <aside
+      ref={panelRef}
+      tabIndex={-1}
       dir={ui}
       data-testid="writing-panel"
       aria-label={t("writing.title")}
@@ -267,6 +287,7 @@ export function WritingPanel({ host, state, onClose }: { host: WritingHost; stat
         <span style={muted} data-testid="ws-count">
           {t("writing.count", { n: list.length })}
         </span>
+        <HelpButton topic="editor/writing-agents" size={20} />
         <button type="button" style={btn} onClick={onClose} aria-label={t("writing.close")}>
           ×
         </button>
@@ -303,7 +324,10 @@ export function WritingPanel({ host, state, onClose }: { host: WritingHost; stat
       ) : null}
       {list.length > 1 ? (
         <div style={{ display: "flex", gap: 6 }}>
-          <button type="button" data-testid="ws-acceptAll" style={acceptable.length ? primary : { ...btn, opacity: 0.5 }} disabled={!acceptable.length} onClick={() => say(host.accept(acceptable.map((s) => ({ id: s.id }))))}>
+          <button type="button" data-testid="ws-acceptAll" style={acceptable.length ? primary : { ...btn, opacity: 0.5 }} disabled={!acceptable.length} onClick={() => {
+              keepFocus(null);
+              say(host.accept(acceptable.map((s) => ({ id: s.id }))));
+            }}>
             {t("writing.acceptAll", { n: acceptable.length })}
           </button>
           <button
@@ -311,6 +335,7 @@ export function WritingPanel({ host, state, onClose }: { host: WritingHost; stat
             data-testid="ws-rejectAll"
             style={btn}
             onClick={() => {
+              keepFocus(null);
               host.reject(list.map((s) => s.id));
               setStatus(t("writing.statusRejected"));
             }}
@@ -335,7 +360,10 @@ export function WritingPanel({ host, state, onClose }: { host: WritingHost; stat
               setActive(s.id);
               host.focus(s.id);
             }}
-            onDone={say}
+            onDone={(plan, rejected) => {
+              keepFocus(document.activeElement);
+              say(plan, rejected);
+            }}
           />
         ))}
       </ul>
