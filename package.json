@@ -114,6 +114,7 @@
     "lint:prune": "eslint src --prune-suppressions",
     "plan": "node scripts/plan/build.mjs",
     "plan:check": "node scripts/plan/build.mjs --check",
+    "plan:ratchet": "node scripts/plan/ledgerRatchet.mjs",
     "plan:receipts": "node scripts/plan/receipts.mjs",
     "plan:areas": "node scripts/plan/areas.mjs",
     "plan:targets": "node scripts/plan-targets.mjs",

@@ -138,6 +138,8 @@ export function planSteps({ pkg, exists, changed, flags, dynamicTargets, hasBin 
     { id: "i18n", title: "i18n keys + drift", cmd: ["node", "scripts/extract-i18n-keys.mjs", "--check"], needs: ["scripts/extract-i18n-keys.mjs"] },
     has(pkg, "licenses") ? { id: "licenses", title: "Licence gate", cmd: ["npm", "run", "-s", "licenses"] } : { id: "licenses", title: "Licence gate", cmd: [], skipReason: "not here (plan 0.10)" },
     exists("scripts/headers.mjs") ? { id: "headers", title: "Security headers", cmd: ["node", "scripts/headers.mjs", "--check"] } : { id: "headers", title: "Security headers", cmd: [], skipReason: "not here (plan 0.17)" },
+    // Review 12, M3: the plan's ratchet files (audit ledger, WIP decisions, merged-while-frozen), held against the PR's base.
+    has(pkg, "plan:ratchet") ? { id: "plan-ratchet", title: "Plan ratchets (only one way)", cmd: ["npm", "run", "-s", "plan:ratchet", ...(flags.base ? ["--", "--base", flags.base] : [])] } : { id: "plan-ratchet", title: "Plan ratchets", cmd: [], skipReason: "not here (review 12, M3)" },
     // pr:check, the PR gate (plan 0.19), on every run (W10.D4). Vercel builds only
     // main and verify/* (100 builds a day on the free plan, and the builds are the
     // Mac's now), so a PR gets it here and in Buildkite's pr-check job, not from a
@@ -246,7 +248,7 @@ export function buildState(results) {
 }
 
 /** Step ids, for --only / --skip. */
-export const STEP_IDS = ["typecheck", "hygiene", "lint", "unused", "knip", "i18n", "licenses", "headers", "pr-check", "gitleaks", "semgrep", "cargo-audit", "test", "build", "budget", "ocr", "public-eval", "bidi-conformance", "e2e"];
+export const STEP_IDS = ["typecheck", "hygiene", "lint", "unused", "knip", "i18n", "licenses", "headers", "plan-ratchet", "pr-check", "gitleaks", "semgrep", "cargo-audit", "test", "build", "budget", "ocr", "public-eval", "bidi-conformance", "e2e"];
 const BOOL_FLAGS = ["--help", "--h", "-h", "--changed", "--coverage", "--bail", "--install-hook", "--force"];
 const VALUE_FLAGS = ["--base", "--body", "--skip", "--only"];
 

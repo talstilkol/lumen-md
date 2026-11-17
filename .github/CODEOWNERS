@@ -321,3 +321,11 @@
 /scripts/plan/wipGate.mjs                @talstilkol
 /scripts/plan/auditGuard.mjs             @talstilkol
 /scripts/plan/ledgerRatchet.mjs          @talstilkol
+
+# ── Review 12 (M2, M3): the WIP decisions and the merged-while-frozen ledger ──
+#   plan.json's schedule can't be owned line by line, so the written WIP decisions moved to their own file
+/plan/wip-decisions.json                 @talstilkol
+/scripts/plan/wipDecisions.mjs           @talstilkol
+#   Work merged while its wave was frozen: append-only, mergeSha an ancestor of the train
+/plan/merged-while-frozen.json           @talstilkol
+/scripts/plan/mergedWhileFrozen.mjs      @talstilkol

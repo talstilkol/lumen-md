@@ -18,11 +18,14 @@
  *                            status is longer than STATUS_MAX (W10.G7);
  *                            or a wave is over its work-in-progress limit while
  *                            the next wave has started and no written decision in
- *                            plan.schedule.wipDecisions freezes it (plan W6.39,
+ *                            plan/wip-decisions.json freezes it (plan W6.39,
  *                            strict by default since W10.G6: scripts/plan/wipDecisions.mjs),
  *                            or a task starts in a frozen wave (scripts/plan/wipGate.mjs)
  *   npm run plan:check -- --wip-limit 3     a lower limit than plan.schedule.wipLimit / WIP_LIMIT (never a higher one)
  *   npm run plan:check -- --wip-strict      accepted, and the default: there is no flag that only warns
+ *   npm run plan:check -- --wip-none        also exit 1 when ANY wave pair is over its limit, even one held
+ *                            by a written decision (W6.39's own dod: done means no wave over its limit,
+ *                            read from the exit code, not from how the output is worded; review 12, H3)
  *   npm run plan -- --hours  also print actual hours per task branch (git)
  *
  * The scheduler started as a port of the earlier Python generator (plan5.py
@@ -46,6 +49,9 @@ import { auditGuard, readLedger } from "./auditGuard.mjs";
 import { RECEIPTS_FILE, checkReceiptClaims } from "./receiptLevels.mjs";
 import { AREAS_FILE, checkAreas } from "./areas.mjs";
 import { formatGate, readFrozen, wipGate } from "./wipGate.mjs";
+import { HELD_LABEL, MERGED_FILE, ancestorOfHead, gitNamedLog, mergedIds, mergedProblems, namedInCode, readMerged, unlistedMergedWork } from "./mergedWhileFrozen.mjs";
+import { WIP_DECISIONS_FILE, readWipDecisions } from "./wipDecisions.mjs";
+import { checkRoot as ratchetCheck } from "./ledgerRatchet.mjs";
 import { checkOriginClaims } from "../golden/origin-claims.mjs";
 import { decidedPairs, lowerOnlyLimit, wipDecisionProblems } from "./wipDecisions.mjs";
 
@@ -209,7 +215,7 @@ export function buildModel(plan) {
         id: x.id, t: x.title, br: x.branch ?? "—", lane: x.lane,
         m: done ? 0 : x.minutes, m_est: x.minutes, done,
         dep: [...(x.dep ?? [])], depRule: x.depRule, g: [...(x.groups ?? [])], p: x.priority,
-        status: x.status, verified: x.verified, pr: x.pr, new: !!x.new, tal: x.owner ?? "", old: x.was ?? "", w: x.source ?? "",
+        status: x.status, verified: x.verified, pr: x.pr, new: !!x.new, tal: x.owner ?? "", old: x.was ?? "", w: x.source ?? "", held: !!x.heldByFrozenWave,
         steps: x.steps, ok: x.acceptance, notes: x.notes, phase: pi,
       };
       agent.push(t);
@@ -482,7 +488,7 @@ export function renderBoard(M) {
     o.push("| # | משימה | עדיפות | מסלול | הערכה | תלוי ב- | התחלה | סיום | מצב | אימות |\n|---|---|---|---|---|---|---|---|---|---|");
     for (const t of p.tasks) {
       const tag = t.new ? " 🆕" : "";
-      o.push(`| ${t.id} | ${cell(t.t)}${tag} | ${priTxt(t)} | ${t.lane} | ${est(t)} | ${cell(depsTxt(M, t) || "—")} | ${t.done ? "—" : fmt(t.start)} | ${t.done ? "—" : fmt(t.end)} | ${cell(t.status ?? "⬜")} | ${cell(verifiedTxt(t))} |`);
+      o.push(`| ${t.id} | ${cell(t.t)}${tag} | ${priTxt(t)} | ${t.lane} | ${est(t)} | ${cell(depsTxt(M, t) || "—")} | ${t.done ? "—" : fmt(t.start)} | ${t.done ? "—" : fmt(t.end)} | ${cell(`${t.status ?? "⬜"}${t.held ? ` · ${HELD_LABEL}` : ""}`)} | ${cell(verifiedTxt(t))} |`);
     }
     o.push("");
     for (const t of p.tasks) {
@@ -552,6 +558,7 @@ ol.steps b{color:var(--muted);font-weight:600}
 .ok ul{margin:4px 0 0;padding-inline-start:18px}
 .pill{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;margin-inline-start:6px;white-space:nowrap}
 .p-now{background:var(--now-bg);color:var(--now)}
+.p-held{background:var(--now-bg);color:var(--now);font-style:italic}
 .p-new{background:var(--new-bg);color:var(--new)}
 .p-tal{background:var(--tal-bg);color:var(--tal)}
 .p-p0{background:var(--fg);color:var(--bg)}
@@ -617,6 +624,7 @@ export function renderHtml(M) {
     for (const t of p.tasks) {
       let pills = "";
       if (t.status) pills += `<span class="pill p-now">${E(t.status)}</span>`;
+      if (t.held) pills += `<span class="pill p-held">${E(HELD_LABEL)}</span>`;
       if (t.verified) pills += `<span class="pill p-v p-v-${t.verified}">אימות: ${E(VERIFIED_LABEL[t.verified])}${t.pr ? ` · <a href="${PR_URL}${t.pr}">#${t.pr}</a>` : ""}</span>`;
       if (t.new) pills += '<span class="pill p-new">חדש</span>';
       pills += `<span class="pill p-${t.eff.toLowerCase()}">${E(priTxt(t))}</span>`;
@@ -876,9 +884,12 @@ const present = (v) => v !== undefined && v !== null && v !== "" && !(Array.isAr
  * A task is started once it has a status other than the placeholder (a PR, work
  * in progress, or done), or once anything records work on it: a `verified`
  * level, a `pr`, or `evidence` (review 11, M4: a placeholder status alone used
- * to hide a task whose work had begun).
+ * to hide a task whose work had begun), or once it is in `merged`, the ids of
+ * plan/merged-while-frozen.json (review 12, M2; run() also marks them
+ * `heldByFrozenWave` in memory).
  */
-export const isStarted = (task) => {
+export const isStarted = (task, merged) => {
+  if (merged?.has(task.id) || task.heldByFrozenWave === true) return true;
   const s = String(task.status ?? "").trim();
   if (s !== "" && !NOT_STARTED.test(s)) return true;
   return present(task.verified) || present(task.pr) || present(task.evidence);
@@ -887,9 +898,10 @@ export const isStarted = (task) => {
 /**
  * Every wave over its limit whose next wave has started:
  * [{ wave, next, limit, open: [ids below the floor], unlabelled, started: [ids of the next wave] }].
- * The limit is `limit`, else plan.schedule.wipLimit, else WIP_LIMIT.
+ * The limit is `limit`, else plan.schedule.wipLimit, else WIP_LIMIT. `merged`: the
+ * ids of plan/merged-while-frozen.json, started whatever their status says.
  */
-export function wipWarnings(plan, { limit } = {}) {
+export function wipWarnings(plan, { limit, merged } = {}) {
   const max = Number.isInteger(limit) && limit >= 0 ? limit : Number.isInteger(plan.schedule?.wipLimit) ? plan.schedule.wipLimit : WIP_LIMIT;
   // A part of a wave ("גל 12ב") is that wave: its tasks join wave 12's, so wave 12 is never "followed" by itself.
   const byWave = new Map();
@@ -902,7 +914,7 @@ export function wipWarnings(plan, { limit } = {}) {
   const out = [];
   for (let i = 0; i + 1 < waves.length; i++) {
     const open = waves[i].tasks.filter((t) => belowFloor(t));
-    const started = waves[i + 1].tasks.filter(isStarted);
+    const started = waves[i + 1].tasks.filter((t) => isStarted(t, merged));
     if (open.length > max && started.length) {
       out.push({ wave: waves[i].n, next: waves[i + 1].n, limit: max, open: open.map((t) => t.id), unlabelled: open.filter((t) => t.verified === undefined).length, started: started.map((t) => t.id) });
     }
@@ -920,6 +932,22 @@ export function formatWip(w) {
 
 export function run({ root = ROOT, check = false, wipLimit, strictReceipts = false } = {}) {
   const plan = JSON.parse(readFileSync(join(root, PLAN_FILE), "utf8"));
+  // Review 12, M3: the written WIP decisions live in their own file, owned in CODEOWNERS.
+  const fileDecisions = readWipDecisions(root);
+  if (fileDecisions && plan.schedule?.wipDecisions !== undefined) throw new Error(`plan: plan.schedule.wipDecisions moved to ${WIP_DECISIONS_FILE}; remove it from ${PLAN_FILE}`);
+  if (fileDecisions) plan.schedule = { ...plan.schedule, wipDecisions: fileDecisions };
+  // Review 12, M2: work merged while its wave was frozen is recorded, counted as started, and shown.
+  const mergedFile = readMerged(root);
+  const merged = mergedIds(mergedFile);
+  const planIds = new Set(plan.phases.flatMap((p) => p.tasks.map((t) => t.id)));
+  const mergedErr = mergedProblems(mergedFile, planIds, ancestorOfHead(root));
+  const log = gitNamedLog(root);
+  if (log !== null) mergedErr.push(...unlistedMergedWork(plan, namedInCode(log, planIds), merged, (t) => isStarted(t, merged)));
+  if (mergedErr.length) throw new Error(`plan: ${MERGED_FILE} (review 12, M2) —\n  ${mergedErr.join("\n  ")}`);
+  // heldByFrozenWave is set here, in memory, from the list; plan.json never carries it.
+  const handSet = plan.phases.flatMap((p) => p.tasks).filter((t) => "heldByFrozenWave" in t).map((t) => t.id);
+  if (handSet.length) throw new Error(`plan: ${handSet.join(", ")}: "heldByFrozenWave" comes from ${MERGED_FILE}, never from ${PLAN_FILE}`);
+  for (const p of plan.phases) for (const t of p.tasks) if (merged.has(t.id)) t.heldByFrozenWave = true;
   const limit = lowerOnlyLimit(wipLimit, Number.isInteger(plan.schedule?.wipLimit) ? plan.schedule.wipLimit : WIP_LIMIT);
   // Plan 0.7: no ✅ without the commands that prove it.
   // W11.I18: a ✅ that rests on an eval cites a complete public or held-out card.
@@ -975,16 +1003,16 @@ export function run({ root = ROOT, check = false, wipLimit, strictReceipts = fal
     if (stale.includes(ROADMAP_FILE)) writeFileSync(roadmapPath, wantRoadmap);
   }
   // W6.39: the frozen-wave gate holds at the plan's own limit; W10.G6: the written decisions are checked at `limit` (never above the plan's).
-  const wip = wipWarnings(plan, { limit });
+  const wip = wipWarnings(plan, { limit, merged });
   M.plan = plan;
-  return { M, stale, wip, wipProblems: wipDecisionProblems(plan, wip), gate: wipGate(wipWarnings(plan), readFrozen(root)) };
+  return { M, stale, wip, wipProblems: wipDecisionProblems(plan, wip), gate: wipGate(wipWarnings(plan, { merged }), readFrozen(root), merged), ratchet: check ? ratchetCheck(root) : null };
 }
 
 function main(argv) {
   const check = argv.includes("--check");
   const at = argv.indexOf("--wip-limit");
   const wipLimit = at >= 0 ? (/^\d+$/.test(argv[at + 1] ?? "") ? Number(argv[at + 1]) : argv[at + 1] ?? null) : undefined;
-  const { M, stale, wip, wipProblems, gate } = run({ check, wipLimit, strictReceipts: argv.includes("--strict-receipts") });
+  const { M, stale, wip, wipProblems, gate, ratchet } = run({ check, wipLimit, strictReceipts: argv.includes("--strict-receipts") });
   if (M.MANUAL_LEVELS.length) console.error(`plan: ${M.MANUAL_LEVELS.length} level(s) above what the signed receipts prove (W10.G9; --strict-receipts fails on them): ${M.MANUAL_LEVELS.slice(0, 8).join(", ")}${M.MANUAL_LEVELS.length > 8 ? " …" : ""}`);
   const P0 = M.agent.filter((t) => t.eff === "P0").length;
   const levels = [...VERIFIED_LEVELS.map((k) => `${k} ${M.VERIFIED[k]}`), ...(M.VERIFIED.none ? [`unset ${M.VERIFIED.none}`] : [])].join(", ");
@@ -998,15 +1026,24 @@ function main(argv) {
     // one line says how many. Any other pair over its limit is printed, and fails just below.
     const decided = decidedPairs(M.plan ?? null, wip, wipProblems);
     for (const w of wip) if (!decided.has(`${w.wave}→${w.next}`)) console.error(formatWip(w));
-    if (decided.size) console.log(`plan: work in progress — ${decided.size} wave pair${decided.size > 1 ? "s" : ""} over the limit held by a written decision at frozen numbers (plan.schedule.wipDecisions, W10.G6); no new start in them.`);
+    if (decided.size) console.log(`plan: work in progress — ${decided.size} wave pair${decided.size > 1 ? "s" : ""} over the limit held by a written decision at frozen numbers (plan/wip-decisions.json, W10.G6); no new start in them.`);
     // W10.G6: strict by default. A wave over its limit passes only with a written decision that freezes it.
     if (wipProblems.length) {
       console.error(`plan: work-in-progress limit (W6.39, strict by default — W10.G6) —\n  ${wipProblems.join("\n  ")}`);
       return 1;
     }
+    if (argv.includes("--wip-none") && wip.length) {
+      console.error(`plan: --wip-none: ${wip.length} wave pair${wip.length > 1 ? "s are" : " is"} over the WIP limit (${decided.size} held by a written decision): ${wip.map((w) => `${w.wave}→${w.next}`).join(", ")}`);
+      return 1;
+    }
     const gateLines = formatGate(gate);
     if (gateLines.length) {
       for (const l of gateLines) console.error(l);
+      return 1;
+    }
+    // Review 12, M3: the ratchet files only move one way (scripts/plan/ledgerRatchet.mjs, also npm run plan:ratchet).
+    if (ratchet?.problems.length) {
+      for (const p of ratchet.problems) console.error(`plan: ledger ratchet — ${p}`);
       return 1;
     }
     if (stale.length) {

@@ -46,7 +46,21 @@ import { WIP_FROZEN_FILE, formatGate, pruned, readFrozen, wipGate } from "../../
 import { decidedPairs, lowerOnlyLimit, wipDecisionProblems } from "../../scripts/plan/wipDecisions.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
-const plan = () => JSON.parse(readFileSync(join(ROOT, "plan/plan.json"), "utf8"));
+/** The plan as plan:check reads it: the WIP decisions from plan/wip-decisions.json, the merged-while-frozen tasks marked (review 12, M2/M3). */
+const plan = () => {
+  const p = JSON.parse(readFileSync(join(ROOT, "plan/plan.json"), "utf8"));
+  p.schedule = { ...p.schedule, wipDecisions: JSON.parse(readFileSync(join(ROOT, "plan/wip-decisions.json"), "utf8")).decisions };
+  return p;
+};
+/** The ids plan:check counts as started whatever their status (plan/merged-while-frozen.json, review 12 M2). */
+const MERGED = new Set<string>(JSON.parse(readFileSync(join(ROOT, "plan/merged-while-frozen.json"), "utf8")).merged.map((e: { id: string }) => e.id));
+/** wipWarnings of the real plan, as plan:check computes them. */
+const realWip = (p: unknown, o: { limit?: number } = {}) => wipWarnings(p, { ...o, merged: MERGED });
+/** The plan as plan.json stores it (no in-memory decisions). */
+const fileText = (p: { schedule?: Record<string, unknown> }) => {
+  const { wipDecisions: _, ...schedule } = p.schedule ?? {};
+  return JSON.stringify({ ...p, schedule }, null, 1);
+};
 const tmp = mkdtempSync(join(tmpdir(), "lumen-plan-"));
 afterAll(() => rmSync(tmp, { recursive: true, force: true }));
 
@@ -57,7 +71,7 @@ function copy(name: string): string {
   mkdirSync(join(dir, "public"), { recursive: true });
   // eval/origins.json: plan:check fails without it (review 10, L8).
   mkdirSync(join(dir, "eval"), { recursive: true });
-  for (const f of ["plan/plan.json", "plan/audit-verdicts.json", "plan/board.html", "public/roadmap.html", "MASTER_PLAN.md", "eval/origins.json"]) cpSync(join(ROOT, f), join(dir, f));
+  for (const f of ["plan/plan.json", "plan/audit-verdicts.json", "plan/wip-decisions.json", "plan/merged-while-frozen.json", "plan/board.html", "public/roadmap.html", "MASTER_PLAN.md", "eval/origins.json"]) cpSync(join(ROOT, f), join(dir, f));
   return dir;
 }
 type Task = { id: string; status?: string; verified?: string; pr?: number; priority: string; dep?: string[]; notes?: string };
@@ -251,7 +265,7 @@ describe("verification level (W4.24)", () => {
     expect(problems.some((x) => x.startsWith(`${c.id}: verified, pr must come right after "status"`))).toBe(true);
     expect(problems.some((x) => x.startsWith(`${d.id}: verified and pr without a status`))).toBe(true);
     const dir = copy("verified-bad");
-    writeFileSync(join(dir, "plan/plan.json"), JSON.stringify(p, null, 1) + "\n");
+    writeFileSync(join(dir, "plan/plan.json"), fileText(p) + "\n");
     expect(() => run({ root: dir, check: true })).toThrow(/verified \/ pr \(W4\.24\)/);
   });
 
@@ -341,11 +355,11 @@ describe("honest statuses (W10.G7, W10.G8, W10.G12)", () => {
     const p = plan();
     const t = tasks(p).find((x) => x.id === "0.6")! as Task & { verified?: string };
     t.verified = "node";
-    writeFileSync(join(dir, "plan/plan.json"), JSON.stringify(p, null, 1) + "\n");
+    writeFileSync(join(dir, "plan/plan.json"), fileText(p) + "\n");
     expect(() => run({ root: dir, check: true })).toThrow(/0\.6: marked ✅ but verified "node"/);
     t.verified = "browser";
     t.status = "⏳ " + "ב".repeat(STATUS_MAX);
-    writeFileSync(join(dir, "plan/plan.json"), JSON.stringify(p, null, 1) + "\n");
+    writeFileSync(join(dir, "plan/plan.json"), fileText(p) + "\n");
     expect(() => run({ root: dir, check: true })).toThrow(/0\.6: status is \d+ characters/);
   });
 
@@ -454,11 +468,11 @@ describe("work-in-progress limit (plan W6.39)", () => {
     const dir = copy("wipgate");
     cpSync(join(ROOT, WIP_FROZEN_FILE), join(dir, WIP_FROZEN_FILE));
     const p = plan();
-    const live = new Set(wipWarnings(p).map((w) => w.next));
+    const live = new Set(realWip(p).map((w) => w.next));
     const phase = p.phases.find((ph: { title: string; tasks: Task[] }) => live.has(waveNumber(ph.title)) && ph.tasks.some((t) => !frozen.started.includes(t.id)));
     const fresh: Task = phase.tasks.find((t: Task) => !frozen.started.includes(t.id));
     fresh.status = "⏳ #99999 started anyway";
-    writeFileSync(join(dir, "plan/plan.json"), JSON.stringify(p, null, 1));
+    writeFileSync(join(dir, "plan/plan.json"), fileText(p));
     const { gate } = run({ root: dir, check: true });
     expect(gate.blocked.map((b: { id: string }) => b.id)).toEqual([fresh.id]);
     // Without the frozen file nothing is exempt (fail closed).
@@ -472,19 +486,19 @@ describe("work-in-progress limit (plan W6.39)", () => {
   it("run() reports the warnings and their problems; the CLI fails on them with no flag (W10.G6)", () => {
     const p = plan();
     const r = run({ root: ROOT, check: true, wipLimit: 3 });
-    expect(r.wip).toEqual(wipWarnings(p, { limit: 3 }));
+    expect(r.wip).toEqual(realWip(p, { limit: 3 }));
     expect(r.wipProblems).toEqual(wipDecisionProblems(p, r.wip));
     const cli = (...args: string[]) => spawnSync(process.execPath, [join(ROOT, "scripts/plan/build.mjs"), "--check", ...args], { cwd: ROOT, encoding: "utf8" });
-    const red = wipDecisionProblems(p, wipWarnings(p)).length ? 1 : 0;
+    const red = wipDecisionProblems(p, realWip(p)).length ? 1 : 0;
     expect(cli().status).toBe(red);
     expect(cli("--wip-strict").status).toBe(red);
     const low = cli("--wip-limit", "0");
-    expect(low.status).toBe(wipDecisionProblems(p, wipWarnings(p, { limit: 0 })).length ? 1 : 0);
-    const lowW = wipWarnings(p, { limit: 0 });
+    expect(low.status).toBe(wipDecisionProblems(p, realWip(p, { limit: 0 })).length ? 1 : 0);
+    const lowW = realWip(p, { limit: 0 });
     expect(low.stderr.split("\n").filter((l) => l.startsWith("plan: WIP")).length).toBe(lowW.length - decidedPairs(p, lowW).size);
     // On the real plan every pair over the limit is held by a decision: no WIP warning at all (W6.39 audit r3).
     expect(cli().stderr.split("\n").filter((l) => l.startsWith("plan: WIP"))).toEqual([]);
-    expect(cli().stdout).toMatch(/10 wave pairs over the limit held by a written decision/);
+    expect(cli().stdout).toMatch(/11 wave pairs over the limit held by a written decision/);
     // --wip-limit only lowers the limit: a higher one is refused, never read.
     const high = cli("--wip-limit", "100000");
     expect(high.status).toBe(1);
@@ -559,19 +573,19 @@ describe("work-in-progress limit (plan W6.39)", () => {
   it("run() reports the warnings and their problems; the CLI fails on them with no flag (W10.G6)", () => {
     const p = plan();
     const r = run({ root: ROOT, check: true, wipLimit: 3 });
-    expect(r.wip).toEqual(wipWarnings(p, { limit: 3 }));
+    expect(r.wip).toEqual(realWip(p, { limit: 3 }));
     expect(r.wipProblems).toEqual(wipDecisionProblems(p, r.wip));
     const cli = (...args: string[]) => spawnSync(process.execPath, [join(ROOT, "scripts/plan/build.mjs"), "--check", ...args], { cwd: ROOT, encoding: "utf8" });
-    const red = wipDecisionProblems(p, wipWarnings(p)).length ? 1 : 0;
+    const red = wipDecisionProblems(p, realWip(p)).length ? 1 : 0;
     expect(cli().status).toBe(red);
     expect(cli("--wip-strict").status).toBe(red);
     const low = cli("--wip-limit", "0");
-    expect(low.status).toBe(wipDecisionProblems(p, wipWarnings(p, { limit: 0 })).length ? 1 : 0);
-    const lowW = wipWarnings(p, { limit: 0 });
+    expect(low.status).toBe(wipDecisionProblems(p, realWip(p, { limit: 0 })).length ? 1 : 0);
+    const lowW = realWip(p, { limit: 0 });
     expect(low.stderr.split("\n").filter((l) => l.startsWith("plan: WIP")).length).toBe(lowW.length - decidedPairs(p, lowW).size);
     // On the real plan every pair over the limit is held by a decision: no WIP warning at all (W6.39 audit r3).
     expect(cli().stderr.split("\n").filter((l) => l.startsWith("plan: WIP"))).toEqual([]);
-    expect(cli().stdout).toMatch(/10 wave pairs over the limit held by a written decision/);
+    expect(cli().stdout).toMatch(/11 wave pairs over the limit held by a written decision/);
     // --wip-limit only lowers the limit: a higher one is refused, never read.
     const high = cli("--wip-limit", "100000");
     expect(high.status).toBe(1);
@@ -612,9 +626,9 @@ describe("work in progress: strict by default, a written decision only freezes (
 
   it("the repo's own plan passes the strict rule: every wave over its limit has a dated, written decision at today's numbers (D1, 16.11)", () => {
     const p = plan();
-    expect(wipDecisionProblems(p, wipWarnings(p))).toEqual([]);
+    expect(wipDecisionProblems(p, realWip(p))).toEqual([]);
     const ds = p.schedule.wipDecisions as Array<{ wave: number; next: number; decision: string }>;
-    expect(ds.map((d) => `${d.wave}→${d.next}`)).toEqual(wipWarnings(p).map((w: { wave: number; next: number }) => `${w.wave}→${w.next}`));
+    expect(ds.map((d) => `${d.wave}→${d.next}`)).toEqual(realWip(p).map((w: { wave: number; next: number }) => `${w.wave}→${w.next}`));
     for (const d of ds) expect(d.decision).toMatch(/delegation of 16\.11\.2026 21:53/);
   });
 
