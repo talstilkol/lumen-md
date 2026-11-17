@@ -3,7 +3,8 @@
  * single change, against a local WebDAV server.
  *
  *   npx tsx scripts/bench/sync-first.ts [--notes 10000] [--attachments-mb 1024]
- *        [--attachment-mb 8] [--max-first-s 600] [--max-change-s 3] [--json]
+ *        [--attachment-mb 8] [--max-first-s 600] [--max-change-s 3]
+ *        [--max-rss-mb 1536] [--json]
  *
  * Everything is real except the disk: the encrypted sync engine, the WebDAV
  * provider and its HTTP requests over loopback to a WebDAV server (the same
@@ -11,10 +12,18 @@
  * AES-GCM per file. Both devices keep their notes in memory, so the numbers
  * measure the sync, not this machine's disk.
  *
+ * Attachments stream (scripts/bench/sync-bench-store.ts): device A generates
+ * each one when the engine reads it, device B keeps the hash of each download
+ * (compared with A's at the end), and the server spills them to a temporary
+ * folder. Held in memory three times over, 1 GB of attachments was killed by
+ * the OOM killer on a 7 GB machine (L4); the peak resident size is now
+ * reported and limited (--max-rss-mb), and stays flat in the attachment size.
+ *
  * Measured, with the plan's limits:
  *   1. device A's first sync: every note and attachment up   (< 10 min)
  *   2. device B's first sync: all of it down                 (< 10 min)
  *   3. one note edited on A: A's round, then B's round       (< 3 s each)
+ *   4. the peak resident size of the whole run                (< 1.5 GB)
  * Exit code 1 when a limit is missed.
  */
 
@@ -26,6 +35,7 @@ import { memoryFiles } from "../../src/sync/e2ee/localFiles";
 import { memoryStateStore } from "../../src/sync/e2ee/state";
 import { webdavProvider } from "../../src/sync/e2ee/providers/webdav";
 import { fakeWebdav } from "../../src/__tests__/helpers/fakeServers/webdav";
+import { hashOnlyFiles, rssSampler, spillToDisk, virtualAttachments } from "./sync-bench-store";
 
 const args = process.argv.slice(2);
 const opt = (name: string, dflt: number) => {
@@ -37,6 +47,7 @@ const ATTACH_MB = opt("--attachments-mb", 1024);
 const EACH_MB = opt("--attachment-mb", 8);
 const MAX_FIRST_S = opt("--max-first-s", 600);
 const MAX_CHANGE_S = opt("--max-change-s", 3);
+const MAX_RSS_MB = opt("--max-rss-mb", 1536);
 const JSON_OUT = args.includes("--json");
 
 const PASS = "a long benchmark passphrase 2026";
@@ -53,7 +64,7 @@ function readBody(req: IncomingMessage): Promise<Uint8Array> {
 }
 
 /** The mock WebDAV server on 127.0.0.1, over real HTTP. */
-async function startDav(): Promise<{ url: string; close: () => Promise<void>; requests: () => number }> {
+async function startDav(): Promise<{ url: string; close: () => Promise<void>; requests: () => number; spill: ReturnType<typeof spillToDisk> }> {
   let dav: ReturnType<typeof fakeWebdav> | null = null;
   let url = "";
   const server = createServer((req, res) => {
@@ -74,7 +85,8 @@ async function startDav(): Promise<{ url: string; close: () => Promise<void>; re
   const port = (server.address() as AddressInfo).port;
   url = `http://127.0.0.1:${port}/dav/${USER}/Lumen/`;
   dav = fakeWebdav({ baseUrl: url, username: USER, password: PW, preCreated: true });
-  return { url, requests: () => dav!.log.length, close: () => new Promise((r) => server.close(() => r())) };
+  const spill = spillToDisk(dav.files);
+  return { url, spill, requests: () => dav!.log.length, close: () => new Promise((r) => server.close(() => (spill.dispose(), r()))) };
 }
 
 /** A note of 1–3 KB, Hebrew and English, with front matter and links. */
@@ -90,19 +102,20 @@ function note(i: number): string {
 const secs = (t0: number) => (performance.now() - t0) / 1000;
 
 async function main() {
+  const rss = rssSampler();
   const dav = await startDav();
   const provider = () => webdavProvider({ url: dav.url, username: USER, password: PW });
 
   // Device A: the vault to sync.
-  const a = memoryFiles();
+  const aNotes = memoryFiles();
   let noteBytes = 0;
   for (let i = 0; i < NOTES; i++) {
     const text = note(i);
     noteBytes += Buffer.byteLength(text);
-    a.set(`notes/${String(Math.floor(i / 500)).padStart(2, "0")}/note-${i}.md`, text);
+    aNotes.set(`notes/${String(Math.floor(i / 500)).padStart(2, "0")}/note-${i}.md`, text);
   }
   const attachments = Math.max(0, Math.round(ATTACH_MB / EACH_MB));
-  for (let i = 0; i < attachments; i++) a.files.set(`attachments/file-${i}.bin`, new Uint8Array(randomBytes(EACH_MB * 1024 * 1024)));
+  const a = virtualAttachments(aNotes, { seed: randomBytes(4).readUInt32LE(0), count: attachments, each: EACH_MB * 1024 * 1024 });
 
   const created = await createVault(provider(), PASS);
   const syncA = new E2eeSync({ provider: provider(), keys: created.keys, local: a, store: memoryStateStore() });
@@ -113,21 +126,26 @@ async function main() {
   const firstUp = secs(t0);
 
   const { keys } = await unlockVault(provider(), PASS);
-  const b = memoryFiles();
+  const bNotes = memoryFiles();
+  const b = hashOnlyFiles(bNotes);
   const syncB = new E2eeSync({ provider: provider(), keys, local: b, store: memoryStateStore() });
   t0 = performance.now();
   const firstB = await syncB.sync();
   const firstDown = secs(t0);
 
+  const aList = new Map((await a.list()).map((f) => [f.path, f.hash]));
+  const attachmentsMatch = a.paths.every((p) => b.hashes.get(p)?.hash === aList.get(p));
+
   const one = "notes/00/note-1.md";
-  a.set(one, note(1) + "\nedited once\n");
+  aNotes.set(one, note(1) + "\nedited once\n");
   t0 = performance.now();
   const changeA = await syncA.sync();
   const changeUp = secs(t0);
   t0 = performance.now();
   const changeB = await syncB.sync();
   const changeDown = secs(t0);
-  const same = b.text(one) === a.text(one);
+  const same = bNotes.text(one) === aNotes.text(one);
+  const peakRssMB = rss.stop();
 
   const result = {
     notes: NOTES,
@@ -144,7 +162,10 @@ async function main() {
     changeUploaded: changeA.uploaded,
     changeDownloaded: changeB.downloaded,
     changeArrived: same,
-    limits: { firstSyncSeconds: MAX_FIRST_S, singleChangeSeconds: MAX_CHANGE_S },
+    attachmentsMatch,
+    peakRssMB,
+    serverMBInMemory: Math.round(dav.spill.bytesInMemory() / 1024 / 1024),
+    limits: { firstSyncSeconds: MAX_FIRST_S, singleChangeSeconds: MAX_CHANGE_S, peakRssMB: MAX_RSS_MB },
   };
   const files = NOTES + attachments;
   const ok =
@@ -153,6 +174,8 @@ async function main() {
     changeA.uploaded === 1 &&
     changeB.downloaded === 1 &&
     same &&
+    attachmentsMatch &&
+    peakRssMB < MAX_RSS_MB &&
     firstUp < MAX_FIRST_S &&
     firstDown < MAX_FIRST_S &&
     changeUp < MAX_CHANGE_S &&
@@ -165,7 +188,8 @@ async function main() {
     console.log(`  first sync, down (device B): ${result.firstSyncDownSeconds} s   limit ${MAX_FIRST_S} s`);
     console.log(`  one change, up   (device A): ${result.singleChangeUpSeconds} s   limit ${MAX_CHANGE_S} s`);
     console.log(`  one change, down (device B): ${result.singleChangeDownSeconds} s   limit ${MAX_CHANGE_S} s`);
-    console.log(`  ${result.requests} WebDAV requests; ${ok ? "PASS" : "FAIL"}`);
+    console.log(`  peak resident size:          ${peakRssMB} MB   limit ${MAX_RSS_MB} MB`);
+    console.log(`  ${result.requests} WebDAV requests; attachments ${attachmentsMatch ? "identical" : "DIFFER"}; ${ok ? "PASS" : "FAIL"}`);
   }
   process.exit(ok ? 0 : 1);
 }
