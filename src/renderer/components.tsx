@@ -36,6 +36,7 @@ const DataBlock = lazy(() => import("../plugins/DataBlock"));
 const DatabaseBlock = lazy(() => import("../views/DatabaseBlock"));
 const BasesBlock = lazy(() => import("../views/bases/BasesBlock"));
 const QueryBlock = lazy(() => import("../views/QueryBlock"));
+const AchBlock = lazy(() => import("../plugins/AchBlock"));
 const LiveCssBlock = lazy(() => import("../plugins/LiveCssBlock"));
 const LiveJsBlock = lazy(() => import("../plugins/LiveJsBlock"));
 const LivePyBlock = lazy(() => import("../plugins/LivePyBlock"));
@@ -319,6 +320,8 @@ const Bibtex = withSuspense<BlockProps>(
 );
 
 const Tasks = withSuspense<BlockProps>((props) => <TasksBlock source={getText(props.children)} />, "tasks");
+
+const Ach = withSuspense<BlockProps>((props) => <AchBlock source={getText(props.children)} />, "competing hypotheses");
 
 // `lumen-data` covers the SQL / Pandas / JS-object / auto-detect family.
 // The fence language flows through as `props.lang` so DataBlock can pick
@@ -694,6 +697,7 @@ export const components: Record<string, LumenBlock> = {
   "lumen-base": Base as unknown as LumenBlock,
   "lumen-query": Query as unknown as LumenBlock,
   "lumen-dataview": Query as unknown as LumenBlock,
+  "lumen-ach": Ach as unknown as LumenBlock,
   "lumen-livecss": LiveCss as unknown as LumenBlock,
   "lumen-livejs": LiveJs as unknown as LumenBlock,
   "lumen-livesvg": LiveSvg as unknown as LumenBlock,

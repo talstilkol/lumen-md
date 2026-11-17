@@ -170,6 +170,140 @@
       "vars": []
     },
     {
+      "key": "ach.caption",
+      "en": "{title}: evidence × hypotheses",
+      "vars": [
+        "title"
+      ]
+    },
+    {
+      "key": "ach.consistency",
+      "en": "Consistency",
+      "vars": []
+    },
+    {
+      "key": "ach.copied",
+      "en": "Copied",
+      "vars": []
+    },
+    {
+      "key": "ach.copy",
+      "en": "Copy as a table",
+      "vars": []
+    },
+    {
+      "key": "ach.deception.changes",
+      "en": "Without the evidence at risk of deception, the leader changes to {id}.",
+      "vars": [
+        "id"
+      ]
+    },
+    {
+      "key": "ach.deception.holds",
+      "en": "The leader holds without the evidence at risk of deception.",
+      "vars": []
+    },
+    {
+      "key": "ach.evidence",
+      "en": "Evidence",
+      "vars": []
+    },
+    {
+      "key": "ach.flag.deceptive",
+      "en": "risk of deception",
+      "vars": []
+    },
+    {
+      "key": "ach.flag.linchpin",
+      "en": "linchpin",
+      "vars": []
+    },
+    {
+      "key": "ach.flag.notDiagnostic",
+      "en": "not diagnostic",
+      "vars": []
+    },
+    {
+      "key": "ach.inconsistency",
+      "en": "Inconsistency",
+      "vars": []
+    },
+    {
+      "key": "ach.leader",
+      "en": "Leading: {id} — the least inconsistent (margin {margin}). A research instrument, not a verdict.",
+      "vars": [
+        "id",
+        "margin"
+      ]
+    },
+    {
+      "key": "ach.linchpins",
+      "en": "The verdict rests on one item: {rows}",
+      "vars": [
+        "rows"
+      ]
+    },
+    {
+      "key": "ach.mark.C",
+      "en": "consistent",
+      "vars": []
+    },
+    {
+      "key": "ach.mark.CC",
+      "en": "very consistent",
+      "vars": []
+    },
+    {
+      "key": "ach.mark.I",
+      "en": "inconsistent",
+      "vars": []
+    },
+    {
+      "key": "ach.mark.II",
+      "en": "very inconsistent",
+      "vars": []
+    },
+    {
+      "key": "ach.mark.N",
+      "en": "neutral",
+      "vars": []
+    },
+    {
+      "key": "ach.needTwo",
+      "en": "Add at least two hypotheses to compare.",
+      "vars": []
+    },
+    {
+      "key": "ach.ranking",
+      "en": "Hypotheses, the least inconsistent first",
+      "vars": []
+    },
+    {
+      "key": "ach.scores",
+      "en": "inconsistency {inconsistency} · consistency {consistency}",
+      "vars": [
+        "inconsistency",
+        "consistency"
+      ]
+    },
+    {
+      "key": "ach.title",
+      "en": "Competing hypotheses (ACH)",
+      "vars": []
+    },
+    {
+      "key": "ach.unmarked",
+      "en": "{count} cells unmarked (counted as N)",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "ach.weight",
+      "en": "Weight",
+      "vars": []
+    },
+    {
       "key": "agentReview.approve",
       "en": "Approve",
       "vars": []
