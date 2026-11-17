@@ -294,7 +294,7 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
       const tag = await documentLanguage(markdownText);
       if (!live) return;
       setNoteLang(tag);
-      void ensureLanguageFont(tag).catch(() => undefined);
+      void ensureLanguageFont(tag, markdownText).catch(() => undefined);
     });
     return () => {
       live = false;

@@ -39,3 +39,26 @@ describe("note language tags (W7.9)", () => {
     expect(wantsHebrewFont("he")).toBe(false);
   });
 });
+
+describe("note language tags and tagged blocks (W7.9)", () => {
+  const yiddishLine = "מיר וווינען אין דער שטאָט און לייענען ביכער אויף ייִדיש.";
+  it("does not tag an English note yi because it quotes Yiddish", () => {
+    expect(noteLanguage(`# Family letters\n\nAn English note about the letters our grandmother wrote, with one line:\n\n${yiddishLine}`)).toBeNull();
+  });
+
+  it("leaves a block tagged with its own lang out of the note's detection", () => {
+    expect(noteLanguage(`# Letters\n\n<div lang="yi">\n\n${yiddishLine}\n\n</div>\n\nשלום, זו פסקה בעברית.`)).toBeNull();
+    expect(noteLanguage(`# ייִדיש\n\n${yiddishLine}\n\nA line in English inside a Yiddish note.`)?.tag).toBe("yi");
+  });
+});
+
+describe("the pointed Hebrew face for a tagged block (W7.9)", () => {
+  it("is wanted for a yi or lad-Hebr block, not for other tags", async () => {
+    const { hasPointedBlock } = await import("../text/noteLanguageLoader");
+    expect(hasPointedBlock('<div lang="yi">\n\nאַ ליד\n\n</div>')).toBe(true);
+    expect(hasPointedBlock("<p lang='lad-Hebr'>קי חאבֿיר</p>")).toBe(true);
+    expect(hasPointedBlock('<div lang="lad-Latn">Ke haber</div>')).toBe(false);
+    expect(hasPointedBlock('<div lang="yiddish-ish">x</div>')).toBe(false);
+    expect(hasPointedBlock('<p lang="yi-Latn">mir voynen</p>')).toBe(false);
+  });
+});

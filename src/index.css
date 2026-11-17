@@ -51,7 +51,10 @@
 }
 
 /* Yiddish and Hebrew-letter Ladino (plan W7.9): a Hebrew face with full pointing (אַ אָ פֿ), loaded on demand; Heebo lacks the points. */
-:is(.prose-lumen, .cm-content):is([lang="yi"], [lang="lad-Hebr"]) {
+:is(.prose-lumen, .cm-content):is([lang="yi"], [lang="lad-Hebr"]),
+.prose-lumen :is([lang="yi"], [lang="lad-Hebr"]),
+.prose-lumen:is([lang="yi"], [lang="lad-Hebr"]) :is(h1, h2, h3, h4, h5, h6),
+.prose-lumen :is([lang="yi"], [lang="lad-Hebr"]) :is(h1, h2, h3, h4, h5, h6) {
   font-family: "Lumen Noto Sans Hebrew", var(--font-sans);
 }
 

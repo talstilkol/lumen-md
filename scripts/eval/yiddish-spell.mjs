@@ -5,6 +5,10 @@
  *
  *   node scripts/eval/yiddish-spell.mjs --dict <folder with yi.aff and yi.dic> --text <a YIVO-spelled text> [--words 100]
  *
+ * The text that goes with it: src/__tests__/fixtures/yiddish-yivo-text.txt (lines
+ * starting with # are left out). Exit 0 when both targets are met, 1 when
+ * not, 2 when there is nothing to check (fewer than N words, no slip).
+ *
  * Takes the first N distinct words of the text (all spelled correctly, as
  * a YIVO text is), and for each makes one typical slip: a missing point
  * under alef (אַ → א), a missing dagesh (פּ → פ), one vov for two, ayin
@@ -43,7 +47,8 @@ const { normalizeYiddish } = await import(pathToFileURL(join(ROOT, "src/text/yid
 const spell = nspell(readFileSync(join(dict, "yi.aff"), "utf8"), readFileSync(join(dict, "yi.dic"), "utf8"));
 const seen = new Set();
 const words = [];
-for (const { word } of yiddishWords(readFileSync(textFile, "utf8"))) {
+const text = readFileSync(textFile, "utf8").split("\n").filter((l) => !l.startsWith("#")).join("\n");
+for (const { word } of yiddishWords(text)) {
   const w = normalizeYiddish(word);
   if (seen.has(w)) continue;
   seen.add(w);
@@ -93,3 +98,11 @@ console.log(`slips that make another real word, left out: ${realWord}`);
 console.log(`slips ${slips}: flagged ${flagged}, right word in the first five suggestions ${suggested} (${((100 * suggested) / Math.max(1, slips)).toFixed(1)} %)`);
 console.log(`identified correctly: ${right}/${total} (${((100 * right) / total).toFixed(1)} %)`);
 if (wrong.length) console.log(`not accepted: ${wrong.join(" ")}`);
+// A check with nothing to check is not a pass (W7.9): too few words, or no slip to suggest for.
+if (words.length < n || slips === 0) {
+  console.error(`yiddish-spell: only ${words.length} of ${n} words and ${slips} slips — not a check`);
+  process.exit(2);
+}
+const ok = right / total >= 0.95 && suggested / slips >= 0.8;
+console.log(ok ? "yiddish-spell: meets the plan targets (≥ 95 % right, ≥ 80 % suggested)" : "yiddish-spell: BELOW the plan targets");
+process.exit(ok ? 0 : 1);

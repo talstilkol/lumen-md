@@ -9,10 +9,18 @@ export function mayHaveLanguage(head: string): boolean {
   return /^---[\s\S]*?^(?:lang|language):/m.test(head) || /[א-ת]/.test(head);
 }
 
-/** Load the reading face a language wants (once; the face is same-origin, never a CDN). */
-export async function ensureLanguageFont(tag: string | null): Promise<void> {
+/** A block tagged Yiddish or Hebrew-letter Ladino inside the note (`<div lang="yi">`). */
+export function hasPointedBlock(doc: string): boolean {
+  return /\blang=["'](?:yi|lad-Hebr)["']/i.test(doc);
+}
+
+/**
+ * Load the reading face a language wants (once; the face is same-origin, never a CDN):
+ * for the note's own tag, or for a block of the note tagged with such a language.
+ */
+export async function ensureLanguageFont(tag: string | null, doc = ""): Promise<void> {
   const { wantsHebrewFont } = await import("./noteLanguage");
-  if (!wantsHebrewFont(tag)) return;
+  if (!wantsHebrewFont(tag) && !hasPointedBlock(doc)) return;
   const { loadReadingFont, readingFont } = await import("../reading/fonts");
   const face = readingFont("notoSans");
   if (face) await loadReadingFont(face);

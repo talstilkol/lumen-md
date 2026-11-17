@@ -15,6 +15,8 @@
  * that, so the common ones are a table here (`HEBRAISMS`), read both ways.
  */
 
+import { HEBRAISMS_MORE } from "./yiddishHebraisms";
+
 const PATAKH = "\u05B7";
 const KAMATS = "\u05B8";
 const HIRIK = "\u05B4";
@@ -72,7 +74,7 @@ export const HEBRAISMS: ReadonlyArray<readonly [yiddish: string, latin: string]>
 
 const HEB_TO_LAT = new Map<string, string>();
 const LAT_TO_HEB = new Map<string, string>();
-for (const [y, l] of HEBRAISMS) {
+for (const [y, l] of [...HEBRAISMS, ...HEBRAISMS_MORE]) {
   // Lumen's own forms are written with combining points; match either.
   const k = normalizeYiddish(y);
   HEB_TO_LAT.set(k, l);
