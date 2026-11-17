@@ -1037,6 +1037,55 @@
       "vars": []
     },
     {
+      "key": "appLock.recover",
+      "en": "Use the recovery code",
+      "vars": []
+    },
+    {
+      "key": "appLock.recover.done",
+      "en": "Unlocked with the recovery code. The app lock is off now: turn it on again to make a new key and a new code.",
+      "vars": []
+    },
+    {
+      "key": "appLock.recover.label",
+      "en": "Recovery code",
+      "vars": []
+    },
+    {
+      "key": "appLock.recover.none",
+      "en": "This lock has no recovery code (it was turned on before there were codes). Unlock with the device's check.",
+      "vars": []
+    },
+    {
+      "key": "appLock.recover.show.body",
+      "en": "If this device's check stops working (Windows Hello reset, a new fingerprint, a cleared browser), this code unlocks Lumen once. Write it down and keep it away from this device. It is shown only now: {code}",
+      "vars": [
+        "code"
+      ]
+    },
+    {
+      "key": "appLock.recover.show.title",
+      "en": "Your app lock recovery code",
+      "vars": []
+    },
+    {
+      "key": "appLock.recover.submit",
+      "en": "Unlock with the code",
+      "vars": []
+    },
+    {
+      "key": "appLock.recover.wait",
+      "en": "Too many wrong codes. Try again in {seconds} seconds.",
+      "vars": [
+        "seconds"
+      ]
+    },
+    {
+      "key": "appLock.recover.wrong",
+      "en": "That code is not right.",
+      "vars": []
+    },
+    {
       "key": "appLock.title",
       "en": "Lumen is locked",
       "vars": []
