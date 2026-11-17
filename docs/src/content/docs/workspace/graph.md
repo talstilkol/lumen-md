@@ -2,7 +2,7 @@
 title: Graph and local graph
 description: The knowledge graph of the whole vault — 10,000 notes and 50,000 links — and the local graph of the open note, with filters, colour groups and full keyboard use.
 type: how-to
-tasks: ["W12.V8", "W12.V3", "W1.10"]
+tasks: ["W12.V8", "W12.V3", "W1.10", "W13.G1", "W13.G11"]
 ---
 
 ## The graph
@@ -24,6 +24,18 @@ for every `[[link]]` between two notes.
   tag. The legend shows the twelve biggest groups.
 - **Labels** show for the bigger notes, and for more of them as you zoom
   in. Hebrew names are shaped and written right to left.
+
+## Very large vaults, and the graph as a list
+
+- **Above 20,000 notes** the graph switches to a GPU engine (WebGL2) for
+  the layout and the drawing; below that the usual engine draws it, with
+  the same filters and colours. Without WebGL2 the list and the table
+  below show the same notes.
+- **The graph as a list** is for the keyboard and screen readers: the
+  current note, its neighbours grouped by relation ("Linked from",
+  "Incoming: …"), and a summary of the view ("12 neighbours in 3
+  groups"). ↑/↓ move between neighbours, Enter goes there, Backspace goes
+  back. The summary follows the filters.
 
 ## Structure: tree and sunburst
 

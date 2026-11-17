@@ -2,7 +2,7 @@
 title: Entity graph
 description: People, places, organisations, events, laws, sources and concepts found in your notes, each relation backed by an exact quote from a paragraph, reviewed by you before anything is written.
 type: how-to
-tasks: ["W12.X3", "W12.E7", "W12.V2", "R12.8", "W12.E10"]
+tasks: ["W12.X3", "W12.E7", "W12.V2", "R12.8", "W12.E10", "W13.G4", "W13.G9"]
 ---
 
 ## What it is
@@ -53,6 +53,20 @@ the relations between them ("born in", "member of", "cites", …).
   neighbours, and Enter centres the view.
 - Export to JSON-LD (schema.org), GraphML, RDF/Turtle with PROV-O, or
   Neo4j `neo4j-admin import` CSV. Every relation keeps its source.
+
+## How do two entities connect? Paths and saved views
+
+- **Path finder** (a mode of the entity graph view): pick **From** and
+  **To**, and Lumen finds the shortest chains of relations between them —
+  several paths, with how many links each has. Limit the relation types
+  and the longest chain. Each step names its relation (a reversed one
+  says so) and opens the paragraph it came from, so a path reads as a
+  chain of citations.
+- **Saved views**: a colour and a size for each kind of entity (fixed, or
+  by number of links), the kinds shown, and whether linked notes outside
+  them are included. Save a view under a name, update it, or delete it
+  (with undo). A Base or a query can open as a graph of its rows, and as
+  a table again.
 
 ## Reviewing and finding entities
 

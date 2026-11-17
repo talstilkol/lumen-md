@@ -1,6 +1,8 @@
 ---
 title: Cursor movement in Hebrew and English
 description: Choose how the arrow keys move through a line that mixes Hebrew and English — visually, as the line looks (the default, like Word), or logically, in the order of the text.
+type: how-to
+tasks: ["W13.H1"]
 ---
 
 A line such as `ראה iPhone 15 בחנות` holds two directions: the Hebrew runs

@@ -1,6 +1,8 @@
 ---
 title: Writing agents and their suggestions
 description: Local writing checks and rewrites that only propose — every change is shown as a diff and goes into the note only when you accept it, in the editor or in the review panel.
+type: how-to
+tasks: ["W13.W1"]
 ---
 
 The writing agents (clarity and style, tone, concision, consistency across
@@ -25,6 +27,11 @@ and the change as a word diff.
   back.
 - Keys: ↓ / ↑ move between cards, Enter accepts, Delete rejects, E edits,
   Esc closes. After an accept or a reject the focus moves to the next card.
+
+Every agent hands its findings over in one shape: the span of text, the
+kind of change, a short reason, how sure it is, and the change itself as
+a diff. That is why every agent's suggestions are marked the same way in
+both editors and are accepted or rejected the same way, one at a time.
 
 ## Two review paths
 

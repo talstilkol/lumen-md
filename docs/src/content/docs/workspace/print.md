@@ -2,7 +2,7 @@
 title: Print and PDF
 description: Print a note or save it as a PDF the way a word processor would, with page numbers (Hebrew numerals too), a header and footer, a table of contents, clean page breaks and embedded fonts.
 type: reference
-tasks: ["W10.E18", "W2.23"]
+tasks: ["W10.E18", "W2.23", "W13.R10"]
 ---
 
 **Print / Save as PDF…** (in the File menu and the command palette) opens the system print dialog. Choose "Save
@@ -48,6 +48,15 @@ footnotes: end         # page (default): at the bottom of each page; end: as end
 The same command works in mobile browsers and in the installed app. When the
 browser blocks the print window, as installed apps and iOS do, Lumen prints
 from the current page instead.
+
+## Page view
+
+The page view shows the note as the PDF will print it, page by page,
+before you print: A4 or Letter, normal, narrow or wide margins, page
+numbers in 1, 2, 3 or Hebrew letters (א, ב, ג), one page or two side by
+side. It is the export's own document laid out by the browser, so the
+number of pages is the PDF's. **Print / Save as PDF** from its toolbar
+prints the export.
 
 ## Limits
 

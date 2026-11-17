@@ -40,7 +40,13 @@
     "9.2": "editor/hebrew",
     "9.7": "editor/hebrew-rtl",
     "10.4": "contributing/code-checks",
-    "W6.29": "ai/privacy"
+    "W6.29": "ai/privacy",
+    "W13.G1": "workspace/graph",
+    "W13.G11": "workspace/graph",
+    "W13.G4": "workspace/entity-graph",
+    "W13.G9": "workspace/entity-graph",
+    "W13.R10": "workspace/print",
+    "W13.W1": "editor/writing-agents"
   },
   "tasksWithoutPage": {
     "W6.25": "#574 moves code out of Editor.tsx, airplane.ts and exportDocx.ts as is; the max-lines gate itself, and its page, come with #500"
