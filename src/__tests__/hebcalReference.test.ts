@@ -111,6 +111,42 @@ describe("the builder (scripts/calendar/reference-from-hebcal.mjs) on saved answ
   });
 });
 
+/**
+ * Until the Hebcal table exists: the 15 holiday anchors of the R12.6 gold
+ * (fixtures/dates-he/gold.synthetic.json, rows with anchor=true; dates worked
+ * out by hand and checked against published calendars, so they come from
+ * outside this calendar's code) are an outside reference for 2023–2024
+ * already. Each anchor's holiday must fall on its date in Israel, and a
+ * multi-day holiday on each day of its span (R12.6 acceptance 3: "the anchor
+ * rows are used by W10.E76 too").
+ */
+describe("the R12.6 holiday anchors as an outside reference (W10.E76 until the Hebcal table)", () => {
+  const gold = JSON.parse(readFileSync("src/__tests__/fixtures/dates-he/gold.synthetic.json", "utf8")) as { cases: Array<{ text: string; anchor?: boolean; expect: Array<{ from: string; to: string; holiday?: string }> }> };
+  const SPAN_END: Record<string, string> = { "rosh-hashana-1": "rosh-hashana-2", "sukkot-1": "hoshana-raba", "chanukah-1": "chanukah-8", "pesach-1": "pesach-7" };
+  const anchors = gold.cases.filter((c) => c.anchor).flatMap((c) => c.expect.filter((e) => e.holiday).map((e) => ({ ...e, text: c.text })));
+
+  it("has the 15 anchors, each naming a holiday the calendar knows", () => {
+    expect(anchors).toHaveLength(15);
+    const known = new Set(ours("2023-01-01", "2024-12-31", true).holidays.map(([, id]) => id));
+    for (const a of anchors) expect(known.has(a.holiday!), a.holiday).toBe(true);
+  });
+
+  it("every anchor's holiday is on the anchor's date, and a span covers its days, with no gap", () => {
+    const gaps: string[] = [];
+    for (const a of anchors) {
+      const on = (day: string) => ours(day, day, true).holidays.map(([, id]) => id);
+      if (!on(a.from).includes(a.holiday!)) gaps.push(`${a.holiday}: not on ${a.from} (there: ${on(a.from).join(", ") || "nothing"}) — ${a.text}`);
+      // A span (Rosh Hashana, Sukkot, Chanukah, Pesach in Israel): its last day is on the span's end.
+      if (a.to !== a.from) {
+        const last = SPAN_END[a.holiday!];
+        if (!last) gaps.push(`${a.holiday}: a span with no known last day`);
+        else if (!on(a.to).includes(last)) gaps.push(`${last}: not on ${a.to}, the end of the span — ${a.text}`);
+      }
+    }
+    expect(gaps).toEqual([]);
+  });
+});
+
 const FIXTURE = "src/__tests__/fixtures/hebcal-reference/2010-2030.json";
 
 // skip-reason: the reference table is fetched from Hebcal on a machine with network (scripts/calendar/reference-from-hebcal.mjs) | task: W2.10 | until: 2027-05-12
