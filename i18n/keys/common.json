@@ -8603,6 +8603,88 @@
       "vars": []
     },
     {
+      "key": "focusLayer.controls",
+      "en": "Focus and readability",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.hemingway",
+      "en": "Readability highlights",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.kind.adverb",
+      "en": "Adverb",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.kind.complex",
+      "en": "Simpler word exists",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.kind.long",
+      "en": "Hard to read",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.kind.passive",
+      "en": "Passive voice",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.kind.veryLong",
+      "en": "Very hard to read",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.legend",
+      "en": "Readability legend",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.note",
+      "en": "Shown only on screen: the note is not changed.",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.toSource",
+      "en": "Switch to the source editor to see them",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.total",
+      "en": "{n} highlights",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "focusLayer.unit",
+      "en": "Keep bright",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.unit.line",
+      "en": "The line",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.unit.off",
+      "en": "Everything",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.unit.paragraph",
+      "en": "The paragraph",
+      "vars": []
+    },
+    {
+      "key": "focusLayer.unit.sentence",
+      "en": "The sentence",
+      "vars": []
+    },
+    {
       "key": "frontmatter.by",
       "en": "by",
       "vars": []

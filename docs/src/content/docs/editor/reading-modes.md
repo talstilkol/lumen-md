@@ -13,7 +13,39 @@ goes back to what it was.
 | Mode | What it does |
 |---|---|
 | Page | The note as a clean page to read and highlight, alone or beside its translation. |
-| Focus | A distraction-free screen for the editor. |
+| Focus | A distraction-free screen for the editor. The line, the sentence or the paragraph you are in stays bright and the rest dims (as in iA Writer), with optional readability highlights. |
+
+## Focus: sentence focus and readability highlights
+
+In focus mode (**⇧⌘F**, or *Open Focus* in the menu) the bar at the top
+chooses what **stays bright** — everything, the line, the sentence or the
+paragraph at the cursor — and turns on **readability highlights**, in the
+manner of Hemingway:
+
+| Highlight | Underline | English | Hebrew |
+|---|---|---|---|
+| Very hard to read | double | a sentence over 30 words | over 25 words |
+| Hard to read | solid | over 20 words | over 16 words |
+| Passive voice | dashed | *was written*, *is done* | ״נכתב על ידי״, ״בוצע״, ״הוחלט״ |
+| Adverb | dotted | words in *-ly* (not *family*, *early*…) | ״באופן …״, ״בצורה …״ |
+| Simpler word exists | wavy | *utilize* → *use*, *in order to* → *to* | ״במסגרת״, ״על מנת ל״ → ״כדי ל״ |
+
+Each kind has its own colour **and** its own underline, so no highlight
+depends on colour alone. A legend counts each kind; it sits on the side
+where reading starts — the left in English, the right in Hebrew. Hebrew
+words carry their prefixes, so the Hebrew sentence limits are lower.
+
+Sentences are found with the browser's Intl.Segmenter (Hebrew and English
+rules), extended to end a sentence at the sof pasuq (׃) and not after an
+abbreviation (*Dr.*, *e.g.*). Headings, list items, quotes, table rows and
+code blocks are their own paragraphs; code, inline code, frontmatter and
+link targets are never highlighted.
+
+The highlights are drawn on the screen only: the note is not changed. When
+the clarity and style coach is installed, its findings are shown in the same
+colours instead of these rules. Sentence focus and highlights work in the
+source editor; in the rich-text editor or the preview the bar offers to
+switch to it.
 
 ## The reading profile
 
@@ -73,3 +105,5 @@ are clamped (a `width: 200` reads as the widest column).
 | `layout` | `single`, `sideBySide` |
 | `voice` | a voice name, or `""` for this device's voice for the note's language |
 | `rate` | 0.5–2 |
+| `focusUnit` | `line`, `sentence`, `paragraph` (with `mode: focus`) |
+| `hemingway` | `true` / `false` |

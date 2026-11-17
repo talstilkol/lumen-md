@@ -1,0 +1,18 @@
+{
+  "focusLayer.controls": "Focus and readability",
+  "focusLayer.unit": "Keep bright",
+  "focusLayer.unit.off": "Everything",
+  "focusLayer.unit.line": "The line",
+  "focusLayer.unit.sentence": "The sentence",
+  "focusLayer.unit.paragraph": "The paragraph",
+  "focusLayer.hemingway": "Readability highlights",
+  "focusLayer.toSource": "Switch to the source editor to see them",
+  "focusLayer.legend": "Readability legend",
+  "focusLayer.total": "{n} highlights",
+  "focusLayer.kind.veryLong": "Very hard to read",
+  "focusLayer.kind.long": "Hard to read",
+  "focusLayer.kind.passive": "Passive voice",
+  "focusLayer.kind.adverb": "Adverb",
+  "focusLayer.kind.complex": "Simpler word exists",
+  "focusLayer.note": "Shown only on screen: the note is not changed."
+}
