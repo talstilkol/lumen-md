@@ -1,0 +1,25 @@
+{
+ "$comment": "Plan W13.H2 — physical CSS properties (margin-left, right:, paddingRight, ml-2, text-left…) per file under src/, frozen when the gate landed. Only goes down: fix the file, then `node scripts/check-logical-css.mjs --update`.",
+ "total": 24,
+ "files": {
+  "src/ai/ocrLayout.ts": 1,
+  "src/editor/insertMenu.ts": 1,
+  "src/editor/wysiwygWikiComplete.ts": 1,
+  "src/index.css": 2,
+  "src/lexicon/LexiconPopover.tsx": 1,
+  "src/pdf/OcrTextLayer.tsx": 1,
+  "src/plugins/CodeDoctorBlock.tsx": 1,
+  "src/renderer/footnoteHover.ts": 1,
+  "src/renderer/hoverPreview.tsx": 1,
+  "src/ui/AgentReviewPanel.tsx": 1,
+  "src/ui/DocTabs.tsx": 2,
+  "src/ui/entity/entityInfobox.css": 3,
+  "src/ui/FamilyTreeView.tsx": 2,
+  "src/ui/FileTree.css": 1,
+  "src/ui/GoalsDialog.tsx": 1,
+  "src/ui/OnboardingTour.tsx": 1,
+  "src/ui/PagedPreview.tsx": 1,
+  "src/ui/PrivacyLedgerPanel.tsx": 1,
+  "src/ui/SearchDialog.tsx": 1
+ }
+}

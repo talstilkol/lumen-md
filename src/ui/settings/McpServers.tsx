@@ -116,7 +116,7 @@ function ServerLog({ id }: { id: string }) {
   // empty-action: the card's "Show tools" button connects to the server, which fills its log
   if (!lines.length) return <p style={muted}>{t("mcpServers.log.empty")}</p>;
   return (
-    <pre data-testid={`mcp-log-${id}`} style={{ maxHeight: 160, overflow: "auto", fontSize: 11, direction: "ltr", textAlign: "left", whiteSpace: "pre-wrap" }}>
+    <pre data-testid={`mcp-log-${id}`} style={{ maxHeight: 160, overflow: "auto", fontSize: 11, direction: "ltr", textAlign: "start", whiteSpace: "pre-wrap" }}>
       {lines.map((l) => `${formatTime(l.ts, { timeStyle: "medium" })} ${l.stream === "stderr" ? "!" : "·"} ${l.text}`).join("\n")}
     </pre>
   );

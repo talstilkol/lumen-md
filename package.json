@@ -16,7 +16,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "typecheck:crypto-lib": "tsc -p src/sync/e2ee/primitives/lib --noEmit",
-    "hygiene": "node scripts/check-code-hygiene.mjs && node scripts/check-max-lines.mjs && node scripts/audit-lock.mjs && node scripts/check-live-seams.mjs && node scripts/check-no-workflows.mjs",
+    "hygiene": "node scripts/check-code-hygiene.mjs && node scripts/check-logical-css.mjs && node scripts/check-max-lines.mjs && node scripts/audit-lock.mjs && node scripts/check-live-seams.mjs && node scripts/check-no-workflows.mjs",
     "check": "npm run -s hygiene",
     "check:seams": "node scripts/check-live-seams.mjs",
     "audit:lock": "node scripts/audit-lock.mjs",

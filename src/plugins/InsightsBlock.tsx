@@ -198,7 +198,7 @@ function ViewTab({
       className={`chart-block-tab ${view === target ? "active" : ""}`}
       onClick={() => set(target)}
     >
-      <span style={{ display: "inline", marginRight: 4 }}>{icon}</span>
+      <span style={{ display: "inline", marginInlineEnd: 4 }}>{icon}</span>
       {label}
     </button>
   );
@@ -304,7 +304,7 @@ function ProbabilityTable({ freq }: { freq: ReturnType<typeof frequencyTable> })
       <table className="data-table">
         <thead>
           <tr>
-            <th style={{ textAlign: "left" }}>{t("block.insights.col.value")}</th>
+            <th style={{ textAlign: "start" }}>{t("block.insights.col.value")}</th>
             <th className="num">{t("block.insights.col.count")}</th>
             <th className="num">{t("block.insights.col.probability")}</th>
             <th className="num">{t("block.insights.col.bar")}</th>
@@ -502,7 +502,7 @@ function SuggestionsList({
             type="button"
             onClick={() => applySuggestion(s)}
             style={{
-              textAlign: "left",
+              textAlign: "start",
               padding: 12,
               border: "1px solid hsl(var(--border))",
               borderRadius: 8,
@@ -550,7 +550,7 @@ function RawRecords({
         <thead>
           <tr>
             {fields.map((f) => (
-              <th key={f} style={{ textAlign: "left" }}>
+              <th key={f} style={{ textAlign: "start" }}>
                 {f}
               </th>
             ))}

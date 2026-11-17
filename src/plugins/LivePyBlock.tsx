@@ -175,7 +175,7 @@ export default function LivePyBlock({ source, meta }: Props) {
           marginBottom: 6,
           fontSize: 11,
           color: state === "error" ? "hsl(0 80% 65%)" : "hsl(var(--fg-muted))",
-          textAlign: "right",
+          textAlign: "end",
         }}
       >
         Python: {stateLabel}

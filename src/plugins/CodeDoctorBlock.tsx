@@ -238,10 +238,10 @@ function DiagnosePanel({
       <table className="data-table" style={{ marginBottom: 8 }}>
         <thead>
           <tr>
-            <th style={{ textAlign: "left" }}>{t("block.codeDoctor.col.issue")}</th>
+            <th style={{ textAlign: "start" }}>{t("block.codeDoctor.col.issue")}</th>
             <th className="num">{t("block.codeDoctor.col.count")}</th>
             <th>{t("block.codeDoctor.col.confidence")}</th>
-            <th style={{ textAlign: "left" }}>{t("block.codeDoctor.col.example")}</th>
+            <th style={{ textAlign: "start" }}>{t("block.codeDoctor.col.example")}</th>
           </tr>
         </thead>
         <tbody>
@@ -397,7 +397,7 @@ function RepairedPanel({
               marginBottom: 4,
             }}
           >
-            <FileCode size={12} style={{ verticalAlign: "-2px", marginRight: 4 }} />
+            <FileCode size={12} style={{ verticalAlign: "-2px", marginInlineEnd: 4 }} />
             {t("block.codeDoctor.repairedTable")}
           </div>
           <DataTable data={dataTable} />

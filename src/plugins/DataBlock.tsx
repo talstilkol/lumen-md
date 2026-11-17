@@ -83,7 +83,7 @@ export default function DataBlock({ source, meta, lang }: Props) {
             className={`chart-block-tab ${view === "table" ? "active" : ""}`}
             onClick={() => setView("table")}
           >
-            <Table2 size={12} style={{ display: "inline", marginRight: 4 }} />
+            <Table2 size={12} style={{ display: "inline", marginInlineEnd: 4 }} />
             {t("block.data.table")}
           </button>
           {suggestions.length > 0 && (
@@ -92,7 +92,7 @@ export default function DataBlock({ source, meta, lang }: Props) {
               className={`chart-block-tab ${view === "chart" ? "active" : ""}`}
               onClick={() => setView("chart")}
             >
-              <BarChart3 size={12} style={{ display: "inline", marginRight: 4 }} />
+              <BarChart3 size={12} style={{ display: "inline", marginInlineEnd: 4 }} />
               {t("block.data.chart")}
             </button>
           )}
