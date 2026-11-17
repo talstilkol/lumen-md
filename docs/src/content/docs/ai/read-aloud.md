@@ -1,6 +1,8 @@
 ---
 title: Read aloud (Hebrew included)
 description: Listen to a note on this device — the word being read is highlighted, the position is kept, and you choose the speed and voice.
+type: how-to
+tasks: ["W10.E65", "W2.6"]
 ---
 
 **Command palette → Read aloud** reads the open note on this device. Run it
@@ -21,6 +23,16 @@ listen.
   read in its own language: a Hebrew sentence with the Hebrew voice, an
   English one with the English voice.
 
+## Listening to a PDF
+
+In the [PDF reader](/workspace/pdf-reader/), **Read aloud** in the toolbar
+reads the PDF with the same voice, speed and saved position, and the view
+follows the page being read ("Reading page 3"). Press it again to stop, or
+close the PDF. Before reading, Lumen joins the lines of each paragraph,
+mends words hyphenated across lines, and puts Hebrew that the PDF stored in
+visual order back in reading order. A scanned page has no text until you
+recognise it (OCR on the page).
+
 ## Hebrew voices
 
 Hebrew is read with **your system's Hebrew voice** (on macOS, Windows and
@@ -35,6 +47,34 @@ recordings that may not be used commercially, so none can ship. Once a voice
 with a licence that allows it exists, it is listed in the licence gate,
 downloads once with your consent, and Hebrew notes are read with it. After
 that download, reading needs no network.
+
+## A neural English voice
+
+English is read with your system's voice too. Lumen has a place for an
+on-device neural English voice, Kokoro (Apache-2.0 weights), in its own
+worker. It does not use kokoro-js, which bundles eSpeak NG (GPL). It is
+**not active yet**: the model files aren't pinned, and the English
+pronunciation step and decision 15.10 are still open.
+
+Once they are, Lumen asks before the download and shows its size. The files
+are checked against their checksums, and English notes are read on the
+device with no further requests. Until then nothing is downloaded.
+Everything but the voice is ready for it:
+- **Numbers are read out** in Hebrew words with their vowels: "15" as
+  חֲמֵשׁ עֶשְׂרֵה, "ב-2025", "3.5%", "-7", "14:30". Prefixes are said the
+  way people say them ("be-alpayim"), and long digit strings are read digit
+  by digit.
+- A candidate voice is checked before it is listed:
+  `npm run tts:voice -- check <voice.onnx.json>` says whether it has every
+  sound Lumen's Hebrew rules write. `npm run tts:voice -- pin …` also
+  checks:
+  - the licence of the weights **and** of the training data: no
+    non-commercial, no-derivatives or GPL terms, and nothing on the
+    licence gate's deny-list;
+  - that both files are pinned to a fixed revision.
+
+  It then prints the two entries to add, with the files' sizes and
+  sha256.
 
 ## Listening test (developers)
 

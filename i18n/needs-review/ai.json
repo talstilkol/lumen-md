@@ -1,0 +1,34 @@
+{
+  "tts.kokoro.body": {
+    "ar": "15pi4g7",
+    "de": "15pi4g7",
+    "fr": "15pi4g7",
+    "ja": "15pi4g7",
+    "ru": "15pi4g7",
+    "zh-CN": "15pi4g7"
+  },
+  "tts.kokoro.ok": {
+    "ar": "1ot74o",
+    "de": "1ot74o",
+    "fr": "1ot74o",
+    "ja": "1ot74o",
+    "ru": "1ot74o",
+    "zh-CN": "1ot74o"
+  },
+  "tts.kokoro.title": {
+    "ar": "1gjpbva",
+    "de": "1gjpbva",
+    "fr": "1gjpbva",
+    "ja": "1gjpbva",
+    "ru": "1gjpbva",
+    "zh-CN": "1gjpbva"
+  },
+  "agent.grammar.found": {
+    "ar": "1ii0ct2",
+    "ru": "1ii0ct2",
+    "fr": "1ii0ct2",
+    "de": "1ii0ct2",
+    "ja": "1ii0ct2",
+    "zh-CN": "1ii0ct2"
+  }
+}

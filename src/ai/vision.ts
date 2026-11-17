@@ -57,16 +57,20 @@ export async function describeImage(blob: Blob, lang: string, model?: string | n
       ? "תאר את התמונה במשפט אחד קצר, בעברית, כטקסט חלופי לנגישות. בלי הקדמה."
       : "Describe this image in one short sentence, as alt text for accessibility. No preamble.";
   try {
-    // privacy-ledger: Ollama at the configured base URL (classify: local-ai on this machine/LAN, cloud-ai when remote)
-    const res = await fetch(`${getBaseUrl()}/api/chat`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: m, stream: false, messages: [{ role: "user", content: prompt, images: [await toBase64(blob)] }], options: { temperature: 0 } }),
-      signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(60_000)]) : AbortSignal.timeout(60_000),
-    });
-    if (!res.ok) return null;
-    const json = (await res.json()) as { message?: { content?: string } };
-    const text = (json.message?.content ?? "").replace(/\s+/g, " ").trim();
+    // Through the runtime (plan 5.5): the Ollama executor, so the run is in
+    // the trace and the "local only" policy refuses a remote server.
+    const [{ runLocalRequest }, { ollamaExecutor }] = await Promise.all([import("../agents/runtime"), import("../agents/executors/ollama")]);
+    const res = await runLocalRequest(
+      ollamaExecutor,
+      {
+        model: m,
+        messages: [{ role: "user", content: prompt, images: [await toBase64(blob)] }],
+        temperature: 0,
+        signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(60_000)]) : AbortSignal.timeout(60_000),
+      },
+      { agentId: "image-describe" },
+    );
+    const text = res.content.replace(/\s+/g, " ").trim();
     return text ? text.slice(0, 200) : null;
   } catch (e) {
     if (signal?.aborted) throw e;

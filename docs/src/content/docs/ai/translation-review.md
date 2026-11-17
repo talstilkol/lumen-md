@@ -1,6 +1,8 @@
 ---
 title: Translation review (the UI's seven languages)
 description: The agent that checks every translation of Lumen's interface against its English — missing variables, odd lengths, untranslated strings and, on this machine, a back-translation.
+type: reference
+tasks: ["9.4"]
 ---
 
 Lumen's interface is translated into seven languages (Arabic, German,

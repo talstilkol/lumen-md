@@ -1,6 +1,7 @@
 ---
 title: A second host and tests without Vercel
 description: Why Cloudflare Pages is Lumen's second host next to Vercel Hobby, what each free tier allows, how to deploy the same build there, what to do when a quota runs out, and how to run the whole test pipeline in Docker.
+type: how-to
 ---
 
 Vercel's Hobby plan builds every branch, one build at a time, 100

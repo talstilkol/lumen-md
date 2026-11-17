@@ -1,0 +1,766 @@
+{
+  "apiVersion": "1.1.0",
+  "entries": [
+    {
+      "key": "BasesQueryResult",
+      "kind": "interface",
+      "signature": "interface BasesQueryResult",
+      "since": "1.0.0"
+    },
+    {
+      "key": "BasesQueryResult.columns",
+      "kind": "property",
+      "signature": "columns: Array<{ id: string; label: string }>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "BasesQueryResult.errors",
+      "kind": "property",
+      "signature": "errors: string[]",
+      "since": "1.0.0"
+    },
+    {
+      "key": "BasesQueryResult.rows",
+      "kind": "property",
+      "signature": "rows: Array<{ path: string; cells: Record<string, JsonValue> }>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "BasesQueryResult.total",
+      "kind": "property",
+      "signature": "total: number",
+      "since": "1.0.0"
+    },
+    {
+      "key": "BasesQueryResult.view",
+      "kind": "property",
+      "signature": "view: string",
+      "since": "1.0.0"
+    },
+    {
+      "key": "BasesRowEdit",
+      "kind": "interface",
+      "signature": "interface BasesRowEdit",
+      "since": "1.0.0"
+    },
+    {
+      "key": "BasesRowEdit.path",
+      "kind": "property",
+      "signature": "path: string",
+      "since": "1.0.0"
+    },
+    {
+      "key": "BasesRowEdit.set",
+      "kind": "property",
+      "signature": "set: Record<string, JsonValue>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "BasesUpdateResult",
+      "kind": "type",
+      "signature": "type BasesUpdateResult",
+      "since": "1.0.0"
+    },
+    {
+      "key": "BasesUpdateResult | { written: 0; unchanged: number; declined: true }",
+      "kind": "union-member",
+      "signature": "{ written: 0; unchanged: number; declined: true }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "BasesUpdateResult | { written: number; unchanged: number; declined: false }",
+      "kind": "union-member",
+      "signature": "{ written: number; unchanged: number; declined: false }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "CommandSpec",
+      "kind": "interface",
+      "signature": "interface CommandSpec",
+      "since": "1.0.0"
+    },
+    {
+      "key": "CommandSpec.hint",
+      "kind": "property",
+      "signature": "hint?: string",
+      "since": "1.0.0"
+    },
+    {
+      "key": "CommandSpec.id",
+      "kind": "property",
+      "signature": "id: string",
+      "since": "1.0.0"
+    },
+    {
+      "key": "CommandSpec.label",
+      "kind": "property",
+      "signature": "label: string",
+      "since": "1.0.0"
+    },
+    {
+      "key": "FetchInit",
+      "kind": "interface",
+      "signature": "interface FetchInit",
+      "since": "1.0.0"
+    },
+    {
+      "key": "FetchInit.body",
+      "kind": "property",
+      "signature": "body?: string",
+      "since": "1.0.0"
+    },
+    {
+      "key": "FetchInit.headers",
+      "kind": "property",
+      "signature": "headers?: Record<string, string>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "FetchInit.method",
+      "kind": "property",
+      "signature": "method?: \"GET\" | \"POST\" | \"PUT\" | \"DELETE\" | \"PATCH\" | \"HEAD\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "FetchResult",
+      "kind": "interface",
+      "signature": "interface FetchResult",
+      "since": "1.0.0"
+    },
+    {
+      "key": "FetchResult.body",
+      "kind": "property",
+      "signature": "body: string",
+      "since": "1.0.0"
+    },
+    {
+      "key": "FetchResult.headers",
+      "kind": "property",
+      "signature": "headers: Record<string, string>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "FetchResult.status",
+      "kind": "property",
+      "signature": "status: number",
+      "since": "1.0.0"
+    },
+    {
+      "key": "JsonValue",
+      "kind": "type",
+      "signature": "type JsonValue",
+      "since": "1.0.0"
+    },
+    {
+      "key": "JsonValue | JsonValue[]",
+      "kind": "union-member",
+      "signature": "JsonValue[]",
+      "since": "1.0.0"
+    },
+    {
+      "key": "JsonValue | boolean",
+      "kind": "union-member",
+      "signature": "boolean",
+      "since": "1.0.0"
+    },
+    {
+      "key": "JsonValue | null",
+      "kind": "union-member",
+      "signature": "null",
+      "since": "1.0.0"
+    },
+    {
+      "key": "JsonValue | number",
+      "kind": "union-member",
+      "signature": "number",
+      "since": "1.0.0"
+    },
+    {
+      "key": "JsonValue | string",
+      "kind": "union-member",
+      "signature": "string",
+      "since": "1.0.0"
+    },
+    {
+      "key": "JsonValue | { [key: string]: JsonValue }",
+      "kind": "union-member",
+      "signature": "{ [key: string]: JsonValue }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenBasesApi",
+      "kind": "interface",
+      "signature": "interface LumenBasesApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenBasesApi.query",
+      "kind": "method",
+      "signature": "query(path: string, view?: string | number, page?: { offset?: number; limit?: number }): Promise<BasesQueryResult>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenBasesApi.update",
+      "kind": "method",
+      "signature": "update(edits: BasesRowEdit[]): Promise<BasesUpdateResult>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenClipboardApi",
+      "kind": "interface",
+      "signature": "interface LumenClipboardApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenClipboardApi.writeText",
+      "kind": "method",
+      "signature": "writeText(text: string): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenCommandsApi",
+      "kind": "interface",
+      "signature": "interface LumenCommandsApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenCommandsApi.register",
+      "kind": "method",
+      "signature": "register(command: CommandSpec, handler?: (payload: { source: \"palette\" }) => void | Promise<void>): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenCommandsApi.unregister",
+      "kind": "method",
+      "signature": "unregister(id: string): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenDocumentApi",
+      "kind": "interface",
+      "signature": "interface LumenDocumentApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenDocumentApi.applyEdits",
+      "kind": "method",
+      "signature": "applyEdits(edits: TextEdit[]): Promise<number>",
+      "since": "1.1.0"
+    },
+    {
+      "key": "LumenDocumentApi.getFileName",
+      "kind": "method",
+      "signature": "getFileName(): Promise<string>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenDocumentApi.getSelection",
+      "kind": "method",
+      "signature": "getSelection(): Promise<Selection | null>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenDocumentApi.getText",
+      "kind": "method",
+      "signature": "getText(): Promise<string>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenDocumentApi.insertText",
+      "kind": "method",
+      "signature": "insertText(text: string): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenDocumentApi.replaceSelection",
+      "kind": "method",
+      "signature": "replaceSelection(text: string): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenDocumentApi.setText",
+      "kind": "method",
+      "signature": "setText(text: string): Promise<void>",
+      "since": "1.0.0",
+      "deprecated": {
+        "since": "1.1.0",
+        "removeIn": "2.0.0",
+        "use": "document.applyEdits"
+      }
+    },
+    {
+      "key": "LumenNetworkApi",
+      "kind": "interface",
+      "signature": "interface LumenNetworkApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenNetworkApi.fetch",
+      "kind": "method",
+      "signature": "fetch(url: string, init?: FetchInit): Promise<FetchResult>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenNotificationsApi",
+      "kind": "interface",
+      "signature": "interface LumenNotificationsApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenNotificationsApi.show",
+      "kind": "method",
+      "signature": "show(text: string, kind?: \"info\" | \"success\" | \"error\"): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPanelApi",
+      "kind": "interface",
+      "signature": "interface LumenPanelApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPanelApi.close",
+      "kind": "method",
+      "signature": "close(): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPanelApi.open",
+      "kind": "method",
+      "signature": "open(options?: { title?: string }): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPanelApi.render",
+      "kind": "method",
+      "signature": "render(tree: UiNode): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi",
+      "kind": "interface",
+      "signature": "interface LumenPluginApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi.apiVersion",
+      "kind": "property",
+      "signature": "readonly apiVersion: string",
+      "since": "1.1.0"
+    },
+    {
+      "key": "LumenPluginApi.bases",
+      "kind": "property",
+      "signature": "readonly bases: LumenBasesApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi.clipboard",
+      "kind": "property",
+      "signature": "readonly clipboard: LumenClipboardApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi.commands",
+      "kind": "property",
+      "signature": "readonly commands: LumenCommandsApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi.document",
+      "kind": "property",
+      "signature": "readonly document: LumenDocumentApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi.manifest",
+      "kind": "property",
+      "signature": "readonly manifest: Readonly<Record<string, JsonValue>>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi.network",
+      "kind": "property",
+      "signature": "readonly network: LumenNetworkApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi.notifications",
+      "kind": "property",
+      "signature": "readonly notifications: LumenNotificationsApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi.on",
+      "kind": "method",
+      "signature": "on(event: string, handler: (payload: JsonValue) => void | Promise<void>): () => void",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi.panel",
+      "kind": "property",
+      "signature": "readonly panel: LumenPanelApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi.renderer",
+      "kind": "property",
+      "signature": "readonly renderer: LumenRendererApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi.settings",
+      "kind": "property",
+      "signature": "readonly settings: LumenSettingsApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi.storage",
+      "kind": "property",
+      "signature": "readonly storage: LumenStorageApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenPluginApi.vault",
+      "kind": "property",
+      "signature": "readonly vault: LumenVaultApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenRendererApi",
+      "kind": "interface",
+      "signature": "interface LumenRendererApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenRendererApi.register",
+      "kind": "method",
+      "signature": "register(lang: string): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenRendererApi.result",
+      "kind": "method",
+      "signature": "result(requestId: string, tree: UiNode): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenSettingsApi",
+      "kind": "interface",
+      "signature": "interface LumenSettingsApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenSettingsApi.get",
+      "kind": "method",
+      "signature": "get(): Promise<JsonValue>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenSettingsApi.set",
+      "kind": "method",
+      "signature": "set(value: JsonValue): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenStorageApi",
+      "kind": "interface",
+      "signature": "interface LumenStorageApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenStorageApi.delete",
+      "kind": "method",
+      "signature": "delete(key: string): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenStorageApi.get",
+      "kind": "method",
+      "signature": "get(key: string): Promise<JsonValue>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenStorageApi.set",
+      "kind": "method",
+      "signature": "set(key: string, value: JsonValue): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable",
+      "kind": "type",
+      "signature": "type LumenThemeVariable",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--accent\"",
+      "kind": "union-member",
+      "signature": "\"--accent\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--accent-fg\"",
+      "kind": "union-member",
+      "signature": "\"--accent-fg\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--bg\"",
+      "kind": "union-member",
+      "signature": "\"--bg\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--bg-inset\"",
+      "kind": "union-member",
+      "signature": "\"--bg-inset\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--bg-muted\"",
+      "kind": "union-member",
+      "signature": "\"--bg-muted\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--bg-subtle\"",
+      "kind": "union-member",
+      "signature": "\"--bg-subtle\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--border\"",
+      "kind": "union-member",
+      "signature": "\"--border\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--border-strong\"",
+      "kind": "union-member",
+      "signature": "\"--border-strong\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--danger\"",
+      "kind": "union-member",
+      "signature": "\"--danger\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--fg\"",
+      "kind": "union-member",
+      "signature": "\"--fg\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--fg-muted\"",
+      "kind": "union-member",
+      "signature": "\"--fg-muted\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--fg-subtle\"",
+      "kind": "union-member",
+      "signature": "\"--fg-subtle\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--info\"",
+      "kind": "union-member",
+      "signature": "\"--info\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--success\"",
+      "kind": "union-member",
+      "signature": "\"--success\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenThemeVariable | \"--warning\"",
+      "kind": "union-member",
+      "signature": "\"--warning\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenVaultApi",
+      "kind": "interface",
+      "signature": "interface LumenVaultApi",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenVaultApi.list",
+      "kind": "method",
+      "signature": "list(dir?: string): Promise<VaultEntry[]>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenVaultApi.read",
+      "kind": "method",
+      "signature": "read(path: string): Promise<string>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "LumenVaultApi.write",
+      "kind": "method",
+      "signature": "write(path: string, text: string): Promise<void>",
+      "since": "1.0.0"
+    },
+    {
+      "key": "Selection",
+      "kind": "interface",
+      "signature": "interface Selection",
+      "since": "1.0.0"
+    },
+    {
+      "key": "Selection.from",
+      "kind": "property",
+      "signature": "from: number",
+      "since": "1.0.0"
+    },
+    {
+      "key": "Selection.text",
+      "kind": "property",
+      "signature": "text: string",
+      "since": "1.0.0"
+    },
+    {
+      "key": "Selection.to",
+      "kind": "property",
+      "signature": "to: number",
+      "since": "1.0.0"
+    },
+    {
+      "key": "TextEdit",
+      "kind": "interface",
+      "signature": "interface TextEdit",
+      "since": "1.1.0"
+    },
+    {
+      "key": "TextEdit.from",
+      "kind": "property",
+      "signature": "from: number",
+      "since": "1.1.0"
+    },
+    {
+      "key": "TextEdit.insert",
+      "kind": "property",
+      "signature": "insert: string",
+      "since": "1.1.0"
+    },
+    {
+      "key": "TextEdit.to",
+      "kind": "property",
+      "signature": "to: number",
+      "since": "1.1.0"
+    },
+    {
+      "key": "UiNode",
+      "kind": "type",
+      "signature": "type UiNode",
+      "since": "1.0.0"
+    },
+    {
+      "key": "UiNode | { type: \"box\"; direction?: \"row\" | \"column\"; gap?: number; children: UiNode[] }",
+      "kind": "union-member",
+      "signature": "{ type: \"box\"; direction?: \"row\" | \"column\"; gap?: number; children: UiNode[] }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "UiNode | { type: \"button\"; id: string; label: string; primary?: boolean; disabled?: boolean }",
+      "kind": "union-member",
+      "signature": "{ type: \"button\"; id: string; label: string; primary?: boolean; disabled?: boolean }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "UiNode | { type: \"checkbox\"; id: string; checked?: boolean; label: string }",
+      "kind": "union-member",
+      "signature": "{ type: \"checkbox\"; id: string; checked?: boolean; label: string }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "UiNode | { type: \"code\"; text: string; lang?: string }",
+      "kind": "union-member",
+      "signature": "{ type: \"code\"; text: string; lang?: string }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "UiNode | { type: \"divider\" }",
+      "kind": "union-member",
+      "signature": "{ type: \"divider\" }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "UiNode | { type: \"heading\"; level?: 1 | 2 | 3; text: string }",
+      "kind": "union-member",
+      "signature": "{ type: \"heading\"; level?: 1 | 2 | 3; text: string }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "UiNode | { type: \"input\"; id: string; value?: string; placeholder?: string; multiline?: boolean }",
+      "kind": "union-member",
+      "signature": "{ type: \"input\"; id: string; value?: string; placeholder?: string; multiline?: boolean }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "UiNode | { type: \"list\"; ordered?: boolean; items: UiNode[][] }",
+      "kind": "union-member",
+      "signature": "{ type: \"list\"; ordered?: boolean; items: UiNode[][] }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "UiNode | { type: \"noteLink\"; target: string; label?: string }",
+      "kind": "union-member",
+      "signature": "{ type: \"noteLink\"; target: string; label?: string }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "UiNode | { type: \"paragraph\"; children: UiNode[] }",
+      "kind": "union-member",
+      "signature": "{ type: \"paragraph\"; children: UiNode[] }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "UiNode | { type: \"select\"; id: string; value?: string; options: { value: string; label: string }[] }",
+      "kind": "union-member",
+      "signature": "{ type: \"select\"; id: string; value?: string; options: { value: string; label: string }[] }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "UiNode | { type: \"text\"; text: string }",
+      "kind": "union-member",
+      "signature": "{ type: \"text\"; text: string }",
+      "since": "1.0.0"
+    },
+    {
+      "key": "VaultEntry",
+      "kind": "interface",
+      "signature": "interface VaultEntry",
+      "since": "1.0.0"
+    },
+    {
+      "key": "VaultEntry.kind",
+      "kind": "property",
+      "signature": "kind: \"file\" | \"dir\"",
+      "since": "1.0.0"
+    },
+    {
+      "key": "VaultEntry.name",
+      "kind": "property",
+      "signature": "name: string",
+      "since": "1.0.0"
+    },
+    {
+      "key": "VaultEntry.path",
+      "kind": "property",
+      "signature": "path: string",
+      "since": "1.0.0"
+    },
+    {
+      "key": "global global",
+      "kind": "global",
+      "signature": "declare global { const lumen: LumenPluginApi; }",
+      "since": "1.0.0"
+    }
+  ]
+}

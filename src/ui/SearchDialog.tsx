@@ -1,11 +1,13 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactElement } from "react";
-import { Search, FileText, Sparkles, Loader2, FileCode2, Wand2, Image as ImageIcon } from "lucide-react";
+import { Search, Sparkles, Loader2, FileCode2, Wand2, Image as ImageIcon } from "lucide-react";
 import { t, tPlural } from "../i18n";
 import "../ai/imageSearchStrings";
 import { searchWorkspace, type SearchHit } from "../storage/workspaceIndex";
 import { wrongLayoutVariant } from "../lib/keyboardLayout";
 import { mergeLayoutHits } from "./paletteSearch";
+import { streamSearch } from "../storage/searchStream";
+import { SearchHitList } from "./SearchHitList";
 import { isOPFSAvailable, readWorkspaceFile } from "../storage/workspace";
 import { AiError } from "../ai/llm";
 import type { ChatMessage } from "../ai/llm";
@@ -15,7 +17,8 @@ import { showAiToast } from "../ui/AiToast";
 import type { RagResult } from "../ai/embeddings";
 import { indexWorkspace, searchHybrid, type SemanticHit } from "../ai/semanticSearch";
 import { rerank } from "../ai/reranker";
-import { CITE_INSTRUCTIONS, verifyVaultCitations, type VaultCitation } from "../ai/vaultCitations";
+import { CITE_INSTRUCTIONS, claimSupport, markUnsupportedClaims, verifyVaultCitations, type ClaimSupport, type VaultCitation } from "../ai/vaultCitations";
+import { loadVaultScope, scopeFilter, type AskScopeChoice } from "../ai/askScope";
 import { rememberSearch, getSearchHistory, forgetSearch } from "../storage/searchHistory";
 import { flashSearchHighlight } from "../editor/searchHighlight";
 import { isSaved, removeSavedSearch, saveSearch } from "../search/savedSearches";
@@ -28,7 +31,7 @@ import { HelpButton } from "./HelpButton";
 import "./searchDialogStrings";
 import { Modal } from "./Modal";
 import { buildAskContext, retrieveForQuestion } from "./searchDialogParts";
-import { renderSnippet } from "./searchSnippet";
+import { AskScopePicker, VaultCitationList } from "./askVaultViews";
 import { regexNoteText } from "./searchRegexNote";
 
 interface Props {
@@ -81,7 +84,9 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
   const [aiRendered, setAiRendered] = useState<ReactElement | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiSources, setAiSources] = useState<RagResult[]>([]);
-  const [aiCitations, setAiCitations] = useState<{ citations: VaultCitation[]; verifiedCount: number } | null>(null);
+  const [aiCitations, setAiCitations] = useState<{ citations: VaultCitation[]; verifiedCount: number; claims: ClaimSupport[] } | null>(null);
+  // W12.A2: what "Ask" may read — the vault (minus what .lumen/mcp.json denies), one folder, or one tag.
+  const [askScope, setAskScope] = useState<AskScopeChoice>({ kind: "vault" });
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
@@ -110,19 +115,33 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
     if (!open) return;
     if (mode !== "search") return;
     let cancelled = false;
+    // W13.V3: results stream a page at a time; the next keystroke stops the stream.
+    const abort = new AbortController();
     setLoading(true);
     const handle = setTimeout(() => {
       let note = "";
-      searchWorkspace(query, { limit: 40, onRegexInfo: (r) => (note = regexNoteText(r)) })
+      let firstPage = true;
+      const page = (q: string, o: { limit: number; offset: number }) => searchWorkspace(q, { ...o, onRegexInfo: (r) => (note = regexNoteText(r)) });
+      void streamSearch(page, query, {
+        signal: abort.signal,
+        onPage: (more) => {
+          if (cancelled) return;
+          if (!firstPage) return setHits((h) => [...h, ...more]);
+          firstPage = false;
+          setHits(more);
+          setRegexNote(note);
+          setActive(0);
+          setLoading(false);
+        },
+      })
         .then(async (h) => {
           // Few hits: try the same keystrokes in the other keyboard layout too (plan W2.8).
           const other = h.length < 3 ? wrongLayoutVariant(query) : null;
           const more = other ? await searchWorkspace(other, { limit: 40 }).catch(() => [] as SearchHit[]) : [];
           if (cancelled) return;
           setLayoutVariant(more.length ? other : null);
-          setHits(mergeLayoutHits(h, more));
+          if (more.length || !h.length) setHits(mergeLayoutHits(h, more));
           setRegexNote(note);
-          setActive(0);
           setLoading(false);
         })
         .catch(() => {
@@ -134,6 +153,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
     }, 150);
     return () => {
       cancelled = true;
+      abort.abort();
       clearTimeout(handle);
     };
   }, [open, query, mode]);
@@ -304,12 +324,15 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
     setAiCitations(null);
 
     try {
-      const results = await retrieveForQuestion(query);
+      // W12.A2: the same scope as the MCP server (.lumen/mcp.json), narrowed by the picker; locked notes never.
+      // A note out of scope is dropped before reranking, so it reaches neither the prompt nor a citation.
+      const inScope = scopeFilter(await loadVaultScope(readWorkspaceFile), askScope);
+      const results = await retrieveForQuestion(query, inScope);
       if (local.signal.aborted) throw local.signal.reason; // superseded or closed
       setAiSources(results);
       setAiCitations(null);
 
-      const { contextStr, untrusted } = await buildAskContext(query, results);
+      const { contextStr, untrusted } = await buildAskContext(query, results, inScope);
 
       setAiAnswer(t("searchDialog.thinking"));
 
@@ -322,8 +345,11 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
       );
       if (local.signal.aborted) throw local.signal.reason;
       setAiAnswer(answer);
-      // Check every citation against the note it names (T29).
-      setAiCitations(verifyVaultCitations(answer, results.map((r) => ({ path: r.path, content: r.content }))));
+      // Check every citation against the note it names (T29), down to the paragraph (W12.A1),
+      // and flag each claim no verified citation backs.
+      const checked = verifyVaultCitations(answer, results.map((r) => ({ path: r.path, content: r.content })));
+      const claims = claimSupport(answer, checked.citations);
+      setAiCitations({ ...checked, claims });
 
       // Save to conversation history
       setConversation((prev) => [
@@ -333,7 +359,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
       ]);
 
       const isDark = () => document.documentElement.classList.contains("dark");
-      const rendered = await renderMarkdown(answer, isDark);
+      const rendered = await renderMarkdown(markUnsupportedClaims(answer, claims, t("vaultCite.unsupportedClaim")), isDark);
       setAiRendered(rendered);
     } catch (e) {
       if (isAbort(e) || local.signal.aborted) {
@@ -490,6 +516,28 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
               {isSaved(query) ? `★ ${t("search.savedLabel")}` : `☆ ${t("search.save")}`}
             </button>
           )}
+          {mode === "search" && query.trim() && isOPFSAvailable() && (
+            // W12.A4: a query of tag:/path: operators only becomes an Obsidian .base (a table, embeddable in a dashboard note).
+            <button
+              type="button"
+              data-testid="search-save-base"
+              title={t("search.saveAsBaseHint")}
+              onClick={async () => {
+                const { queryToBase } = await import("../search/queryToBase");
+                const name = query.trim();
+                const b = queryToBase(name, name);
+                if (!b.ok) return showAiToast(t("search.saveAsBaseNo", { parts: b.unsupported.join(" ") }), "error");
+                const { uniqueWorkspaceName, writeWorkspaceFile } = await import("../storage/workspace");
+                const path = await uniqueWorkspaceName(`Searches/${name.replace(/[\\/:*?"<>|#^[\]]+/g, " ").replace(/\s+/g, " ").trim() || "search"}.base`);
+                await writeWorkspaceFile(path, b.text);
+                window.dispatchEvent(new Event("lumen-workspace-changed"));
+                showAiToast(t("search.saveAsBaseDone", { path }), "success");
+              }}
+              style={{ flexShrink: 0, fontSize: 11, padding: "2px 8px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg-subtle))", color: "hsl(var(--fg-muted))", cursor: "pointer", whiteSpace: "nowrap" }}
+            >
+              {t("search.saveAsBase")}
+            </button>
+          )}
         </div>
         {mode !== "smart" && isOPFSAvailable() && (
           // Plan 11.3: the operators, shown under the input (LTR syntax inside an RTL UI stays readable).
@@ -609,43 +657,9 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
               ))}
             </div>
           )}
-          {(mode === "search" || mode === "ai") && hits.map((hit, i) => (
-            <div
-              key={hit.path}
-              data-search-index={i}
-              className={`cmd-palette-item ${i === active ? "active" : ""}`}
-              onMouseEnter={() => setActive(i)}
-              onClick={() => void openHit(hit)}
-              style={{ alignItems: "flex-start" }}
-              title={hit.path}
-            >
-              <FileText size={14} style={{ opacity: 0.7, marginTop: 1, flexShrink: 0 }} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="cmd-palette-label" style={{ fontWeight: 500 }}>
-                  {hit.name}
-                  {hit.path !== hit.name && (
-                    <span style={{ color: "hsl(var(--fg-muted))", fontWeight: 400, marginInlineStart: 6, fontSize: 11 }}>
-                      {hit.path}
-                    </span>
-                  )}
-                </div>
-                {hit.snippet && (
-                  <div
-                    style={{
-                      color: "hsl(var(--fg-muted))",
-                      fontSize: 11.5,
-                      marginTop: 2,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {renderSnippet(hit)}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+          {(mode === "search" || mode === "ai") && (
+            <SearchHitList hits={hits} active={active} setActive={setActive} onOpen={(hit) => void openHit(hit)} query={query} showMatchedAs={mode === "search"} scrollRef={listRef} />
+          )}
           {mode === "smart" && smartHits.map((hit, i) => {
             const name = hit.path.split("/").pop() ?? hit.path;
             return (
@@ -661,10 +675,10 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
                 <Wand2 size={14} style={{ opacity: 0.7, marginTop: 1, flexShrink: 0, color: "hsl(var(--accent))" }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="cmd-palette-label" style={{ fontWeight: 500, display: "flex", alignItems: "center", gap: 6 }}>
-                    <span>{name}</span>
+                    <bdi>{name}</bdi>
                     {hit.path !== name && (
                       <span style={{ color: "hsl(var(--fg-muted))", fontWeight: 400, fontSize: 11 }}>
-                        {hit.path}
+                        <bdi>{hit.path}</bdi>
                       </span>
                     )}
                     <span style={{ marginInlineStart: "auto", fontSize: 10, color: "hsl(var(--fg-muted))" }}>
@@ -682,7 +696,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {hit.snippet}
+                      <bdi>{hit.snippet}</bdi>
                     </div>
                   )}
                   {hit.path in translations && (
@@ -710,6 +724,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
         
         {mode === "ai" && (
           <div style={{ flex: 1, padding: "12px 16px", overflowY: "auto", fontSize: 13, color: "hsl(var(--fg))", borderTop: "1px solid hsl(var(--border))", background: "hsl(var(--bg-subtle))", display: "flex", flexDirection: "column", gap: 10 }}>
+            <AskScopePicker value={askScope} onChange={setAskScope} />
             {aiLoading ? (
               <div style={{ display: "flex", alignItems: "center", gap: 8, color: "hsl(var(--accent))" }}>
                 <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} />
@@ -720,41 +735,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
                 <div className="prose-lumen" style={{ padding: 0, fontSize: 13, lineHeight: 1.6, maxWidth: "none" }}>
                   {aiRendered}
                 </div>
-                {aiCitations && (
-                  <div data-testid="vault-citations" style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 8, marginTop: 4, fontSize: 11.5 }}>
-                    {aiCitations.verifiedCount === 0 ? (
-                      <div role="alert" style={{ color: "hsl(var(--warn))", fontWeight: 600, marginBottom: 4 }}>{t("vaultCite.unsupported")}</div>
-                    ) : (
-                      <div style={{ color: "hsl(var(--fg-muted))", fontWeight: 600, marginBottom: 4 }}>
-                        {t("vaultCite.summary", { ok: aiCitations.verifiedCount, total: aiCitations.citations.length })}
-                      </div>
-                    )}
-                    {aiCitations.citations.map((c, i) => (
-                      <button
-                        type="button"
-                        key={`${c.n}-${i}`}
-                        disabled={!c.path}
-                        data-verified={c.verified ? "1" : "0"}
-                        onClick={() => {
-                          const src = aiSources[c.n - 1];
-                          if (!src) return;
-                          onClose();
-                          onOpenFile(src.path, src.content);
-                          if (c.line) window.dispatchEvent(new CustomEvent("lumen-reveal-line", { detail: { line: c.line, content: src.content } }));
-                        }}
-                        style={{ display: "flex", gap: 6, alignItems: "baseline", width: "100%", textAlign: "start", padding: "3px 0", background: "none", border: 0, color: "inherit", cursor: c.path ? "pointer" : "default" }}
-                      >
-                        <span style={{ color: c.verified ? "hsl(var(--success))" : "hsl(var(--danger))", fontWeight: 700 }} aria-label={c.verified ? t("vaultCite.verified") : t("vaultCite.notVerified")}>
-                          {c.verified ? "✓" : "✗"}
-                        </span>
-                        <span style={{ color: "hsl(var(--accent))", whiteSpace: "nowrap" }}>
-                          [{c.n}] <bdi>{c.path ?? t("vaultCite.noSource")}</bdi>{c.line ? `:${c.line}` : ""}
-                        </span>
-                        {c.quote && <span dir="auto" style={{ color: "hsl(var(--fg-muted))", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>“{c.quote}”</span>}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {aiCitations && <VaultCitationList checked={aiCitations} sources={aiSources} onOpen={(src) => { onClose(); onOpenFile(src.path, src.content); }} />}
                 {aiSources.length > 0 && (
                   <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 8, marginTop: 4 }}>
                     <div style={{ fontSize: 11, color: "hsl(var(--fg-muted))", marginBottom: 4, fontWeight: 600 }}>{t("searchDialog.sources")}</div>
@@ -766,7 +747,7 @@ export function SearchDialog({ open, onClose, onOpenFile, initialQuery = "" }: P
                         title={t("searchDialog.relevance", { pct: (s.score * 100).toFixed(0) })}
                       >
                         <FileCode2 size={11} />
-                        <span>[{i + 1}] {s.path}</span>
+                        <span>[{i + 1}] <bdi>{s.path}</bdi></span>
                         <span style={{ color: "hsl(var(--fg-muted))", marginInlineStart: "auto" }}>{(s.score * 100).toFixed(0)}%</span>
                       </div>
                     ))}

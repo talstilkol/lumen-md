@@ -22,6 +22,7 @@
  * | after the journal, before the removal | journaled: not added again, removed |
  */
 import { MAX_TEXT, type PendingCapture } from "./nativeActions";
+import { wordSlug } from "../lib/slug";
 
 export type CaptureKind = "text" | "url" | "image" | "pdf";
 export const CAPTURE_SOURCES = ["siri", "shortcut", "control", "lockscreen", "widget", "tile", "share", "legacy"] as const;
@@ -190,13 +191,7 @@ const pad2 = (n: number) => String(n).padStart(2, "0");
 /** `attachments/capture-2026-11-15-0905-<name>.pdf`: the time, then the original name made safe. */
 export function captureFilePath(c: QueuedCapture, when: Date): string {
   const ext = (c.file!.match(/\.([A-Za-z0-9]{1,8})$/)?.[1] ?? (c.kind === "pdf" ? "pdf" : "jpg")).toLowerCase();
-  const base = (c.name ?? "")
-    .replace(/\.[A-Za-z0-9]{1,8}$/, "")
-    .normalize("NFC")
-    .replace(/[^\p{L}\p{N}]+/gu, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 40)
-    .replace(/-+$/, "");
+  const base = wordSlug((c.name ?? "").replace(/\.[A-Za-z0-9]{1,8}$/, ""), { nfc: true, max: 40 });
   const stamp = `${when.getFullYear()}-${pad2(when.getMonth() + 1)}-${pad2(when.getDate())}-${pad2(when.getHours())}${pad2(when.getMinutes())}`;
   return `attachments/capture-${stamp}${base ? `-${base}` : ""}-${c.id.slice(0, 8).toLowerCase()}.${ext}`;
 }

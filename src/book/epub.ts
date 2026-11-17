@@ -11,6 +11,7 @@
  * images come from `assets` or are replaced by their alt text.
  */
 import { zip, type ZipInput } from "../storage/zip";
+import { a11yMetadata, countImages, pageListNav, paginate } from "./epubA11y";
 
 export interface EpubChapter {
   title: string;
@@ -39,7 +40,7 @@ export interface EpubBook {
   /** Image bytes by the src written in the chapter HTML (vault path or URL). */
   assets?: (src: string) => Promise<{ bytes: Uint8Array; mediaType: string } | null>;
   /** Localised labels. */
-  labels: { contents: string; titlePage: string };
+  labels: { contents: string; titlePage: string; pages?: string };
 }
 
 const XHTML_NS = "http://www.w3.org/1999/xhtml";
@@ -163,10 +164,21 @@ nav ol { list-style: none; padding: 0; }
 export async function buildEpub(book: EpubBook): Promise<Uint8Array> {
   const images = new Map<string, { href: string; bytes: Uint8Array; mediaType: string }>();
   const chapters: Array<{ id: string; href: string; title: string; xhtml: string }> = [];
+  // W13.F4: the book paginates itself (a page list), and the OPF says how it can be read.
+  const pageEntries: { href: string; n: number; id: string }[] = [];
+  let imageCount = 0;
+  let imagesWithoutAlt = 0;
+  let hasMath = false;
   for (const [i, ch] of book.chapters.entries()) {
     const body = await chapterXhtml(ch.html, images, book.assets);
     const id = `ch${String(i + 1).padStart(3, "0")}`;
-    const section = `<section epub:type="chapter" role="doc-chapter" aria-labelledby="${id}-title">\n<h1 class="chapter-title" id="${id}-title">${escapeXml(ch.title)}</h1>\n${body}\n</section>`;
+    const counted = countImages(body);
+    imageCount += counted.images;
+    imagesWithoutAlt += counted.withoutAlt;
+    hasMath ||= /<math\b/.test(body);
+    const paged = paginate(`<h1 class="chapter-title" id="${id}-title">${escapeXml(ch.title)}</h1>\n${body}`, pageEntries.length + 1);
+    for (const p of paged.pages) pageEntries.push({ href: `${id}.xhtml`, ...p });
+    const section = `<section epub:type="chapter" role="doc-chapter" aria-labelledby="${id}-title">\n${paged.body}\n</section>`;
     chapters.push({ id, href: `${id}.xhtml`, title: ch.title, xhtml: page(ch.lang, ch.dir, ch.title, section) });
   }
   const fontFiles = (book.font?.files ?? []).map((f, i) => ({ id: `font${i + 1}`, href: `fonts/font${i + 1}.woff2`, bytes: f.bytes }));
@@ -183,7 +195,8 @@ export async function buildEpub(book: EpubBook): Promise<Uint8Array> {
     book.dir,
     book.labels.contents,
     `<nav epub:type="toc" id="toc" role="doc-toc"><h1>${escapeXml(book.labels.contents)}</h1>\n<ol>\n${chapters.map((c) => `<li><a href="${c.href}">${escapeXml(c.title)}</a></li>`).join("\n")}\n</ol></nav>\n` +
-      `<nav epub:type="landmarks" id="landmarks" hidden="hidden"><ol><li><a epub:type="titlepage" href="title.xhtml">${escapeXml(book.labels.titlePage)}</a></li><li><a epub:type="toc" href="nav.xhtml">${escapeXml(book.labels.contents)}</a></li>${chapters.length ? `<li><a epub:type="bodymatter" href="${chapters[0].href}">${escapeXml(chapters[0].title)}</a></li>` : ""}</ol></nav>`,
+      `<nav epub:type="landmarks" id="landmarks" hidden="hidden"><ol><li><a epub:type="titlepage" href="title.xhtml">${escapeXml(book.labels.titlePage)}</a></li><li><a epub:type="toc" href="nav.xhtml">${escapeXml(book.labels.contents)}</a></li>${chapters.length ? `<li><a epub:type="bodymatter" href="${chapters[0].href}">${escapeXml(chapters[0].title)}</a></li>` : ""}</ol></nav>\n` +
+      (pageEntries.length ? pageListNav(pageEntries, book.labels.pages ?? (book.lang.startsWith("he") ? "עמודים" : "Pages")) : ""),
   );
   const imageItems = [...images.values()];
   const opf =
@@ -192,7 +205,8 @@ export async function buildEpub(book: EpubBook): Promise<Uint8Array> {
     `<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">\n` +
     `<dc:identifier id="bookid">${escapeXml(book.identifier)}</dc:identifier>\n<dc:title>${title}</dc:title>\n<dc:language>${book.lang}</dc:language>\n` +
     (book.author ? `<dc:creator>${escapeXml(book.author)}</dc:creator>\n` : "") +
-    `<meta property="dcterms:modified">${epubDate(book.modified)}</meta>\n</metadata>\n<manifest>\n` +
+    `<meta property="dcterms:modified">${epubDate(book.modified)}</meta>\n` +
+    `${a11yMetadata({ lang: book.lang, images: imageCount, imagesWithoutAlt, pages: pageEntries.length, hasMath })}\n</metadata>\n<manifest>\n` +
     `<item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>\n` +
     `<item id="title" href="title.xhtml" media-type="application/xhtml+xml"/>\n` +
     `<item id="css" href="book.css" media-type="text/css"/>\n` +

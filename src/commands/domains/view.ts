@@ -1,12 +1,15 @@
 /** View commands: editor modes, panels, editor settings, language and theme. */
-import { isBetaLocale } from "../../i18n/review";
+import { localeOptionLabel } from "../../i18n/localeLabel";
 import { cmdIcons } from "../../ui/cmdIcons";
 import type { Command } from "../../ui/CommandPalette";
 import { useAppStore } from "../../store/useStore";
-import { t, SUPPORTED_LOCALES } from "../../i18n";
+import { formatNumber, getLocale, t, SUPPORTED_LOCALES } from "../../i18n";
+import { NATIVE_DIGITS, numerals, setNumerals } from "../../i18n/numerals";
 import type { CommandContext } from "./context";
 import { EXCALIDRAW_CANVAS_ENABLED } from "../../canvas/engine";
 import { log } from "../../lib/logger";
+import { dateCalendar, formatDate, setDateCalendar } from "../../i18n/format";
+import { showAiToast } from "../../ui/AiToast";
 
 /** Editor modes, side panels and the editor's on/off settings. */
 export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEnabled, spellCheck, typewriterMode, pageView, toggleWorkspace, toggleBacklinks, toggleVim, toggleSpellCheck, toggleTypewriter, tsChecks, toggleTsChecks, grammarCheck, toggleGrammarCheck, setMode, toggleOutline }: CommandContext): Command[] {
@@ -26,6 +29,33 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       icon: cmdIcons.Columns2,
       group: t("group.view"),
       action: () => setMode("split"),
+    },
+    {
+      id: "view.sideBySide",
+      label: t("cmd.view.sideBySide"),
+      hint: t("cmd.view.sideBySide.hint"),
+      icon: cmdIcons.Columns2,
+      group: t("group.view"),
+      // Plan W12.H6: the note and its translation aligned by paragraph (local layers only).
+      action: () => void import("../../ai/mt/openSideBySide").then((m) => m.openSideBySide()),
+    },
+    {
+      id: "view.daf",
+      label: t("cmd.view.daf"),
+      hint: t("cmd.view.daf.hint"),
+      icon: cmdIcons.Columns2,
+      group: t("group.view"),
+      // W13.R11: the main text with its commentaries around it (lazy; reads the vault only).
+      action: () => void import("../../reading/daf/openDaf").then((m) => m.openDaf()),
+    },
+    {
+      id: "view.bilingual",
+      label: t("cmd.view.bilingual"),
+      hint: t("cmd.view.bilingual.hint"),
+      icon: cmdIcons.Columns2,
+      group: t("group.view"),
+      // W13.R12: official versions or the W12.H6 sidecar, by verse; columns, interlinear, source only.
+      action: () => void import("../../reading/bilingual/openBilingual").then((m) => m.openBilingual()),
     },
     {
       id: "view.preview",
@@ -96,6 +126,15 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
     },
     {
+      id: "learning.plans",
+      label: t("cmd.learning.plans"),
+      hint: t("cmd.learning.plans.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W12.H4: follow Daf Yomi, Mishnah Yomit or the daily Rambam, with progress.
+      action: () => void import("../../learning/open").then((m) => m.openLearningPlans()),
+    },
+    {
       id: "pdf.open",
       label: t("cmd.pdf.open"),
       hint: t("cmd.pdf.open.hint"),
@@ -114,6 +153,15 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => void import("../../student/LectureRecorder").then((m) => m.openLectureRecorder()),
     },
     {
+      id: "student.syllabus",
+      label: t("cmd.student.syllabus"),
+      hint: t("cmd.student.syllabus.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W12.H5: the semester's teaching weeks from the academic calendar (an .ics in the vault).
+      action: () => void import("../../academic/createSyllabus").then((m) => m.createSyllabus()),
+    },
+    {
       id: "note.capture",
       label: t("capture.title"),
       shortcut: "⌥⌘N",
@@ -122,12 +170,30 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => window.dispatchEvent(new CustomEvent("lumen-open-capture")),
     },
     {
+      id: "capture.triageInbox",
+      label: t("cmd.capture.triageInbox"),
+      hint: t("cmd.capture.triageInbox.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.file"),
+      // W10.C21: the inbox sorted by a local model (ai/structured), staged for review.
+      action: () => void import("../../capture/triageActions").then((m) => m.triageInboxFlow()),
+    },
+    {
       id: "epub.open",
       label: t("cmd.epub.open"),
       icon: cmdIcons.FileText,
       group: t("group.file"),
       // Plan W1.14: copies the book into the vault and opens it in the reader.
       action: () => void import("../../epub/openEpub").then((m) => m.pickAndOpenEpub()),
+    },
+    {
+      id: "view.readingProfile",
+      label: t("cmd.reading.profile"),
+      hint: t("desc.reading.profile"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W13.R1: one menu for every reading mode and the note's reading profile.
+      action: () => void import("../../ui/ReadingModeMenu").then((m) => m.openReadingModeMenu()),
     },
     {
       id: "view.reading",
@@ -303,10 +369,42 @@ export function buildLanguageCommands({ rtl, toggleRtl, setLocale }: CommandCont
       group: t("group.view"),
       action: toggleRtl,
     },
+    {
+      // W13.I3 / W2.10: dates in the Hebrew calendar (Intl -u-ca-hebrew), on every screen that formats through src/i18n/format.ts.
+      id: "view.hebrewCalendarDates",
+      label: dateCalendar() === "hebrew" ? t("cmd.view.hebrewDates.off") : t("cmd.view.hebrewDates.on"),
+      hint: t("cmd.view.hebrewDates.hint"),
+      icon: cmdIcons.PanelRightOpen,
+      group: t("group.view"),
+      action: () => {
+        const next = dateCalendar() === "hebrew" ? "gregory" : "hebrew";
+        setDateCalendar(next);
+        showAiToast(t(next === "hebrew" ? "toast.hebrewDates.on" : "toast.hebrewDates.off", { today: formatDate(Date.now(), { dateStyle: "long" }) }), "info");
+      },
+    },
+    // W13.I5 / W13.I7: an Arabic or Persian UI chooses its digits: Latin (0123) or its own (٠١٢٣ / ۰۱۲۳).
+    ...(NATIVE_DIGITS[getLocale()]
+      ? [
+          {
+            id: "view.digits",
+            label: numerals(getLocale()) === "native" ? t("cmd.view.digits.latin") : t("cmd.view.digits.native"),
+            hint: t("cmd.view.digits.hint"),
+            icon: cmdIcons.PanelRightOpen,
+            group: t("group.view"),
+            action: () => {
+              const locale = getLocale();
+              setNumerals(locale, numerals(locale) === "native" ? "latn" : "native");
+              // Re-render in the same language so every number on screen is written again.
+              setLocale(locale);
+              showAiToast(t("toast.digits", { sample: formatNumber(1234567.5) }), "info");
+            },
+          },
+        ]
+      : []),
     ...SUPPORTED_LOCALES.map((l) => ({
       id: `lang.${l.code}`,
-      // Plan W4.18: a language no native speaker has reviewed says so.
-      label: t("cmd.view.language", { label: isBetaLocale(l.code) ? t("locale.betaLabel", { label: l.label }) : l.label }),
+      // Plan W4.18 / launch P0 #16: a language no native speaker has reviewed says "Beta (machine translation, awaiting native review)".
+      label: t("cmd.view.language", { label: localeOptionLabel(l.code) }),
       hint:
         l.dir === "rtl"
           ? t("cmd.view.language.rtl")
@@ -357,6 +455,26 @@ export function buildPanelCommands({ setFindReplaceOpen, setGraphOpen, setHistor
       icon: cmdIcons.PanelRightOpen,
       group: t("group.view"),
       action: () => setHistoryOpen(true),
+    },
+    {
+      id: "view.asOf",
+      label: t("cmd.view.asOf"),
+      hint: t("cmd.view.asOf.hint"),
+      icon: cmdIcons.PanelRightOpen,
+      group: t("group.view"),
+      action: () => {
+        // W12.S2: lazy, so the dialog and its strings load only when asked for.
+        void Promise.all([import("../../ui/AsOfDialog"), import("../../editor/asOfRestoreEdit"), import("../../storage/history")]).then(([ui, edit, h]) => {
+          const d = liveDoc();
+          ui.openAsOfDialog({
+            activeName: h.historyKey(d),
+            applyRestore: (hunk) => {
+              const view = edit.activeSourceView();
+              return !!view && edit.restoreInView(view, hunk);
+            },
+          });
+        });
+      },
     },
     {
       id: "insert.table",

@@ -6,6 +6,7 @@
 import { SUPPORTED_IMPORT_EXTENSIONS } from "./importExtensions";
 // The converters load on the first import, not at startup (bundle budget).
 import type * as FileFormats from "./fileFormats";
+import { swallowed } from "../lib/logger";
 
 /** The converters of the markup formats `convertImported` turns into Markdown. */
 export type MarkupConverters = Pick<typeof FileFormats, "rtfToMarkdown" | "htmlToMarkdown" | "xmlToMarkdown">;
@@ -102,8 +103,9 @@ export async function saveFile(
         await writable.write(file.content);
         await writable.close();
         return file;
-      } catch {
+      } catch (err) {
         /* why: fall through to Save As */
+        swallowed("storage/fs: fall through to Save As", err);
       }
     }
   }
@@ -135,6 +137,30 @@ export async function saveFile(
   a.remove();
   URL.revokeObjectURL(url);
   return file;
+}
+
+/**
+ * Save a built file (an export: a finished PDF/UA, W13.F3) where the user picks, through the save
+ * dialog when the browser has one; else a download. Cancelling the dialog throws AbortError.
+ */
+export async function saveBlobAs(blob: Blob, name: string, type: { description: string; accept: Record<string, string[]> }): Promise<void> {
+  if (window.showSaveFilePicker) {
+    try {
+      const handle = await window.showSaveFilePicker({ suggestedName: name, types: [type] });
+      const out = await handle.createWritable();
+      await out.write(blob);
+      await out.close();
+      return;
+    } catch (err) {
+      if ((err as Error).name === "AbortError") throw err;
+      swallowed("storage/fs: save dialog failed, download instead", err);
+    }
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 10_000);
 }
 
 /**
@@ -177,8 +203,9 @@ export function convertImported(name: string, raw: string, markup?: MarkupConver
     let isArray = false;
     try {
       isArray = Array.isArray(JSON.parse(trimmed));
-    } catch {
+    } catch (err) {
       /* why: malformed json — keep as code block */
+      swallowed("storage/fs: malformed json — keep as code block", err);
     }
     if (isArray) {
       return `# ${name}\n\n\`\`\`json-table title="${name}"\n${trimmed}\n\`\`\`\n`;

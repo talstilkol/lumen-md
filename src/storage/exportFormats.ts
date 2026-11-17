@@ -14,6 +14,7 @@
 import { zip } from "./zip";
 import { pageFileSlug } from "../lib/slug";
 import { firstRtlLanguage, firstStrongDirection, hasRtl, markdownBaseDirection } from "../lib/textDirection";
+import { createFenceTracker } from "./fenceTracker";
 
 function escapeHtml(s: string): string {
   return s
@@ -23,32 +24,8 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-/**
- * CommonMark-style fenced-code tracker. A fence opens with ``` or ~~~ (3+,
- * up to 3 spaces indent) and closes only on a line of the SAME character,
- * at least as long, with nothing else on it — so a ```` block that
- * demonstrates a ``` fence (or a ~~~ line inside ```) stays code.
- * Feed every line in order; returns whether it is a fence line and whether
- * we're inside code after it.
- */
-export function createFenceTracker(): (line: string) => { fence: boolean; inCode: boolean } {
-  let open: { ch: string; len: number } | null = null;
-  return (line: string) => {
-    const m = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(line);
-    if (!open) {
-      if (m && !(m[1][0] === "`" && m[2].includes("`"))) {
-        open = { ch: m[1][0], len: m[1].length };
-        return { fence: true, inCode: true };
-      }
-      return { fence: false, inCode: false };
-    }
-    if (m && m[1][0] === open.ch && m[1].length >= open.len && m[2].trim() === "") {
-      open = null;
-      return { fence: true, inCode: false };
-    }
-    return { fence: false, inCode: true };
-  };
-}
+export { createFenceTracker } from "./fenceTracker";
+export { markdownToAdoc, markdownToOpml, markdownToOrg } from "./exportOutline";
 
 /**
  * Markdown → RTF. Uses the minimal RTF 1.5 dialect that every RTF
@@ -96,15 +73,27 @@ export function markdownToRtf(md: string): string {
   return out.join("\n");
 }
 
+/**
+ * Inline Markdown → another format, code spans first: a `*` inside one
+ * (`*.host.example`) is not emphasis and must not pair with a `*` after
+ * the span (the LaTeX, EPUB and RTF writers all turned it into italics).
+ * `rest` converts the text around the spans; `code` renders each span.
+ */
+function codeSpansFirst(s: string, rest: (t: string) => string, code: (c: string) => string): string {
+  const spans: string[] = [];
+  const out = rest(s.replace(/`([^`]+)`/g, (_m, c: string) => `\u0001${spans.push(c) - 1}\u0001`));
+  return out.replace(/\u0001(\d+)\u0001/g, (_m, i: string) => code(spans[Number(i)]));
+}
+
 function escapeRtf(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/[{}]/g, "\\$&");
 }
 function escapeRtfInline(s: string): string {
-  return escapeRtf(s)
-    .replace(/\*\*([^*]+)\*\*/g, "\\b $1\\b0")
-    .replace(/\*([^*]+)\*/g, "\\i $1\\i0")
-    .replace(/`([^`]+)`/g, "{\\f1 $1}")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)");
+  return codeSpansFirst(
+    escapeRtf(s),
+    (t) => t.replace(/\*\*([^*]+)\*\*/g, "\\b $1\\b0").replace(/\*([^*]+)\*/g, "\\i $1\\i0").replace(/\[([^\]]+)\]\(([^)]+)\)/g, "$1 ($2)"),
+    (c) => `{\\f1 ${c}}`,
+  );
 }
 
 /**
@@ -160,11 +149,29 @@ export function markdownToLatex(md: string): string {
     return d && d !== base ? `\\text${otherLang}{${tex}}` : tex;
   };
   const fenceAt = createFenceTracker();
-  let inList = false;
+  // Open lists, innermost last: kind, bullet character, the column an item
+  // must reach to nest inside the list's current item, and the enclosing
+  // item's content column (an item left of it leaves the list).
+  const lists: Array<{ kind: "itemize" | "enumerate"; mark: string; outer: number; content: number }> = [];
+  /** Close the lists an item at `indent` is outside of (all of them for -1). */
+  const closeLists = (indent: number): void => {
+    while (lists.length > 0 && (indent < 0 || indent < lists[lists.length - 1].outer)) out.push(`\\end{${lists.pop()!.kind}}`);
+  };
+  let prevBlank = false;
   for (const line of lines) {
     const { fence, inCode } = fenceAt(line);
     if (fence) {
-      out.push(inCode ? "\\begin{verbatim}" : "\\end{verbatim}");
+      prevBlank = false;
+      if (!inCode) {
+        out.push("\\end{verbatim}");
+        continue;
+      }
+      // A fence inside a list item keeps its indent; its info string goes in
+      // a comment line (an unknown lstlisting language would not compile).
+      const fm = /^( *)(?:`{3,}|~{3,})\s*(\S*)/.exec(line)!;
+      while (lists.length > 0 && fm[1].length < lists[lists.length - 1].content) out.push(`\\end{${lists.pop()!.kind}}`);
+      if (fm[2]) out.push(`% code: ${fm[2]}`);
+      out.push(`${fm[1]}\\begin{verbatim}`);
       continue;
     }
     if (inCode) {
@@ -173,34 +180,66 @@ export function markdownToLatex(md: string): string {
     }
     const h = /^(#{1,6})\s+(.+)$/.exec(line);
     if (h) {
-      const cmd =
-        h[1].length === 1
-          ? "section"
-          : h[1].length === 2
-            ? "subsection"
-            : "subsubsection";
-      out.push(`\\${cmd}{${inLangInline(escapeLatex(h[2]), h[2])}}`);
+      closeLists(-1);
+      // article class: # is \section (pandoc's mapping); 4–6 go to the
+      // run-in \paragraph / \subparagraph levels instead of collapsing.
+      const cmd = LATEX_HEADINGS[Math.min(h[1].length, LATEX_HEADINGS.length) - 1];
+      out.push(`\\${cmd}{${inLangInline(escapeLatexInline(h[2]), h[2])}}`);
       continue;
     }
-    if (/^[-*+]\s/.test(line)) {
-      if (!inList) {
-        out.push("\\begin{itemize}");
-        inList = true;
+    const li = /^( *)([-*+]|\d{1,9}[.)])(?:( +)(\S.*))?$/.exec(line);
+    if (li && (li[4] !== undefined || lists.length > 0) && (lists.length > 0 || li[1].length < 4)) {
+      li[3] ??= " ";
+      li[4] ??= "";
+      const indent = li[1].length;
+      const kind = /\d/.test(li[2]) ? "enumerate" : "itemize";
+      const mark = li[2].replace(/\d+/, "");
+      closeLists(indent);
+      let top = lists[lists.length - 1];
+      if (top && indent < top.content && top.mark !== mark) {
+        // Another bullet character (or ./)) starts a new list in CommonMark.
+        out.push(`\\end{${lists.pop()!.kind}}`);
+        top = lists[lists.length - 1];
       }
-      const item = line.replace(/^[-*+]\s+/, "");
-      out.push(`\\item ${inLangInline(escapeLatexInline(item), item)}`);
+      const gapLen = li[3].length > 4 ? 1 : li[3].length;
+      const content = indent + li[2].length + gapLen;
+      const begin = (): void => {
+        out.push(`\\begin{${kind}}`);
+        // A list that does not start at 1 keeps its number (\setcounter is
+        // the LaTeX idiom; enumi…enumiv by depth).
+        const start = kind === "enumerate" ? parseInt(li[2], 10) : 1;
+        if (start !== 1) out.push(`\\setcounter{enum${"i".repeat(Math.min(lists.length, 4))}}{${start - 1}}`);
+      };
+      if (!top || indent >= top.content) {
+        lists.push({ kind, mark, outer: top ? top.content : 0, content });
+        begin();
+      } else if (top.kind !== kind) {
+        out.push(`\\end{${top.kind}}`);
+        top.kind = kind;
+        top.mark = mark;
+        begin();
+      }
+      lists[lists.length - 1].content = content;
+      // The spaces after the marker set the item's content column in
+      // Markdown; LaTeX ignores them, and the importer reads them back.
+      const gap = li[3].length > 4 ? " " : li[3];
+      out.push(`\\item${gap}${inLangInline(escapeLatexInline(li[4]), li[4])}`);
+      prevBlank = false;
       continue;
-    } else if (inList && line.trim() === "") {
-      out.push("\\end{itemize}");
-      inList = false;
     }
     if (!line.trim()) {
+      prevBlank = true;
       out.push("");
       continue;
     }
+    // After a blank line, a line left of the item's content leaves the list
+    // (a line right after an item, with no blank, is a lazy continuation).
+    const lead = /^ */.exec(line)![0].length;
+    if (prevBlank) while (lists.length > 0 && lead < lists[lists.length - 1].content) out.push(`\\end{${lists.pop()!.kind}}`);
+    prevBlank = false;
     out.push(inLang(escapeLatexInline(line), line));
   }
-  if (inList) out.push("\\end{itemize}");
+  closeLists(-1);
   out.push("\\end{document}");
   return out.join("\n");
 }
@@ -216,15 +255,18 @@ function pageLang(html: string): string {
   return firstStrongDirection(text) === "rtl" ? firstRtlLanguage(text) ?? "en" : "en";
 }
 
+const LATEX_HEADINGS = ["section", "subsection", "subsubsection", "paragraph", "subparagraph"] as const;
+
 function escapeLatex(s: string): string {
-  return s.replace(/[\\&%$#_{}~^]/g, "\\$&");
+  // A lone backslash is \textbackslash{}: "\\" would be a LaTeX line break.
+  return s.replace(/[\\&%$#_{}~^]/g, (c) => (c === "\\" ? "\\textbackslash{}" : "\\" + c));
 }
 function escapeLatexInline(s: string): string {
-  return escapeLatex(s)
-    .replace(/\*\*([^*]+)\*\*/g, "\\textbf{$1}")
-    .replace(/\*([^*]+)\*/g, "\\textit{$1}")
-    .replace(/`([^`]+)`/g, "\\texttt{$1}")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "\\href{$2}{$1}");
+  return codeSpansFirst(
+    escapeLatex(s),
+    (t) => t.replace(/\*\*([^*]+)\*\*/g, "\\textbf{$1}").replace(/\*([^*]+)\*/g, "\\textit{$1}").replace(/\[([^\]]+)\]\(([^)]+)\)/g, "\\href{$2}{$1}"),
+    (c) => `\\texttt{${c}}`,
+  );
 }
 
 /**
@@ -234,7 +276,20 @@ function escapeLatexInline(s: string): string {
 export function markdownToRst(md: string): string {
   const lines = md.split(/\r?\n/);
   const out: string[] = [];
-  for (const line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // A fenced block is a `code-block` directive with its body indented (it was copied as text, and came back as inline code).
+    const fence = /^(\s*)(`{3,}|~{3,})\s*([\w+-]*)/.exec(line);
+    // A backtick fence's info string has no backtick (```foo`` is a code span).
+    if (fence && !(fence[2][0] === "`" && line.slice(fence[0].length).includes("`"))) {
+      const [, indent, marks, lang] = fence;
+      const close = new RegExp(`^\\s*${marks[0] === "`" ? "`" : "~"}{${marks.length},}\\s*$`);
+      if (!indent && out.length && out[out.length - 1].trim()) out.push(""); // a directive starts a block of its own
+      out.push(`${indent}.. code-block::${lang ? ` ${lang}` : ""}`, "");
+      for (i++; i < lines.length && !close.test(lines[i]); i++) out.push(lines[i].trim() ? `${indent}   ${lines[i].startsWith(indent) ? lines[i].slice(indent.length) : lines[i].trimStart()}` : "");
+      out.push("");
+      continue;
+    }
     const h = /^(#{1,6})\s+(.+)$/.exec(line);
     if (h) {
       const c = h[1].length === 1 ? "=" : h[1].length === 2 ? "-" : "~";
@@ -250,60 +305,6 @@ export function markdownToRst(md: string): string {
         .replace(/\*([^*]+)\*/g, "*$1*"),
     );
   }
-  return out.join("\n");
-}
-
-/**
- * Markdown → AsciiDoc. Heading depth maps 1:1 (# → =, ## → ==), inline
- * stays close enough that a paste into Asciidoctor will Just Work.
- */
-export function markdownToAdoc(md: string): string {
-  return md
-    .replace(/^(#{1,6})\s+(.+)$/gm, (_m, hashes: string, t: string) => `${"=".repeat(hashes.length)} ${t}`)
-    .replace(/^[-*+]\s/gm, "* ")
-    .replace(/`([^`]+)`/g, "``$1``")
-    .replace(/\*\*([^*]+)\*\*/g, "*$1*"); // adoc bold
-}
-
-/**
- * Markdown → Org-mode. Heading depth maps 1:1 (# → *, ## → **), bold &
- * italic syntax adjusted, code fences become `#+BEGIN_SRC`.
- */
-export function markdownToOrg(md: string): string {
-  return md
-    .replace(/^(#{1,6})\s+(.+)$/gm, (_m, hashes: string, t: string) => `${"*".repeat(hashes.length)} ${t}`)
-    .replace(/```(\w*)\n([\s\S]*?)```/g, "#+BEGIN_SRC $1\n$2#+END_SRC")
-    .replace(/\*\*([^*]+)\*\*/g, "*$1*")
-    .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, "/$1/")
-    .replace(/`([^`]+)`/g, "=$1=");
-}
-
-/** Markdown → OPML (treat top-level lists as the outline). */
-export function markdownToOpml(md: string, title = "Outline"): string {
-  const lines = md.split(/\r?\n/);
-  const out: string[] = [];
-  out.push('<?xml version="1.0" encoding="UTF-8"?>');
-  out.push('<opml version="2.0">');
-  out.push(`<head><title>${escapeHtml(title)}</title></head>`);
-  out.push("<body>");
-  const stack: number[] = [];
-  for (const line of lines) {
-    const m = /^( *)[-*+]\s+(.+)$/.exec(line);
-    if (!m) continue;
-    const depth = Math.floor(m[1].length / 2);
-    while (stack.length && stack[stack.length - 1] >= depth) {
-      out.push("</outline>");
-      stack.pop();
-    }
-    out.push(`<outline text="${escapeHtml(m[2])}">`);
-    stack.push(depth);
-  }
-  while (stack.length) {
-    out.push("</outline>");
-    stack.pop();
-  }
-  out.push("</body>");
-  out.push("</opml>");
   return out.join("\n");
 }
 
@@ -387,59 +388,157 @@ export function markdownToRevealHtml(md: string, title = "Slides"): string {
 /* ─── Markdown → EPUB 3 (real package, zipped) ─────────────────────── */
 
 function mdInlineToHtml(s: string): string {
-  return escapeHtml(s)
-    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*([^*\n]+)\*/g, "<em>$1</em>")
-    .replace(/`([^`]+)`/g, "<code>$1</code>")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+  return codeSpansFirst(
+    escapeHtml(s),
+    (t) => t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/\*([^*\n]+)\*/g, "<em>$1</em>").replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>'),
+    (c) => `<code>${c}</code>`,
+  );
 }
 
-/** Minimal, well-formed XHTML body conversion for EPUB chapters. */
+const isRtlText = (s: string): boolean => (s.match(/[\u0590-\u08FF]/g)?.length ?? 0) > (s.match(/[A-Za-z]/g)?.length ?? 0);
+
+/** The cells of a pipe-table row (escaped pipes kept). */
+function tableCells(row: string): string[] {
+  return row.trim().replace(/^\|/, "").replace(/(?<!\\)\|$/, "").split(/(?<!\\)\|/).map((c) => c.trim().replace(/\\\|/g, "|"));
+}
+
+const TABLE_SEP = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
+const LIST_ITEM = /^( *)([-*+]|\d{1,9}[.)])\s+(.*)$/;
+const FOOTNOTE_DEF = /^\[\^[^\]]+\]:/;
+const EPUB_BLOCK = /^\s*(#{1,6}\s|>|```|~~~|\||[-*+]\s|\d{1,9}[.)]\s|\[\^[^\]]+\]:)|^\s{0,3}([-*_])(\s*\2){2,}\s*$/;
+
+/** A paragraph's lines: soft wraps join with a space, a hard break (two spaces or \) is <br/>. */
+function xhtmlLines(lines: string[]): string {
+  return lines
+    .map((l, i) => {
+      const last = i === lines.length - 1;
+      const hard = !last && (/ {2,}$/.test(l) || /\\$/.test(l));
+      const text = mdInlineToHtml(l.replace(/\\$/, "").trim());
+      return hard ? `${text}<br/>` : text;
+    })
+    .join(" ")
+    .replace(/<br\/> /g, "<br/>");
+}
+
+/**
+ * Well-formed XHTML body for an EPUB chapter: headings, paragraphs (soft
+ * wraps joined), bullet and numbered lists (nested by indent, with their start
+ * number), pipe tables (a mostly-Hebrew table is dir="rtl"), block quotes,
+ * rules and fenced code with its language.
+ */
 function mdToXhtml(md: string): string {
+  const lines = md.replace(/\r\n?/g, "\n").split("\n");
   const out: string[] = [];
-  let inList = false;
-  let inCode = false;
-  const closeList = () => {
-    if (inList) {
-      out.push("</ul>");
-      inList = false;
+  const lists: Array<{ tag: "ul" | "ol"; indent: number }> = [];
+  let item: string[] | null = null; // lines of the open <li>
+  const flushItem = (): void => {
+    if (item) out.push(`<li>${xhtmlLines(item)}`);
+    item = null;
+  };
+  const closeLists = (indent: number): void => {
+    flushItem();
+    while (lists.length && lists[lists.length - 1].indent >= indent) {
+      out.push(`</li></${lists.pop()!.tag}>`);
     }
   };
-  for (const line of md.split(/\r?\n/)) {
-    if (/^```/.test(line.trim())) {
-      closeList();
-      out.push(inCode ? "</code></pre>" : "<pre><code>");
-      inCode = !inCode;
-      continue;
-    }
-    if (inCode) {
-      out.push(escapeHtml(line));
-      continue;
-    }
-    const h = /^(#{1,6})\s+(.+)$/.exec(line);
-    if (h) {
-      closeList();
-      out.push(`<h${h[1].length}>${mdInlineToHtml(h[2])}</h${h[1].length}>`);
-      continue;
-    }
-    const li = /^[-*+]\s+(.+)$/.exec(line);
-    if (li) {
-      if (!inList) {
-        out.push("<ul>");
-        inList = true;
-      }
-      out.push(`<li>${mdInlineToHtml(li[1])}</li>`);
+  let para: string[] = [];
+  const flushPara = (): void => {
+    if (para.length) out.push(`<p>${xhtmlLines(para)}</p>`);
+    para = [];
+  };
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const fence = /^ {0,3}(`{3,}|~{3,})\s*([\w+#.-]*)/.exec(line);
+    if (fence) {
+      flushPara();
+      closeLists(0);
+      const body: string[] = [];
+      let j = i + 1;
+      for (; j < lines.length && !new RegExp(`^ {0,3}${fence[1][0]}{${fence[1].length},}\\s*$`).test(lines[j]); j++) body.push(lines[j]);
+      const cls = fence[2] ? ` class="language-${escapeHtml(fence[2])}"` : "";
+      out.push(`<pre><code${cls}>${escapeHtml(body.join("\n"))}</code></pre>`);
+      i = j;
       continue;
     }
     if (!line.trim()) {
-      closeList();
+      flushPara();
+      flushItem();
       continue;
     }
-    closeList();
-    out.push(`<p>${mdInlineToHtml(line)}</p>`);
+    const li = LIST_ITEM.exec(line);
+    if (li && (lists.length || !para.length || !/^\d/.test(li[2]) || li[2].startsWith("1"))) {
+      flushPara();
+      const indent = li[1].length;
+      const tag = /\d/.test(li[2]) ? "ol" : "ul";
+      flushItem();
+      while (lists.length && (lists[lists.length - 1].indent > indent || (lists[lists.length - 1].indent === indent && lists[lists.length - 1].tag !== tag))) {
+        out.push(`</li></${lists.pop()!.tag}>`);
+      }
+      const top = lists[lists.length - 1];
+      if (!top || indent > top.indent) {
+        const start = tag === "ol" ? parseInt(li[2], 10) : 1;
+        out.push(start !== 1 ? `<ol start="${start}">` : `<${tag}>`);
+        lists.push({ tag, indent });
+      } else out.push("</li>");
+      item = [li[3]];
+      continue;
+    }
+    // A continuation line of a list item (indented, or a lazy one right after it).
+    if (item && !EPUB_BLOCK.test(line)) {
+      (item as string[]).push(line);
+      continue;
+    }
+    if (lists.length && !/^\s/.test(line)) closeLists(0);
+    const h = /^ {0,3}(#{1,6})\s+(.+?)(?:\s+#+)?\s*$/.exec(line);
+    if (h) {
+      flushPara();
+      closeLists(0);
+      out.push(`<h${h[1].length}>${mdInlineToHtml(h[2])}</h${h[1].length}>`);
+      continue;
+    }
+    if (/^\s{0,3}([-*_])(\s*\1){2,}\s*$/.test(line) && !para.length) {
+      closeLists(0);
+      out.push("<hr/>");
+      continue;
+    }
+    if (/^\s*\|/.test(line) && lines[i + 1] !== undefined && TABLE_SEP.test(lines[i + 1])) {
+      flushPara();
+      closeLists(0);
+      const head = tableCells(line);
+      const rows: string[][] = [];
+      let j = i + 2;
+      for (; j < lines.length && /^\s*\|/.test(lines[j]); j++) rows.push(tableCells(lines[j]));
+      // Direction from the cells' words (link targets and markup are not text).
+      const words = [head, ...rows].flat().join(" ").replace(/\]\([^)]*\)|`[^`]*`|<[^>]*>/g, " ");
+      const dir = isRtlText(words) ? ' dir="rtl"' : "";
+      out.push(
+        `<table${dir}><thead><tr>${head.map((c) => `<th>${mdInlineToHtml(c)}</th>`).join("")}</tr></thead><tbody>` +
+          rows.map((r) => `<tr>${head.map((_, k) => `<td>${mdInlineToHtml(r[k] ?? "")}</td>`).join("")}</tr>`).join("") +
+          "</tbody></table>",
+      );
+      i = j - 1;
+      continue;
+    }
+    if (FOOTNOTE_DEF.test(line)) {
+      // A footnote stays a paragraph of its own: "[^1]: text" (EPUB has no notes here).
+      flushPara();
+      closeLists(0);
+      out.push(`<p>${mdInlineToHtml(line)}</p>`);
+      continue;
+    }
+    const quote = /^ {0,3}>\s?(.*)$/.exec(line);
+    if (quote) {
+      flushPara();
+      closeLists(0);
+      const body = [quote[1]];
+      while (i + 1 < lines.length && /^ {0,3}>/.test(lines[i + 1])) body.push(lines[++i].replace(/^ {0,3}>\s?/, ""));
+      out.push(`<blockquote>${mdToXhtml(body.join("\n"))}</blockquote>`);
+      continue;
+    }
+    para.push(line);
   }
-  closeList();
-  if (inCode) out.push("</code></pre>");
+  flushPara();
+  closeLists(0);
   return out.join("\n");
 }
 
@@ -455,15 +554,21 @@ export async function markdownToEpubBytes(md: string, title = "Document"): Promi
   // An RTL book's language is its first RTL passage's: frontmatter keys
   // and code are Latin and would otherwise decide.
   const bookLang = (bookDir === "rtl" ? firstRtlLanguage(md) : null) ?? "en";
+  const { a11yMetadata, pageListNav, paginate } = await import("../book/epubA11y");
+  // W13.F4: a page list the book sets for itself (a break per chapter, then every ~300 words).
+  const pageEntries: { href: string; n: number; id: string }[] = [];
   const chapters = (parts.length ? parts : [md]).map((c, i) => {
     const chTitle = c.match(/^#\s+(.+)$/m)?.[1] ?? `Chapter ${i + 1}`;
     const dir = markdownBaseDirection(c);
     const lang = (dir === "rtl" ? firstRtlLanguage(c) : null) ?? (dir === bookDir ? bookLang : "en");
+    const href = `chapter${i + 1}.xhtml`;
+    const paged = paginate(mdToXhtml(c), pageEntries.length + 1);
+    for (const p of paged.pages) pageEntries.push({ href, ...p });
     const xhtml =
       `<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n` +
-      `<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${lang}" lang="${lang}" dir="${dir}"><head><title>${escapeHtml(chTitle)}</title></head>` +
-      `<body>\n${mdToXhtml(c)}\n</body></html>`;
-    return { id: `ch${i + 1}`, href: `chapter${i + 1}.xhtml`, title: chTitle, xhtml };
+      `<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${lang}" lang="${lang}" dir="${dir}"><head><title>${escapeHtml(chTitle)}</title></head>` +
+      `<body>\n${paged.body}\n</body></html>`;
+    return { id: `ch${i + 1}`, href, title: chTitle, xhtml };
   });
 
   const uid = "urn:uuid:" + (globalThis.crypto?.randomUUID?.() ?? Date.now().toString(16));
@@ -477,18 +582,26 @@ export async function markdownToEpubBytes(md: string, title = "Document"): Promi
     `<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">` +
     `<dc:identifier id="bookid">${uid}</dc:identifier>` +
     `<dc:title>${escapeHtml(title)}</dc:title><dc:language>${bookLang}</dc:language>` +
-    `<meta property="dcterms:modified">1970-01-01T00:00:00Z</meta></metadata>` +
+    `<meta property="dcterms:modified">1970-01-01T00:00:00Z</meta>` +
+    a11yMetadata({ lang: bookLang, images: 0, imagesWithoutAlt: 0, pages: pageEntries.length }) +
+    `</metadata>` +
     `<manifest><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>` +
     chapters.map((c) => `<item id="${c.id}" href="${c.href}" media-type="application/xhtml+xml"/>`).join("") +
     `</manifest><spine${bookDir === "rtl" ? ' page-progression-direction="rtl"' : ""}>` +
     chapters.map((c) => `<itemref idref="${c.id}"/>`).join("") +
     `</spine></package>`;
+  // The book's own language for its navigation (a screen reader reads it in that voice). The navigation is
+  // not in the spine here, so the landmarks name the body only (a link to a non-spine page is an epubcheck error).
+  const navTitle = bookLang.startsWith("he") ? "תוכן העניינים" : "Contents";
   const nav =
     `<?xml version="1.0" encoding="utf-8"?>\n` +
-    `<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${bookLang}" lang="${bookLang}" dir="${bookDir}"><head><title>Contents</title></head>` +
+    `<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${bookLang}" lang="${bookLang}" dir="${bookDir}"><head><title>${navTitle}</title></head>` +
     `<body><nav epub:type="toc"><ol>` +
     chapters.map((c) => `<li><a href="${c.href}">${escapeHtml(c.title)}</a></li>`).join("") +
-    `</ol></nav></body></html>`;
+    `</ol></nav>` +
+    `<nav epub:type="landmarks" hidden="hidden"><ol>${chapters.length ? `<li><a epub:type="bodymatter" href="${chapters[0].href}">${escapeHtml(chapters[0].title)}</a></li>` : ""}</ol></nav>` +
+    pageListNav(pageEntries, bookLang.startsWith("he") ? "עמודים" : "Pages") +
+    `</body></html>`;
 
   return zip([
     // The mimetype entry must come first and be stored (uncompressed).
@@ -570,9 +683,12 @@ export async function markdownToStaticSiteBytes(md: string, siteTitle = "Site"):
 /* ─── Markdown → Jupyter notebook (.ipynb) ─────────────────────────── */
 
 /**
- * Convert Markdown to a valid Jupyter notebook (nbformat 4.5). Fenced code
- * blocks become code cells (in the fence's language); everything else becomes
- * markdown cells. Round-trips with `ipynbToMarkdown` in ./fileFormats.
+ * Convert Markdown to a valid Jupyter notebook (nbformat 4.5). A top-level
+ * fenced block in the notebook's language becomes a code cell; everything
+ * else becomes markdown cells, including a fence in another language (or none)
+ * and a fence inside a list item, which a code cell could not hold without
+ * losing its language or splitting the list. Round-trips with
+ * `ipynbToMarkdown` in ./fileFormats.
  */
 export function markdownToIpynb(md: string, lang = "python"): string {
   const lines = md.replace(/\r\n/g, "\n").split("\n");
@@ -591,8 +707,13 @@ export function markdownToIpynb(md: string, lang = "python"): string {
 
   let i = 0;
   while (i < lines.length) {
-    const fence = lines[i].match(/^\s*```(\w+)?/);
-    if (fence) {
+    const fence = lines[i].match(/^(\s*)```([\w+-]+)?/);
+    if (fence && (fence[1] !== "" || (fence[2] ?? "").toLowerCase() !== lang.toLowerCase())) {
+      // Not a code cell: the fence stays Markdown, whole, with its language.
+      prose.push(lines[i++]);
+      while (i < lines.length && !/^\s*```\s*$/.test(lines[i])) prose.push(lines[i++]);
+      if (i < lines.length) prose.push(lines[i++]);
+    } else if (fence) {
       flushProse();
       i++;
       const code: string[] = [];

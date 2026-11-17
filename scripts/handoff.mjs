@@ -7,15 +7,19 @@
  *   npm run handoff -- --task "4.5 [[ autocomplete" --next "push and open the PR"
  *   npm run handoff -- --stdout          print instead of writing the file
  *   npm run handoff -- --no-github       local data only (no gh calls)
+ *   npm run handoff -- --refresh         regenerate, keeping the task and next step of the
+ *                                        document it replaces (step 2: the lane's
+ *                                        reference-transaction hook runs it after each push
+ *                                        origin confirmed, with --no-github)
  *
  * Needs `gh` signed in for the PR part. Exits 1 when a branch or worktree it
  * names does not exist, after writing the file (the problems are listed in it).
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { missingRefs, parseWorktrees, renderHandoff } from "./lib/handoff.mjs";
+import { ciOfHead, missingRefs, nextStepProblems, parseWorktrees, refreshFields, renderHandoff } from "./lib/handoff.mjs";
 
 // fileURLToPath, not `.pathname`: a checkout in "lumen md/" is "lumen%20md/" in the URL.
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
@@ -26,6 +30,13 @@ const opt = (n) => {
   return i >= 0 ? argv[i + 1] ?? "" : null;
 };
 const flag = (n) => argv.includes(`--${n}`);
+// review 9, L10: a line break in --task or --next would not survive the round trip; refuse it before writing.
+for (const name of ["task", "next"]) {
+  if (/[\n\r\u2028\u2029\u0085]/.test(opt(name) ?? "")) {
+    console.error(`handoff: --${name} must be one line (no newline or carriage return); nothing written`);
+    process.exit(2);
+  }
+}
 
 function sh(cmd, args) {
   const r = spawnSync(cmd, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
@@ -49,7 +60,24 @@ function ghJson(path, perPage = 100, maxPages = 1000) {
   throw new Error(`${path}: more than ${maxPages} pages; the count would be incomplete`);
 }
 
-/** The newest CI run of a head branch: the CI workflow's own runs, not the newest ten of every workflow. */
+/** This machine's run records (train:offline --all, ci:local) and committed receipts: { sha, at, green, gates }. */
+function localRunRecords() {
+  const out = [];
+  for (const [dir, keep] of [[".ci-local/runs", () => true], ["reports", (f) => /^train-offline-[0-9a-f]{40}\.json$/.test(f)]]) {
+    if (!existsSync(dir)) continue;
+    for (const f of readdirSync(dir).filter((n) => n.endsWith(".json") && keep(n))) {
+      try {
+        const j = JSON.parse(readFileSync(`${dir}/${f}`, "utf8"));
+        if (typeof j.sha === "string") out.push({ sha: j.sha, at: j.at, green: j.green, gates: j.gates ?? j.steps ?? [] });
+      } catch {
+        // not a record
+      }
+    }
+  }
+  return out;
+}
+
+/** The newest Actions CI run of a head branch (retired 9.11; history only): the CI workflow's own runs, not the newest ten of every workflow. */
 function ciRuns(head) {
   const branch = encodeURIComponent(head);
   try {
@@ -78,15 +106,23 @@ const branches = sh("git", ["for-each-ref", "--format=%(refname)", "refs/heads",
 let prs = [];
 if (!flag("no-github")) {
   // headRepo: a fork's head is a branch of the fork (null when the fork was deleted).
-  prs = ghJson(`repos/${repo}/pulls?state=open&per_page=100`).map((p) => ({ number: p.number, title: p.title, head: p.head.ref, headRepo: p.head.repo?.full_name ?? null, base: p.base.ref }));
+  prs = ghJson(`repos/${repo}/pulls?state=open&per_page=100`).map((p) => ({ number: p.number, title: p.title, head: p.head.ref, headSha: p.head.sha ?? null, headRepo: p.head.repo?.full_name ?? null, base: p.base.ref }));
+  const local = localRunRecords();
   for (const p of prs) {
     try {
-      // Other workflows (Tauri runs on every label event) would push the CI run out of a short list.
-      const runs = ciRuns(p.head);
-      // A same-named branch of this repository is not a fork PR's head.
-      const ci = runs.find((r) => r.name === "CI" && (r.head_repository?.full_name ?? repo) === (p.headRepo ?? repo));
-      p.ci = ci ? (ci.status === "completed" ? ci.conclusion : null) : undefined;
-      p.ciSha = ci?.head_sha?.slice(0, 8);
+      // The commit's combined status: what Buildkite, Vercel and the receipt signer post (Actions is retired).
+      const status = p.headSha ? JSON.parse(sh("gh", ["api", `repos/${repo}/commits/${p.headSha}/status`])) : null;
+      let actionsRun = null;
+      if (!(status && Number(status.total_count) > 0) && !(p.headSha && local.some((r) => r.sha.startsWith(p.headSha)))) {
+        // Other workflows (Tauri runs on every label event) would push the CI run out of a short list.
+        const runs = ciRuns(p.head);
+        // A same-named branch of this repository is not a fork PR's head.
+        actionsRun = runs.find((r) => r.name === "CI" && (r.head_repository?.full_name ?? repo) === (p.headRepo ?? repo)) ?? null;
+      }
+      const c = ciOfHead({ headSha: p.headSha, status, localRuns: local, actionsRun });
+      p.ci = c.ci;
+      p.ciSha = c.sha;
+      p.ciVia = c.via;
       const comments = ghJson(`repos/${repo}/pulls/${p.number}/comments?per_page=100`);
       const replied = new Set(comments.map((c) => c.in_reply_to_id).filter(Boolean));
       p.unanswered = comments.filter((c) => !c.in_reply_to_id && !replied.has(c.id)).length;
@@ -98,19 +134,24 @@ if (!flag("no-github")) {
   }
 }
 
-const problems = missingRefs({ prs, worktrees, branches, repo });
+// Where the next step runs: this checkout (the worktree the handoff is written from).
+const where = { path: sh("git", ["rev-parse", "--show-toplevel"]).trim(), branch: sh("git", ["branch", "--show-current"]).trim() || null };
+const handoffFile = resolve(root, "docs/dev/HANDOFF.md");
+const { task, next } = flag("refresh") ? refreshFields(existsSync(handoffFile) ? readFileSync(handoffFile, "utf8") : null, { task: opt("task"), next: opt("next") }) : { task: opt("task"), next: opt("next") };
+const problems = [...missingRefs({ prs, worktrees, branches, repo }), ...nextStepProblems({ task, next, where })];
 const md = renderHandoff({
   now: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
   repo,
-  task: opt("task"),
-  next: opt("next"),
+  task,
+  next,
+  where,
   prs,
   worktrees,
   problems,
 });
 if (flag("stdout")) process.stdout.write(md);
 else {
-  const file = resolve(root, "docs/dev/HANDOFF.md");
+  const file = handoffFile;
   mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, md);
   console.log(`handoff: wrote docs/dev/HANDOFF.md (${prs.length} PRs, ${worktrees.length} worktrees${problems.length ? `, ${problems.length} problems` : ""})`);

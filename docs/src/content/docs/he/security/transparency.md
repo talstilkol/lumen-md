@@ -1,6 +1,7 @@
 ---
 title: דוח שקיפות
 description: כל חצי שנה: בקשות למידע של משתמשים שממסר הסנכרון המוצפן ושרת השיתוף קיבלו, ענו עליהן ודחו, ומה הם יכולים למסור בכלל.
+type: explanation
 ---
 
 <!-- Written by scripts/privacy/transparency.mjs from security/transparency/. Do not edit by hand. -->

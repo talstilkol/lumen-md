@@ -8,6 +8,7 @@
 import { EditorView, keymap } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
 import { safeSetHtml } from "../lib/trustedTypes";
+import { matchesAnyFilter } from "../text/filterMatch";
 
 interface MenuEntry {
   id: string;
@@ -254,6 +255,13 @@ const ENTRIES: MenuEntry[] = [
     template: '```bibtex\n@article{einstein1905,\n  title  = {On the Electrodynamics of Moving Bodies},\n  author = {Einstein, Albert},\n  year   = 1905\n}\n```',
   },
   {
+    id: "ach",
+    label: "Competing hypotheses (ACH)",
+    hint: "Evidence × hypotheses",
+    group: "Math & references",
+    template: '```ach\ntitle: Who leaked the report?\nhypotheses:\n  H1: Someone inside\n  H2: A contractor\nevidence:\n  - text: The file names an office laptop\n    weight: 3\n    marks: { H1: CC, H2: I }\n  - text: The contractor\'s own blog post\n    deceptive: true\n    marks: { H1: N, H2: C }\n```',
+  },
+  {
     id: "wiki",
     label: "Wiki-link",
     hint: "[[Page name]]",
@@ -405,11 +413,8 @@ function onDocMouseDown(e: MouseEvent) {
 }
 
 function filtered(query: string): MenuEntry[] {
-  const q = query.trim().toLowerCase();
-  if (!q) return ENTRIES;
-  return ENTRIES.filter((e) =>
-    `${e.label} ${e.hint} ${e.group} ${e.id}`.toLowerCase().includes(q),
-  );
+  if (!query.trim()) return ENTRIES;
+  return ENTRIES.filter((e) => matchesAnyFilter([e.label, e.hint, e.group, e.id], query));
 }
 
 function insertEntry(view: EditorView, entry: MenuEntry, replaceFrom: number) {

@@ -55,6 +55,7 @@ import { JSON_CANVAS_EXT, excalidrawToJsonCanvas, jsonCanvasToExcalidraw, serial
 import { CARD_HEIGHT, CARD_WIDTH, NOTE_LINK, cardPositions, noteLink, notePathOf, pastedNoteRefs, resolveNoteRef } from "../canvas/noteCards";
 import { NoteCard, readNote } from "../canvas/NoteCard";
 import { listWorkspace } from "../storage/workspace";
+import { useHighlightCards } from "./useHighlightCards";
 import type { ExportKind } from "./canvasExport";
 // The Mermaid → diagram dialog loads when it opens (its own strings and the converter come with it).
 const DiagramDialog = lazy(() => import("../canvas/DiagramDialog").then((m) => ({ default: m.DiagramDialog })));
@@ -152,6 +153,7 @@ export function CanvasExcalidraw({ open, onClose, collab = null }: Props) {
   const apiRef = useRef<CanvasApi | null>(null);
   /** The mounted Excalidraw's API, as state: the live binding starts once it is there. */
   const [api, setApi] = useState<CanvasApi | null>(null);
+  const highlights = useHighlightCards(apiRef, api); // W12.R1: PDF highlight cards
   const liveRef = useRef<LiveCanvas | null>(null);
   const [exporting, setExporting] = useState<ExportKind | null>(null);
   const [diagramOpen, setDiagramOpen] = useState(false);
@@ -508,7 +510,7 @@ export function CanvasExcalidraw({ open, onClose, collab = null }: Props) {
         </button>
       </div>
 
-      <div className="lumen-canvas-body" data-canvas-name={scene?.name ?? ""} data-file={scene ? `${scene.name}${EXCALIDRAW_EXT}` : ""}>
+      <div className="lumen-canvas-body" onDropCapture={highlights.onDrop} data-canvas-name={scene?.name ?? ""} data-file={scene ? `${scene.name}${EXCALIDRAW_EXT}` : ""}>
         {scene && (
           <Excalidraw
             key={scene.name}
@@ -528,6 +530,7 @@ export function CanvasExcalidraw({ open, onClose, collab = null }: Props) {
             isCollaborating={collab !== null}
             onPointerUpdate={collab ? (p: { pointer: { x: number; y: number; tool: "pointer" | "laser" }; button: "down" | "up" }) => liveRef.current?.pointer(p) : undefined}
             // Note cards (plan W1.16): lumen-note: embeds are ours, drawn by NoteCard; other embeds keep Excalidraw's rules.
+            onLinkOpen={highlights.onLinkOpen}
             validateEmbeddable={(link: string) => (link.startsWith(NOTE_LINK) ? true : undefined)}
             renderEmbeddable={(el: { id: string; type: string; link: string | null }, appState: { activeEmbeddable: { element: { id: string }; state: string } | null }) => {
               const path = notePathOf(el);

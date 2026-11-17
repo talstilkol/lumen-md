@@ -33,9 +33,20 @@ import {
 
 const args = parseArgs(argv.slice(2));
 
+// W13.L5: `--sigstore <version folder>` signs that registry version as its author (keyless: cosign sign-blob
+// after a GitHub login) and writes author.sigstore.json next to it. The registry verifies it against the
+// manifest's publisher.github before it shows "Verified author".
+if (args.sigstore) {
+  const { signAuthor } = await import("./lib/plugin-author.mjs");
+  const out = await signAuthor({ dir: resolve(String(args.sigstore)) });
+  console.log(`author signature written: ${out}`);
+  exit(0);
+}
+
 if (!args.dir || !args.key || !args["bundle-url"]) {
   console.error(
-    "usage: publish-plugin --dir <plugin-dir> --key <author.key> --bundle-url <https://…/index.js>\n" +
+    "usage: publish-plugin --sigstore <registry version folder>   (W13.L5: keyless author signature)\n" +
+    "       publish-plugin --dir <plugin-dir> --key <author.key> --bundle-url <https://…/index.js>\n" +
       "                      [--registry-repo <path> | --gh-pr <owner/repo>]\n" +
       "\n" +
       "Modes:\n" +

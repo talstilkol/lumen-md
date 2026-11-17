@@ -60,6 +60,7 @@ describe("security/github-ruleset.json", () => {
   });
 
   const ajvPath = "/opt/npm-tools/node_modules/ajv";
+  // skip-reason: the second validator (Ajv) is read from the machine's tool folder, not a dependency of the app; the built-in schema check always runs | task: W11.S4 | until: 2027-05-16
   it.skipIf(!existsSync(ajvPath))("Ajv (draft-07) agrees: the file passes, and broken files fail in both validators", () => {
     const Ajv = createRequire(import.meta.url)(ajvPath);
     const check = new Ajv({ allErrors: true, strict: false }).compile(schema);

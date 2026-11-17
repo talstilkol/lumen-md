@@ -1,6 +1,7 @@
 ---
 title: Native builds on free hosts
 description: How the desktop app, the Android AAB and the iOS IPA are really compiled without GitHub Actions — a Linux script for the second host, Codemagic's free macOS minutes, and a robo run on Firebase Test Lab or BrowserStack.
+type: how-to
 ---
 
 Plan W6.24. The native code (Rust in `src-tauri/`, Java in `android/`, Swift in

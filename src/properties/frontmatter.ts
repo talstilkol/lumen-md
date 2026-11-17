@@ -21,8 +21,13 @@
  */
 
 import { Document, isMap, isNode, isScalar, isSeq, parseDocument, Scalar, YAMLSeq, type Pair } from "yaml";
+import { compareNames } from "../i18n/collate";
 
-export type PropertyType = "text" | "number" | "date" | "list" | "checkbox" | "link";
+/**
+ * "amount" and "address" are text in the file; ./valueTypes.ts reads them
+ * (inferValueType), so their parsers stay out of this module (plan R12.17).
+ */
+export type PropertyType = "text" | "number" | "date" | "list" | "checkbox" | "link" | "amount" | "address";
 export type PropertyValue = string | number | boolean | string[] | null;
 
 export interface Property {
@@ -348,6 +353,8 @@ export function convertValue(value: unknown, to: PropertyType): PropertyValue {
   const str = Array.isArray(value) ? value.join(", ") : value === null || value === undefined ? "" : String(value);
   switch (to) {
     case "text":
+    case "amount":
+    case "address":
       return str || null;
     case "number": {
       const n = Number(str);
@@ -401,7 +408,7 @@ export function rankSuggestions(counts: Map<string, number> | undefined, exclude
   const skip = new Set(exclude);
   return [...counts.entries()]
     .filter(([v]) => !skip.has(v))
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .sort((a, b) => b[1] - a[1] || compareNames(a[0], b[0]))
     .slice(0, limit)
     .map(([v]) => v);
 }

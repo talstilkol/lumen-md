@@ -36,14 +36,23 @@
  * arrived yet (`store.pendingStructs`), so envelopes may be decrypted and
  * applied in any order.
  *
- * Compaction: once the array holds more than `compactThreshold`
- * envelopes, the peer that just pushed one encrypts a full-state snapshot
+ * Compaction: once the array holds more than this peer's compaction point
+ * (see `compactAt`: between half the `compactThreshold` and all of it),
+ * the peer that just pushed an envelope encrypts a full-state snapshot
  * of its plaintext doc, pushes it with `s: 1`, and deletes exactly the
  * envelopes it has already applied (entries it hasn't seen — e.g. a
  * concurrent push from another peer — are kept). This is only attempted
  * when every applied envelope decrypted cleanly and the plaintext doc has
  * no pending (dependency-blocked) structs, so the snapshot provably covers
  * everything it replaces.
+ *
+ * Each peer's point is its own (from its client id), and a peer that finds
+ * the array already compacted below its point when its snapshot is ready
+ * drops it: otherwise every peer crossing the same threshold at once pushes
+ * a full snapshot, and a room briefly holds one copy of the whole document
+ * per peer. Measured by the soak (scripts/bench/collab-soak.ts, W2.20): a
+ * 1 MB note with 5 participants grew the room past the public server's
+ * 4 MB limit (relay.mjs maxBytes), which closes the sender's connection.
  */
 
 import * as Y from "yjs";
@@ -83,6 +92,17 @@ export interface E2EChannel {
   destroy(): void;
 }
 
+/**
+ * The envelope count past which a peer compacts: `threshold` less up to half
+ * of it, by the peer's client id, so peers that see the same array do not all
+ * cross their point at the same envelope. Never above `threshold`.
+ */
+export function compactAt(threshold: number, clientId: number): number {
+  if (threshold <= 1) return threshold;
+  const spread = Math.ceil(threshold / 2);
+  return threshold - (Math.abs(Math.trunc(clientId)) % spread);
+}
+
 export function e2eSalt(room: string): string {
   return roomSalt(room);
 }
@@ -118,6 +138,7 @@ export function wireE2E(
   const arr = transportDoc.getArray<Envelope>(E2E_ARRAY_NAME);
   const ctx = (snapshot: boolean) => ({ salt: e2eSalt(opts.room), aad: aadFor(snapshot) });
   const threshold = opts.compactThreshold ?? DEFAULT_COMPACT_THRESHOLD;
+  const limit = compactAt(threshold, plainDoc.clientID);
 
   let destroyed = false;
   let errorReported = false;
@@ -160,7 +181,7 @@ export function wireE2E(
     };
     applied.add(env); // our own content is in plainDoc already
     transportDoc.transact(() => arr.push([env]), E2E_LOCAL_ORIGIN);
-    if (threshold > 0 && arr.length > threshold) await compact();
+    if (threshold > 0 && arr.length > limit) await compact();
   };
 
   const compact = async () => {
@@ -174,6 +195,8 @@ export function wireE2E(
       ctx(true),
     );
     if (destroyed || hasPending(plainDoc)) return;
+    // Another peer compacted while this snapshot was being sealed: the room has its snapshot already.
+    if (arr.length <= limit) return;
     const snap: Envelope = {
       v: E2E_VERSION,
       iv: sealed.slice(0, 12),

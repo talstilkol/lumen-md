@@ -12,6 +12,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { displayValue, rowLatLng, type DatabaseRow, type DatabaseSpec } from "./database";
 import { getLeaflet } from "../plugins/map/leaflet";
+import { addBaseTiles } from "../plugins/map/tiles";
 import { t } from "../i18n";
 
 const titleOf = (row: DatabaseRow) => (typeof row.fm.title === "string" && row.fm.title) || row.basename;
@@ -45,10 +46,7 @@ export default function DatabaseMapView({ rows, spec, fields }: { rows: Database
       if (cancelled || !ref.current) return;
       const m = L.map(ref.current, { scrollWheelZoom: false });
       map = m;
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      }).addTo(m);
+      addBaseTiles(L, m);
       for (const p of points) {
         // Popup content is built from DOM nodes (textContent), never from HTML strings.
         const box = document.createElement("div");

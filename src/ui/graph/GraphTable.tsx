@@ -6,6 +6,7 @@
  * and a keyboard user get the graph's content, not a picture of it.
  */
 import { t } from "../../i18n";
+import { compareNames } from "../../i18n/collate";
 
 /** Rows shown at once; the filters above the graph narrow a larger vault. */
 export const GRAPH_TABLE_ROWS = 500;
@@ -21,7 +22,7 @@ export interface GraphTableRow {
 /** The rows: most-linked first, then by name; at most `max`. */
 export function graphTableRows(labels: readonly string[], neighbors: (i: number) => readonly number[], max = GRAPH_TABLE_ROWS): GraphTableRow[] {
   const rows = labels.map((label, index) => ({ index, label, links: [...new Set(neighbors(index))].filter((j) => j !== index) }));
-  rows.sort((a, b) => b.links.length - a.links.length || a.label.localeCompare(b.label));
+  rows.sort((a, b) => b.links.length - a.links.length || compareNames(a.label, b.label));
   return rows.slice(0, max);
 }
 

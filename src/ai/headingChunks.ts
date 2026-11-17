@@ -19,6 +19,8 @@
  * Hebrew characters per token), summed once per note.
  */
 
+import { noteParagraphs } from "./paragraphAnchors";
+
 export const CHUNK_MIN_TOKENS = 200;
 export const CHUNK_MAX_TOKENS = 400;
 export const CHUNK_OVERLAP_TOKENS = 50;
@@ -34,6 +36,8 @@ export interface HeadingChunk {
   headings: string[];
   /** "Title › Heading › Sub · #tag #tag" */
   prefix: string;
+  /** W12.A1: the anchors (`^id` or virtual `p-…`, ./paragraphAnchors) of the paragraphs that start in this chunk. */
+  paragraphs: string[];
 }
 
 interface Section {
@@ -180,6 +184,7 @@ export function headingChunks(text: string, opts: { title?: string; min?: number
     } else groups.push({ ...s, headings: [...s.headings] });
   }
 
+  const paras = noteParagraphs(text);
   const out: HeadingChunk[] = [];
   for (const g of groups) {
     const pieces = cut(text, cost, g.start, g.end, max);
@@ -187,7 +192,7 @@ export function headingChunks(text: string, opts: { title?: string; min?: number
       const body = text.slice(s, e);
       if (!body.trim()) return;
       const prev = i > 0 ? pieces[i - 1]! : null;
-      out.push({ start: s, end: e, text: body, overlap: prev ? tail(text, cost, prev[0], prev[1], overlapTokens) : "", headings: g.headings, prefix: prefixOf(g.headings) });
+      out.push({ start: s, end: e, text: body, overlap: prev ? tail(text, cost, prev[0], prev[1], overlapTokens) : "", headings: g.headings, prefix: prefixOf(g.headings), paragraphs: paras.filter((p) => p.start >= s && p.start < e).map((p) => p.anchor) });
     });
   }
   return out;

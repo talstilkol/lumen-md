@@ -48,7 +48,27 @@ export interface PrintOptions {
   pageSize?: "A4" | "Letter";
   /** Where footnotes print: the bottom of the page (default) or the end of the note. */
   footnotes?: FootnotePlacement;
+  /** Page margins (W13.R10): normal (the default), narrow or wide. */
+  margins?: PageMargins;
   dir: "rtl" | "ltr";
+}
+
+export type PageMargins = "normal" | "narrow" | "wide";
+
+/** The `@page` margins of each preset, in mm (top, inline end, bottom, inline start). */
+export const MARGINS_MM: Readonly<Record<PageMargins, { top: number; side: number; bottom: number }>> = {
+  normal: { top: 22, side: 18, bottom: 20 },
+  narrow: { top: 14, side: 12.7, bottom: 14 },
+  wide: { top: 25.4, side: 25.4, bottom: 25.4 },
+};
+
+export const PAPER_MM = { A4: { width: 210, height: 297 }, Letter: { width: 215.9, height: 279.4 } } as const;
+
+/** The printable area of a page of this size and margins, in mm. */
+export function pageArea(size: "A4" | "Letter" = "A4", margins: PageMargins = "normal"): { width: number; height: number } {
+  const p = PAPER_MM[size];
+  const m = MARGINS_MM[margins] ?? MARGINS_MM.normal;
+  return { width: +(p.width - 2 * m.side).toFixed(2), height: +(p.height - m.top - m.bottom).toFixed(2) };
 }
 
 export type FootnotePlacement = "page" | "end";
@@ -109,6 +129,8 @@ export function printFrontmatter(fm: Record<string, unknown> | null | undefined)
   const size = String(fm["page-size"] ?? "");
   if (size === "Letter" || size === "letter") out.pageSize = "Letter";
   if (size === "A4" || size === "a4") out.pageSize = "A4";
+  const mg = String(fm.margins ?? fm["page-margins"] ?? "");
+  if (mg === "normal" || mg === "narrow" || mg === "wide") out.margins = mg;
   const fn = String(fm.footnotes ?? "");
   if (fn === "page" || fn === "bottom") out.footnotes = "page";
   if (fn === "end" || fn === "endnotes") out.footnotes = "end";
@@ -124,10 +146,11 @@ export function printCss(o: PrintOptions): string {
       : `counter(page, ${numbering}) " / " counter(pages, ${numbering})`;
   const footer = o.footer ? `${cssString(o.footer)} "  ·  " ` : "";
   const margin = "font: 9pt var(--font-sans, Heebo, Inter, sans-serif); color: #666;";
+  const m = MARGINS_MM[o.margins ?? "normal"] ?? MARGINS_MM.normal;
   return `
 @page {
   size: ${o.pageSize ?? "A4"};
-  margin: 22mm 18mm 20mm 18mm;
+  margin: ${m.top}mm ${m.side}mm ${m.bottom}mm ${m.side}mm;
   @top-center { content: ${header ? cssString(header) : '""'}; ${margin} }
   @bottom-center { content: ${footer}${pageNo}; ${margin} direction: ${o.dir}; }
 }
@@ -159,7 +182,7 @@ a { color: inherit; text-decoration: underline; }
 .print-toc li { margin: 0.2em 0; }
 .print-toc a { text-decoration: none; }
 section.footnotes, section[data-footnotes] { break-before: auto; font-size: 9.5pt; border-top: 1px solid #ccc; margin-top: 8mm; }
-.print-page { display: flow-root; position: relative; height: ${(PAGE_AREA_MM[o.pageSize ?? "A4"].height - PAGE_SLACK_MM + 1).toFixed(1)}mm; break-after: page; }
+.print-page { display: flow-root; position: relative; height: ${(pageArea(o.pageSize, o.margins).height - PAGE_SLACK_MM + 1).toFixed(1)}mm; break-after: page; }
 .print-page:last-child, .print-page .print-toc { break-after: auto; }
 .print-page.print-page-tall { height: auto; }
 .page-footnotes { position: absolute; inset-inline: 0; bottom: 0; font-size: 9.5pt; line-height: 1.4; }

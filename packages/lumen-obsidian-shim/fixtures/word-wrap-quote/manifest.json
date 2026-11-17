@@ -1,0 +1,1 @@
+{ "id": "word-wrap-quote", "name": "Quote selection", "version": "1.0.0", "minAppVersion": "1.0.0", "description": "Fixture: quote the selection, count words, keep settings.", "author": "Lumen", "isDesktopOnly": false }

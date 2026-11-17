@@ -18,6 +18,7 @@ import {
   workspaceHasEntry,
   writeWorkspaceBlob,
 } from "./workspace";
+import { swallowed } from "../lib/logger";
 
 export interface MoveResult {
   /** Where the entry is now. */
@@ -62,7 +63,7 @@ async function moveEntry(from: string, to: string, confirmReplace?: (path: strin
   try {
     await renameWorkspaceFile(from, to);
   } catch (e) {
-    if (replaced) await restoreFromTrash(replaced.id).catch(() => undefined);
+    if (replaced) await restoreFromTrash(replaced.id).catch((e: unknown) => swallowed("storage/fileOps: the replaced file could not be restored from the trash after a failed move (it is still in the trash)", e));
     if (e instanceof WorkspaceConflictError) return null;
     throw e;
   }
@@ -70,7 +71,7 @@ async function moveEntry(from: string, to: string, confirmReplace?: (path: strin
 }
 
 /** Rewrite the links after a move that `moveEntry` made. */
-async function relink(from: string, to: string, folder: boolean | undefined, moved: Moved): Promise<MoveResult> {
+async function relink(from: string, to: string, folder: boolean | undefined, moved: Moved, noLog = false): Promise<MoveResult> {
   // The entry has moved: report that even when a link rewrite fails, so
   // the caller still retargets the open note instead of autosaving it back
   // to the old path.
@@ -84,10 +85,13 @@ async function relink(from: string, to: string, folder: boolean | undefined, mov
   // Per-note reading options follow the note (plan W3.5) — only once someone has set any.
   try {
     if (localStorage.getItem("lumen-reading") !== null) (await import("../reading/settings")).moveNoteReading(from, to);
-  } catch {
+  } catch (err) {
     // why: storage is blocked: there are no per-note reading options to move
     /* no storage: nothing to move */
+    swallowed("storage/fileOps: storage is blocked: there are no per-note reading options to move", err);
   }
+  // W13.S1: the "Deleted and renamed files" screen lists it (off the startup path).
+  if (!noLog) await import("./renameLog").then((m) => m.recordRename(from, to, !!folder)).catch((e: unknown) => swallowed("storage/fileOps: the rename log did not load; the move itself happened", e));
   window.dispatchEvent(new Event("lumen-workspace-changed"));
   const vault = moved.vault;
   const rewrite = (content: string, notePrevPath: string) =>
@@ -103,11 +107,11 @@ async function relink(from: string, to: string, folder: boolean | undefined, mov
 export async function safeMove(
   from: string,
   to: string,
-  opts: { folder?: boolean; confirmReplace?: (path: string) => Promise<boolean> } = {},
+  opts: { folder?: boolean; confirmReplace?: (path: string) => Promise<boolean>; /** Undoing a logged rename: don't log the way back. */ noLog?: boolean } = {},
 ): Promise<MoveResult | null> {
   if (from === to) return { path: to, linksUpdated: [], rewrite: (c) => c };
   const moved = await moveEntry(from, to, opts.confirmReplace);
-  return moved ? relink(from, to, opts.folder, moved) : null;
+  return moved ? relink(from, to, opts.folder, moved, opts.noLog) : null;
 }
 
 /**
@@ -359,7 +363,7 @@ export async function safeMoveWithCompanion(
   if (!noteMoved) {
     // Put the file back where it was, next to its note; nothing was relinked.
     await renameWorkspaceFile(to, from);
-    if (pdfMoved.replaced) await restoreFromTrash(pdfMoved.replaced.id).catch(() => undefined);
+    if (pdfMoved.replaced) await restoreFromTrash(pdfMoved.replaced.id).catch((e: unknown) => swallowed("storage/fileOps: the replaced PDF could not be restored from the trash after a failed move (it is still in the trash)", e));
     if (failure) throw failure;
     return null;
   }

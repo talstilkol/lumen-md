@@ -9,17 +9,23 @@
  * query language is parsed and interpreted (search/dataview.ts).
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { AlertCircle } from "lucide-react";
-import { t } from "../i18n";
+import { getLocale, isRTL, t } from "../i18n";
+import { formatDate } from "../i18n/format";
 import { ensureIndex, indexedNotes, searchWorkspace } from "../storage/workspaceIndex";
 import { watchVault } from "../storage/vault";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { useAppStore } from "../store/useStore";
-import { MAX_LIMIT, parseEmbeddedQuery, rowsFor, type QueryNote, type QueryRow } from "../search/embeddedQuery";
-import { DataviewError, parseDataview, runDataview, show, type DvResult, type Value } from "../search/dataview";
+import { MAX_LIMIT, parseEmbeddedQuery, rowsFor, splitChartOptions, type QueryChart, type QueryNote, type QueryRow } from "../search/embeddedQuery";
+import { DataviewError, DataviewLimitError, parseDataview, runDataview, show, type DvResult, type Value } from "../search/dataview";
 import "./queryBlockStrings";
+import { OpenAsGraph } from "../ui/graph/OpenAsGraph";
+import { useVisibleRefresh } from "../lib/visibleRefresh";
 import { EmptyState, learnHow } from "../ui/EmptyState";
+
+// W12.V1: `chart:` draws the rows; ECharts and the chart strings load only then.
+const QueryChartView = lazy(() => import("../viz/QueryChartView"));
 
 interface Props {
   source: string;
@@ -36,6 +42,8 @@ function selfPath(): string | null {
 }
 
 function NoteLink({ path, name }: { path: string; name: string }) {
+  // A GROUP BY row whose key is not a note: its key as text.
+  if (!path) return <span dir="auto">{name}</span>;
   return (
     <a className="wiki-link" href="#" data-wiki-target={path.replace(/\.md$/i, "")} dir="auto">
       {name}
@@ -53,15 +61,21 @@ function Cell({ v }: { v: Value }) {
 export default function QueryBlock({ source, lang }: Props) {
   const isDataview = lang === "dataview";
   const parsed = useMemo(() => {
-    if (!isDataview) return { q: parseEmbeddedQuery(source), dv: null, error: null };
+    if (!isDataview) {
+      const q = parseEmbeddedQuery(source);
+      return { q, dv: null, error: null, chart: q.chart };
+    }
+    const { rest, chart } = splitChartOptions(source);
     try {
-      return { q: null, dv: parseDataview(source), error: null };
+      return { q: null, dv: parseDataview(rest), error: null, chart };
     } catch (e) {
-      return { q: null, dv: null, error: e instanceof DataviewError ? e.message : String(e) };
+      return { q: null, dv: null, error: e instanceof DataviewError ? e.message : String(e), chart };
     }
   }, [source, isDataview]);
   const [out, setOut] = useState<Outcome | null>(null);
   const [runs, setRuns] = useState(0);
+  // W12.V6: off screen (a long dashboard), a vault change waits until the block is seen again.
+  const [rootRef, schedule] = useVisibleRefresh();
 
   useEffect(() => {
     let cancelled = false;
@@ -75,8 +89,9 @@ export default function QueryBlock({ source, lang }: Props) {
           await ensureIndex();
           const self = selfPath();
           // W2.22: the text is read from the index for this run, then let go.
-          const notes = (await indexedNotes()).filter((f) => f.path !== self);
-          next = { kind: "dataview", result: runDataview(parsed.dv, notes) };
+          // As in Dataview, the note the block is in is one of the pages (`WHERE file = this.file` lists it) and is `this`.
+          const notes = await indexedNotes();
+          next = { kind: "dataview", result: runDataview(parsed.dv, notes, Date.now(), notes.find((f) => f.path === self)) };
         } else {
           const q = parsed.q!;
           if (!q.query.trim()) next = { kind: "error", message: t("query.empty") };
@@ -91,33 +106,38 @@ export default function QueryBlock({ source, lang }: Props) {
           setRuns((n) => n + 1);
         }
       } catch (e) {
-        if (!cancelled && mine === seq) setOut({ kind: "error", message: e instanceof Error ? e.message : String(e) });
+        // Review 11, M3: a query past its bounds (rows, evaluations, text) says so in the reader's language.
+        if (!cancelled && mine === seq) setOut({ kind: "error", message: e instanceof DataviewLimitError ? t("query.tooLarge") : e instanceof Error ? e.message : String(e) });
       }
     };
     void run();
     // A save anywhere in the vault: re-run at once (the index re-reads only what changed).
     const offVault = watchVault((e) => {
-      if (e.type === "write" || e.type === "delete" || e.type === "rename") void run();
+      if (e.type === "write" || e.type === "delete" || e.type === "rename") schedule(() => void run());
     });
-    const offWs = onWorkspaceChanged(() => void run(), { debounceMs: 50 });
+    const offWs = onWorkspaceChanged(() => schedule(() => void run()), { debounceMs: 50 });
     return () => {
       cancelled = true;
       offVault();
       offWs();
     };
-  }, [parsed]);
+  }, [parsed, schedule]);
 
   const problems = parsed.q?.problems ?? [];
   const count = out?.kind === "query" ? out.rows.length : out?.kind === "dataview" ? out.result.rows.length : 0;
+  const chart: QueryChart | undefined = parsed.chart;
+  const title = isDataview ? t("query.dataviewTitle") : parsed.q?.query || t("query.title");
 
   return (
-    <div className="chart-block lumen-query-block" data-query-runs={runs} data-query-kind={isDataview ? "dataview" : "query"}>
+    <div ref={rootRef} className="chart-block lumen-query-block" data-query-runs={runs} data-query-kind={isDataview ? "dataview" : "query"}>
       <div className="chart-block-header">
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontWeight: 600 }} dir="auto">
             {isDataview ? t("query.dataviewTitle") : parsed.q?.query || t("query.title")}
           </span>
           {out && out.kind !== "error" && <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>{t("query.count", { count })}</span>}
+          {/* W13.G9: the result as a graph (the vault's links between these notes). */}
+          {out?.kind === "query" && count > 0 && <OpenAsGraph label={t("query.openAsGraph")} title={title} paths={() => out.rows.map((r) => r.path)} testId="query-open-graph" />}
         </span>
       </div>
       <div style={{ padding: 8 }}>
@@ -132,7 +152,19 @@ export default function QueryBlock({ source, lang }: Props) {
           </div>
         )}
         {out && out.kind !== "error" && count === 0 && <EmptyState style={{ padding: 0, fontSize: 13 }} message={t("query.none")} action={learnHow("workspace/embedded-queries#query-blocks")} />}
-        {out?.kind === "query" && count > 0 && out.view === "list" && (
+        {chart && out && out.kind !== "error" && count > 0 && (
+          <Suspense fallback={<div style={{ fontSize: 12, color: "hsl(var(--fg-muted))" }}>{t("query.loading")}</div>}>
+            <QueryChartView
+              chart={chart}
+              title={title}
+              dir={isRTL() ? "rtl" : "ltr"}
+              locale={getLocale()}
+              rows={out.kind === "query" ? out.rows : undefined}
+              dataview={out.kind === "dataview" ? out.result : undefined}
+            />
+          </Suspense>
+        )}
+        {!chart && out?.kind === "query" && count > 0 && out.view === "list" && (
           <ul className="lumen-query-list">
             {out.rows.map((r) => (
               <li key={r.path}>
@@ -147,7 +179,7 @@ export default function QueryBlock({ source, lang }: Props) {
             ))}
           </ul>
         )}
-        {out?.kind === "query" && count > 0 && out.view === "table" && (
+        {!chart && out?.kind === "query" && count > 0 && out.view === "table" && (
           <table className="lumen-query-table">
             <thead>
               <tr>
@@ -164,17 +196,17 @@ export default function QueryBlock({ source, lang }: Props) {
                     <NoteLink path={r.path} name={r.name} />
                   </td>
                   <td dir="auto">{r.folder}</td>
-                  <td>{r.modified ? new Date(r.modified).toLocaleDateString() : ""}</td>
+                  <td>{r.modified ? formatDate(r.modified) : ""}</td>
                   <td dir="auto">{r.tags.map((x) => "#" + x).join(" ")}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
-        {out?.kind === "dataview" && count > 0 && out.result.type === "list" && (
+        {!chart && out?.kind === "dataview" && count > 0 && out.result.type === "list" && (
           <ul className="lumen-query-list">
-            {out.result.rows.map((r) => (
-              <li key={r.path}>
+            {out.result.rows.map((r, i) => (
+              <li key={`${r.path}|${i}`}>
                 <NoteLink path={r.path} name={r.name} />
                 {r.cells.length > 0 && r.cells[0] !== null && (
                   <>
@@ -186,7 +218,31 @@ export default function QueryBlock({ source, lang }: Props) {
             ))}
           </ul>
         )}
-        {out?.kind === "dataview" && count > 0 && out.result.type === "table" && (
+        {!chart && out?.kind === "dataview" && count > 0 && out.result.type === "task" && (
+          <ul className="lumen-query-list lumen-query-tasks" style={{ listStyle: "none", paddingInlineStart: 0 }}>
+            {out.result.rows.map((r, i) => (
+              <li key={`${r.path}|${r.task?.line}|${i}`} data-task-status={r.task?.status}>
+                {r.group !== undefined && r.group !== out.result.rows[i - 1]?.group && (
+                  <div style={{ fontWeight: 600, marginTop: i ? 6 : 0 }} dir="auto">
+                    {r.group}
+                  </div>
+                )}
+                <label style={{ display: "inline-flex", alignItems: "baseline", gap: 6 }}>
+                  {/* Read-only here: the task is ticked in its own note. */}
+                  <input type="checkbox" checked={r.task?.completed ?? false} readOnly disabled aria-readonly="true" />
+                  <span dir="auto" style={r.task?.completed ? { textDecoration: "line-through", color: "hsl(var(--fg-muted))" } : undefined}>
+                    {r.task?.text}
+                  </span>
+                </label>
+                <span style={{ color: "hsl(var(--fg-muted))", fontSize: 12 }}>
+                  {" — "}
+                  <NoteLink path={r.path} name={r.name} />
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {!chart && out?.kind === "dataview" && count > 0 && out.result.type === "table" && (
           <table className="lumen-query-table">
             <thead>
               <tr>
@@ -198,8 +254,8 @@ export default function QueryBlock({ source, lang }: Props) {
               </tr>
             </thead>
             <tbody>
-              {out.result.rows.map((r) => (
-                <tr key={r.path}>
+              {out.result.rows.map((r, i) => (
+                <tr key={`${r.path}|${i}`}>
                   {out.result.headers.length > r.cells.length && (
                     <td>
                       <NoteLink path={r.path} name={r.name} />

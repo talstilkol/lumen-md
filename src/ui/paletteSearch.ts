@@ -11,6 +11,8 @@
  */
 
 import { wrongLayoutVariant } from "../lib/keyboardLayout";
+import { shownHint } from "../commands/hints";
+import { normalizeForFilter } from "../text/filterMatch";
 
 interface Searchable {
   label: string;
@@ -20,15 +22,20 @@ interface Searchable {
 
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-/** 4 starts the label, 3 starts a word of it, 2 inside it, 1 in the hint or group, 0 no match. */
-export function matchScore(c: Searchable, q: string): number {
+/**
+ * 4 starts the label, 3 starts a word of it, 2 inside it, 1 in the hint or
+ * group, 0 no match. Niqqud, accents, case and geresh do not count (W13.E3):
+ * both sides go through `normalizeForFilter`.
+ */
+export function matchScore(c: Searchable, query: string): number {
+  const q = normalizeForFilter(query);
   if (!q) return 0;
   // Leading emoji and symbols ("🎨 Canvas") don't count for "starts with".
-  const label = c.label.toLowerCase().replace(/^[^\p{L}\p{N}]+/u, "");
+  const label = normalizeForFilter(c.label).replace(/^[^\p{L}\p{N}]+/u, "");
   if (label.startsWith(q)) return 4;
   if (new RegExp(`(^|[^\\p{L}\\p{N}])${escape(q)}`, "u").test(label)) return 3;
   if (label.includes(q)) return 2;
-  if (`${c.hint ?? ""} ${c.group ?? ""}`.toLowerCase().includes(q)) return 1;
+  if (normalizeForFilter(`${shownHint(c.hint) ?? ""} ${c.group ?? ""}`).includes(q)) return 1;
   return 0;
 }
 
@@ -39,9 +46,10 @@ export interface RankedSearch<T> {
 }
 
 export function rankCommands<T extends Searchable>(list: readonly T[], query: string): RankedSearch<T> {
-  const q = query.trim().toLowerCase();
+  const typed = query.trim().toLowerCase();
+  const q = normalizeForFilter(typed);
   if (!q) return { items: [...list], variant: null };
-  const v = wrongLayoutVariant(q)?.toLowerCase() ?? null;
+  const v = wrongLayoutVariant(typed)?.toLowerCase() ?? null;
   const scored: Array<{ c: T; s: number; i: number }> = [];
   let variantHit = false;
   list.forEach((c, i) => {

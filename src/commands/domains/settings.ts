@@ -5,6 +5,8 @@ import { t } from "../../i18n";
 import { canPurchasePlans, manageBilling, upgradeTo } from "../../billing/planActions";
 import type { CommandContext } from "./context";
 import { airplaneFlagOn } from "../../privacy/airplaneBoot";
+import { appLockOn } from "../../privacy/appLockBoot";
+import { uiSelect } from "../../ui/PromptDialog";
 import { showAiToast } from "../../ui/AiToast";
 
 /** Panels only some builds mount: listed only when App passes their setter. */
@@ -131,9 +133,72 @@ export function buildBillingCommands(): Command[] {
   ];
 }
 
+/** The app lock (plan W13.P1): on / off, lock now, the delay. Its UI loads on use. */
+function buildAppLockCommands(): Command[] {
+  const on = appLockOn();
+  const base = { icon: cmdIcons.Network, group: t("group.security"), hint: t("cmd.appLock.hint") };
+  const afterLabel = (n: number) => (n === 0 ? t("toast.appLock.atOnce") : t("toast.appLock.minutes", { n }));
+  return [
+    {
+      ...base,
+      id: "privacy.appLock",
+      label: on ? t("cmd.appLock.off") : t("cmd.appLock.on"),
+      action: async () => {
+        const { appLock, mountAppLock } = await import("../../privacy/appLockUi");
+        const { readSettings, writeSettings, webAuthnSeam } = await import("../../privacy/appLock");
+        const s = readSettings();
+        if (s.enabled) {
+          // Turning it off takes the same check as unlocking.
+          if (!(await appLock().unlock())) return;
+          writeSettings({ ...s, enabled: false });
+          void appLock().syncSecure();
+          return showAiToast(t("toast.appLock.off"), "info");
+        }
+        const seam = webAuthnSeam();
+        if (!(await seam.available())) return showAiToast(t("toast.appLock.unavailable"), "error");
+        let credentialId: string;
+        try {
+          credentialId = await seam.enroll();
+        } catch {
+          return showAiToast(t("toast.appLock.unavailable"), "error");
+        }
+        writeSettings({ ...s, enabled: true, credentialId });
+        mountAppLock();
+        void appLock().syncSecure();
+        showAiToast(t("toast.appLock.on", { after: afterLabel(s.after) }), "success");
+      },
+    },
+    ...(on
+      ? [
+          {
+            ...base,
+            id: "privacy.appLock.now",
+            label: t("cmd.appLock.now"),
+            action: () => void import("../../privacy/appLockUi").then((m) => (m.mountAppLock(), m.appLock().lockNow())),
+          },
+          {
+            ...base,
+            id: "privacy.appLock.after",
+            label: t("cmd.appLock.after"),
+            action: async () => {
+              const { LOCK_DELAYS, readSettings, writeSettings } = await import("../../privacy/appLock");
+              const s = readSettings();
+              const v = await uiSelect({ message: t("toast.appLock.afterPrompt"), defaultValue: String(s.after), choices: LOCK_DELAYS.map((n) => ({ value: String(n), label: afterLabel(n) })) });
+              if (v === null) return;
+              const after = LOCK_DELAYS.find((n) => String(n) === v) ?? s.after;
+              writeSettings({ ...s, after });
+              showAiToast(t("toast.appLock.on", { after: afterLabel(after) }), "success");
+            },
+          },
+        ]
+      : []),
+  ];
+}
+
 /** Airplane mode and the network monitor (plan W5.9); both load on use. */
 export function buildAirplaneCommands(): Command[] {
   return [
+    ...buildAppLockCommands(),
     {
       id: "privacy.airplane",
       label: t("cmd.airplane.toggle"),
@@ -149,6 +214,15 @@ export function buildAirplaneCommands(): Command[] {
       },
     },
     {
+      // W13.P4: the on-device data inventory, with per-category deletion and crypto-shredding.
+      id: "privacy.localData",
+      label: t("cmd.privacy.localData"),
+      hint: t("cmd.privacy.localData.hint"),
+      icon: cmdIcons.Network,
+      group: t("group.security"),
+      action: () => void import("../../privacy/LocalDataDialog").then((m) => m.openLocalData()),
+    },
+    {
       id: "privacy.networkMonitor",
       label: t("cmd.airplane.monitor"),
       hint: t("cmd.airplane.monitor.hint"),
@@ -156,6 +230,53 @@ export function buildAirplaneCommands(): Command[] {
       group: t("group.security"),
       action: () => {
         void import("../../privacy/NetworkMonitor").then((m) => m.openNetworkMonitor());
+      },
+    },
+  ];
+}
+
+/** Screenshot to note (plan W7.16, W10.C22): the image on the clipboard, or a file, read on this device and previewed. */
+export function buildScreenshotCommands(ctx: CommandContext): Command[] {
+  return [
+    {
+      id: "ai.screenshotToNote",
+      label: t("cmd.screenshotToNote"),
+      hint: t("cmd.screenshotToNote.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () =>
+        void import("../../ai/ScreenshotNoteDialog").then(async (m) => {
+          const image = (await m.clipboardImage()) ?? (await m.pickImageFile());
+          if (!image) return;
+          const { getLocale } = await import("../../i18n");
+          const md = await m.previewScreenshotNote(image, getLocale());
+          if (md) ctx.insertSnippet(`\n${md}\n`);
+        }),
+    },
+  ];
+}
+
+/** MCP servers (plan W7.18, W10.C2): the settings tab, and the agent that uses their tools. Both load on use. */
+export function buildMcpCommands(): Command[] {
+  return [
+    {
+      id: "mcp.settings",
+      label: t("cmd.mcp.settings"),
+      hint: t("cmd.mcp.settings.hint"),
+      icon: cmdIcons.Network,
+      group: t("group.tools"),
+      action: () => {
+        window.dispatchEvent(new CustomEvent("lumen-open-settings", { detail: { tab: "mcp" } }));
+      },
+    },
+    {
+      id: "mcp.ask",
+      label: t("cmd.mcp.ask"),
+      hint: t("cmd.mcp.ask.hint"),
+      icon: cmdIcons.Network,
+      group: t("group.tools"),
+      action: () => {
+        void import("../../agents/mcp/agent").then((m) => m.askWithMcpServers());
       },
     },
   ];

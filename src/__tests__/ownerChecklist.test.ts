@@ -6,7 +6,7 @@
  */
 import { describe, it, expect, afterAll } from "vitest";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import {
@@ -19,6 +19,7 @@ import {
   splitSteps,
   extractCommands,
   previousState,
+  loadPlan,
   // @ts-expect-error — plain .mjs script without type declarations
 } from "../../scripts/owner-checklist.mjs";
 
@@ -189,5 +190,22 @@ describe("owner-checklist: the page, re-runs and --check", () => {
       code = (e as { status: number }).status;
     }
     expect(code).toBe(1);
+  });
+});
+
+describe("owner-checklist: which plan a re-run reads (W9.3)", () => {
+  it("the checkout's plan/plan.json, not a stale chore/dod; chore/dod only when the checkout has none", () => {
+    const repo = mkdtempSync(join(tmp, "plan-"));
+    const git = (...a: string[]) => execFileSync("git", ["-c", "user.name=t", "-c", "user.email=t@example.org", ...a], { cwd: repo, stdio: "pipe" });
+    git("init", "-q", "-b", "chore/dod");
+    mkdirSync(join(repo, "plan"));
+    writeFileSync(join(repo, "plan/plan.json"), JSON.stringify({ from: "chore/dod" }));
+    git("add", "plan/plan.json");
+    git("commit", "-q", "-m", "plan on chore/dod");
+    git("checkout", "-q", "-b", "verify/train");
+    writeFileSync(join(repo, "plan/plan.json"), JSON.stringify({ from: "train" }));
+    expect(loadPlan(repo)).toEqual({ plan: { from: "train" }, from: "plan/plan.json" });
+    rmSync(join(repo, "plan/plan.json"));
+    expect(loadPlan(repo)).toEqual({ plan: { from: "chore/dod" }, from: "chore/dod:plan/plan.json" });
   });
 });

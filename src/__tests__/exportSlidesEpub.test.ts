@@ -54,6 +54,65 @@ describe("markdownToEpubBytes", () => {
   });
 });
 
+describe("markdownToEpubBytes: tables and lists (fixed here: tables became <p> text, numbered and nested lists were lost)", () => {
+  const NOTE = [
+    "# פרק",
+    "",
+    "| שם | ערך |",
+    "|---|---|",
+    "| **אלף** | [קישור](https://example.org) |",
+    "| בית | `x \\| y` |",
+    "",
+    "1. ראשון",
+    "2. שני",
+    "   - מקונן",
+    "     עם שורה שנייה",
+    "3. שלישי",
+    "",
+    "פסקה.",
+    "",
+    "5. מתחיל בחמש",
+    "",
+    "> ציטוט",
+    "",
+    "---",
+    "",
+    "```js",
+    "let a = 1 < 2;",
+    "```",
+    "",
+  ].join("\n");
+
+  async function xhtmlOf(md: string): Promise<string> {
+    const bytes = await markdownToEpubBytes(md, "n");
+    const files = await unzip(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
+    return new TextDecoder().decode(files.get("OEBPS/chapter1.xhtml")!);
+  }
+
+  it("writes a real, well-formed table (RTL for a Hebrew table), <ol> with start, nested lists, quotes, rules and code", async () => {
+    const x = await xhtmlOf(NOTE);
+    expect(x).toContain('<table dir="rtl"><thead><tr><th>שם</th><th>ערך</th></tr></thead>');
+    expect(x).toContain("<td><strong>אלף</strong></td>");
+    expect(x).toContain('<ol start="5">');
+    expect(x).toMatch(/<li>שני\n<ul>\n<li>מקונן עם שורה שנייה/);
+    expect(x).toContain("<blockquote><p>ציטוט</p></blockquote>");
+    expect(x).toContain("<hr/>");
+    expect(x).toContain('<pre><code class="language-js">let a = 1 &lt; 2;</code></pre>');
+    // Well-formed XML: an EPUB reading system rejects anything else.
+    const doc = new DOMParser().parseFromString(x, "application/xhtml+xml");
+    expect(doc.getElementsByTagName("parsererror")).toHaveLength(0);
+  });
+
+  it("comes back through the EPUB importer with the table, list numbers and nesting", async () => {
+    const md = await epubToMarkdown(fileFrom(await markdownToEpubBytes(NOTE, "n"), "n.epub"));
+    expect(md).toContain("| שם | ערך |");
+    expect(md).toContain("| **אלף** | [קישור](https://example.org) |");
+    expect(md).toMatch(/1\. ראשון\s*\n2\. שני\s*\n\s+- מקונן עם שורה שנייה\s*\n3\. שלישי/);
+    expect(md).toContain("5. מתחיל בחמש");
+    expect(md).toContain("```js\nlet a = 1 < 2;\n```");
+  });
+});
+
 describe("markdownToStaticSiteBytes", () => {
   it("builds a multi-page site (index + page per H1 + css + rss) with cross-nav", async () => {
     const md = "# Getting Started\n\nIntro text.\n\n# API Reference\n\n- one\n- two";

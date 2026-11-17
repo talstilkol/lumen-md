@@ -99,6 +99,7 @@ export function buildAiModelCommands(): Command[] {
       id: "settings.open",
       label: t("settings.title"),
       hint: t("settings.search"),
+      shortcut: "⌘,",
       icon: cmdIcons.Sparkles,
       group: t("group.view"),
       action: () => {
@@ -242,6 +243,19 @@ export function buildAiControlCommands({ getEditorView }: CommandContext): Comma
       icon: cmdIcons.FileText,
       group: t("group.tools"),
       action: () => void import("../../ui/diagnosticsActions").then((m) => m.saveDiagnostics()),
+    },
+    {
+      // W13.T5: no plugins, snippets or agents until the person leaves safe mode (the banner).
+      id: "help.safeMode",
+      label: t("cmd.help.safeMode"),
+      hint: t("cmd.help.safeMode.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.tools"),
+      action: () =>
+        void import("../../boot/bootSentinel").then((m) => {
+          m.requestSafeModeNextStart();
+          location.reload();
+        }),
     },
     {
       // Plan 1.7 / W10.B20: the model credits and licences sit with the other

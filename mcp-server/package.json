@@ -16,7 +16,7 @@
     "build": "tsc -p tsconfig.json && node scripts/bundle-bases.mjs",
     "start": "node dist/index.js",
     "dev": "tsc -p tsconfig.json --watch",
-    "test:stdio": "npm run build && node test/stdio-smoke.mjs && node test/stdio-2026.mjs"
+    "test:stdio": "npm run build && node test/stdio-smoke.mjs && node test/stdio-2026.mjs && node test/stdio-types.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2"

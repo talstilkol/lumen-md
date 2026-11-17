@@ -46,6 +46,11 @@
  *     sees addresses, as any host does.
  *   - Awareness (cursors, the random display name) is relayed in memory and
  *     never stored.
+ *   - Study rooms (havruta, plan W12.H3: `havruta-…` names) are kept at most
+ *     HAVRUTA_RETENTION_DAYS (30). "End session" deletes one on request:
+ *     /token {action: "delete", room, proof} (and "exists" → {status: 200 |
+ *     404}) needs the room proof that the committed name commits to, so only
+ *     someone who has the room's password can delete it.
  *
  * Deploy: `npm run collab:deploy` (docs: collab/public-server).
  */
@@ -86,6 +91,14 @@ import {
 // A name, or a name with its commitment (`<name>_k<32 hex>`, roomToken.mjs).
 const ROOM_NAME = /^[\w-]{1,162}$/;
 const DAY_MS = 24 * 60 * 60 * 1000;
+/** W12.H3: study rooms (src/havruta) and their retention. */
+export const HAVRUTA_PREFIX = "havruta-";
+export const HAVRUTA_RETENTION_DAYS = 30;
+/** How long a room is kept after its last change: RETENTION_DAYS, and at most 30 days for a study room. */
+export function retentionMs(name, env) {
+  const days = num(env.RETENTION_DAYS, 90);
+  return (String(name).startsWith(HAVRUTA_PREFIX) ? Math.min(days > 0 ? days : HAVRUTA_RETENTION_DAYS, HAVRUTA_RETENTION_DAYS) : days) * DAY_MS;
+}
 const CHUNK = 1_000_000; // a Durable Object value holds at most 2 MB
 const SAVE_DEBOUNCE_MS = 2000;
 const MAX_PEERS = 50;
@@ -116,13 +129,18 @@ function tokenSocket(env) {
   const { server, response } = upgrade();
   server.accept();
   const timer = setTimeout(() => server.close(1008, "timeout"), 5000);
-  server.addEventListener("message", (ev) => {
+  server.addEventListener("message", async (ev) => {
     clearTimeout(timer);
     let req = null;
     try {
       req = JSON.parse(typeof ev.data === "string" ? ev.data : new TextDecoder().decode(ev.data));
     } catch {
       /* answered below */
+    }
+    if (req && (req.action === "delete" || req.action === "exists")) {
+      server.send(JSON.stringify(await roomAdmin(req, env)));
+      server.close(1000, "done");
+      return;
     }
     let answer;
     const keyed = Boolean(env.COLLAB_ACCESS_KEY);
@@ -141,6 +159,22 @@ function tokenSocket(env) {
     server.close(1000, "done");
   });
   return response;
+}
+
+/**
+ * W12.H3: delete a room, or ask whether it is stored. Only a committed room
+ * name, and only with the proof it commits to (the proof comes from the
+ * room's password), plus the access key on a private server.
+ */
+export async function roomAdmin(req, env) {
+  if (typeof req.room !== "string" || !ROOM_NAME.test(req.room)) return { error: "bad-room" };
+  if (env.COLLAB_ACCESS_KEY && !accessKeyOk(req.key, env.COLLAB_ACCESS_KEY)) return { error: "unauthorized" };
+  const verifier = proofVerifier(req.proof);
+  if (!verifier || !splitCommittedRoom(req.room) || !commitmentOk(req.room, verifier)) return { error: "commitment" };
+  const stub = env.ROOMS.get(env.ROOMS.idFromName(req.room));
+  if (req.action === "exists") return { status: (await stub.exists()) ? 200 : 404 };
+  await stub.purge(verifier);
+  return { deleted: true, status: 404 };
 }
 
 export default {
@@ -349,7 +383,7 @@ export class CollabRoom {
       const old = (await this.state.storage.get("chunks")) ?? 0;
       await this.state.storage.put(entries);
       if (old > chunks) await this.state.storage.delete(Array.from({ length: old - chunks }, (_, i) => `s${chunks + i}`));
-      await this.state.storage.setAlarm(Date.now() + num(this.env.RETENTION_DAYS, 90) * DAY_MS);
+      await this.state.storage.setAlarm(Date.now() + retentionMs(name, this.env));
       this.stored = true;
       // Size and time, every save: the quota caps bytes too (review 6, RR6-469-2).
       const { rid, did } = this.rid(name);
@@ -455,10 +489,50 @@ export class CollabRoom {
     return true;
   }
 
-  /** Retention: delete a room nobody changed for RETENTION_DAYS. */
+  /** RPC (W12.H3): is anything of this room stored? */
+  async exists() {
+    return this.stored || ((await this.state.storage.get("chunks")) ?? 0) > 0;
+  }
+
+  /**
+   * RPC (W12.H3, "end session"): delete the room now, at a participant's
+   * request (roomAdmin checked the proof against the name). Every socket is
+   * closed, connected or not. A room bound to another proof is left alone.
+   */
+  async purge(verifier) {
+    const bound = this.verifier ?? (await this.state.storage.get("verifier")) ?? null;
+    if (bound && bound !== verifier) return false;
+    const name = (await this.state.storage.get("name")) ?? "";
+    const had = await this.exists();
+    for (const ws of this.state.getWebSockets()) {
+      this.peers.get(ws)?.leave();
+      this.peers.delete(ws);
+      try {
+        ws.close(4410, "room-deleted");
+      } catch {
+        /* already closed */
+      }
+    }
+    if (this.saveTimer) clearTimeout(this.saveTimer);
+    this.saveTimer = null;
+    await this.state.storage.deleteAll();
+    await this.state.storage.deleteAlarm?.();
+    this.room?.destroy();
+    this.room = null;
+    this.stored = false;
+    this.verifier = null;
+    this.owner = null;
+    this.writers = {};
+    this.lastSize = 0;
+    this.dirty = false;
+    if (had) await this.quotaStub()?.forget(this.rid(name).rid).catch(() => {}); // why: the quota's count drifts back on its own sweep
+    return true;
+  }
+
+  /** Retention: delete a room nobody changed for RETENTION_DAYS (30 at most for a study room). */
   async alarm() {
     const lastWrite = (await this.state.storage.get("lastWrite")) ?? 0;
-    const keep = num(this.env.RETENTION_DAYS, 90) * DAY_MS;
+    const keep = retentionMs((await this.state.storage.get("name")) ?? "", this.env);
     if (this.state.getWebSockets().length === 0 && Date.now() - lastWrite >= keep) {
       const had = this.stored || ((await this.state.storage.get("chunks")) ?? 0) > 0;
       const name = (await this.state.storage.get("name")) ?? "";

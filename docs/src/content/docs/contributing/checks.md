@@ -1,6 +1,7 @@
 ---
 title: Checks on every branch (Vercel)
 description: Lumen's gates run in the Vercel build of every branch, without GitHub Actions — what runs, what a red status means, and where the old CI checks went.
+type: how-to
 ---
 
 `main` and the integration trains (`verify/…`) get a Vercel build when
@@ -97,6 +98,23 @@ and `--tree <dir>` also lists the packages that another `node_modules` (an
 offline test shim) holds at versions the lockfile does not name. To fix a
 drift, reinstall with `npm ci`. If `package.json` changed, regenerate the
 lockfile with `npm install --package-lock-only` and commit it.
+
+The docs have their own checks: every page has its Diátaxis kind (tutorial,
+how-to, reference or explanation), every feature page names its plan task,
+and every example marked `run` — like the two below — runs and passes:
+
+```sh run
+node scripts/docs-meta.mjs --check    # expect: every one typed
+node scripts/docs-parity.mjs --strict
+```
+
+```js run
+const { bannerFor } = await import(process.cwd() + "/scripts/lib/docsMeta.mjs");
+const tasks = new Map([["W1.1", { verified: "built" }], ["W1.2", { verified: "browser" }]]);
+console.log(bannerFor(["W1.2"], tasks) === null ? "verified: no banner" : "?");
+console.log(bannerFor(["W1.1"], tasks).includes("Beta") ? "built: beta banner" : "?");
+// expect: built: beta banner
+```
 
 ## What does not run in the build
 

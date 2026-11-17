@@ -14,12 +14,19 @@
 //! move a folder into itself, or to replace a folder that holds the source.
 
 use serde::Serialize;
+
+/// Is one vault folder inside the other, on disk (R8b-L1).
+pub mod nesting;
 use std::fmt;
 use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::UNIX_EPOCH;
+
+/// Folder names the snapshot never walks, at any depth (plan W13.V6; the same as
+/// `DEFAULT_IGNORED_DIRS` in src/storage/vault/ignore.ts, apart from `.obsidian/cache`, a path).
+pub const SKIPPED_DIRS: [&str; 6] = [".git", ".hg", ".svn", "node_modules", ".venv", "__pycache__"];
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VaultError {
@@ -473,6 +480,9 @@ impl Vault {
     /// desktop app polls this to notice changes made by other programs
     /// (plan 4.4). Folder symlinks are not followed (as in `list`), and the
     /// temporary files of in-flight atomic writes are left out.
+    /// Every file with size and mtime, for the external-change watcher. Folders in
+    /// [`SKIPPED_DIRS`] (`.git`, `node_modules`…) are not walked: a vault that is a git
+    /// repository would otherwise stat every object on every poll (plan W13.V6).
     pub fn snapshot(&self) -> Result<Vec<SnapEntry>> {
         let mut out = Vec::new();
         self.snapshot_into(&self.root.clone(), "", &mut out)?;
@@ -502,6 +512,9 @@ impl Vault {
             let is_link = item.file_type().map(|t| t.is_symlink()).unwrap_or(false);
             match fs::metadata(item.path()) {
                 Ok(m) if m.is_dir() && is_link => {}
+                // W13.V6: version-control and package folders are never walked (src/storage/vault/ignore.ts
+                // has the same defaults; the user's own extra folders are filtered on the TypeScript side).
+                Ok(m) if m.is_dir() && SKIPPED_DIRS.contains(&name.as_str()) => {}
                 Ok(m) if m.is_dir() => self.snapshot_into(&item.path(), &path, out)?,
                 Ok(m) => out.push(SnapEntry {
                     path,

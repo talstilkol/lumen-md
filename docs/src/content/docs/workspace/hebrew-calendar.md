@@ -1,6 +1,8 @@
 ---
 title: Daily notes and the Hebrew calendar
 description: The calendar's holidays, fasts and weekly Torah portion, for Israel or the diaspora, and the {{holiday}} and {{parasha}} placeholders of the daily note.
+type: how-to
+tasks: ["4.12"]
 ---
 
 **Show / hide the calendar** (command palette) shows a month under the file tree. A day with a daily
@@ -66,6 +68,31 @@ For example, the template
 gives, on Friday 16 May 2025 in Israel, a line with the Hebrew date,
 `Emor` and `Lag BaOmer` (in a Hebrew UI: `פרשת אמור` and `ל״ג בעומר`).
 
+## The Hebrew-month view
+
+A ```hebrew-calendar block shows the daily notes on a month of the Hebrew
+calendar — Tishrei to Elul, with Adar I and Adar II in a leap year — with
+each day's holidays and the Shabbat reading, and under it the year's
+writing activity (notes saved per day) by Hebrew month:
+
+```hebrew-calendar
+heatmap: true      # false: the month only
+```
+
+In a `.base`, `type: hebrew-calendar` (with `date:`, default `date`) puts
+each note of the view on its day.
+
+- **Tab** to the month, then ← / → move a day (in Hebrew ← is the next
+  day), ↑ / ↓ a week, Home / End the ends of the week, PageUp / PageDown
+  the month before or after, and **Enter** opens the day's note (a Base:
+  the first note on that day). Each day reads out its Hebrew and Gregorian
+  date, holidays and portion.
+- The heatmap has a row per Hebrew month and a column per day of the month
+  (day 1 on the right in Hebrew), and "Show the table" gives its numbers.
+- Gregorian calendar charts can't do this: their calendar is Gregorian only,
+  so this view is drawn by Lumen itself from the same calendar as the daily
+  note.
+
 ## How it is computed
 
 The calendar is Lumen's own code: the fixed Hebrew calendar (the molad and
@@ -107,3 +134,29 @@ The block sits between `<!-- lumen:morning:start -->` and
 `<!-- lumen:morning:end -->`. Writing it again replaces only that part, so
 your own text in the note stays as it is. While today's note is open with
 edits, the block is written into the editor instead of the file.
+
+## Learning plans
+
+`⌘K → Learning plans…` lists four study cycles, each with today's reading
+and a link to its text on Sefaria:
+
+| Cycle | A cycle | Started |
+|---|---|---|
+| Daf Yomi | 2,711 days, a folio a day | cycle 14 on 5 January 2020 |
+| Mishnah Yomit | 2,096 days, two mishnayot a day | 20 May 1947 |
+| Daily Rambam, one chapter | 1,017 days | 29 April 1984 |
+| Daily Rambam, three chapters | 339 days | 29 April 1984 |
+
+Both Rambam cycles start with the Mishneh Torah's introduction (the
+transmission of the Oral Law, the positive and the negative commandments,
+and the list of commandments by section), each part in three days at one
+chapter a day, or one day at three. They also include The Order of Prayer
+and the text of the Haggadah, as the published schedule does.
+
+Tick **Follow** to follow a cycle from today. A followed cycle shows how
+many days you marked learned out of the days since you started, and how
+many are not marked. **Learned today** marks today; **Review later** makes
+today's reading a review card in the review queue. The plans are saved in
+`.lumen/learning.json` in your vault; nothing is sent anywhere, and Sefaria
+opens only when you click a link. `{{learning}}` in the daily note template
+writes one line per cycle with the same link.

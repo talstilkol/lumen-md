@@ -1,6 +1,7 @@
 ---
 title: CI ב-Buildkite, בלי GitHub Actions
 description: Buildkite Free מתזמן את השערים של lumen-md על המכונות שלנו (המארח של מפעל האימות ו-Mac), ומדווח commit status לכל שער בכל PR, עם קבלה חתומה.
+type: how-to
 ---
 
 Lumen לא משתמש ב-GitHub Actions. מפעל האימות

@@ -1,6 +1,8 @@
 ---
 title: JSON Canvas (Obsidian .canvas)
 description: Open Obsidian canvases in Lumen's Excalidraw canvas and write them back as .canvas files. JSON Canvas is an open, MIT-licensed format.
+type: how-to
+tasks: ["W4.30", "4.17"]
 ---
 
 [JSON Canvas](https://jsoncanvas.org) is the open format Obsidian uses for its

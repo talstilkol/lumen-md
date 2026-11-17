@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "./strings";
-import { t } from "../i18n";
+import { getLocale, t } from "../i18n";
 import { clock } from "./lectureCore";
 import { HelpButton } from "../ui/HelpButton";
 import { explainError } from "../lib/userError";
@@ -19,13 +19,16 @@ export interface RecorderDeps {
   process: (audio: Blob, o: { durationMs: number; markers: number[]; title: string }) => Promise<{ path: string; cards: number; important: number; summary?: "checked" | "extractive" }>;
   open: (path: string) => void;
   now: () => number;
+  /** W10.C27: today's place in the academic year ("שבוע 6 בסמסטר א׳ · תשפ״ז"), or null. */
+  semester?: () => Promise<{ line: string } | null>;
 }
 
 async function defaultDeps(): Promise<RecorderDeps> {
-  const [{ startRecording }, { processLecture }, { registerLectureSummarizer }] = await Promise.all([import("../capture/voiceCapture"), import("./lecture"), import("./lectureSummarizer")]);
+  const [{ startRecording }, { processLecture, semesterOf }, { registerLectureSummarizer }] = await Promise.all([import("../capture/voiceCapture"), import("./lecture"), import("./lectureSummarizer")]);
   // Plan 6.11 (W10.C9): the checked local summary; without a local model the extractive one, and the note says which.
   await registerLectureSummarizer(undefined, document.documentElement.lang || undefined);
   return {
+    semester: () => semesterOf(new Date(), getLocale()),
     start: () => startRecording(),
     process: (audio, o) => processLecture(audio, o),
     open: (path) => window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path } })),
@@ -42,6 +45,17 @@ export function LectureRecorder({ onClose, deps }: { onClose: () => void; deps?:
   const rec = useRef<{ stop(): Promise<{ audio: Blob; durationMs: number }>; cancel(): void } | null>(null);
   const started = useRef(0);
   const d = useRef<RecorderDeps | null>(deps ?? null);
+  const [week, setWeek] = useState("");
+  useEffect(() => {
+    let live = true;
+    void (d.current ? Promise.resolve(d.current) : defaultDeps().then((x) => (d.current ??= x)))
+      .then((x) => x.semester?.() ?? null)
+      .then((s) => live && setWeek(s?.line ?? ""))
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, []);
 
   const now = () => d.current!.now();
   const mark = () => {
@@ -103,6 +117,11 @@ export function LectureRecorder({ onClose, deps }: { onClose: () => void; deps?:
         <h2 id="lecture-title" style={{ margin: 0, fontSize: 17 }}>{t("student.title")}</h2>
         <HelpButton topic="workspace/student-mode#the-lecture-note" />
         <p style={{ margin: 0, fontSize: 12.5, color: "hsl(var(--fg-muted))" }}>{t("student.about")}</p>
+        {week && (
+          <p data-testid="lecture-semester-week" dir="auto" style={{ margin: 0, fontSize: 12.5 }}>
+            🎓 {week}
+          </p>
+        )}
         <label style={{ display: "grid", gap: 4, fontSize: 12.5 }}>
           {t("student.name")}
           <input value={title} onChange={(e) => setTitle(e.target.value)} disabled={phase === "processing"} dir="auto" />

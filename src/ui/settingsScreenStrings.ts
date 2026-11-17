@@ -4,6 +4,9 @@
  */
 
 import english from "../i18n/lazy/settingsScreen.json";
+import searchEnglish from "../i18n/lazy/settingsSearch.json";
 import { registerEnglish } from "../i18n";
 
 registerEnglish(english);
+// W13.E4: the settings search's result strings and keywords.
+registerEnglish(searchEnglish);

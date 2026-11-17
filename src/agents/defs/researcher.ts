@@ -14,11 +14,15 @@
  *            with `folder`, `read_file`, `extract_quotes` with `path`.
  *            Nothing leaves the device.
  *
+ * R12.9: the command then runs the cite-or-delete gate (`agents/cite/gate`):
+ * every sentence is tied to an exact quote that the verifier, not the model,
+ * picks from a source read in the run, or it is deleted and counted.
+ *
  * The deterministic checks stay outside the model: the `cited` validator
  * refuses an answer that cites nothing it read, and `verified` refuses one
  * whose quotes are not in their sources (the critic then retries with
- * "quote word for word"). The command builds the footnotes and flags what
- * remains unverified (`research/agent.ts`), as before.
+ * "quote word for word"). The command builds the footnotes from the gate's
+ * evidence (`research/agent.ts`).
  *
  * Everything the model reads here is outside content: the runtime cleans
  * and delimits every page, snippet and library note (plan 2.7), and the

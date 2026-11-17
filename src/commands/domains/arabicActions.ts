@@ -1,6 +1,6 @@
 /** The bodies of the Arabic commands (plan W5.17), loaded on first use (./tools.ts). */
 import type { EditorView } from "@codemirror/view";
-import { t } from "../../i18n";
+import { formatNumber, t } from "../../i18n";
 import { uiConfirm } from "../../ui/PromptDialog";
 import { showAiToast } from "../../ui/AiToast";
 import { explainError } from "../../lib/userError";
@@ -17,7 +17,7 @@ export async function toggleArabicDictionary(): Promise<void> {
   if (!(await uiConfirm({ message: t("spell.ar.downloadConfirm") }))) return;
   try {
     const n = await svc.downloadArabicDictionary();
-    showAiToast(t("spell.ar.installed", { n: n.toLocaleString() }), "info");
+    showAiToast(t("spell.ar.installed", { n: formatNumber(n) }), "info");
   } catch (e) {
     showAiToast(t("spell.ar.failed", { error: explainError(e) }), "error");
   }

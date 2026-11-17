@@ -1,6 +1,7 @@
 ---
 title: Moving from Evernote
 description: Get your notebooks out of Evernote and into Lumen as Markdown, with their images and attachments.
+type: how-to
 ---
 
 Evernote keeps notes in its own format (ENML), so they are converted on the

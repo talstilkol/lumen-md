@@ -1,0 +1,19 @@
+{
+  "xchg.absentAfter": "(dropped from the new text)",
+  "xchg.absentBefore": "(not in the old text)",
+  "xchg.against": "Compared with the version of {version}",
+  "xchg.changes": "All {count} changes",
+  "xchg.close": "Close",
+  "xchg.dropped": "{count} lines of the model's summary were left out: they spoke of changes that did not happen.",
+  "xchg.engine.model": "summary by a local model, every line checked against the change",
+  "xchg.engine.rules": "summary by rules (no local model)",
+  "xchg.kind.entity": "name",
+  "xchg.kind.negation": "negation",
+  "xchg.kind.number": "number",
+  "xchg.meaning": "Changes of meaning",
+  "xchg.meaningNone": "No number, negation or name changed.",
+  "xchg.none": "Nothing changed between the two versions.",
+  "xchg.stats": "+{added} / −{removed} words",
+  "xchg.summary": "What changed",
+  "xchg.title": "Explain my change"
+}

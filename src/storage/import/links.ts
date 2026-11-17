@@ -7,6 +7,7 @@
  */
 import { dirOf, resolveRel } from "./names";
 import type { ConvertedVault, LinkStats } from "./types";
+import { swallowed } from "../../lib/logger";
 
 const MAX_LISTED = 200;
 
@@ -19,7 +20,9 @@ export function linkTargets(md: string): { kind: "wiki" | "md"; target: string }
   const out: { kind: "wiki" | "md"; target: string }[] = [];
   const text = prose(md);
   for (const m of text.matchAll(/!?\[\[([^\]|#^\n]*)(?:[#^][^\]|\n]*)?(?:\|[^\]\n]*)?\]\]/g)) {
-    if (m[1].trim()) out.push({ kind: "wiki", target: m[1].trim() });
+    // `[[a\|b]]`: the pipe escaped inside a table cell (W13.F1) — the target is `a`.
+    const target = m[1].trim().replace(/\\$/, "");
+    if (target) out.push({ kind: "wiki", target });
   }
   for (const m of text.matchAll(/!?\[(?:[^\]\n]|\\\])*\]\((<[^>\n]+>|[^)\s]+)(?:\s+"[^"]*")?\)/g)) {
     const dest = m[1].replace(/^<|>$/g, "");
@@ -57,9 +60,10 @@ export function linkStats(vault: Pick<ConvertedVault, "notes" | "attachments">):
         let d = l.target.split(/[?#]/)[0];
         try {
           d = decodeURIComponent(d);
-        } catch {
+        } catch (err) {
           // why: not percent-encoded: the link target is used as written
           /* as written */
+          swallowed("storage/import/links: not percent-encoded: the link target is used as written", err);
         }
         ok = !d || exact.has(key(resolveRel(dirOf(path), d)));
       }

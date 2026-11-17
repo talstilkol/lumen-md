@@ -86,6 +86,8 @@ const PARTS = {
   bidi: { lines: ["./sets/small.mjs", "bidi"] },
   "hebrew-dates": { dates: ["./sets/small.mjs", "hebrewDates"] },
   citations: { records: ["./sets/small.mjs", "citations"] },
+  // W10.B19: related notes on real links.
+  "related-real": { links: ["./sets/related-real.mjs", "realLinks"] },
 };
 
 /**

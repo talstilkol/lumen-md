@@ -27,13 +27,29 @@ replay.
 
 ### Written for you: the hooks and the hourly tick
 
-Two of those writes happen without anyone doing them, once per clone:
+Two of those writes happen without anyone doing them. `npm install` and
+`npm ci` install the reference-transaction hook in every clone (the `prepare` script,
+`scripts/prepare.mjs`, runs `scripts/install-git-hooks.mjs`; it keeps a hook that is not ours, and does
+nothing in CI or with `LUMEN_NO_HOOKS=1`). That hook does nothing until a lane
+state is set, and `prepare` starts no watcher. The ci:local pre-push hook is
+opt-in (it runs the checks on every push): `git config lumen.ciLocalHook true`
+before `npm install`, or `npm run ci:local -- --install-hook`. The one thing a lane does is say
+where its state lives:
 
 ```bash
-npm run ci:local -- --install-hook                              # pre-push: notes what the push sends
-node scripts/lane-state.mjs install-hook --state-dir "$S/lanes"  # reference-transaction: records it
-node scripts/lane-state.mjs watch "$S/lanes/<lane>/STATE.md" &   # the hourly tick, while the lane works
+git config lumen.laneStateDir "$S/lanes"    # or: lumen.laneState <STATE.md>, or $LUMEN_LANE_STATE(_DIR)
 ```
+
+By hand, the same hooks: `npm run ci:local -- --install-hook` (pre-push) and
+`node scripts/lane-state.mjs install-hook --state-dir "$S/lanes"`
+(reference-transaction; it also sets the git config above).
+`install-hook` writes the pre-push half itself when the clone has no pre-push
+hook. A clone with `npm run ci:local -- --install-hook` already has it (that
+hook notes the push before it runs the checks); a pre-push hook of your own is
+never replaced, and install-hook prints the one line to add to it.
+`src/__tests__/laneStateResume.test.ts` runs the whole thing on a throw-away
+origin: a stop after a push, a stop between a push and the STATE.md edit, and
+a stop with an unpushed commit; resume, follow it, and no sha arrives twice.
 
 - **After a push.** Git has no post-push hook. So the pre-push hook writes
   what it is about to send to `$(git rev-parse --git-path lumen-lane-pending.json)`.
@@ -46,8 +62,17 @@ node scripts/lane-state.mjs watch "$S/lanes/<lane>/STATE.md" &   # the hourly ti
   `--state <file>` names one STATE.md instead of a folder of lanes.
   `$LUMEN_LANE_STATE` / `$LUMEN_LANE_STATE_DIR` override the git config.
   With nothing set, the hooks do nothing.
-- **Every hour.** `watch` runs `tick` now and every `--every-min` minutes
-  (60 by default). A tick writes the Updated time, and records any Branches
+- **Every hour.** The first ref change after the lane state is set (a
+  commit, a fetch, a push) makes the reference-transaction hook start
+  `lane-state.mjs watch` in the background for the lane's STATE.md, unless a
+  watcher already runs for it. The record is
+  `$(git rev-parse --git-common-dir)/lumen-lane-watch.json`, one entry per
+  STATE.md, shared by every linked worktree of the clone, and written under a
+  lock (`lumen-lane-watch.lock` next to it), so worktrees and hooks that fire at
+  once start one watcher. After a reboot the next ref change starts it again; when
+  the STATE.md or the clone is deleted the watcher stops within seconds. `watch` runs `tick` now and
+  every `--every-min` minutes (60 by default; `$LUMEN_LANE_TICK_MIN` for the
+  one the hook starts; `$LUMEN_LANE_WATCH=0` makes the hook start none). A tick writes the Updated time, and records any Branches
   head that origin has moved since. As a cron line instead:
   `0 * * * * cd <clone> && node scripts/lane-state.mjs tick <STATE.md>`.
 

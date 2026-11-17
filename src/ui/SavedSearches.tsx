@@ -7,17 +7,20 @@
 import { useEffect, useState } from "react";
 import { Search, X } from "lucide-react";
 import { t } from "../i18n";
-import { SAVED_SEARCHES_CHANGED, openSearch, removeSavedSearch, savedSearches, type SavedSearch } from "../search/savedSearches";
+import { SAVED_SEARCHES_CHANGED, openSearch, refreshSavedSearches, removeSavedSearch, savedSearches, type SavedSearch } from "../search/savedSearches";
 
 export default function SavedSearches() {
   const [list, setList] = useState<SavedSearch[]>(() => savedSearches());
   useEffect(() => {
     const on = () => setList(savedSearches());
+    // W12.A4: the list lives in the vault (.lumen/searches.json): read it now, and again when the vault changes (sync writes dispatch lumen-workspace-changed).
+    const reread = () => void refreshSavedSearches().then(on, () => undefined);
+    reread();
     window.addEventListener(SAVED_SEARCHES_CHANGED, on);
-    window.addEventListener("storage", on);
+    window.addEventListener("lumen-workspace-changed", reread);
     return () => {
       window.removeEventListener(SAVED_SEARCHES_CHANGED, on);
-      window.removeEventListener("storage", on);
+      window.removeEventListener("lumen-workspace-changed", reread);
     };
   }, []);
   if (!list.length) return null;
@@ -35,7 +38,7 @@ export default function SavedSearches() {
               style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: 6, background: "transparent", border: "none", color: "hsl(var(--fg))", cursor: "pointer", padding: "3px 4px", fontSize: 12, textAlign: "start" }}
             >
               <Search size={12} style={{ flexShrink: 0, opacity: 0.6 }} />
-              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>
+              <bdi style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</bdi>
             </button>
             <button
               type="button"

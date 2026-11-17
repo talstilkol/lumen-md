@@ -1,6 +1,8 @@
 ---
 title: Obsidian syntax
 description: Callouts, comments, coloured highlights, footnotes with hover, math and image sizes, written the way Obsidian writes them, so a vault moves to Lumen without changing a line.
+type: reference
+tasks: ["W12.U1", "W1.3"]
 ---
 
 A vault that comes from Obsidian uses this syntax every day. Lumen reads it,
@@ -64,6 +66,25 @@ contains math, so it never slows down opening the app.
 In the preview, drag an image's edge (the right edge in English, the left
 in Hebrew) to resize it. The new width is written into the note, as in
 Obsidian 1.12.
+
+## Editing an embedded block in place
+
+An embed of a block or a section of another note, `![[Note#^id]]` or
+`![[Note#Heading]]`, has a ✎ button in its title. It opens a small editor
+on that block's Markdown, framed and labelled **Editing the source: Note**.
+
+- **Save** (or Ctrl+Enter / ⌘Enter) changes the block in the source note,
+  and only that block. The `^id` marker stays, so links to it keep working.
+  The embed shows the new text right away.
+- **Undo** (or Ctrl+Z / ⌘Z on the control) puts the source back, as long as
+  nothing changed it since.
+- If the source changed after the embed was shown, the edit is refused. The
+  embed then refreshes, so you never overwrite text you didn't see.
+- **What can't be edited here:**
+  - an embed inside another embed;
+  - a section of the note you are in;
+  - a whole-note embed;
+  - a circular embed, which shows its notice instead.
 
 ## Tested
 

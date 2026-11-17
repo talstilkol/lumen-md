@@ -1,0 +1,200 @@
+{"id":"rep-1","text":"She ate ate an apple after the long walk home.","kind":"repetition","error":{"from":4,"to":11}}
+{"id":"spell-1","text":"She ate an apple after the long walk home.","kind":"spelling","error":{"from":11,"to":16}}
+{"id":"art-1","text":"She ate a apple after the long walk home.","kind":"article","error":{"from":8,"to":9}}
+{"id":"clean-1","text":"She ate an apple after the long walk home.","kind":"clean","error":null}
+{"id":"rep-2","text":"We waited waited an hour for the delayed train to arrive.","kind":"repetition","error":{"from":3,"to":16}}
+{"id":"spell-2","text":"We waited an hour for the dealyed train to arrive.","kind":"spelling","error":{"from":26,"to":33}}
+{"id":"art-2","text":"We waited a hour for the delayed train to arrive.","kind":"article","error":{"from":10,"to":11}}
+{"id":"clean-2","text":"We waited an hour for the delayed train to arrive.","kind":"clean","error":null}
+{"id":"rep-3","text":"He told told an interesting story about his grandfather.","kind":"repetition","error":{"from":3,"to":12}}
+{"id":"spell-3","text":"He told an inteersting story about his grandfather.","kind":"spelling","error":{"from":11,"to":22}}
+{"id":"art-3","text":"He told a interesting story about his grandfather.","kind":"article","error":{"from":8,"to":9}}
+{"id":"clean-3","text":"He told an interesting story about his grandfather.","kind":"clean","error":null}
+{"id":"rep-4","text":"The museum museum opened an exhibition of modern sculpture.","kind":"repetition","error":{"from":4,"to":17}}
+{"id":"spell-4","text":"The museum opened an exhiibtion of modern sculpture.","kind":"spelling","error":{"from":21,"to":31}}
+{"id":"art-4","text":"The museum opened a exhibition of modern sculpture.","kind":"article","error":{"from":18,"to":19}}
+{"id":"clean-4","text":"The museum opened an exhibition of modern sculpture.","kind":"clean","error":null}
+{"id":"rep-5","text":"They found found an old map hidden inside the wooden box.","kind":"repetition","error":{"from":5,"to":16}}
+{"id":"spell-5","text":"They found an old map hidden inside the wooden box.","kind":"spelling","error":{"from":22,"to":28}}
+{"id":"art-5","text":"They found a old map hidden inside the wooden box.","kind":"article","error":{"from":11,"to":12}}
+{"id":"clean-5","text":"They found an old map hidden inside the wooden box.","kind":"clean","error":null}
+{"id":"rep-6","text":"Our teacher teacher gave an example that everyone understood.","kind":"repetition","error":{"from":4,"to":19}}
+{"id":"spell-6","text":"Our teacher gave an example that everyone undesrtood.","kind":"spelling","error":{"from":42,"to":52}}
+{"id":"art-6","text":"Our teacher gave a example that everyone understood.","kind":"article","error":{"from":17,"to":18}}
+{"id":"clean-6","text":"Our teacher gave an example that everyone understood.","kind":"clean","error":null}
+{"id":"rep-7","text":"I need need an umbrella because it looks like rain today.","kind":"repetition","error":{"from":2,"to":11}}
+{"id":"spell-7","text":"I need an umberlla because it looks like rain today.","kind":"spelling","error":{"from":10,"to":18}}
+{"id":"art-7","text":"I need a umbrella because it looks like rain today.","kind":"article","error":{"from":7,"to":8}}
+{"id":"clean-7","text":"I need an umbrella because it looks like rain today.","kind":"clean","error":null}
+{"id":"rep-8","text":"The company company hired an engineer to fix the network.","kind":"repetition","error":{"from":4,"to":19}}
+{"id":"spell-8","text":"The company hired an engnieer to fix the network.","kind":"spelling","error":{"from":21,"to":29}}
+{"id":"art-8","text":"The company hired a engineer to fix the network.","kind":"article","error":{"from":18,"to":19}}
+{"id":"clean-8","text":"The company hired an engineer to fix the network.","kind":"clean","error":null}
+{"id":"rep-9","text":"You will will receive an email with the meeting details.","kind":"repetition","error":{"from":4,"to":13}}
+{"id":"spell-9","text":"You will reecive an email with the meeting details.","kind":"spelling","error":{"from":9,"to":16}}
+{"id":"art-9","text":"You will receive a email with the meeting details.","kind":"article","error":{"from":17,"to":18}}
+{"id":"clean-9","text":"You will receive an email with the meeting details.","kind":"clean","error":null}
+{"id":"rep-10","text":"My sister sister bought an orange coat for the cold winter.","kind":"repetition","error":{"from":3,"to":16}}
+{"id":"spell-10","text":"My sitser bought an orange coat for the cold winter.","kind":"spelling","error":{"from":3,"to":9}}
+{"id":"art-10","text":"My sister bought a orange coat for the cold winter.","kind":"article","error":{"from":17,"to":18}}
+{"id":"clean-10","text":"My sister bought an orange coat for the cold winter.","kind":"clean","error":null}
+{"id":"rep-11","text":"The children children saw an elephant at the city zoo.","kind":"repetition","error":{"from":4,"to":21}}
+{"id":"spell-11","text":"The chidlren saw an elephant at the city zoo.","kind":"spelling","error":{"from":4,"to":12}}
+{"id":"art-11","text":"The children saw a elephant at the city zoo.","kind":"article","error":{"from":17,"to":18}}
+{"id":"clean-11","text":"The children saw an elephant at the city zoo.","kind":"clean","error":null}
+{"id":"rep-12","text":"It was was an honest mistake that nobody noticed at first.","kind":"repetition","error":{"from":3,"to":10}}
+{"id":"spell-12","text":"It was an honest mitsake that nobody noticed at first.","kind":"spelling","error":{"from":17,"to":24}}
+{"id":"art-12","text":"It was a honest mistake that nobody noticed at first.","kind":"article","error":{"from":7,"to":8}}
+{"id":"clean-12","text":"It was an honest mistake that nobody noticed at first.","kind":"clean","error":null}
+{"id":"rep-13","text":"The council council approved an increase in the parks budget.","kind":"repetition","error":{"from":4,"to":19}}
+{"id":"spell-13","text":"The council apporved an increase in the parks budget.","kind":"spelling","error":{"from":12,"to":20}}
+{"id":"art-13","text":"The council approved a increase in the parks budget.","kind":"article","error":{"from":21,"to":22}}
+{"id":"clean-13","text":"The council approved an increase in the parks budget.","kind":"clean","error":null}
+{"id":"rep-14","text":"We stayed stayed at an inn near the edge of the forest.","kind":"repetition","error":{"from":3,"to":16}}
+{"id":"spell-14","text":"We styaed at an inn near the edge of the forest.","kind":"spelling","error":{"from":3,"to":9}}
+{"id":"art-14","text":"We stayed at a inn near the edge of the forest.","kind":"article","error":{"from":13,"to":14}}
+{"id":"clean-14","text":"We stayed at an inn near the edge of the forest.","kind":"clean","error":null}
+{"id":"rep-15","text":"He wrote wrote an essay about the history of the river.","kind":"repetition","error":{"from":3,"to":14}}
+{"id":"spell-15","text":"He wrote an essay about the hitsory of the river.","kind":"spelling","error":{"from":28,"to":35}}
+{"id":"art-15","text":"He wrote a essay about the history of the river.","kind":"article","error":{"from":9,"to":10}}
+{"id":"clean-15","text":"He wrote an essay about the history of the river.","kind":"clean","error":null}
+{"id":"rep-16","text":"Please send send an update before the end of the week.","kind":"repetition","error":{"from":7,"to":16}}
+{"id":"spell-16","text":"Plaese send an update before the end of the week.","kind":"spelling","error":{"from":0,"to":6}}
+{"id":"art-16","text":"Please send a update before the end of the week.","kind":"article","error":{"from":12,"to":13}}
+{"id":"clean-16","text":"Please send an update before the end of the week.","kind":"clean","error":null}
+{"id":"rep-17","text":"The doctor doctor gave an injection to the frightened patient.","kind":"repetition","error":{"from":4,"to":17}}
+{"id":"spell-17","text":"The doctor gave an injection to the frigthened patient.","kind":"spelling","error":{"from":36,"to":46}}
+{"id":"art-17","text":"The doctor gave a injection to the frightened patient.","kind":"article","error":{"from":16,"to":17}}
+{"id":"clean-17","text":"The doctor gave an injection to the frightened patient.","kind":"clean","error":null}
+{"id":"rep-18","text":"She is is an expert in early medieval manuscripts.","kind":"repetition","error":{"from":4,"to":9}}
+{"id":"spell-18","text":"She is an expert in early medieval manucsripts.","kind":"spelling","error":{"from":35,"to":46}}
+{"id":"art-18","text":"She is a expert in early medieval manuscripts.","kind":"article","error":{"from":7,"to":8}}
+{"id":"clean-18","text":"She is an expert in early medieval manuscripts.","kind":"clean","error":null}
+{"id":"rep-19","text":"The town town built an airport on the old farmland.","kind":"repetition","error":{"from":4,"to":13}}
+{"id":"spell-19","text":"The town built an airport on the old farlmand.","kind":"spelling","error":{"from":37,"to":45}}
+{"id":"art-19","text":"The town built a airport on the old farmland.","kind":"article","error":{"from":15,"to":16}}
+{"id":"clean-19","text":"The town built an airport on the old farmland.","kind":"clean","error":null}
+{"id":"rep-20","text":"There was was an error in the final report we submitted.","kind":"repetition","error":{"from":6,"to":13}}
+{"id":"spell-20","text":"There was an error in the final report we subimtted.","kind":"spelling","error":{"from":42,"to":51}}
+{"id":"art-20","text":"There was a error in the final report we submitted.","kind":"article","error":{"from":10,"to":11}}
+{"id":"clean-20","text":"There was an error in the final report we submitted.","kind":"clean","error":null}
+{"id":"rep-21","text":"They planted planted an oak tree in the middle of the square.","kind":"repetition","error":{"from":5,"to":20}}
+{"id":"spell-21","text":"They plnated an oak tree in the middle of the square.","kind":"spelling","error":{"from":5,"to":12}}
+{"id":"art-21","text":"They planted a oak tree in the middle of the square.","kind":"article","error":{"from":13,"to":14}}
+{"id":"clean-21","text":"They planted an oak tree in the middle of the square.","kind":"clean","error":null}
+{"id":"rep-22","text":"I read read an article about solar power last night.","kind":"repetition","error":{"from":2,"to":11}}
+{"id":"spell-22","text":"I read an aritcle about solar power last night.","kind":"spelling","error":{"from":10,"to":17}}
+{"id":"art-22","text":"I read a article about solar power last night.","kind":"article","error":{"from":7,"to":8}}
+{"id":"clean-22","text":"I read an article about solar power last night.","kind":"clean","error":null}
+{"id":"rep-23","text":"The board board held an emergency meeting on Sunday morning.","kind":"repetition","error":{"from":4,"to":15}}
+{"id":"spell-23","text":"The board held an emegrency meeting on Sunday morning.","kind":"spelling","error":{"from":18,"to":27}}
+{"id":"art-23","text":"The board held a emergency meeting on Sunday morning.","kind":"article","error":{"from":15,"to":16}}
+{"id":"clean-23","text":"The board held an emergency meeting on Sunday morning.","kind":"clean","error":null}
+{"id":"rep-24","text":"He opened opened an account at the bank near his office.","kind":"repetition","error":{"from":3,"to":16}}
+{"id":"spell-24","text":"He opened an acocunt at the bank near his office.","kind":"spelling","error":{"from":13,"to":20}}
+{"id":"art-24","text":"He opened a account at the bank near his office.","kind":"article","error":{"from":10,"to":11}}
+{"id":"clean-24","text":"He opened an account at the bank near his office.","kind":"clean","error":null}
+{"id":"rep-25","text":"The storm storm caused an outage across the northern district.","kind":"repetition","error":{"from":4,"to":15}}
+{"id":"spell-25","text":"The storm caused an outage across the norhtern district.","kind":"spelling","error":{"from":38,"to":46}}
+{"id":"art-25","text":"The storm caused a outage across the northern district.","kind":"article","error":{"from":17,"to":18}}
+{"id":"clean-25","text":"The storm caused an outage across the northern district.","kind":"clean","error":null}
+{"id":"rep-26","text":"We ordered ordered an extra blanket for the guest room.","kind":"repetition","error":{"from":3,"to":18}}
+{"id":"spell-26","text":"We oredred an extra blanket for the guest room.","kind":"spelling","error":{"from":3,"to":10}}
+{"id":"art-26","text":"We ordered a extra blanket for the guest room.","kind":"article","error":{"from":11,"to":12}}
+{"id":"clean-26","text":"We ordered an extra blanket for the guest room.","kind":"clean","error":null}
+{"id":"rep-27","text":"She gave gave an answer that surprised the whole class.","kind":"repetition","error":{"from":4,"to":13}}
+{"id":"spell-27","text":"She gave an answer that surrpised the whole class.","kind":"spelling","error":{"from":24,"to":33}}
+{"id":"art-27","text":"She gave a answer that surprised the whole class.","kind":"article","error":{"from":9,"to":10}}
+{"id":"clean-27","text":"She gave an answer that surprised the whole class.","kind":"clean","error":null}
+{"id":"rep-28","text":"The scientists scientists ran an experiment with three groups.","kind":"repetition","error":{"from":4,"to":25}}
+{"id":"spell-28","text":"The scietnists ran an experiment with three groups.","kind":"spelling","error":{"from":4,"to":14}}
+{"id":"art-28","text":"The scientists ran a experiment with three groups.","kind":"article","error":{"from":19,"to":20}}
+{"id":"clean-28","text":"The scientists ran an experiment with three groups.","kind":"clean","error":null}
+{"id":"rep-29","text":"He made made an offer that the owners could not refuse.","kind":"repetition","error":{"from":3,"to":12}}
+{"id":"spell-29","text":"He made an offer that the owenrs could not refuse.","kind":"spelling","error":{"from":26,"to":32}}
+{"id":"art-29","text":"He made a offer that the owners could not refuse.","kind":"article","error":{"from":8,"to":9}}
+{"id":"clean-29","text":"He made an offer that the owners could not refuse.","kind":"clean","error":null}
+{"id":"rep-30","text":"The library library added an archive of local newspapers.","kind":"repetition","error":{"from":4,"to":19}}
+{"id":"spell-30","text":"The library added an archive of local newsappers.","kind":"spelling","error":{"from":38,"to":48}}
+{"id":"art-30","text":"The library added a archive of local newspapers.","kind":"article","error":{"from":18,"to":19}}
+{"id":"clean-30","text":"The library added an archive of local newspapers.","kind":"clean","error":null}
+{"id":"rep-31","text":"My brother brother is an artist who paints large murals.","kind":"repetition","error":{"from":3,"to":18}}
+{"id":"spell-31","text":"My brtoher is an artist who paints large murals.","kind":"spelling","error":{"from":3,"to":10}}
+{"id":"art-31","text":"My brother is a artist who paints large murals.","kind":"article","error":{"from":14,"to":15}}
+{"id":"clean-31","text":"My brother is an artist who paints large murals.","kind":"clean","error":null}
+{"id":"rep-32","text":"We heard heard an announcement about the cancelled flight.","kind":"repetition","error":{"from":3,"to":14}}
+{"id":"spell-32","text":"We heard an annoucnement about the cancelled flight.","kind":"spelling","error":{"from":12,"to":24}}
+{"id":"art-32","text":"We heard a announcement about the cancelled flight.","kind":"article","error":{"from":9,"to":10}}
+{"id":"clean-32","text":"We heard an announcement about the cancelled flight.","kind":"clean","error":null}
+{"id":"rep-33","text":"The team team needs an editor for the weekly newsletter.","kind":"repetition","error":{"from":4,"to":13}}
+{"id":"spell-33","text":"The team needs an editor for the weekly newseltter.","kind":"spelling","error":{"from":40,"to":50}}
+{"id":"art-33","text":"The team needs a editor for the weekly newsletter.","kind":"article","error":{"from":15,"to":16}}
+{"id":"clean-33","text":"The team needs an editor for the weekly newsletter.","kind":"clean","error":null}
+{"id":"rep-34","text":"She took took an early bus to reach the office on time.","kind":"repetition","error":{"from":4,"to":13}}
+{"id":"spell-34","text":"She took an early bus to reach the ofifce on time.","kind":"spelling","error":{"from":35,"to":41}}
+{"id":"art-34","text":"She took a early bus to reach the office on time.","kind":"article","error":{"from":9,"to":10}}
+{"id":"clean-34","text":"She took an early bus to reach the office on time.","kind":"clean","error":null}
+{"id":"rep-35","text":"The farmer farmer keeps an eye on the weather every morning.","kind":"repetition","error":{"from":4,"to":17}}
+{"id":"spell-35","text":"The farmer keeps an eye on the wetaher every morning.","kind":"spelling","error":{"from":31,"to":38}}
+{"id":"art-35","text":"The farmer keeps a eye on the weather every morning.","kind":"article","error":{"from":17,"to":18}}
+{"id":"clean-35","text":"The farmer keeps an eye on the weather every morning.","kind":"clean","error":null}
+{"id":"rep-36","text":"They rented rented an apartment close to the university.","kind":"repetition","error":{"from":5,"to":18}}
+{"id":"spell-36","text":"They rented an apartment close to the univresity.","kind":"spelling","error":{"from":38,"to":48}}
+{"id":"art-36","text":"They rented a apartment close to the university.","kind":"article","error":{"from":12,"to":13}}
+{"id":"clean-36","text":"They rented an apartment close to the university.","kind":"clean","error":null}
+{"id":"rep-37","text":"The report report includes an overview of the main findings.","kind":"repetition","error":{"from":4,"to":17}}
+{"id":"spell-37","text":"The report inculdes an overview of the main findings.","kind":"spelling","error":{"from":11,"to":19}}
+{"id":"art-37","text":"The report includes a overview of the main findings.","kind":"article","error":{"from":20,"to":21}}
+{"id":"clean-37","text":"The report includes an overview of the main findings.","kind":"clean","error":null}
+{"id":"rep-38","text":"He found found an envelope with no name on the front.","kind":"repetition","error":{"from":3,"to":14}}
+{"id":"spell-38","text":"He found an envleope with no name on the front.","kind":"spelling","error":{"from":12,"to":20}}
+{"id":"art-38","text":"He found a envelope with no name on the front.","kind":"article","error":{"from":9,"to":10}}
+{"id":"clean-38","text":"He found an envelope with no name on the front.","kind":"clean","error":null}
+{"id":"rep-39","text":"We visited visited an island famous for its white beaches.","kind":"repetition","error":{"from":3,"to":18}}
+{"id":"spell-39","text":"We viisted an island famous for its white beaches.","kind":"spelling","error":{"from":3,"to":10}}
+{"id":"art-39","text":"We visited a island famous for its white beaches.","kind":"article","error":{"from":11,"to":12}}
+{"id":"clean-39","text":"We visited an island famous for its white beaches.","kind":"clean","error":null}
+{"id":"rep-40","text":"The judge judge issued an order to stop the construction.","kind":"repetition","error":{"from":4,"to":15}}
+{"id":"spell-40","text":"The judge issued an order to stop the consturction.","kind":"spelling","error":{"from":38,"to":50}}
+{"id":"art-40","text":"The judge issued a order to stop the construction.","kind":"article","error":{"from":17,"to":18}}
+{"id":"clean-40","text":"The judge issued an order to stop the construction.","kind":"clean","error":null}
+{"id":"rep-41","text":"Our neighbour neighbour has an idea for the community garden.","kind":"repetition","error":{"from":4,"to":23}}
+{"id":"spell-41","text":"Our neihgbour has an idea for the community garden.","kind":"spelling","error":{"from":4,"to":13}}
+{"id":"art-41","text":"Our neighbour has a idea for the community garden.","kind":"article","error":{"from":18,"to":19}}
+{"id":"clean-41","text":"Our neighbour has an idea for the community garden.","kind":"clean","error":null}
+{"id":"rep-42","text":"The class class went on an outing to the science centre.","kind":"repetition","error":{"from":4,"to":15}}
+{"id":"spell-42","text":"The class went on an outing to the sceince centre.","kind":"spelling","error":{"from":35,"to":42}}
+{"id":"art-42","text":"The class went on a outing to the science centre.","kind":"article","error":{"from":18,"to":19}}
+{"id":"clean-42","text":"The class went on an outing to the science centre.","kind":"clean","error":null}
+{"id":"rep-43","text":"She plays plays an instrument in the school orchestra.","kind":"repetition","error":{"from":4,"to":15}}
+{"id":"spell-43","text":"She plays an insturment in the school orchestra.","kind":"spelling","error":{"from":13,"to":23}}
+{"id":"art-43","text":"She plays a instrument in the school orchestra.","kind":"article","error":{"from":10,"to":11}}
+{"id":"clean-43","text":"She plays an instrument in the school orchestra.","kind":"clean","error":null}
+{"id":"rep-44","text":"The website website shows an estimate of the delivery time.","kind":"repetition","error":{"from":4,"to":19}}
+{"id":"spell-44","text":"The website shows an estmiate of the delivery time.","kind":"spelling","error":{"from":21,"to":29}}
+{"id":"art-44","text":"The website shows a estimate of the delivery time.","kind":"article","error":{"from":18,"to":19}}
+{"id":"clean-44","text":"The website shows an estimate of the delivery time.","kind":"clean","error":null}
+{"id":"rep-45","text":"He keeps keeps an album of photos from every trip.","kind":"repetition","error":{"from":3,"to":14}}
+{"id":"spell-45","text":"He keeps an album of phtoos from every trip.","kind":"spelling","error":{"from":21,"to":27}}
+{"id":"art-45","text":"He keeps a album of photos from every trip.","kind":"article","error":{"from":9,"to":10}}
+{"id":"clean-45","text":"He keeps an album of photos from every trip.","kind":"clean","error":null}
+{"id":"rep-46","text":"The nurse nurse wrote an entry in the patient's record.","kind":"repetition","error":{"from":4,"to":15}}
+{"id":"spell-46","text":"The nurse wrote an entry in the paitent's record.","kind":"spelling","error":{"from":32,"to":39}}
+{"id":"art-46","text":"The nurse wrote a entry in the patient's record.","kind":"article","error":{"from":16,"to":17}}
+{"id":"clean-46","text":"The nurse wrote an entry in the patient's record.","kind":"clean","error":null}
+{"id":"rep-47","text":"They held held an auction to raise money for the shelter.","kind":"repetition","error":{"from":5,"to":14}}
+{"id":"spell-47","text":"They held an autcion to raise money for the shelter.","kind":"spelling","error":{"from":13,"to":20}}
+{"id":"art-47","text":"They held a auction to raise money for the shelter.","kind":"article","error":{"from":10,"to":11}}
+{"id":"clean-47","text":"They held an auction to raise money for the shelter.","kind":"clean","error":null}
+{"id":"rep-48","text":"I saw saw an owl sitting on the fence last evening.","kind":"repetition","error":{"from":2,"to":9}}
+{"id":"spell-48","text":"I saw an owl sitting on the fence last evening.","kind":"spelling","error":{"from":13,"to":20}}
+{"id":"art-48","text":"I saw a owl sitting on the fence last evening.","kind":"article","error":{"from":6,"to":7}}
+{"id":"clean-48","text":"I saw an owl sitting on the fence last evening.","kind":"clean","error":null}
+{"id":"rep-49","text":"The city city opened an office for new residents.","kind":"repetition","error":{"from":4,"to":13}}
+{"id":"spell-49","text":"The city opened an office for new resdients.","kind":"spelling","error":{"from":34,"to":43}}
+{"id":"art-49","text":"The city opened a office for new residents.","kind":"article","error":{"from":16,"to":17}}
+{"id":"clean-49","text":"The city opened an office for new residents.","kind":"clean","error":null}
+{"id":"rep-50","text":"We had had an argument about where to go for dinner.","kind":"repetition","error":{"from":3,"to":10}}
+{"id":"spell-50","text":"We had an argmuent about where to go for dinner.","kind":"spelling","error":{"from":10,"to":18}}
+{"id":"art-50","text":"We had a argument about where to go for dinner.","kind":"article","error":{"from":7,"to":8}}
+{"id":"clean-50","text":"We had an argument about where to go for dinner.","kind":"clean","error":null}

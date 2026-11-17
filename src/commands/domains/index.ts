@@ -10,7 +10,7 @@ import { buildLanguageCommands, buildPanelCommands, buildThemeToggleCommands, bu
 import { buildEditCommands, buildInsertCommands } from "./edit";
 import { buildHebrewDictionaryCommands, buildPluginCommands, buildUsabilityStudyCommands, buildWritingGoalCommands, buildArabicCommands } from "./tools";
 import { buildAiCancelCommands, buildAiCapabilityCommands, buildAiControlCommands, buildAiModelCommands, buildAiProviderCommands, buildPrivacyModeCommands } from "./ai";
-import { buildAltTextCommands, buildDocumentAgentCommands, buildGrammarCommands, buildNikudCommands, buildPromptTemplateCommands } from "./agents";
+import { buildAltTextCommands, buildExternalAgentCommands, buildDocumentAgentCommands, buildGrammarCommands, buildNikudCommands, buildPromptTemplateCommands } from "./agents";
 import { buildBatchCommands } from "./batch";
 import { buildResearchCommands } from "./research";
 import { buildDigestCommands, buildEncryptionCommands, buildVaultDoctorCommands, buildVaultTransferCommands } from "./vault";
@@ -18,7 +18,7 @@ import { buildDesktopUpdateCommands, buildVaultLocationCommands, buildWhatsNewCo
 import { buildReadAloudCommands, buildVoiceCommands } from "./voice";
 import { buildGitCommands } from "./git";
 import { buildCollabCommands, buildCommentCommands } from "./collab";
-import { buildBillingCommands, buildOptionalPanelCommands, buildAirplaneCommands } from "./settings";
+import { buildBillingCommands, buildOptionalPanelCommands, buildAirplaneCommands, buildScreenshotCommands, buildMcpCommands } from "./settings";
 import { buildAccessibilityCommands } from "./a11y";
 import { buildSourceCommands } from "./sources";
 import { buildBookCommands } from "./book";
@@ -28,6 +28,13 @@ import { buildKnessetCommands } from "./knesset";
 import { buildDataGovCommands } from "./datagov";
 import { buildBenYehudaCommands } from "./benyehuda";
 import { buildOpenSourceCommands } from "./openSources";
+import { buildEntityCommands } from "./entities";
+import { buildReadingCommands } from "./reading";
+import { buildJewishLanguageCommands } from "./jewishLanguages";
+import { buildAcademicCommands } from "./academic";
+import { buildWritingCommands } from "./writing";
+import { buildReadingViewCommands } from "./readingViews";
+import { buildWritingCheckCommands } from "./writingChecks";
 
 export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]> = [
   buildRecentCommands,
@@ -88,4 +95,18 @@ export const COMMAND_SECTIONS: ReadonlyArray<(ctx: CommandContext) => Command[]>
   buildDataGovCommands,
   buildBenYehudaCommands,
   buildOpenSourceCommands,
+  buildEntityCommands,
+  buildReadingCommands,
+  buildScreenshotCommands,
+  buildMcpCommands,
+  // Appended (plan W7.9).
+  buildJewishLanguageCommands,
+  buildAcademicCommands,
+  buildExternalAgentCommands,
+  // Appended (plan W13.W1): the local writing agents.
+  buildWritingCommands,
+  // Appended (plan W13.R7): reading views.
+  buildReadingViewCommands,
+  // Appended (plan W13.W6–W15): the local writing checkers.
+  buildWritingCheckCommands,
 ];

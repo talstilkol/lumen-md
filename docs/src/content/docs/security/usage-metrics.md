@@ -1,6 +1,7 @@
 ---
 title: Usage on this device
 description: Lumen counts starts, commands and errors on your device only. The weekly report is off until you turn it on, and you send it yourself. Nothing leaves without your click.
+type: how-to
 ---
 
 Lumen has no analytics and no tracking. To know whether the app is used and

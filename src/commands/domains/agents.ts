@@ -10,7 +10,7 @@ import { cancellable, type CommandContext } from "./context";
 import { explainError } from "../../lib/userError";
 
 /** Agents on the open note: tags, links, product, diagram, action items, translation, chart. */
-export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandContext): Command[] {
+export function buildDocumentAgentCommands({ setContent, liveDoc, getEditorView }: CommandContext): Command[] {
   return [
     {
       id: "tools.autoTag",
@@ -51,6 +51,14 @@ export function buildDocumentAgentCommands({ setContent, liveDoc }: CommandConte
       icon: cmdIcons.Sparkles,
       group: t("group.tools"),
       action: () => void import("./agentsActions").then((m) => m.actionItemsFlow({ setContent, liveDoc })),
+    },
+    {
+      id: "ai.claims",
+      label: t("cmd.ai.claims", { defaultValue: "AI: Paragraph → Claims" }),
+      hint: t("cmd.ai.claims.hint", { defaultValue: "Checkable claims from the paragraph at the cursor, each with an exact quote (R12.11)" }),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => void import("./claimsAction").then((m) => m.claimsFlow({ getEditorView, liveDoc })),
     },
     {
       id: "ai.translate",
@@ -232,5 +240,20 @@ export function buildPromptTemplateCommands({ locale, setContent, liveDoc }: Com
         }
       },
     })),
+  ];
+}
+
+/** W11.I23: an external agent over ACP — desktop only (it needs the native process bridge), never in airplane mode. */
+export function buildExternalAgentCommands(): Command[] {
+  if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return [];
+  return [
+    {
+      id: "agents.acp",
+      label: t("cmd.agents.acp"),
+      hint: t("cmd.agents.acp.hint"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => void import("./acpActions").then((m) => m.askExternalAgentFlow()),
+    },
   ];
 }

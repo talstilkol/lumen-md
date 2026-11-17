@@ -7,9 +7,11 @@
  * with a notice; the person can still choose WYSIWYG, with a warning.
  *
  * The ceiling, from R5.6: 300 KB of UTF-8 or 5,000 blocks, whichever comes
- * first. "Tune by measurement": W11.Q5's keypress→paint gate measures
- * Milkdown at Moby-Dick size (≈ 1.2 MB, far above this) on the Mac, and these
- * two numbers move only with that measurement.
+ * first. "Tune by measurement": `npm run perf:wysiwyg-ceiling`
+ * (e2e/wysiwyg-ceiling-calibrate.spec.ts) opens 50 KB–900 KB in WYSIWYG with
+ * the CPU 4× slower and records open time and keypress → paint p95;
+ * scripts/perf/wysiwyg-ceiling.mjs --check fails while these two numbers are
+ * above what that measurement supports. They move only with it.
  */
 
 export const WYSIWYG_MAX_BYTES = 300 * 1024;

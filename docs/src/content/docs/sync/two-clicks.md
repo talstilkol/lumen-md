@@ -1,6 +1,8 @@
 ---
 title: Sync in two clicks
 description: A guided setup that picks the best place for your encrypted notes on this device, makes the key for you, and shows every file's state.
+type: reference
+tasks: ["W4.19"]
 ---
 
 Run **Set up sync (two clicks)** from the command palette.
@@ -47,7 +49,7 @@ extra spaces and final letters (ם or מ) don't matter.
 The relay sees a token that is a hash of your words, never the words, and
 stores only a hash of that token. Every object it keeps was encrypted on
 your device with keys it never sees (the [encrypted sync](/sync/e2ee/)
-format). It deletes a space nobody has read or written for 180 days: a vault
+format). It deletes a space nobody has read or written for 90 days: a vault
 you only read on your devices is kept.
 
 Running your own relay: `VAULT_RELAY=1 node sync-server/server.js` (or

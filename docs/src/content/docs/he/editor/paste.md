@@ -1,6 +1,8 @@
 ---
 title: הדבקה מ-Word, מ-Google Docs ומהרשת
 description: הדביקו מ-Word, מ-Google Docs, מוויקיפדיה, מאתרי חדשות או מ-Gmail, בעברית או באנגלית, וקבלו Markdown נקי ששומר על המבנה ומשמיט את העיצוב.
+type: how-to
+tasks: ["W10.B5", "W6.38", "W1.4"]
 ---
 
 רוב הטקסט נכנס לפתק בהדבקה. Lumen הופך את מה שיש בלוח ל-Markdown נקי,

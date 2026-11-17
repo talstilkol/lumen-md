@@ -90,7 +90,7 @@ const setSuggestion = StateEffect.define<RefSuggestion | null>();
 export interface RefTriggerOptions {
   /** The reference parser (default: sources/sefaria/refs.ts, loaded on first need). */
   parse?: Parse;
-  /** Insert was chosen: fetch (with consent given by the click) and replace the typed reference. */
+  /** Insert was chosen: fetch the text, with consent given by the click, and replace the typed reference. */
   insert?: (view: EditorView, s: RefSuggestion) => Promise<void>;
 }
 

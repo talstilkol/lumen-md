@@ -6,7 +6,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { t } from "../i18n";
-import { buildChannel, FLAGS, FLAGS_CHANGED, flagState, resetFlags, setFlag } from "../flags/flags";
+import { buildChannel, classicLook, FLAGS, FLAGS_CHANGED, flagState, resetFlags, setClassicLook, setFlag } from "../flags/flags";
 import "./featureFlagsPanelStrings";
 import { HelpButton } from "./HelpButton";
 import { Modal } from "./Modal";
@@ -48,6 +48,15 @@ export function FeatureFlagsPanel({ onClose }: { onClose: () => void }) {
         <p style={{ fontSize: 13, color: "hsl(var(--fg-muted))", margin: "8px 0 12px" }}>
           {channel === "beta" ? t("flags.intro.beta") : t("flags.intro.stable")}
         </p>
+        {/* Plan W11.P15: one switch for every design change that ships behind a flag. */}
+        <label data-testid="flags-classic" style={{ display: "flex", gap: 8, alignItems: "flex-start", fontSize: 13, paddingBlock: 8, borderBlockEnd: "1px solid hsl(var(--border))" }}>
+          <input type="checkbox" checked={classicLook()} onChange={(e) => setClassicLook(e.currentTarget.checked)} />
+          <span>
+            <strong>{t("flags.classic")}</strong>
+            <br />
+            <span style={{ color: "hsl(var(--fg-muted))" }}>{t("flags.classic.desc")}</span>
+          </span>
+        </label>
         <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
           {FLAGS.map((f) => {
             const s = flagState(f.id)!;
@@ -61,7 +70,7 @@ export function FeatureFlagsPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div style={{ fontSize: 13, color: "hsl(var(--fg-muted))", marginBlockStart: 2 }}>{t(`flag.${f.id}.desc`)}</div>
                   <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))", marginBlockStart: 4 }}>
-                    {s.source === "override" ? t("flags.source.override", { default: s.channelDefault ? t("flags.on") : t("flags.off") }) : t("flags.source.channel")}
+                    {s.source === "classic" ? t("flags.source.classic") : s.source === "override" ? t("flags.source.override", { default: s.channelDefault ? t("flags.on") : t("flags.off") }) : t("flags.source.channel")}
                     {s.source === "override" && (
                       <>
                         {" · "}

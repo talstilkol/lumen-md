@@ -12,6 +12,7 @@ import { groupThreads, renderThread } from "./threads";
 import { DOC_EXT, isDriveFile, isKeepJson, keepNoteMarkdown, readKeep, type KeepNote } from "./takeout";
 import { safeName } from "../chats/notes";
 import type { InputFile, PlannedChat } from "../chats/importChats";
+import { compareNames } from "../../i18n/collate";
 
 export interface ReadMail {
   messages: MailMessage[];
@@ -81,7 +82,7 @@ export async function readMailFiles(files: InputFile[], unzip: (b: ArrayBuffer) 
 export function labelCounts(messages: MailMessage[]): Array<{ label: string; n: number }> {
   const c = new Map<string, number>();
   for (const m of messages) for (const l of m.labels) c.set(l, (c.get(l) ?? 0) + 1);
-  return [...c].map(([label, n]) => ({ label, n })).sort((a, b) => b.n - a.n || a.label.localeCompare(b.label));
+  return [...c].map(([label, n]) => ({ label, n })).sort((a, b) => b.n - a.n || compareNames(a.label, b.label));
 }
 
 export interface MailPlanOptions {

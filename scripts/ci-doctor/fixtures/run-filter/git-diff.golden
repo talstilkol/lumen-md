@@ -1,0 +1,48 @@
+git-diff
+2 קבצים · +301 −300
+---
+── big.js (+300 −300)
+@@ -1,300 +1,300 @@
+-line 1 of the original module
+-line 2 of the original module
+-line 3 of the original module
+-line 4 of the original module
+-line 5 of the original module
+-line 6 of the original module
+-line 7 of the original module
+-line 8 of the original module
+-line 9 of the original module
+-line 10 of the original module
+-line 11 of the original module
+-line 12 of the original module
+-line 13 of the original module
+-line 14 of the original module
+-line 15 of the original module
+-line 16 of the original module
+-line 17 of the original module
+-line 18 of the original module
+-line 19 of the original module
+-line 20 of the original module
+-line 21 of the original module
+-line 22 of the original module
+-line 23 of the original module
+-line 24 of the original module
+-line 25 of the original module
+-line 26 of the original module
+-line 27 of the original module
+-line 28 of the original module
+-line 29 of the original module
+-line 30 of the original module
+-line 31 of the original module
+-line 32 of the original module
+-line 33 of the original module
+-line 34 of the original module
+-line 35 of the original module
+-line 36 of the original module
+-line 37 of the original module
+-line 38 of the original module
+-line 39 of the original module
+  … עוד 561 שורות בקובץ הזה (node scripts/ci-doctor/runFilter.mjs expand <id> --grep "big.js")
+── small.md (+1 −0)
+@@ -1 +1,2 @@
++b

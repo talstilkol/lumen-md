@@ -12,12 +12,14 @@
 import { randomId } from "../lib/cryptoRandom";
 import { getVaultBackend, VaultNotFoundError, type VaultData, type VaultEntry } from "./vault";
 import { basename, dirname, splitPath } from "./vault/shared";
+import { isIgnoredDir } from "./vault/ignore";
 import { lockedNotes, noteSealer } from "./lockedNotesRegistry";
 
 export { basename, dirname, joinPath, splitPath } from "./vault/shared";
 export { WorkspaceConflictError } from "./vault/types";
 export type { VaultEntry } from "./vault/types";
 import { readText } from "./textCodec";
+import { swallowed } from "../lib/logger";
 
 export interface WorkspaceEntry {
   /** File path relative to the workspace root. */
@@ -57,6 +59,8 @@ async function readDirInto(
     // real repository content such as `.github/` — only the trash stays out.
     if (name.startsWith(".") && (!opts.includeHidden || (!dir && name === ".trash"))) continue;
     if (entry.kind === "directory") {
+      // W13.V6: .git, node_modules… are never walked (vault/ignore), even for sync's mirror.
+      if (isIgnoredDir(path)) continue;
       let children: WorkspaceNode[];
       try {
         children = await readDirInto(path, opts);
@@ -234,7 +238,8 @@ export async function listWorkspaceFolder(path: string): Promise<string[]> {
 export async function workspaceHasEntry(path: string): Promise<boolean> {
   try {
     return (await vault().stat(path)) !== null;
-  } catch {
+  } catch (e) {
+    if (!(e instanceof VaultNotFoundError)) swallowed("storage/workspace: stat failed (not a missing path); the entry reads as absent", e);
     return false;
   }
 }
@@ -262,8 +267,9 @@ export async function renameWorkspaceFile(
   } catch (e) {
     try {
       prov.restoreRecords(before);
-    } catch {
+    } catch (err) {
       /* why: the records stay on the new name as well: outside content is never lost */
+      swallowed("storage/workspace: the records stay on the new name as well: outside content is never los", err);
     }
     throw e;
   }
@@ -272,7 +278,8 @@ export async function renameWorkspaceFile(
 export async function workspaceHasFile(path: string): Promise<boolean> {
   try {
     return (await vault().stat(path))?.kind === "file";
-  } catch {
+  } catch (e) {
+    if (!(e instanceof VaultNotFoundError)) swallowed("storage/workspace: stat failed (not a missing path); the file reads as absent", e);
     return false;
   }
 }

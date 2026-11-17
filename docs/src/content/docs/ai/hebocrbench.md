@@ -1,6 +1,8 @@
 ---
 title: External OCR benchmark (HebOCRBench)
 description: How Lumen's OCR is measured on HebOCRBench, an outside Hebrew benchmark whose answers only its organisers hold, and where the scores are published.
+type: how-to
+tasks: ["W7.12"]
 ---
 
 Our own OCR numbers (the `ocr-he` set, plan 7.5) come from a set we built.

@@ -1,6 +1,7 @@
 ---
 title: Moving production to another host
 description: The runbook for moving Lumen's production from Vercel Hobby to Cloudflare Pages in under an hour, before the first payment. It covers the new address, the users' notes that stay with the old one, the redirect, the checks and the way back.
+type: how-to
 ---
 
 Vercel's Hobby plan is for **non-commercial use only**

@@ -1,6 +1,8 @@
 ---
 title: פרסום ל-Bluesky ולפדיברס
 description: פרסום פתק כמסמך Standard.site בחשבון ה-AT Protocol שלכם, כך ש-Bluesky מציג אותו עם תצוגה מקדימה עשירה, קוראים כמו Leaflet מציגים אותו במלואו, ו-Bridgy Fed יכול להביא אותו ל-Mastodon.
+type: how-to
+tasks: ["W7.19"]
 ---
 
 פותחים פתק ומריצים **פרסום ל-Bluesky ‏(Standard.site)…** מלוח הפקודות.

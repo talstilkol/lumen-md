@@ -1,0 +1,445 @@
+[
+  {
+    "id": "W1.1",
+    "decision": "Merge the train stack into main, then keep feature PRs at most 7 days old.",
+    "options": [
+      "A: merge the draft 'main into train 7' (tree-identical to train 7), let the Mac run L4.all + the full e2e, then promote:main by fast-forward",
+      "B: force main to train 7 (rewrites main; forbidden by the lane rules and by the ruleset W10.O1 wants)",
+      "C: keep waiting for more trains before main moves"
+    ],
+    "recommendation": "A",
+    "why": "main (7fc2e65364) is NOT an ancestor of verify/train-7 (f090c20812): main holds #432's 3 commits, so promote:main (fast-forward only) cannot take any train today. The draft merge resolves the two conflicts to train 7's side and leaves the tree byte-identical to train 7 (git diff empty), so the same-tree rule of promote-main.mjs lets train 7's e2e receipt count. 100 PRs are open and every one of them is older than 7 days (created before 9.11): the 7-day rule is only reachable after main moves.",
+    "sources": [
+      "scripts/promote-main.mjs (fast-forward only, same-tree receipt)",
+      "git merge-base --is-ancestor origin/main f090c20812 → false (checked 16.11)",
+      "GET repos/talstilkol/lumen-md/pulls?state=open: 100, all created before 2026-11-09"
+    ],
+    "changes": [
+      "merge the OWNER-DECISION draft branch fix/g6-L4-main-into-train7 into verify/train-7 (integrator)",
+      "then: npm run promote:main -- <train-7 head> --push (W10.O4)"
+    ],
+    "draftPr": "fix/g6-L4-main-into-train7"
+  },
+  {
+    "id": "W1.7",
+    "decision": "Invite a public review of the sync crypto (spec + vectors + Python decoder), and decide hand-rolled vs hash-wasm/typage.",
+    "options": [
+      "A: keep the own TypeScript primitives (verified against RFC, Node and Python vectors) and invite public review now; swap to hash-wasm/typage only if review finds a problem",
+      "B: install hash-wasm + typage on the Mac (W10.M2) and switch before any review",
+      "C: wait for a paid external audit (W10.O8) before anything"
+    ],
+    "recommendation": "A, plus run cryptoDifferential.test.ts on the Mac (it compares against @noble and typage once installed)",
+    "why": "The plan step names hash-wasm/typage, but the shipped code is already differential-tested; a public invitation (GitHub Discussions, Security category) costs nothing and is the acceptance's missing piece. The npm registry is closed in the cloud, so B is a Mac step anyway; C has no budget.",
+    "sources": [
+      "docs/sync-protocol.md",
+      "src/__tests__/cryptoDifferential.test.ts (skipIf without @noble/typage)",
+      "docs/owner/checklist.md 10.30",
+      "https://docs.github.com/en/discussions"
+    ],
+    "changes": [
+      "turn on Discussions (W10.O1), post docs/sync-protocol.md + the vectors under Security",
+      "W1.7 acceptance 'independent decoder' → already in the spec PR #399"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W1.28",
+    "decision": "Open GitHub Discussions; approve the 30 GIFs the Mac makes (W10.M9); confirm Pagefind search on the live docs site.",
+    "options": [
+      "A: Discussions on + GIFs from playwright.gifs.config.ts on the Mac + Pagefind on the deployed site",
+      "B: keep issues as the forum, no GIFs"
+    ],
+    "recommendation": "A",
+    "why": "Acceptance: every P0 feature with a GIF and 20/20 golden queries on the live Pagefind index. The GIF specs exist (30 tests in playwright.gifs.config.ts, listed in the cloud); only the recording and the site deploy are missing. Discussions is off today (GET repos/… has_discussions: false).",
+    "sources": [
+      "playwright.gifs.config.ts (30 tests)",
+      "https://pagefind.app/",
+      "https://docs.github.com/en/discussions/quickstart"
+    ],
+    "changes": [
+      "Settings → General → Features → Discussions",
+      "npx playwright test -c playwright.gifs.config.ts on the Mac; commit e2e/gifs output",
+      "docs social list gets the Discussions link (checklist 10.118)"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W1.29",
+    "decision": "Hold the Hebrew usability rounds (5–8 sessions per round).",
+    "options": [
+      "A: two rounds of 5–8 participants with the kit of #419 (10 tasks, SEQ + SUS, consent, local recorder)",
+      "B: one round of 5 now, the second after the fixes",
+      "C: skip"
+    ],
+    "recommendation": "B (5 sessions find most severe problems; the second round measures SUS ≥ 80 after the fixes)",
+    "why": "Nothing in the cloud can replace the sessions. Five users per round is the usual small-sample practice; the acceptance needs SUS ≥ 80 in round two and 10/10 severe issues closed.",
+    "sources": [
+      "research/usability-hebrew (PR #419)",
+      "https://measuringu.com/sus/",
+      "https://www.nngroup.com/articles/why-you-only-need-to-test-with-5-users/"
+    ],
+    "changes": [
+      "eval/golden/usability: the findings template, one file per round"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W1.35",
+    "decision": "Should PR branches get a Vercel preview build (and so a failure status)?",
+    "options": [
+      "A: keep only main and verify/* building (as scripts/vercel-ignore.sh does), and accept that a PR's status comes from its train",
+      "B: set LUMEN_BUILD_ALL=1 in the Vercel project so every branch builds",
+      "C: build PRs only when labelled"
+    ],
+    "recommendation": "A",
+    "why": "The free plan has 100 builds a day and one slot; the owner moved full verification to the Mac. Every PR in this repo reaches main only through a train, which IS built and gated. B would queue ~100 previews behind each train.",
+    "sources": [
+      "scripts/vercel-ignore.sh (rules, LUMEN_BUILD_ALL)",
+      "https://vercel.com/docs/project-configuration/git-settings#ignored-build-step",
+      "memory: builds run on the Mac"
+    ],
+    "changes": [
+      "none (A keeps today's file); with B: Vercel project env LUMEN_BUILD_ALL=1"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W10.O1",
+    "decision": "Apply the GitHub security settings: private vulnerability reporting, secret scanning + push protection, the ruleset, labels, Discussions.",
+    "options": [
+      "A: all of them now, the ruleset from security/github-ruleset.json with the owner in bypass for PRs only",
+      "B: reporting + scanning now, the ruleset after main moves (W10.O4)"
+    ],
+    "recommendation": "B: reporting and secret scanning today (nothing depends on them); the ruleset right after the fast-forward of W10.O4, so the promote itself is not blocked",
+    "why": "Checked 16.11 (read-only API): private vulnerability reporting enabled=false, secret_scanning disabled, push protection disabled, 0 rulesets, main not protected, Discussions off. SECURITY.md on main already links the advisory form, which does not work while reporting is off (see the W1.1 draft).",
+    "sources": [
+      "https://docs.github.com/en/code-security/security-advisories/working-with-repository-security-advisories/configuring-private-vulnerability-reporting-for-a-repository",
+      "https://docs.github.com/en/code-security/secret-scanning/introduction/about-push-protection",
+      "https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets",
+      "security/github-ruleset.json",
+      "security/channels.json"
+    ],
+    "changes": [
+      "PUT repos/talstilkol/lumen-md/private-vulnerability-reporting",
+      "PATCH repos/talstilkol/lumen-md security_and_analysis.secret_scanning(+_push_protection)=enabled",
+      "POST repos/talstilkol/lumen-md/rulesets < security/github-ruleset.json",
+      "security/channels.json: privateReporting → on, then SECURITY.md takes main's link"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W10.O2",
+    "decision": "Create the reviewer signing keys (Ed25519) and a second reviewer, then sign the Z2 receipts.",
+    "options": [
+      "A: owner key now + a second reviewer from W10.O8",
+      "B: owner key only (pr:check counts receipts only from listed keys; a single reviewer cannot review own PRs)"
+    ],
+    "recommendation": "A",
+    "why": "security/reviewers.json has reviewers: {} — no receipt counts today. Keys are made outside every repo and the entry only counts after the change that adds it is merged (merge-base rule), so this must happen before the next review round.",
+    "sources": [
+      "security/reviewers.json",
+      "scripts/review-sign.mjs keygen"
+    ],
+    "changes": [
+      "node scripts/review-sign.mjs keygen tal --login talstilkol --email <git email> --out ~/lumen-keys",
+      "paste the printed entry under reviewers in security/reviewers.json (sensitive file, CODEOWNERS)"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W10.O3",
+    "decision": "Set the Vercel project's Ignored Build Step to `bash scripts/vercel-ignore.sh`.",
+    "options": [
+      "A: dashboard (Settings → Git → Ignored Build Step → Custom)",
+      "B: vercel api PATCH with commandForIgnoringBuildStep (the command in scripts/check-vercel-ignore.mjs)"
+    ],
+    "recommendation": "B (one command, and check:vercel-ignore verifies it)",
+    "why": "vercel.ts is compiled after the ignore step, so its ignoreCommand is never read; until the project setting is set every push takes the one build slot. The cloud cannot read the setting: check:vercel-ignore exits 2 without VERCEL_TOKEN, and the project summary read through the Vercel connector (16.11) does not include it.",
+    "sources": [
+      "scripts/check-vercel-ignore.mjs",
+      "https://vercel.com/docs/project-configuration/git-settings#ignored-build-step"
+    ],
+    "changes": [
+      "Vercel project prj_HBRHQedUcIu68Z2oJjScnI9Q6Spz: commandForIgnoringBuildStep",
+      "verify: VERCEL_TOKEN=… node scripts/check-vercel-ignore.mjs → exit 0"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W10.F3",
+    "decision": "Same setting as W10.O3 (the check is wired; only the project setting is owed).",
+    "options": [
+      "see W10.O3"
+    ],
+    "recommendation": "see W10.O3",
+    "why": "check:vercel-ignore is in the train and reports 'unknown' (exit 2) without a token, never a pass.",
+    "sources": [
+      "scripts/check-vercel-ignore.mjs"
+    ],
+    "changes": [
+      "as W10.O3"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W10.O4",
+    "decision": "Promote main to the train: fast-forward, tag, smoke, rollback plan.",
+    "options": [
+      "A: merge the W1.1 draft into the train, Mac e2e receipt for its head, then promote:main --push, tag, smoke lumen-md.vercel.app; rollback = Vercel 'promote previous deployment'",
+      "B: promote train 6 first (older, smaller)"
+    ],
+    "recommendation": "A (train 7 contains train 6)",
+    "why": "promote-main.mjs refuses anything but a fast-forward with a signed e2e receipt for the same tree. Today the fast-forward is impossible (see W1.1); the draft fixes that without changing the tree.",
+    "sources": [
+      "scripts/promote-main.mjs",
+      "scripts/promote/check.mjs"
+    ],
+    "changes": [
+      "npm run promote:main -- <head> --push",
+      "git tag v0.1.0-beta.1 (after W10.O5)"
+    ],
+    "draftPr": "fix/g6-L4-main-into-train7"
+  },
+  {
+    "id": "W10.O5",
+    "decision": "Make the offline release key and updater pubkey, sign beta.1, run the beta.1→beta.2 drill.",
+    "options": [
+      "A: minisign/Tauri key pair generated offline on the Mac, backed up in two offline places; LUMEN_UPDATER_PUBKEY set for the build",
+      "B: wait for SignPath (W11.S15) first"
+    ],
+    "recommendation": "A (Windows Authenticode is separate; the Tauri update signature is mandatory and independent of it)",
+    "why": "tauri.conf.json reads the updater pubkey from ${LUMEN_UPDATER_PUBKEY}; without it no update is accepted (manifest_sig.rs no_key_means_no_update, which passes in the cloud with rustc --test). The Rust side of the drill (update_guard: newer only, never below the highest installed) passes 4/4 in the cloud.",
+    "sources": [
+      "src-tauri/tauri.conf.json:84",
+      "src-tauri/src/manifest_sig.rs, update_guard.rs (rustc --test: 9/9 and 4/4, 16.11)",
+      "https://v2.tauri.app/plugin/updater/",
+      "https://jedisct1.github.io/minisign/"
+    ],
+    "changes": [
+      "npx tauri signer generate -w <offline path>",
+      "Vercel/Mac env LUMEN_UPDATER_PUBKEY=<public key>",
+      "npm run release -- --publish beta.1, then beta.2; spctl -a -vv on macOS"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W10.O6",
+    "decision": "Deploy the content-frame site, the share server + relay, the mirror Worker; request a rescan.",
+    "options": [
+      "A: deploy each with its script after the Mac run, measure from Israel",
+      "B: one at a time, relay first (VITE_SYNC_RELAY_URL unblocks 10.53)"
+    ],
+    "recommendation": "B: relay first (fixes H1/H2 in 23c997bcfe pushed to #664 after approval), then content frame (lumen-md-frame.pages.dev in the CSP), then share server and mirror",
+    "why": "The CSP already names https://lumen-md-frame.pages.dev as frame-src; until it is live every content-frame embed fails. The relay unlocks classroom sync (10.53).",
+    "sources": [
+      "scripts/pages-deploy.sh",
+      "scripts/collab-deploy.mjs",
+      "scripts/share-deploy.mjs",
+      "plan/decisions-2026-11-14.md 5.16, 10.53"
+    ],
+    "changes": [
+      "Vercel env VITE_SYNC_RELAY_URL",
+      "wrangler deploy (cloudflare/)",
+      "fly deploy (sync-server/fly.toml)"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W10.O7",
+    "decision": "Store and service accounts: TestFlight, Play, Codemagic, BrowserStack/Percy, package managers, Sponsors.",
+    "options": [
+      "A: only what a shipped artefact needs now (Apple Developer + Play Console after W10.O5 signed builds)",
+      "B: all accounts now"
+    ],
+    "recommendation": "A",
+    "why": "No signed artefacts exist yet (W1.24); accounts without artefacts cost money (Apple: yearly fee) and expire. store:check already passes in the cloud (listings within limits, metadata current).",
+    "sources": [
+      "scripts/store.mjs check (exit 0 in the cloud, 16.11)",
+      "codemagic.yaml",
+      "fastlane/"
+    ],
+    "changes": [
+      "store/listing.json → fastlane metadata on submit"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W10.O8",
+    "decision": "Recruit people: usability participants, language reviewers, a labelled grammar set, external crypto review, plugin developers, beta audience.",
+    "options": [
+      "A: start with the two that block acceptance: usability (W1.29) and a second reviewer (W10.O2)",
+      "B: all at once"
+    ],
+    "recommendation": "A",
+    "why": "Only those two gate plan acceptance today; the others feed wave 11 findings.",
+    "sources": [
+      "research/usability-hebrew",
+      "security/reviewers.json"
+    ],
+    "changes": [
+      "none in the repo until people are found"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W10.O9",
+    "decision": "Contribute real exports (Word/Docs pastes, Notion, Evernote, Bear, Apple Notes, Keep, OneNote, Obsidian 1.15 + Bases, PDFs, WhatsApp) with consent and licence.",
+    "options": [
+      "A: 6 sources × 3 exports of the 50 public-domain texts (Ben-Yehuda, Sefaria), as the plan says",
+      "B: the owner's own vault (personal data: no)"
+    ],
+    "recommendation": "A: public-domain text only, so the corpus can be committed",
+    "why": "Unblocks W1.4, W1.11, W1.26, W12.T7 (all PARTIAL only because their goldens are synthetic). import:diff already exists and gates each export.",
+    "sources": [
+      "eval/origins.json (origin: real)",
+      "scripts/import-diff.mjs",
+      "https://github.com/obsidianmd/obsidian-importer"
+    ],
+    "changes": [
+      "eval/golden/<source>/real/* + a sha256 manifest per export",
+      "npm run import:diff -- --lumen … --oracle …"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W10.O10",
+    "decision": "Write down the licence decisions (15.10, Hebrew speaker consent, DictaLM 12B/24B, embeddings, academic calendars, HebOCRBench, Zotero).",
+    "options": [
+      "A: confirm the 15.10 set as decided on 14.11 and add one line per new item",
+      "B: reopen each"
+    ],
+    "recommendation": "A",
+    "why": "plan/decisions-2026-11-14.md 2.1 already confirms 15.10 (copyleft stays a user-started download, never in the build); nothing since argues otherwise. The new items follow the same rule: no model or dataset in the build without a licence that allows redistribution.",
+    "sources": [
+      "plan/decisions-2026-11-14.md (2.1, 2.77)",
+      "licenses.allow.json",
+      "legal/consent-register.json"
+    ],
+    "changes": [
+      "legal/consent-register.json: the speaker's signed consent",
+      "licenses.allow.json: no new entry without a written decision"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W10.O11",
+    "decision": "Install Renovate, enable OpenSSF Scorecard + badge, request an external review.",
+    "options": [
+      "A: Renovate GitHub App with the repo's renovate.json; Scorecard runs locally in supply:nightly (no Actions); badge from bestpractices.dev",
+      "B: Dependabot only"
+    ],
+    "recommendation": "A",
+    "why": "renovate.json is already in the repo; Scorecard needs no Actions when run by the nightly script (supply:nightly --dry-run passes in the cloud and marks every gate 'unmeasured'). Branch-Protection ≥ 8 depends on W10.O1's ruleset.",
+    "sources": [
+      "renovate.json",
+      "scripts/supply/nightly.mjs",
+      "https://docs.renovatebot.com/",
+      "https://github.com/ossf/scorecard",
+      "https://www.bestpractices.dev/"
+    ],
+    "changes": [
+      "README badge line after the first Scorecard result"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W10.O12",
+    "decision": "Fix the WER target after the M7 model day.",
+    "options": [
+      "A: primary = ivrit.ai eval-whatsapp and eval-d1 under the leaderboard normaliser; FLEURS and Common Voice secondary; the number = the best local engine's measured WER rounded up, never above today's 15 % mobile target",
+      "B: FLEURS as primary (cleaner audio, but not what users dictate)"
+    ],
+    "recommendation": "A (the acceptance already names it); the number is decided only from M7's measurement",
+    "why": "eval-whatsapp is real voice notes, what the inbox capture gets. The code's mobile target is 15 % (desktopOffload.ts MOBILE_WER_TARGET); the desktop Whisper target in W1.17 is ≤ 10 % on FLEURS. No number can honestly be fixed before M7 measures.",
+    "sources": [
+      "eval/public/asr-ivrit-eval-whatsapp.json, asr-ivrit-eval-d1.json, asr-fleurs-he.json",
+      "src/ai/dictation/desktopOffload.ts:64",
+      "https://huggingface.co/ivrit-ai"
+    ],
+    "changes": [
+      "src/ai/dictation/desktopOffload.ts MOBILE_WER_TARGET (only lower)",
+      "plan target text of 6.1"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W11.S15",
+    "decision": "Windows signing through SignPath Foundation (free for OSS).",
+    "options": [
+      "A: apply to SignPath Foundation; signCommand of #792 runs their submitter; until approved Windows beta builds are marked unsigned",
+      "B: buy an OV/EV certificate",
+      "C: ship Windows unsigned"
+    ],
+    "recommendation": "A",
+    "why": "SignPath signs OSI-licensed projects for free and Lumen is MIT; the code path (#792) refuses to mark a build signed without SignPath credentials and verifies with signtool. B costs money every year; C triggers SmartScreen warnings.",
+    "sources": [
+      "https://signpath.org/",
+      "PR #792 (signCommand, release-run step)"
+    ],
+    "changes": [
+      "src-tauri/tauri.conf.json bundle.windows.signCommand (from #792)",
+      "release-run env: SIGNPATH_* secrets on the Mac only"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "W12.T7",
+    "decision": "Provide one real Notion database export for the type import report.",
+    "options": [
+      "A: a Notion workspace export (Markdown & CSV, include subpages) of a public-data database with relations and rollups",
+      "B: keep the 20 synthetic W8.2 cases"
+    ],
+    "recommendation": "A (part of W10.O9)",
+    "why": "The acceptance asks for 0 lost columns without explanation on a real export; the report exists (#898).",
+    "sources": [
+      "https://www.notion.com/help/export-your-content",
+      "PR #898"
+    ],
+    "changes": [
+      "eval/golden/notion/real/<export> + manifest",
+      "npm run import:diff on it"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "12.2",
+    "decision": "Dependencies: the open overrides and cargo update.",
+    "options": [
+      "A: on the Mac, npm outdated + cargo update; one PR per major (React 19 last, after the release, as decided 14.11 2.70)",
+      "B: bump everything at once"
+    ],
+    "recommendation": "A",
+    "why": "'0 majors behind' needs a registry (closed in the cloud). The overrides in package.json (serialize-javascript, uuid, babel runtime, katex, hocuspocus, onnxruntime-web) each pin a security or dedupe fix; remove one only when its parent has caught up.",
+    "sources": [
+      "package.json overrides (line ~394)",
+      "plan/decisions-2026-11-14.md 2.70, 2.71",
+      "src-tauri/Cargo.lock"
+    ],
+    "changes": [
+      "package.json overrides: drop only those whose parent now ships the fixed version",
+      "npm outdated --json > reports/deps-outdated.json on the Mac"
+    ],
+    "draftPr": null
+  },
+  {
+    "id": "12.4",
+    "decision": "Opt-in monitoring: which error tracker, and does the official build carry a DSN?",
+    "options": [
+      "A: official builds carry no DSN; a user can point to their own Sentry or self-hosted GlitchTip (same protocol)",
+      "B: a project Sentry DSN in official builds, still opt-in",
+      "C: drop remote error reports entirely"
+    ],
+    "recommendation": "A",
+    "why": "Local-first and 'no request by default' (monitoring.spec: 0 requests in four states) are the product's promise; with no DSN the SDK is never downloaded. A keeps the feature for self-hosters at zero cost and zero data. web-vitals: keep the own implementation (7/7 tests) unless the Mac run shows a mismatch.",
+    "sources": [
+      "docs/src/content/docs/security/monitoring.md",
+      "e2e/monitoring.spec.ts",
+      "https://glitchtip.com/",
+      "https://develop.sentry.dev/self-hosted/"
+    ],
+    "changes": [
+      "none: VITE_SENTRY_DSN stays unset in Vercel (store privacy labels: crash data not collected, decision 1.8)"
+    ],
+    "draftPr": null
+  }
+]

@@ -4,6 +4,7 @@
   "ai.doctor.check.executor": "An executor the agents can use right now",
   "ai.doctor.check.golden": "Golden case",
   "ai.doctor.check.grammar": "Grammar service (LanguageTool)",
+  "ai.doctor.check.ladder": "The engine ladder on this device (what can run, in order)",
   "ai.doctor.check.models": "A chat model is installed (qwen2.5:7b recommended)",
   "ai.doctor.check.ollama": "Ollama server reachable from this page",
   "ai.doctor.check.ollamaVersion": "Ollama version (0.5+ for structured output)",

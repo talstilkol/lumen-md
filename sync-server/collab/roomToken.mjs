@@ -177,6 +177,19 @@ export function commitmentOk(name, verifier) {
 }
 
 /**
+ * Review Z7-L6, the self-hosted Node server's room delete: does a request for the committed name `name`, with
+ * `proof`, show the room's password? The proof must match the name's commitment, and, as the Node server stores a
+ * room under its base name, the commitment must be the one bound to that base (`bound`, the first commitment the
+ * server issued a token for; null before any). Returns the commitment to bind when it holds, else null.
+ */
+export function adminCommitment(name, proof, bound) {
+  const c = splitCommittedRoom(name);
+  if (!c || !commitmentOk(name, proofVerifier(proof))) return null;
+  if (bound && bound !== c.commit) return null;
+  return c.commit;
+}
+
+/**
  * How a room binds its proof:
  *   "committed"  the name commits to the proof: only the matching one is let in;
  *   "app"        an app-made name from before commitments (128 random bits, and the

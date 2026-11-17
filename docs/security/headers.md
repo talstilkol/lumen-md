@@ -160,6 +160,32 @@ These are written in `policy.json` under `hosts`.
 | nginx | COOP `same-origin`, COEP `credentialless` | cross-origin isolation (D9). COEP goes on every document and worker it serves. Since 13.2 this is the compose bundle's image too; keeping it is decision 15.10(7) |
 | Netlify | runner pages and the content frame: `X-Frame-Options` dropped, CSP replaced, by `netlify/edge-functions/runner-headers.ts` | Netlify's `_headers` cannot detach the catch-all rules (13.2); the function's policy strings are a `headers.mjs` source |
 
+## Narrowing the `default` Trusted Types policy (plan W11.S17)
+
+The `default` policy exists so that third-party libraries (mermaid, the
+canvas, ProseMirror, model-viewer) keep working when they hand a plain string
+to a sink: it sanitizes that string with a broad DOMPurify profile. That also
+hides sinks that should be explicit. The plan is to remove `default` from
+`trusted-types`, in three steps:
+
+1. **Record every hit.** `src/lib/trustedTypes.ts` records each sink that
+   reaches the `default` policy, where it came from (the first stack frame
+   outside the module) and how often (`defaultPolicyHits()`,
+   `window.__lumenTrustedTypesDefaultHits`). The policy still returns what
+   it returned before.
+
+   The research suggested a Report-Only header without `default`. It would
+   report only the creation of the `default` policy: while the enforced header
+   lists `default`, the browser converts each string before the Report-Only
+   policy sees a sink. So the record lives in the policy itself.
+2. **Make each hit explicit.** Each sink the record lists becomes a `lumen`
+   or `dompurify` call. `safeSetHtml` already uses the HTML Sanitizer API's
+   `Element.setHTML` where the browser has it, after DOMPurify, so that path
+   reaches no policy at all.
+3. **Remove `default`** from the app route's `trusted-types` in
+   `security/policy.json`, once `e2e/trusted-types-default.spec.ts` ends a
+   full run against a production build with no hits.
+
 ## Images in notes and WebSockets (plan 2.2)
 
 **Images from other sites.** A static policy cannot hold one user's choices, so the
@@ -295,14 +321,14 @@ header policy is written before the build and cannot name them. Now:
 Embeds kept `allow-same-origin`, so the content frame ran with the app's origin: any
 future sink in the content frame's script would have been full XSS on the app. Now:
 
-- **The frame has its own site**: `VITE_CONTENT_FRAME_URL`, officially
+- **The frame has its own site**: `LUMEN_CONTENT_FRAME_URL`, officially
   `https://lumen-md-frame.pages.dev/` (Cloudflare Pages by Direct Upload,
   `scripts/content-frame-site.mjs`; `pages.dev` is on the Public Suffix List, so it is
   another *site*, not only another origin). Host `content-frame-site` in `policy.json`,
   checked file `deploy/content-frame/_headers`: no `sandbox`, `frame-ancestors` = the apps.
   The app's `frame-src` is `'self'` plus that origin. There an embed's `allow-same-origin`
   is the frame site's origin.
-- **Without one** (a build with no `VITE_CONTENT_FRAME_URL`): images, media and Gists
+- **Without one** (a build with no `LUMEN_CONTENT_FRAME_URL`): images, media and Gists
   still render in an opaque frame on the app's host, and the host's header adds
   `sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox` to
   `/content-frame.html`, so even a top-level visit runs it opaque. Embeds become a link.

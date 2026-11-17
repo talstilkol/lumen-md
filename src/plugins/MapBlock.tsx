@@ -1,7 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import YAML from "yaml";
 import { t } from "../i18n";
 import { getLeaflet } from "./map/leaflet";
+import { addBaseTiles } from "./map/tiles";
+import "../map/offlineMapStrings";
+
+// W13.G3: the offline basemap's panel, on demand.
+const OfflineMapPanel = lazy(() => import("../map/OfflineMapPanel"));
 
 interface Props {
   source: string;
@@ -20,6 +25,8 @@ interface MapSpec {
   zoom?: number;
   markers?: MapMarker[];
   geojson?: unknown;
+  /** W13.G3: the vault's entities with a location (`location: 31.77, 35.21`), clustered. */
+  entities?: boolean;
 }
 
 function parseSpec(source: string, lang: "map" | "geojson"): MapSpec | null {
@@ -46,6 +53,9 @@ export default function MapBlock({ source, lang }: Props) {
   const mapRef = useRef<HTMLDivElement | null>(null);
   // Defer heavy Leaflet load until the map enters viewport.
   const [inView, setInView] = useState(false);
+  const [offline, setOffline] = useState(false);
+  // A basemap imported or removed: draw the map again with it.
+  const [redraw, setRedraw] = useState(0);
 
   useEffect(() => {
     if (!containerRef.current || inView) return;
@@ -97,18 +107,17 @@ export default function MapBlock({ source, lang }: Props) {
         scrollWheelZoom: false,
       });
 
-      L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
-          maxZoom: 19,
-          attribution:
-            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        },
-      ).addTo(mapInstance);
+      addBaseTiles(L, mapInstance);
 
       for (const m of markers) {
         const marker = L.marker([m.lat, m.lng]).addTo(mapInstance);
         if (m.label) marker.bindPopup(m.label);
+      }
+
+      if (spec.entities) {
+        const { addEntityMarkers } = await import("../map/entityMarkers");
+        if (cancelled || !mapInstance) return;
+        await addEntityMarkers(L, mapInstance, { fit: !spec.center && !markers.length && !spec.geojson });
       }
 
       if (spec.geojson) {
@@ -134,13 +143,21 @@ export default function MapBlock({ source, lang }: Props) {
       cancelled = true;
       mapInstance?.remove();
     };
-  }, [source, lang, inView]);
+  }, [source, lang, inView, redraw]);
 
   return (
     <div className="chart-block" ref={containerRef}>
       <div className="chart-block-header">
         <span>{t("plugin.map")}</span>
+        <button type="button" className="chart-block-tab" aria-expanded={offline} onClick={() => setOffline((v) => !v)} data-testid="map-offline-toggle">
+          {t("map.offline.toggle")}
+        </button>
       </div>
+      {offline && (
+        <Suspense fallback={null}>
+          <OfflineMapPanel onChange={() => setRedraw((n) => n + 1)} />
+        </Suspense>
+      )}
       <div ref={mapRef} style={{ height: 360, width: "100%" }} />
     </div>
   );

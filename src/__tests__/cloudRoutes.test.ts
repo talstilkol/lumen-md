@@ -63,7 +63,7 @@ const ROUTES: Route[] = [
   { id: "benyehuda-dump", file: "sources/benyehuda/app.ts", marker: /withGate\(gate\(confirm\)/, gate: /enabled: \(\) => isSourceEnabled\("benyehuda"\)/ },
   // W7.24: one dialog search; asks once, and sends only to the sources that are on.
   { id: "open-sources-search", file: "sources/open/app.ts", marker: /searchOnline\(q, enabled, dialogFetch\(confirm\), kind\)/, gate: /if \(!h \|\| !enabledSources\(\)\[h\.source\]\) throw new SourceOffError/ },
-  { id: "sefaria-texts", file: "sources/sefaria/app.ts", marker: /ledgerFetch\(\{ force: \{ category: "cloud-text", reason: LEDGER_REASON \}, consent: true \}\)/, gate: /asked \?\?= await confirm\(\);\s*if \(!asked\) throw new DeclinedError\(\)/ },
+  { id: "sefaria-texts", file: "sources/sefaria/app.ts", marker: /ledgerFetch\(\{ force: \{ category: "cloud-text", reason: LEDGER_REASON \}, consent: true \}\)/, gate: /asked \?\?= confirm\(\);\s*if \(!\(await asked\)\) throw new DeclinedError\(\)/ },
   // W7.19 (review 20): one note, to the user's own PDS, only after a confirmation that says the record is public and permanent.
   { id: "atproto-publish", file: "publish/standardSite.ts", marker: /ledgerFetch\(\{ force: \{ category: "third-party", reason: ATPROTO_REASON \}, consent: true \}\)/, gate: /asked \?\?= confirm\(\);\s*if \(!\(await asked\)\) throw new DeclinedError\(\)/ },
 ];

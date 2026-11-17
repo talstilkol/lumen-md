@@ -1,5 +1,6 @@
 /** "Read aloud" claims the reading before waiting for the voice list, so a second press stops it instead of starting a second reading. */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import "./helpers/commandSections";
 import { renderHook } from "@testing-library/react";
 
 vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));

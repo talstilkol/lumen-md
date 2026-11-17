@@ -2,7 +2,7 @@
  * Privacy ledger panel (T37): every AI network request — where, how much,
  * why, under which policy — and what the policy blocked.
  */
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { Suspense, lazy, useEffect, useState, useSyncExternalStore } from "react";
 import { ShieldCheck, X } from "lucide-react";
 import { t, getLocale } from "../i18n";
 import { auditMode, clearLedger, leftDevice, ledgerEntries, ledgerSummary, subscribeLedger, type LedgerEntry } from "../ai/privacyLedger";
@@ -32,6 +32,9 @@ function bytes(n: number | null): string {
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
+// W13.A3: when agents read AGENT-MEMORY.md, in its own chunk.
+const MemoryReadsView = lazy(() => import("./MemoryReadsView"));
+
 export function PrivacyLedgerPanel({ open, onClose, mcpLedger = readVaultMcpLedger }: Props) {
   const list = useSyncExternalStore(subscribeLedger, ledgerEntries, ledgerEntries);
   const [onlyCloud, setOnlyCloud] = useState(false);
@@ -55,7 +58,7 @@ export function PrivacyLedgerPanel({ open, onClose, mcpLedger = readVaultMcpLedg
   };
 
   // W11.I9: what MCP clients (outside agents) took from the vault, from the server's own ledger.
-  const [tab, setTab] = useState<"requests" | "mcp">("requests");
+  const [tab, setTab] = useState<"requests" | "mcp" | "memory">("requests");
   const [mcp, setMcp] = useState<{ rows: McpLedgerRow[]; error?: string } | null>(null);
   const [mcpClient, setMcpClient] = useState("");
   useEffect(() => {
@@ -98,14 +101,18 @@ export function PrivacyLedgerPanel({ open, onClose, mcpLedger = readVaultMcpLedg
           {guard.length > 0 && <span data-testid="privacy-guard">{t("privacy.guard.summary", { ...guardTotals(guard) })}</span>}
         </div>
         <div role="tablist" style={{ padding: "8px 16px 0", display: "flex", gap: 6, fontSize: 12 }}>
-          {(["requests", "mcp"] as const).map((k) => (
+          {(["requests", "mcp", "memory"] as const).map((k) => (
             <button key={k} type="button" role="tab" aria-selected={tab === k} data-testid={`privacy-tab-${k}`} style={{ ...btn, fontWeight: tab === k ? 600 : 400 }} onClick={() => setTab(k)}>
               {t(`privacy.tab.${k}`)}
               {k === "mcp" && mcp?.rows.length ? ` (${mcp.rows.length})` : ""}
             </button>
           ))}
         </div>
-        {tab === "mcp" ? (
+        {tab === "memory" ? (
+          <Suspense fallback={null}>
+            <MemoryReadsView />
+          </Suspense>
+        ) : tab === "mcp" ? (
           <McpLedgerView state={mcp} client={mcpClient} onClient={setMcpClient} />
         ) : (
         <>

@@ -1,6 +1,8 @@
 ---
 title: Database views
 description: Editable Table / Cards / Kanban / List / Calendar views over your YAML frontmatter.
+type: how-to
+tasks: ["W7.4", "4.11", "4.10"]
 ---
 
 The `database` block turns any folder of markdown notes (with consistent

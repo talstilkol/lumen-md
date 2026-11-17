@@ -5,7 +5,7 @@ import { useAppStore } from "../../store/useStore";
 import { t, getLocale } from "../../i18n";
 import { getRecents, removeRecent } from "../../storage/recent";
 import { uiAlert } from "../../ui/PromptDialog";
-import { TEMPLATES } from "../../editor/templates";
+import { TEMPLATE_META } from "../../editor/templateMeta";
 import { buildInstalledTemplateCommands } from "../installedTemplates";
 import { showAiToast } from "../../ui/AiToast";
 import { isOPFSAvailable, readWorkspaceFile } from "../../storage/workspace";
@@ -13,6 +13,7 @@ import { relativeTime } from "../../lib/relativeTime";
 import { openTemplateDoc } from "../openDoc";
 import type { CommandContext } from "./context";
 import { explainError } from "../../lib/userError";
+import { localizedTemplate } from "../../welcomeDoc";
 
 /** Recently opened files (the last 8): reopen one, or drop it from the list. */
 export function buildRecentCommands({ recents, setRecents, handleReopenRecent }: CommandContext): Command[] {
@@ -151,19 +152,36 @@ export function buildSyncCommands(): Command[] {
       group: t("group.tools"),
       action: () => void import("../../sync/e2ee/classroom/launch").then((m) => m.openClassroom()),
     },
+    {
+      // Plan W12.S4: one encrypted vault for a family or a class, with reader / writer / admin keys; loaded on use.
+      id: "roleVault.open",
+      label: t("cmd.roleVault.open"),
+      icon: cmdIcons.Sparkles,
+      group: t("group.tools"),
+      action: () => void import("../../sync/e2ee/roles/ui/launch").then((m) => m.openRoleVaults()),
+    },
   ];
 }
 
 /** New note from a built-in or an installed template. */
 export function buildTemplateCommands({ installedTemplates }: CommandContext): Command[] {
   return [
-    ...TEMPLATES.map((tpl) => ({
+    // The content loads when a template is chosen (startup: the names only).
+    ...TEMPLATE_META.map((tpl) => ({
       id: `template.${tpl.id}`,
       label: `${t("group.templates")}: ${tpl.name}`,
       hint: tpl.category,
       icon: cmdIcons.FileText,
       group: t("group.templates"),
-      action: () => openTemplateDoc(tpl.name, tpl.content),
+      action: () =>
+        void import("../../editor/templates")
+          .then(({ TEMPLATES }) => {
+            // W13.I5: the language's own version when it has one (Arabic), else the English.
+            const full = localizedTemplate(tpl.id) ?? TEMPLATES.find((x) => x.id === tpl.id);
+            if (full) openTemplateDoc(full.name, full.content);
+          })
+          // A chunk that fails to load (offline after a deploy, a stale cache) says so instead of doing nothing (R8-L6).
+          .catch((e: unknown) => showAiToast(t("templates.loadFailed", { error: explainError(e) }), "error")),
     })),
     // Marketplace templates installed into the workspace (templates/<id>.md).
     ...buildInstalledTemplateCommands(installedTemplates, {
@@ -171,9 +189,9 @@ export function buildTemplateCommands({ installedTemplates }: CommandContext): C
       hint: t("templates.installed.button"),
       apply: (name, content) => {
         // {{title}}, {{date}}, {{time}}, {{hebrewDate}}: as Obsidian's Templates plugin fills them.
-        void import("../../editor/templateVars").then(({ expandTemplate }) =>
-          openTemplateDoc(name, expandTemplate(content, { title: name, locale: getLocale() })),
-        );
+        void import("../../editor/templateVars")
+          .then(({ expandTemplate }) => openTemplateDoc(name, expandTemplate(content, { title: name, locale: getLocale() })))
+          .catch((e: unknown) => showAiToast(t("templates.loadFailed", { error: explainError(e) }), "error"));
       },
       onError: (e) => showAiToast(t("templates.loadFailed", { error: e.message }), "error"),
     }),

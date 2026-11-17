@@ -23,7 +23,7 @@ const SRC = join(ROOT, "src");
 
 /** Literals that look like keys but are not stored under that name. */
 const NOT_KEYS: Record<string, string> = {
-  "lumen.": "prefix that clearLumenState matches on",
+  "lumen.": "the prefix every Lumen key starts with",
   "lumen.collab.v1": "PBKDF2 salt text, not a key",
   "lumen.word-count": "built-in plugin id",
 };
@@ -58,10 +58,11 @@ function storedKeys(): Map<string, string> {
   for (const file of sourceFiles(SRC)) {
     const src = code(file);
     for (const m of src.matchAll(/["'`](lumen\.[A-Za-z0-9_.-]*(?:\$\{[^}`]*\}[A-Za-z0-9_.-]*)*)["'`]/g)) add(star(m[1]), file);
-    for (const m of src.matchAll(/(?:localStorage|sessionStorage)\??\.(?:getItem|setItem|removeItem)\(\s*["'`]([^"'`]+)["'`]/g)) add(star(m[1]), file);
+    for (const m of src.matchAll(/\b[A-Za-z_$][\w$]*\??\.(?:getItem|setItem|removeItem)\(\s*["'`]([^"'`]+)["'`]/g)) add(star(m[1]), file);
     const consts = new Map<string, string>();
     for (const m of src.matchAll(/const\s+([A-Za-z_$][\w$]*)\s*=\s*["'`]([^"'`]+)["'`]/g)) consts.set(m[1], m[2]);
-    for (const m of src.matchAll(/(?:localStorage|sessionStorage)\??\.(?:getItem|setItem|removeItem)\(\s*([A-Za-z_$][\w$]*)\s*[,)]/g)) {
+    // Any Storage the code holds (`localStorage`, or a `local` / `store` it was handed, as in savedSearchStore.ts).
+    for (const m of src.matchAll(/\b[A-Za-z_$][\w$]*\??\.(?:getItem|setItem|removeItem)\(\s*([A-Za-z_$][\w$]*)\s*[,)]/g)) {
       const value = consts.get(m[1]);
       if (value) add(star(value), file);
     }

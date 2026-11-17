@@ -1,0 +1,12 @@
+{
+  "monitoring.settings.dsn": "Your own error tracker (GlitchTip or Sentry DSN)",
+  "monitoring.settings.dsnInvalid": "Not a DSN: it looks like https://<key>@host/<project number>.",
+  "monitoring.settings.dsnNote": "Optional. Reports go there instead of the build's tracker. Leave it empty to use the build's, if it has one. The site's security policy must allow the host.",
+  "monitoring.settings.errors": "Send error reports",
+  "monitoring.settings.errorsNote": "The error's class name and where in the code it happened. No message, note text, titles, paths, page address or IP address. Secrets and personal details are removed too.",
+  "monitoring.settings.noTracker": "No error tracker is set, so nothing is sent whatever the switches say.",
+  "monitoring.settings.performance": "Send performance reports",
+  "monitoring.settings.performanceNote": "Once per session: how many page loads were good, needs improvement or poor for each web vital. No timings, no page address.",
+  "monitoring.settings.title": "Error and performance reports",
+  "monitoring.settings.tracker": "Reports go to {host}, and only with a switch below turned on."
+}

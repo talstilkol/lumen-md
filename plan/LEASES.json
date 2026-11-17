@@ -1,0 +1,12 @@
+{
+  "$comment": "Lane leases (plan R12.13). Before a session starts, the coordinator gives its lane globs here; with LUMEN_LANE set, .githooks/pre-commit refuses files outside the lane's globs and `shared`. `merge`: how scripts/lanes/merge-driver.mjs merges each kind of file (lane = the lane's side, train = the train's side then regenerate, union = sorted union of lines).",
+  "shared": ["CHANGELOG.md", "i18n/keys/*.json", "i18n/weblate/en/*.json", "src/i18n/locales/*/*.json", "src/__tests__/__snapshots__/commandIds.snapshot.json", "plan/lanes/*.list"],
+  "lanes": {},
+  "merge": [
+    { "glob": "plan/lanes/**/*.md", "rule": "lane" },
+    { "glob": "plan/lanes/*.list", "rule": "union" },
+    { "glob": "i18n/keys/*.json", "rule": "train", "regen": "node scripts/extract-i18n-keys.mjs" },
+    { "glob": "i18n/weblate/en/*.json", "rule": "train", "regen": "node scripts/weblate.mjs --write" },
+    { "glob": "src/__tests__/__snapshots__/commandIds.snapshot.json", "rule": "train", "regen": "npx vitest run -u src/__tests__/commandIds.test.ts" }
+  ]
+}

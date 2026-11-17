@@ -7,7 +7,10 @@
  * (`npx vitest run -u src/__tests__/commandIds.test.ts`).
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import "./helpers/commandSections";
 import { act, renderHook } from "@testing-library/react";
+import "../commands/cmdHintStrings";
+import { shownHint } from "../commands/hints";
 
 const flags = vi.hoisted(() => ({ full: false }));
 // Billing builds and installed plugins / marketplace templates add commands;
@@ -76,7 +79,8 @@ function describeCommands(list: Command[], opts: UseCommandsOptions): Entry[] {
   return list.map((c) => {
     const e: Entry = { id: c.id, label: c.label };
     if (c.group !== undefined) e.group = c.group;
-    if (c.hint !== undefined) e.hint = /^recent\./.test(c.id) ? "<relative time>" : c.hint;
+    // The hint as shown: its English is the lazy hints chunk (commands/hints.ts), registered by the import above as the palette does.
+    if (c.hint !== undefined) e.hint = /^recent\./.test(c.id) ? "<relative time>" : shownHint(c.hint);
     if (c.shortcut !== undefined) e.shortcut = c.shortcut;
     if (c.icon !== undefined) e.icon = iconName.get(c.icon) ?? "<other>";
     if (direct.has(c.action)) e.action = direct.get(c.action);

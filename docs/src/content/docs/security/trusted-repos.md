@@ -1,6 +1,7 @@
 ---
 title: Trusted repositories
 description: Let agents propose changes in a git repository you own without the extra outside-content question.
+type: how-to
 ---
 
 Notes that come from a **git clone or pull** are *outside content*:

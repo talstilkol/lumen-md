@@ -1,9 +1,12 @@
 ---
 title: Settings
 description: One screen for every setting — tabs, search, and export / import of your choices.
+type: reference
+tasks: ["W13.E4"]
 ---
 
-Open **Settings** from the command palette (`⌘K` → *Settings*). Every
+Open **Settings** with `⌘,` (`Ctrl+,` on Windows and Linux), or from the
+command palette (`⌘K` → *Settings*). The search box has the focus. Every
 older settings dialog now opens here, on its own tab:
 
 | Tab | What it holds |
@@ -20,8 +23,31 @@ older settings dialog now opens here, on its own tab:
 
 Type in the search box at the top. Lumen matches the name of every
 setting — including the ones inside a tab, such as *Ollama* or
-*signaling* — and shows only the tabs that have a match. In the General
-tab, only the matching settings stay on screen.
+*signaling* — and also the words people use for it: *dark mode* finds the
+theme, *EXIF* finds the photo-metadata switch, *crash reports* finds error
+reports. It matches in your interface language and in English, and it
+ignores niqqud, accents and case: *שָׂפָה* and *שפה* both find the language
+setting, *langüage* finds it too.
+
+The best matches are listed under the box, best first, with the tab each one
+lives on. Only the tabs that have a match stay in the side list.
+
+| Key | Does |
+| --- | --- |
+| `↓` / `↑` | Move through the results (`Page Down` / `Page Up` jump eight) |
+| `Enter` | Open the result: its tab opens and its control has the focus |
+| `Esc` | Clear the search; a second `Esc` closes the settings |
+| `⌘F` / `Ctrl+F` | Back to the search box, from anywhere in the settings |
+
+Settings that plugins add are found the same way; picking one opens the
+plugin's own view.
+
+## Links to a setting
+
+`lumen://settings/<id>` (desktop) and `#settings/<id>` after the app's
+address (web) open the settings on that setting, with its control focused —
+for example `lumen://settings/vimEnabled` or `#settings/tab:privacy` for a
+whole tab. A plugin's setting is `plugin:<plugin id>/<setting id>`.
 
 ## Export and import
 
@@ -46,3 +72,9 @@ Every stored key and every persisted store field is listed in
 its tab and its label. `src/__tests__/settingsSchema.test.ts` scans the
 sources and fails when a new key is missing from the table, so the screen,
 its search and its export can't fall behind.
+
+The search (`src/settings/settingsSearch.ts`) reads the label and the
+`settingsSearch.kw.<id>` keywords of each setting, translated like any UI
+string. A plugin adds its own with `api.registerSetting({ id, label,
+description, keywords, open })` — a label or description may be one string
+or one per locale code — and the setting leaves with the plugin.

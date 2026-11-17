@@ -13,6 +13,22 @@ import { explainError } from "../../lib/userError";
 import type { CommandContext } from "./context";
 import "./vaultActionsStrings";
 
+/** W13.P3: the exit package — notes, attachments, history, settings, AI profiles, manifest.json with SHA-256. */
+export async function exportEverything(): Promise<void> {
+  const { flushActiveWorkspaceDoc } = await import("../../store/openDocs");
+  try {
+    await flushActiveWorkspaceDoc();
+    const { exitPackageZip } = await import("../../storage/exitCollect");
+    const { useAppStore } = await import("../../store/useStore");
+    const { bytes, files } = await exitPackageZip({ getApp: () => useAppStore.getState() as unknown as Record<string, unknown>, applyApp: () => undefined, storage: localStorage });
+    const { downloadBytes } = await import("../../storage/exportFormats");
+    downloadBytes(`lumen-everything-${new Date().toISOString().slice(0, 10)}.zip`, bytes, "application/zip");
+    showAiToast(t("vault.exportEverything.done", { n: String(files) }), "success");
+  } catch (e) {
+    showAiToast(t("vault.exportEverything.failed", { error: e instanceof Error ? e.message : String(e) }), "error");
+  }
+}
+
 export async function exportVault(): Promise<void> {
   const { exportVaultZip, exportVaultToFolder } = await import("../../storage/exportAll");
   const { flushActiveWorkspaceDoc } = await import("../../store/openDocs");

@@ -23,6 +23,7 @@
 import { chunkMarkdown, packVectors, bestChunk, type FileVectors } from "../../ai/semanticSearch";
 import { isLibraryPath } from "../clipper";
 import { log } from "../../lib/logger";
+import { compareNames } from "../../i18n/collate";
 
 export const LIBRARY_INDEX_KEY = "lumen-library-index";
 const LABEL = "library-index";
@@ -301,5 +302,5 @@ export async function searchLibrary(query: string, k = 10, deps: LibraryDeps = a
     if (!best) continue;
     hits.push({ path: c.path, title: c.title, source: c.source, score: best.score, snippet: c.chunks[best.index]?.preview ?? "" });
   }
-  return hits.sort((a, b) => b.score - a.score || a.path.localeCompare(b.path)).slice(0, k);
+  return hits.sort((a, b) => b.score - a.score || compareNames(a.path, b.path)).slice(0, k);
 }

@@ -1,6 +1,8 @@
 ---
 title: Dynamic blocks reference
 description: The fenced code-block languages that Lumen renders as live, interactive previews.
+type: reference
+tasks: ["W12.X1", "W4.15", "W1.34"]
 ---
 
 Lumen's killer feature is **dynamic blocks**: write a fenced code block in markdown, and the preview renders it as a chart, diagram, table, map, or live sandbox. Every block degrades gracefully — if rendering fails, you still see the source.
@@ -12,6 +14,7 @@ Lumen's killer feature is **dynamic blocks**: write a fenced code block in markd
 | ` ```mermaid ` | Inline SVG diagram (flowcharts, sequence, gantt, class, state, ER) | Mermaid v11; lazy-loaded |
 | ` ```chart ` | ECharts (line / bar / pie / scatter / heatmap / radar / boxplot / treemap / sunburst / sankey) | YAML or JSON spec |
 | ` ```csv ` / ` ```tsv ` | Sortable / filterable DataTable + auto-chart suggestion | Title via `title="..."` |
+| ` ```sheet ` | A small spreadsheet: CSV cells, and `=` formulas with A1 references and ranges | See [Sheet block](/blocks/sheet/) |
 | ` ```json-table ` | DataTable from a JSON array | Array of objects required |
 | ` ```sql ` / ` ```pandas ` / ` ```object ` / ` ```data ` | Tabular display via the shared `DataBlock` renderer | `pandas` parses DataFrame `to_dict()` shape |
 | ` ```map ` / ` ```geojson ` | Leaflet map (tile, markers, polygons, popups) | GeoJSON or YAML map-spec |

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { log } from "../lib/logger";
+import { runCommandById } from "./useCommandEvents";
 
 /**
  * Bridges native Tauri menu events to in-app commands.
@@ -143,6 +144,8 @@ function dispatch(id: string, a: MenuActions): void {
       a.onTour?.();
       return;
     default:
-      log.warn("unhandled tauri menu id", id);
+      // W13.K5: the translated menu (src/desktop/nativeMenu.ts) adds items that are palette commands.
+      if (/^[a-z][A-Za-z0-9]*(\.[A-Za-z0-9]+)+$/.test(id)) runCommandById(id);
+      else log.warn("unhandled tauri menu id", id);
   }
 }

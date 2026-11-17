@@ -1,0 +1,3 @@
+m.py:2: error: Incompatible return value type (got "int", expected "str")  [return-value]
+m.py:3: error: Argument 1 to "f" has incompatible type "str"; expected "int"  [arg-type]
+Found 2 errors in 1 file (checked 1 source file)

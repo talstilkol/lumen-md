@@ -4,8 +4,9 @@
  *
  *   node scripts/golden/origin-claims.mjs <plan.json>   list the statuses that do (exit 1 when any)
  *
- * `falseRealClaims(text, origins)` is the rule plan:check can call
- * (scripts/plan/build.mjs on chore/dod): a status that names a golden set
+ * `falseRealClaims(text, origins)` is the rule, and `checkOriginClaims(plan,
+ * origins)` is what plan:check runs (scripts/plan/build.mjs; without
+ * eval/origins.json plan:check fails, review 10 L8): a status or notes that names a golden set
  * or fixture whose origin (eval/origins.json) is synthetic, and in the same
  * sentence calls it real ("real", "אמיתי", "from Obsidian", "מ-Obsidian").
  */
@@ -48,6 +49,21 @@ export function falseRealClaims(text, origins) {
   return hits;
 }
 
+/**
+ * Plan W10.B13, for plan:check: one problem line per plan status, or task
+ * notes (review 10, L8: the detail moved out of a status goes there), that
+ * calls a synthetic source real.
+ */
+export function checkOriginClaims(plan, origins) {
+  const problems = [];
+  walk(plan, (t) => {
+    for (const field of ["status", "notes"]) {
+      for (const h of typeof t[field] === "string" ? falseRealClaims(t[field], origins) : []) problems.push(`${t.id}${field === "notes" ? " (notes)" : ""}: calls "${h.name}" real, but its origin is synthetic (eval/origins.json) — ${h.sentence.slice(0, 200)}`);
+    }
+  });
+  return problems;
+}
+
 function walk(o, fn) {
   if (Array.isArray(o)) o.forEach((x) => walk(x, fn));
   else if (o && typeof o === "object") {
@@ -60,13 +76,8 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   const root = resolve(fileURLToPath(new URL("../..", import.meta.url)));
   const origins = JSON.parse(readFileSync(resolve(root, "eval/origins.json"), "utf8"));
   const plan = JSON.parse(readFileSync(process.argv[2], "utf8"));
-  let n = 0;
-  walk(plan, (t) => {
-    for (const h of falseRealClaims(t.status, origins)) {
-      n++;
-      console.log(`✖ ${t.id}: calls "${h.name}" real, but its origin is synthetic — ${h.sentence.slice(0, 200)}`);
-    }
-  });
-  if (n) process.exit(1);
+  const problems = checkOriginClaims(plan, origins);
+  for (const p of problems) console.log(`✖ ${p}`);
+  if (problems.length) process.exit(1);
   console.log("✓ no plan status calls a synthetic set real");
 }

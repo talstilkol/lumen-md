@@ -42,6 +42,9 @@ nm=${LUMEN_NODE_MODULES:-$main/node_modules}
 nm=$(cd "$nm" && pwd -P)
 
 git worktree add --quiet -b "$name" "$dir" "$base"
+# Plan R12.13: the lease check runs on every commit of a lane with LUMEN_LANE set.
+# core.hooksPath is shared by all worktrees; another hooksPath the user set is left alone.
+node "$top/scripts/lanes/leases.mjs" install-hook || echo "lane: the lease hook is not on (see above)" >&2
 # Shared, read-mostly deps. Vite's writable cache is not shared: with a
 # symlinked node_modules, vite.config.ts puts it in the lane's own .vite/
 # (src/build/laneCache.ts), so concurrent dev servers do not swap each

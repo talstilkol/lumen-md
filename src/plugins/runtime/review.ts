@@ -22,7 +22,7 @@
  * Ported from #714 (the other W11.S14 implementation, W10 port onto train 6),
  * the checks this design lacked:
  *   - licence: the manifest's `license` must be an open-source SPDX id (or an
- *     expression of them); anything else is closed source;
+ *     expression of them, ./spdx.ts); anything else, or none, is closed source;
  *   - known-bad dependencies, offline: every package in the version's
  *     package-lock.json against security/known-bad.json (the list
  *     `npm run audit:lock` uses); high or critical fails the version, lower is
@@ -39,6 +39,10 @@
 
 import { parseManifest, type CapabilityRequest } from "./manifest";
 import { scanPluginVersion, type ScanFinding, type ScanInput, type ScanResult } from "./scan";
+import { cssLoads, remoteTarget } from "./cssUrls";
+import { isOpenSourceLicense } from "./spdx";
+
+export { OPEN_SOURCE_LICENSES, OPEN_SOURCE_EXCEPTIONS, isOpenSourceLicense } from "./spdx";
 
 export const REVIEWER = "lumen-review/1";
 /** A failing version that is still listed after this long is overdue. Never lengthen it. */
@@ -56,15 +60,6 @@ export interface KnownBad {
   versions?: string[];
   severity: string;
   advisories: string[];
-}
-
-/** OSI-approved licences a listed version may use (SPDX ids), from #714. */
-export const OPEN_SOURCE_LICENSES: ReadonlySet<string> = new Set(["MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "MPL-2.0", "GPL-2.0-only", "GPL-2.0-or-later", "GPL-3.0-only", "GPL-3.0-or-later", "LGPL-2.1-only", "LGPL-2.1-or-later", "LGPL-3.0-only", "LGPL-3.0-or-later", "AGPL-3.0-only", "AGPL-3.0-or-later", "0BSD", "Unlicense", "Zlib", "EUPL-1.2"]);
-
-/** `MIT OR Apache-2.0`, `(MIT AND Zlib)`, `GPL-2.0-or-later WITH Classpath-exception-2.0`: every id must be open source. */
-export function isOpenSourceLicense(spdx: string): boolean {
-  const ids = spdx.replace(/[()]/g, " ").split(/\s+(?:OR|AND|WITH)\s+|\s+/).filter(Boolean);
-  return ids.length > 0 && ids.every((id) => OPEN_SOURCE_LICENSES.has(id) || /-exception(-[0-9.]+)?$/i.test(id));
 }
 
 export interface ReviewFinding {
@@ -132,14 +127,9 @@ export function obfuscationFindings(code: string, file: string): ReviewFinding[]
   return out;
 }
 
-/**
- * A bundle no one can read: minified lines and no readable source shipped
- * with it. One very long line or a long average (this design), or, from #714,
- * many long lines (over 30 % longer than 500) or next to no whitespace (< 8 %).
- */
-export function minifiedOnly(code: string, source: string | undefined): boolean {
-  if (source?.trim()) return false;
-  if (code.length <= 2000) return false;
+/** Lines and whitespace of a text that reads as minified (`floor`: a text this short never does). */
+function looksMinified(code: string, floor: number): boolean {
+  if (code.length <= floor) return false;
   const lines = code.split("\n");
   const longest = Math.max(...lines.map((l) => l.length));
   if (longest > 1000 || code.length / lines.length > 300) return true;
@@ -147,6 +137,27 @@ export function minifiedOnly(code: string, source: string | undefined): boolean 
   const longShare = nonEmpty.filter((l) => l.length > 500).length / Math.max(1, nonEmpty.length);
   const spaces = (code.match(/\s/g) ?? []).length;
   return longShare > 0.3 || spaces / code.length < 0.08;
+}
+
+/** A shipped source excuses a minified bundle only when it is at least this long… */
+export const MIN_SOURCE_CHARS = 200;
+/** …and at least this share of the bundle's length (a stub is not the bundle's source). */
+export const MIN_SOURCE_SHARE = 0.1;
+
+/**
+ * A bundle no one can read: minified lines and no readable source shipped
+ * with it. One very long line or a long average (this design), or, from #714,
+ * many long lines (over 30 % longer than 500) or next to no whitespace (< 8 %).
+ * Review Z6-L1: the check runs whether or not a source is shipped. A source
+ * excuses a minified bundle only when it is readable itself (the same rules,
+ * at any length) and plausibly the bundle's: MIN_SOURCE_CHARS and
+ * MIN_SOURCE_SHARE of the bundle.
+ */
+export function minifiedOnly(code: string, source: string | undefined): boolean {
+  if (!looksMinified(code, 2000)) return false;
+  const src = source?.trim() ?? "";
+  const plausible = src.length >= Math.max(MIN_SOURCE_CHARS, code.length * MIN_SOURCE_SHARE);
+  return !(plausible && !looksMinified(src, 0));
 }
 
 /** CSS escapes (`\75 rl`, `\3a`, `\(`) decoded, so an escaped `url(` or scheme is seen (from #714). */
@@ -197,26 +208,25 @@ export function knownBadFindings(lock: string, knownBad: readonly KnownBad[], in
   return out;
 }
 
-/** `@import` and `url()` to another origin in a stylesheet (escapes decoded; `image-set()` and `src()` strings too, from #714). */
+/**
+ * `@import` and `url()` to another origin in a stylesheet. Review Z6-M1: read by a CSS tokenizer (./cssUrls.ts), not
+ * a pattern: quoted targets may hold `)` and quotes, escapes are decoded where the browser decodes them, and every
+ * target is resolved as the URL parser resolves it (tab and newline stripped), against the plugin's own origin.
+ */
 export function cssFindings(css: string, allowed: readonly string[] = CSS_ALLOWED_ORIGINS): ReviewFinding[] {
   const out: ReviewFinding[] = [];
-  const clean = decodeCssEscapes(css.replace(/\/\*[\s\S]*?\*\//g, ""));
-  for (const m of clean.matchAll(/@import\b[^;]*;?/gi)) out.push({ rule: "css-import", severity: "error", detail: m[0].trim().slice(0, 120) });
-  const targets: string[] = [];
-  for (const m of clean.matchAll(/url\(\s*(['"]?)([^'")]*)\1\s*\)/gi)) targets.push(m[2]);
-  for (const m of clean.matchAll(/(?:image-set|src)\(\s*(?:"([^"]*)"|'([^']*)')/gi)) targets.push(m[1] ?? m[2] ?? "");
-  for (const raw of targets) {
-    const target = raw.trim().replace(/\\/g, "");
-    if (/^data:/i.test(target) || target.startsWith("#")) continue;
-    let origin: string | null = null;
-    if (/^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith("//")) {
-      try {
-        origin = new URL(target, "https://relative.invalid").origin;
-      } catch {
-        origin = target;
-      }
+  for (const load of cssLoads(css)) {
+    if (load.kind === "import") {
+      out.push({ rule: "css-import", severity: "error", detail: load.target.slice(0, 120) });
+      continue;
     }
-    if (origin && !allowed.includes(origin)) out.push({ rule: "css-remote-url", severity: "error", detail: target.slice(0, 120) });
+    if (load.kind === "substitution") {
+      // Review Z7-M1: the value a var()/env()/attr() puts into a URL function is not known here, so it is refused.
+      out.push({ rule: "css-remote-url", severity: "error", detail: `${load.target}: the loaded value is not reviewable` });
+      continue;
+    }
+    const origin = remoteTarget(load.target, allowed);
+    if (origin) out.push({ rule: "css-remote-url", severity: "error", detail: `${origin}: ${JSON.stringify(load.target.slice(0, 120))}` });
   }
   return out;
 }
@@ -245,8 +255,10 @@ export async function reviewPluginVersion(input: ReviewInput): Promise<Scorecard
   }
   const repository = repositoryOf(raw);
   if (!repository && !input.inRepo) findings.push({ rule: "closed-source", severity: "error", detail: "no public source repository (manifest `repository`, https)" });
+  // Review Z6-M2: a licence that is missing, not a string, or not an open-source SPDX expression is closed source.
   const license = (raw as { license?: unknown } | null)?.license;
-  if (typeof license === "string" && license.trim() && !isOpenSourceLicense(license.trim())) findings.push({ rule: "closed-source", severity: "error", detail: `licence ${JSON.stringify(license)} is not an open-source SPDX id` });
+  if (typeof license !== "string" || !license.trim()) findings.push({ rule: "closed-source", severity: "error", detail: "no licence (manifest `license`: an open-source SPDX expression)" });
+  else if (!isOpenSourceLicense(license)) findings.push({ rule: "closed-source", severity: "error", detail: `licence ${JSON.stringify(license)} is not an open-source SPDX expression` });
   if (input.lockfile !== undefined && input.knownBad) findings.push(...knownBadFindings(input.lockfile, input.knownBad, input.inRange));
   if (input.css !== undefined) findings.push(...cssFindings(input.css));
 
@@ -304,6 +316,19 @@ export function withReviewWarnings<C extends Scorecard>(card: C, extra: readonly
 }
 
 /** Listed versions whose review failed more than 24 hours ago: they must already be down. */
+/**
+ * W11.S14: the listed versions to take down now — every one whose review
+ * on record failed. `review-plugins.mjs --takedown` marks them `delisted`
+ * in index.json (the app neither shows nor installs them), and the owner
+ * re-signs the index; `--check` keeps failing on one still listed after
+ * TAKEDOWN_MS (overdueTakedowns).
+ */
+export function takedowns(listed: ReadonlyArray<{ id: string; version: string }>, cards: readonly Scorecard[]): Scorecard[] {
+  const key = (x: { id: string; version: string }) => `${x.id}@${x.version}`;
+  const up = new Set(listed.map(key));
+  return cards.filter((c) => !c.passed && up.has(key(c)));
+}
+
 export function overdueTakedowns(listed: ReadonlyArray<{ id: string; version: string }>, cards: readonly Scorecard[], now: number): Scorecard[] {
   const key = (x: { id: string; version: string }) => `${x.id}@${x.version}`;
   const up = new Set(listed.map(key));

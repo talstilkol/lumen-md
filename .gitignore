@@ -67,6 +67,7 @@ coverage/
 .claude/
 .vercel
 public/pyodide/
+public/vendor/typst/
 public/webr/
 public/ort/
 public/vad/
@@ -159,3 +160,12 @@ dist-frame/
 # W11.I13: public retrieval sets fetched by scripts/retrieval/fetch.py (never committed)
 eval/public-data/
 scripts/drill/tauri-writer/target/
+# Plan W11.P14: the teacher PDF is built (npm run edu:pdf), not kept
+edu/dist/
+.ci-doctor/
+.ci-local/
+# Mac pack results (plan/mac-pack/*.json, npm run mac:pack): lane L2 writes .mac-pack/; reports/mac-pack/ is under /reports/* above
+/.mac-pack/
+
+# Pseudo-locales, built on demand (scripts/i18n-pseudo.mjs, plan W13.I1)
+/.pseudo/

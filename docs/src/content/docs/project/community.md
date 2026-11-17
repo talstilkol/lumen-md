@@ -1,6 +1,7 @@
 ---
 title: Community and the beta
 description: Where to talk about Lumen, how the Hebrew beta works, how to join, and the code of conduct.
+type: explanation
 ---
 
 Lumen is built in the open, in Hebrew and English.

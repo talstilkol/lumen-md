@@ -7,6 +7,11 @@ import { scrollBehavior } from "../lib/motion";
 import { useAppStore } from "../store/useStore";
 import { EmptyState } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
+import { filterMatch, highlightParts } from "../text/filterMatch";
+
+
+/** The search results' highlight (searchSnippet.tsx): the accent tint, readable in both themes. */
+const MARK: React.CSSProperties = { background: "hsl(var(--accent) / 0.25)", color: "hsl(var(--fg))", padding: 0, borderRadius: 2 };
 
 interface Props {
   markdownText: string;
@@ -42,6 +47,11 @@ export const Outline = React.memo(function Outline({ markdownText, sheet = false
     };
   }, [debounced, large]);
   const toc = smallToc ?? largeToc;
+  // The heading filter (W13.E3): niqqud, accents, case and geresh do not count.
+  const [filter, setFilter] = useState("");
+  const shown = useMemo(() => (filter.trim() ? toc.filter((h) => filterMatch(h.text, filter)) : toc), [toc, filter]);
+  const navRef = useRef<HTMLElement | null>(null);
+  const filterRef = useRef<HTMLInputElement | null>(null);
   // The ready marker (plan W7.25): the list is built from the text on screen, not a stale or pending parse.
   const [largeFor, setLargeFor] = useState<string | null>(null);
   const ready = debounced === markdownText && (!large || largeFor === debounced);
@@ -125,10 +135,69 @@ export const Outline = React.memo(function Outline({ markdownText, sheet = false
           action={{ label: t("outline.addHeading"), onClick: () => window.dispatchEvent(new CustomEvent("lumen-mobile-insert", { detail: { insert: "\n# ", cursorOffset: 0 } })) }}
         />
       ) : (
-        <nav aria-label={t("outline.title")}>
-          {toc.map((h, i) => (
+        <>
+        {toc.length > 1 && (
+          <div className="px-2 mb-2">
+            <input
+              ref={filterRef}
+              type="search"
+              className="w-full rounded border border-border bg-bg px-2 py-1 text-sm text-fg"
+              placeholder={t("outline.filter")}
+              aria-label={t("outline.filter")}
+              data-testid="outline-filter"
+              dir="auto"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape" && filter) {
+                  // Clear first; a second Escape goes on to whatever closes the panel.
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setFilter("");
+                } else if (e.key === "ArrowDown" || (e.key === "Enter" && shown.length)) {
+                  const first = navRef.current?.querySelector<HTMLElement>("a");
+                  if (first) {
+                    e.preventDefault();
+                    if (e.key === "Enter") first.click();
+                    else first.focus();
+                  }
+                }
+              }}
+            />
+            {filter.trim() && (
+              <p className="sr-only" role="status" aria-live="polite">
+                {shown.length ? t("outline.filterCount", { n: shown.length, total: toc.length }) : ""}
+              </p>
+            )}
+          </div>
+        )}
+        {shown.length === 0 && filter.trim() ? (
+          <p className="px-2 text-sm text-fg-muted" role="status" data-testid="outline-filter-empty" dir="auto">
+            {t("outline.filterNoMatch", { q: filter.trim() })}
+          </p>
+        ) : null}
+        <nav
+          aria-label={t("outline.title")}
+          ref={navRef}
+          onKeyDown={(e) => {
+            // Up from the first heading goes back to the filter box.
+            if (e.key === "ArrowUp" && e.target === navRef.current?.querySelector("a")) {
+              e.preventDefault();
+              filterRef.current?.focus();
+            } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+              const links = [...(navRef.current?.querySelectorAll<HTMLElement>("a") ?? [])];
+              const at = links.indexOf(e.target as HTMLElement);
+              const next = links[at + (e.key === "ArrowDown" ? 1 : -1)];
+              if (at >= 0 && next) {
+                e.preventDefault();
+                next.focus();
+              }
+            }
+          }}
+        >
+          {shown.map((h, i) => (
             <a
-              key={i}
+              key={`${h.id}-${i}`}
               href={`#${h.id}`}
               className={`outline-link h${h.depth}${activeId === h.id ? " active" : ""}`}
               aria-current={activeId === h.id ? "location" : undefined}
@@ -143,10 +212,15 @@ export const Outline = React.memo(function Outline({ markdownText, sheet = false
                 if (sheet) useAppStore.getState().toggleOutline();
               }}
             >
-              {h.text}
+              {filter.trim() ? (
+                <bdi>{highlightParts(h.text, filter).map((p, j) => (p.hit ? <mark key={j} style={MARK}>{p.text}</mark> : <React.Fragment key={j}>{p.text}</React.Fragment>))}</bdi>
+              ) : (
+                <bdi>{h.text}</bdi>
+              )}
             </a>
           ))}
         </nav>
+        </>
       )}
     </aside>
   );

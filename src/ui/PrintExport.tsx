@@ -6,10 +6,12 @@
  */
 
 import { extractFrontmatter, renderMarkdown } from "../renderer/pipeline";
-import { MM, PAGE_AREA_MM, PAGE_SLACK_MM, applyPageBreaks, buildToc, contentDirection, contentLang, layoutFootnotePages, printCss, printFrontmatter, type PrintOptions } from "../print/printLayout";
+import { hebrewListCss, listNumberingOf } from "../lib/hebrewListNumbering";
+import { MM, PAGE_SLACK_MM, pageArea, applyPageBreaks, buildToc, contentDirection, contentLang, layoutFootnotePages, printCss, printFrontmatter, type PrintOptions } from "../print/printLayout";
 import { getLocale, t } from "../i18n";
 import { safeSetHtml, safeClearHtml } from "../lib/trustedTypes";
 import { exportReadyText } from "../storage/exportReady";
+import { makePrintAccessible, type PdfPreflight } from "../print/accessiblePdf";
 
 /**
  * Generate a printable document from markdown content.
@@ -33,17 +35,19 @@ export async function printDocument(
   printInlineFallback(title, themeClass, dir, styles, html);
 }
 
-interface PreparedPrint {
+export interface PreparedPrint {
   title: string;
   themeClass: string;
   dir: "rtl" | "ltr";
   lang: string;
   styles: string;
   html: string;
+  /** W13.F3: what the accessibility pass changed, and the images still without a real description. */
+  preflight: PdfPreflight;
 }
 
 /** Render the note and lay it out for print (W2.23). Exposed for the print golden tests. */
-export async function preparePrint(markdownText: string, docName: string, opts: { appStyles?: boolean } = {}): Promise<PreparedPrint> {
+export async function preparePrint(markdownText: string, docName: string, opts: { appStyles?: boolean; overrides?: Partial<Pick<PrintOptions, "pageSize" | "margins" | "numbering">> } = {}): Promise<PreparedPrint> {
   const isDark = () => document.documentElement.classList.contains("dark");
   // W5.11: the PDF gets the text without its marked passages (removed, not
   // covered), and photos inlined without metadata (Chromium embeds a JPEG as is).
@@ -64,14 +68,21 @@ export async function preparePrint(markdownText: string, docName: string, opts: 
   const dir = contentDirection(markdownText);
   const lang = contentLang(temp.textContent ?? "", getLocale());
 
-  applyPageBreaks(temp);
-  const settings = printFrontmatter(fm);
-  if (settings.toc) {
-    const toc = buildToc(temp, t("print.toc"));
-    if (toc) temp.prepend(toc);
-  }
-  let html = temp.innerHTML;
+  // The layout works on a copy: React still owns `temp`'s nodes, and
+  // unmounting after they were replaced (\newpage, the table of contents)
+  // threw "removeChild … not a child of this node" (W13.R10).
+  const work = temp.cloneNode(true) as HTMLElement;
   root.unmount();
+  applyPageBreaks(work);
+  // W13.R10: the page preview's choices (size, margins, numbering) win over the frontmatter.
+  const settings: Partial<PrintOptions> = { ...printFrontmatter(fm), ...Object.fromEntries(Object.entries(opts.overrides ?? {}).filter(([, v]) => v !== undefined)) };
+  if (settings.toc) {
+    const toc = buildToc(work, t("print.toc"));
+    if (toc) work.prepend(toc);
+  }
+  // W13.F3: what a tagged PDF / PDF/UA-1 needs from the HTML (heading levels, alt text, table headers, language runs).
+  const preflight = makePrintAccessible(work, { lang, fallbackAlt: t("pdfUa.imageFallbackAlt") });
+  let html = work.innerHTML;
 
   // The app's own styles (theme, callouts, code, math, fonts), then the print layout.
   const styles: string[] = [];
@@ -85,6 +96,8 @@ export async function preparePrint(markdownText: string, docName: string, opts: 
     }
   }
   styles.push(printCss({ title, dir, ...settings }));
+  // W13.H5: א. ב. ג. for a note that asks for Hebrew list numbering (the Markdown keeps 1. 2. 3.).
+  if (listNumberingOf(fm) === "hebrew") styles.push(hebrewListCss("html"));
   // W2.23: footnotes at the bottom of their page unless the note asks for endnotes.
   if ((settings.footnotes ?? "page") === "page" && /data-footnotes|class="footnotes"/.test(html)) {
     html = (await layoutInFrame(html, styles.join("\n\n"), dir, lang, { title, dir, ...settings })) ?? html;
@@ -97,6 +110,7 @@ export async function preparePrint(markdownText: string, docName: string, opts: 
     lang,
     styles: styles.join("\n\n"),
     html,
+    preflight,
   };
 }
 
@@ -107,11 +121,11 @@ export async function preparePrint(markdownText: string, docName: string, opts: 
  * DOM without layout): the footnotes then stay endnotes.
  */
 async function layoutInFrame(html: string, styles: string, dir: string, lang: string, o: PrintOptions): Promise<string | null> {
-  const area = PAGE_AREA_MM[o.pageSize ?? "A4"];
+  const area = pageArea(o.pageSize, o.margins);
   const frame = document.createElement("iframe");
   frame.setAttribute("aria-hidden", "true");
   frame.tabIndex = -1;
-  frame.style.cssText = `position:fixed;left:-10000px;top:0;width:${area.width + 40}mm;height:${area.height}mm;border:0;visibility:hidden;`;
+  frame.style.cssText = `position:fixed;inset-inline-start:-10000px;top:0;width:${area.width + 40}mm;height:${area.height}mm;border:0;visibility:hidden;`;
   document.body.appendChild(frame);
   try {
     const doc = frame.contentDocument;
@@ -138,7 +152,8 @@ export async function buildPrintHtml(markdownText: string, docName: string): Pro
   return "<!doctype html>" + doc.documentElement.outerHTML;
 }
 
-function hydratePrintDocument(
+/** Write the print document into a (frame's) document: the export and the page preview share it (W13.R10). */
+export function hydratePrintDocument(
   targetDocument: Document,
   safeDocName: string,
   themeClass: string,

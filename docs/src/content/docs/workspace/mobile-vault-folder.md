@@ -1,6 +1,8 @@
 ---
 title: The vault in a folder on your phone
 description: In the iOS and Android apps, keep the vault in a real folder — the Files app on iOS, a folder you pick on Android — and see edits made there.
+type: how-to
+tasks: ["4.20"]
 ---
 
 In the phone app the vault starts in the app's private storage. **Command

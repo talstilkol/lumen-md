@@ -1,6 +1,8 @@
 ---
 title: Citations with [@key]
 description: Cite from your BibTeX, CSL-JSON or Zotero library with pandoc's [@key, p. 10], in APA, Chicago, MLA or the Israeli APA, with a reference list in the preview, DOCX and PDF.
+type: reference
+tasks: ["W5.23", "W10.E38", "6.13", "W2.16"]
 ---
 
 ## Cite in two keystrokes
@@ -32,6 +34,27 @@ Keys come from the source: the BibTeX key, CSL's `citation-key`, or a
 `Citation Key:` line from Better BibTeX. Otherwise the key is the author's
 family name and the year (`austen1813`, `כהן2020`).
 
+## Zotero by file
+
+Works on every build, offline, with nothing sent anywhere:
+
+1. In Zotero, choose **File → Export Library…** (or right-click a
+   collection → **Export Collection…**) and pick **CSL JSON**, **BibTeX**
+   or **RIS**. Better BibTeX keys are kept.
+2. In Lumen, **⌘K → Citations: import a Zotero export file** and pick the
+   file. The sources join the cite dialog.
+
+Importing the same library again changes only what changed: Lumen matches
+each source by its citation key, then its Zotero id, its DOI, or its title
+and year, and says how many were added, updated and unchanged. Sources that
+are not in the file stay, unless you agree to remove them (an export of one
+collection is not the whole library).
+
+The other way: **⌘K → Citations: export the vault's sources for Zotero**
+writes `lumen-sources.json` (CSL JSON) with every source of the vault
+(`.bib`, CSL JSON and the Zotero copy), keys included; **…as RIS** writes
+`lumen-sources.ris`. In Zotero, **File → Import…** adds them.
+
 ## Zotero without the desktop app
 
 On the web and on phones, **⌘K → Citations: sync the Zotero library from
@@ -56,6 +79,24 @@ The sync itself never writes to Zotero; the one write is
 [sending PDF highlights](/workspace/pdf-reader/#send-highlights-to-zotero),
 after you confirm it, with a key that has write access. If Zotero asks the app to slow down
 (`Backoff`, `429`), Lumen waits.
+
+## From a DOI
+
+> **Off in this version.** The lookup needs `api.crossref.org` in the app's
+> Content-Security-Policy, and that change is waiting for the owner's approval.
+> Until then the command says so and sends nothing. What follows is how it works
+> once it is on.
+
+**Cite from a DOI (CrossRef)…** in the command palette takes a DOI (`10.…`,
+`doi:…` or a `doi.org` link). After you approve the request, it fills the
+reference from CrossRef's public API: authors, year, title, journal or book,
+volume, issue, pages and publisher. The reference is inserted at the cursor in
+APA 7. Only the DOI is sent, to `api.crossref.org`, and the request appears in
+the privacy ledger. Under the local-only policy it is blocked, like the other
+research services.
+
+Research answers (**Research: …**) now end with a **References** list in APA 7:
+each web page the answer cites, once. The footnotes with their quotes stay.
 
 ## Pandoc syntax
 

@@ -1,6 +1,8 @@
 ---
 title: Note cards and image export
 description: Put vault notes on the canvas as live cards, edit them in place, and export the canvas as PNG, SVG or PDF with Hebrew intact.
+type: how-to
+tasks: ["W1.16"]
 ---
 
 ## Note cards

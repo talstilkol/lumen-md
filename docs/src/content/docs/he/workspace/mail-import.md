@@ -1,6 +1,8 @@
 ---
 title: דואר ו-Google Takeout לפתקים
 description: ייבוא דואר .eml ו-.mbox וארכיון Google Takeout (Keep, Docs) לפתקים, מקבצים בלבד, עם דואר עברי בכל הקידודים הישנים.
+type: reference
+tasks: ["W5.18"]
 ---
 
 **⌘K ← ייבוא דואר (.eml, .mbox) או Google Takeout…** קורא דואר ונתוני

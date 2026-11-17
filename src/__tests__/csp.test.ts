@@ -223,6 +223,7 @@ describe("CSP alignment", () => {
       "https://www.sefaria.org/api/v3/texts/Genesis%201%3A1", // sources/sefaria (W5.1)
       "https://knesset.gov.il/OdataV4/ParliamentInfo/KNS_IsraelLaw?$top=1", // sources/knesset (W7.5)
       "https://knesset.gov.il/Odata/ParliamentInfo.svc/KNS_IsraelLaw?$format=json", // V3 fallback
+      "https://www.wikidata.org/w/api.php?action=wbsearchentities&search=x&language=he&format=json&origin=*", // entities/wikidata (W12.E10)
       "https://data.gov.il/api/3/action/datastore_search?resource_id=x", // sources/datagov (W7.6)
       "https://apis.cbs.gov.il/series/data/list?id=120010&format=json&download=false",
       "https://oauth2.googleapis.com/token",

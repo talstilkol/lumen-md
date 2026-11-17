@@ -185,6 +185,18 @@
       "vars": []
     },
     {
+      "key": "canvas.hl.deleted",
+      "en": "Source deleted",
+      "vars": []
+    },
+    {
+      "key": "canvas.hl.page",
+      "en": "p. {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "canvas.jsonCanvas.export",
       "en": "Export .canvas",
       "vars": []

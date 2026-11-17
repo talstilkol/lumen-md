@@ -2,9 +2,13 @@
 
 ## Supported versions
 
-| Version | Supported |
-|---------|-----------|
-| 0.1.x   | ✅ Current |
+| Version | Supported | Security fixes |
+|---------|-----------|----------------|
+| 0.1.x   | ✅ Current | While it is the newest release line, and for critical and high severity for 90 days after the next minor line ships. |
+
+**Support period:** Lumen gets security updates for at least five years from its first public release, and never ending before 31 December 2031 (CRA Art. 13(8)). They ship in the newest release line, which every user can move to free of charge (Art. 13(10)); each security update stays downloadable for at least ten years (Art. 13(9)).
+
+The same table is on the public security page (written from `security/disclosure.json`). Which browsers and systems are supported, and how the code keeps to them: [docs/support-policy.md](docs/support-policy.md) ([עברית](docs/support-policy.he.md)).
 
 ## Reporting a vulnerability
 
@@ -31,6 +35,18 @@ GitHub's private vulnerability reporting is **not turned on yet** for this repos
 
 If the first maintainer does not answer within 48 hours, the second maintainer (docs: *contributing/second-maintainer*) takes the report. Both receive every report.
 
+### Disclosure timelines (EU Cyber Resilience Act, Article 14)
+
+The reporting duties of the CRA (Regulation (EU) 2024/2847) apply from 11 September 2026. A free project that is not monetised is most likely outside them, but Lumen keeps the same clock for a vulnerability that is **actively exploited**:
+
+| When | What the maintainers publish |
+|---|---|
+| ≤ 24 hours after learning it is exploited | **Early warning**: what is affected and what to do meanwhile, with no exploit details. |
+| ≤ 72 hours | **Notification**: the affected versions, the severity (CVSS 3.1) and the mitigations. |
+| ≤ 14 days after a fix or mitigation is available | **Final report**: the GitHub security advisory (GHSA) with the description, severity, impact, root cause and fix, and a CVE requested through it. |
+
+For a severe incident the final report comes within 30 days. If Lumen ever becomes a manufacturer under the CRA (for example through a paid relay), the same reports also go to the CSIRT and ENISA's single reporting platform, on the same clock. The contact is also published as [`/.well-known/security.txt`](https://lumen-md.vercel.app/.well-known/security.txt) (RFC 9116).
+
 ### In scope
 
 - The web app (lumen-md.vercel.app and self-hosted builds), the desktop app (Tauri), the Android and iOS apps
@@ -45,11 +61,19 @@ If the first maintainer does not answer within 48 hours, the second maintainer (
 - Missing hardening headers on hosts Lumen does not run
 - Third-party services the user connects (their own model provider, sync provider), except how Lumen uses them
 
-We do not pursue legal action against good-faith research that follows this policy, avoids harm to users' data, and gives us the time above.
+### Good-faith research (safe harbor)
+
+We will not take legal action against research, or ask a host to act against it, when it follows this policy, tests only your own data and installations, does not read, change or delete other people's data, does not degrade the service for others, and gives us the time above before publishing. If someone else acts against you for such research, we will say publicly that it followed this policy.
 
 ### בעברית
 
 לא מפרסמים פרטים של חולשת אבטחה ב-issue, בדיון או ב-PR ציבוריים. **היום** פותחים issue ציבורי בכותרת **["Security contact request"](https://github.com/talstilkol/lumen-md/issues/new?title=Security%20contact%20request)** בלי שום פרט, ומתחזק עונה תוך 48 שעות עם ערוץ פרטי שאליו שולחים את הדיווח. הדיווח הפרטי של GitHub ‏(Report a vulnerability) **עוד לא מופעל** במאגר הזה, ולכן הכפתור לא עובד; כשהבעלים יפעיל אותו הוא יהיה הערוץ הראשון, ואחריו תיבת דואר ייעודית עם מפתח מפורסם. מצב כל ערוץ נמצא ב-`security/channels.json`. ניתן חומרה ותאריך תיקון תוך 5 ימי עבודה, נתקן ב-fork פרטי זמני ונפרסם את הגרסה ואז את ה-advisory (עם CVE מחומרה בינונית ומעלה, ועם קרדיט למדווח). המועד האחרון לפרסום הוא 90 יום מהדיווח. אם המתחזק הראשון לא עונה תוך 48 שעות, המתחזק השני מטפל.
+
+**לוחות זמנים לפי ה-CRA (סעיף 14):** לחולשה שמנוצלת בפועל — התרעה מוקדמת עד 24 שעות מרגע שנודע עליה (מה מושפע ומה לעשות, בלי פרטי ניצול), הודעה עד 72 שעות (גרסאות, חומרה, התגוננות), ודוח סופי עד 14 יום אחרי שיש תיקון או התגוננות (ה-advisory של GitHub עם CVE). באירוע חמור הדוח הסופי תוך 30 יום. פרויקט חינמי כנראה פטור מהחובות האלה, שחלות מ-11 בספטמבר 2026, אבל אנחנו שומרים על אותם זמנים.
+
+**מחקר בתום לב:** לא ננקוט צעדים משפטיים נגד מחקר שפועל לפי המדיניות הזו, בודק רק על הנתונים וההתקנות שלכם, לא נוגע בנתונים של אחרים ולא פוגע בשירות, ונותן לנו את הזמן שלמעלה לפני פרסום.
+
+**תקופת תמיכה:** קו הגרסאות 0.1.x מקבל תיקוני אבטחה כל עוד הוא החדש ביותר, ותיקונים בחומרה קריטית וגבוהה עוד 90 יום אחרי שקו הגרסאות הבא יוצא. Lumen מקבל עדכוני אבטחה לפחות חמש שנים מהגרסה הציבורית הראשונה, ובכל מקרה לא פחות מעד 31 בדצמבר 2031 (CRA סעיף 13(8)). העדכונים יוצאים בקו הגרסאות החדש ביותר, שכל משתמש יכול לעבור אליו בחינם (סעיף 13(10)), וכל עדכון אבטחה נשאר זמין להורדה לפחות עשר שנים (סעיף 13(9)).
 
 ## Maintainers and keys
 
@@ -125,3 +149,7 @@ Third-party plugins run in a sandboxed `<iframe>` with:
 ## Disclosure timeline
 
 We follow a **90-day disclosure policy**. If a fix is not released within 90 days of the initial report, the reporter may publish details publicly.
+
+## Hall of fame
+
+Reporters are credited here and in the advisory, unless they ask not to be. No reports credited yet.

@@ -1,6 +1,8 @@
 ---
 title: Markdown fidelity
 description: How closely Lumen follows the CommonMark and GFM specs, and the promise that opening and saving a file in either editor gives you back the same bytes.
+type: how-to
+tasks: ["W11.Q8", "W1.2"]
 ---
 
 A Markdown editor should never rewrite your files behind your back. Lumen is
@@ -22,7 +24,7 @@ on its own. What Lumen adds on top changes a handful of results on purpose:
 
 | Where Lumen differs | Why |
 |---|---|
-| A leading `---` block is frontmatter | It holds the note's metadata (title, tags). The spec reads it as a thematic break and text. |
+| A leading `---` block is frontmatter, even an empty one | It holds the note's metadata (title, tags). The spec reads it as thematic breaks and text. |
 | A bare URL or email address becomes a link | GFM autolink literals are always on, including in examples that test plain CommonMark. |
 | `ftp://` addresses are not linked automatically | Matches github.com today. Write `<ftp://…>` to link one. |
 | Disallowed raw HTML (`<script>`, `<title>`, …) is not filtered by the parser | The preview sanitizes all raw HTML afterwards, which removes these tags. |
@@ -34,6 +36,25 @@ the newer spec, and those examples are left out of the GFM score.
 
 Any other failing example fails the suite, so every difference has to be
 explained here.
+
+### The published numbers
+
+`eval/results/md-conformance.json` lists the numbers below. Every exception in it has a reason. `node scripts/md-conformance.mjs` writes the file, and `--check` fails if the file no longer matches a fresh run.
+
+| Row | Passed | Rate |
+|---|---|---|
+| CommonMark parser (micromark) | 652 / 652 | 100% |
+| CommonMark, saved through the AST | 647 / 652 | 99.23% |
+| GFM parser (micromark with the GFM extensions) | 652 / 661 | 98.64% |
+| GFM, saved through the AST | 654 / 661 | 98.94% |
+| The preview: CommonMark | 646 / 652 | 99.08% |
+| The preview: GFM | 653 / 661 | 98.79% |
+
+The GFM rows leave out 11 of the 672 examples: the 2 that the spec disables and 9 that CommonMark 0.31.2 superseded.
+
+The GFM rows are under 99%. 8 of the 9 parser misses are core examples that the GFM spec wrote without its own extensions. For example, its tag filter escapes `<script>`, and its autolink literals link a bare URL. The 9th is `ftp://`, which is no longer linked.
+
+The two preview rows were measured on 16 November 2026 in Chromium. They use the lockfile's packages.
 
 ## Round trip
 

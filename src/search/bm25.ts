@@ -13,7 +13,8 @@
  * nothing here is in the startup bundle.
  */
 
-import { documentTerms, queryTerms, STEM, type QueryTerm } from "../text/searchTokens";
+import { documentTerms, queryTerms, STEM, TRANSLIT_WEIGHT, type QueryTerm } from "../text/searchTokens";
+import { phoneticKeys, translitScript } from "../text/translit";
 
 export const K1 = 1.2;
 export const B = 0.75;
@@ -31,6 +32,12 @@ export const PREFIX_WEIGHT = 0.5;
  */
 export const MAX_PREFIX_POSTINGS = 50_000;
 
+/** At most this many words in the other script stand for one query word (R12.16). */
+export const MAX_TRANSLIT_TERMS = 8;
+
+/** A word's length without Latin vowels (Hebrew writes few vowels: "kohen" is as long as "כהנ"). */
+const consonants = (w: string) => w.replace(/[aeiouy]/g, "").length;
+
 interface Doc {
   id: string;
   /** Internal number: postings are keyed by it (small integers are V8's fastest Map keys). */
@@ -42,6 +49,8 @@ interface Doc {
   length: number;
   /** Its distinct terms (for removal). */
   terms: string[];
+  /** The extra terms it was indexed with (W11.H12: model lemmas), joined; "" for none. */
+  extra: string;
 }
 
 export interface Bm25Hit {
@@ -59,6 +68,12 @@ export class Bm25Index {
   private postings = new Map<string, Map<number, number>>();
   private totalLength = 0;
   private nextNum = 0;
+  /**
+   * Phonetic key → the index's words with that key (R12.16). Built the first
+   * time a query needs it, then kept up to date by set / remove, so an index
+   * nobody searches across scripts never pays for it.
+   */
+  private translit: Map<string, Set<string>> | null = null;
 
   get size(): number {
     return this.docs.size;
@@ -74,13 +89,22 @@ export class Bm25Index {
     return !!d && d.source === text && d.name === name;
   }
 
-  /** Add or replace one document. */
-  set(id: string, text: string, name = ""): void {
-    if (this.isCurrent(id, text, name)) return;
+  /**
+   * Add or replace one document. `extra`: terms computed elsewhere, each
+   * counted once like a word of the text (W11.H12: the `≃` lemma terms a
+   * lemmatizer model gives, ./lemma/lemmaIndex.ts).
+   */
+  set(id: string, text: string, name = "", extra: readonly string[] = []): void {
+    const key = extra.join("\u0000");
+    if (this.isCurrent(id, text, name) && this.docs.get(id)!.extra === key) return;
     this.remove(id);
     const counts = new Map<string, number>();
     let length = 0;
     for (const t of documentTerms(text)) {
+      counts.set(t, (counts.get(t) ?? 0) + 1);
+      length++;
+    }
+    for (const t of extra) {
       counts.set(t, (counts.get(t) ?? 0) + 1);
       length++;
     }
@@ -89,15 +113,63 @@ export class Bm25Index {
       length += NAME_BOOST;
     }
     const num = this.nextNum++;
-    const doc: Doc = { id, num, source: text, name, length, terms: [...counts.keys()] };
+    const doc: Doc = { id, num, source: text, name, length, terms: [...counts.keys()], extra: key };
     this.docs.set(id, doc);
     this.byNum.set(num, doc);
     this.totalLength += length;
     for (const [t, tf] of counts) {
       let p = this.postings.get(t);
-      if (!p) this.postings.set(t, (p = new Map()));
+      if (!p) {
+        this.postings.set(t, (p = new Map()));
+        if (this.translit) this.addTranslit(t);
+      }
       p.set(num, tf);
     }
+  }
+
+  private addTranslit(term: string): void {
+    const map = this.translit;
+    if (!map || !translitScript(term)) return;
+    for (const k of phoneticKeys(term)) {
+      let s = map.get(k);
+      if (!s) map.set(k, (s = new Set()));
+      s.add(term);
+    }
+  }
+
+  private dropTranslit(term: string): void {
+    const map = this.translit;
+    if (!map || !translitScript(term)) return;
+    for (const k of phoneticKeys(term)) {
+      const s = map.get(k);
+      if (!s) continue;
+      s.delete(term);
+      if (!s.size) map.delete(k);
+    }
+  }
+
+  /**
+   * For each query word, the index's words in the other script that share a
+   * phonetic key with it ("Kohen" → "כהנ"), as weaker forms of that word.
+   */
+  private transliterations(terms: QueryTerm[]): QueryTerm[] {
+    const exact = terms.filter((t) => t.weight === 1 && translitScript(t.term) && t.term.replace(/['"]/g, "").length >= 3);
+    if (!exact.length) return [];
+    if (!this.translit) {
+      this.translit = new Map();
+      for (const term of this.postings.keys()) this.addTranslit(term);
+    }
+    const out: QueryTerm[] = [];
+    for (const { term, group } of exact) {
+      const script = translitScript(term);
+      const found = new Set<string>();
+      for (const k of phoneticKeys(term)) for (const w of this.translit.get(k) ?? []) if (translitScript(w) !== script) found.add(w);
+      // The closest in consonants first (a name, not a longer word that happens to share its sounds).
+      const len = consonants(term);
+      const best = [...found].sort((a, b) => Math.abs(consonants(a) - len) - Math.abs(consonants(b) - len) || (a < b ? -1 : 1)).slice(0, MAX_TRANSLIT_TERMS);
+      for (const w of best) out.push({ term: w, weight: TRANSLIT_WEIGHT, group });
+    }
+    return out;
   }
 
   remove(id: string): void {
@@ -110,7 +182,10 @@ export class Bm25Index {
       const p = this.postings.get(t);
       if (!p) continue;
       p.delete(d.num);
-      if (!p.size) this.postings.delete(t);
+      if (!p.size) {
+        this.postings.delete(t);
+        this.dropTranslit(t);
+      }
     }
   }
 
@@ -148,19 +223,30 @@ export class Bm25Index {
     return out;
   }
 
-  search(query: string | QueryTerm[], opts: { limit?: number; filter?: (id: string) => boolean; prefix?: boolean } = {}): Bm25Hit[] {
+  /**
+   * `expand`: more forms of the query's words, from the query's terms (W11.H12:
+   * a lemmatizer's lemmas, ./lemma/lemmaIndex.ts); each keeps its word's group.
+   */
+  search(query: string | QueryTerm[], opts: { limit?: number; filter?: (id: string) => boolean; prefix?: boolean; expand?: (base: QueryTerm[]) => QueryTerm[] } = {}): Bm25Hit[] {
     const base = typeof query === "string" ? queryTerms(query) : query;
     const n = this.docs.size;
     if (!n || !base.length) return [];
-    const terms = opts.prefix ? [...base, ...this.completions(base)] : base;
-    const groups = new Set(base.map((t) => t.group)).size;
+    const expanded = opts.expand ? [...base, ...opts.expand(base)] : base;
+    const withTranslit = typeof query === "string" ? [...expanded, ...this.transliterations(base)] : expanded;
+    const terms = opts.prefix ? [...withTranslit, ...this.completions(base)] : withTranslit;
+    // Query words by index (W13.V3: arrays per document, not a Map each — a word in 5,000 notes allocates 5,000 fewer Maps).
+    const groupIndex = new Map<number, number>();
+    for (const t of base) if (!groupIndex.has(t.group)) groupIndex.set(t.group, groupIndex.size);
+    const groups = groupIndex.size;
     const avg = this.totalLength / n || 1;
     // Per document, per query word: the best of its forms (see QueryTerm.group).
-    const scores = new Map<Doc, { best: Map<number, [string, number]> }>();
+    const scores = new Map<Doc, { s: Float64Array; t: (string | undefined)[] }>();
     const allowed = new Map<Doc, boolean>();
     for (const { term, weight, group } of terms) {
       const p = this.postings.get(term);
       if (!p) continue;
+      const gi = groupIndex.get(group);
+      if (gi === undefined) continue;
       const idf = this.idf(term) * weight;
       for (const [num, tf] of p) {
         const doc = this.byNum.get(num)!;
@@ -172,16 +258,32 @@ export class Bm25Index {
         const len = doc.length;
         const s = (idf * tf * (K1 + 1)) / (tf + K1 * (1 - B + (B * len) / avg));
         let e = scores.get(doc);
-        if (!e) scores.set(doc, (e = { best: new Map() }));
-        const prev = e.best.get(group);
-        if (!prev || s > prev[1]) e.best.set(group, [term, s]);
+        if (!e) scores.set(doc, (e = { s: new Float64Array(groups), t: new Array(groups) }));
+        if (e.t[gi] === undefined || s > e.s[gi]) {
+          e.s[gi] = s;
+          e.t[gi] = term;
+        }
       }
     }
     const limit = opts.limit ?? 30;
     const hits: Bm25Hit[] = [];
     for (const [doc, e] of scores) {
-      const parts = [...e.best.values()].sort((a, b) => b[1] - a[1]);
-      hits.push({ id: doc.id, score: parts.reduce((sum, [, v]) => sum + v, 0), matched: parts.map(([t]) => t), complete: e.best.size === groups });
+      let score = 0;
+      let found = 0;
+      const parts: [string, number][] = [];
+      for (let g = 0; g < groups; g++) {
+        const term = e.t[g];
+        if (term === undefined) continue;
+        found++;
+        score += e.s[g];
+        parts.push([term, e.s[g]]);
+      }
+      if (parts.length > 1) {
+        // The same order of addition as before, so equal scores stay equal to the last bit.
+        parts.sort((x, y) => y[1] - x[1]);
+        score = parts.reduce((sum, [, v]) => sum + v, 0);
+      }
+      hits.push({ id: doc.id, score, matched: parts.map(([t]) => t), complete: found === groups });
     }
     hits.sort((a, b) => b.score - a.score || (a.id < b.id ? -1 : 1));
     return hits.slice(0, limit);

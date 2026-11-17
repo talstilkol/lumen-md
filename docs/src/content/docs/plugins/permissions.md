@@ -1,6 +1,8 @@
 ---
 title: Permissions and safety scan
 description: Before a sandboxed plugin installs, Lumen shows every permission it asks for in plain language; every version in the registry is scanned, and a version that fails is not shown.
+type: reference
+tasks: ["W1.20"]
 ---
 
 A sandboxed plugin can do nothing until you allow it — see the

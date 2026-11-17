@@ -11,6 +11,8 @@
  *  - "Save this source for offline": the user-initiated offline copy
  *    (free text only) in Sources/Sefaria/.
  *  - "My notes on this verse": every note that cites the same verse.
+ *  - "Study with a partner (havruta)" (W12.H2): a shared, encrypted study
+ *    room on the reference; notes travel, the text stays on each device.
  */
 import { t } from "../../i18n";
 import { cmdIcons } from "../../ui/cmdIcons";
@@ -44,6 +46,14 @@ export function buildSourceCommands(ctx: CommandContext): Command[] {
       icon: cmdIcons.Link,
       group,
       action: () => import("./sourcesActions").then((m) => m.notesOnVerse(ctx)),
+    },
+    {
+      id: "sources.havruta",
+      label: t("cmd.sources.havruta"),
+      hint: t("cmd.sources.havruta.hint"),
+      icon: cmdIcons.Link,
+      group,
+      action: () => import("./sourcesActions").then((m) => m.studyHavruta(ctx)),
     },
   ];
 }

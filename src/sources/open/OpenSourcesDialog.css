@@ -9,3 +9,9 @@
 .os-switches { border: 1px solid var(--border, #8884); border-radius: 0.4rem; padding: 0.4rem 0.6rem; font-size: 0.85rem; }
 .os-switch { display: grid; grid-template-columns: auto auto 1fr; gap: 0.5rem; align-items: baseline; padding: 0.15rem 0; }
 .os-sends { opacity: 0.75; font-size: 0.8rem; }
+/* R12.19: a register's licence light and terms. */
+.os-terms { flex-basis: 100%; font-size: 0.75rem; opacity: 0.85; }
+.os-light-green::before, .os-light-amber::before, .os-light-red::before { content: "●"; margin-inline-end: 0.25rem; }
+.os-light-green::before { color: hsl(142 60% 38%); }
+.os-light-amber::before { color: hsl(38 90% 45%); }
+.os-light-red::before { color: hsl(0 70% 48%); }

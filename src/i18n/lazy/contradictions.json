@@ -1,0 +1,12 @@
+{
+  "contradictions.candidates": "{n} candidates. Each is two exact quotes for you to compare; nothing was decided or changed.",
+  "contradictions.kind.correction": "A correction",
+  "contradictions.kind.date": "Different dates",
+  "contradictions.kind.denial": "A denial",
+  "contradictions.kind.direction": "Opposite direction",
+  "contradictions.kind.value": "Different values",
+  "contradictions.none": "No disagreements found between your notes.",
+  "contradictions.summary": "Where my notes disagree: {n} candidates",
+  "contradictions.title": "Where my notes disagree",
+  "contradictions.untrusted": "Outside content, given no weight: {why}"
+}

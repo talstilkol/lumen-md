@@ -49,9 +49,11 @@ export function scoreLabel(r) {
  * null when it is not there.
  * @returns {{ module: string, state: "ok" | "absent" | "missing" | "low" | "stale" | "estimated", score?: number, note?: string, testsChanged?: boolean }[]}
  */
-export function checkReceipt(targets, receipt, read) {
+export function checkReceipt(targets, receipt, read, calibration = null) {
   const min = targets.critical?.min ?? 80;
-  return (targets.critical?.modules ?? []).map((module) => {
+  return (targets.critical?.modules ?? []).map((module) => withCalibration(module, calibration, checkOne(module)));
+
+  function checkOne(module) {
     const src = read(module);
     if (src === null) return { module, state: "absent" };
     const r = receipt?.modules?.[module];
@@ -66,7 +68,19 @@ export function checkReceipt(targets, receipt, read) {
     }
     if (!(r.score >= min)) return { module, state: "low", score: r.score, note: `${scoreLabel(r)} < ${min}%`, testsChanged };
     return { module, state: "ok", score: r.score, note: scoreLabel(r), testsChanged };
-  });
+  }
+}
+
+/**
+ * W11.Q9: a module whose score was calibrated against Stryker carries the
+ * verdict. "unverified" (more than 5 points apart) does not fail the gate,
+ * but is printed with both numbers, so no status reports our number as if
+ * it were Stryker's.
+ */
+function withCalibration(module, calibration, row) {
+  const c = calibration?.modules?.[module];
+  if (!c || c.verdict === "not measured") return row;
+  return { ...row, verified: c.verdict === "verified", stryker: c.stryker };
 }
 
 function main() {
@@ -75,11 +89,14 @@ function main() {
   const file = join(root, "scripts/mutation/receipt.json");
   const receipt = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : null;
   const read = (p) => (existsSync(join(root, p)) ? readFileSync(join(root, p), "utf8") : null);
-  const rows = checkReceipt(targets, receipt, read);
+  const calFile = join(root, "scripts/mutation/calibration.json");
+  const calibration = existsSync(calFile) ? JSON.parse(readFileSync(calFile, "utf8")) : null;
+  const rows = checkReceipt(targets, receipt, read, calibration);
   const bad = rows.filter((r) => r.state === "missing" || r.state === "low" || r.state === "stale" || r.state === "estimated");
   for (const r of rows) {
     const mark = { ok: "✓", absent: "·", missing: "✗", low: "✗", stale: "✗", estimated: "~" }[r.state];
-    console.log(`${mark} ${r.module}: ${r.state === "absent" ? "not on this branch" : r.note}${r.testsChanged && r.state !== "absent" ? " (its tests changed since the run)" : ""}`);
+    const cal = r.verified === false ? ` — unverified: Stryker scores it ${r.stryker}%` : r.verified ? ` (Stryker ${r.stryker}%)` : "";
+    console.log(`${mark} ${r.module}: ${r.state === "absent" ? "not on this branch" : r.note}${r.testsChanged && r.state !== "absent" ? " (its tests changed since the run)" : ""}${cal}`);
   }
   if (bad.length) {
     console.error(

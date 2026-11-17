@@ -9,12 +9,29 @@
  * head commit is an ancestor of the train's head, and reads the decision for
  * each one that is not from plan/train-missing.json:
  *
- *   { "pr": 235, "head": "<sha the decision is about>", "decision": "in" | "rejected" | "replaced",
- *     "reason": "…", "via": "W10.F4" (for "in": the task or PR that brings it), "by": "…" (for "replaced": what replaces it) }
+ *   { "pr": 235, "head": "<sha the decision is about>", "decision": "in" | "deferred" | "rejected" | "replaced",
+ *     "reason": "…", "via": "W10.F4" (for "in": the task or PR that brings it), "by": "…" (for "replaced": what replaces it),
+ *     "until": "…" (for "deferred": what has to happen before it may go in, e.g. an owner decision) }
+ *
+ * "deferred" (review 12, L5) is a PR held out on purpose until something else
+ * happens; "in" is only for a PR that the next integration brings in.
  *
  * A decision is about one head: when the PR has moved since, the decision
  * is stale and the PR counts as undecided again. The run fails (exit 1)
  * while any PR head outside the train has no current decision.
+ *
+ * One exception (R8 train:missing, R8b-L3): dependabot rebases its PRs onto
+ * the default branch on its own, which moves their heads without changing
+ * what they bump. A `"rejected"` decision with `"author": "dependabot[bot]"`
+ * and the PR's exact `"title"` holds across such a rebase, but only while
+ *   - the PR's author is dependabot[bot] and its title is still that title
+ *     (a new version in the title is a new bump, and stale; a grouped title
+ *     names no versions, which is why only a rejection may follow), and
+ *   - every commit on the PR is dependabot's own: authored by dependabot[bot],
+ *     committed by it or by GitHub (web-flow), and signature-verified
+ *     (`GET pulls/{n}/commits`). One push by anyone else makes it stale.
+ * "in" and "replaced" never follow a rebase: a new head needs a new look.
+ * Every other PR is matched by head, as before.
  *
  *   npm run train:missing [-- --train verify/train-4] [--decisions plan/train-missing.json] [--json]
  */
@@ -24,8 +41,12 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { currentTrain } from "./lib/trainBase.mjs";
 
-export const DECISIONS = ["in", "rejected", "replaced"];
+export const DECISIONS = ["in", "deferred", "rejected", "replaced"];
+/** The one author whose PRs a decision may follow across a rebase (by number, author and title). */
+export const DEPENDABOT = "dependabot[bot]";
 export const DECISIONS_FILE = "plan/train-missing.json";
+/** Who may commit a dependabot PR's commits: the bot, or GitHub signing for it. */
+const BOT_COMMITTERS = [DEPENDABOT, "web-flow"];
 
 /** Every open PR, all pages: `api(path)` returns one page (an array). */
 export function openPulls(api, repo) {
@@ -33,6 +54,18 @@ export function openPulls(api, repo) {
   for (let page = 1; page < 100; page++) {
     const batch = api(`repos/${repo}/pulls?state=open&per_page=100&page=${page}`);
     if (!Array.isArray(batch)) throw new Error(`GET pulls page ${page}: not a list`);
+    out.push(...batch);
+    if (batch.length < 100) break;
+  }
+  return out;
+}
+
+/** A PR's commits, all pages (the endpoint lists at most 250). */
+export function pullCommits(api, repo, number) {
+  const out = [];
+  for (let page = 1; page <= 3; page++) {
+    const batch = api(`repos/${repo}/pulls/${number}/commits?per_page=100&page=${page}`);
+    if (!Array.isArray(batch)) throw new Error(`GET pulls/${number}/commits page ${page}: not a list`);
     out.push(...batch);
     if (batch.length < 100) break;
   }
@@ -55,15 +88,44 @@ export function checkDecisions(file) {
     if (typeof d?.head !== "string" || !/^[0-9a-f]{10,40}$/.test(d.head)) problems.push(`${at}: head is not a commit sha (10 to 40 hex)`);
     if (d?.decision === "in" && !(typeof d.via === "string" && d.via.trim())) problems.push(`${at}: "in" names the task or PR that brings it (via)`);
     if (d?.decision === "replaced" && !(typeof d.by === "string" && d.by.trim())) problems.push(`${at}: "replaced" names what replaces it (by)`);
+    if (d?.decision === "deferred" && !(typeof d.until === "string" && d.until.trim())) problems.push(`${at}: "deferred" names what it waits for (until)`);
+    if (d?.decision === "in" && typeof d?.reason === "string" && /\bleft out on purpose\b/i.test(d.reason)) problems.push(`${at}: a PR left out on purpose is "deferred" (with until), not "in"`);
+    if (d?.author !== undefined && d.author !== DEPENDABOT) problems.push(`${at}: author may only be "${DEPENDABOT}" (other PRs are decided by head)`);
+    if (d?.author === DEPENDABOT && !(typeof d.title === "string" && d.title.trim())) problems.push(`${at}: a dependabot decision names the PR's title (a new version is a new decision)`);
+    if (d?.author === DEPENDABOT && d?.decision !== "rejected") problems.push(`${at}: only a "rejected" dependabot decision may follow a rebase; "${d?.decision}" is decided by head`);
   }
   return problems;
 }
 
+/** Every commit is dependabot's own: its author, committed by it or GitHub, signature-verified. */
+export function onlyBotCommits(commits) {
+  return (
+    Array.isArray(commits) &&
+    commits.length > 0 &&
+    commits.every((c) => c?.author?.login === DEPENDABOT && BOT_COMMITTERS.includes(c?.committer?.login) && c?.commit?.verification?.verified === true)
+  );
+}
+
+/**
+ * A dependabot PR rebased since its "rejected" decision: the same number, author and title,
+ * and only the bot's commits. `commitsOf(pr)` lists the PR's commits; without it nothing follows.
+ */
+function followsRebase(d, p, commitsOf) {
+  if (!(d.decision === "rejected" && d.author === DEPENDABOT && p.user?.login === DEPENDABOT && typeof d.title === "string" && d.title === p.title)) return false;
+  if (typeof commitsOf !== "function") return false;
+  try {
+    return onlyBotCommits(commitsOf(p.number));
+  } catch {
+    return false;
+  }
+}
+
 /**
  * The verdict: { inTrain, decided, stale, undecided, gone, problems, ok }.
- * `isAncestor(sha)` answers whether a commit is in the train.
+ * `isAncestor(sha)` answers whether a commit is in the train; `commitsOf(pr)`
+ * lists a PR's commits (asked only for a dependabot PR that moved).
  */
-export function classify(pulls, file, isAncestor) {
+export function classify(pulls, file, isAncestor, commitsOf) {
   const problems = checkDecisions(file);
   const byPr = new Map((Array.isArray(file?.decisions) ? file.decisions : []).filter((d) => Number.isInteger(d?.pr)).map((d) => [d.pr, d]));
   const out = { inTrain: [], decided: [], stale: [], undecided: [], gone: [], problems };
@@ -78,8 +140,9 @@ export function classify(pulls, file, isAncestor) {
     }
     const d = byPr.get(p.number);
     if (!d) out.undecided.push(row);
-    else if (!head || !head.startsWith(d.head)) out.stale.push({ ...row, decidedHead: d.head, decision: d.decision });
-    else out.decided.push({ ...row, decision: d.decision, reason: d.reason, via: d.via, by: d.by });
+    else if (head && head.startsWith(d.head)) out.decided.push({ ...row, decision: d.decision, reason: d.reason, via: d.via, by: d.by, until: d.until });
+    else if (head && followsRebase(d, p, commitsOf)) out.decided.push({ ...row, decision: d.decision, reason: d.reason, via: d.via, by: d.by, rebasedFrom: d.head });
+    else out.stale.push({ ...row, decidedHead: d.head, decision: d.decision });
   }
   for (const d of byPr.values()) if (!open.has(d.pr)) out.gone.push(d.pr);
   out.ok = !out.problems.length && !out.undecided.length && !out.stale.length;
@@ -90,13 +153,48 @@ export function report(v, train) {
   const n = (k) => v[k].length;
   const lines = [`train:missing against ${train}: ${n("inTrain")} open PR heads in the train, ${n("decided")} outside it with a decision, ${n("stale")} stale, ${n("undecided")} undecided.`];
   const count = (d) => v.decided.filter((x) => x.decision === d).length;
-  lines.push(`Decisions: in ${count("in")} · rejected ${count("rejected")} · replaced ${count("replaced")}.`);
+  lines.push(`Decisions: in ${count("in")} · deferred ${count("deferred")} · rejected ${count("rejected")} · replaced ${count("replaced")}.`);
   for (const p of v.problems) lines.push(`✗ ${DECISIONS_FILE}: ${p}`);
+  for (const r of v.decided.filter((x) => x.rebasedFrom)) lines.push(`· #${r.pr} (dependabot) rebased to ${r.head.slice(0, 10)} since the decision "${r.decision}" about ${r.rebasedFrom.slice(0, 10)}: same PR, author and title, only the bot's commits, kept`);
   for (const r of v.stale) lines.push(`✗ #${r.pr} moved to ${r.head.slice(0, 10)} since the decision "${r.decision}" about ${r.decidedHead.slice(0, 10)} (${r.title.slice(0, 70)})`);
   for (const r of v.undecided) lines.push(`✗ #${r.pr} (${r.base}) ${r.head?.slice(0, 10)}: no decision — ${r.title.slice(0, 80)}`);
   if (v.gone.length) lines.push(`Decisions about PRs no longer open (can go): ${v.gone.map((x) => `#${x}`).join(" ")}.`);
-  lines.push(v.ok ? "✓ every open PR head is in the train or decided." : "✗ train:missing: add a decision for each PR above (in / rejected / replaced, with a reason).");
+  lines.push(v.ok ? "✓ every open PR head is in the train or decided." : "✗ train:missing: add a decision for each PR above (in / deferred / rejected / replaced, with a reason).");
   return lines;
+}
+
+/**
+ * Review 11, L13: the decisions file records the train and head it was decided at
+ * (`train`, `trainHead`); when the train has moved since, the file is stale even if
+ * every PR still has a decision. Null when it is current (or records neither).
+ *
+ * Review 12, M1: the commit that records `trainHead` is itself on the train, so
+ * the pushed head can never equal it. The file is current when `trainHead` is an
+ * ancestor of the train's head and every commit after it (trainHead..head) is a
+ * non-merge commit that touches only this decisions file: nothing else reached
+ * the train since it was decided. `git` runs git; without it only equality counts.
+ */
+export function staleTrainHead(file, train, trainHead, git) {
+  if (!file || (file.trainHead === undefined && file.train === undefined)) return null;
+  const was = `decided at ${file.train ?? "?"} @ ${String(file.trainHead ?? "?").slice(0, 10)}, but ${train} is at ${trainHead.slice(0, 10)}`;
+  const redo = `re-run train:missing on this head and record it in "trainHead"`;
+  if (file.train !== train || typeof file.trainHead !== "string") return `${was}: ${redo}`;
+  if (file.trainHead === trainHead) return null;
+  if (!git) return `${was}: ${redo}`;
+  try {
+    git("merge-base", "--is-ancestor", file.trainHead, trainHead);
+  } catch {
+    return `${was}, and ${file.trainHead.slice(0, 10)} is not an ancestor of it: ${redo}`;
+  }
+  const after = git("rev-list", "--reverse", "--parents", `${file.trainHead}..${trainHead}`).split("\n").filter(Boolean);
+  for (const line of after) {
+    const [sha, ...parents] = line.split(" ");
+    if (parents.length > 1) return `${was}: ${sha.slice(0, 10)} after it is a merge, so more than the decisions reached the train: ${redo}`;
+    const touched = git("diff-tree", "--no-commit-id", "--name-only", "-r", sha).split("\n").filter(Boolean);
+    const other = touched.filter((f) => f !== DECISIONS_FILE);
+    if (other.length || !touched.length) return `${was}: ${sha.slice(0, 10)} after it touches ${other.length ? other.slice(0, 3).join(", ") : "nothing"}, not only ${DECISIONS_FILE}: ${redo}`;
+  }
+  return null;
 }
 
 const gitIn = (cwd) => (...a) => execFileSync("git", a, { cwd, encoding: "utf8", maxBuffer: 1 << 28, stdio: ["ignore", "pipe", "pipe"] }).trim();
@@ -125,7 +223,13 @@ export function run({ cwd = process.cwd(), remote = "origin", train, decisions =
   if (!t) throw new Error(`no verify/train(-N) on ${remote}: pass --train`);
   const trainHead = git("rev-parse", `${remote}/${t}`);
   const file = JSON.parse(readFileSync(resolve(cwd, decisions), "utf8"));
-  const v = classify(openPulls(api, repo), file, ancestry({ git, api, repo, trainHead }));
+  const v = classify(openPulls(api, repo), file, ancestry({ git, api, repo, trainHead }), (n) => pullCommits(api, repo, n));
+  // Review 11, L13: a file that records the train head it was decided at must name this train's head.
+  const at = staleTrainHead(file, t, trainHead, git);
+  if (at) {
+    v.problems.push(at);
+    v.ok = false;
+  }
   return { train: t, trainHead, ...v, lines: report(v, t) };
 }
 

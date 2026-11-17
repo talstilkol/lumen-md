@@ -294,6 +294,18 @@ export async function approveStagedChange(id: string): Promise<StagedChange> {
   }
 }
 
+/**
+ * The user changed a proposal before approving it (plan W13.A4): its new
+ * text replaces the agent's, and the change is marked `edited`, so the
+ * outcome is counted as "edited, then accepted" — the agent's own text was
+ * not what the user wanted as it was.
+ */
+export function editStagedChange(id: string, after: string): StagedChange | undefined {
+  const change = getStagedChange(id);
+  if (!change || change.status !== "pending" || change.after === after) return change;
+  return update(id, { after, edited: true });
+}
+
 export function rejectStagedChange(id: string): StagedChange | undefined {
   const change = getStagedChange(id);
   if (!change || change.status !== "pending") return change;

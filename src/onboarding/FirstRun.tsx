@@ -14,6 +14,8 @@ import { createFirstNote, currentVault, languageOrder, languagePlan, markSetupDo
 import "./FirstRun.css";
 import "./firstRunStrings";
 import { HelpButton } from "../ui/HelpButton";
+import { isBetaLocale } from "../i18n/review";
+import { localeOptionLabel, openTranslationHelp } from "../i18n/localeLabel";
 import { explainError } from "../lib/userError";
 import { Modal } from "../ui/Modal";
 import { markActivation } from "../metrics/count";
@@ -92,9 +94,13 @@ export default function FirstRun({ onDone }: Props) {
     };
   }, []);
 
-  // Each step starts at its first control (keyboard and screen readers).
+  // Each step starts at its first control (keyboard and screen readers); in a
+  // radio group that is the chosen radio, as Tab reaches it (Hebrew is listed
+  // first, the language in use is the one checked).
   useEffect(() => {
-    panel.current?.querySelector<HTMLElement>("input:not([disabled]), button:not([disabled])")?.focus();
+    const first = panel.current?.querySelector<HTMLInputElement>("input:not([disabled]), button:not([disabled])");
+    const chosen = first?.type === "radio" && first.name ? panel.current?.querySelector<HTMLInputElement>(`input[type="radio"][name="${first.name}"]:checked:not([disabled])`) : null;
+    (chosen ?? first)?.focus();
   }, [step]);
 
   const skip = () => {
@@ -208,7 +214,7 @@ export default function FirstRun({ onDone }: Props) {
           <p id="lumen-firstrun-sub">{t("onboard.subtitle")}</p>
           {!showLang && (
             <p className="lumen-firstrun-hint">
-              {t("onboard.lang.current", { language: SUPPORTED_LOCALES.find((l) => l.code === shownLocale)?.label ?? shownLocale })}{" "}
+              {t("onboard.lang.current", { language: localeOptionLabel(shownLocale) })}{" "}
               <button
                 type="button"
                 className="lumen-firstrun-link"
@@ -250,10 +256,20 @@ export default function FirstRun({ onDone }: Props) {
                           .then(() => setPickedLocale((p) => (p === l.code ? null : p)));
                       }}
                     />
-                    <span lang={l.code} dir={l.dir}>{l.label}</span>
+                    <span>
+                      <span lang={l.code} dir={l.dir}>{l.label}</span>
+                      {isBetaLocale(l.code) && <small data-testid={`first-run-beta-${l.code}`}>{t("locale.beta")}</small>}
+                    </span>
                   </label>
                 ))}
               </div>
+              {/* Launch P0 #16: only Hebrew and English are full languages; the beta ones say so, with the help on reporting a translation issue. */}
+              <p className="lumen-firstrun-hint" data-testid="first-run-beta-hint">
+                {t("locale.betaHint")}{" "}
+                <button type="button" className="lumen-firstrun-link" data-testid="first-run-beta-help" onClick={openTranslationHelp}>
+                  {t("locale.betaHelp")}
+                </button>
+              </p>
             </fieldset>
           )}
 

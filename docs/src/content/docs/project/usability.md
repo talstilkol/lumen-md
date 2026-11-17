@@ -1,6 +1,7 @@
 ---
 title: Usability tests with Hebrew speakers
 description: How Lumen is tested with people who write in Hebrew — the ten tasks, SUS, the consent-first session recorder that keeps no note text, and the analysis.
+type: how-to
 ---
 
 The project measures a lot, and sessions with real people measure what

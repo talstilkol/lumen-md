@@ -2,7 +2,9 @@
 /**
  * Bundle the app's Bases engine (src/views/bases/api.ts, plan W6.46) into
  * dist/bases-engine.js for the MCP server and the CLI (plan W8.1), so
- * `bases_query` returns exactly the rows the app computes.
+ * `bases_query` returns exactly the rows the app computes — and the typed
+ * objects' schema rules (src/types/api.ts, plan W12.T4) into
+ * dist/types-engine.js, next to it.
  *
  * Uses the esbuild of the repository root (a Vite dependency): run
  * `npm ci` in the root first. Without it the server still builds and runs;
@@ -25,13 +27,13 @@ try {
   console.warn("bundle-bases: esbuild not found (run `npm ci` in the repository root); dist/bases-engine.js not built, Bases tools will be unavailable.");
   process.exit(0);
 }
-await esbuild.build({
-  entryPoints: [path.join(root, "src/views/bases/api.ts")],
+const build = (entry, outfile) => esbuild.build({
+  entryPoints: [path.join(root, entry)],
   bundle: true,
   format: "esm",
   platform: "node",
   target: "node22",
-  outfile: out,
+  outfile,
   legalComments: "eof",
   // yaml is CommonJS and requires node built-ins: give the ESM bundle a require.
   banner: { js: 'import { createRequire as __lumenCreateRequire } from "node:module"; const require = __lumenCreateRequire(import.meta.url);' },
@@ -39,4 +41,10 @@ await esbuild.build({
   nodePaths: process.env.NODE_PATH ? process.env.NODE_PATH.split(path.delimiter) : [],
   logLevel: "warning",
 });
+await build("src/views/bases/api.ts", out);
 console.log(`bundle-bases: ${path.relative(process.cwd(), out)}`);
+const typesOut = path.join(path.dirname(out), "types-engine.js");
+await build("src/types/api.ts", typesOut);
+// W13.K1: the app's link rewrite, for `lumen move` / `lumen rename`.
+await build("src/cli/linksEngine.ts", path.join(path.dirname(out), "links-engine.js"));
+console.log(`bundle-bases: ${path.relative(process.cwd(), typesOut)}`);

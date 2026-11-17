@@ -1,6 +1,8 @@
 ---
 title: קנבס (Excalidraw)
 description: הלוח הלבן — על Excalidraw, נשמר כקובצי ‎.excalidraw פתוחים בכספת, כולו במכשיר — ומה קורה לקנבסים הישנים של tldraw.
+type: how-to
+tasks: ["4.19"]
 ---
 
 הקנבס (`🎨 קנבס / לוח לבן`, `⌘K`) הוא

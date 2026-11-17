@@ -238,6 +238,7 @@ export const lmstudioExecutor: Executor = {
   supportsSchema: () => true,
   modelFor: (tier) => pickModel(tier, models),
   async chat(req: ExecutorRequest): Promise<ExecutorResponse> {
+    if (req.loopbackOnly && !isLoopback(lmStudioUrl())) throw new Error(`This agent uses only an LM Studio on this computer; ${lmStudioUrl()} is not (writing agents send no text off the machine).`);
     const refused = await lmStudioRefusal();
     if (refused) throw new Error(`LM Studio at ${lmStudioUrl()} is refused (${refused === "policy" ? 'the AI policy is "local only"' : "airplane mode is on"})`);
     const model = req.model ?? pickModel(req.tier ?? "small", models);

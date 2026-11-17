@@ -22,5 +22,7 @@
   "pluginDev.denied": "Refused",
   "pluginDev.notAsked": "not in the manifest",
   "pluginDev.unused": "never used",
-  "pluginDev.calls": "Last calls ({n})"
+  "pluginDev.calls": "Last calls ({n})",
+  "pluginDev.api": "plugin API {version}",
+  "pluginDev.apiCompat": "plugin API {version} (compatibility mode)"
 }

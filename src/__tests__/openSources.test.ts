@@ -21,7 +21,7 @@ const DATASETS: { datasets: Array<{ source: string; package_show?: { result: Rec
 const CATALOGUE = parseCatalogue(F("benyehuda", "pseudocatalogue.csv"));
 
 const SAVED = Object.entries(ASK.laws).map(([name, text]) => parseLawNote(`Sources/Knesset/Laws/${name}.md`, renderLawNote(LAWS.find((l) => l.name === name)!, "2026-11-14", text))!);
-const ALL_ON = { sefaria: true, knesset: true, datagov: true, benyehuda: true };
+const ALL_ON = { sefaria: true, knesset: true, datagov: true, benyehuda: true, registers: false };
 const LOCAL: LocalSources = { enabled: ALL_ON, laws: SAVED, library: new Library(CATALOGUE) };
 
 /** data.gov.il's package_search, recorded: titles containing a word of the query. */
@@ -98,7 +98,7 @@ describe("one search over the open sources", () => {
 
   it("a source that is off is sent nothing, and its local results are not shown", async () => {
     const f = vi.fn(async () => new Response("{}"));
-    const off = { sefaria: false, knesset: false, datagov: false, benyehuda: false };
+    const off = { sefaria: false, knesset: false, datagov: false, benyehuda: false, registers: false };
     expect(await searchOnline("תאונות דרכים", off, f as unknown as typeof fetch)).toEqual([]);
     expect(f).not.toHaveBeenCalled();
     expect(searchLocal("בראשית א:א", { ...LOCAL, enabled: off })).toEqual([]);

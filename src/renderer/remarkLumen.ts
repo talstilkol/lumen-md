@@ -8,6 +8,7 @@
 import { headingSlug } from "../lib/slug";
 import { visit } from "unist-util-visit";
 import type { Root as MdastRoot } from "mdast";
+import { ADMONITION_NAMES } from "./syntaxBoundaries";
 
 // Inline remark-breaks plugin: converts single newlines in paragraphs to <br>.
 export function remarkBreaks() {
@@ -115,7 +116,7 @@ function splitWikiText(value: string): MdastTextLike[] {
  * remark plugin: convert :::name container directives into admonitions.
  */
 export function remarkAdmonitions() {
-  const known = new Set(["note", "tip", "info", "warning", "danger"]);
+  const known = new Set(ADMONITION_NAMES);
   // remark-directive nodes don't ship type defs in mdast — narrow locally.
   interface DirectiveNode {
     type: string;

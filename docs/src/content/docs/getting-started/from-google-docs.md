@@ -1,6 +1,7 @@
 ---
 title: Moving from Google Docs
 description: Turn Google Docs into Markdown notes in Lumen — one document, or a whole Drive folder.
+type: how-to
 ---
 
 ## One document

@@ -1,6 +1,7 @@
 ---
 title: ברוכים הבאים ל-Lumen
 description: למה בנינו את Lumen, ובמה היא שונה מ-Obsidian,‏ Notion,‏ Typora ו-Bear.
+type: how-to
 ---
 
 ## איפה Lumen נכנסת

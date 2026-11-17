@@ -2,8 +2,8 @@
  * Plan 7.6 — the reranker, measured on the retrieval golden set's dev split
  * (7.1, HeQ). The model reranker (bge-reranker-v2-m3, ~570 MB) can't run in
  * the unit tests; it is measured by `npm run eval:rerank`
- * (src/agents/eval/rerank.eval.ts). Here: BM25 alone against the default
- * (lexical) reranker over the same candidates, and the decision rule.
+ * (src/agents/eval/rerank.eval.ts). Here: BM25 alone against the opt-in
+ * lexical reranker (not the default since W10.B18) over the same candidates, and the decision rule.
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
@@ -20,7 +20,7 @@ const heq = JSON.parse(readFileSync(join(__dirname, "../../eval/golden/retrieval
 };
 
 describe("reranker on the HeQ dev split (7.6)", () => {
-  it("BM25 alone is already at the ceiling there, and the default reranker keeps it", async () => {
+  it("BM25 alone is already at the ceiling there, and the lexical reranker keeps it", async () => {
     const res = await compareRerank(Bm25Index, (q: string, docs: Array<{ id: string; text: string }>) => rerank(q, docs, { mode: "lexical" }), {
       items: heq.items,
       documents: heq.corpus,

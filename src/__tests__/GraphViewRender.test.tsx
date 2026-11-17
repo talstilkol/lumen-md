@@ -1,10 +1,14 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, waitFor } from "@testing-library/react";
 
-vi.mock("../i18n", () => ({ registerEnglish: () => undefined, t: (k: string, p?: Record<string, string>) => {
-  if (p) return Object.entries(p).reduce((s, [k2, v]) => s.replace(`{${k2}}`, v), k);
-  return k;
-}}));
+vi.mock("../i18n", () => {
+  const t = (k: string, p?: Record<string, string>) => {
+    if (p) return Object.entries(p).reduce((s, [k2, v]) => s.replace(`{${k2}}`, v), k);
+    return k;
+  };
+  // W13.G11's summary counts with tPlural.
+  return { registerEnglish: () => undefined, t, tPlural: (k: string, n: number) => `${k}:${n}` };
+});
 vi.mock("../lib/logger", () => ({
   log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
@@ -16,6 +20,10 @@ vi.mock("../storage/workspace", () => ({
 vi.mock("../storage/workspaceIndex", () => ({
   ensureIndex: vi.fn().mockResolvedValue(undefined),
   indexedFiles: vi.fn().mockReturnValue([]),
+}));
+// The layout itself is tested in graph10k.test.ts; here every note sits at the origin.
+vi.mock("../graph/layoutClient", () => ({
+  runLayout: vi.fn(async (n: number) => new Float32Array(2 * n)),
 }));
 
 describe("GraphView", () => {
@@ -45,39 +53,79 @@ describe("GraphView", () => {
 });
 
 describe("GraphView by touch (plan 10.2.1)", () => {
-  // One note: the layout puts it at (cx + 0.7·min(cx, cy)·0.99^100, cy) on the
-  // default 800×600 canvas; jsdom's canvas rect is at (0, 0).
-  const nodeX = 400 + 210 * Math.pow(0.99, 100);
+  // One note on an 800×600 surface: fitted, it sits at the centre (400, 300).
+  // Zoomed out by the "-" key, its dot is smaller than the hit areas, so the
+  // test measures the 10 px of the cursor and the 22 px of a finger.
+  const nodeX = 400;
   const nodeY = 300;
 
   async function mount() {
     const ws = await import("../storage/workspace");
-    vi.mocked(ws.listWorkspace).mockResolvedValue([{ name: "a.md", path: "a.md" }] as never);
+    const index = await import("../storage/workspaceIndex");
+    // The graph is built from the vault index (W1.10), not from a listing of the folder.
+    vi.mocked(index.indexedFiles).mockReturnValue([{ path: "a.md", wikiTargets: [], meta: {}, modified: 1 }] as never);
     vi.mocked(ws.readWorkspaceFile).mockResolvedValue("# A");
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 800, height: 600, right: 800, bottom: 600, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+    const { fireEvent } = await import("@testing-library/react");
     const { GraphView } = await import("../ui/GraphView");
     const onOpenFile = vi.fn();
-    const { findByTestId } = render(<GraphView onOpenFile={onOpenFile} />);
-    const canvas = await findByTestId("graph-canvas");
-    return { canvas, onOpenFile };
+    const { findByRole } = render(<GraphView onOpenFile={onOpenFile} />);
+    const surface = await findByRole("application");
+    fireEvent.focus(surface);
+    await waitFor(() => expect(surface.getAttribute("data-focus")).toBe("0"));
+    for (let i = 0; i < 8; i++) fireEvent.keyDown(surface, { key: "-" });
+    return { surface, onOpenFile, fireEvent };
   }
+  const press = (fireEvent: typeof import("@testing-library/react").fireEvent, el: HTMLElement, pointerType: string, dx: number) => {
+    fireEvent.pointerDown(el, { pointerType, clientX: nodeX + dx, clientY: nodeY });
+    fireEvent.pointerUp(el, { pointerType, clientX: nodeX + dx, clientY: nodeY });
+  };
 
   it("a tap opens the note under the finger, with nothing hovered before", async () => {
-    const { fireEvent } = await import("@testing-library/react");
-    const { canvas, onOpenFile } = await mount();
+    const { surface, onOpenFile, fireEvent } = await mount();
     // 15 px off the dot: inside a finger's 22 px, outside the cursor's 10 px.
-    fireEvent.pointerDown(canvas, { pointerType: "touch", clientX: nodeX + 15, clientY: nodeY });
-    fireEvent.click(canvas, { clientX: nodeX + 15, clientY: nodeY, pointerType: "touch" });
+    press(fireEvent, surface, "touch", 15);
     await waitFor(() => expect(onOpenFile).toHaveBeenCalledWith("a.md", "# A"));
   });
 
   it("the mouse keeps the tighter hit area", async () => {
-    const { fireEvent } = await import("@testing-library/react");
-    const { canvas, onOpenFile } = await mount();
-    fireEvent.pointerMove(canvas, { pointerType: "mouse", clientX: nodeX + 15, clientY: nodeY });
-    fireEvent.click(canvas, { clientX: nodeX + 15, clientY: nodeY });
+    const { surface, onOpenFile, fireEvent } = await mount();
+    press(fireEvent, surface, "mouse", 15);
     await new Promise((r) => setTimeout(r, 20));
     expect(onOpenFile).not.toHaveBeenCalled();
-    fireEvent.click(canvas, { clientX: nodeX + 3, clientY: nodeY });
+    // A finger 30 px away is outside its 22 px too.
+    press(fireEvent, surface, "touch", 30);
+    await new Promise((r) => setTimeout(r, 20));
+    expect(onOpenFile).not.toHaveBeenCalled();
+    press(fireEvent, surface, "mouse", 3);
     await waitFor(() => expect(onOpenFile).toHaveBeenCalledWith("a.md", "# A"));
+  });
+});
+
+describe("GraphView as a list (W13.G11)", () => {
+  it("the list button walks the notes; the summary counts the same graph", async () => {
+    const ws = await import("../storage/workspace");
+    const index = await import("../storage/workspaceIndex");
+    vi.mocked(index.indexedFiles).mockReturnValue([
+      { path: "a.md", wikiTargets: ["b"], meta: {}, modified: 1 },
+      { path: "b.md", wikiTargets: [], meta: {}, modified: 1 },
+    ] as never);
+    vi.mocked(ws.readWorkspaceFile).mockResolvedValue("# A");
+    const { fireEvent, screen, act } = await import("@testing-library/react");
+    const { GraphView } = await import("../ui/GraphView");
+    const onOpenFile = vi.fn();
+    render(<GraphView onOpenFile={onOpenFile} />);
+    fireEvent.click(await screen.findByTestId("graph-as-list"));
+    const current = await screen.findByTestId("graph-list-current");
+    expect(screen.queryByRole("application")).toBeNull();
+    const goto = screen.getByTestId("graph-list-goto") as HTMLSelectElement;
+    expect([...goto.options].map((o) => o.value).sort()).toEqual(["a.md", "b.md"]);
+    const from = current.textContent;
+    const neighbour = document.querySelector<HTMLButtonElement>("button[data-neighbour]")!;
+    await act(async () => void fireEvent.click(neighbour));
+    expect(screen.getByTestId("graph-list-current").textContent).not.toBe(from);
+    fireEvent.click(screen.getByTestId("graph-list-open"));
+    await waitFor(() => expect(onOpenFile).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByTestId("graph-summary").textContent).toContain("graphAlt.summary.nodes:2"), { timeout: 2000 });
   });
 });

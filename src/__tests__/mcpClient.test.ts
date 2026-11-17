@@ -21,6 +21,7 @@ import { enableClient } from "../../mcp-server/src/vault/config";
 import { McpClient, httpTransport, isLoopbackUrl, type JsonRpcMessage, type McpTransport } from "../agents/mcp/client";
 import { addServer, blockedReason, effectivePermission, readServers, setToolPermission, SUGGESTED_SERVERS, type McpServerConfig, type ReachContext } from "../agents/mcp/servers";
 import { agentToolName, serverAgentTools } from "../agents/mcp/tools";
+import { ToolApprovals } from "../agents/mcp/approvals";
 import { CredentialStore, authorizationRequest, checkAuthorizationResponse, checkAuthServerMetadata, CLIENT_ID } from "../agents/mcp/oauth";
 import { describeNetworkCall, openNetworkGate } from "../agents/network";
 import { ledgerEntries } from "../ai/privacyLedger";
@@ -131,8 +132,9 @@ describe("the client, both eras", () => {
 
 describe("permissions per server and tool", () => {
   it("suggested servers are added off; nothing is offered until enabled", async () => {
-    expect(SUGGESTED_SERVERS.map((s) => s.id)).toEqual(["knesset", "data-gov-il", "zotero", "files"]);
-    const s = addServer(SUGGESTED_SERVERS[2]!);
+    // W11.H17 added the built-in Sefaria server.
+    expect(SUGGESTED_SERVERS.map((s) => s.id)).toEqual(["knesset", "data-gov-il", "sefaria", "zotero", "files"]);
+    const s = addServer(SUGGESTED_SERVERS.find((x) => x.id === "zotero")!);
     expect(s.enabled).toBe(false);
     expect(readServers()).toHaveLength(1);
     const tools = await serverAgentTools(s, () => legacyServer([{ name: "search" }], () => ""), { reach: () => REACH, confirmCall: () => true });
@@ -143,13 +145,15 @@ describe("permissions per server and tool", () => {
     const asked: string[] = [];
     const cfg = server({ defaultPermission: "read", tools: { drop: "block", write_thing: "read" } });
     const t = () => legacyServer([{ name: "find", annotations: { readOnlyHint: true } }, { name: "write_thing" }, { name: "drop" }], (n) => `ok ${n}`);
-    const tools = await serverAgentTools(cfg, t, { reach: () => REACH, confirmCall: (_s, name) => (asked.push(name), false) });
+    // W10.C2: a tool never approved asks once ("new"), even a read-only one; "once" approves that call and pins it.
+    const tools = await serverAgentTools(cfg, t, { reach: () => REACH, approvals: new ToolApprovals({ store: null }), onPin: () => {}, confirmCall: (_s, name, _a, info) => (asked.push(`${name}:${info.status}`), info.status === "new" && name === "find" ? "once" : false) });
     expect(tools.map((x) => x.name)).toEqual([agentToolName("s", "find"), agentToolName("s", "write_thing")]);
     expect(tools.every((x) => (x.offeredBy ?? []).includes("MCP server Test server"))).toBe(true);
     expect(effectivePermission(cfg, { name: "write_thing" })).toBe("ask"); // "read" needs readOnlyHint
     expect(await tools[0]!.run({}, { grants: new Set() })).toBe("ok find");
+    expect(await tools[0]!.run({}, { grants: new Set() })).toBe("ok find"); // pinned now: a read tool runs without asking
     await expect(tools[1]!.run({}, { grants: new Set() })).rejects.toThrow("did not allow");
-    expect(asked).toEqual(["write_thing"]);
+    expect(asked).toEqual(["find:new", "write_thing:new"]);
     setToolPermission("nope", "x", "block"); // unknown server: no-op
   });
 

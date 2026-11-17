@@ -97,6 +97,14 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       action: () => void import("../../citations/CiteDialog").then((m) => m.openCiteDialog()),
     },
     {
+      // W10.E38 (plan 6.13): a DOI fills the reference from CrossRef, after the user approves the request.
+      id: "cite.fromDoi",
+      label: t("cmd.cite.fromDoi"),
+      icon: cmdIcons.FileText,
+      group: t("group.tools"),
+      action: () => void import("../../citations/run").then((m) => m.citeFromDoi()),
+    },
+    {
       id: "cite.legal",
       label: t("cmd.cite.legal"),
       hint: t("cmd.cite.legal.hint"),
@@ -146,6 +154,38 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       action: () => void import("../../citations/run").then((m) => m.syncZoteroWebLibrary()),
     },
     {
+      // Plan W5.23: Zotero by file — no api.zotero.org, nothing fetched. The user exports from Zotero and imports here.
+      id: "cite.importZoteroFile",
+      label: t("cmd.cite.importZoteroFile"),
+      icon: cmdIcons.FileText,
+      group: t("group.tools"),
+      action: () => void import("../../citations/zoteroFileRun").then((m) => m.importZoteroFile()),
+    },
+    {
+      // Plan W5.23: the vault's sources as CSL JSON (or RIS) for Zotero's File → Import.
+      id: "cite.exportForZotero",
+      label: t("cmd.cite.exportForZotero"),
+      icon: cmdIcons.Download,
+      group: t("group.tools"),
+      action: () => void import("../../citations/zoteroFileRun").then((m) => m.exportForZotero("csl-json")),
+    },
+    {
+      id: "cite.exportRis",
+      label: t("cmd.cite.exportRis"),
+      icon: cmdIcons.Download,
+      group: t("group.tools"),
+      action: () => void import("../../citations/zoteroFileRun").then((m) => m.exportForZotero("ris")),
+    },
+    {
+      // Plan W12.X3: the gated OpenAlex lookup for the open source note's DOI; the result waits in the review queue.
+      id: "cite.fillReferencesOpenAlex",
+      label: t("cmd.cite.fillReferencesOpenAlex"),
+      hint: t("cmd.cite.fillReferencesOpenAlex.hint"),
+      icon: cmdIcons.FileText,
+      group: t("group.tools"),
+      action: () => void import("../../citations/fillReferencesAction").then((m) => m.fillReferencesForOpenNote()),
+    },
+    {
       id: "file.exportRtf",
       label: t("cmd.file.exportRtf"),
       hint: t("cmd.file.exportRtf.hint"),
@@ -174,6 +214,24 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       group: t("group.file"),
       // Snapshot first: a tab switch while the chunk loads must not export another note.
       action: () => exportAs(liveDoc(), "latex"),
+    },
+    {
+      id: "file.exportTypst",
+      label: t("cmd.file.exportTypst"),
+      hint: t("cmd.file.exportTypst.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      // Snapshot first: a tab switch while the chunk loads must not export another note.
+      action: () => exportAs(liveDoc(), "typst"),
+    },
+    {
+      // W12.F2: PDF through typst.ts in the browser, loaded on demand from this origin.
+      id: "file.exportTypstPdf",
+      label: t("cmd.file.exportTypstPdf"),
+      hint: t("cmd.file.exportTypstPdf.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: () => exportAs(liveDoc(), "typst-pdf"),
     },
     {
       id: "file.exportRst",
@@ -210,6 +268,31 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
       group: t("group.file"),
       // Snapshot first: a tab switch while the chunk loads must not export another note.
       action: () => exportAs(liveDoc(), "opml"),
+    },
+    {
+      id: "file.exportOdt",
+      label: t("cmd.file.exportOdt"),
+      hint: t("cmd.file.exportOdt.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      // Snapshot first: a tab switch while the chunk loads must not export another note.
+      action: () => exportAs(liveDoc(), "odt"),
+    },
+    {
+      id: "file.importVcard",
+      label: t("cmd.file.importVcard"),
+      hint: t("cmd.file.importVcard.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: async () => (await import("../../contacts/vcardActions")).importVcard(),
+    },
+    {
+      id: "file.exportVcard",
+      label: t("cmd.file.exportVcard"),
+      hint: t("cmd.file.exportVcard.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: async () => (await import("../../contacts/vcardActions")).exportVcard(),
     },
     {
       id: "file.exportReveal",
@@ -268,6 +351,28 @@ export function buildExportCommands({ handleExportHtml, liveDoc, getEditorView }
         const { printDocument } = await import("../../ui/PrintExport");
         await printDocument(doc.content, doc.name);
       },
+    },
+    {
+      // W13.F3: a tagged PDF (headings, alt text, table headers, language), then finished as PDF/UA-1.
+      id: "file.exportPdfUa",
+      label: t("cmd.file.exportPdfUa"),
+      hint: t("cmd.file.exportPdfUa.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: async () => {
+        // Snapshot before any await: a tab switch while the chunk loads must not export another note.
+        const doc = liveDoc();
+        await (await import("../../print/pdfUaFinish")).exportAccessiblePdf(doc);
+      },
+    },
+    {
+      // W13.F3: any tagged PDF (Chrome's "Save as PDF", Word's) finished as PDF/UA-1, on the device.
+      id: "file.finishPdfUa",
+      label: t("cmd.file.finishPdfUa"),
+      hint: t("cmd.file.finishPdfUa.hint"),
+      icon: cmdIcons.Download,
+      group: t("group.file"),
+      action: async () => (await import("../../print/pdfUaFinish")).finishPickedPdf(),
     },
     {
       // W5.11: the note as Markdown, without what is marked <redact> and without hidden comments.

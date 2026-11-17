@@ -1,6 +1,8 @@
 ---
 title: Graph and local graph
 description: The knowledge graph of the whole vault — 10,000 notes and 50,000 links — and the local graph of the open note, with filters, colour groups and full keyboard use.
+type: how-to
+tasks: ["W12.V8", "W12.V3", "W1.10", "W13.G1", "W13.G11"]
 ---
 
 ## The graph
@@ -23,12 +25,54 @@ for every `[[link]]` between two notes.
 - **Labels** show for the bigger notes, and for more of them as you zoom
   in. Hebrew names are shaped and written right to left.
 
+## Very large vaults, and the graph as a list
+
+- **Above 20,000 notes** the graph switches to a GPU engine (WebGL2) for
+  the layout and the drawing; below that the usual engine draws it, with
+  the same filters and colours. Without WebGL2 the list and the table
+  below show the same notes.
+- **The graph as a list** is for the keyboard and screen readers: the
+  current note, its neighbours grouped by relation ("Linked from",
+  "Incoming: …"), and a summary of the view ("12 neighbours in 3
+  groups"). ↑/↓ move between neighbours, Enter goes there, Backspace goes
+  back. The summary follows the filters.
+
+## Structure: tree and sunburst
+
+A ```structure block draws the vault's folders, its nested tags
+(`#project/lumen/ui`) or this note's headings as a tree or a sunburst:
+
+```structure
+source: tags        # folders | tags | headings
+view: sunburst      # tree | sunburst
+root: project       # optional: only under this folder or tag
+```
+
+- Each item shows how many notes are under it (headings: how many headings).
+- In Hebrew the tree grows from the right, and the sunburst runs
+  counter-clockwise from the top.
+- "Show as a tree" swaps the picture for an outline tree. **Tab** to it,
+  then ↓ / ↑ move, the arrow toward the text's end opens an item or goes
+  to its first child (← in Hebrew, → in English), the other arrow closes
+  it or goes to its parent, Home / End go to the ends, and **Enter**
+  opens the note or jumps to the heading.
+
 ## The local graph
 
 **Show / hide the local graph** opens a panel beside the note: the open
 note in the middle, and the notes within **1, 2 or 3** links of it. It has
 the same tag and folder filters, and is coloured by folder. It follows you
 as you open other notes, and opens in well under a fifth of a second.
+
+## The time slider
+
+"Up to" narrows the graph to the notes dated up to a day — by **Last saved**
+or by **Created** (the note's `created` property, else its `date`). Notes
+with no such date always stay. It works together with the tag, folder and
+property filters, and the table view lists exactly the notes the graph
+draws. In Hebrew the slider runs right to left; ←/→, Home and End move it,
+and Play steps through the days. It is the same slider as the entity
+graph's.
 
 ## With the keyboard
 

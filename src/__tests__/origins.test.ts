@@ -91,3 +91,47 @@ describe("falseRealClaims: a status may not call a synthetic set real (W10.B13)"
     expect(flag("obsidian-corpus: real vaults at pinned commits.")).toEqual([]);
   });
 });
+
+describe("plan:check runs the origin rule (W10.B13)", () => {
+  it("a plan status that calls a synthetic set real fails plan:check; the checked-in plan passes", async () => {
+    const { mkdtempSync, mkdirSync, cpSync, writeFileSync, rmSync } = await import("node:fs");
+    const { tmpdir } = await import("node:os");
+    // @ts-expect-error plain JavaScript
+    const { run } = await import("../../scripts/plan/build.mjs");
+    const dir = mkdtempSync(join(tmpdir(), "lumen-origins-"));
+    try {
+      mkdirSync(join(dir, "plan"), { recursive: true });
+      mkdirSync(join(dir, "eval"), { recursive: true });
+      for (const f of ["plan/plan.json", "plan/audit-verdicts.json", "plan/board.html", "MASTER_PLAN.md", "eval/origins.json"]) cpSync(f, join(dir, f));
+      const plan = JSON.parse(readFileSync("plan/plan.json", "utf8"));
+      // A ⏳ task anywhere in the plan, told it was measured on "real data" from a synthetic set.
+      let target: { id: string; status: string } | null = null;
+      const walk = (o: unknown): void => {
+        if (target || !o || typeof o !== "object") return;
+        const x = o as { id?: unknown; status?: unknown };
+        if (typeof x.id === "string" && typeof x.status === "string" && x.status.startsWith("⏳")) target = x as { id: string; status: string };
+        else Object.values(o).forEach(walk);
+      };
+      walk(plan);
+      expect(target).not.toBeNull();
+      target!.status = "⏳ measured on real data: spell-en/moby recall 0.99.";
+      writeFileSync(join(dir, "plan/plan.json"), JSON.stringify(plan, null, 1) + "\n");
+      expect(() => run({ root: dir, check: true })).toThrow(/synthetic set called real[\s\S]*spell-en\/moby/);
+      // Without the false claim the same copy gets past the rule.
+      target!.status = "⏳ measured on the synthetic set spell-en/moby: recall 0.99.";
+      writeFileSync(join(dir, "plan/plan.json"), JSON.stringify(plan, null, 1) + "\n");
+      expect(() => run({ root: dir, check: true })).not.toThrow(/synthetic set called real/);
+      // Review 10, L8: the notes are read too (a status's detail moves there).
+      (target as unknown as { notes?: string }).notes = "Measured on real data: spell-en/moby recall 0.99.";
+      writeFileSync(join(dir, "plan/plan.json"), JSON.stringify(plan, null, 1) + "\n");
+      expect(() => run({ root: dir, check: true })).toThrow(/synthetic set called real[\s\S]*\(notes\)[\s\S]*spell-en\/moby/);
+      // And without eval/origins.json the rule cannot run: plan:check fails instead of passing.
+      (target as unknown as { notes?: string }).notes = "Measured on the synthetic set.";
+      writeFileSync(join(dir, "plan/plan.json"), JSON.stringify(plan, null, 1) + "\n");
+      rmSync(join(dir, "eval/origins.json"));
+      expect(() => run({ root: dir, check: true })).toThrow(/eval\/origins\.json is missing/);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});

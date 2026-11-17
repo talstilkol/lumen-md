@@ -10,6 +10,8 @@ import { parseBibtex } from "../data/bibtex";
 import { recordFromBibtex, plainTitle, type CitationRecord } from "../data/citationStyles";
 import { cslToRecord, keyFromNote, type CslItem } from "./csl";
 import { baseKey, isKey, uniqueKey } from "./keys";
+import { compareNames } from "../i18n/collate";
+import { normalizeForFilter } from "../text/filterMatch";
 
 export type Origin = "bibtex" | "csl" | "zotero";
 
@@ -60,7 +62,8 @@ export function mergeLibrary(lists: LibraryItem[][]): LibraryItem[] {
   return out;
 }
 
-const fold = (s: string) => s.normalize("NFD").replace(/[̀-֑ͯ-ׇ]/g, "").toLocaleLowerCase("en");
+/** Case, niqqud, accents (Łódź, Müller) and geresh do not count (W13.E3). */
+const fold = normalizeForFilter;
 
 /** Search by key, author, title, year and container; every word must match. Best first. */
 export function searchLibrary(items: readonly LibraryItem[], query: string, recent: readonly string[] = []): LibraryItem[] {
@@ -81,7 +84,7 @@ export function searchLibrary(items: readonly LibraryItem[], query: string, rece
     if (ri >= 0) score += 10 - Math.min(ri, 9);
     scored.push({ it, score });
   }
-  return scored.sort((a, b) => b.score - a.score || a.it.key.localeCompare(b.it.key)).map((x) => x.it);
+  return scored.sort((a, b) => b.score - a.score || compareNames(a.it.key, b.it.key)).map((x) => x.it);
 }
 
 /* ─── The vault's library, cached until the vault changes ─────────── */

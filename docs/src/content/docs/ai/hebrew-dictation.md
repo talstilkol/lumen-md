@@ -1,6 +1,8 @@
 ---
 title: Hebrew dictation, models and accuracy
 description: Which speech model Lumen uses for Hebrew in the browser and on phones, how each sentence is re-read by Whisper, and how accuracy (WER) is measured.
+type: how-to
+tasks: ["1.3", "6.1"]
 ---
 
 Dictation runs on your device. The audio never leaves it, unless you send

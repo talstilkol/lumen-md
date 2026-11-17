@@ -1,6 +1,8 @@
 ---
 title: Literature review matrix
 description: One table of every PDF in the vault, with question, method, sample, findings and limitations, and each value backed by a quote verified on its page. Runs on this device.
+type: reference
+tasks: ["W12.V4", "R12.20", "W5.12"]
 ---
 
 `⌘K` → **Literature review from the vault's PDFs** reads every PDF in the
@@ -13,6 +15,30 @@ vault on this device. Scanned pages are read with OCR. It writes:
   paper and one column per field (Obsidian Bases format). It has two views:
   **All papers** and **Verified only**, which lists only the papers where
   every field is verified.
+
+## Argument map
+
+Give notes `type: claim` (טענה) or `type: evidence` (מקור, a source), and
+link them with `supports:`, `contradicts:` or `qualifies:` (each a list of
+`[[links]]` to claims). Mark the end points with `conclusion: true`. An
+`argument-map` block draws them:
+
+```argument-map
+folder: research/wages     # optional
+```
+
+- Sources sit in the first column (on the right in Hebrew), then the claims
+  they lead to, then the conclusions. Green lines support, red dashed lines
+  contradict, yellow dotted lines qualify.
+- A claim that no source reaches through "supports" or "qualifies" is
+  marked **no source**.
+- "Show as a list" gives the same map as a nested list: each claim with the
+  notes that support, contradict or qualify it. On the map, **Tab** to it,
+  then the arrow keys go from note to note and **Enter** opens one.
+- "Save as a canvas" writes the map to `canvases/` as a JSON Canvas (opens
+  in Obsidian) and as an Excalidraw drawing.
+- The two types are built in, so they show in the type list, the type's
+  Base and the properties form like your own types.
 
 ## No value without a quote
 
@@ -27,6 +53,37 @@ looked up in its passage and located on its page:
 
 The model is the local one in AI settings (Ollama or the browser model). A
 cloud model is used only if your AI policy allows it.
+
+## Competing hypotheses (ACH)
+
+An `ach` block weighs evidence against competing explanations, the way
+Richards Heuer's Analysis of Competing Hypotheses does:
+
+```ach
+title: Who leaked the report?
+hypotheses:
+  H1: Someone inside
+  H2: A contractor
+evidence:
+  - text: The file names an office laptop
+    weight: 3
+    marks: { H1: CC, H2: I }
+  - text: The contractor's own blog post
+    deceptive: true
+    marks: { H1: N, H2: C }
+```
+
+- Each mark is **CC** (very consistent), **C**, **N** (neutral; an empty
+  cell is N), **I** (inconsistent) or **II**; `++ + 0 - --` work too. A
+  weight is a whole number (default 1).
+- Hypotheses are ranked by the **least** weighted inconsistency
+  (I = 1, II = 2 per weight): evidence rules hypotheses out more than it
+  proves them. Ties go to the most consistency.
+- The block also says which rows don't tell the hypotheses apart, which
+  single row the verdict rests on (a linchpin), and whether the leader
+  holds without the rows marked `deceptive`.
+- "Copy as a table" copies the matrix as a Markdown table. It is a research
+  instrument, not a verdict.
 
 ## How it is measured
 

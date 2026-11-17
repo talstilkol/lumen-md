@@ -23,7 +23,6 @@ export type PublicEnvName =
   | "VITE_WEBRTC_SIGNALING_URL"
   | "VITE_DROPBOX_APP_KEY"
   | "VITE_GDRIVE_CLIENT_ID"
-  | "VITE_ONENOTE_CLIENT_ID"
   | "VITE_SENTRY_DSN"
   | "VITE_DOCS_URL"
   | "VITE_PLUGIN_TRUSTED_KEYS";
@@ -49,8 +48,6 @@ function raw(name: PublicEnvName): string | undefined {
       return import.meta.env.VITE_DROPBOX_APP_KEY;
     case "VITE_GDRIVE_CLIENT_ID":
       return import.meta.env.VITE_GDRIVE_CLIENT_ID;
-    case "VITE_ONENOTE_CLIENT_ID":
-      return import.meta.env.VITE_ONENOTE_CLIENT_ID;
     case "VITE_SENTRY_DSN":
       return import.meta.env.VITE_SENTRY_DSN;
     case "VITE_DOCS_URL":

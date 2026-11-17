@@ -15,7 +15,7 @@
 
 - קוד פתוח, רישיון MIT.[^mit]
 - עובד בלי אינטרנט כאפליקציית רשת מותקנת;[^offline] יש גם אפליקציה לשולחן העבודה.[^desktop]
-- הממשק ב-8 שפות.[^ui-languages]
+- הממשק ב-8 שפות, שש מהן בבטא.[^ui-languages]
 - הלוגיקה של תוסף רצה ב-QuickJS בתוך Web Worker משלה, בלי fetch, ‏DOM או אחסון.[^plugin-quickjs]
 - לכל תוסף ברשימה יש כרטיס סקירה ציבורי עם תווית פרטיות.[^plugin-scorecards]
 - הצפנת כספת אופציונלית במנוחה עם AES-256-GCM,[^vault-encryption] ומפתח מסיסמה בעזרת Argon2id.[^argon2id]
@@ -43,7 +43,7 @@ OWNER: כתובת לפניות עיתונאים.
 [^plugin-no-access]: Every plugin runs with no access by default. Receipt: `docs/src/content/docs/plugins/sandbox.md`.
 [^rtl-per-line]: Direction is set per line, from its first strong letter. Receipt: `docs/src/content/docs/editor/hebrew.md`.
 [^hebrew-search]: Search folds niqqud, final letters and the prefix letters. Receipt: `docs/src/content/docs/editor/hebrew.md`.
-[^ui-languages]: The interface is in 8 languages; Hebrew and Arabic mirror the layout. Receipt: `docs/src/content/docs/editor/hebrew.md`.
+[^ui-languages]: הממשק ב-8 שפות, שש מהן בבטא (תרגום מכונה); בעברית ובערבית הממשק מתהפך. קבלה: `docs/src/content/docs/editor/hebrew.md`.
 [^md-files]: Notes are plain Markdown; the whole vault exports as a .zip or a folder. Receipt: `docs/src/content/docs/workspace/export-import.md`.
 [^no-account]: No account; with the default settings nothing leaves the device. Receipt: `docs/src/content/docs/security/privacy-report.md`.
 [^local-ai]: AI can run entirely on the device (WebGPU), with no per-token cost. Receipt: `docs/src/content/docs/ai/local-llm.md`.

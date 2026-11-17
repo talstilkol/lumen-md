@@ -1,0 +1,13 @@
+{
+  "openAlex.confirm": "Send the DOI {doi} to OpenAlex (api.openalex.org) to find the works it cites?",
+  "openAlex.fill.button": "Fill references from OpenAlex",
+  "openAlex.fill.failed": "The OpenAlex lookup failed: {error}",
+  "openAlex.fill.noDoi": "This is not a source note with a DOI. Give it type: source and a doi: property first.",
+  "openAlex.fill.off": "The OpenAlex lookup is off. Turn it on in Settings → Privacy. Nothing was sent.",
+  "openAlex.fill.queued": "References waiting for your approval in Property proposals: {n}",
+  "openAlex.fill.saveFirst": "Save the note first: the references are proposed on its saved text.",
+  "openAlex.fill.unchanged": "OpenAlex lists no references that this note does not already have.",
+  "openAlex.note": "Off by default. While it is on, each lookup still asks first, and only the DOI is sent, to api.openalex.org. The privacy ledger lists every request.",
+  "openAlex.switch": "Look up the references of a DOI in OpenAlex",
+  "openAlex.title": "OpenAlex (citation graph)"
+}

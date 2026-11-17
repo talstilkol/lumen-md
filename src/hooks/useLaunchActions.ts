@@ -49,6 +49,8 @@ export function useLaunchActions({ setCaptureOpen, setCaptureVoice, setPaletteOp
         openNewDoc(t("doc.untitled"), "", false);
       } else if (l.kind === "action" && l.action === "palette") {
         setPaletteOpen(true);
+      } else if (l.kind === "action" && l.action === "vaults") {
+        void import("../mobile/vaultPickerActions").then((m) => m.openVaultPicker());
       }
       if (l.kind !== "none") clearLaunchParams();
       onDesktopCapture();
@@ -56,6 +58,11 @@ export function useLaunchActions({ setCaptureOpen, setCaptureVoice, setPaletteOp
       onLaunchFiles((name, content, handle) => openTabAction({ name, content, workspaceName: null, handle }));
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // W13.M6: the vault screen's cache — this vault is "opening" until the app has stayed up, then its card is written.
+  useEffect(() => {
+    void import("../mobile/vaultPickerActions").then((m) => m.trackVaultOpen()).catch(() => undefined);
   }, []);
 
   // Plan W3.4: home-screen widgets, App Shortcuts, Siri / Shortcuts and Spotlight
@@ -85,6 +92,10 @@ export function useLaunchActions({ setCaptureOpen, setCaptureVoice, setPaletteOp
           setSearchOpen(true);
         },
         daily: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
+        // W13.X5: lumen://capture?text=… writes to the inbox: asked first.
+        confirm: async (a) => (await import("../security/LinkConfirmDialog")).confirmLinkInApp(a),
+        // W13.M3/M5: Spotlight, Siri and a second iPad window open a note by its vault path.
+        openNote: (path) => window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path } })),
       });
     });
     return () => stop?.();

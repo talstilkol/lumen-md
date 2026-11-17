@@ -64,7 +64,7 @@ import { join, relative, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 import postcss from "postcss";
-import { auditSkips, MAX_E2E_SKIPS } from "./lib/skipAudit.mjs";
+import { auditSkips, MAX_E2E_HELPER_SKIPS, MAX_E2E_SKIP_POINTS, MAX_E2E_SKIPS } from "./lib/skipAudit.mjs";
 import { domainInTree } from "./lib/takenDomain.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -105,7 +105,9 @@ function outerOf(node) {
 export const DIRECT_FS_ALLOWLIST = {
   "src/storage/vault/handleBackend.ts": "the vault implementation: walks a FileSystemDirectoryHandle (the OPFS root, or a folder the user picked)",
   "src/storage/vault/opfs.ts": "the OPFS backend: opens the OPFS root with navigator.storage.getDirectory()",
-  "src/storage/vault/opfsSyncWrite.ts": "the OPFS backend's WebKit write fallback: a worker writing through a sync access handle",
+  // W11.Q10/Q11 moved the sync-access-handle code out of opfsSyncWrite.ts (which now only starts the worker) into
+  // vaultIoFs.ts: the entry moved with it, one file for one file, not a new allowance.
+  "src/storage/vault/vaultIoFs.ts": "the OPFS backend's vault-io worker logic: note writes and batched reads through sync access handles (W11.Q10/Q11)",
   "src/storage/fs.ts": "Open / Save / Save As of a single file the user picked (showOpenFilePicker / showSaveFilePicker): a real file outside the vault, not OPFS",
   "src/storage/exportDocx.ts": "writes an exported .docx to the location the user picked in the save dialog: not OPFS, not the vault",
   // Self-converted model weights (plan 6.0) live in OPFS `models/`, beside the vault, not in it: no note is read or written.
@@ -426,7 +428,7 @@ function main() {
       `no direct file-system calls outside the vault layer and ${Object.keys(DIRECT_FS_ALLOWLIST).length} allowlisted files); ` +
       `${sheets.length} stylesheets use logical properties in .prose-lumen / .cm-* rules; ` +
       `${e2eFiles.length} e2e files without waitForTimeout; ` +
-      `${skips.sites.length} skipped tests each with a reason, task and date (${skips.e2eCount} of at most ${MAX_E2E_SKIPS} in e2e); ` +
+      `${skips.sites.length} skipped tests each with a reason, task and date (${skips.e2eCount} of at most ${MAX_E2E_SKIPS} in e2e, and ${skips.e2eHelperCount} of at most ${MAX_E2E_HELPER_SKIPS} engine-helper calls; ${skips.e2eSkipPoints} of at most ${MAX_E2E_SKIP_POINTS} e2e skip points); ` +
       "the taken domain appears nowhere in the tree.",
   );
 }

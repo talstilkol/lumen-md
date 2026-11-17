@@ -1,6 +1,8 @@
 ---
 title: Train a model on your style, on this machine
 description: A LoRA adapter trained on your own notes on a Mac or NVIDIA computer and used in Ollama. Nothing is uploaded.
+type: how-to
+tasks: ["6.12"]
 ---
 
 `⌘K → AI fine-tune settings…` now offers the **local route first**. Lumen
@@ -30,6 +32,19 @@ script on your own computer, and the result appears in Ollama as the model
      It then converts the adapter with llama.cpp's `convert_lora_to_gguf.py`
      and creates a Modelfile with `ADAPTER`.
 3. Select `lumen-style` as the Ollama model in the AI settings.
+
+## From the command line
+
+The same export, without the app, for a vault folder on disk (the style
+profile is not included, since it lives in the app):
+
+```bash
+node scripts/lora/export.mjs --vault ~/Notes --out ~/lumen-lora --platform mac
+cd ~/lumen-lora && bash train-mac.sh
+```
+
+It prints only counts. It exits with 1 when the notes are too few to
+train on, the same rule as the button.
 
 ## Is it closer to your style?
 

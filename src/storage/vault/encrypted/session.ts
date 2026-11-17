@@ -14,7 +14,7 @@
 
 import { getVaultBackend, refreshVaultEncryption, setVaultEncryptionState, unwrapVaultBackend, vaultEncryptionReady } from "../index";
 import type { VaultBackend } from "../types";
-import { log } from "../../../lib/logger";
+import { log, swallowed } from "../../../lib/logger";
 import type { KdfPolicy } from "../../../sync/e2ee/kdf";
 import { calibrateArgon2, type Argon2Cost } from "../../../sync/e2ee/kdfCalibrate";
 import { setRestSealer } from "../restStore";
@@ -251,8 +251,9 @@ export function autoLockMinutes(): number {
 export function setAutoLockMinutes(n: number): void {
   try {
     localStorage.setItem(LOCK_KEY, String(Math.max(0, Math.round(n))));
-  } catch {
+  } catch (err) {
     /* why: storage blocked: the default stays */
+    swallowed("storage/vault/encrypted/session: storage blocked: the default stays", err);
   }
 }
 
@@ -332,8 +333,9 @@ export async function enableEncryption(
   try {
     const { useAppStore } = await import("../../../store/useStore");
     useAppStore.setState({});
-  } catch {
+  } catch (err) {
     /* why: it is dropped at the next change anyway */
+    swallowed("storage/vault/encrypted/session: it is dropped at the next change anyway", err);
   }
   return { recoveryKey, report };
 }

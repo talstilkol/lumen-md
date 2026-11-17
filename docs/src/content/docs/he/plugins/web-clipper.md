@@ -1,6 +1,8 @@
 ---
 title: גוזר הרשת (Web Clipper)
 description: לשמור דף אינטרנט כפתק Markdown נקי, מתוך Lumen או מתוסף הדפדפן, שמעביר את הגזיר לאפליקציה. בלי שרת גזירה.
+type: reference
+tasks: ["W10.E67", "4.15", "W2.14"]
 ---
 
 ## גזירה מתוך Lumen

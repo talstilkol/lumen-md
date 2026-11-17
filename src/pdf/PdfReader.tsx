@@ -36,15 +36,17 @@ import { drainQueue } from "./drainQueue";
 import { companionNotePath, createPdfAnnotation, describeAnnotation, findAll, nextMatchIndex, readAnnotationsNote, parsePdfFragment, shortId, unionRect, upsertAnnotationsNote, withNote, type PdfAnnotation } from "./annotations";
 import { layerText, offsetsToRange, pageTextFromItems, rangePageRects, rangeToOffsets } from "./textMap";
 import { openPdf, type PdfDocument } from "./pdfjs";
+import { PdfListenButton } from "./PdfListenButton";
 import "./PdfReader.css";
 import { HelpButton } from "../ui/HelpButton";
 import { explainError, UserFacingError } from "../lib/userError";
 import { EmptyState, learnHow } from "../ui/EmptyState";
-import { PdfPageView, withPageSize } from "./PdfPageView";
+import { PdfPageView, withPageSize, type PageSize } from "./PdfPageView";
 import { usePdfInk } from "./usePdfInk";
-import type { PageSize } from "./PdfPageView";
 import type { OcrPage } from "./ocrPages";
 import { positionAt, scrollTopFor } from "./readingPosition";
+import { SpreadControls, SpreadRows, useSpread } from "./PdfSpread";
+import "./spreadStrings"; // the spread controls' English (pdf.spread) loads with the reader, on demand
 import { annotationsByPage, baseName, byPosition, EMPTY, isMissing, MAX_SCALE, MIN_SCALE, newUuid, pageBoxes, POSITION_SAVE_MS, positionsIO, ROOT_MARGIN, type Props } from "./pdfReaderParts";
 import { Modal } from "../ui/Modal";
 import { isTopDialog } from "../ui/useFocusTrap";
@@ -84,6 +86,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
   const scrollRef = useRef<HTMLDivElement>(null);
   const pageEls = useRef(new Map<number, HTMLDivElement>());
   const pageTexts = useRef(new Map<number, string>());
+  const spread = useSpread(doc, path, scrollRef, pageEls); // W12.R2: two-page spreads, right to left for a Hebrew book
   const writeQueue = useRef<Promise<void>>(Promise.resolve());
   /** The last note write failed: the highlights in the reader are not saved. */
   const writeFailed = useRef(false);
@@ -275,7 +278,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
       const b = scrollRef.current;
       if (!b) return;
       const pos = positionAt(pageBoxes(pageEls.current), b.scrollTop);
-      void import("./readingPosition").then(({ savePosition }) => savePosition(positionsIO, path, pos)).catch(() => undefined);
+      void import("./readingPosition").then(({ savePosition }) => savePosition(positionsIO, path, pos)).then(() => import("../reading/progress")).then((m) => m.noteReaderProgress(path, { page: pos.page, pages: pageEls.current.size })).catch(() => undefined); // + W12.X2: the source note's progress
     }, POSITION_SAVE_MS);
   }, [path]);
   const savePosTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -533,20 +536,8 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
     if (!doc || ocrAllBusy) return;
     setOcrAllBusy(true);
     try {
-      const { ocrPdfPage } = await import("./ocrPages");
-      let done = 0;
-      for (let p = 1; p <= doc.numPages; p++) {
-        if (ocrPages[p]) continue;
-        let text = pageTexts.current.get(p);
-        if (text === undefined) {
-          text = pageTextFromItems((await (await doc.getPage(p)).getTextContent()).items);
-          pageTexts.current.set(p, text);
-        }
-        if (text.trim()) continue;
-        showAiToast(t("pdf.ocr.allRunning", { n: p, total: doc.numPages }), "info");
-        onOcr(p, await ocrPdfPage(doc, p));
-        done++;
-      }
+      const { ocrScannedPages } = await import("./ocrAll");
+      const done = await ocrScannedPages(doc, ocrPages, pageTexts.current, onOcr, (n, total) => showAiToast(t("pdf.ocr.allRunning", { n, total }), "info"));
       showAiToast(done ? t("pdf.ocr.allDone", { n: done }) : t("pdf.ocr.none"), "success");
     } catch (e) {
       showAiToast(t("pdf.failed", { error: explainError(e) }), "error");
@@ -616,6 +607,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
           <button type="button" className="icon-btn pdf-text-btn" onClick={fitWidth}>
             {t("pdf.zoomFit")}
           </button>
+          <SpreadControls spread={spread} />
         </div>
         <form
           className="pdf-group pdf-search"
@@ -677,6 +669,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
           >
             {t("pdf.highlight")}
           </button>
+          <PdfListenButton doc={doc} ocrPages={ocrPages} pageTexts={pageTexts} path={path} goToPage={goToPage} />
           <button type="button" className="icon-btn pdf-text-btn" data-testid="pdf-ask" aria-pressed={askOpen} onClick={() => setAskOpen((v) => !v)}>
             {t("pdf.ask")}
           </button>
@@ -702,7 +695,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
             </p>
           )}
           {!doc && !error && <p className="pdf-message">{t("loading.generic")}</p>}
-          {doc &&
+          {doc && (<SpreadRows spread={spread}>{
             sizes.map((size, i) => (
               <PdfPageView
                 key={i + 1}
@@ -723,7 +716,7 @@ export function PdfReader({ path, fragment = null, openSeq = 0, onClose, onOpenN
                 onOcr={onOcr}
                 onAnchored={onAnchored}
               />
-            ))}
+            ))}</SpreadRows>)}
           <div className="pdf-tail" aria-hidden="true" />
         </div>
         {askOpen && (

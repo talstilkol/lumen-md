@@ -1,6 +1,8 @@
 ---
 title: מפתחות חתימה לתוספים
 description: להחליט על התוספים של אילו מפרסמים Lumen סומכת.
+type: how-to
+untracked: "shipped before the plan (plugin signing, release 9.4); no plan task covers it"
 ---
 
 אפשר לחתום על תוספים מהמאגר במפתח **Ed25519**. לפני ההתקנה Lumen מאמתת את

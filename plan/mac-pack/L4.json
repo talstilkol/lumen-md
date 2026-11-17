@@ -1,0 +1,443 @@
+[
+  {
+    "id": "L4.all",
+    "cmd": "node scripts/mac-pack/L4.mjs all",
+    "expect": "exit 0 and reports/mac-pack/L4/summary.json .ok == true (.failed lists the task ids that are not)",
+    "needs": [
+      "npm ci",
+      "Playwright browsers",
+      "see each task"
+    ],
+    "minutes": 709
+  },
+  {
+    "id": "L4.e2e",
+    "cmd": "node scripts/mac-pack/L4.mjs all --e2e-only",
+    "expect": "exit 0; one Playwright run; every task's reports/mac-pack/L4/<id>.json .e2e[].ok == true (0 failed, 0 flaky, 0 skipped on chromium)",
+    "needs": [
+      "npm ci",
+      "Playwright browsers"
+    ],
+    "minutes": 45
+  },
+  {
+    "id": "W1.3",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.3",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.3.json .ok == true; e2e: e2e/obsidian-syntax.spec.ts [chromium,firefox,webkit]; e2e/math-in-hebrew.spec.ts [chromium,firefox,webkit]; commands: Temml is a dependency, not only a lockfile entry; golden notes render and round-trip; size-limit: Temml not in the startup bundle; still owed after it (.owed): the 40 golden notes are not Obsidian exports: W10.O9 corpus",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 12
+  },
+  {
+    "id": "W1.4",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.4",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.4.json .ok == true; e2e: e2e/paste-fidelity.spec.ts [chromium,firefox,webkit]; e2e/paste-html.spec.ts [chromium,firefox,webkit]; commands: 30 captures: ≥ 95 % structure, 0 stray marks, 0 inline style; still owed after it (.owed): real clipboard captures from Word, Google Docs and Gmail (W10.O9) replace the synthetic 30",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 8
+  },
+  {
+    "id": "W1.5",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.5",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.5.json .ok == true; commands: 1,000 kills mid-save: 0 damaged, 0 missing, 0 leftovers; vault check finds 12/12 planted faults, 10k notes < 5 s",
+    "needs": [
+      "npm ci"
+    ],
+    "minutes": 25
+  },
+  {
+    "id": "W1.6",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.6",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.6.json .ok == true; e2e: e2e/backup-drill.spec.ts [chromium,firefox,webkit]; commands: backup units (WebDAV target, age zip, failure shown)",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 8
+  },
+  {
+    "id": "W1.8",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.8",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.8.json .ok == true; e2e: e2e/sync-explained.spec.ts [chromium,firefox,webkit]; commands: bench: first sync < 10 min, one change < 3 s; still owed after it (.owed): mobile background sync on a phone (W11.M10)",
+    "needs": [
+      "npm ci",
+      "browsers",
+      "≥ 12 GB free RAM (1 GB on two devices + server)"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "W1.10",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.10",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.10.json .ok == true; e2e: e2e/a11y-hebrew-gate.spec.ts /knowledge graph/ [chromium,firefox,webkit]; commands: layout and local-graph budgets; still owed after it (.owed): ≥ 30 fps at 10k/50k on a real GPU (W10.M11): no e2e measures fps yet",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 8
+  },
+  {
+    "id": "W1.11",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.11",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.11.json .ok == true; e2e: e2e/obsidian-bases.spec.ts [chromium,firefox,webkit]; commands: formula coverage ≥ 90 %, golden .base files; still owed after it (.owed): npm run obsidian:compare -- prepare|diff <obsidian-help vault> in Obsidian 1.15.1 (W11.M12): 0 differing views",
+    "needs": [
+      "npm ci",
+      "browsers",
+      "Obsidian 1.15.1 for the owed step"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "W1.12",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.12",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.12.json .ok == true; e2e: e2e/database-edit.spec.ts [chromium,firefox,webkit]; e2e/rtl-parity/database-keyboard.spec.ts [chromium,firefox,webkit]; commands: 30 rollup goldens; still owed after it (.owed): 10,000 rows ≥ 55 fps and the calendar drag round-trip have no e2e yet",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 8
+  },
+  {
+    "id": "W1.13",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.13",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.13.json .ok == true; e2e: e2e/voice-capture.spec.ts [chromium]; still owed after it (.owed): < 1 s press-to-record and WER of a 60 s note on a real phone (W11.M10)",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 4
+  },
+  {
+    "id": "W1.14",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.14",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.14.json .ok == true; e2e: e2e/epub-reader.spec.ts [chromium,firefox,webkit]; still owed after it (.owed): 10 golden EPUBs in data/epub-golden (W10.M10: 5 from Project Ben-Yehuda)",
+    "needs": [
+      "npm ci",
+      "browsers",
+      "data/epub-golden/*.epub"
+    ],
+    "minutes": 6
+  },
+  {
+    "id": "W1.15",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.15",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.15.json .ok == true; e2e: e2e/highlights-hub.spec.ts [chromium,firefox,webkit]; e2e/highlight-import.spec.ts [chromium,firefox,webkit]",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 4
+  },
+  {
+    "id": "W1.16",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.16",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.16.json .ok == true; e2e: e2e/canvas-note-cards.spec.ts [chromium,firefox,webkit]; e2e/canvas-excalidraw.spec.ts [chromium,firefox,webkit]; commands: tldraw: 0 references in the build",
+    "needs": [
+      "npm ci",
+      "browsers",
+      "visual baselines (W10.M9)"
+    ],
+    "minutes": 12
+  },
+  {
+    "id": "W1.17",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.17",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.17.json .ok == true; commands: whisper_core tests (std only); lib.rs compiles; FLEURS-he WER ≤ 10 %; still owed after it (.owed): 1 h of audio < 10 min on the M1: time the wer run",
+    "needs": [
+      "Rust toolchain",
+      "whisper-cli",
+      "FLEURS-he test split",
+      "the pinned ggml model"
+    ],
+    "minutes": 60
+  },
+  {
+    "id": "W1.19",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.19",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.19.json .ok == true; e2e: e2e/collab-sharing.spec.ts [chromium]; e2e/collab-e2ee.spec.ts [chromium]; e2e/share-link.spec.ts [chromium,firefox,webkit]; commands: server: viewer can't write, revoked link blocked < 5 s, Hebrew anchor survives 100 edits; still owed after it (.owed): two-browser RTL cursor check by eye",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "W1.20",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.20",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.20.json .ok == true; e2e: e2e/plugin-install.spec.ts [chromium,firefox,webkit]; e2e/plugin-ecosystem.spec.ts [chromium,firefox,webkit]; commands: every registry version has a scan result and scorecard",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 8
+  },
+  {
+    "id": "W1.21",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.21",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.21.json .ok == true; e2e: e2e/settings.spec.ts /theme/ [chromium,firefox,webkit]; commands: themes: RTL, contrast scorecards; still owed after it (.owed): axe AA on 5 themes he/en and a < 100 ms switch have no e2e yet",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "W1.22",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.22",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.22.json .ok == true; commands: the editor corpus (Moby-Dick, 2 MB Ben-Yehuda); INP p75 < 100 ms, keypress → paint p95, gate vs baseline; still owed after it (.owed): the first run makes the baseline: npm run perf:inp:gate -- --update, reviewed by the owner",
+    "needs": [
+      "npm ci",
+      "browsers",
+      "network for the corpus once"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "W1.23",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.23",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.23.json .ok == true; e2e: e2e/reflow.spec.ts [chromium,firefox,webkit]; e2e/sr-announce.spec.ts [chromium,firefox,webkit]; e2e/aria-hebrew.spec.ts [chromium]; commands: VoiceOver journey (Guidepup); still owed after it (.owed): NVDA (Windows) and TalkBack (Android) journeys by a person, protocol in sr/",
+    "needs": [
+      "npm ci",
+      "browsers",
+      "npx @guidepup/setup",
+      "the Mac's audio and keyboard for ~10 min"
+    ],
+    "minutes": 25
+  },
+  {
+    "id": "W1.24",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.24",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.24.json .ok == true; commands: store listings and metadata current; mobile toolchains present; still owed after it (.owed): brew install --cask / winget / flatpak install of a signed build (needs W10.O5 signed artefacts)",
+    "needs": [
+      "Xcode",
+      "Android SDK"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "W1.25",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.25",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.25.json .ok == true; e2e: e2e/mobile-native.spec.ts [chromium]; e2e/touch.spec.ts [chromium]; still owed after it (.owed): tap counts vs Obsidian Mobile and launch < 1.5 s on a real Pixel 7 / iPhone 14 (W11.M10)",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 6
+  },
+  {
+    "id": "W1.26",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.26",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.26.json .ok == true; e2e: e2e/import-wizard.spec.ts [chromium,firefox,webkit]; commands: importers: goldens, Notion database → .base, undo by hash; still owed after it (.owed): npm run import:diff on each real export of W10.O9",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 8
+  },
+  {
+    "id": "W1.27",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.27",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.27.json .ok == true; commands: 1,000,000 inputs per decoder: 0 crashes, 0 hangs > 1 s; two builds, same sha256 for every dist file; CycloneDX SBOM; still owed after it (.owed): a release with SBOM + signature (W10.O5); the OpenSSF badge (W10.O11)",
+    "needs": [
+      "npm ci",
+      "~3 h for the fuzz",
+      "faketime (optional)"
+    ],
+    "minutes": 200
+  },
+  {
+    "id": "W1.34",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.34",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.34.json .ok == true; e2e: e2e/live-exec.spec.ts /live-r/ [chromium,firefox,webkit]; commands: licence gate passes with no webR exception",
+    "needs": [
+      "npm ci",
+      "browsers",
+      "npm run webr:local (Playwright's webServer runs it)"
+    ],
+    "minutes": 6
+  },
+  {
+    "id": "W1.36",
+    "cmd": "node scripts/mac-pack/L4.mjs W1.36",
+    "expect": "exit 0 and reports/mac-pack/L4/W1.36.json .ok == true; commands: build + bundle budget with the exception removed; still owed after it (.owed): find a smaller Excalidraw build, then delete the 'vendor: excalidraw core' rule in scripts/bundle-budgets.json (expires 2027-01-15)",
+    "needs": [
+      "npm ci"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "W11.S2",
+    "cmd": "node scripts/mac-pack/L4.mjs W11.S2",
+    "expect": "exit 0 and reports/mac-pack/L4/W11.S2.json .ok == true; commands: update_guard + manifest_sig (std only); tauri-plugin-updater ≥ 2.13.3, cargo test",
+    "needs": [
+      "Rust toolchain",
+      "crates.io"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "W11.S3",
+    "cmd": "node scripts/mac-pack/L4.mjs W11.S3",
+    "expect": "exit 0 and reports/mac-pack/L4/W11.S3.json .ok == true; commands: release-run refuses without a .sig; still owed after it (.owed): a real minisign key: W10.O5",
+    "needs": [
+      "npm ci",
+      "minisign"
+    ],
+    "minutes": 6
+  },
+  {
+    "id": "W11.S5",
+    "cmd": "node scripts/mac-pack/L4.mjs W11.S5",
+    "expect": "exit 0 and reports/mac-pack/L4/W11.S5.json .ok == true; commands: nightly receipt with every tool measured; still owed after it (.owed): Scorecard ≥ 7.0 needs the GitHub settings of W10.O1",
+    "needs": [
+      "scorecard",
+      "osv-scanner",
+      "cargo-deny",
+      "network"
+    ],
+    "minutes": 15
+  },
+  {
+    "id": "W11.S6",
+    "cmd": "node scripts/mac-pack/L4.mjs W11.S6",
+    "expect": "exit 0 and reports/mac-pack/L4/W11.S6.json .ok == true; e2e: e2e/sync-conflict-file.spec.ts [chromium,firefox,webkit]; commands: unit: both versions, history, not synced",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "W11.S7",
+    "cmd": "node scripts/mac-pack/L4.mjs W11.S7",
+    "expect": "exit 0 and reports/mac-pack/L4/W11.S7.json .ok == true; commands: josephg/editing-traces + crdt-benchmarks B4: ≥ 90 % merged, 0 lost; still owed after it (.owed): replace the 91.8 % figure in the plan with the result",
+    "needs": [
+      "npm ci",
+      "network (GitHub raw)"
+    ],
+    "minutes": 15
+  },
+  {
+    "id": "W11.S9",
+    "cmd": "node scripts/mac-pack/L4.mjs W11.S9",
+    "expect": "exit 0 and reports/mac-pack/L4/W11.S9.json .ok == true; e2e: e2e/recovery-kit.spec.ts [chromium,firefox,webkit]",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "W11.S10",
+    "cmd": "node scripts/mac-pack/L4.mjs W11.S10",
+    "expect": "exit 0 and reports/mac-pack/L4/W11.S10.json .ok == true; e2e: e2e/passkey-unlock.spec.ts [chromium,firefox,webkit]; still owed after it (.owed): a real passkey in Chrome and Safari (W11.M11)",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "W11.S17",
+    "cmd": "node scripts/mac-pack/L4.mjs W11.S17",
+    "expect": "exit 0 and reports/mac-pack/L4/W11.S17.json .ok == true; e2e: e2e/trusted-types-default.spec.ts [chromium]; e2e/csp-violations.spec.ts [chromium,firefox,webkit]",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 4
+  },
+  {
+    "id": "W11.S19",
+    "cmd": "node scripts/mac-pack/L4.mjs W11.S19",
+    "expect": "exit 0 and reports/mac-pack/L4/W11.S19.json .ok == true; e2e: e2e/monitoring.spec.ts [chromium,firefox,webkit]; e2e/pii-redaction.spec.ts [chromium,firefox,webkit]; commands: planted secrets: 0 leaks",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "W10.F2",
+    "cmd": "node scripts/mac-pack/L4.mjs W10.F2",
+    "expect": "exit 0 and reports/mac-pack/L4/W10.F2.json .ok == true; commands: a timed local Vercel-like build writes reports/vercel-build.json; the gate estimate is inside 38 min",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 40
+  },
+  {
+    "id": "W10.F4",
+    "cmd": "node scripts/mac-pack/L4.mjs W10.F4",
+    "expect": "exit 0 and reports/mac-pack/L4/W10.F4.json .ok == true; e2e: e2e/vault-folder.spec.ts [chromium,firefox,webkit]",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 4
+  },
+  {
+    "id": "W10.F5",
+    "cmd": "node scripts/mac-pack/L4.mjs W10.F5",
+    "expect": "exit 0 and reports/mac-pack/L4/W10.F5.json .ok == true; commands: the whole e2e suite, three browsers",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 60
+  },
+  {
+    "id": "W10.F10",
+    "cmd": "node scripts/mac-pack/L4.mjs W10.F10",
+    "expect": "exit 0 and reports/mac-pack/L4/W10.F10.json .ok == true; e2e: e2e/plugins.spec.ts [chromium,firefox,webkit]; e2e/plugin-dev.spec.ts [chromium,firefox,webkit]",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 4
+  },
+  {
+    "id": "W12.T2",
+    "cmd": "node scripts/mac-pack/L4.mjs W12.T2",
+    "expect": "exit 0 and reports/mac-pack/L4/W12.T2.json .ok == true; commands: form, RTL אדם note with 5 fields, axe, 100-note rename + one Ctrl+Z; still owed after it (.owed): the acceptance asks for e2e: no Playwright spec for Object Studio yet",
+    "needs": [
+      "npm ci"
+    ],
+    "minutes": 3
+  },
+  {
+    "id": "W12.T3",
+    "cmd": "node scripts/mac-pack/L4.mjs W12.T3",
+    "expect": "exit 0 and reports/mac-pack/L4/W12.T3.json .ok == true; e2e: e2e/rtl-parity/database-keyboard.spec.ts [chromium,firefox,webkit]; commands: 1,000 notes of a type < 300 ms on a 10k vault; still owed after it (.owed): 'Save as .base' opens in Obsidian 1.15.1 with the same rows (W12.M2)",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 6
+  },
+  {
+    "id": "W12.T5",
+    "cmd": "node scripts/mac-pack/L4.mjs W12.T5",
+    "expect": "exit 0 and reports/mac-pack/L4/W12.T5.json .ok == true; e2e: e2e/rtl-parity/database-keyboard.spec.ts [chromium,firefox,webkit]; e2e/bulk-properties.spec.ts /kanban/ [chromium,firefox,webkit]; still owed after it (.owed): mouse drag between kanban columns in RTL has no e2e yet; obsidian-help corpus (W11.P3)",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "W12.U1",
+    "cmd": "node scripts/mac-pack/L4.mjs W12.U1",
+    "expect": "exit 0 and reports/mac-pack/L4/W12.U1.json .ok == true; e2e: e2e/embed-edit.spec.ts [chromium,firefox,webkit]; e2e/embeds.spec.ts [chromium,firefox,webkit]",
+    "needs": [
+      "npm ci",
+      "browsers"
+    ],
+    "minutes": 4
+  }
+]

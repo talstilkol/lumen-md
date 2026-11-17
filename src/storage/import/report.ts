@@ -44,6 +44,7 @@ export function reportMarkdown(r: ImportReport): string {
   if (r.attachmentsLost) parts.push(t("importWizard.lost", { n: r.attachmentsLost }));
   if (r.skipped.length) parts.push(`## ${t("importWizard.review.skipped", { n: r.skipped.length })}\n\n${list(r.skipped, (i) => `${code(i.path)} — ${skipText(i)}`)}`);
   if (r.warnings.length) parts.push(`## ${t("importWizard.review.warnings", { n: r.warnings.length })}\n\n${list(r.warnings, (i) => `${code(i.path)} — ${warningText(i)}`)}`);
+  if (r.typeReport?.length) parts.push(`## ${t("importWizard.review.types")}\n\n${r.typeReport.join("\n")}`);
   if (r.links.unresolved.length) parts.push(`## ${t("importWizard.review.unresolved", { n: r.links.total - r.links.resolved })}\n\n${list(r.links.unresolved, (u) => `${code(u.path)} → ${code(u.target)}`)}`);
   return `${parts.join("\n\n")}\n`;
 }

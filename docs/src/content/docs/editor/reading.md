@@ -1,6 +1,8 @@
 ---
 title: Reading options and Hebrew fonts
 description: Choose the Hebrew font, size, line height and column width of the preview — for every note or one note — with spaced Hebrew and a dyslexia-friendly font for English. Fonts download only when chosen, from the app itself.
+type: reference
+tasks: ["W3.5"]
 ---
 
 **View → Reading options…** (or the command palette) sets how the preview

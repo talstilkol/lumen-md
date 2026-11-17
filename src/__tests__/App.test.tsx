@@ -10,6 +10,7 @@
  * i18n and the AI toast stack are the real ones.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import "./helpers/commandSections";
 import { render, screen, fireEvent, waitFor, act, cleanup } from "@testing-library/react";
 import type { UseCommandsOptions } from "../commands/useCommands";
 import type { MenuActions } from "../hooks/useTauriMenu";
@@ -940,6 +941,8 @@ describe("App workspace sidebar and tabs", () => {
     useAppStore.setState({ showBacklinks: true });
     h.readWorkspaceFile.mockResolvedValue("links here");
     await renderApp();
+    // The panel is a lazy chunk (W10.E19): wait for it before using its callback.
+    await waitFor(() => expect(propsOf("BacklinksPanel").onOpen).toBeTypeOf("function"), { timeout: 3000 });
     await run(() => cb("BacklinksPanel", "onOpen")("dir/from.md"));
     expect(doc().name).toBe("from.md");
     expect(doc().content).toBe("links here");

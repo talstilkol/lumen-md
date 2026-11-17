@@ -4,7 +4,7 @@
   "imageHosts.intro": "Images from these sites load without asking. Revoke one, and its images wait for you again.",
   "imageHosts.revoke": "Revoke",
   "imageHosts.revokeAll": "Revoke all",
-  "imageHosts.revokeHost": "Stop always allowing {host}",
+  "imageHosts.revokeHost": "Revoke always allowing {host}",
   "imageHosts.revoked": "{host}: images wait for you again",
   "imageHosts.revokedAll": "Every site's images wait for you again",
   "imageHosts.title": "Allowed image hosts"

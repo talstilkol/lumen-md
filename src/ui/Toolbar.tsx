@@ -36,6 +36,7 @@ import { useAppStore } from "../store/useStore";
 import type { ViewMode } from "../store/useStore";
 import { t } from "../i18n";
 import type { Command } from "./CommandPalette";
+import { shownHint, useCommandHints } from "../commands/hints";
 import { AuthButton } from "../components/AuthButton";
 
 interface Props {
@@ -133,6 +134,7 @@ export function Toolbar({
   const isDark = theme === "dark";
 
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  useCommandHints(openMenu !== null);
   const menuBarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -249,7 +251,7 @@ export function Toolbar({
             <MenuItem icon={<Download size={14} />} label={t("toolbar.exportPdf")} description={t("desc.exportPdf")} onClick={() => exec(exportPdfCmd.action)} />
           )}
           {exportPptxCmd && (
-            <MenuItem icon={<Download size={14} />} label={exportPptxCmd.label} description={exportPptxCmd.hint} onClick={() => exec(exportPptxCmd.action)} />
+            <MenuItem icon={<Download size={14} />} label={exportPptxCmd.label} description={shownHint(exportPptxCmd.hint)} onClick={() => exec(exportPptxCmd.action)} />
           )}
           {printCmd && (
             <MenuItem icon={<Printer size={14} />} label={t("toolbar.print")} description={t("desc.print")} hint="⌘P" onClick={() => exec(printCmd.action)} />
@@ -285,8 +287,8 @@ export function Toolbar({
           onHover={() => openMenu && setOpenMenu("edit")}
         >
           <MenuSection label={t("toolbar.section.history")} />
-          <MenuItem icon={<Undo2 size={14} />} label={t("toolbar.undo")} description={t("desc.undo")} hint="⌘Z" onClick={() => exec(() => document.execCommand("undo"))} />
-          <MenuItem icon={<Redo2 size={14} />} label={t("toolbar.redo")} description={t("desc.redo")} hint="⇧⌘Z" onClick={() => exec(() => document.execCommand("redo"))} />
+          <MenuItem icon={<Undo2 size={14} className="icon-dir" />} label={t("toolbar.undo")} description={t("desc.undo")} hint="⌘Z" onClick={() => exec(() => document.execCommand("undo"))} />
+          <MenuItem icon={<Redo2 size={14} className="icon-dir" />} label={t("toolbar.redo")} description={t("desc.redo")} hint="⇧⌘Z" onClick={() => exec(() => document.execCommand("redo"))} />
           <MenuDivider />
           <MenuSection label={t("toolbar.section.clipboard")} />
           <MenuItem icon={<Scissors size={14} />} label={t("toolbar.cut")} description={t("desc.cut")} hint="⌘X" onClick={() => exec(() => document.execCommand("cut"))} />
@@ -299,7 +301,7 @@ export function Toolbar({
           <MenuItem icon={<CheckSquare size={14} />} label={t("toolbar.selectAll")} description={t("desc.selectAll")} hint="⌘A" onClick={() => exec(() => document.execCommand("selectAll"))} />
           <MenuItem icon={<Trash2 size={14} />} label={t("toolbar.delete")} description={t("desc.delete")} onClick={() => exec(() => document.execCommand("delete"))} />
           {toggleDirectionCmd && (
-            <MenuItem icon={<ArrowRightLeft size={14} />} label={toggleDirectionCmd.label} description={toggleDirectionCmd.hint} hint={toggleDirectionCmd.shortcut} onClick={() => exec(() => void toggleDirectionCmd.action())} />
+            <MenuItem icon={<ArrowRightLeft size={14} />} label={toggleDirectionCmd.label} description={shownHint(toggleDirectionCmd.hint)} hint={toggleDirectionCmd.shortcut} onClick={() => exec(() => void toggleDirectionCmd.action())} />
           )}
         </MenuBarItem>
 
@@ -348,7 +350,7 @@ export function Toolbar({
                         key={cmd.id}
                         icon={Icon ? <Icon size={14} /> : <Plus size={14} />}
                         label={cmd.label}
-                        description={cmd.hint}
+                        description={shownHint(cmd.hint)}
                         onClick={() => exec(cmd.action)}
                       />
                     );
@@ -366,7 +368,7 @@ export function Toolbar({
                         key={cmd.id}
                         icon={Icon ? <Icon size={14} /> : <Plus size={14} />}
                         label={cmd.label}
-                        description={cmd.hint}
+                        description={shownHint(cmd.hint)}
                         onClick={() => exec(cmd.action)}
                       />
                     );
@@ -414,7 +416,7 @@ export function Toolbar({
           <MenuDivider />
           <MenuSection label={t("toolbar.panels")} />
           <MenuItem
-            icon={showOutline ? <PanelRightClose size={14} /> : <PanelRightOpen size={14} />}
+            icon={showOutline ? <PanelRightClose size={14} className="icon-dir" /> : <PanelRightOpen size={14} className="icon-dir" />}
             label={showOutline ? t("toolbar.outline.hide") : t("toolbar.outline.show")}
             description={t("desc.outline")}
             onClick={() => exec(toggleOutline)}
@@ -448,6 +450,7 @@ export function Toolbar({
             onClick={() => exec(() => setSplitAxis("vertical"))}
           />
           <MenuDivider />
+          <MenuItem icon={<BookOpen size={14} />} label={t("cmd.reading.profile")} description={t("desc.reading.profile")} onClick={() => exec(() => void import("./ReadingModeMenu").then((m) => m.openReadingModeMenu()))} />
           <MenuItem
             icon={<Eye size={14} />}
             label={pageView ? t("toolbar.pageView.on") : t("toolbar.pageView.off")}
@@ -508,7 +511,7 @@ export function Toolbar({
           }}
           title={doc.name}
         >
-          {doc.name}
+          <bdi>{doc.name}</bdi>
           {doc.dirty && <span style={{ color: "hsl(var(--accent))", marginInlineStart: 4 }}>•</span>}
         </div>
       </div>
@@ -697,7 +700,7 @@ function SubMenuItem({
         {description && (
           <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>{description}</span>
         )}
-        <ChevronRight size={14} aria-hidden style={{ flexShrink: 0, opacity: 0.7 }} />
+        <ChevronRight size={14} aria-hidden className="icon-dir" style={{ flexShrink: 0, opacity: 0.7 }} />
       </button>
       {open && pos &&
         createPortal(

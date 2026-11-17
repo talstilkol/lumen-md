@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { chromiumOnlyHere } from "./_engines";
 
 /**
  * Plan W4.21 — the accessibility tree of the key Hebrew flows, pinned with
@@ -30,9 +31,9 @@ async function open(page: Page, mode: "preview" | "source" = "preview") {
 }
 
 test.describe("aria snapshots, Hebrew interface", () => {
-  // skip-reason: the aria snapshots are pinned to Chromium's accessibility tree (each engine names roles differently); the real screen readers run in e2e/sr/ | task: W4.21 | until: 2027-05-12
-  // skip-reason: the aria snapshots pin Chromium's accessibility tree; each engine builds its own, and the real screen readers run in sr/ (W6.30) | task: W4.21 | until: 2027-05-12
-  test.skip(({ browserName }) => browserName !== "chromium", "the accessibility tree is pinned on Chromium; the real readers are in sr/");
+  // The aria snapshots pin Chromium's accessibility tree (each engine names roles differently); the real readers run in e2e/sr/ (W4.21, W6.30).
+  // skip-reason: the aria snapshots pin Chromium's accessibility tree; each engine builds its own, and the real screen readers run in e2e/sr/ | task: W4.21 | until: 2027-05-16
+  chromiumOnlyHere("the aria snapshots");
 
   test("shell: the skip link comes first, then the main landmark", async ({ page }) => {
     await open(page);

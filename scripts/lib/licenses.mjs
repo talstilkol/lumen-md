@@ -16,8 +16,12 @@ export const best = (a, b) => (RANK[a] <= RANK[b] ? a : b);
 
 // ── SPDX licences ──────────────────────────────────────────────────────
 
-/** Permissive (or file-level copyleft that is fine to ship unmodified). */
-const OK_IDS = new Set(
+/**
+ * Permissive (or file-level copyleft that is fine to ship unmodified).
+ * src-tauri/deny.toml allows exactly these ids for the Rust crates (its
+ * non-SPDX "Public Domain" aside); src/__tests__/cargoDeny.test.ts keeps them equal.
+ */
+export const OK_LICENCE_IDS = Object.freeze(
   [
     "MIT", "MIT-0", "ISC", "0BSD", "BSD-2-Clause", "BSD-3-Clause", "BSD-3-Clause-Clear", "Apache-2.0", "Apache-1.1",
     "Unlicense", "CC0-1.0", "CC-BY-3.0", "CC-BY-4.0", "BlueOak-1.0.0", "Zlib", "Python-2.0", "PSF-2.0", "OFL-1.1",
@@ -25,8 +29,9 @@ const OK_IDS = new Set(
     "BSL-1.0",
     "WTFPL", "MPL-1.1", "MPL-2.0", "EPL-1.0", "EPL-2.0", "CDDL-1.0", "CDDL-1.1", "Artistic-2.0", "X11", "W3C", "Ruby",
     "Unicode-DFS-2016", "Unicode-3.0", "AFL-2.1", "AFL-3.0", "Public Domain",
-  ].map((s) => s.toLowerCase()),
+  ],
 );
+const OK_IDS = new Set(OK_LICENCE_IDS.map((s) => s.toLowerCase()));
 
 /** Exceptions that turn a GPL into something an app may link against. */
 /** Exact SPDX ids only: "Classpath-exception-2.0x" is a typo, not an exception. */

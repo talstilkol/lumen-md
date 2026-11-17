@@ -1,6 +1,8 @@
 ---
 title: Academic LaTeX export (Hebrew)
 description: Export a note as a LaTeX project — Hebrew right to left with babel, math, Pandoc-style [@key] citations from the vault's BibTeX, and images — that compiles with LuaLaTeX or XeLaTeX.
+type: how-to
+tasks: ["W10.E14", "W5.22"]
 ---
 
 **Export LaTeX project (academic, Hebrew)…** in the command palette
@@ -19,6 +21,21 @@ downloads `<note>-latex.zip` with:
 
 Compile with `latexmk -lualatex main.tex` (recommended) or
 `latexmk -xelatex main.tex`. Both work from the same preamble.
+
+## PDF from LaTeX (desktop)
+
+In the desktop app, **PDF from LaTeX (desktop, Tectonic)…** compiles the
+same export into `<note>.pdf` with [Tectonic](https://tectonic-typesetting.github.io),
+if you have installed it (`brew install tectonic`). Lumen does not bundle a TeX
+engine. It finds `tectonic` on your `PATH`, in `/opt/homebrew/bin` or
+`/usr/local/bin`, or at the path in `LUMEN_TECTONIC`. The project is compiled
+in a temporary folder that is removed afterwards. Tectonic runs with
+`--untrusted`, so the document can't run shell commands.
+
+When TeX fails, Lumen lists its errors with their lines in `main.tex`
+(`main.tex:7: Undefined control sequence.`), or the end of the log when TeX
+gives no line. In the browser there is no compiler; export the project and
+compile it yourself.
 
 ## Hebrew
 

@@ -94,6 +94,7 @@ describe("the in-house primitives match the RFC vectors", () => {
   }, 60_000);
 });
 
+// skip-reason: the audited libraries (@noble) must be installed to compare against; without them the reason is printed in the title | task: W10.D12 | until: 2027-05-16
 describe.skipIf(!audited.impl)(`in-house vs audited libraries${audited.impl ? "" : ` (${audited.why})`}`, () => {
   const lib = audited.impl!;
   it("the audited libraries match the RFC vectors", async () => {
@@ -144,6 +145,7 @@ describe.skipIf(!audited.impl)(`in-house vs audited libraries${audited.impl ? ""
   }, 600_000);
 });
 
+// skip-reason: the age interop needs the typage library installed; without it the reason is printed in the title | task: W10.D12 | until: 2027-05-16
 describe.skipIf(!audited.age)(`age: ours and typage read each other's files${audited.age ? "" : ` (${audited.why})`}`, () => {
   it("X25519 and passphrase files, both ways", async () => {
     const lib = audited.age!;

@@ -6,8 +6,12 @@
  *
  *   when: note created (in a folder) · tag added · property changed (to a
  *         value) · daily (once a day) · a row of a base view changes (W6.46)
+ *         · an object of a type is created · a field of a type changes (W12.U2)
+ *   unless: Shabbat or a yom tov (W12.U2): the rule waits for the next weekday
  *   then: move to a folder · add a tag · apply a template · add a line to
- *         the daily note
+ *         the daily note · add a task (W10.E15: `- [ ]` in a tasks note) ·
+ *         run an agent (W10.E15: its changes wait in the review panel; the
+ *         automation itself writes nothing for it)
  *
  * Pure: `plan` reads a snapshot of the vault and returns the changes; the
  * caller writes them (`applyPlan`) through an injected file system.
@@ -15,6 +19,8 @@
 import YAML from "yaml";
 import { setProperty } from "../properties/frontmatter";
 import { basesFileFromText, parseBase, runBase } from "../views/bases/base";
+import { nextWorkday, restAt, type RestDay } from "./restDays";
+import type { City } from "../daily/shabbatTimes";
 
 export type Trigger =
   | { kind: "created"; folder?: string }
@@ -26,13 +32,24 @@ export type Trigger =
    * (after the change) has a property changed (`property`, or any), or a new
    * note joins the view. The view's filters decide, as in the table itself.
    */
-  | { kind: "rowChanged"; base: string; view?: string; property?: string };
+  | { kind: "rowChanged"; base: string; view?: string; property?: string }
+  /**
+   * W12.U2: a note becomes an object of type `type`: created with it, or
+   * given it later (`type:` in frontmatter, by id or label, as W12.T1 reads it).
+   */
+  | { kind: "typeCreated"; type: string }
+  /** W12.U2: a field of an object of type `type` changes (`field`, or any; to `value`, or any). */
+  | { kind: "typeFieldChanged"; type: string; field?: string; value?: string };
 
 export type Action =
   | { kind: "move"; folder: string }
   | { kind: "tag"; tag: string }
   | { kind: "template"; template: string }
-  | { kind: "appendDaily"; text: string };
+  | { kind: "appendDaily"; text: string }
+  /** W10.E15: a `- [ ] …` line in a tasks note (`file`, default TASKS_PATH); `{{link}}` etc. as in appendDaily. */
+  | { kind: "createTask"; text: string; file?: string }
+  /** W10.E15: run an agent on the note; what it proposes is staged for approval, never written by the rule. */
+  | { kind: "runAgent"; agent: string; prompt?: string };
 
 export interface Rule {
   id: string;
@@ -40,6 +57,12 @@ export interface Rule {
   enabled: boolean;
   when: Trigger;
   then: Action[];
+  /**
+   * W12.U2: not on Shabbat or a yom tov. On such a day the rule does not run:
+   * a daily rule runs on the next weekday, and an event waits in the
+   * postponed list until then (the caller replays it).
+   */
+  notOnRestDays?: boolean;
 }
 
 export type VaultEvent =
@@ -49,7 +72,12 @@ export type VaultEvent =
 
 export type Change =
   | { kind: "write"; path: string; before: string | null; after: string; rule: string }
-  | { kind: "move"; from: string; to: string; rule: string };
+  | { kind: "move"; from: string; to: string; rule: string }
+  /** An agent run: nothing is written by the automation, so there is nothing to undo; the agent's proposals wait for review. */
+  | { kind: "agent"; agent: string; path: string | null; prompt: string; rule: string };
+
+/** Where "add a task" writes when the rule names no note. */
+export const TASKS_PATH = "Tasks.md";
 
 /** What a rule may read: the vault as it is now. */
 export interface VaultView {
@@ -64,6 +92,23 @@ export interface PlanContext {
   today: string;
   /** Rule id → the last day it ran (daily rules run once a day). */
   lastDaily?: Readonly<Record<string, string>>;
+  /** Holidays as in Israel (one day of yom tov) or the diaspora (two). Default: Israel. */
+  israel?: boolean;
+  /**
+   * Review Z7-M6: the moment of the run (epoch ms) and the daily-notes city, so that "not on Shabbat or a holiday"
+   * starts at candle lighting on the eve (restDays.ts `restAt`). Without a city, an eve rests from 12:00; without
+   * `now`, an eve rests all day (fail safe).
+   */
+  now?: number;
+  city?: City | null;
+  /** Candle lighting, minutes before sunset (the daily-notes setting). */
+  candles?: number;
+  /**
+   * A note's types, lower case: by default `type:` in its frontmatter (one
+   * value or a list). W12.T1's registry, which also knows activating tags
+   * and labels, can be passed instead.
+   */
+  typesOf?: (text: string) => string[];
 }
 
 /** How deep a cascade may go: a rule's change may trigger rules, theirs may too, then it stops. */
@@ -121,8 +166,15 @@ function propsChanged(before: string, after: string, key?: string): boolean {
   return [...keys].some((k) => JSON.stringify(a[k] ?? null) !== JSON.stringify(b[k] ?? null));
 }
 
+/** A note's types from `type:` in its frontmatter (a value or a list), lower case. */
+export function frontmatterTypes(text: string): string[] {
+  const t = frontmatter(text).type;
+  const list = Array.isArray(t) ? t : t === undefined || t === null ? [] : [t];
+  return list.map((x) => String(x).trim().toLowerCase()).filter(Boolean);
+}
+
 /** Does `rule` fire on `event`? */
-export function fires(rule: Rule, event: VaultEvent, ctx: Pick<PlanContext, "today" | "lastDaily"> & { vault?: VaultView }): boolean {
+export function fires(rule: Rule, event: VaultEvent, ctx: Pick<PlanContext, "today" | "lastDaily" | "typesOf"> & { vault?: VaultView }): boolean {
   if (!rule.enabled) return false;
   const w = rule.when;
   switch (w.kind) {
@@ -149,6 +201,23 @@ export function fires(rule: Rule, event: VaultEvent, ctx: Pick<PlanContext, "tod
         return isRowOf(ctx.vault.read(w.base), w.view, event.path, event.text);
       }
       return propsChanged(event.before, event.after, w.property) && isRowOf(ctx.vault.read(w.base), w.view, event.path, event.after);
+    }
+    case "typeCreated": {
+      if (event.kind === "daily" || !event.path.endsWith(".md") || (event.kind === "created" && event.moved)) return false;
+      const typesOf = ctx.typesOf ?? frontmatterTypes;
+      const want = w.type.trim().toLowerCase();
+      const after = typesOf(event.kind === "created" ? event.text : event.after);
+      const before = event.kind === "created" ? [] : typesOf(event.before);
+      return after.includes(want) && !before.includes(want);
+    }
+    case "typeFieldChanged": {
+      if (event.kind !== "changed" || !event.path.endsWith(".md")) return false;
+      const typesOf = ctx.typesOf ?? frontmatterTypes;
+      if (!typesOf(event.after).includes(w.type.trim().toLowerCase())) return false;
+      if (!w.field) return propsChanged(event.before, event.after);
+      const a = scalar(frontmatter(event.before)[w.field]);
+      const b = scalar(frontmatter(event.after)[w.field]);
+      return a !== b && (w.value === undefined || b === w.value);
     }
   }
 }
@@ -193,6 +262,12 @@ export interface Plan {
   stopped: Array<{ rule: string; on: string; reason: "depth" | "repeat" }>;
   /** Daily rules that ran (rule id → date), for the caller to remember. */
   dailyRan: Record<string, string>;
+  /**
+   * W12.U2: rules that would have run but wait for the end of Shabbat or a
+   * yom tov, with the day they wait for. An event rule's event is kept here
+   * for the caller to replay; a daily rule simply runs on that day.
+   */
+  postponed: Array<{ rule: string; on: string; why: RestDay; until: string; event?: VaultEvent }>;
 }
 
 /**
@@ -205,7 +280,8 @@ export function plan(rules: readonly Rule[], event: VaultEvent, ctx: PlanContext
   const files = new Map<string, string | null>();
   const read = (p: string) => (files.has(p) ? files.get(p)! : ctx.vault.read(p));
   const exists = (p: string) => (files.has(p) ? files.get(p) !== null : ctx.vault.exists(p));
-  const out: Plan = { changes: [], fired: [], stopped: [], dailyRan: {} };
+  const out: Plan = { changes: [], fired: [], stopped: [], dailyRan: {}, postponed: [] };
+  const rest = restAt(ctx.today, ctx.now, { israel: ctx.israel ?? true, city: ctx.city ?? null, ...(ctx.candles !== undefined ? { candles: ctx.candles } : {}) });
   const seen = new Set<string>();
   const queue: Array<{ event: VaultEvent; depth: number }> = [{ event, depth: 0 }];
   const write = (path: string, after: string, rule: string, depth: number, cascade = true) => {
@@ -221,6 +297,11 @@ export function plan(rules: readonly Rule[], event: VaultEvent, ctx: PlanContext
     const on = ev.kind === "daily" ? `daily:${ev.date}` : ev.path;
     for (const rule of rules) {
       if (!fires(rule, ev, { ...ctx, vault: { read, exists } })) continue;
+      if (rule.notOnRestDays && rest) {
+        // Nothing is written on Shabbat or a yom tov; the dry run shows the wait.
+        out.postponed.push({ rule: rule.id, on, why: rest, until: nextWorkday(ctx.today, ctx.israel ?? true), event: ev.kind === "daily" ? undefined : ev });
+        continue;
+      }
       const key = `${rule.id}\u0000${on}`;
       if (seen.has(key)) {
         out.stopped.push({ rule: rule.id, on, reason: "repeat" });
@@ -240,6 +321,18 @@ export function plan(rules: readonly Rule[], event: VaultEvent, ctx: PlanContext
           const cur = read(daily) ?? "";
           const line = fill(a.text, path, ctx.today);
           if (!cur.split("\n").includes(line)) write(daily, cur ? `${cur.replace(/\s*$/, "")}\n${line}\n` : `${line}\n`, rule.id, depth, false);
+          continue;
+        }
+        if (a.kind === "createTask") {
+          const file = cleanFolder(a.file ?? "") || TASKS_PATH;
+          const cur = read(file) ?? "";
+          const line = `- [ ] ${fill(a.text, path, ctx.today).trim()}`;
+          // A task is a to-do, not an edit of a note: it triggers nothing, and the same task is not added twice.
+          if (!cur.split("\n").includes(line)) write(file, cur ? `${cur.replace(/\s*$/, "")}\n${line}\n` : `${line}\n`, rule.id, depth, false);
+          continue;
+        }
+        if (a.kind === "runAgent") {
+          out.changes.push({ kind: "agent", agent: a.agent, path, prompt: fill(a.prompt ?? "", path, ctx.today), rule: rule.id });
           continue;
         }
         if (!path) continue; // a daily rule has no note of its own
@@ -273,6 +366,8 @@ export interface Fs {
   write(path: string, text: string): Promise<void>;
   move(from: string, to: string): Promise<void>;
   remove(path: string): Promise<void>;
+  /** Start an agent run (W10.E15). Its changes are staged for review; without it an agent change is only planned. */
+  runAgent?(change: Extract<Change, { kind: "agent" }>): Promise<void>;
 }
 
 export interface RunLogEntry {
@@ -292,6 +387,9 @@ export async function applyPlan(p: Plan, fs: Fs, id: string, event: string, now:
       const before = await fs.read(c.path);
       await fs.write(c.path, c.after);
       done.push({ ...c, before });
+    } else if (c.kind === "agent") {
+      await fs.runAgent?.(c);
+      done.push(c);
     } else {
       await fs.move(c.from, c.to);
       done.push(c);
@@ -306,6 +404,8 @@ export async function undoRun(entry: RunLogEntry, fs: Fs): Promise<{ ok: true } 
   const overlay = new Map<string, string | null>();
   const cur = async (p: string) => (overlay.has(p) ? overlay.get(p)! : await fs.read(p));
   for (const c of [...entry.changes].reverse()) {
+    // An agent run wrote nothing itself: its proposals are approved or rejected in the review panel.
+    if (c.kind === "agent") continue;
     if (c.kind === "write") {
       if ((await cur(c.path)) !== c.after) return { ok: false, path: c.path };
       overlay.set(c.path, c.before);
@@ -317,6 +417,7 @@ export async function undoRun(entry: RunLogEntry, fs: Fs): Promise<{ ok: true } 
     }
   }
   for (const c of [...entry.changes].reverse()) {
+    if (c.kind === "agent") continue;
     if (c.kind === "write") {
       if (c.before === null) await fs.remove(c.path);
       else await fs.write(c.path, c.before);

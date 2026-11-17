@@ -3,6 +3,7 @@
  * its lazy chunk, not the startup bundle (plan W1.26).
  */
 import { describe, expect, it } from "vitest";
+import "./helpers/commandSections";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { t } from "../i18n";
@@ -33,8 +34,8 @@ describe("i18n: the import wizard's lazy English", () => {
 
   it("every reason, warning and source the code can name has its words", () => {
     for (const r of ["appFolder", "trashed", "duplicate", "unsupported", "empty", "unreadable", "encrypted"]) expect(lazy[`importWizard.reason.${r}`], r).toBeDefined();
-    for (const w of ["missingAttachment", "encryptedPart", "noDates"]) expect(lazy[`importWizard.warn.${w}`], w).toBeDefined();
-    for (const s of ["obsidian", "notion", "evernote", "bear", "appleNotes", "keep", "logseq", "onenote", "lumen"]) expect(lazy[`importWizard.how.${s}`], s).toBeDefined();
+    for (const w of ["missingAttachment", "encryptedPart", "noDates", "remoteAttachment", "craftLink", "pdfOnly"]) expect(lazy[`importWizard.warn.${w}`], w).toBeDefined();
+    for (const s of ["obsidian", "notion", "evernote", "bear", "appleNotes", "keep", "logseq", "onenote", "roam", "craft", "textbundle", "dayOne", "appleJournal", "samsungNotes", "airtable", "tomboy", "lumen"]) expect(lazy[`importWizard.how.${s}`], s).toBeDefined();
   });
 
   it("is imported only by its strings module, which only lazily loaded modules import", () => {

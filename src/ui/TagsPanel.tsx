@@ -202,7 +202,7 @@ export function TagsPanel({ open, onClose }: Props) {
                   gap: 4,
                 }}
               >
-                <span>{b.tag}</span>
+                <bdi>{b.tag}</bdi>
                 <span style={{ opacity: 0.6 }}>{b.count}</span>
               </button>
             ))}
@@ -252,13 +252,14 @@ export function TagsPanel({ open, onClose }: Props) {
                     }
                     title={p}
                   >
-                    <div style={{ fontWeight: 500 }}>{name}</div>
+                    <div style={{ fontWeight: 500 }} dir="auto">{name}</div>
                     {p !== name && (
                       <div
                         style={{
                           fontSize: 10.5,
                           color: "hsl(var(--fg-muted))",
                         }}
+                        dir="auto"
                       >
                         {p}
                       </div>

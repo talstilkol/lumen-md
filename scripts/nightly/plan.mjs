@@ -48,6 +48,8 @@ export function fullSteps({ vitestShards = VITEST_SHARDS, e2eShards = E2E_SHARDS
     for (let i = 1; i <= e2eShards; i++)
       steps.push({ id: `e2e-${browser}-${i}of${e2eShards}`, group: "e2e", parallel: true, cmd: ["node", "scripts/nightly/e2e-shard.mjs", browser, `${i}/${e2eShards}`], timeoutMin: 40 });
   steps.push({ id: "perf-e2e", group: "perf", cmd: ["node", "scripts/nightly/e2e-shard.mjs", "perf", "1/1"], timeoutMin: 30 });
+  // W13.V2: heap back within 10 % after 500 notes, 50 vault switches, 500 Yjs documents, and the editor in Chromium.
+  steps.push({ id: "perf-leak", group: "perf", cmd: ["node", "scripts/perf/leak.mjs", "--notes", "500", "--browser", "--json", "reports/perf/leak.json"], timeoutMin: 15 });
   steps.push({ id: "vercel-ignore-step", group: "vercel", cmd: ["node", "scripts/check-vercel-ignore.mjs"], timeoutMin: 2 });
   return steps;
 }

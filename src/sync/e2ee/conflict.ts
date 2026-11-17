@@ -12,7 +12,7 @@
 import { fromUtf8, utf8 } from "./bytes";
 import { mergeText } from "../merge/textMerge";
 import { keepBothVersions } from "../merge/keepVersions";
-import "./strings";
+import { swallowed } from "../../lib/logger";
 
 export interface ConflictInput {
   path: string;
@@ -85,7 +85,9 @@ const askResolver: ConflictResolver = async (c) => {
   const remote = asText(c.remote);
   if (local === null || remote === null) return { kind: "keepBoth" };
   const base = (c.base && asText(c.base)) ?? "";
-  const [{ openConflictDialog }, { t }] = await Promise.all([import("../cloud/ConflictDialog"), import("../../i18n")]);
+  // The strings load with the dialog, not with the engine: the engine also runs outside Vite (scripts/bench/sync-first.ts under tsx),
+  // where the i18n module's import.meta.glob does not exist.
+  const [{ openConflictDialog }, { t }] = await Promise.all([import("../cloud/ConflictDialog"), import("../../i18n"), import("./strings")]);
   const choice = await openConflictDialog({
     path: c.path,
     base,
@@ -178,7 +180,7 @@ export function fileModeResolver(keep: (path: string, ours: string, theirs: stri
 
 async function keepLocalVersion(path: string, text: string): Promise<void> {
   const { recordSnapshot } = await import("../../storage/history");
-  await recordSnapshot(path, text, "merge").catch(() => false);
+  await recordSnapshot(path, text, "merge").catch((e: unknown) => (swallowed("sync/e2ee/conflict: this device's version could not be kept in the note's history before a merge", e), false));
 }
 
 /** The resolver for this device's mode (./conflictMode.ts), read at every conflict, so a change applies at once. */

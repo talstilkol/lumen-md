@@ -7,6 +7,7 @@
  * Apache / MIT, "Built with Llama", the Gemma terms).
  */
 import registry from "../../models/registry.json";
+import { compareNames } from "../i18n/collate";
 
 export interface RegistryModel {
   id: string;
@@ -100,7 +101,7 @@ export function modelCredits(list: readonly RegistryModel[] = (registry as { mod
         hebrew: HEBREW.test(`${m.id} ${m.source ?? ""} ${m.attribution ?? ""}`),
       };
     })
-    .sort((a, b) => Number(b.hebrew) - Number(a.hebrew) || a.kind.localeCompare(b.kind) || a.name.localeCompare(b.name));
+    .sort((a, b) => Number(b.hebrew) - Number(a.hebrew) || compareNames(a.kind, b.kind) || compareNames(a.name, b.name));
 }
 
 /** Why an entry cannot be shown as a proper credit (empty = fine). */

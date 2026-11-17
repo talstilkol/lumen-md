@@ -1,6 +1,7 @@
 ---
 title: Before main, WebKit and Safari
 description: npm run promote:check refuses to promote main to a commit without a signed WebKit receipt and a signed Safari receipt for that commit. WebKit runs on the verification factory, real Safari on BrowserStack's open-source plan.
+type: how-to
 ---
 
 The platform that lost notes in the data-safety drill (#470: 376 notes on

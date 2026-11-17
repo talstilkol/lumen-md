@@ -26,8 +26,12 @@ import { tasksInNote, type Task } from "../tasks/taskParser";
 import { parseQuery as parseTaskQuery, runQuery, type QueryResult } from "../tasks/taskQuery";
 import { noteKey } from "../lib/slug";
 import { hasHebrew, hebrewFind, normalizeForMatch, prefixVariants } from "../text/hebrew";
+import { normalizeForFilter } from "../text/filterMatch";
 import { WIKI_RE } from "./wikiTargets";
 import { Bm25Index } from "../search/bm25";
+import type { Lemmatizer } from "../search/lemma/lemmatizer";
+import type { LemmaLexicon } from "../search/lemma/lemmaIndex";
+import type { QueryTerm } from "../text/searchTokens";
 import { matchesOps, noteTags, opLocation, parseQuery, REGEX_MAX_CHARS, type Matchable } from "../search/queryOps";
 import { relatedNotes, type RelatedHit } from "../related/related";
 import { folderOff } from "../related/prefs";
@@ -78,12 +82,30 @@ export interface SearchResult {
   regexSkipped: number;
   /** With `regexSkipped`: the length limit (characters) those notes are over. */
   regexMaxChars?: number;
-  /** The /regex/ ran past `REGEX_TIME_LIMIT_MS` and was stopped: no hits (set by the main thread). */
+  /** The /regex/ ran past `REGEX_TIME_LIMIT_MS` and was stopped: no hits. */
   regexTimedOut?: true;
+}
+
+/**
+ * 2.39, review Z6-H1/M4: what a search tells its caller about the /regex/ it runs. The decision rests on the
+ * parse that runs the regex (`parseQuery` below), never on a second look at the query text, so no query syntax
+ * runs a regex without them.
+ */
+export interface QueryHooks {
+  /** Called once, right before the first note is matched against a /regex/ of the query (not at all without one). */
+  onRegexStart?: () => void;
+  /** Asked between notes once the regex runs: true stops the search with `regexTimedOut` (the in-thread budget). */
+  regexOverdue?: () => boolean;
 }
 
 export interface SearchOptions {
   limit?: number;
+  /**
+   * Skip the first `offset` results (W13.V3: the search streams its results a
+   * page at a time). A later page keeps the order the first page was cut from,
+   * so a result never moves once it is on screen.
+   */
+  offset?: number;
   /** Only these paths (applied before `limit`). Serialisable, unlike a filter function. */
   paths?: string[];
 }
@@ -122,6 +144,8 @@ interface Entry {
   nameLower: string;
   /** The name folded for search, for Hebrew name matches without normalising per query. */
   nameFolded: string | null;
+  /** The name as a filter folds it (W13.E3: accents, geresh), only when that differs from `nameLower`. */
+  nameAccentless: string | null;
   pathLower: string;
   // W2.22: no lower-cased or folded copy of the text per note — content is
   // ranked by BM25, and a snippet lower-cases only the hits it shows.
@@ -210,6 +234,14 @@ export class VaultIndex {
   /** Content ranking (plan 5.2), one document per note, updated with it. */
   private readonly bm25 = new Bm25Index();
   private readonly counters = { indexed: 0, removed: 0, backlinkReads: 0, tokenised: 0, unchanged: 0 };
+  /**
+   * W11.H12: a lemmatizer model's lemmas next to each note's words
+   * (../search/lemma/lemmaIndex.ts), computed after the note is indexed, one
+   * note at a time. Null (no lemmatizer passed W11.M3 yet): search is BM25
+   * over words with the rule-based morphology, as before.
+   */
+  private lemma: { lz: Lemmatizer; lexicon: LemmaLexicon; mod: typeof import("../search/lemma/lemmaIndex") } | null = null;
+  private lemmaQueue: Promise<void> = Promise.resolve();
 
   get size(): number {
     return this.files.size;
@@ -258,6 +290,7 @@ export class VaultIndex {
       order: prev ? prev.order : this.nextOrder++,
       nameLower: input.name.toLowerCase(),
       nameFolded: MAY_FOLD_TO_HEBREW.test(input.name) ? foldForSearch(input.name) : null,
+      nameAccentless: accentless(input.name),
       pathLower: input.path.toLowerCase(),
       links,
       tags: noteTags(content),
@@ -267,6 +300,7 @@ export class VaultIndex {
     if (!this.bm25.isCurrent(input.path, content, bm25Name(input.name))) {
       this.bm25.set(input.path, content, bm25Name(input.name));
       this.counters.tokenised++;
+      if (this.lemma) this.queueLemmas(input.path);
     }
     for (const l of links) {
       let set = this.incoming.get(l.key);
@@ -319,6 +353,46 @@ export class VaultIndex {
   related(paragraph: string, opts: { self?: string | null; offFolders?: readonly string[]; semantic?: ReadonlyArray<{ path: string; score: number }>; limit?: number } = {}): RelatedHit[] {
     const folders = opts.offFolders ?? [];
     return relatedNotes(this.bm25, paragraph, { self: opts.self, semantic: opts.semantic, limit: opts.limit, filter: (p) => !folderOff(p, folders) });
+  }
+
+  /**
+   * W11.H12: use a lemmatizer for the notes' lemmas (every note is lemmatized
+   * again, in the background: `lemmasSettled()`), or none.
+   */
+  async useLemmatizer(lz: Lemmatizer | null): Promise<void> {
+    if (!lz) {
+      const had = this.lemma;
+      this.lemma = null;
+      if (had) for (const e of this.files.values()) this.bm25.set(e.path, e.content, bm25Name(e.name));
+      return;
+    }
+    const mod = await import("../search/lemma/lemmaIndex");
+    this.lemma = { lz, lexicon: new mod.LemmaLexicon(), mod };
+    for (const path of this.files.keys()) this.queueLemmas(path);
+    await this.lemmasSettled();
+  }
+
+  /** Resolves when every queued note has its lemmas. */
+  lemmasSettled(): Promise<void> {
+    return this.lemmaQueue;
+  }
+
+  private queueLemmas(path: string): void {
+    this.lemmaQueue = this.lemmaQueue.then(() => this.lemmatizeNote(path));
+  }
+
+  private async lemmatizeNote(path: string): Promise<void> {
+    const l = this.lemma;
+    const e = this.files.get(path);
+    if (!l || !e) return;
+    let terms: string[];
+    try {
+      terms = await l.mod.documentLemmaTerms(e.content, l.lz, l.lexicon);
+    } catch {
+      return; // why: a model that fails on one note leaves that note on its words; search still finds it
+    }
+    // The note may have changed or gone while the model ran: only the text it was given gets its lemmas.
+    if (this.lemma === l && this.files.get(path) === e) this.bm25.set(path, e.content, bm25Name(e.name), terms);
   }
 
   /** Remove one note. O(its links). */
@@ -413,32 +487,49 @@ export class VaultIndex {
    * the whole query found as a phrase adds a few more. Each hit carries a
    * snippet around the phrase, or around its best-matching word.
    */
-  search(rawQuery: string, opts: SearchOptions = {}): SearchHit[] {
-    return this.query(rawQuery, opts).hits;
+  search(rawQuery: string, opts: SearchOptions = {}, hooks: QueryHooks = {}): SearchHit[] {
+    return this.query(rawQuery, opts, hooks).hits;
   }
 
-  /** `search`, and how many notes a /regex/ skipped because they are too long (2.39). */
-  query(rawQuery: string, opts: SearchOptions = {}): SearchResult {
+  /** `search`, and how many notes a /regex/ skipped because they are too long (2.39), or that it ran out of time. */
+  query(rawQuery: string, opts: SearchOptions = {}, hooks: QueryHooks = {}): SearchResult {
     let regexSkipped = 0;
-    const hits = this.rank(rawQuery, opts, () => regexSkipped++);
+    let timedOut = false;
+    const hits = this.rank(rawQuery, opts, () => regexSkipped++, hooks, () => (timedOut = true));
+    if (timedOut) return { hits: [], regexSkipped, regexTimedOut: true };
     return regexSkipped ? { hits, regexSkipped, regexMaxChars: REGEX_MAX_CHARS } : { hits, regexSkipped };
   }
 
-  private rank(rawQuery: string, opts: SearchOptions, onRegexSkip: () => void): SearchHit[] {
+  private rank(rawQuery: string, opts: SearchOptions, onRegexSkip: () => void, hooks: QueryHooks, onTimeout: () => void): SearchHit[] {
     const limit = opts.limit ?? 30;
+    const offset = Math.max(0, opts.offset ?? 0);
     // Operators (plan 11.3): tag:, path:, "phrase", /regex/, -term. The rest ranks.
     const { text: query, ops, invalid } = parseQuery(rawQuery);
     // A /regex/ that does not compile matches nothing, rather than being dropped (which would list every note).
     if (invalid.length) return [];
     const q = query.trim().toLowerCase();
     const scope = opts.paths ? new Set(opts.paths) : null;
-    const pass = (e: Entry) => (!scope || scope.has(e.path)) && (!ops.length || matchesOps(ops, matchable(e), onRegexSkip));
+    // Z6-H1: the time limit is armed from this parse, the one whose regex runs below.
+    const regex = ops.some((o) => o.kind === "regex");
+    if (regex) hooks.onRegexStart?.();
+    let overdue = false;
+    const pass = (e: Entry) => {
+      if (scope && !scope.has(e.path)) return false;
+      if (!ops.length) return true;
+      if (regex && !overdue && hooks.regexOverdue?.() === true) overdue = true;
+      if (overdue) return false;
+      return matchesOps(ops, matchable(e), onRegexSkip);
+    };
     const allow = scope || ops.length ? new Set([...this.files.values()].filter(pass).map((e) => e.path)) : null;
+    if (overdue) {
+      onTimeout();
+      return [];
+    }
     if (!q) {
       return [...this.files.values()]
         .filter((f) => !allow || allow.has(f.path))
         .sort((a, b) => b.modified - a.modified || (a.path < b.path ? -1 : 1))
-        .slice(0, limit)
+        .slice(offset, offset + limit)
         .map((f) => {
           // An operator-only query shows where it matched.
           const at = ops.length ? opLocation(ops, matchable(f)) : null;
@@ -454,7 +545,9 @@ export class VaultIndex {
     // The last word may still be typed: it also matches the terms it starts.
     const content = new Map<string, { score: number; matched: string[]; complete: boolean }>();
     const filter = allow ? (id: string) => allow.has(id) : undefined;
-    for (const h of this.bm25.search(query, { limit: Math.max(limit * 3, 100), filter, prefix: true })) content.set(h.id, h);
+    const lemma = this.lemma;
+    const expand = lemma ? (base: QueryTerm[]) => lemma.mod.expandWithLemmas(base, lemma.lexicon) : undefined;
+    for (const h of this.bm25.search(query, { limit: Math.max((offset + limit) * 3, 100), filter, prefix: true, expand })) content.set(h.id, h);
     // The whole query as a phrase only means something for several words,
     // and only in a note that has every one of them.
     const multiWord = /\s/.test(q);
@@ -471,7 +564,8 @@ export class VaultIndex {
     // for the leading candidates — but for every one the phrase bonus could
     // still lift into the first `limit`.
     const cutoff = ranked.length > limit ? ranked[limit - 1].score : -Infinity;
-    const candidates = ranked.filter((r, i) => i < limit || (r.phraseable && r.score + PHRASE_BONUS >= cutoff));
+    // W13.V3: a later page is the next slice of the same order; the phrase bonus reorders inside it only.
+    const candidates = offset > 0 ? ranked.slice(offset, offset + limit) : ranked.filter((r, i) => i < limit || (r.phraseable && r.score + PHRASE_BONUS >= cutoff));
     const out: SearchHit[] = [];
     for (const { e, score: base, matched, phraseable } of candidates) {
       let score = base;
@@ -490,6 +584,9 @@ export class VaultIndex {
       out.push(hit);
     }
     out.sort((a, b) => b.score - a.score || (a.path < b.path ? -1 : 1));
+    // Paged (W13.V3): nothing is cut, so a result the phrase bonus pushed down is not lost between pages;
+    // one it lifted from below the cut comes again on a later page, and the stream keeps the first.
+    if (opts.offset !== undefined) return out;
     return out.slice(0, limit);
   }
 }
@@ -504,9 +601,32 @@ export const PHRASE_BONUS = 4;
 export const bm25Name = (name: string) => name.replace(/\.(md|markdown|txt)$/i, "");
 
 /** Points for the query in a note's name or path (file-name search stays first-class). */
+/** Only a name with a character beyond ASCII letters, digits and plain punctuation can fold further (W13.E3). */
+const PLAIN_NAME = /^[\x20\x21\x23-\x26\x28-\x7E]*$/;
+function accentless(name: string): string | null {
+  if (PLAIN_NAME.test(name)) return null;
+  const f = normalizeForFilter(name);
+  return f === name.toLowerCase() ? null : f;
+}
+/** The query folded once per search, not once per note. */
+let lastQuery = "";
+let lastFolded = "";
+function foldQuery(q: string): string {
+  if (q !== lastQuery) {
+    lastQuery = q;
+    lastFolded = normalizeForFilter(q);
+  }
+  return lastFolded;
+}
+
 function nameScore(e: Entry, q: string, hebrewQuery: boolean, forms: string[]): number {
   let score = 0;
-  const inName = e.nameLower.includes(q);
+  let inName = e.nameLower.includes(q);
+  // The note switcher is a filter box too (W13.E3): `cafe` finds Café.md, `lodz` Łódź.md, `צהל` צה״ל.md.
+  if (!inName && e.nameAccentless !== null) {
+    const qf = foldQuery(q);
+    inName = !!qf && e.nameAccentless.includes(qf);
+  }
   if (inName) score += 10;
   if (e.nameLower === q) score += 20;
   if (e.nameLower.startsWith(q)) score += 5;

@@ -59,7 +59,13 @@ export interface PluginManifest {
   capabilities: CapabilityRequest[];
   /** Lowest Lumen version the plugin needs. */
   minLumen?: string;
+  /** W13.L2: the lowest plugin API version the plugin needs; below it, it does not load (src/plugins/api/version.ts). */
+  minApiVersion?: string;
+  /** W13.L2: the plugin API version the plugin was built and tested against (default 1.0.0); older runs in compatibility mode. */
+  targetApiVersion?: string;
   homepage?: string;
+  /** W13.L5: the GitHub account that signs this plugin's versions (keyless Sigstore); the registry checks the signature against it. */
+  publisher?: { github: string };
 }
 
 export class ManifestError extends Error {
@@ -132,6 +138,11 @@ export function parseManifest(input: string | unknown): PluginManifest {
   if (ui !== undefined && !PATH_RE.test(ui)) throw new ManifestError(`manifest: "ui" must be a relative .js/.mjs path inside the plugin`);
   const minLumen = str(o, "minLumen", 64, false);
   if (minLumen !== undefined && !SEMVER_RE.test(minLumen)) throw new ManifestError('manifest: "minLumen" is not a semantic version');
+  const minApiVersion = str(o, "minApiVersion", 64, false);
+  if (minApiVersion !== undefined && !SEMVER_RE.test(minApiVersion)) throw new ManifestError('manifest: "minApiVersion" is not a semantic version');
+  const targetApiVersion = str(o, "targetApiVersion", 64, false);
+  if (targetApiVersion !== undefined && !SEMVER_RE.test(targetApiVersion)) throw new ManifestError('manifest: "targetApiVersion" is not a semantic version');
+  if (minApiVersion !== undefined && targetApiVersion !== undefined && !semverAtLeast(targetApiVersion, minApiVersion)) throw new ManifestError('manifest: "targetApiVersion" is older than "minApiVersion"');
   const homepage = str(o, "homepage", 500, false);
   if (homepage !== undefined) {
     let u: URL | null = null;
@@ -141,6 +152,13 @@ export function parseManifest(input: string | unknown): PluginManifest {
       /* why: invalid */
     }
     if (!u || u.protocol !== "https:") throw new ManifestError('manifest: "homepage" must be an https URL');
+  }
+  let publisher: { github: string } | undefined;
+  if (o.publisher !== undefined) {
+    const pub = o.publisher as Record<string, unknown> | null;
+    const gh = pub && typeof pub === "object" ? pub.github : undefined;
+    if (typeof gh !== "string" || !/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$/.test(gh)) throw new ManifestError('manifest: "publisher" must be { "github": "<GitHub login>" }');
+    publisher = { github: gh };
   }
   const caps = o.capabilities;
   if (!Array.isArray(caps)) throw new ManifestError('manifest: "capabilities" must be an array (empty when none are needed)');
@@ -168,7 +186,10 @@ export function parseManifest(input: string | unknown): PluginManifest {
     ...(ui !== undefined ? { ui } : {}),
     capabilities,
     ...(minLumen !== undefined ? { minLumen } : {}),
+    ...(minApiVersion !== undefined ? { minApiVersion } : {}),
+    ...(targetApiVersion !== undefined ? { targetApiVersion } : {}),
     ...(homepage !== undefined ? { homepage } : {}),
+    ...(publisher ? { publisher } : {}),
   };
 }
 

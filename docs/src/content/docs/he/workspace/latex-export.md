@@ -1,6 +1,8 @@
 ---
 title: ייצוא LaTeX אקדמי (עברית)
 description: ייצוא פתק כפרויקט LaTeX — עברית מימין לשמאל עם babel, מתמטיקה, ציטוטי [@key] בסגנון Pandoc מה-BibTeX שבכספת, ותמונות — שמתקמפל ב-LuaLaTeX או ב-XeLaTeX.
+type: how-to
+tasks: ["W10.E14", "W5.22"]
 ---
 
 **ייצוא פרויקט LaTeX (אקדמי, עברית)…** בלוח הפקודות מוריד
@@ -18,6 +20,19 @@ description: ייצוא פתק כפרויקט LaTeX — עברית מימין ל
 
 קומפילציה: `latexmk -lualatex main.tex` (מומלץ) או
 `latexmk -xelatex main.tex`. שתיהן עובדות מאותה הקדמה.
+
+## PDF מ-LaTeX (שולחן העבודה)
+
+באפליקציית שולחן העבודה, **PDF מ-LaTeX (שולחן העבודה, Tectonic)…** מקמפלת את
+אותו ייצוא ל-`<note>.pdf` בעזרת [Tectonic](https://tectonic-typesetting.github.io),
+אם התקנתם אותו (`brew install tectonic`). Lumen לא כולל מנוע TeX. הוא מחפש את
+`tectonic` ב-`PATH`, ב-`/opt/homebrew/bin` או ב-`/usr/local/bin`, או בנתיב
+שב-`LUMEN_TECTONIC`. הקומפילציה רצה בתיקייה זמנית שנמחקת בסופה. Tectonic רץ
+עם `--untrusted`, כך שהמסמך לא יכול להריץ פקודות מערכת.
+
+כש-TeX נכשל, Lumen מציג את השגיאות עם מספרי השורות שלהן ב-`main.tex`
+(`main.tex:7: Undefined control sequence.`), או את סוף הלוג כש-TeX לא נותן שורה.
+בדפדפן אין מהדר: ייצאו את הפרויקט וקמפלו אותו בעצמכם.
 
 ## עברית
 

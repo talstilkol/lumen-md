@@ -420,6 +420,31 @@ function cosine(a: Float32Array, b: Float32Array): number {
   return denom === 0 ? 0 : dot / denom;
 }
 
+/**
+ * Each note's embedding from the stored smart-search index — the mean of its
+ * chunks' vectors — for `paths` that are in it (W13.G8: cluster similarity by
+ * meaning). Reads what is already on this device; it never calls a model,
+ * so it is free and offline. Null when there is no index.
+ */
+export async function storedNoteVectors(paths: readonly string[]): Promise<{ embedding: string; vectors: Map<string, Float32Array> } | null> {
+  const index = await loadIndex();
+  if (!Object.keys(index.files).length) return null;
+  const vectors = new Map<string, Float32Array>();
+  for (const path of paths) {
+    const file = index.files[path];
+    const v = file ? vectorsOf(file) : null;
+    if (!v || !v.count) continue;
+    const mean = new Float32Array(v.dims);
+    for (let i = 0; i < v.count; i++) {
+      const scale = v.scales ? v.scales[i] : 1;
+      const norm = v.norms[i] || 1;
+      for (let j = 0; j < v.dims; j++) mean[j] += (v.data[i * v.dims + j] * scale) / norm;
+    }
+    vectors.set(path, mean);
+  }
+  return { embedding: index.embedding ?? "openai:text-embedding-3-small", vectors };
+}
+
 /** Which embedding provider built the stored index (`ollama:…`, `transformers:…`, `openai:…`), or null when there is none. */
 export async function semanticIndexEmbedding(): Promise<string | null> {
   const index = await loadIndex();

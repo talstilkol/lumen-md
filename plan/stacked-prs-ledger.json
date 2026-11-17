@@ -1,0 +1,5280 @@
+{
+ "about": "Decision D1 \u00a79 (16.11.2026, plan/decisions-2026-11-16-d1.md), made by Claude under the owner's delegation of 16.11.2026 21:53: the open PRs stacked on older trains (base neither verify/train-7 nor main) stay open; none is closed by a lane. verify/train-7 supersedes them: a PR whose head is an ancestor of the train head is in it (inTrain), and every other one has its decision in plan/train-missing.json at the same head. GitHub closes a PR on its own once its head reaches its base; a lane never closes one. src/__tests__/stackedPrsLedger.test.ts checks this file against train-missing.json.",
+ "train": "verify/train-7",
+ "trainHead": "f090c2081271c5a2e71f98e97dd9c3675224511f",
+ "taken": "2026-11-16",
+ "counts": {
+  "stacked": 748,
+  "inTrain": 718,
+  "outside": 30,
+  "w10": 292
+ },
+ "rows": [
+  {
+   "pr": 138,
+   "head": "f27b5ec871e1026a58d573541cfe151c859d16f2",
+   "branch": "feat/agents-ollama",
+   "base": "feat/agents-runtime",
+   "inTrain": true
+  },
+  {
+   "pr": 139,
+   "head": "49a2237dceb684b9a05c9d9e6aa3ef5a5c2d6a13",
+   "branch": "feat/agents-transformers",
+   "base": "feat/agents-ollama",
+   "inTrain": true
+  },
+  {
+   "pr": 140,
+   "head": "57804ea669f6fff312c488ca383de7e00a5e7b4f",
+   "branch": "feat/agents-b1",
+   "base": "feat/agents-transformers",
+   "inTrain": true
+  },
+  {
+   "pr": 141,
+   "head": "098f90993bea8ba782eab9bf815f96b54bff5d53",
+   "branch": "feat/agents-b2",
+   "base": "feat/agents-b1",
+   "inTrain": true
+  },
+  {
+   "pr": 142,
+   "head": "518e76dc992a926a1ebc38fffa22fda85b1069a3",
+   "branch": "feat/agents-b3",
+   "base": "feat/agents-b2",
+   "inTrain": true
+  },
+  {
+   "pr": 143,
+   "head": "e1b8ea0f738d38bf87a9d100fe48fdb4c0b6a8ee",
+   "branch": "feat/agents-c1",
+   "base": "feat/agents-b3",
+   "inTrain": true
+  },
+  {
+   "pr": 144,
+   "head": "d340829bd3fceb91f99313f2bbe93e2d68cca743",
+   "branch": "feat/agents-c2",
+   "base": "feat/agents-c1",
+   "inTrain": true
+  },
+  {
+   "pr": 145,
+   "head": "d37b64c75c23c72b73b882962d09787d7e6f5697",
+   "branch": "feat/agents-c3",
+   "base": "feat/agents-c2",
+   "inTrain": true
+  },
+  {
+   "pr": 146,
+   "head": "990239882af6e84d68aad52fad195e329f190538",
+   "branch": "feat/agents-c4",
+   "base": "feat/agents-c3",
+   "inTrain": true
+  },
+  {
+   "pr": 147,
+   "head": "35c3e7c861df1cc64b752cd2392c510155ba4da4",
+   "branch": "feat/agents-c5",
+   "base": "feat/agents-c4",
+   "inTrain": true
+  },
+  {
+   "pr": 148,
+   "head": "86598947c3c4b1dc018a4c0584ad0cdcf4f666f6",
+   "branch": "feat/agents-d1",
+   "base": "feat/agents-c5",
+   "inTrain": true
+  },
+  {
+   "pr": 149,
+   "head": "d071fdd0d6fa0a560a19aa09fe35b5869eb21c64",
+   "branch": "feat/agents-d2",
+   "base": "feat/agents-d1",
+   "inTrain": true
+  },
+  {
+   "pr": 150,
+   "head": "2a887446b86c4af835d81e1e58acd98e207a1963",
+   "branch": "feat/agents-e1",
+   "base": "feat/agents-d2",
+   "inTrain": true
+  },
+  {
+   "pr": 155,
+   "head": "b119fd83b88bf9048bef01826af011e574932e62",
+   "branch": "feat/agents-e2",
+   "base": "feat/agents-e1",
+   "inTrain": true
+  },
+  {
+   "pr": 156,
+   "head": "06ecef45a8aa3fc25ad4ae41d595502da0556d89",
+   "branch": "fix/immediate",
+   "base": "feat/agents-e2",
+   "inTrain": true
+  },
+  {
+   "pr": 157,
+   "head": "93fd49265fc1869ec531016a4e7ef9c7c36d479f",
+   "branch": "feat/agents-f1",
+   "base": "fix/immediate",
+   "inTrain": true
+  },
+  {
+   "pr": 158,
+   "head": "b059aac7cd765a02e3321be38afc1ab452c2ba8f",
+   "branch": "feat/ai-doctor",
+   "base": "feat/agents-f1",
+   "inTrain": true
+  },
+  {
+   "pr": 169,
+   "head": "6f4a43f59c1ef2d7e89ec3c08d855bd0b323d0d0",
+   "branch": "test/honest",
+   "base": "feat/ai-doctor",
+   "inTrain": true
+  },
+  {
+   "pr": 170,
+   "head": "4e2b980ea002f17e653f780adf283303db176958",
+   "branch": "test/visual",
+   "base": "test/honest",
+   "inTrain": true
+  },
+  {
+   "pr": 171,
+   "head": "5b4cf195a0ab86c9227c1674218204f149e32c59",
+   "branch": "feat/hebrew-core",
+   "base": "test/visual",
+   "inTrain": true
+  },
+  {
+   "pr": 172,
+   "head": "3c5f9a43b415785ddadb86bc894e8a86cddda303",
+   "branch": "feat/history-one",
+   "base": "feat/hebrew-core",
+   "inTrain": true
+  },
+  {
+   "pr": 173,
+   "head": "280f44342b09199bced057173fc256e91e0db9e6",
+   "branch": "feat/hebrew-models",
+   "base": "feat/history-one",
+   "inTrain": true
+  },
+  {
+   "pr": 174,
+   "head": "399805f4a0bf893a586f8df37c0e4f0badc1d303",
+   "branch": "feat/safe-files",
+   "base": "feat/hebrew-models",
+   "inTrain": true
+  },
+  {
+   "pr": 175,
+   "head": "e0a4c52379ad6bc58f59250d4f95798554e939d9",
+   "branch": "feat/hebrew-spell",
+   "base": "feat/safe-files",
+   "inTrain": true
+  },
+  {
+   "pr": 176,
+   "head": "59023c17902231349dde4970ea2fc82e5dc22443",
+   "branch": "feat/export-import-all",
+   "base": "feat/hebrew-spell",
+   "inTrain": true
+  },
+  {
+   "pr": 177,
+   "head": "c3f81c4c2e525d5d1f3987c2a50e22c334cec1c3",
+   "branch": "feat/export-bidi",
+   "base": "feat/export-import-all",
+   "inTrain": true
+  },
+  {
+   "pr": 178,
+   "head": "0eafb4d0ea3905215da365e04d89a5f464304be1",
+   "branch": "feat/content-sandbox",
+   "base": "feat/export-bidi",
+   "inTrain": true
+  },
+  {
+   "pr": 179,
+   "head": "f7d2b9f2950b8f8a08fce3bf7a8b308be7a020c5",
+   "branch": "feat/hebrew-content",
+   "base": "feat/content-sandbox",
+   "inTrain": true
+  },
+  {
+   "pr": 180,
+   "head": "a75642eb3aeed32b9e783e3e3f153af83374d1e6",
+   "branch": "feat/secret-store",
+   "base": "feat/hebrew-content",
+   "inTrain": true
+  },
+  {
+   "pr": 181,
+   "head": "c2b578ec19d5e17d5b4fb1dc0f801a19dce07262",
+   "branch": "feat/privacy-ledger",
+   "base": "feat/secret-store",
+   "inTrain": true
+  },
+  {
+   "pr": 182,
+   "head": "208e0f7ec5241e1dfafc14251b1a4fe043dba899",
+   "branch": "feat/secure-rooms",
+   "base": "feat/privacy-ledger",
+   "inTrain": true
+  },
+  {
+   "pr": 183,
+   "head": "0e65c9a914eaaa18ebe57351720aa402a038c6ad",
+   "branch": "feat/rerank-cite",
+   "base": "feat/secure-rooms",
+   "inTrain": true
+  },
+  {
+   "pr": 184,
+   "head": "35171fa9242d7bf268ee33205045845635dcf4bd",
+   "branch": "feat/learning-critic",
+   "base": "feat/rerank-cite",
+   "inTrain": true
+  },
+  {
+   "pr": 185,
+   "head": "3092939ceb800b179a7dd9f8800913a9b8dfa54c",
+   "branch": "feat/vision",
+   "base": "feat/learning-critic",
+   "inTrain": true
+  },
+  {
+   "pr": 186,
+   "head": "0bcec17bf986e4c29af5972c682305d8196c4a41",
+   "branch": "feat/tts-digest",
+   "base": "feat/vision",
+   "inTrain": true
+  },
+  {
+   "pr": 187,
+   "head": "0847afa33d26c9077fdd7c515c2f5ec2cdb2fbf8",
+   "branch": "feat/clipper",
+   "base": "feat/tts-digest",
+   "inTrain": true
+  },
+  {
+   "pr": 188,
+   "head": "6e6c7f23a4d6c218c7da1d0c6a525059a9be7551",
+   "branch": "refactor/one-ai",
+   "base": "feat/clipper",
+   "inTrain": true
+  },
+  {
+   "pr": 189,
+   "head": "d811e8225c1d229d3075157f7a37a6842bf5a7e0",
+   "branch": "feat/eval-baseline",
+   "base": "refactor/one-ai",
+   "inTrain": true
+  },
+  {
+   "pr": 190,
+   "head": "7bbcba0c545b9d074188cd09729d3f3d0d7456a0",
+   "branch": "perf/startup",
+   "base": "feat/eval-baseline",
+   "inTrain": true
+  },
+  {
+   "pr": 191,
+   "head": "7ef4915cf7530cdb4b8937f30b2d640671a5d180",
+   "branch": "perf/big-vault",
+   "base": "perf/startup",
+   "inTrain": true
+  },
+  {
+   "pr": 192,
+   "head": "6c1de70924533f50e79312786422a600bc80a740",
+   "branch": "perf/graphviz-worker",
+   "base": "perf/big-vault",
+   "inTrain": true
+  },
+  {
+   "pr": 193,
+   "head": "f52caab5d8519835272c51fec920c33c978e158c",
+   "branch": "feat/pwa-real",
+   "base": "perf/graphviz-worker",
+   "inTrain": true
+  },
+  {
+   "pr": 194,
+   "head": "9e13289cc461ab39e0b08127a4011f7644c3176b",
+   "branch": "fix/codex-backlog",
+   "base": "feat/pwa-real",
+   "inTrain": true
+  },
+  {
+   "pr": 195,
+   "head": "621923c8c2aecbf0cf7b3b138a7e5c4634a10e53",
+   "branch": "fix/honest-small",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 196,
+   "head": "3ef33e7bdd8de4da76fec51f015a6c616a918c44",
+   "branch": "fix/abort-all",
+   "base": "fix/honest-small",
+   "inTrain": true
+  },
+  {
+   "pr": 197,
+   "head": "1f2b5b424050e84db7b11068a97627065043ea32",
+   "branch": "fix/dictate-local",
+   "base": "fix/abort-all",
+   "inTrain": true
+  },
+  {
+   "pr": 198,
+   "head": "1b570cfa8b8748dd03a77f8f7427c4ad2c707478",
+   "branch": "fix/tldraw-licence",
+   "base": "fix/dictate-local",
+   "inTrain": true
+  },
+  {
+   "pr": 199,
+   "head": "7d6441b3587234734c68788654f2d78bac1d25f5",
+   "branch": "chore/license-gate",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 200,
+   "head": "848cbb873410118a3e310107faf2d93528acc12a",
+   "branch": "fix/model-catalog",
+   "base": "chore/license-gate",
+   "inTrain": true
+  },
+  {
+   "pr": 201,
+   "head": "ea9fa999d63b6c1c71353e69f66094a325ffd295",
+   "branch": "chore/stack",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 202,
+   "head": "05973c40e660b98ac095b7bb3679f4af34b9999c",
+   "branch": "chore/lanes",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 203,
+   "head": "5c254e7295b5944b357eda58f28d1eb870e2f45d",
+   "branch": "chore/review-tools",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 204,
+   "head": "42c847468cd8184202c24d6b8de8f3afe93646a3",
+   "branch": "chore/ci-doctor",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 205,
+   "head": "21cab2eca0e6f21d9740a9b46b313e84292956f2",
+   "branch": "feat/agent-tools",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 206,
+   "head": "281ac64fde802da6c10f3b0ebc904de2685a87f4",
+   "branch": "fix/review-194-r2",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 207,
+   "head": "4796e651eeb2c5486c68b7673f17758bbfec1ccc",
+   "branch": "chore/headers-one",
+   "base": "fix/tldraw-licence",
+   "inTrain": true
+  },
+  {
+   "pr": 208,
+   "head": "24227cc70d7a9363403b2f4f987534923758a227",
+   "branch": "refactor/commands-domains",
+   "base": "fix/tldraw-licence",
+   "inTrain": true
+  },
+  {
+   "pr": 209,
+   "head": "17700d1da0f4df9561332533c100086934717a8c",
+   "branch": "fix/commands-deps",
+   "base": "refactor/commands-domains",
+   "inTrain": true
+  },
+  {
+   "pr": 210,
+   "head": "543c2a9e36a597cd7657f20f88299ad65a6eda4d",
+   "branch": "chore/ci-local",
+   "base": "chore/lanes",
+   "inTrain": true
+  },
+  {
+   "pr": 211,
+   "head": "dc8b1ad932d7783f965df532e12074c83a5e8128",
+   "branch": "chore/handoff",
+   "base": "chore/lanes",
+   "inTrain": true
+  },
+  {
+   "pr": 212,
+   "head": "4d6dfdf7a80b11b98174d682ef742fa60f162407",
+   "branch": "feat/ledger-complete",
+   "base": "fix/tldraw-licence",
+   "inTrain": true
+  },
+  {
+   "pr": 213,
+   "head": "ed21125416832d977d2d3c485a3952c2004f04fe",
+   "branch": "fix/review-195-r2",
+   "base": "fix/honest-small",
+   "inTrain": true
+  },
+  {
+   "pr": 214,
+   "head": "12b2eb60dba2d3fd81f337c6e224bd57d43b0aff",
+   "branch": "fix/review-196-r2",
+   "base": "fix/abort-all",
+   "inTrain": true
+  },
+  {
+   "pr": 215,
+   "head": "dc04e9efd402af67703880f3bacef8ef86f41210",
+   "branch": "fix/review-197-r2",
+   "base": "fix/dictate-local",
+   "inTrain": true
+  },
+  {
+   "pr": 216,
+   "head": "ea13b3e6202e55d846ca1ca39b8252ad35b9eebf",
+   "branch": "fix/review-198-r2",
+   "base": "fix/tldraw-licence",
+   "inTrain": true
+  },
+  {
+   "pr": 217,
+   "head": "27e86e17e78610848836c200aa96e94f83a8108b",
+   "branch": "feat/link-autocomplete",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 218,
+   "head": "c759b99321baed16548a0d2f8dc353097105dc9d",
+   "branch": "feat/trash-undo",
+   "base": "fix/review-194-r2",
+   "inTrain": true
+  },
+  {
+   "pr": 219,
+   "head": "f3fe6ae7eb6fb44bc45fc7df7704ce136d1c834b",
+   "branch": "fix/css-slug",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 220,
+   "head": "f0340c5eaa0d7a7dd8d812377d1e577775117159",
+   "branch": "fix/tauri-csp",
+   "base": "chore/headers-one",
+   "inTrain": true
+  },
+  {
+   "pr": 221,
+   "head": "0890b44c0ce657d36341c69ef4d1db826081dc6e",
+   "branch": "feat/remote-images",
+   "base": "fix/tauri-csp",
+   "inTrain": true
+  },
+  {
+   "pr": 222,
+   "head": "3fa4f1ecf49b5e7b3d66e4e002bd279a542e7c46",
+   "branch": "test/security-spec",
+   "base": "feat/remote-images",
+   "inTrain": true
+  },
+  {
+   "pr": 223,
+   "head": "27e7befa47110c4742c067fe89b7814605c33351",
+   "branch": "feat/agent-review-ui",
+   "base": "feat/agent-tools",
+   "inTrain": true
+  },
+  {
+   "pr": 224,
+   "head": "f3a059052ad0d009de2198947e728d29813da820",
+   "branch": "feat/embeds",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 225,
+   "head": "cd6a253eb20562c31e7f36126f25b8ceba8d6213",
+   "branch": "feat/golden-sets",
+   "base": "fix/model-catalog",
+   "inTrain": true
+  },
+  {
+   "pr": 226,
+   "head": "df1dc95f11fdf5bc5de2ff106dc5121a504cfd8c",
+   "branch": "refactor/vault-backend",
+   "base": "fix/commands-deps",
+   "inTrain": true
+  },
+  {
+   "pr": 227,
+   "head": "6e910c52ee5360a7a280da8548b32921bd3d959e",
+   "branch": "chore/docs-sync",
+   "base": "chore/lanes",
+   "inTrain": true
+  },
+  {
+   "pr": 228,
+   "head": "4f014fb6dac4d9c91c734622974f9f3ee9133894",
+   "branch": "feat/properties",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 229,
+   "head": "7ca67b00f90e90a3d1419e4cddf886e2c52209c4",
+   "branch": "feat/history-complete",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 230,
+   "head": "c48de9a76fb3c68820cc1d809e9e1067a5dccc83",
+   "branch": "fix/secrets-complete",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 231,
+   "head": "dd26ed817912f53f351ad691764bb912283a5c8a",
+   "branch": "feat/database-edit",
+   "base": "feat/properties",
+   "inTrain": true
+  },
+  {
+   "pr": 232,
+   "head": "8c6ad4dddb9b64a295c5428d71efe7b8f6b78cab",
+   "branch": "feat/bm25",
+   "base": "feat/golden-sets",
+   "inTrain": true
+  },
+  {
+   "pr": 233,
+   "head": "b40cf07e96d6d8f04f34de3b42be4875e2037a20",
+   "branch": "fix/livejs-worker-csp",
+   "base": "test/security-spec",
+   "inTrain": true
+  },
+  {
+   "pr": 234,
+   "head": "e716e5aefd13fc30ecb5a51e3d2c41588ed02616",
+   "branch": "chore/ci-stable",
+   "base": "chore/lanes",
+   "inTrain": true
+  },
+  {
+   "pr": 235,
+   "head": "13344606962cce6d33e9be3e1b100ac4927e3917",
+   "branch": "feat/vault-folder-web",
+   "base": "refactor/vault-backend",
+   "inTrain": true
+  },
+  {
+   "pr": 236,
+   "head": "2f0106e1fb49a63c8fb4aa9ea62294e9a5c1bf86",
+   "branch": "chore/security-ci",
+   "base": "chore/headers-one",
+   "inTrain": true
+  },
+  {
+   "pr": 237,
+   "head": "72ac388212e4075e12e855d351761e8f1fc6221a",
+   "branch": "feat/collab-persist",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 238,
+   "head": "4c1cd9bc9eca3dccb3e588db7e7bc8f4973e4dad",
+   "branch": "feat/block-refs",
+   "base": "feat/embeds",
+   "inTrain": true
+  },
+  {
+   "pr": 239,
+   "head": "05cf01ac8a985e0e3ff4a08ea211a8c17bc33168",
+   "branch": "fix/headers-followups",
+   "base": "chore/headers-one",
+   "inTrain": true
+  },
+  {
+   "pr": 240,
+   "head": "d652f8cb1f78dd2b7c1d7bfe855cb29a4803efd3",
+   "branch": "feat/golden-small",
+   "base": "feat/golden-sets",
+   "inTrain": true
+  },
+  {
+   "pr": 241,
+   "head": "2ea5a117148228434d37d205622a822e2ff74be1",
+   "branch": "feat/agents-use-tools",
+   "base": "feat/bm25",
+   "inTrain": true
+  },
+  {
+   "pr": 242,
+   "head": "ab0f31e06691ca4fe3ae1c44bffcee34d47fa0d2",
+   "branch": "feat/injection-guard",
+   "base": "feat/agent-tools",
+   "inTrain": true
+  },
+  {
+   "pr": 243,
+   "head": "2768da3ffd5884eb58a5da98fed5e01d713c9660",
+   "branch": "fix/research-token",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 244,
+   "head": "5b328187c432d46ca50aacecbd87ba6415887549",
+   "branch": "refactor/i18n-namespaces",
+   "base": "refactor/commands-domains",
+   "inTrain": true
+  },
+  {
+   "pr": 245,
+   "head": "02be60c429ddd5aa15b0773972ac7ffb88d26b81",
+   "branch": "chore/nightly",
+   "base": "chore/ci-stable",
+   "inTrain": true
+  },
+  {
+   "pr": 246,
+   "head": "2bf41410e11fce24490b7c58337882ae2d6e5436",
+   "branch": "chore/eslint",
+   "base": "refactor/commands-domains",
+   "inTrain": true
+  },
+  {
+   "pr": 247,
+   "head": "8a19d55b7e8a4c70966fa228094a8f2bea2390ec",
+   "branch": "feat/vault-folder-desktop",
+   "base": "feat/vault-folder-web",
+   "inTrain": true
+  },
+  {
+   "pr": 248,
+   "head": "c66887c44991f634e6a38b8a58b82750d5500a77",
+   "branch": "perf/startup-headroom",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 249,
+   "head": "89d0e0836932a56b2c300b8c9dd5bd9bb256e45a",
+   "branch": "feat/daily-notes",
+   "base": "feat/golden-small",
+   "inTrain": true
+  },
+  {
+   "pr": 250,
+   "head": "fc2aa1abce665e6d9ac60b69c7cd000aebfea79f",
+   "branch": "feat/hover-preview",
+   "base": "feat/block-refs",
+   "inTrain": true
+  },
+  {
+   "pr": 251,
+   "head": "4932b4dfc9ae0b880818241a3111ada74b9cf87b",
+   "branch": "chore/plan-data",
+   "base": "chore/lanes",
+   "inTrain": true
+  },
+  {
+   "pr": 252,
+   "head": "8605ee3181d7616fe81e08f27e0d9e4a4738d64c",
+   "branch": "feat/bidi-editing",
+   "base": "feat/golden-small",
+   "inTrain": true
+  },
+  {
+   "pr": 253,
+   "head": "13272aecab91cbe4e153282c2555878c928e1ca4",
+   "branch": "fix/i18n-labels",
+   "base": "refactor/i18n-namespaces",
+   "inTrain": true
+  },
+  {
+   "pr": 254,
+   "head": "f151ed025ac893f4c190d42a80450d3298661125",
+   "branch": "fix/digest",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 255,
+   "head": "df478c2513519b4fbd77e420f5249bbb66bcf8a9",
+   "branch": "feat/live-dictation",
+   "base": "feat/golden-small",
+   "inTrain": true
+  },
+  {
+   "pr": 256,
+   "head": "225225f17de39c2b85c6b7cc5e805b0683a5e2c4",
+   "branch": "feat/lang-id",
+   "base": "feat/daily-notes",
+   "inTrain": true
+  },
+  {
+   "pr": 257,
+   "head": "efead8fdc303b05a62c78cf0e1690e8b5077fdfb",
+   "branch": "feat/hebrew-spell-2",
+   "base": "feat/golden-small",
+   "inTrain": true
+  },
+  {
+   "pr": 258,
+   "head": "aeb77482d4f3b4eccee38d55768ddf4c47632afe",
+   "branch": "feat/vault-watch",
+   "base": "feat/vault-folder-desktop",
+   "inTrain": true
+  },
+  {
+   "pr": 259,
+   "head": "c807fb008e034d8e1c115144b728738bd3fd77aa",
+   "branch": "perf/render-worker",
+   "base": "feat/lang-id",
+   "inTrain": true
+  },
+  {
+   "pr": 260,
+   "head": "50ecb4e6c7de9b3c2b610c541c933b0f17bdafac",
+   "branch": "ci/model-convert",
+   "base": "chore/license-gate",
+   "inTrain": true
+  },
+  {
+   "pr": 261,
+   "head": "ba8c89c30141f477b77576feca4f77ec22811f8e",
+   "branch": "feat/onboarding",
+   "base": "feat/daily-notes",
+   "inTrain": true
+  },
+  {
+   "pr": 262,
+   "head": "9119a6cc7942734c51ed1eeda94be219ea1ec325",
+   "branch": "fix/pwa-offline",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 263,
+   "head": "0038044b41abc3b43e22c8f2b373f07b06425e78",
+   "branch": "fix/docx-rtl-align",
+   "base": "fix/codex-backlog",
+   "inTrain": true
+  },
+  {
+   "pr": 265,
+   "head": "12b772c5ce51c2cc9314c73e389ed51d170d1dc7",
+   "branch": "chore/dod",
+   "base": "chore/plan-data",
+   "inTrain": true
+  },
+  {
+   "pr": 266,
+   "head": "3706297b6a294edb36fafb335bb564caf00f904e",
+   "branch": "chore/knip",
+   "base": "chore/eslint",
+   "inTrain": true
+  },
+  {
+   "pr": 267,
+   "head": "d40c48b9f9e9b3ce3e4914d3af97550bae848fe0",
+   "branch": "feat/database-formulas",
+   "base": "feat/database-edit",
+   "inTrain": true
+  },
+  {
+   "pr": 268,
+   "head": "c52a2c713e3ab27d905d73272ca3172f4db6bcce",
+   "branch": "feat/quick-capture",
+   "base": "feat/daily-notes",
+   "inTrain": true
+  },
+  {
+   "pr": 269,
+   "head": "40938abfdc4cc410ae128af1eb5a426bfa62b626",
+   "branch": "feat/safe-git",
+   "base": "feat/vault-watch",
+   "inTrain": true
+  },
+  {
+   "pr": 270,
+   "head": "3cf0ce916730a46d558a2f7e095ff6f0903d9d3e",
+   "branch": "chore/no-domain",
+   "base": "chore/dod",
+   "inTrain": true
+  },
+  {
+   "pr": 271,
+   "head": "aeab395b495ad1493f2a6f1f2ac2618e7a9edc29",
+   "branch": "fix/known-limits",
+   "base": "fix/docx-rtl-align",
+   "inTrain": true
+  },
+  {
+   "pr": 272,
+   "head": "fa8cd877e52c901f4b8160dedd1e03d0ca436ab5",
+   "branch": "feat/pdf-reader",
+   "base": "feat/lang-id",
+   "inTrain": true
+  },
+  {
+   "pr": 273,
+   "head": "55648c274ddaf88a00259605f493f3784c398214",
+   "branch": "fix/palette-reset",
+   "base": "chore/dod",
+   "inTrain": true
+  },
+  {
+   "pr": 274,
+   "head": "db567ae7f7984da3a0b91c9f473cc9be3ebcb012",
+   "branch": "perf/vault-worker",
+   "base": "refactor/vault-backend",
+   "inTrain": true
+  },
+  {
+   "pr": 275,
+   "head": "e1ecaeaaee9696787c86919dfa8b21325b345c1b",
+   "branch": "feat/e2ee-sync-core",
+   "base": "feat/vault-watch",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 276,
+   "head": "cc0b65adfde38ec6eb0101c0e1b49a0f430fa3d0",
+   "branch": "feat/canvas-excalidraw",
+   "base": "fix/tldraw-licence",
+   "inTrain": true
+  },
+  {
+   "pr": 277,
+   "head": "eae63aba62f60887aabf1fdc4f5827edda733158",
+   "branch": "feat/model-manager",
+   "base": "feat/lang-id",
+   "inTrain": true
+  },
+  {
+   "pr": 278,
+   "head": "90923cff178c1905de3ead0e6c93a5a8e0f7fa79",
+   "branch": "feat/ocr-ci",
+   "base": "feat/golden-sets",
+   "inTrain": true
+  },
+  {
+   "pr": 279,
+   "head": "4f22348cdcbaec2b4037edf551a983f5acb0bc3e",
+   "branch": "feat/agent-python",
+   "base": "feat/agent-tools",
+   "inTrain": true
+  },
+  {
+   "pr": 280,
+   "head": "d979fdb4039093b005d57f376e07a80ac2211ea0",
+   "branch": "feat/monitoring",
+   "base": "feat/ledger-complete",
+   "inTrain": true
+  },
+  {
+   "pr": 281,
+   "head": "ef29da1d9d341682d5d0b7d1b4898f7ea0ed5156",
+   "branch": "test/coverage-all",
+   "base": "chore/ci-stable",
+   "inTrain": true
+  },
+  {
+   "pr": 282,
+   "head": "f68ef89ab28b3892b251d81c04000ec29f420317",
+   "branch": "feat/local-mt",
+   "base": "feat/lang-id",
+   "inTrain": true
+  },
+  {
+   "pr": 283,
+   "head": "0c256dd06f3eb646e1a3552f18415718d61d5b9a",
+   "branch": "feat/canvas-excalidraw-2",
+   "base": "feat/canvas-excalidraw",
+   "inTrain": true
+  },
+  {
+   "pr": 284,
+   "head": "0113590019a74238a32e9e1aee95936ca3c955f6",
+   "branch": "feat/local-spell-en",
+   "base": "feat/lang-id",
+   "inTrain": true
+  },
+  {
+   "pr": 285,
+   "head": "a589ccd571a3dc493d7eba8a311b6e905953e819",
+   "branch": "feat/researcher-agent",
+   "base": "feat/injection-guard",
+   "inTrain": true
+  },
+  {
+   "pr": 286,
+   "head": "90c13eb6266e482a59c3cd7fa9bc73575d1e62c5",
+   "branch": "feat/local-vision",
+   "base": "feat/local-mt",
+   "inTrain": true
+  },
+  {
+   "pr": 287,
+   "head": "035f7dfb0fc562aba57cddf725067c23c33c8cb9",
+   "branch": "feat/plugins-runtime",
+   "base": "feat/onboarding",
+   "inTrain": true
+  },
+  {
+   "pr": 288,
+   "head": "065d445c8e44b15bd418a66d339adc4a30cb7ee2",
+   "branch": "refactor/all-through-runtime",
+   "base": "feat/researcher-agent",
+   "inTrain": true
+  },
+  {
+   "pr": 289,
+   "head": "a1653e07461fc488f1e91fffe12258834b5c4a88",
+   "branch": "feat/plugins-api",
+   "base": "feat/plugins-runtime",
+   "inTrain": true
+  },
+  {
+   "pr": 290,
+   "head": "9ad8a1505d384edd05aff676a17f6fbf7f821249",
+   "branch": "feat/a11y",
+   "base": "feat/onboarding",
+   "inTrain": true
+  },
+  {
+   "pr": 291,
+   "head": "9262efa53614f47827487764139740f6a81779ea",
+   "branch": "feat/e2ee-sync-providers",
+   "base": "feat/e2ee-sync-core",
+   "inTrain": true
+  },
+  {
+   "pr": 292,
+   "head": "d74296ec867ad1168f13dce83b1089d2123d8eaa",
+   "branch": "ci/real-tiny-model",
+   "base": "refactor/all-through-runtime",
+   "inTrain": true
+  },
+  {
+   "pr": 293,
+   "head": "1ae431c8890466e01ae1c4d7f45ea3200325d758",
+   "branch": "feat/nikud",
+   "base": "feat/local-mt",
+   "inTrain": true
+  },
+  {
+   "pr": 297,
+   "head": "01eacb9a3736b239ed6f68f3442465c2004b230b",
+   "branch": "test/data-safety-matrix",
+   "base": "feat/safe-git",
+   "inTrain": true
+  },
+  {
+   "pr": 298,
+   "head": "2fb6322457060a7e043e8484a9d3fe9fdd2c671a",
+   "branch": "feat/eval-complete",
+   "base": "ci/real-tiny-model",
+   "inTrain": true
+  },
+  {
+   "pr": 300,
+   "head": "0beb29d1e797430d148b1ceec9cc98e1e1699e1e",
+   "branch": "feat/touch",
+   "base": "feat/a11y",
+   "inTrain": true
+  },
+  {
+   "pr": 301,
+   "head": "a7a4adc39bda7151596f57dd3b52011451159868",
+   "branch": "chore/hosting",
+   "base": "chore/no-domain",
+   "inTrain": true
+  },
+  {
+   "pr": 302,
+   "head": "e857c73e339bbba4a273ed9493524d69f24f8ac1",
+   "branch": "feat/mobile-builds",
+   "base": "chore/hosting",
+   "inTrain": true
+  },
+  {
+   "pr": 303,
+   "head": "72ee0a3cbb6290e2f42108404cc6c5a5abbb6668",
+   "branch": "chore/issue-triage",
+   "base": "chore/dod",
+   "inTrain": true
+  },
+  {
+   "pr": 304,
+   "head": "07a3262f1becc3fdfa84121193fba9ac78afe32e",
+   "branch": "feat/public-roadmap",
+   "base": "chore/dod",
+   "inTrain": true
+  },
+  {
+   "pr": 305,
+   "head": "f8a2695a68a7e114d9d3f7e7c624d7f62cf89622",
+   "branch": "feat/doctor-complete",
+   "base": "feat/nikud",
+   "inTrain": true
+  },
+  {
+   "pr": 306,
+   "head": "4a807c4b7f5259d422054529fbd7a11be5aeb9fd",
+   "branch": "feat/search-ops",
+   "base": "perf/vault-worker",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 307,
+   "head": "21a2ac3637742c56a25a66095cb18b8bf4e760e2",
+   "branch": "feat/pii-redactor",
+   "base": "ci/model-convert",
+   "inTrain": true
+  },
+  {
+   "pr": 308,
+   "head": "4a22028afcc5d67923759b4929acc7de032c9499",
+   "branch": "feat/clipper-v2",
+   "base": "feat/injection-guard",
+   "inTrain": true
+  },
+  {
+   "pr": 309,
+   "head": "5d1647ccac400e509b740893a24f3b06233884c9",
+   "branch": "feat/image-search",
+   "base": "feat/local-vision",
+   "inTrain": true
+  },
+  {
+   "pr": 311,
+   "head": "e4bbf308fda447f580ecdc2089a9f767c2a241a9",
+   "branch": "feat/data-analyst",
+   "base": "feat/agent-python",
+   "inTrain": true
+  },
+  {
+   "pr": 312,
+   "head": "f85344fdd2bcc83d57deaa36e687b8f162435095",
+   "branch": "feat/neural-tts",
+   "base": "feat/local-mt",
+   "inTrain": true
+  },
+  {
+   "pr": 313,
+   "head": "23fba87850f47d1614581826a8e07a6c7ed5db15",
+   "branch": "feat/local-lora",
+   "base": "feat/local-mt",
+   "inTrain": true
+  },
+  {
+   "pr": 314,
+   "head": "c05706bb1c3c3c9954ce914d907d21f3cbd5d9a5",
+   "branch": "feat/desktop-release",
+   "base": "feat/vault-folder-desktop",
+   "inTrain": true
+  },
+  {
+   "pr": 315,
+   "head": "b247d9096ff85c423ec1d35eea630a217262578c",
+   "branch": "feat/critic-complete",
+   "base": "feat/eval-complete",
+   "inTrain": true
+  },
+  {
+   "pr": 316,
+   "head": "6a0c27b1586f7e7c653b8ce4a08dbbd9ddece30f",
+   "branch": "docs/complete",
+   "base": "chore/dod",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 331,
+   "head": "9f89ab986e98a4dab884d4c61057e2c8f8bd49e8",
+   "branch": "feat/vault-tasks",
+   "base": "perf/vault-worker",
+   "inTrain": true
+  },
+  {
+   "pr": 332,
+   "head": "eebf23f1db7ab3c826008b00573719098d2bdf87",
+   "branch": "chore/no-cloud-defaults",
+   "base": "refactor/all-through-runtime",
+   "inTrain": true
+  },
+  {
+   "pr": 333,
+   "head": "68b6d828a5f5deec77490308e83eeb448ca15ad1",
+   "branch": "feat/settings-one",
+   "base": "feat/model-manager",
+   "inTrain": true
+  },
+  {
+   "pr": 334,
+   "head": "35db6bc329393f4fed060a989656bbb40ae8978a",
+   "branch": "feat/batch-ui",
+   "base": "refactor/all-through-runtime",
+   "inTrain": true
+  },
+  {
+   "pr": 335,
+   "head": "070436a8163d1e7cd810b8db7f5d3960c81e4edb",
+   "branch": "feat/ai-authorship",
+   "base": "refactor/all-through-runtime",
+   "inTrain": true
+  },
+  {
+   "pr": 336,
+   "head": "49e1c83d7959080b17a9ab5f61bd7bdb093d93ba",
+   "branch": "feat/local-fim",
+   "base": "refactor/all-through-runtime",
+   "inTrain": true
+  },
+  {
+   "pr": 337,
+   "head": "bc060b7f8581d4df284d2ed1ba9f7ace5d61fdba",
+   "branch": "feat/i18n-draft-agent",
+   "base": "refactor/i18n-namespaces",
+   "inTrain": true
+  },
+  {
+   "pr": 338,
+   "head": "c69cc787830f9a42cf7411eff57f8a358ad4f141",
+   "branch": "feat/vault-encryption",
+   "base": "feat/e2ee-sync-core",
+   "inTrain": true
+  },
+  {
+   "pr": 339,
+   "head": "ee7d3a57148675e0abf203ef9ff6b92c363d5967",
+   "branch": "feat/pdf-chat",
+   "base": "feat/pdf-reader",
+   "inTrain": true
+  },
+  {
+   "pr": 340,
+   "head": "29270ef009df04c14c525567b815ef20e8cd770f",
+   "branch": "chore/catch-split",
+   "base": "fix/known-limits",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 341,
+   "head": "d37a19d94fe8ee4e8a469258ba0ae14e54216657",
+   "branch": "feat/citations",
+   "base": "perf/render-worker",
+   "inTrain": true
+  },
+  {
+   "pr": 342,
+   "head": "41eb9124cd85734040bf30684081ed2cc75ce248",
+   "branch": "feat/local-summarize",
+   "base": "feat/pdf-chat",
+   "inTrain": true
+  },
+  {
+   "pr": 343,
+   "head": "2ff0b16e0e6908b32cc10f9cea69b8a40ecaa20a",
+   "branch": "test/visual-local",
+   "base": "chore/ci-stable",
+   "inTrain": true
+  },
+  {
+   "pr": 344,
+   "head": "0fab7ac9a0e0a2eee3fdf0dbd9a311c3e8d6827b",
+   "branch": "feat/vault-folder-mobile",
+   "base": "feat/vault-watch",
+   "inTrain": true
+  },
+  {
+   "pr": 345,
+   "head": "44ff3b2c9b41093770e49f7e4ccde7a9dbeb7cea",
+   "branch": "feat/rerank-library",
+   "base": "refactor/all-through-runtime",
+   "inTrain": true
+  },
+  {
+   "pr": 346,
+   "head": "1717b9519ccad4c6d6a9eb7226b2f785eb15f6c5",
+   "branch": "test/rtl-matrix",
+   "base": "test/visual-local",
+   "inTrain": true
+  },
+  {
+   "pr": 347,
+   "head": "dffeee709754eeca5b83e437facb3ecfd02435bd",
+   "branch": "feat/feedback",
+   "base": "feat/doctor-complete",
+   "inTrain": true
+  },
+  {
+   "pr": 348,
+   "head": "fc97c4b9b9b2bef0f1cd0cf3964c598cab9410a0",
+   "branch": "feat/i18n-review-agent",
+   "base": "feat/local-mt",
+   "inTrain": true
+  },
+  {
+   "pr": 349,
+   "head": "944c2443bec08d87386dc63bfe70b30f6cdf33f3",
+   "branch": "feat/ai-autofill",
+   "base": "feat/properties",
+   "inTrain": true
+  },
+  {
+   "pr": 350,
+   "head": "65cc28388e436c0c263568272e49ba37bcae4318",
+   "branch": "feat/rtl-parity",
+   "base": "test/rtl-matrix",
+   "inTrain": true
+  },
+  {
+   "pr": 351,
+   "head": "bfd605a9763448f67cc51daa543d236a02d40d83",
+   "branch": "feat/json-canvas",
+   "base": "feat/canvas-excalidraw-2",
+   "inTrain": true
+  },
+  {
+   "pr": 352,
+   "head": "a3011dcd7d8ec50917a9e761e9d38f259739d931",
+   "branch": "fix/kroki-policy",
+   "base": "chore/no-cloud-defaults",
+   "inTrain": true
+  },
+  {
+   "pr": 353,
+   "head": "6f4791af7dee1c6fe1132573d7425b51dcfeec90",
+   "branch": "feat/meeting-notes",
+   "base": "feat/vault-tasks",
+   "inTrain": true
+  },
+  {
+   "pr": 354,
+   "head": "96932d54f2769d9dd8a8146c7521f64f7c0cfbfb",
+   "branch": "feat/publish-own",
+   "base": "feat/safe-git",
+   "inTrain": true
+  },
+  {
+   "pr": 355,
+   "head": "92926553274dda4bc3f8a54247325a2162cd6a15",
+   "branch": "chore/release",
+   "base": "feat/desktop-release",
+   "inTrain": true
+  },
+  {
+   "pr": 356,
+   "head": "ecb426ad9554e56b6264b09a91a7bc18a0dec533",
+   "branch": "feat/atomic-writes",
+   "base": "feat/vault-folder-mobile",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 357,
+   "head": "fde0bfa3bd2b60dbc65f19236bf38415236c7d84",
+   "branch": "feat/ocr-mixed-layout",
+   "base": "feat/ocr-ci",
+   "inTrain": true
+  },
+  {
+   "pr": 358,
+   "head": "d7d341d376af1efe06b71ab30a1b7c96cab5088d",
+   "branch": "feat/obsidian-bases",
+   "base": "feat/database-formulas",
+   "inTrain": true
+  },
+  {
+   "pr": 359,
+   "head": "7b6030698d4d48c09f69c0093ff83a73fd26d65e",
+   "branch": "feat/nikud-dicta",
+   "base": "feat/nikud",
+   "inTrain": true
+  },
+  {
+   "pr": 360,
+   "head": "640bf5edb6d46f0073b2feabbd182f71c6962290",
+   "branch": "feat/a11y-hebrew-sr",
+   "base": "feat/a11y",
+   "inTrain": true
+  },
+  {
+   "pr": 361,
+   "head": "3a8e11fcfc34f696880068a2d1ca799d13daf016",
+   "branch": "chore/threat-model",
+   "base": "chore/security-ci",
+   "inTrain": true
+  },
+  {
+   "pr": 362,
+   "head": "76a4c195d6cdd161863c1331d1fe00ad8588113d",
+   "branch": "feat/hebrew-search-morph",
+   "base": "feat/rerank-library",
+   "inTrain": true
+  },
+  {
+   "pr": 363,
+   "head": "ca6a6dcd9abfc0c6020a0e439912b5c99a7d2c67",
+   "branch": "feat/hebrew-layout",
+   "base": "refactor/commands-domains",
+   "inTrain": true
+  },
+  {
+   "pr": 364,
+   "head": "1b8eece942cae225e696a1c202b4a875763a07f1",
+   "branch": "feat/clip-interpreter",
+   "base": "feat/clipper-v2",
+   "inTrain": true
+  },
+  {
+   "pr": 365,
+   "head": "125e4820fdd32ae87675d67ffd5c4838d1c95b42",
+   "branch": "feat/hebrew-typography",
+   "base": "feat/bidi-editing",
+   "inTrain": true
+  },
+  {
+   "pr": 366,
+   "head": "922cd68e79061c326e2e9b7837f224ff02767766",
+   "branch": "feat/auto-merge",
+   "base": "feat/e2ee-sync-core",
+   "inTrain": true
+  },
+  {
+   "pr": 367,
+   "head": "1467ce090593e2c51e55c3cec1a7d2af8cad0c06",
+   "branch": "feat/plugin-trust",
+   "base": "feat/plugins-api",
+   "inTrain": true
+  },
+  {
+   "pr": 368,
+   "head": "8ea60161215b5c492043a079186c7db3a10646ed",
+   "branch": "feat/agent-review-dev-only",
+   "base": "feat/agent-review-ui",
+   "inTrain": true
+  },
+  {
+   "pr": 369,
+   "head": "86580a0b6270c74c52da5d71928f625a1b6b6e07",
+   "branch": "feat/vault-mcp-cli",
+   "base": "feat/agent-review-ui",
+   "inTrain": true
+  },
+  {
+   "pr": 370,
+   "head": "f662bc0d1b86befe45dda5532ecf30cbabbb5ac6",
+   "branch": "feat/outline-mode",
+   "base": "feat/bidi-editing",
+   "inTrain": true
+  },
+  {
+   "pr": 371,
+   "head": "e96b2e940be6a9b404e5168efceb4646a14672d3",
+   "branch": "feat/embedded-queries",
+   "base": "feat/search-ops",
+   "inTrain": true
+  },
+  {
+   "pr": 372,
+   "head": "49bd769349b865c476ef2df3258add510c081b3e",
+   "branch": "feat/image-hosts",
+   "base": "feat/remote-images",
+   "inTrain": true
+  },
+  {
+   "pr": 373,
+   "head": "8dc683146369535307a9f04aa5f9af8c3036fc89",
+   "branch": "feat/trust-repo",
+   "base": "feat/injection-guard",
+   "inTrain": true
+  },
+  {
+   "pr": 374,
+   "head": "58531c3f8acff9b86b0bc12aa5f03a883b0cda34",
+   "branch": "feat/vault-organizer",
+   "base": "feat/critic-complete",
+   "inTrain": true
+  },
+  {
+   "pr": 375,
+   "head": "9af6af3aa0cb83a84f23e8c2831ef977303dcc4f",
+   "branch": "feat/related-notes",
+   "base": "feat/hebrew-search-morph",
+   "inTrain": true
+  },
+  {
+   "pr": 376,
+   "head": "bcab862388b97ca69d8ad86f13cdee41e2c7aa08",
+   "branch": "feat/voice-capture",
+   "base": "feat/quick-capture",
+   "inTrain": true
+  },
+  {
+   "pr": 377,
+   "head": "6c534a47b56917df5f0963fb0f45a080b904131a",
+   "branch": "feat/import-wizard",
+   "base": "feat/obsidian-bases",
+   "inTrain": true
+  },
+  {
+   "pr": 378,
+   "head": "48f95e7a21feed1b65a59b602db8b8231cdc5998",
+   "branch": "feat/sync-explained",
+   "base": "feat/e2ee-sync-providers",
+   "inTrain": true
+  },
+  {
+   "pr": 379,
+   "head": "2cc22ac4d5a133b2544f668dcf912ca68fe10f86",
+   "branch": "feat/dictalm3",
+   "base": "feat/model-manager",
+   "inTrain": true
+  },
+  {
+   "pr": 380,
+   "head": "b92cd2185dcf14670869fd4c70f7bac07d73c79a",
+   "branch": "feat/respectful-messages",
+   "base": "fix/i18n-labels",
+   "inTrain": true
+  },
+  {
+   "pr": 381,
+   "head": "8e1a37902fed30dae8f47561b3a234b806e2bd2a",
+   "branch": "feat/real-sharing",
+   "base": "feat/collab-persist",
+   "inTrain": true
+  },
+  {
+   "pr": 382,
+   "head": "7773ce6b3197a0ed8a55ffe0b549d3bb21516ab1",
+   "branch": "feat/hebrew-fonts",
+   "base": "fix/pwa-offline",
+   "inTrain": true
+  },
+  {
+   "pr": 383,
+   "head": "fd24690ec0afaa7a154c19436120c4da2cd8a919",
+   "branch": "feat/ivrit-whisper",
+   "base": "feat/live-dictation",
+   "inTrain": true
+  },
+  {
+   "pr": 384,
+   "head": "b01415fb17154d22a90d6a0a0b6d1428ea733898",
+   "branch": "docs/hebrew-first",
+   "base": "docs/complete",
+   "inTrain": true
+  },
+  {
+   "pr": 385,
+   "head": "c4776dbb049d5bafe148df6fa154ff42c1df2e23",
+   "branch": "perf/inp-budget",
+   "base": "perf/vault-worker",
+   "inTrain": true
+  },
+  {
+   "pr": 386,
+   "head": "450f6ad0bf341d9a374aa33dd5da4dfe6a697bac",
+   "branch": "perf/cold-start",
+   "base": "perf/startup-headroom",
+   "inTrain": true
+  },
+  {
+   "pr": 387,
+   "head": "2ba8d3fda071662048ee4f0cd253dacee0cc43cb",
+   "branch": "feat/e2ee-live-sharing",
+   "base": "feat/real-sharing",
+   "inTrain": true
+  },
+  {
+   "pr": 388,
+   "head": "515d0f20d80cf8b1e24860c2dc92b48bcd3beb33",
+   "branch": "feat/hebrew-neural-tts",
+   "base": "feat/neural-tts",
+   "inTrain": true
+  },
+  {
+   "pr": 389,
+   "head": "112e0dae5a82bc57c896653f29af58db893d85ac",
+   "branch": "feat/design-tokens",
+   "base": "test/visual-local",
+   "inTrain": true
+  },
+  {
+   "pr": 390,
+   "head": "200872c347e871d2a1d1f2359e93cc444c9a34c7",
+   "branch": "feat/israeli-templates",
+   "base": "feat/import-wizard",
+   "inTrain": true
+  },
+  {
+   "pr": 391,
+   "head": "2807f6374c55c1dc7494660933c79f6eca31a300",
+   "branch": "feat/epub-reader",
+   "base": "feat/pdf-reader",
+   "inTrain": true
+  },
+  {
+   "pr": 392,
+   "head": "8316677b3a201aa49ea2403317340c1d4620ce07",
+   "branch": "feat/lan-sync",
+   "base": "feat/e2ee-sync-providers",
+   "inTrain": true
+  },
+  {
+   "pr": 393,
+   "head": "8881aff307577f2abcdade4935ee05ed5ef27dfb",
+   "branch": "feat/highlights-hub",
+   "base": "feat/epub-reader",
+   "inTrain": true
+  },
+  {
+   "pr": 394,
+   "head": "f520f8bcc3b467ce171fdf308065500a8ff4dff0",
+   "branch": "feat/spaced-review",
+   "base": "feat/highlights-hub",
+   "inTrain": true
+  },
+  {
+   "pr": 395,
+   "head": "4253c5ab82a2eaa48efceb1bb8806188dde31ea2",
+   "branch": "feat/privacy-report",
+   "base": "chore/threat-model",
+   "inTrain": true
+  },
+  {
+   "pr": 396,
+   "head": "0e5a55a05fb03f9876d8733e04b3920aafabd0cc",
+   "branch": "feat/hebrew-calendar",
+   "base": "feat/daily-notes",
+   "inTrain": true
+  },
+  {
+   "pr": 397,
+   "head": "68dc6b54dc15a3b0a54098108f84e1d545d2f04a",
+   "branch": "feat/bases-relations",
+   "base": "feat/obsidian-bases",
+   "inTrain": true
+  },
+  {
+   "pr": 398,
+   "head": "c275dddfecb44c2444f10824e3ebba3c9a9e204a",
+   "branch": "feat/meeting-speakers",
+   "base": "feat/meeting-notes",
+   "inTrain": true
+  },
+  {
+   "pr": 399,
+   "head": "44d1f9f6d7abeab074929363c20deed91eaa1dc9",
+   "branch": "feat/sync-crypto",
+   "base": "feat/e2ee-sync-core",
+   "inTrain": true
+  },
+  {
+   "pr": 400,
+   "head": "97ae9c52e6c864254b836ee1d3817c7cc526ff5a",
+   "branch": "feat/graph-10k",
+   "base": "perf/vault-worker",
+   "inTrain": true
+  },
+  {
+   "pr": 401,
+   "head": "745d9aadf6168d25b0e949cafdbbedfeefe7170b",
+   "branch": "feat/excalidraw-notes",
+   "base": "feat/json-canvas",
+   "inTrain": true
+  },
+  {
+   "pr": 402,
+   "head": "73e866d9bb9eb113f5b0826c6187cf7e383290c2",
+   "branch": "feat/backup-drill",
+   "base": "feat/history-complete",
+   "inTrain": true
+  },
+  {
+   "pr": 403,
+   "head": "cbe0d09000a11316c3079248c31cd76c735330c6",
+   "branch": "feat/safe-themes",
+   "base": "feat/plugin-trust",
+   "inTrain": true
+  },
+  {
+   "pr": 404,
+   "head": "5d9ddc8117d60dfdf8449f4b6cbde905ad60dcd7",
+   "branch": "feat/canvas-mermaid",
+   "base": "feat/excalidraw-notes",
+   "inTrain": true
+  },
+  {
+   "pr": 405,
+   "head": "f3dd8352483c211f4d114cbcccabe6234264f148",
+   "branch": "docs/acr-wcag22",
+   "base": "feat/a11y-hebrew-sr",
+   "inTrain": true
+  },
+  {
+   "pr": 406,
+   "head": "2d0927fbc24cd549d6cbcab318d9b02d37129a77",
+   "branch": "feat/slides",
+   "base": "feat/excalidraw-notes",
+   "inTrain": true
+  },
+  {
+   "pr": 407,
+   "head": "f651b556a0df258c54dcaea4cdf79443ecda0235",
+   "branch": "test/md-conformance",
+   "base": "feat/outline-mode",
+   "inTrain": true
+  },
+  {
+   "pr": 408,
+   "head": "ffe7c8e470e61eead6eae992cd0eb1b447008ee1",
+   "branch": "feat/highlight-import",
+   "base": "feat/highlights-hub",
+   "inTrain": true
+  },
+  {
+   "pr": 409,
+   "head": "4ab3e71260eb33dd545d458a5a391ff627afab4b",
+   "branch": "feat/in-app-help",
+   "base": "docs/hebrew-first",
+   "inTrain": true
+  },
+  {
+   "pr": 410,
+   "head": "faed213c841981f629ec5d1fb3264f00b8233ac4",
+   "branch": "feat/obsidian-syntax",
+   "base": "test/md-conformance",
+   "inTrain": true
+  },
+  {
+   "pr": 411,
+   "head": "0e888a8c661fd24335c2ec1432f6c887064db818",
+   "branch": "feat/citations-zotero",
+   "base": "feat/citations",
+   "inTrain": true
+  },
+  {
+   "pr": 412,
+   "head": "2d5178819d20ad15a13c27175e9f29b9493b9f0e",
+   "branch": "feat/paste-fidelity",
+   "base": "test/md-conformance",
+   "inTrain": true
+  },
+  {
+   "pr": 413,
+   "head": "192e550c4b22eed23c77491d6255b74934652bbe",
+   "branch": "feat/whats-new",
+   "base": "chore/release",
+   "inTrain": true
+  },
+  {
+   "pr": 414,
+   "head": "3e9b1406d939b504ccc0b36fe22baa0b02c1eb61",
+   "branch": "feat/hebrew-print",
+   "base": "feat/obsidian-syntax",
+   "inTrain": true
+  },
+  {
+   "pr": 415,
+   "head": "ee4f81e85b85cefd1eccf96e430451cb94d67821",
+   "branch": "feat/mobile-native",
+   "base": "feat/touch",
+   "inTrain": true
+  },
+  {
+   "pr": 416,
+   "head": "aa21d6f03f1af743b2f4c91b2a4e7ab548355ea0",
+   "branch": "feat/suggest-versions",
+   "base": "feat/real-sharing",
+   "inTrain": true
+  },
+  {
+   "pr": 417,
+   "head": "f7f80a2e076f08ec703cd2a5633e233b74dbad84",
+   "branch": "feat/beta-channel",
+   "base": "chore/release",
+   "inTrain": true
+  },
+  {
+   "pr": 418,
+   "head": "be3fe3bc87a8a0efd283e3ff551efaac514072a2",
+   "branch": "feat/plugin-dx",
+   "base": "feat/plugin-trust",
+   "inTrain": true
+  },
+  {
+   "pr": 419,
+   "head": "abbdfc5ce75b98f7da94f99d124a249236d01412",
+   "branch": "research/usability-hebrew",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 420,
+   "head": "b7d4adcf0e34ffc5832ea73493ab7080505184d5",
+   "branch": "feat/vault-100k",
+   "base": "feat/graph-10k",
+   "inTrain": true
+  },
+  {
+   "pr": 421,
+   "head": "83c07b5731b14f0fe6fdc27fc17b587f8db7f211",
+   "branch": "feat/model-bench",
+   "base": "feat/rerank-library",
+   "inTrain": true
+  },
+  {
+   "pr": 422,
+   "head": "9dad38fda356f9807750d0027b0f11e9736420c0",
+   "branch": "feat/desktop-native",
+   "base": "feat/desktop-release",
+   "inTrain": true
+  },
+  {
+   "pr": 423,
+   "head": "9495c0b776a7f8a0747bd43eb34836bdae14154d",
+   "branch": "feat/store-packaging",
+   "base": "chore/release",
+   "inTrain": true
+  },
+  {
+   "pr": 424,
+   "head": "02405cda3b97d4e70b74af2c36491fa8bab8daa1",
+   "branch": "ci/lighthouse-gate",
+   "base": "perf/cold-start",
+   "inTrain": true
+  },
+  {
+   "pr": 425,
+   "head": "06dea157b7c04c2102ca2beb96c02a725d116327",
+   "branch": "feat/widgets-siri",
+   "base": "feat/voice-capture",
+   "inTrain": true
+  },
+  {
+   "pr": 426,
+   "head": "9118b421819e641722fad2372572fd9d98b25aed",
+   "branch": "chore/pr-check",
+   "base": "chore/knip",
+   "inTrain": true
+  },
+  {
+   "pr": 427,
+   "head": "a025aa84f6ba26ac80b04ce0c02f24d7347c9124",
+   "branch": "test/mutation-critical",
+   "base": "feat/backup-drill",
+   "inTrain": true
+  },
+  {
+   "pr": 428,
+   "head": "4da4d29f4e559b908c69c2d109ef22fbe549cfdb",
+   "branch": "launch/hebrew-beta",
+   "base": "docs/hebrew-first",
+   "inTrain": true
+  },
+  {
+   "pr": 429,
+   "head": "1a9bb9938b580cdc0b902836370cbaa2f5492a77",
+   "branch": "feat/model-credits",
+   "base": "feat/live-dictation",
+   "inTrain": true
+  },
+  {
+   "pr": 430,
+   "head": "ef44532ba0ee7f69fd94483cbeab39a70d85a205",
+   "branch": "chore/store-submit",
+   "base": "feat/mobile-builds",
+   "inTrain": true
+  },
+  {
+   "pr": 433,
+   "head": "854f62153babe432abe0ae9309ffb34129d4db2c",
+   "branch": "feat/hebrew-first-load",
+   "base": "docs/hebrew-first",
+   "inTrain": true
+  },
+  {
+   "pr": 434,
+   "head": "df1c09698ec17bc19512a9a36b74ea1db8f8cda3",
+   "branch": "feat/crosslingual-search",
+   "base": "feat/hebrew-search-morph",
+   "inTrain": true
+  },
+  {
+   "pr": 435,
+   "head": "889c2cf78ea8e7f4ab1b85e06140adf757b2fbf0",
+   "branch": "feat/first-run-language",
+   "base": "feat/hebrew-first-load",
+   "inTrain": true
+  },
+  {
+   "pr": 436,
+   "head": "1aa0f1078ae15e6adb23f185e8328b56312daee4",
+   "branch": "chore/secrets-live",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 437,
+   "head": "65760fa0258dceadc1e95dc891d98476a8d63fa7",
+   "branch": "feat/hebrew-grammar",
+   "base": "feat/hebrew-spell-2",
+   "inTrain": true
+  },
+  {
+   "pr": 438,
+   "head": "4f8bc2643bc598880dc0618926ff7b0a142ebc46",
+   "branch": "feat/lit-review-matrix",
+   "base": "feat/pdf-chat",
+   "inTrain": true
+  },
+  {
+   "pr": 439,
+   "head": "d1bada5ac7712f5142e2e0ad6a50a3c218c4286b",
+   "branch": "feat/bidi-marks",
+   "base": "feat/bidi-editing",
+   "inTrain": true
+  },
+  {
+   "pr": 440,
+   "head": "b8ccd5926cff8a1963d74ac8ec1d3ae83718445a",
+   "branch": "feat/morning-summary",
+   "base": "feat/spaced-review",
+   "inTrain": true
+  },
+  {
+   "pr": 441,
+   "head": "368dd0b300da4d1ecb864f220a162804a32e03be",
+   "branch": "feat/student-mode",
+   "base": "feat/voice-capture",
+   "inTrain": true
+  },
+  {
+   "pr": 442,
+   "head": "1a513814ab231527186a1b6469294b4be1144127",
+   "branch": "feat/pdf-paste-reversed",
+   "base": "feat/paste-fidelity",
+   "inTrain": true
+  },
+  {
+   "pr": 443,
+   "head": "9987a639c257939e5159a179365e4839137b7c54",
+   "branch": "feat/models-day",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 444,
+   "head": "e6a0afdfcb125cc4d335049ca5c7c7756698ba5c",
+   "branch": "feat/csp-content-frame",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 445,
+   "head": "a51f98544c02b0f69e298debfa99bf9c2b5a1f0c",
+   "branch": "test/skip-audit",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 446,
+   "head": "dd3c47be236509199bd91541d26e76f47031536a",
+   "branch": "feat/math-in-hebrew",
+   "base": "feat/bidi-editing",
+   "inTrain": true
+  },
+  {
+   "pr": 447,
+   "head": "8dba48e4ac881505f2c7d428231cedc4951fc953",
+   "branch": "feat/accessible-reading",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 448,
+   "head": "f3861f8884be9c28238afddfcd88ffcc2f249e87",
+   "branch": "feat/share-link-fragment",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 449,
+   "head": "8462762f3363e639a6051f5a4c92aaebfd602d24",
+   "branch": "feat/tool-call-reliability",
+   "base": "feat/models-day",
+   "inTrain": true
+  },
+  {
+   "pr": 450,
+   "head": "5b2be2986d8631b948a68d80178867ed06898403",
+   "branch": "feat/israeli-time",
+   "base": "feat/hebrew-calendar",
+   "inTrain": true
+  },
+  {
+   "pr": 451,
+   "head": "aae88fe95a7003f4bca5ade9f4470f8f0788dae2",
+   "branch": "feat/airplane-mode",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 452,
+   "head": "bfb8bc1735302427030e7c73d30408a62316352a",
+   "branch": "feat/sefaria-sources",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 453,
+   "head": "5520cadad2172b48bf4a995794841138b4312d55",
+   "branch": "feat/hebrew-lexicon",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 454,
+   "head": "7f0ae2f647dd0c46e787cf5b19145d22fcf10ca1",
+   "branch": "feat/hebrew-dictation-web",
+   "base": "feat/models-day",
+   "inTrain": true
+  },
+  {
+   "pr": 455,
+   "head": "d124512a276a4a0280521bca29283fd9e17db54f",
+   "branch": "chore/nightly-receipts",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 456,
+   "head": "adb8ec2117b9b947edc57334d2edcb280eeca69f",
+   "branch": "docs/privacy-amendment-13",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 457,
+   "head": "023eff5cd8a7611a8135238a1fa48a10141fc0f0",
+   "branch": "feat/israeli-citations",
+   "base": "feat/citations-zotero",
+   "inTrain": true
+  },
+  {
+   "pr": 458,
+   "head": "19a8683d48bdecbc65d2019c08f121e9e70a9487",
+   "branch": "feat/voice-commands",
+   "base": "feat/hebrew-dictation-web",
+   "inTrain": true
+  },
+  {
+   "pr": 459,
+   "head": "1f8d67209a43ca44b90d058e66523aa3d5cd72ff",
+   "branch": "feat/locale-beta",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 460,
+   "head": "b4afa462c55c229f951c5ab415d224f51472621b",
+   "branch": "perf/markdown-slow-inputs",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 461,
+   "head": "37a69fe1609e0fb8a9dfc6e8818f6b08519e9b85",
+   "branch": "feat/local-usage-metrics",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 462,
+   "head": "e0a9b09d16de667262fa3e4459979cf4f4cfb2e8",
+   "branch": "test/obsidian-real-corpus",
+   "base": "feat/obsidian-bases",
+   "inTrain": true
+  },
+  {
+   "pr": 463,
+   "head": "b260d6fbf2e207a8d52acdee67251fef742de11c",
+   "branch": "fix/json-canvas-obsidian-bytes",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 464,
+   "head": "ecad02ba39c3cd78bb989f71e9652c4811f9712f",
+   "branch": "feat/academic-docx",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 465,
+   "head": "1316f1e1caca5649fd757b6da2e26c195b8b2bcf",
+   "branch": "feat/book-mode",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 466,
+   "head": "4eb7a70b9c475a2c35ead75ae377a5fbef6c55a3",
+   "branch": "feat/arabic-first",
+   "base": "feat/locale-beta",
+   "inTrain": true
+  },
+  {
+   "pr": 467,
+   "head": "1683332fc7abf85c9129d0252ff2266267c86ab3",
+   "branch": "feat/sr-automation",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 468,
+   "head": "3fdaf06274964498e2bb62b9b5fcff58a4eb6b32",
+   "branch": "feat/latex-academic",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 469,
+   "head": "18620faf2785cf77a471896714af7d8465641d4b",
+   "branch": "feat/collab-relay-free",
+   "base": "verify/train",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 470,
+   "head": "69cc470cbffdde87c54519c0ac9cba36c1c990e1",
+   "branch": "test/data-safety-drill",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 471,
+   "head": "2eea6d535f3e06953c8a70e94a3aa1ffd8501df0",
+   "branch": "feat/automations",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 472,
+   "head": "7d29b4a9b50f598ad84fe237dca82ad8fb95d5ab",
+   "branch": "feat/vault-argon2id",
+   "base": "verify/train",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 473,
+   "head": "ece997f52c6ad083d7babaf8bb1c068aff0dae0e",
+   "branch": "feat/journalist-mode",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 474,
+   "head": "b0f66a5dfe0d84a8b01a2009d0dfd53241ac8b12",
+   "branch": "test/mutation-80",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 475,
+   "head": "021f554bb9b71ebf3b3f9e618abe0eb001ab32d0",
+   "branch": "feat/ink-notes",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 476,
+   "head": "aab6f9aa1ac459598c70250e05568d96dafe5f1b",
+   "branch": "feat/model-mirrors",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 477,
+   "head": "d40dd45688c773f68f7a409f3ab7368841885c99",
+   "branch": "feat/plugin-ecosystem",
+   "base": "feat/plugin-dx",
+   "inTrain": true
+  },
+  {
+   "pr": 478,
+   "head": "6d4cf307914b33c79fc2770bbd490121a5faf1eb",
+   "branch": "feat/chat-import",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 479,
+   "head": "d5ce38d8e2b1ab9dc09d401fb8743a585c17149a",
+   "branch": "chore/native-check",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 480,
+   "head": "2e1d4ff48134d448f13bdcfb254c5cc166486762",
+   "branch": "docs/finish-pagefind-gifs",
+   "base": "docs/hebrew-first",
+   "inTrain": true
+  },
+  {
+   "pr": 481,
+   "head": "0b0ad06c4a7a9c00d881b2e74f934b7020204048",
+   "branch": "chore/bus-factor",
+   "base": "chore/pr-check",
+   "inTrain": true
+  },
+  {
+   "pr": 482,
+   "head": "68fb0d54d2f8370fee43756c2436959b31884f28",
+   "branch": "feat/mail-import",
+   "base": "feat/chat-import",
+   "inTrain": true
+  },
+  {
+   "pr": 483,
+   "head": "80704a7da95e2fd4ecaab0d9fd2941c4e12f13ba",
+   "branch": "feat/sync-two-clicks",
+   "base": "feat/sync-explained",
+   "inTrain": true
+  },
+  {
+   "pr": 484,
+   "head": "321d8081918bf2b453d584be7b8ba8c5a22b224b",
+   "branch": "chore/second-host",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 485,
+   "head": "e51ff6574a94a290aa2469cf577cb4df96b5dbfa",
+   "branch": "feat/zotero-web-api",
+   "base": "feat/citations-zotero",
+   "inTrain": true
+  },
+  {
+   "pr": 486,
+   "head": "f2fba6b207b47dfe21b30463e0c854bc22a117cf",
+   "branch": "docs/owner-sessions",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 487,
+   "head": "cd5fcaba9714df1efd1936a2ba94363f7f22bc8c",
+   "branch": "research/usability-unmoderated",
+   "base": "research/usability-hebrew",
+   "inTrain": true
+  },
+  {
+   "pr": 488,
+   "head": "27862ef5f9e25021d507644b1382e75a435a83c4",
+   "branch": "feat/private-classroom",
+   "base": "feat/sync-two-clicks",
+   "inTrain": true
+  },
+  {
+   "pr": 490,
+   "head": "ab63be96b69b9da435473cb3d368bb4d490ab6a2",
+   "branch": "feat/sustainability",
+   "base": "feat/collab-relay-free",
+   "inTrain": true
+  },
+  {
+   "pr": 491,
+   "head": "979d7af558b84bf509081e538c67eeed9650bdb4",
+   "branch": "chore/deps-cleanup",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 492,
+   "head": "ec068e56b46d0751cae91520ffba5f9d2128403b",
+   "branch": "chore/release-beta1",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 493,
+   "head": "8e51b13809dcc26f518f3fe479b04a9764c8b7ad",
+   "branch": "feat/mobile-one-command",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 494,
+   "head": "f8b9cad8e5806620c53df349cd0f14054f070bfd",
+   "branch": "fix/vuln-deps",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 495,
+   "head": "ad415c29a328bbfdb64e7c36dc47fe504fb8b1e7",
+   "branch": "verify/train-2",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 496,
+   "head": "b91872deed6bcab2ff342574bec5bae84c5e1174",
+   "branch": "docs/hebrew-parity",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 497,
+   "head": "d3190ee7cae7b9e662e6985515c49bc4eb1cbb5c",
+   "branch": "feat/review-required",
+   "base": "chore/bus-factor",
+   "inTrain": true
+  },
+  {
+   "pr": 498,
+   "head": "56310db77b64aac5f99891404eb6fddddeede64c",
+   "branch": "feat/live-meta-check",
+   "base": "chore/nightly-receipts",
+   "inTrain": true
+  },
+  {
+   "pr": 499,
+   "head": "1329854b6ebd6db390f7babfc9692f0daa1832e6",
+   "branch": "fix/vuln-deps-fold",
+   "base": "fix/vuln-deps",
+   "inTrain": true
+  },
+  {
+   "pr": 500,
+   "head": "dc4b14ffe7e3c4d250b50ea21ecc2ae030dc65e3",
+   "branch": "chore/max-lines-gate",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 501,
+   "head": "a8c39431d952b0cb48f72809ea9591f48e40034d",
+   "branch": "chore/pr-triage",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 502,
+   "head": "4aca2ac6fdf09774a93e5c03e0ca0ae28810b03c",
+   "branch": "chore/plan-wip-limit",
+   "base": "chore/dod",
+   "inTrain": true
+  },
+  {
+   "pr": 503,
+   "head": "df897de134e85f4e5c643974e49b2ed5cfdb12a1",
+   "branch": "feat/heldout-evaluator",
+   "base": "feat/models-day",
+   "inTrain": true
+  },
+  {
+   "pr": 504,
+   "head": "3cbb5b6fc361cb60d78d50ee86b04f6e3565b83f",
+   "branch": "feat/cloud-models-day",
+   "base": "feat/heldout-evaluator",
+   "inTrain": true
+  },
+  {
+   "pr": 505,
+   "head": "de6d23cfd28727ddd9f029da84e50c0f84f3fdb2",
+   "branch": "chore/budget-ratchet",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 506,
+   "head": "b57449b3df9585f8c09f2847b9d9febee72ffa59",
+   "branch": "chore/no-stacks",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 507,
+   "head": "3e6c354cca0503a9801fc6c97c3a8321fd8e48fa",
+   "branch": "test/blind-tests",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 508,
+   "head": "0dccce6f4079af07485dce55b74d3cfb7fea8769",
+   "branch": "fix/ledger-gaps",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 509,
+   "head": "b868770fad094ef39b86e9d89a0bc0f14fbf3cce",
+   "branch": "chore/verify-factory",
+   "base": "chore/second-host",
+   "inTrain": true
+  },
+  {
+   "pr": 510,
+   "head": "48e1bb84d5707ae55459234ed6561f8c4698096b",
+   "branch": "chore/webkit-safari-gate",
+   "base": "chore/verify-factory",
+   "inTrain": true
+  },
+  {
+   "pr": 511,
+   "head": "57bc573db3ae9e0c0af3f5d24a0ddfc01f735f35",
+   "branch": "chore/plan-receipts",
+   "base": "chore/plan-verified",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 512,
+   "head": "0960409772473830c72add31de124bc1af508d85",
+   "branch": "chore/train-cadence",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 513,
+   "head": "5b35ab7af85ecc0d2af04a2ffdb34c233aa40b91",
+   "branch": "chore/area-board",
+   "base": "chore/plan-receipts",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 514,
+   "head": "fa280ac2d956313eb56cdacb9719323ead711e7d",
+   "branch": "fix/design-debt",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 515,
+   "head": "3b6c1fc31a8c9bb820c6e8ff9e8f199579299853",
+   "branch": "chore/owner-session",
+   "base": "docs/owner-sessions",
+   "inTrain": true
+  },
+  {
+   "pr": 516,
+   "head": "b5bf471dec2efcf295bd5a046d9e586ff7d3a908",
+   "branch": "test/real-import-corpus",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 517,
+   "head": "d077d967d2c60426388bb1d98a2f8f0c77e04382",
+   "branch": "chore/docs-parity-gate",
+   "base": "docs/hebrew-parity",
+   "inTrain": true
+  },
+  {
+   "pr": 518,
+   "head": "a61fb43e452859270f55998800df0ca8edd07667",
+   "branch": "chore/second-host-prod",
+   "base": "chore/second-host",
+   "inTrain": true
+  },
+  {
+   "pr": 519,
+   "head": "d12b915d3eef61188e40b77982be745c7964d40e",
+   "branch": "feat/dictation-wer-cloud",
+   "base": "feat/cloud-models-day",
+   "inTrain": true
+  },
+  {
+   "pr": 520,
+   "head": "17c58f920b283e9621caa288ecbd9d2114de802f",
+   "branch": "feat/dictation-desktop-offload",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 521,
+   "head": "bb9b41e502d95db89fba03b9f13372660c50137a",
+   "branch": "perf/inp-baseline",
+   "base": "chore/webkit-safari-gate",
+   "inTrain": true
+  },
+  {
+   "pr": 522,
+   "head": "ba9635c7d206ca7007ced0655bd4933823524945",
+   "branch": "feat/a11y-real",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 523,
+   "head": "85001860d0bd3fda9b31440d82c41eec836649ee",
+   "branch": "feat/canvas-live",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 524,
+   "head": "2f30c6c193b98b3d489444e9ae8e43381f1ab34e",
+   "branch": "feat/beta-programme",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 525,
+   "head": "b54895134da591736092d282db67ff123dd9d2a3",
+   "branch": "feat/pdf-scanned-zotero",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 526,
+   "head": "adabc1f18a9c8d5db4f4248cf62e69320d2dd867",
+   "branch": "test/obsidian-115",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 527,
+   "head": "c41ccf6b0a6b9cc96149383fed98334ea5e741b3",
+   "branch": "test/providers-real-servers",
+   "base": "feat/e2ee-sync-providers",
+   "inTrain": true
+  },
+  {
+   "pr": 528,
+   "head": "febce98998cdbc5a0381ada63d36fbc038661e62",
+   "branch": "feat/content-frame-origin",
+   "base": "feat/csp-content-frame",
+   "inTrain": true
+  },
+  {
+   "pr": 529,
+   "head": "8fb7c8a0e01f37952ed0eb72d7610e7b882687fe",
+   "branch": "perf/encrypted-snapshot",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 530,
+   "head": "4775400c7c22d737cbaebd6451b732372ceb254d",
+   "branch": "feat/bases-notion",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 531,
+   "head": "24244c74fbe20d1b0f164fce3107bedeed06826e",
+   "branch": "feat/share-deploy",
+   "base": "feat/collab-relay-free",
+   "inTrain": true
+  },
+  {
+   "pr": 535,
+   "head": "48787b1fda7748687e471bcbbc65458b348a606d",
+   "branch": "feat/models-no-hf",
+   "base": "feat/model-mirrors",
+   "inTrain": true
+  },
+  {
+   "pr": 536,
+   "head": "a09cc638591aea1766aa98862a5224d05f65d4de",
+   "branch": "test/plugins-quickjs-real",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 537,
+   "head": "e26dc32fd75d12eb87567ad846aea43d9d9f8f1f",
+   "branch": "chore/codeowners-coverage",
+   "base": "chore/bus-factor",
+   "inTrain": true
+  },
+  {
+   "pr": 538,
+   "head": "1cd0969742871dbd6a363c0de9167d21479cc245",
+   "branch": "chore/help-generated-regen",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 539,
+   "head": "70e16bd03d32497dbf1eb4142a942b901096a8f1",
+   "branch": "chore/lockfile-drift",
+   "base": "verify/train",
+   "inTrain": true
+  },
+  {
+   "pr": 540,
+   "head": "c03681679533bcefc7ee47676c7277756ecabe93",
+   "branch": "feat/weblate-sync",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 541,
+   "head": "b3f378f4d35fcfdd890b73d9f49a5660dd58a413",
+   "branch": "research/usability-unmoderated-train",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 542,
+   "head": "208dd07d4b55bcf6d15514e5a46e5ca7a1816057",
+   "branch": "feat/native-builds",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 543,
+   "head": "dc6c94c27b03415e4a8cddd80d4249d9136cbf6f",
+   "branch": "fix/webdav-lost-race",
+   "base": "feat/e2ee-sync-providers",
+   "inTrain": true
+  },
+  {
+   "pr": 544,
+   "head": "29c95591113f8aa619500e6556428664030bebdf",
+   "branch": "feat/pairing-sas",
+   "base": "feat/sync-crypto",
+   "inTrain": true
+  },
+  {
+   "pr": 545,
+   "head": "f6acf9ba34458acafbc78103cc0f563e682a020c",
+   "branch": "feat/pairing-sas-ui",
+   "base": "feat/e2ee-sync-providers",
+   "inTrain": true
+  },
+  {
+   "pr": 546,
+   "head": "5576cb001d6f5c9256bb14a0ae7ab637cbde365d",
+   "branch": "test/skip-audit-train2",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 547,
+   "head": "a530a3aef44f133fba72e4542bb200c20a212d0c",
+   "branch": "verify/train-3",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 548,
+   "head": "c237772fe902b6e0b2f998f6fa815af5c38b744a",
+   "branch": "fix/native-check-real-cargo",
+   "base": "chore/native-check",
+   "inTrain": true
+  },
+  {
+   "pr": 549,
+   "head": "d0c55b66f6ca9726763280d02f26ee13108d566b",
+   "branch": "ci/buildkite",
+   "base": "chore/verify-factory",
+   "inTrain": true
+  },
+  {
+   "pr": 550,
+   "head": "19a727d8156256e9fa2364a4fd0c95f625688403",
+   "branch": "feat/supply-chain-provenance",
+   "base": "chore/verify-factory",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 551,
+   "head": "f8818d2b6f8a1e515e2dd91781afa5631ffd206b",
+   "branch": "chore/second-maintainer",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 552,
+   "head": "00ac68bd1504c2edb5a63160e6c9d0af4ee774f7",
+   "branch": "feat/mcp-2026-07-28",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 553,
+   "head": "d5518751abaf2479098813f96f5f06ab09236704",
+   "branch": "feat/embed-policy-one-source",
+   "base": "feat/airplane-mode",
+   "inTrain": true
+  },
+  {
+   "pr": 554,
+   "head": "d8799fcbd3f65ebae2d628ccb5e64e6b638adb70",
+   "branch": "docs/legal-review-packet",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 555,
+   "head": "c1e6b47a8a4b8f15bf7e9705b2c906466b2f5278",
+   "branch": "fix/lan-preauth-train2",
+   "base": "verify/train-2",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 556,
+   "head": "a6d395f63a284dafdff323ee1e31c6c8fa195794",
+   "branch": "feat/review-coverage",
+   "base": "feat/review-required",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 557,
+   "head": "7e3ad362a568732edfec4341f2893d8a0d3bb231",
+   "branch": "feat/release-supply-chain-gate",
+   "base": "chore/release-beta1",
+   "inTrain": true
+  },
+  {
+   "pr": 558,
+   "head": "fbf28a3f4ad4871e9a4fc760837283396607b7b7",
+   "branch": "feat/hebocrbench-kit",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 559,
+   "head": "49b3682e4fed698e435bbdcd120f068322fb9af0",
+   "branch": "feat/editor-gaps-112",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 560,
+   "head": "a49b4adaa792c229ca592887c069a53eb87cf577",
+   "branch": "perf/snapshot-pending-size",
+   "base": "perf/encrypted-snapshot",
+   "inTrain": true
+  },
+  {
+   "pr": 561,
+   "head": "b14d1fdc5ba4180a65b0630ed27768a0f1473a13",
+   "branch": "feat/repro-two-infra",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 562,
+   "head": "8dbdceead36cdf351eacc6cc2595c7c3e09ec8fd",
+   "branch": "test/blind-tests-rest",
+   "base": "test/blind-tests",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 563,
+   "head": "a426eb8b09bf2fbf2c6209d94e3b036431a45efd",
+   "branch": "feat/bases-mcp-cli",
+   "base": "feat/bases-notion",
+   "inTrain": true
+  },
+  {
+   "pr": 564,
+   "head": "514a1503179a49e0fc25bd36da8e319afd275170",
+   "branch": "feat/caldav-sync",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 565,
+   "head": "1305f8bbef9b03c6dcdbbecf6be5f4d88b48b957",
+   "branch": "chore/second-host-prod-fix",
+   "base": "chore/second-host-prod",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 566,
+   "head": "3fd62bff61b6b58a3cd0a49c88bc36ec30d9bab8",
+   "branch": "fix/e2e-train2",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 567,
+   "head": "2329e5a2bef089f302fc3045127267d7779b98a3",
+   "branch": "test/fuzz-four-decoders",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 568,
+   "head": "95492d5f9299f0ea0e6079b4fc3e1c8c842e880c",
+   "branch": "release-beta1-r2",
+   "base": "verify/train-3",
+   "inTrain": false,
+   "decision": "rejected"
+  },
+  {
+   "pr": 569,
+   "head": "e5692a5fa6f6c62e383c15b6fc8821a419c20699",
+   "branch": "chore/max-lines-split-2",
+   "base": "verify/train-3",
+   "inTrain": true
+  },
+  {
+   "pr": 570,
+   "head": "2af386bcaab94f68896a815431b1ef228db59989",
+   "branch": "fix/i18n-drift-lazy",
+   "base": "ci/buildkite",
+   "inTrain": true
+  },
+  {
+   "pr": 571,
+   "head": "3429b8e78347d1b69ab74d3fe2d03cf8cc06d0ea",
+   "branch": "feat/bulk-properties",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 572,
+   "head": "6c47d70cbb2462e3b0d509ed3e402d4fd408c9fd",
+   "branch": "feat/screenshot-note",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 573,
+   "head": "e22523d8efbacfd215285709f5190c2a01513e48",
+   "branch": "perf/snapshot-check-bounds",
+   "base": "perf/snapshot-pending-size",
+   "inTrain": true
+  },
+  {
+   "pr": 574,
+   "head": "9d425f6337b26abfe334e0f7d6882aec25ad151c",
+   "branch": "refactor/max-lines-train3",
+   "base": "verify/train-3",
+   "inTrain": true
+  },
+  {
+   "pr": 575,
+   "head": "2331e1035820bd84707f2b97eb2cf4ceca0ef743",
+   "branch": "chore/two-host-repro",
+   "base": "verify/train-2",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 576,
+   "head": "1b44f978962b8b79f18db4b24c58742d5db76008",
+   "branch": "feat/yiddish-ladino",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 577,
+   "head": "1bf6b50b472ff668d64d23b1afd5b9962caa4c7c",
+   "branch": "test/percy-visual",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 578,
+   "head": "283840082f1d9ba553c1125e6f4e8b4b02e68caf",
+   "branch": "fix/o2-unused-files",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 579,
+   "head": "05d47d8f1bb6e07b048a83319583b35e009c4303",
+   "branch": "fix/o2-licence-gate",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 580,
+   "head": "04de1d274bc3dcdc887ae2819eda2968cf990006",
+   "branch": "fix/o2-pr-check",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 581,
+   "head": "a29d7ea1676735ce6d2a26d1c8b41b0dec003747",
+   "branch": "fix/o1-7.2-hebrew-smoke",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 582,
+   "head": "644aa1044103c5bab98834dfa19eed30e7a2a59a",
+   "branch": "fix/o1-7.5-ocr-every-pr",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 583,
+   "head": "52e8cba0cf45d21a27afb6d36e95477254c71ecc",
+   "branch": "fix/o1-6.12-finetune-train-button",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 584,
+   "head": "58dcebe1fd37f733ddc7d48280e16b71525add50",
+   "branch": "fix/o1-registry-hosting-format",
+   "base": "feat/model-mirrors",
+   "inTrain": true
+  },
+  {
+   "pr": 585,
+   "head": "f036442d51eef778bad33a06b0c6f4a606af7ebd",
+   "branch": "perf/snapshot-one-listing",
+   "base": "perf/snapshot-check-bounds",
+   "inTrain": true
+  },
+  {
+   "pr": 586,
+   "head": "60a0d0484b74f54b76502e31fa0930ed54462783",
+   "branch": "feat/structured-output",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 587,
+   "head": "05dfb9df1d4db95df71d14a4f0326def202cf6bb",
+   "branch": "feat/standard-site-publish",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 588,
+   "head": "4a3bd2cc40392987d4cf902e00de96a55bafc428",
+   "branch": "test/o2-plugins-exfil",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 589,
+   "head": "a2f9241f4aa551c99a61351783ed409cb7a0dded",
+   "branch": "feat/knesset-sources",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 590,
+   "head": "6d02d1f6254344b277734f2442b55f4378b27e33",
+   "branch": "feat/ollama-speculative",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 591,
+   "head": "908a543645f56bc0f39908a2fe29f300c17e6753",
+   "branch": "feat/datagov-sources",
+   "base": "feat/knesset-sources",
+   "inTrain": true
+  },
+  {
+   "pr": 592,
+   "head": "f44894c1ab9c0a6a0e14bb41765c86783cbc7e12",
+   "branch": "feat/benyehuda-library",
+   "base": "feat/datagov-sources",
+   "inTrain": true
+  },
+  {
+   "pr": 593,
+   "head": "fcc7fd0222fdb6463661ba14b273ea61de423b24",
+   "branch": "feat/open-sources-dialog",
+   "base": "feat/benyehuda-library",
+   "inTrain": true
+  },
+  {
+   "pr": 594,
+   "head": "36b68563478e1e84ac4ab0bbd444705471d7090e",
+   "branch": "feat/academic-calendar",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 595,
+   "head": "79d32daeb3f94bd9a46e6d57bede4ad00273fc3b",
+   "branch": "feat/print-highlights",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 596,
+   "head": "4535c57746883adda28056f0812a261b662ee32f",
+   "branch": "feat/atproto-publish",
+   "base": "verify/train-2",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 597,
+   "head": "cc5be73b14a214f6194cb901ec15083a786c8a17",
+   "branch": "test/redaction-fuzz-nightly",
+   "base": "feat/journalist-mode",
+   "inTrain": true
+  },
+  {
+   "pr": 598,
+   "head": "4417807a536715ac755ac61ee2c63d91e8f65308",
+   "branch": "feat/notion-import-train",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 599,
+   "head": "292bcbb508327e8603b0983e1370bffa7c6eb797",
+   "branch": "feat/agent-skills",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 600,
+   "head": "9f40a35458b214195990eea77e8bb80f7d38f517",
+   "branch": "test/pdf-browser-cer",
+   "base": "feat/pdf-scanned-zotero",
+   "inTrain": true
+  },
+  {
+   "pr": 601,
+   "head": "a324f18f828afc4f4a3e01fe7318f9d9cc369caa",
+   "branch": "feat/mcp-client",
+   "base": "feat/mcp-2026-07-28",
+   "inTrain": true
+  },
+  {
+   "pr": 602,
+   "head": "aa3f9a2b7143dda849ee75c265da625590137191",
+   "branch": "feat/embed-compete",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 603,
+   "head": "584172b6f867945d99ce827b03e97cd204232e26",
+   "branch": "feat/hebrew-handwriting",
+   "base": "feat/ink-notes",
+   "inTrain": true
+  },
+  {
+   "pr": 604,
+   "head": "92893c3ab80f296e3197ec6391c371aa6781d22f",
+   "branch": "perf/snapshot-vault-identity",
+   "base": "perf/snapshot-one-listing",
+   "inTrain": true
+  },
+  {
+   "pr": 605,
+   "head": "2041505607537a146ecb3571abb381f368d96ff7",
+   "branch": "perf/startup-ceiling",
+   "base": "chore/max-lines-split-2",
+   "inTrain": true
+  },
+  {
+   "pr": 606,
+   "head": "eefc83c815c88d3509cbcd70c803588dcc81cfc8",
+   "branch": "feat/hebrew-voice-kit",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 607,
+   "head": "5c2e389ad0548ef4dd8af8ab0203845059d69ea8",
+   "branch": "feat/dictation-measure",
+   "base": "feat/dictation-desktop-offload",
+   "inTrain": true
+  },
+  {
+   "pr": 608,
+   "head": "97ad0f42c8d34ef407227999bcdc3db772346160",
+   "branch": "test/o2-plugins-e2e",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 609,
+   "head": "0a139665dd8e7d45d9ad7b4983162dde306e73b3",
+   "branch": "feat/lan-mdns",
+   "base": "feat/lan-sync",
+   "inTrain": true
+  },
+  {
+   "pr": 610,
+   "head": "fbaafbba312a7f4f0051ed4c6937c7292f7e726e",
+   "branch": "fix/standard-site-rr23",
+   "base": "feat/standard-site-publish",
+   "inTrain": true
+  },
+  {
+   "pr": 611,
+   "head": "87624fb27e5ac5bda0c0baf37046f042ab22be8e",
+   "branch": "feat/tts-he-complete",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 615,
+   "head": "a43a7141c2f151f351bc871ef263d037b682afbb",
+   "branch": "docs/acr-axe",
+   "base": "verify/train-2",
+   "inTrain": true
+  },
+  {
+   "pr": 616,
+   "head": "fcf760fde8e409096db31657461af8b1c7b8cd14",
+   "branch": "verify/train-4",
+   "base": "verify/train-3",
+   "inTrain": true
+  },
+  {
+   "pr": 617,
+   "head": "330817b7ed24cf55cb8de6bbd5db90590dcd52e1",
+   "branch": "chore/owner-checklist",
+   "base": "chore/dod",
+   "inTrain": true
+  },
+  {
+   "pr": 618,
+   "head": "b7c80e7cf7af403f404c444dcf897abd5c725244",
+   "branch": "chore/plan-fixes-d",
+   "base": "chore/dod",
+   "inTrain": true
+  },
+  {
+   "pr": 619,
+   "head": "f885336f8b982ccc20c34913877d0ed606c1fd6d",
+   "branch": "fix/w95-lows",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 620,
+   "head": "1f0564cab107502c1fde0314f5e384019dbca6a1",
+   "branch": "chore/lockfile-drift-t4",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 621,
+   "head": "9031e57099091344bb98cc8f3ea595baeeb2d65f",
+   "branch": "perf/excalidraw-core-anatomy",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 622,
+   "head": "6d09bb12d716609ba31cda4ff5cd5d7b97278aca",
+   "branch": "docs/complete-t4",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 623,
+   "head": "d363921deadbb059953bbaae798cd0bbe603ff24",
+   "branch": "feat/image-hosts-privacy-tab",
+   "base": "verify/train-4",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 624,
+   "head": "a26175b20dc8a563b273bcf2476d164e66fe36f8",
+   "branch": "chore/stack-limit",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 625,
+   "head": "8f1fd377fadf75540416f23e4a8ccaa6e54d511f",
+   "branch": "chore/lane-state-t4",
+   "base": "verify/train-4",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 626,
+   "head": "120b45229653b35eb9a0ca53daf291206b9b38dc",
+   "branch": "w10/f1-train1-commits",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 627,
+   "head": "702e2c64ebcd79ad70fc8cd95ba1709d52bd8a70",
+   "branch": "w10/w10.c12-productagent-staged-write",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 628,
+   "head": "3a425190757301456f57de77fe29d6fc3742aae5",
+   "branch": "w10/w10.c30-domain-whole-tree",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 629,
+   "head": "69c12d780655cf4e0e288f5e23d462bf1066bb24",
+   "branch": "w10/w10.c29-live-meta-after-deploy",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 630,
+   "head": "f9204ed7abc6bd9b8a5f906d6901b790a17b09f9",
+   "branch": "w10/d15-security-channel",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 631,
+   "head": "8b3f8dfc100a0800cdbe9c1940f1ca68f359539f",
+   "branch": "w10/b1-b2-plugin-gallery-honesty",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 632,
+   "head": "3f681db6b5dfb39437f308852e57383b2fe0d071",
+   "branch": "w10/w10.c-live-seam-gate",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 633,
+   "head": "19801f2cd5b0da4371ed5e334359b2fa12e6c317",
+   "branch": "w10/b17-data-safety-matrix-honest",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 634,
+   "head": "46290b8ca06fabfec9f1dbac5bf867c6ac9e7179",
+   "branch": "w10/w10.c8-live-voice-transcriber",
+   "base": "w10/w10.c-live-seam-gate",
+   "inTrain": true
+  },
+  {
+   "pr": 635,
+   "head": "62c7c19190edf460d678ce5243a164cd7b3b5652",
+   "branch": "w10/f4-vault-move-safety",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 636,
+   "head": "da6ccb2ec810ecf351a3f2b075aea5e6dad4f623",
+   "branch": "w10/d9-cargo-zip-updater",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 637,
+   "head": "3a867a4965abddb3b87b4ce31f48d4b8673ec5b5",
+   "branch": "w10/f6-dod-265",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 638,
+   "head": "04f689c3123e77e2111b885b697f246487b0c992",
+   "branch": "w10/b4-delete-dead-plugin-sandbox",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 639,
+   "head": "15a24f7692fe3c26950e18d0d54fe9f7dadb9cb0",
+   "branch": "w10/w10.c9-lecture-summarizer",
+   "base": "w10/w10.c8-live-voice-transcriber",
+   "inTrain": true
+  },
+  {
+   "pr": 640,
+   "head": "c3f055218e6badbeecec9e28eba534b4740ffdea",
+   "branch": "verify/train-5",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 641,
+   "head": "af50ac9253b94a8f5dcf012d34f2c9740cfad9bc",
+   "branch": "w10/b15-real-cargo-unknown",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 642,
+   "head": "a9b074261f8f7c3d20e884cd7f5984a0eb2c5071",
+   "branch": "w10/d5-sync-crypto-fold",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 643,
+   "head": "8d674ee03c9db94b6bf52ee043cb6cf9e790c17b",
+   "branch": "w10/g11-archive-workflows",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 644,
+   "head": "b7d247d78cec56ee5c6c9e23f3e75d3ab9e16240",
+   "branch": "w10/w10.c17-canvas-undo-excalidraw",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 645,
+   "head": "a8021397840b61ba827a7ea72cec5a9a6c330e11",
+   "branch": "w10/w10.c18-image-hosts-in-privacy",
+   "base": "verify/train-4",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 646,
+   "head": "6d263755fd3e3692dc2bc157f721dddc6f5f698b",
+   "branch": "w10/f9-ci-doctor-around",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 647,
+   "head": "21d78bdea54184ec7776f057f36b7ceb83e37564",
+   "branch": "w10/w10.c10-share-target-chat",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 648,
+   "head": "b68f6566da89d0586422b1fe3c10b2cec3ec2832",
+   "branch": "w10/f7-train-missing",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 649,
+   "head": "8544cedc64d4abdf990fe19838d1a26b066a5962",
+   "branch": "w10/d3-review-gate",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 650,
+   "head": "a29d478f29965431ffaa61b222ef9b2680db01b6",
+   "branch": "w10/w11.l1-launch-gate",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 651,
+   "head": "102b2dbd523e45ba0075a701c0172d5a6778ed44",
+   "branch": "w10/f13-mutation-weekly",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 652,
+   "head": "75914544b692102ea40c74f11f71953ac46a787c",
+   "branch": "w10/w10.c11-sign-airplane-certificate",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 653,
+   "head": "96b24101b52f4dd770ee5e8edf333f279862e739",
+   "branch": "w10/f10-plugins-e2e",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 654,
+   "head": "b89c4fb943d4af54a702c60e4e9b353266770597",
+   "branch": "w10/f11-e2e-skips",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 655,
+   "head": "5fadb91dcc200800c7f1ef441409f3d91456b463",
+   "branch": "w10/w11.i1-seam-allowlist-expiry",
+   "base": "w10/w10.c-live-seam-gate",
+   "inTrain": true
+  },
+  {
+   "pr": 656,
+   "head": "8b52257a4e3482c6e3798a2b1e77b0fb777da1c5",
+   "branch": "w10/b20-catalog-fixes",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 657,
+   "head": "f255cf605d9be10547b498d8a176af1baa944d2e",
+   "branch": "w10/w10.c13-global-shortcut-plugin",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 658,
+   "head": "080110241e62500844b69a8e1232e0869959a381",
+   "branch": "w10/f19-supply-chain",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 659,
+   "head": "746a6d72a111bad0d28401a6bcab57498d5b8052",
+   "branch": "w10/w11.p4-activation-ttfv",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 660,
+   "head": "96257dcc9c6e9fbedbc36bb1e86a848606b2b770",
+   "branch": "w10/f17-lockfile-drift",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 661,
+   "head": "5557ca178894a994d155bee8a94ed78922b8854c",
+   "branch": "w10/w11.h5-public-eval",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 662,
+   "head": "edd1971eb7c3606f36f5f9098db56d328b3fa471",
+   "branch": "w10/b16-visual-baselines-never-self-approve",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 663,
+   "head": "8949945c3c7f7d62a19ad253c02129467f22857a",
+   "branch": "w10/w10.c19-c20-sync-wizard-drive-qr",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 664,
+   "head": "23c997bcfee1990c99efc9e1220b235452a14898",
+   "branch": "w10/t5b-relay-cpu",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 665,
+   "head": "f92ffe5f67afe88834c816d39531f140676f37e3",
+   "branch": "w10/f8-pdf-review-272",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 666,
+   "head": "13524e68b96cb11ebf267cff60982b5f5c52717b",
+   "branch": "w10/d2-d1-content-frame",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 667,
+   "head": "965847024b15ae77848a1bf00e2555a05e5131b8",
+   "branch": "w10/f21-low-findings",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 668,
+   "head": "dd8dace84732bb0cabe57fb7c14bbe8e42d26e05",
+   "branch": "w10/d4-d14-ci-gates",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 669,
+   "head": "59a2948ab57e7a60dda1bfb956657f6df3740688",
+   "branch": "w10/w10.c16-organizer-model",
+   "base": "w10/w10.c9-lecture-summarizer",
+   "inTrain": true
+  },
+  {
+   "pr": 670,
+   "head": "10c782813499744c724822ece0167ebd8f52041f",
+   "branch": "w10/d10-deps-fold",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 671,
+   "head": "73156286d3d33d687b0b6c6a4b5d92ac54b00755",
+   "branch": "w10/d11-d13-crypto-libs",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 672,
+   "head": "a494638282630d4db32f7dc6e63fd3fefc1488ea",
+   "branch": "w10/w11.h2-bidi-isolates",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 673,
+   "head": "59e3fcef8a6d4613db3cfcff4e04d4a5e2e171cc",
+   "branch": "w10/f20-owner-checklist",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 674,
+   "head": "16a1a1a50408d3ed7119839c244c27e71b22e888",
+   "branch": "w10/b14-mutation-receipts-honest",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 675,
+   "head": "a7a3edb2258bec8488e53db7e72e7c9d60f30333",
+   "branch": "w10/w10.c7-ios-pbxproj-targets",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 676,
+   "head": "70e4558b51189ba89e448e1c2a9f35d1a8d8eae5",
+   "branch": "w10/w11.s1-e2ee-default-off-unaudited",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 677,
+   "head": "0852f56047c17124a1899a7972e86695fcea4a1a",
+   "branch": "w10/b8-grammar-rule-coverage",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 678,
+   "head": "f8168175a01c18200d7fd25788b60099b19b411a",
+   "branch": "w10/w10.c23-ner-fallback-honest",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 679,
+   "head": "89a1128ed5c7466251e16f629ac8557996f6639b",
+   "branch": "w10/w11.h4-direction-toggle",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 680,
+   "head": "fd436a0db481dc37b357ac8489805d8baabe3dde",
+   "branch": "w10/e9-e10-lighthouse-gate",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 681,
+   "head": "bd017a633b645d23fc0ecb14e7c442b4e1538e85",
+   "branch": "w10/w11.p6-p7-import-first",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 682,
+   "head": "9ee0767f1ce8ae5878881711f273cf40289ec384",
+   "branch": "w10/w10.c25-highlights-in-index-worker",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 683,
+   "head": "ffa29ddda20aaa2ed26589235b03f4a809d9df9a",
+   "branch": "w10/b9-grammar-ranker-wired",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 684,
+   "head": "67da49471594df7a73ed71259113ca4d09f2feb9",
+   "branch": "w10/d1-csp-hashes",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 685,
+   "head": "81ca83b3e1d83cfa0a32c9487a6ad53b2ea465f3",
+   "branch": "w10/w10.c14-android-vault-plugin",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 686,
+   "head": "ee43992567ff90e79c840613ee5eebd21c71708b",
+   "branch": "w10/f12-startup-605",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 687,
+   "head": "224a25d5dd9049c2262401045041af17327bbe13",
+   "branch": "w10/e1-e3-render-worker",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 688,
+   "head": "b247b60bf84aeb2ac21f299efe9c74cf647f425c",
+   "branch": "w10/t5c-review-fixes",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 689,
+   "head": "770542ad6fab873dd6c30e35d2bce592a07ab4e1",
+   "branch": "w10/w11.h15-apa7-hebrew",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 690,
+   "head": "cd7d2f58eb1aa003da9d7b3332f5103ccdf27636",
+   "branch": "w10/w11.p1-importers-oi",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 691,
+   "head": "80769081e8011de59901ac33ab8611310570213d",
+   "branch": "w10/w11.s2-s3-signed-update-manifest",
+   "base": "w10/d9-cargo-zip-updater",
+   "inTrain": true
+  },
+  {
+   "pr": 692,
+   "head": "97a679bfe848cac9f6d80de7848de1e1e589140a",
+   "branch": "w10/w11.i2-rule-of-two-taint",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 693,
+   "head": "fdf052ee02b806fbce4be52cf9493b9e36525d98",
+   "branch": "w10/b10-ask-the-law-not-verified",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 694,
+   "head": "858bcf2611b7ca0f0b52e1ceb7fd4902bddf7da4",
+   "branch": "w10/w11.s4-github-ruleset-as-code",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 695,
+   "head": "2432c62cce67e7ee18b005e95e77e6baaf969205",
+   "branch": "w10/w11.h16-open-law-book",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 696,
+   "head": "c0d477db0658412212c0ba3e626e6089beac4e60",
+   "branch": "w10/w11.p2-import-diff",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 697,
+   "head": "bed74ed2b75b13bbabe57f14c2301dfd31a3dc7a",
+   "branch": "w10/b5-corpus-origin-labels",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 698,
+   "head": "0d57e19191def9a761e35239b4bef8062efc6a47",
+   "branch": "w10/d8-fork-hidden-freeze",
+   "base": "w10/d5-sync-crypto-fold",
+   "inTrain": true
+  },
+  {
+   "pr": 699,
+   "head": "386a26be7eca4cbd4e590f4c5231d07e65bf2495",
+   "branch": "w10/w11.h17-sefaria-tools",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 700,
+   "head": "4f8248b3f06b3be103654a5bcd39a7ba6e8b979e",
+   "branch": "w10/b6-he-en-heldout",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 701,
+   "head": "2203f138118394418f932d6845c9238b0d8623c4",
+   "branch": "w10/w11.s14-s12-plugin-review-security",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 702,
+   "head": "3cac522c6e0555f8b91ea5692da51155f2f2031d",
+   "branch": "w10/t5b-runtime-mutation",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 703,
+   "head": "0a69225d5243cad81c2654dc97b83e5735a33c90",
+   "branch": "w10/w11.i4-agentdojo",
+   "base": "w10/w11.i2-rule-of-two-taint",
+   "inTrain": true
+  },
+  {
+   "pr": 704,
+   "head": "a15fa702a476e1a4896a4a936d0df8585c3da479",
+   "branch": "w10/b19-related-real-links",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 705,
+   "head": "0c912aab8a16bbb391e07e9241b68cc5e8eff06e",
+   "branch": "w10/w11.p12-pricing",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 706,
+   "head": "565e104506b5c46d3b8605b6871abbd85cd8d428",
+   "branch": "w10/b18-rerank-hard-set",
+   "base": "feat/embed-compete",
+   "inTrain": true
+  },
+  {
+   "pr": 707,
+   "head": "eac4e94755eb197c8b029fa37e166736813b2534",
+   "branch": "w10/w11.h11-hebrew-ner",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 708,
+   "head": "fca221903f562da26b347a05be3fc777d526b962",
+   "branch": "w10/w11.h12-lemmatizer-ab",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 709,
+   "head": "c0f29af6b76d690ca78d732b622687c88fac73b8",
+   "branch": "w10/d20-snapshot-rule",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 710,
+   "head": "de9b60b49769d4a118b2a6a0a31db05cf48cb0bb",
+   "branch": "w10/b22-compare-claims-verified",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 711,
+   "head": "123f9bdaf4425e4a9a9df087364ee9376c969c77",
+   "branch": "w10/w11.i10-model-catalog-refresh",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 712,
+   "head": "c72ed72e6c3b7cc18aed57b76bc0c88cebfec5ae",
+   "branch": "w10/w11.h13-hebrew-benchmark-page",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 713,
+   "head": "f9f30ef1fa213ea70499d6927008c643b3744c45",
+   "branch": "w10/w11.s6-conflict-file-mode",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 714,
+   "head": "30333c6121635dcbce977c5a9aab8fdc6a359962",
+   "branch": "w10/w11.s14-plugin-review-pipeline",
+   "base": "verify/train-5",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 715,
+   "head": "f2b0e597a8057aaff3ca404f945a30ed4e8533e8",
+   "branch": "w10/b13-golden-origin",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 716,
+   "head": "27a4f5e6fcc5c39846680b9e54b8e7b4c012cd25",
+   "branch": "w10/e33-real-model-buildkite",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 717,
+   "head": "d115a5da5ef1fe12f427586a9dc928f509525cdf",
+   "branch": "w10/f15-sas-embed",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 718,
+   "head": "24f5ab7fadc37bf5ae404a758114dc7340b13049",
+   "branch": "w10/b21-support-links-follow-funding",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 719,
+   "head": "2bbf868cdb402f356d51a99e0e28e24b3f70832a",
+   "branch": "w10/d22-worker-ledger",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 720,
+   "head": "28df9345628ab2db54e6fd0403196ba873eaf20d",
+   "branch": "w10/b23-comments-match-code",
+   "base": "verify/train-5",
+   "inTrain": false,
+   "decision": "rejected"
+  },
+  {
+   "pr": 721,
+   "head": "34f0cec74f5e3f1831d12cb0c412831e39769074",
+   "branch": "w10/e68-publish-refuses-placeholder",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 722,
+   "head": "7d3c17f8c6ce58cf0fbfa7ab2f9b068bbd6fbd10",
+   "branch": "w10/f16-model-day",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 723,
+   "head": "515de51115b8780ff1f11ed4b8f28896fc74d037",
+   "branch": "w10/b7-der-not-measured",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 724,
+   "head": "4a5f7ad9426cab5fc2404e8509a087e804074be6",
+   "branch": "w10/w11.i16-engine-ladder-lmstudio",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 725,
+   "head": "664d97a3b2cbdd5fcf6a1d1cf71145cde5d11f23",
+   "branch": "w10/w11.p5-ttfv-perf",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 726,
+   "head": "df8ab14a451dd6d9e6b099cca891961858ee4709",
+   "branch": "w10/w11.s5-supply-chain-nightly",
+   "base": "w10/d4-d14-ci-gates",
+   "inTrain": true
+  },
+  {
+   "pr": 727,
+   "head": "b5b15833d95012cd2a1296ecbfe085a26a403b21",
+   "branch": "w10/e12-eval-ingest",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 728,
+   "head": "b369d30269fbf7871542c6ae1a99e98012360678",
+   "branch": "w10/w10.c1-c3-mcp-client-2026",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 729,
+   "head": "7be41999570625f70f427e168a2a1c7e2256dc52",
+   "branch": "w10/w11.i14-heading-chunks",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 730,
+   "head": "4fd35c258c9421b43642215ca2ef7d3f57f16c92",
+   "branch": "w10/e5-e8-modal",
+   "base": "verify/train-4",
+   "inTrain": true
+  },
+  {
+   "pr": 731,
+   "head": "a226c08aaa41689eb6d60ce7ef27d3fde5164a06",
+   "branch": "w10/f18-usability-541",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 732,
+   "head": "18ba679abd6e49128e707e2f00b08f0e1505002d",
+   "branch": "w10/w11.l2-launch-gates-m1-ga",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 733,
+   "head": "376ef0bd44d6447a996ccb3f59fffd949a5b34a9",
+   "branch": "w10/d16-d17-ledger-notes",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 734,
+   "head": "76fa2616fb4147a3ef2af09433daabd25232869c",
+   "branch": "w10/f27-plan-tools",
+   "base": "chore/dod",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 735,
+   "head": "cede9b96de61106ce2b059ceac09bb33a4122521",
+   "branch": "w10/w11.i18-eval-honesty-card",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 736,
+   "head": "6c409b7ea983cb4bd71bf93a351b106bf69d9de3",
+   "branch": "w10/w10.c24-sefaria-ref-trigger",
+   "base": "verify/train-5",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 737,
+   "head": "065ea55b79cd86bd96f74ecc54b8b4fb32edaeff",
+   "branch": "w10/e59-train-base-fail",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 738,
+   "head": "da928464a8b5c5423b09e7dc7a8b800300640832",
+   "branch": "w10/e39-e2e-shards-signed-receipt",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 739,
+   "head": "8fcaba16500538472b7490eaf1e8bf3e142f390b",
+   "branch": "w10/b3-signed-plugin-registry",
+   "base": "w10/b1-b2-plugin-gallery-honesty",
+   "inTrain": true
+  },
+  {
+   "pr": 740,
+   "head": "cf017cd4028ec3e5ca470442d5045f80b2d45fc8",
+   "branch": "w10/w10.e48-apple-notes-notestore",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 741,
+   "head": "01bbef5fe4642b176e601d24bba74b227fe1cefe",
+   "branch": "w10/e56-e57-prepush-lane-state",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 742,
+   "head": "23704379695c312459b648435ed207206b6bfc34",
+   "branch": "w10/e11-nightly-lighthouse-trend",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 743,
+   "head": "8ae9845e25c1a64534b45be575d4334cf1fdaca6",
+   "branch": "w10/w11.i15-bfcl-v4",
+   "base": "w10/w11.i18-eval-honesty-card",
+   "inTrain": true
+  },
+  {
+   "pr": 744,
+   "head": "9e11c9899722062002ca34d1584e9bf0738eb82e",
+   "branch": "w10/w10.cx-dead-seams",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 745,
+   "head": "86d33d827c41de0ec16d86c66e5d147329cb78b3",
+   "branch": "w10/w10.e49-onenote-graph",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 746,
+   "head": "ad3c6280d35476ba3085bda9bdc00c0d1899a041",
+   "branch": "w10/b11-screenshot-cer-real",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 747,
+   "head": "e77b9462933e5d087fd3d9acbb9d906c70a540a7",
+   "branch": "w10/e58-nightly-fuzz-scheduled",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 748,
+   "head": "957ca47c07dcab4b0b74cdf99cab695048493e70",
+   "branch": "w10/w11.s7-public-trace-merge-bench",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 749,
+   "head": "fb504049e2cf7f4d26784f393fb2543f3f742aa5",
+   "branch": "w10/e13-plan-targets",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 750,
+   "head": "7ced5ebe38237d6c65f31c3843943a5f70cc77c1",
+   "branch": "w10/e25-pr-check-comment-renovate",
+   "base": "w10/d4-d14-ci-gates",
+   "inTrain": true
+  },
+  {
+   "pr": 751,
+   "head": "213f15fa26b9dc62fe860c4abc80cd440852ecf1",
+   "branch": "w10/w10.c4-c6-calendar-ui",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 752,
+   "head": "67855be20429b675fed8f368c4370cdd0e52d06b",
+   "branch": "w10/e62-model-convert-local",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 753,
+   "head": "c1ff27f70eef3b333bb4581817e84c00ba010dd5",
+   "branch": "w10/w11.i23-acp-host",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 754,
+   "head": "876ebd699e683731a8f20860b46ca7a1347939f8",
+   "branch": "w10/e24-unused-files-in-every-gate",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 755,
+   "head": "4d916f049201847202dec11b00bd7106c2e8b063",
+   "branch": "w10/w10.c26-workdays-rollups",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 756,
+   "head": "7fc21a8cb5945fc8b76dd9d15b5677683b77ee74",
+   "branch": "w10/d18-d19-blind-tests",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 757,
+   "head": "33182a2a5c54a8018b45d6a184365ae5bb7bf98c",
+   "branch": "w10/w11.i12-measured-default",
+   "base": "w10/w11.i18-eval-honesty-card",
+   "inTrain": true
+  },
+  {
+   "pr": 758,
+   "head": "9667b432ef3614a4bb22e79ff9be9d65d9e376c7",
+   "branch": "w10/w10.c28-open-sources-trigger",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 759,
+   "head": "f2b5149f07326f8bb88f7713c35f8b04d3240ec3",
+   "branch": "w10/w10.e49b-onenote-wizard",
+   "base": "w10/w10.e49-onenote-graph",
+   "inTrain": true
+  },
+  {
+   "pr": 760,
+   "head": "d1f0ad685e37a22ad11fd9e2a287d1af6117aeca",
+   "branch": "w10/e63-contributing-hebrew",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 761,
+   "head": "227f5273eeb62d6333ba649249ded4e4ec30adf4",
+   "branch": "w10/w11.i22-skills-ref",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 762,
+   "head": "6cafc500fbefede1b16d83aaf1417aacb34c094c",
+   "branch": "w10/e43-menaked-tests",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 763,
+   "head": "70ff46c5063c058c0813ed62c20679649e47f425",
+   "branch": "w10/w10.c15-webdav-backup",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 764,
+   "head": "cfb068f2901659f0a436b1d2719a0bca98705882",
+   "branch": "w10/e13b-startup-ceiling-worker-catches",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 765,
+   "head": "40c46971e7ba200cda7ccafaa9ccd3ce3e37333d",
+   "branch": "w10/w11.s11-privacy-consent-ropa",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 766,
+   "head": "2668dbafea7920d8c93e354d89af1d50a3772fcb",
+   "branch": "w10/w10.c31-voice-tile-shortcut",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 767,
+   "head": "cc2c1e74dd09ca0539afeefa1bb2f49b65369014",
+   "branch": "w10/w11.i8-mcp-server-spec",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 768,
+   "head": "c939b029b072b7390d0eadbeb70a4c7ae773f86b",
+   "branch": "w10/w11.s8-recovery-key",
+   "base": "w10/d11-d13-crypto-libs",
+   "inTrain": true
+  },
+  {
+   "pr": 769,
+   "head": "a5629733f178bb5a9cb419c1e7fd8be9cd7fc838",
+   "branch": "w10/w11.s9-recovery-kit",
+   "base": "w10/w11.s8-recovery-key",
+   "inTrain": true
+  },
+  {
+   "pr": 770,
+   "head": "3847f2d8c3ad9d32da4c1f5a8332af7ba61bdb00",
+   "branch": "w10/e66-injection-classifier-seam",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 771,
+   "head": "f37c025494fd43d1810ffabf54c46bfe35ffecd7",
+   "branch": "w10/e21-wysiwyg-table-dir",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 772,
+   "head": "e21304e71fb654f1a6efcdcadfea3a5f80780bea",
+   "branch": "w10/w10.c22-screenshot-to-note-ui",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 773,
+   "head": "fe02b0ddc2e1085db0708c20ec7e9b837e523bfa",
+   "branch": "w10/e75-rtl-matrix-arabic",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 774,
+   "head": "2f9221db9b89ccb3f084c6da636d261099fe6dd4",
+   "branch": "w10/w11.p8-p9-ios-capture",
+   "base": "w10/w10.c7-ios-pbxproj-targets",
+   "inTrain": true
+  },
+  {
+   "pr": 775,
+   "head": "0854d709fb350e4596067464cdc9814dd76415e3",
+   "branch": "w10/w11.s12-security-page-e2ee-status",
+   "base": "w10/w11.s14-s12-plugin-review-security",
+   "inTrain": true
+  },
+  {
+   "pr": 776,
+   "head": "b13739902db3578b08369cb37c7276435bbbcf9f",
+   "branch": "w10/blind-defect-fixes",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 777,
+   "head": "1fd25676d1b8481c05a1c964306ef0ebd936cc69",
+   "branch": "w10/e23-visual-buildkite-step",
+   "base": "w10/b16-visual-baselines-never-self-approve",
+   "inTrain": true
+  },
+  {
+   "pr": 778,
+   "head": "addfbfa52aa2a2d64310da7dfa30a5bcb1d89aea",
+   "branch": "w10/w11.s10-passkey-prf-unlock",
+   "base": "w10/w11.s9-recovery-kit",
+   "inTrain": true
+  },
+  {
+   "pr": 779,
+   "head": "d0c19e0dd9293e1d10598a4c38d47a3c4db705bb",
+   "branch": "w10/e60-graph-axe-text",
+   "base": "verify/train-5",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 780,
+   "head": "835caf96f64a1113fe194856989aacc51358548a",
+   "branch": "w10/w11.i9-mcp-ledger-panel",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 781,
+   "head": "d91fc0635893cc877a49e0f96a77d2b8b864d880",
+   "branch": "w10/f22-yiddish-ladino",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 782,
+   "head": "fd998e43dedab5d732b58c15b6d31c9e3aaf40ef",
+   "branch": "w10/w11.p8-p10-android-capture",
+   "base": "w10/w11.p8-p9-ios-capture",
+   "inTrain": true
+  },
+  {
+   "pr": 783,
+   "head": "d990a17e74f95962ec6765e59a51cce25de3b7d1",
+   "branch": "w10/e54-witness-default",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 784,
+   "head": "bd42d2966da033b8bdd802599e6720485dfaf40a",
+   "branch": "w10/f23-editor-bulk",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 785,
+   "head": "abb3f5792579331a15fe746aa12eba9a3cd30ea0",
+   "branch": "w10/w11.s13-store-labels-transparency",
+   "base": "w10/w11.s12-security-page-e2ee-status",
+   "inTrain": true
+  },
+  {
+   "pr": 786,
+   "head": "65412f8d5f11f04542e60c1132cec92f6680cd4e",
+   "branch": "w10/e27-orphans-one-slug",
+   "base": "w10/e13b-startup-ceiling-worker-catches",
+   "inTrain": true
+  },
+  {
+   "pr": 787,
+   "head": "cba60a944592ca79d1464e4a32f6496e4c25552c",
+   "branch": "w10/w11.i7-mcp-scope-anchors",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 788,
+   "head": "f7ddbfd8122a6d8b233b03d15e5aad0d6c816e34",
+   "branch": "w10/f24-academic-scan-ink",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 789,
+   "head": "2005b1c95ed4c06cb4b47dc4892fdacd53f7ff65",
+   "branch": "w10/f25-notion-cer",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 790,
+   "head": "af4112721039d1b352e58c9a471777e3aa90af02",
+   "branch": "w10/e70-image-hosts-privacy-tab",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 791,
+   "head": "f748d14cc210958a72d6fd37c1663bfd62a43f29",
+   "branch": "w10/w11.p11-store-readiness",
+   "base": "w10/w11.p8-p10-android-capture",
+   "inTrain": true
+  },
+  {
+   "pr": 792,
+   "head": "a5ad364a7c1e00daf223c230b027808f8636c092",
+   "branch": "w10/w11.s15-signpath-windows",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 793,
+   "head": "50bae426626a92037045459041f09fd8ae188f84",
+   "branch": "w10/w11.i13-public-retrieval-loaders",
+   "base": "w10/w11.i18-eval-honesty-card",
+   "inTrain": true
+  },
+  {
+   "pr": 794,
+   "head": "1fb84f700ae8d85a599d66fd51f429bc8793fc87",
+   "branch": "w10/w11.s16-adr-crdt",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 795,
+   "head": "50fca7c551845ed9657ac2d344c4a81bec02befc",
+   "branch": "w10/e32-ci-doctor-buildkite",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 796,
+   "head": "c507977bee45a116695b0a408b11979bc7241efe",
+   "branch": "w10/f26-tts-acr-desktop",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 797,
+   "head": "66f6dfebb1e2574d4847b990f793b635fcefabef",
+   "branch": "w10/w11.p3-obsidian-help",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 798,
+   "head": "8ed48f01db6a3db36839ff42f8fcb3ef807dddfd",
+   "branch": "w10/w11.s17-trusted-types-no-default",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 799,
+   "head": "d9004803d3a810cea350d7b4757c6e790deac9ed",
+   "branch": "w10/e41-ocr-column-order",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 800,
+   "head": "309d21d240acd3a8a3900d1504bcf7f060b3aa3f",
+   "branch": "w10/w11.s18-tauri-capabilities-isolation",
+   "base": "w10/w11.s2-s3-signed-update-manifest",
+   "inTrain": true
+  },
+  {
+   "pr": 801,
+   "head": "d0ea7e342b6bc62074ba35f77a7f18d841f02558",
+   "branch": "w10/e26-mutation-critical-runtime",
+   "base": "w10/t5b-runtime-mutation",
+   "inTrain": true
+  },
+  {
+   "pr": 802,
+   "head": "c3f86d3ee7e9dfe3691ad6e228d224da5c38fb27",
+   "branch": "w10/e53-embedding-default",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 803,
+   "head": "bb8694b16d1229ea70f7996e4b3c42f3216ca8a0",
+   "branch": "w10/e22-rtl-parity-specs",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 804,
+   "head": "84b74468e34119c6a846d34281613cdc3b0f9081",
+   "branch": "w10/w11.l3-launch-kit",
+   "base": "w10/w11.s14-s12-plugin-review-security",
+   "inTrain": true
+  },
+  {
+   "pr": 805,
+   "head": "256453b4e2d370d3f5fb1fd55ad443638a69dfd1",
+   "branch": "w10/e76-hebcal-reference-harness",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 806,
+   "head": "b4829a1edbcd8287219b74527631b62468d9cba7",
+   "branch": "w10/e46-review-in-daily-note",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 807,
+   "head": "3913a27e19fa5fa130fc9a06c35b5d307b163906",
+   "branch": "w10/w11.s19-telemetry-consent",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 808,
+   "head": "b86f8fd37f6f07256b79801570eb4cfe83d01519",
+   "branch": "w10/w11.p13-pwa-install",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 809,
+   "head": "b737ab9efa1d0dfb8283e0ea94c31e61ab4fee70",
+   "branch": "w10/e18-footnotes-page-bottom",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 810,
+   "head": "4a43147dda56648da8a9163f4dcde2ee7e489e0f",
+   "branch": "w10/e65-kokoro-seam",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 811,
+   "head": "e3fe8428aec028ed07eaa5fdb3b16d161ea1ac56",
+   "branch": "w10/w11.p15-retention-loops",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 812,
+   "head": "6b7a4c668c746bedce262022a909ed185fcbe36d",
+   "branch": "w10/w11.i19-i21-local-meeting",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 813,
+   "head": "e6b1f4755796d15de9554527cb213e595351eef5",
+   "branch": "w10/w11.p14-edu-kit",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 814,
+   "head": "8ba82201a7701cf58083ea4270442b22724ba519",
+   "branch": "w10/e19-one-boot-lazy-dialogs",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 815,
+   "head": "bb3e204a9446323cb40458bba49322948e02496b",
+   "branch": "w10/e55-percy-ready-buildkite",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 816,
+   "head": "362beb0255562974aaf25fea0b081b118ac17f2c",
+   "branch": "w10/w11.q1-q2-corpus-vault",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 817,
+   "head": "347e44f77ee64ba5a7338c7b3ef01793fed3d1dc",
+   "branch": "w10/w11.q3-cm6-visible-ranges",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 818,
+   "head": "9397f4b08d209f61e00e62d9679f972039d50688",
+   "branch": "w10/e34-e35-bench-engines",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 819,
+   "head": "3fd92f95245b0e6337d3ec229712ad6c116e44e4",
+   "branch": "w10/e42-nikud-nouns-verbs",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 820,
+   "head": "bcb50e7dbe77ede3c0b2ada2fe9d0835dc554c0e",
+   "branch": "w10/w12-t1-type-schema",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 821,
+   "head": "2ff11af00979fce8adcf0710fc2c936af2b33622",
+   "branch": "w10/e44-lan-sync-loopback",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 822,
+   "head": "c71e577f88e0be504ab49a8103048c3b47139c7c",
+   "branch": "w10/e15-automations-agent-task",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 823,
+   "head": "fa83ea492910766dc006aaa30974505460f072f9",
+   "branch": "w10/w11.q5-keypress-real-text",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 824,
+   "head": "7b9f4037cc3c2ce1632dc1f509e628e0fed7c714",
+   "branch": "w10/w11.q4-milkdown-size-ceiling",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 825,
+   "head": "dc6bd2d7fa24f16da012c83c837533eda9d6a066",
+   "branch": "w10/w12.a1-a2-ask-vault-paragraph-scope",
+   "base": "verify/train-5",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 826,
+   "head": "1bccc019c2fdbf4f6ae3691c0672ace9a69782ce",
+   "branch": "w10/w12.a3-ask-vault-eval",
+   "base": "verify/train-5",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 827,
+   "head": "0b22af07a1823c20b9afa759e49e721fef946b0d",
+   "branch": "w11/merge-newline-loss",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 828,
+   "head": "08fdc6bdbbb9f5fa1ac27b38e0de47ef8794d930",
+   "branch": "w10/e16-virtual-file-tree",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 829,
+   "head": "eb1f9b05bb634f6912a47ef7312e816c3a400d59",
+   "branch": "w10/w11.q6-sr-product-journey",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 830,
+   "head": "12596d6fb1ccd1a0fe270e85a21eb5dfe83a58d3",
+   "branch": "w10/e52-voice-corpus-recorder",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 831,
+   "head": "c6ddc74e574905f9347f04feba2e55f76d75d839",
+   "branch": "w10/w12-t3-t6-type-bases",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 832,
+   "head": "90f089433f3854908e6dd3436e1781f4a6e7bc59",
+   "branch": "w10/e29-e31-max-lines-no-baseline",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 833,
+   "head": "fdce7c53a9d8676327e7f104222622f41c51a299",
+   "branch": "w10/w12-t4-types-mcp-cli",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 834,
+   "head": "08035be5a80255a70f04ced5c537e241c2ef79e6",
+   "branch": "w10/e61-downloads-page-no-release-workflows",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 835,
+   "head": "8546a88b671134edc3de7576eeb7a71574f288cf",
+   "branch": "w10/w12.h1-h3-havruta-room",
+   "base": "verify/train-5",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 836,
+   "head": "5ed2bfe04fb6af3c9d73c5f2ab72a2939e2a3240",
+   "branch": "w10/e17-vault-open-sparse",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 837,
+   "head": "b7d40ffdcb997d13fc0000dd4fe0c0c12192b77d",
+   "branch": "w10/w12.e1-e8-entity-model",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 838,
+   "head": "784ef2e1dd951a4abcaf87c147184bd5775a2509",
+   "branch": "w10/w12.e2-e4-e9-entity-extraction",
+   "base": "w10/w11.h11-hebrew-ner",
+   "inTrain": true
+  },
+  {
+   "pr": 839,
+   "head": "61df55a9a317fe636832253a0aa9dbc60f851473",
+   "branch": "w10/w12.e5-e7-entity-review-pages-graph",
+   "base": "w10/w12.e1-e8-entity-model",
+   "inTrain": true
+  },
+  {
+   "pr": 840,
+   "head": "0996ffe7c97783748b52949f3feeda2905eb6621",
+   "branch": "w10/w11.q7-a11y-statement-acr",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 841,
+   "head": "d0455b5b4d05bc80e8dbaaab4a28e7d409578a1e",
+   "branch": "w10/e67-clip-templates-editor",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 842,
+   "head": "c50e6d48074e017469f3c2ff4066cc7b333d26be",
+   "branch": "w10/w12-t5-bases-parity",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 843,
+   "head": "c347e421a65dc02558ad47d84312056c7e4c1a34",
+   "branch": "w10/e14-tectonic-pdf",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 844,
+   "head": "73388182b837c77be3e9df7efc6dd5bbf53f253f",
+   "branch": "verify/train-6",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 845,
+   "head": "23574078d749813fd43e19375604a65ae253d700",
+   "branch": "w10/w12.h2-havruta-study-screen",
+   "base": "verify/train-5",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 846,
+   "head": "dc5fb9b3654a85e10e24cfa99b1e77b80c6a2c09",
+   "branch": "w10/e37-wysiwyg-ai-marks",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 847,
+   "head": "0869e76b895ba9584306ee47df34ad07f9b850cf",
+   "branch": "w10/w11.q8-commonmark-results",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 848,
+   "head": "e3ee4140809440f218d163bbce14c04b448eed9b",
+   "branch": "w10/w12.a4-saved-searches-in-vault",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 849,
+   "head": "030da477467dbee80e671114ddf0999fe957edbf",
+   "branch": "w10/w12-t2-typed-form",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 850,
+   "head": "0c06a301162c0aba195c68625dcf256beca3be49",
+   "branch": "w10/e51-bulk-batch-through-gate",
+   "base": "w10/f23-editor-bulk",
+   "inTrain": true
+  },
+  {
+   "pr": 851,
+   "head": "9c9b7a4d79529fd0973723962d4b173f7cd24513",
+   "branch": "w10/e38-doi-references",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 852,
+   "head": "5682d7d2935df5a335bf085739f9d9d948f556ac",
+   "branch": "w10/e50-search-code-folds",
+   "base": "w10/f23-editor-bulk",
+   "inTrain": true
+  },
+  {
+   "pr": 853,
+   "head": "b5937d66fd0cca6616dd92b1d6d39c34814595df",
+   "branch": "w10/w11.q9-stryker-calibration",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 854,
+   "head": "46a49927b73fbd1ac6a80a5298d6daaa9cbd39b9",
+   "branch": "w10/e64-pdf-ink",
+   "base": "w10/f8-pdf-review-272",
+   "inTrain": true
+  },
+  {
+   "pr": 855,
+   "head": "5f43ca6a9fd5195a508d0692b6bfcaf2339d3f93",
+   "branch": "w10/w12.f1-format-roundtrip",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 856,
+   "head": "718929b8c55a2cac13c392417cdb8386a1a1ff69",
+   "branch": "w10/w11.q10-q11-opfs-worker",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 857,
+   "head": "c123933ee256efa9814e9733467f5d191e2bb874",
+   "branch": "w10/e45-mobile-lan-discovery",
+   "base": "w10/w10.c7-ios-pbxproj-targets",
+   "inTrain": true
+  },
+  {
+   "pr": 858,
+   "head": "dd08077d831a4d7c1145c523d485e05f1cc5d184",
+   "branch": "w10/w11.q12-vercel-ci-trial",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 859,
+   "head": "2b5a46cf4a1636386f919bcec16edc486ad84b99",
+   "branch": "w10/w12.h4-h8-study-cycles-time",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 860,
+   "head": "5f11643dd8cdbbf95af99ade50cac9e8eaf14b7c",
+   "branch": "w10/w10.e78-codemagic-pr-trigger",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 861,
+   "head": "7e03509190635af62ae2f597a472a3e49bbfa0f7",
+   "branch": "w10/e77-temml-lazy",
+   "base": "w10/e1-e3-render-worker",
+   "inTrain": true
+  },
+  {
+   "pr": 862,
+   "head": "88d2582adb1aed24401189e869c87990dc2ecaa4",
+   "branch": "w10/w12-v1-bases-query-charts",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 863,
+   "head": "9a008906c797115ac9a7c762924b7959e0269f7c",
+   "branch": "w10/w12.f3-odt-export",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 864,
+   "head": "b610ab875215e2a3ef3c680ee384f1ec5ec6c8f3",
+   "branch": "w10/w12-v3-tree-sunburst",
+   "base": "w10/w12-v1-bases-query-charts",
+   "inTrain": true
+  },
+  {
+   "pr": 865,
+   "head": "c8592a2b2d171ec3e2157aea04c44c24a6b6eb5e",
+   "branch": "w10/w12.e5-wire-entity-review-app",
+   "base": "w10/w12.e5-e7-entity-review-pages-graph",
+   "inTrain": true
+  },
+  {
+   "pr": 866,
+   "head": "a72bb5180d3ecd6898f7891170388ff53ee3ddbb",
+   "branch": "w10/r12.6-r12.7-hebrew-dates-timeline",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 867,
+   "head": "1c10f9bd159a64404813bd9e8a42058c11d86521",
+   "branch": "w10/r12.13-lane-leases",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 868,
+   "head": "6f70200555e5bdf2d4fb53bb062d0baff9a3559a",
+   "branch": "w10/r12.14-honest-status",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 869,
+   "head": "7a5c04161516b26cd9e2e84ab1ce940cccce2650",
+   "branch": "w10/w12.e10-wikidata-link",
+   "base": "w10/w12.e5-wire-entity-review-app",
+   "inTrain": true
+  },
+  {
+   "pr": 870,
+   "head": "0a4bd139940058c6bf2ab5f6a4b1553f68fd4307",
+   "branch": "w10/r12.10-contradiction-finder",
+   "base": "w10/r12.6-r12.7-hebrew-dates-timeline",
+   "inTrain": true
+  },
+  {
+   "pr": 871,
+   "head": "d6eca23f8cb65fbdc401a91b67a9eac87f1df6d2",
+   "branch": "w10/w12.h7-h8-time-blocks-shabbat",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 872,
+   "head": "d1aba52071e65eaa52b0476e2d020cc09b7dce89",
+   "branch": "w10/w12-v5-hebrew-calendar-view",
+   "base": "w10/w12-v1-bases-query-charts",
+   "inTrain": true
+  },
+  {
+   "pr": 873,
+   "head": "3ea75c41fe96a1f88b7c0693ba78d8751f917bcf",
+   "branch": "w10/w12.f2-typst-export",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 874,
+   "head": "7a6bc65e2d8bc38ab1e7855fe2040aa51b3d1fd6",
+   "branch": "w10/w12.h5-syllabus-semester-weeks",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 875,
+   "head": "58538be913cd4adb4c956dabc137527593301d8c",
+   "branch": "w10/w12-v6-dashboard-note",
+   "base": "w10/w12-v1-bases-query-charts",
+   "inTrain": true
+  },
+  {
+   "pr": 876,
+   "head": "3ea1f40302eead6c9e234c76441ad1c38416faa2",
+   "branch": "w10/w12.h6-side-by-side-translation",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 877,
+   "head": "75f281fa3fa363f60034793ff35d9ce5cc36c1a9",
+   "branch": "w11/md-roundtrip-fixes",
+   "base": "verify/train-5",
+   "inTrain": true
+  },
+  {
+   "pr": 879,
+   "head": "fe122627a5fd1f205f72a14c8b1a8833f00a2cfd",
+   "branch": "w10/w12.a1-a2-ask-vault-paragraph-scope-t6",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 880,
+   "head": "203e48be208f89b4c1dac8444c8a5bd3c7ae5e03",
+   "branch": "w10/w12.h1-h3-havruta-room-t6",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 881,
+   "head": "36cc483bede2987d0be91182904a2cd03853a57e",
+   "branch": "w10/w12.h2-havruta-study-screen-t6",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 882,
+   "head": "0b85cf94fc59eae66b7dfdd580aec9f12f33a5e0",
+   "branch": "w10/r12-20-ach-block",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 884,
+   "head": "e1c5f727c99d8bbfa76340a6bf60025386b3d502",
+   "branch": "w10/w12.a3-ask-vault-eval-t6",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 885,
+   "head": "d0807899779062c0867596fc4889a49eb556d1ba",
+   "branch": "w10/r12.9-cite-or-delete",
+   "base": "w10/w12.a1-a2-ask-vault-paragraph-scope-t6",
+   "inTrain": true
+  },
+  {
+   "pr": 886,
+   "head": "217e4747380f342ce1923b2c39b4408867793c66",
+   "branch": "w10/w12-v2-r12-8-graph-views",
+   "base": "w10/w12.e5-e7-entity-review-pages-graph",
+   "inTrain": true
+  },
+  {
+   "pr": 887,
+   "head": "6deced9123cba595c2df4445ac08e4db55800bf6",
+   "branch": "w10/w12.f4-f5-f7-file-viewers",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 888,
+   "head": "b86ef778597c8918f8f07d61026d65cccaa307c2",
+   "branch": "w10/e20-cold-open-editable",
+   "base": "w10/e19-one-boot-lazy-dialogs",
+   "inTrain": true
+  },
+  {
+   "pr": 889,
+   "head": "0934e61808582ab5439696f78ec21cc1f8fe13d2",
+   "branch": "w10/w12-v8-note-graph-time-slider",
+   "base": "w10/w12-v2-r12-8-graph-views",
+   "inTrain": true
+  },
+  {
+   "pr": 890,
+   "head": "379f8dcd0593490a5dae816b2147a07a3c508fc0",
+   "branch": "w10/w12.x1-sheet-block",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 891,
+   "head": "178dc693fc790eee20607b6204d41f7608b3a955",
+   "branch": "w10/r12.12-ci-doctor",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 892,
+   "head": "b375b258a9bcf457a1d4c5cc59bacf7a1ebc7a13",
+   "branch": "w10/w12-v4-argument-map",
+   "base": "w10/w12-t3-t6-type-bases",
+   "inTrain": true
+  },
+  {
+   "pr": 893,
+   "head": "a4f8dda714fd8b3cd948fdb821b979a23619467a",
+   "branch": "w10/e36-clip-library",
+   "base": "w10/f16-model-day",
+   "inTrain": true
+  },
+  {
+   "pr": 894,
+   "head": "4eb2b62079b37836eae67aed1a09cf4c559a143f",
+   "branch": "w10/w12.u2-automations-types-shabbat",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 895,
+   "head": "9c28e2e5b867a5e97b8938aae294fa6b40d50a82",
+   "branch": "w10/r12.11-claim-extractor",
+   "base": "w10/r12.9-cite-or-delete",
+   "inTrain": true
+  },
+  {
+   "pr": 896,
+   "head": "19f848bb9641ab368328bcb71ab529001792d680",
+   "branch": "w10/r12.18-runaway-guard",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 897,
+   "head": "5a4a6895660c0272fd7bdcd2ebc00f46b7dfd849",
+   "branch": "w10/w12.f8-webvtt-transcript",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 898,
+   "head": "d7c91d7084cbc1cb32bba753b99c0990173cb10f",
+   "branch": "w10/w12-t7-notion-types",
+   "base": "w10/w12-t3-t6-type-bases",
+   "inTrain": true
+  },
+  {
+   "pr": 899,
+   "head": "2c478f8b42ca3dcae5d7cb9d73500e97b25a4233",
+   "branch": "w10/r12.21-plan-velocity-eta",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 900,
+   "head": "8312d79462761b808580b793580f8846341ea675",
+   "branch": "w10/r12.15-conformal-wilson",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 901,
+   "head": "bd00660e67cfc984a6215062dbda2be9f7f3c32e",
+   "branch": "w10/w12.f6-vcard",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 902,
+   "head": "066666199d9a93a1c1344b95008d07cc08108118",
+   "branch": "w10/w12-v7-viz-gate",
+   "base": "w10/w12-v8-note-graph-time-slider",
+   "inTrain": true
+  },
+  {
+   "pr": 903,
+   "head": "625efeabb689b832a5a5a047e24b97119f1dd2cf",
+   "branch": "w10/w12.s1-as-of-vault",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 904,
+   "head": "7253f2726aae092b785aac625546ca72f8ec60c9",
+   "branch": "w10/w12.u1-embed-edit-in-place",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 905,
+   "head": "bd337f2ae3e66d1ae11048026404c0b4dbcf3252",
+   "branch": "w10/w12.s2-as-of-ui",
+   "base": "w10/w12.s1-as-of-vault",
+   "inTrain": true
+  },
+  {
+   "pr": 906,
+   "head": "b223ce10744119921d9b6f64821935e2de518c4d",
+   "branch": "w10/w12.s5-rtl-garden",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 907,
+   "head": "8687a41da4e11f2a40a8c8702a65af4d554260ae",
+   "branch": "w10/w12.s3-three-way-conflict",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 908,
+   "head": "f655ee0644d138e3f2ee3d93844d8e7991db3d9c",
+   "branch": "w10/r12.17-amounts-addresses",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 909,
+   "head": "332bd12e0c818d395d1d22d915cdeb7053baa71d",
+   "branch": "w10/r12.16-matched-as",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 910,
+   "head": "b7534f345a9fa9e3b6f4ca208faf12178fbb7f9c",
+   "branch": "w10/w12.s6-rtl-theme-check",
+   "base": "w10/w11.s14-plugin-review-pipeline",
+   "inTrain": false,
+   "decision": "replaced"
+  },
+  {
+   "pr": 911,
+   "head": "503e5c40ba1c4ae1495e88b23448cd9a6d4c9498",
+   "branch": "w10/w12.r4-ink-text-search-gated",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 912,
+   "head": "438a8be24376b88ba58c648a0b38840e449da009",
+   "branch": "w10/w12.r2-pdf-rtl-spread",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 913,
+   "head": "78415eade4daa230740cdc10871dd6a42d017b28",
+   "branch": "w12/format-roundtrip-fixes",
+   "base": "w10/w12.f1-format-roundtrip",
+   "inTrain": true
+  },
+  {
+   "pr": 914,
+   "head": "559671295f58c44dd061bfc1ac360eebc6c25410",
+   "branch": "w10/w12.r3-highlights-apa-hebrew",
+   "base": "w10/w11.h15-apa7-hebrew",
+   "inTrain": true
+  },
+  {
+   "pr": 915,
+   "head": "8612742145940ba4762239b57d35dd3a4838ec80",
+   "branch": "w10/w12.x2-reading-list",
+   "base": "w10/w12-t3-t6-type-bases",
+   "inTrain": true
+  },
+  {
+   "pr": 916,
+   "head": "c77241046f7aa7e8c2837fac0e87acf242363b82",
+   "branch": "w10/w12.r1-pdf-highlight-cards",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 917,
+   "head": "865871ecf1f95b6f4170e24e04648aa70bddb9de",
+   "branch": "w10/c21-structured-output-wired",
+   "base": "w10/f16-model-day",
+   "inTrain": true
+  },
+  {
+   "pr": 918,
+   "head": "50d97ee32964ca0e5e66e9eadbc2456514c27d79",
+   "branch": "w10/r12.19-il-registers",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 919,
+   "head": "fbed1a90515a838d902b217019cf43c797dbb0e7",
+   "branch": "w10/w12.x3-citation-graph",
+   "base": "w10/w12.e5-e7-entity-review-pages-graph",
+   "inTrain": true
+  },
+  {
+   "pr": 920,
+   "head": "38e5ceac5c58786484cc13b33cb9667e5aff98ec",
+   "branch": "w10/c27-academic-deadlines-student",
+   "base": "w10/f24-academic-scan-ink",
+   "inTrain": true
+  },
+  {
+   "pr": 921,
+   "head": "0e596b7ce7b82513c11dc221d35b4937bb67e8af",
+   "branch": "w10/d21-deterministic-sourcemaps",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 925,
+   "head": "c99798bba6043d9ccf6eb97738d192c98caa1ae5",
+   "branch": "w10/w12.s4-role-vaults",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 928,
+   "head": "f3ec0105fe9294d21f96271e301a0410b7f27b39",
+   "branch": "w10/w12.e7-entity-graph-host",
+   "base": "w10/w12.x3-citation-graph",
+   "inTrain": true
+  },
+  {
+   "pr": 931,
+   "head": "34ab39dbccd3c391af3b72324bc94ce1d7e5fb4d",
+   "branch": "w10/w12.s4-role-vaults-ui",
+   "base": "w10/w12.s4-role-vaults",
+   "inTrain": true
+  },
+  {
+   "pr": 933,
+   "head": "b2b2cf161b51a9e691673dfab1c8050c5be5a952",
+   "branch": "fix/z6-plugin-review",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 934,
+   "head": "fcc954fefe3928877d2c2613ef512e6c40d4aa04",
+   "branch": "fix/z6-search-regex-budget",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 935,
+   "head": "036fcba00ce38abf1f46afbd0b05cd2cc03efd54",
+   "branch": "fix/z6-eval-card",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 936,
+   "head": "bcd57c6f095418b4df3f6a92b366db81f0dac314",
+   "branch": "fix/z6-lows",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 937,
+   "head": "0c26f5f8c81292878daf3f2a18012ae1b2dc9be8",
+   "branch": "fix/z6-vault-cas-locks",
+   "base": "verify/train-6",
+   "inTrain": true
+  },
+  {
+   "pr": 938,
+   "head": "f090c2081271c5a2e71f98e97dd9c3675224511f",
+   "branch": "verify/train-7",
+   "base": "verify/train-6",
+   "inTrain": true
+  }
+ ]
+}

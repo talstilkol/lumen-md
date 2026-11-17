@@ -1,6 +1,8 @@
 ---
 title: Quick capture (inbox)
 description: Add a thought, task or link to inbox.md in two steps, from the keyboard, the home screen or the share sheet.
+type: how-to
+tasks: ["W10.C13", "4.16"]
 ---
 
 Quick capture adds one entry to the end of `inbox.md`, at the root of

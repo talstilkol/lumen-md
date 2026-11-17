@@ -5,7 +5,7 @@
  * out of Editor.tsx for the 800-line limit (W6.25); each effect listens on
  * window and acts on the current view.
  */
-import { readyToReveal } from "./revealLine";
+import { readyToReveal, revealSelection } from "./revealLine";
 import { useEffect, type RefObject } from "react";
 import { wysiwygTakesPaste, type PasteDetail } from "../paste/pasteCommands";
 import { FIX_PDF_HEBREW_EVENT, fixSourceSelection } from "../paste/pdfPaste";
@@ -76,6 +76,14 @@ export function useSourceEditorEvents(viewRef: RefObject<EditorView | null>, ass
       const { from, to } = view.state.selection.main;
       view.dispatch({ changes: { from, to, insert: text }, selection: { anchor: from + text.length } });
     }
+    // Plugin API 1.1.0 (W13.L1): `lumen-plugin-edits` {edits} — validated, sorted, in the coordinates of the text before the batch: one transaction, one undo step.
+    function onPluginEdits(e: Event) {
+      const view = viewRef.current;
+      const edits = (e as CustomEvent<{ edits?: { from: number; to: number; insert: string }[] }>).detail?.edits;
+      if (!view || !Array.isArray(edits) || edits.some((x) => x.to > view.state.doc.length)) return;
+      e.preventDefault();
+      view.dispatch({ changes: edits.map((x) => ({ from: x.from, to: x.to, insert: x.insert })), userEvent: "input.plugin" });
+    }
     function onSelection(e: Event) {
       const view = viewRef.current;
       const detail = (e as CustomEvent<{ result?: { from: number; to: number; text: string } | null }>).detail;
@@ -85,7 +93,9 @@ export function useSourceEditorEvents(viewRef: RefObject<EditorView | null>, ass
     }
     window.addEventListener("lumen-plugin-insert", onPluginInsert);
     window.addEventListener("lumen-editor-selection", onSelection);
+    window.addEventListener("lumen-plugin-edits", onPluginEdits);
     return () => {
+      window.removeEventListener("lumen-plugin-edits", onPluginEdits);
       window.removeEventListener("lumen-plugin-insert", onPluginInsert);
       window.removeEventListener("lumen-editor-selection", onSelection);
     };
@@ -167,7 +177,8 @@ export function useSourceEditorEvents(viewRef: RefObject<EditorView | null>, ass
   useEffect(() => {
     function onReveal(e: Event) {
       // `select: false` (a tap on reading view, W1.25) puts the cursor at the line's end instead of selecting it.
-      const detail = (e as CustomEvent<{ line: number; content?: string; select?: boolean }>).detail;
+      // `endLine` (W12.A1, a cited paragraph) selects through the end of that line.
+      const detail = (e as CustomEvent<{ line: number; endLine?: number; content?: string; select?: boolean }>).detail;
       const line = detail?.line;
       if (!line || line < 1) return;
       let tries = 0;
@@ -181,7 +192,7 @@ export function useSourceEditorEvents(viewRef: RefObject<EditorView | null>, ass
           return;
         }
         const l = view.state.doc.line(line);
-        view.dispatch({ selection: detail.select === false ? { anchor: l.to } : { anchor: l.from, head: l.to }, effects: EditorView.scrollIntoView(l.from, { y: "center" }) });
+        view.dispatch({ selection: revealSelection(view.state.doc, line, detail.endLine, detail.select !== false), effects: EditorView.scrollIntoView(l.from, { y: "center" }) });
         view.focus();
       };
       go();

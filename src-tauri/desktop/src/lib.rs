@@ -6,8 +6,10 @@
 //!   the command line) → the vault that holds it, or a standalone file;
 //! - [`windows`]: window labels, and moving a tab from one window to another
 //!   without ever losing or duplicating it;
-//! - [`tray`]: the tray menu and the quick-capture entry.
+//! - [`tray`]: the tray menu and the quick-capture entry;
+//! - [`appmenu`]: the native menu bar in the UI language (plan W13.K5).
 
+pub mod appmenu;
 pub mod deeplink;
 pub mod fileopen;
 pub mod tray;
@@ -40,3 +42,5 @@ pub fn percent_decode(s: &str, plus_is_space: bool) -> Option<String> {
 
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod appmenu_tests;

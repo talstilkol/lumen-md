@@ -1,6 +1,6 @@
 {
   "$comment": "W10.D15 (plan W6.12): the vulnerability-reporting channels SECURITY.md may point to, and whether each works today. Checked with the GitHub REST API; re-check before changing a status. SECURITY.md may send reporters only to channels with status \"on\". When the owner turns a channel on, flip its status here and move it into SECURITY.md in the same commit.",
-  "checked": "2026-11-14",
+  "checked": "2026-11-16",
   "channels": [
     {
       "id": "contact-request-issue",
@@ -14,7 +14,7 @@
       "status": "off",
       "how": "GitHub private vulnerability reporting (Security -> Advisories -> Report a vulnerability).",
       "url": "https://github.com/talstilkol/lumen-md/security/advisories/new",
-      "evidence": "GET repos/talstilkol/lumen-md/private-vulnerability-reporting -> {\"enabled\":false} (2026-11-14)",
+      "evidence": "GET repos/talstilkol/lumen-md/private-vulnerability-reporting -> {\"enabled\":false} (2026-11-16). Lane D1 tried PUT once under the owner's delegation of 16.11 21:53: the agent proxy refused it (HTTP 403, \"Write access to this GitHub API path is not permitted through this proxy\"); not retried.",
       "owner": "gh api -X PUT repos/talstilkol/lumen-md/private-vulnerability-reporting"
     },
     {

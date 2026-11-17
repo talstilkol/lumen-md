@@ -1,0 +1,313 @@
+{
+  "format": "lumen-model-cards/1",
+  "generatedFrom": [
+    "eval/cards",
+    "eval/results"
+  ],
+  "agents": {
+    "abstractWriter": [
+      {
+        "source": "eval/cards/writing/abstractWriter.json",
+        "measuredOn": "2026-11-17",
+        "tag": "dev",
+        "model": "none: the R12.9 gate is deterministic; the drafts are scripted",
+        "dataset": {
+          "name": "src/__tests__/abstractWriter.test.ts (scripted drafts)",
+          "version": "1",
+          "license": "MIT (written for lumen-md)",
+          "origin": "synthetic"
+        },
+        "n": 17,
+        "metrics": [
+          {
+            "name": "supportedKept",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          },
+          {
+            "name": "adversarialDeleted",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          },
+          {
+            "name": "keptAnchored",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    ],
+    "argumentChecker": [
+      {
+        "source": "eval/cards/writing/argumentChecker.json",
+        "measuredOn": "2026-11-17",
+        "tag": "dev",
+        "model": "rules (no model)",
+        "dataset": {
+          "name": "src/__tests__/argumentChecker.test.ts (its synthetic set, built in the test)",
+          "version": "1",
+          "license": "MIT (written for lumen-md; synthetic)",
+          "origin": "synthetic"
+        },
+        "n": 150,
+        "metrics": [
+          {
+            "name": "precision",
+            "value": 0.991228,
+            "ci95": [
+              0.973684,
+              1
+            ]
+          },
+          {
+            "name": "recall",
+            "value": 0.991228,
+            "ci95": [
+              0.973684,
+              1
+            ]
+          },
+          {
+            "name": "unseenPrecision",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    ],
+    "concision": [
+      {
+        "source": "eval/cards/writing/concision.json",
+        "measuredOn": "2026-11-17",
+        "tag": "dev",
+        "model": "rules (length + fact checks; the rewrites need a local model, owed)",
+        "dataset": {
+          "name": "eval/writing/concision",
+          "version": "1+ad835ae416fa",
+          "license": "CC0-1.0",
+          "origin": "synthetic"
+        },
+        "n": 320,
+        "metrics": [
+          {
+            "name": "invented_caught",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          },
+          {
+            "name": "fact_recall",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          },
+          {
+            "name": "fact_pass",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          },
+          {
+            "name": "length_agree",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    ],
+    "consistency": [
+      {
+        "source": "eval/cards/writing/consistency.json",
+        "measuredOn": "2026-11-17",
+        "tag": "dev",
+        "model": "rules (no model)",
+        "dataset": {
+          "name": "src/__tests__/vaultConsistency.test.ts (its synthetic vault, built in the test)",
+          "version": "1",
+          "license": "MIT (written for lumen-md; synthetic)",
+          "origin": "synthetic"
+        },
+        "n": 50,
+        "metrics": [
+          {
+            "name": "precision",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          },
+          {
+            "name": "recall",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    ],
+    "readability": [
+      {
+        "source": "eval/cards/writing/readability.json",
+        "measuredOn": "2026-11-17",
+        "tag": "dev",
+        "model": "linear index, 4 features (hebrewModel.json v1)",
+        "dataset": {
+          "name": "src/agents/writing/readability/corpusHe.eval.ts (held-out split)",
+          "version": "1",
+          "license": "MIT (written for lumen-md; graded by intended reader)",
+          "origin": "synthetic"
+        },
+        "n": 15,
+        "metrics": [
+          {
+            "name": "spearman",
+            "value": 0.952656,
+            "ci95": [
+              0.776024,
+              0.992537
+            ]
+          },
+          {
+            "name": "withinOneLevel",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    ],
+    "structureCritic": [
+      {
+        "source": "eval/cards/writing/structureCritic.json",
+        "measuredOn": "2026-11-17",
+        "tag": "dev",
+        "model": "rules (no model; the topic-sentence model is optional)",
+        "dataset": {
+          "name": "src/__tests__/structureCritic.test.ts (its synthetic set, built in the test)",
+          "version": "1",
+          "license": "MIT (written for lumen-md; synthetic)",
+          "origin": "synthetic"
+        },
+        "n": 120,
+        "metrics": [
+          {
+            "name": "precision",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          },
+          {
+            "name": "recall",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    ],
+    "styleCoach": [
+      {
+        "source": "eval/cards/writing/styleCoach.json",
+        "measuredOn": "2026-11-17",
+        "tag": "dev",
+        "model": "rules (styleCoach, no model)",
+        "dataset": {
+          "name": "eval/writing/styleCoach",
+          "version": "1+f8325d343b36",
+          "license": "CC0-1.0",
+          "origin": "synthetic"
+        },
+        "n": 110,
+        "metrics": [
+          {
+            "name": "heldout_precision",
+            "value": 0.945055,
+            "ci95": [
+              0.89011,
+              0.989011
+            ]
+          },
+          {
+            "name": "heldout_recall",
+            "value": 0.781818,
+            "ci95": [
+              0.709091,
+              0.854545
+            ]
+          }
+        ]
+      }
+    ],
+    "toneShifter": [
+      {
+        "source": "eval/cards/writing/toneShifter.json",
+        "measuredOn": "2026-11-17",
+        "tag": "dev",
+        "model": "rules (fact guard; the rewrites need a local model, owed)",
+        "dataset": {
+          "name": "eval/writing/toneShifter",
+          "version": "1+9431b36bdf46",
+          "license": "CC0-1.0",
+          "origin": "synthetic"
+        },
+        "n": 176,
+        "metrics": [
+          {
+            "name": "guard_recall",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          },
+          {
+            "name": "guard_precision",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          },
+          {
+            "name": "kept_passed",
+            "value": 1,
+            "ci95": [
+              1,
+              1
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -63,7 +63,7 @@ import { isSyncedPath } from "./localFiles";
 import { FREEZE_TTL_MS, sealManifest, type Manifest, type ManifestEntry } from "./manifest";
 import { PreconditionFailedError } from "./provider";
 import { computeFileStates, liveHash, sameEntry, type FileStatus } from "./status";
-import { BASE_BYTES_LIMIT, BlobMissingError, successor, type SyncResult } from "./engineTypes";
+import { BASE_BYTES_LIMIT, BlobMissingError, SAVE_BATCH, successor, type SyncResult } from "./engineTypes";
 import { E2eeSyncPairing } from "./enginePairing";
 
 // W4.11: the engine is split into engineTypes.ts, vaultOpen.ts,
@@ -254,12 +254,13 @@ export class E2eeSync extends E2eeSyncPairing {
       delete s.frozenSeen;
       await this.save();
       for (const [path, c] of changes) {
-        await this.setBase(path, c.entry, c.data);
+        await this.setBase(path, c.entry, c.data, true);
         if (c.entry.deleted) {
           res.deleted++;
           this.emit({ kind: "delete", at: this.o.now(), path, bytes: 0, direction: "up" });
         } else res.uploaded++;
       }
+      await this.saveDeferred();
       await this.collectGarbage(next);
       res.counter = next.counter;
       res.held = [...held];
@@ -268,6 +269,28 @@ export class E2eeSync extends E2eeSyncPairing {
     res.incomplete = true;
     res.held = [...held];
     return res;
+  }
+
+  /**
+   * Plan W13.S2: an excluded arrival a shared vault keeps for the user to
+   * read (settings as `<path>.bak`, never at `path`, never loaded). Written
+   * once per version: a `.bak` that already holds it is left alone. Best
+   * effort: a failure only loses the copy, never touches `path`.
+   */
+  private async quarantine(path: string, r: ManifestEntry, local: Map<string, string>): Promise<void> {
+    const target = this.o.quarantine(path);
+    if (!target || target === path) return;
+    const have = local.get(target) ?? null;
+    if (have !== null && have === liveHash(r)) return;
+    try {
+      const data = await this.fetchBlob(path, r);
+      if (await this.o.local.write(target, data, have)) {
+        local.set(target, liveHash(r) as string);
+        this.emit({ kind: "excluded", at: this.o.now(), path: target, reason: "quarantined", direction: "down" });
+      }
+    } catch (e) {
+      this.emit({ kind: "error", at: this.o.now(), message: `could not keep ${path} as ${target}: ${e instanceof Error ? e.message : String(e)}` });
+    }
   }
 
   /** Step 2: bring every path the manifest changed into this device. */
@@ -286,6 +309,7 @@ export class E2eeSync extends E2eeSyncPairing {
       if (why) {
         excluded.add(path);
         this.emit({ kind: "excluded", at: this.o.now(), path, reason: why, direction: "down" });
+        if (!r.deleted) await this.quarantine(path, r, local);
       } else if (!r.deleted && liveHash(r) !== (local.get(path) ?? null)) {
         planFiles++;
         planBytes += r.size;
@@ -307,7 +331,7 @@ export class E2eeSync extends E2eeSyncPairing {
       if (!localChanged || lh === rh) {
         // Only the other side changed (or both made the same change).
         if (lh === rh) {
-          await this.setBase(path, r, rh === null ? null : await this.o.local.read(path));
+          await this.setBase(path, r, rh === null ? null : await this.o.local.read(path), true);
           continue;
         }
         if (rh === null) {
@@ -316,7 +340,7 @@ export class E2eeSync extends E2eeSyncPairing {
             continue;
           }
           res.deleted++;
-          await this.setBase(path, r, null);
+          await this.setBase(path, r, null, true);
           this.emit({ kind: "delete", at: this.o.now(), path, bytes: 0, direction: "down" });
         } else {
           const data = await this.fetchBlob(path, r);
@@ -325,7 +349,7 @@ export class E2eeSync extends E2eeSyncPairing {
             continue;
           }
           res.downloaded++;
-          await this.setBase(path, r, data);
+          await this.setBase(path, r, data, true);
           this.emit({ kind: "download", at: this.o.now(), path, bytes: data.length, direction: "down" });
         }
         continue;
@@ -414,6 +438,7 @@ export class E2eeSync extends E2eeSyncPairing {
         }
       }
     }
+    await this.saveDeferred();
   }
 
   /** Paths changed on this device since its base (not held), without uploading anything. */
@@ -485,11 +510,14 @@ export class E2eeSync extends E2eeSyncPairing {
         if (c.deleted) live.delete(p);
         else live.add(p);
       }
+      // Every folder above a live path, so "is anything under p/" is one lookup (FC1: scanning every live path for each change was quadratic).
+      const folders = new Set<string>();
+      for (const q of live) for (let i = q.indexOf("/"); i > 0; i = q.indexOf("/", i + 1)) folders.add(q.slice(0, i));
       for (const [p, c] of plan) {
         if (c.deleted) continue;
         const segs = p.split("/");
         const above = segs.slice(0, -1).some((_, k) => live.has(segs.slice(0, k + 1).join("/")));
-        const below = [...live].some((q) => q.startsWith(`${p}/`));
+        const below = folders.has(p);
         if (above || below) {
           plan.delete(p);
           this.hold(held, p, "clash");
@@ -499,6 +527,24 @@ export class E2eeSync extends E2eeSyncPairing {
       }
     }
     const out = new Map<string, { entry: ManifestEntry; data: Uint8Array | null }>();
+    // Blob names are recorded in `pending` before their upload, SAVE_BATCH
+    // at a time (one save each, not one per file: FC1). A name whose file
+    // then turns out unchanged, unreadable or excluded is never written; the
+    // garbage pass deletes it as an orphan (a delete of a missing object is
+    // a no-op).
+    const ahead = new Map<string, { rev: string; name: string }>();
+    const fresh = [...plan].filter(([path, c]) => !c.deleted && !uploads.has(path)).map(([path]) => path);
+    const register = async (from: number) => {
+      for (const path of fresh.slice(from, from + SAVE_BATCH)) {
+        const rev = toB64u(randomBytes(12));
+        const name = await this.blob(path, rev);
+        ahead.set(path, { rev, name });
+        s.pending.push(name);
+      }
+      await this.save();
+    };
+    const freshIndex = new Map(fresh.map((p, i) => [p, i]));
+    let registered = 0;
     for (const [path, c] of plan) {
       if (c.deleted) {
         out.set(path, { entry: { ver: c.ver, rev: "", hash: "", size: 0, deleted: true, by: s.deviceId }, data: null });
@@ -515,11 +561,24 @@ export class E2eeSync extends E2eeSyncPairing {
       const hash = await sha256Hex(data);
       let up = uploads.get(path);
       if (!up || up.hash !== hash) {
-        const rev = toB64u(randomBytes(12));
-        const name = await this.blob(path, rev);
+        const at = freshIndex.get(path);
+        if (at !== undefined && !ahead.has(path)) {
+          while (registered <= at) {
+            await register(registered);
+            registered += SAVE_BATCH;
+          }
+        }
+        let pre = ahead.get(path);
+        if (!pre) {
+          // Uploaded earlier in this call and changed since: one name, saved before the upload.
+          const rev = toB64u(randomBytes(12));
+          pre = { rev, name: await this.blob(path, rev) };
+          s.pending.push(pre.name);
+          await this.save();
+        }
+        ahead.delete(path);
+        const { rev, name } = pre;
         const sealed = await seal(this.o.keys.blobs, this.o.keys.vaultId, "blob", name, data);
-        s.pending.push(name);
-        await this.save();
         await this.o.provider.put(name, sealed, { ifNoneMatch: "*" });
         // Kept for the base after the commit only when it will be stored (see setBase).
         up = { hash, rev, size: data.length, data: data.length > BASE_BYTES_LIMIT ? null : data, epoch: this.o.keys.epoch };
@@ -551,14 +610,23 @@ export class E2eeSync extends E2eeSyncPairing {
     const garbage = [...new Set(s.pending.filter((n) => !referenced.has(n)))];
     s.pending = [...garbage];
     await this.save();
+    // Deleted names leave `pending` SAVE_BATCH at a time (FC1): one still
+    // listed after an interruption is deleted again, a no-op.
+    const done = new Set<string>();
+    const forget = async () => {
+      s.pending = s.pending.filter((n) => !done.has(n));
+      done.clear();
+      await this.save();
+    };
     for (const name of garbage) {
       try {
         await this.o.provider.delete(name);
       } catch {
         continue; // costs space, never data; retried after the next round
       }
-      s.pending = s.pending.filter((n) => n !== name);
-      await this.save();
+      done.add(name);
+      if (done.size >= SAVE_BATCH) await forget();
     }
+    if (done.size) await forget();
   }
 }

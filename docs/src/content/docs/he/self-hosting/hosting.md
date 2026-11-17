@@ -1,6 +1,7 @@
 ---
 title: איפה Lumen רץ
 description: מה עובד באיזה אירוח — Cloudflare Pages, Netlify, Vercel ותמונת ה-Docker — ואיך כל אחד מוגדר.
+type: how-to
 ---
 
 Lumen היא אפליקציה סטטית: `npm run build` מייצר `dist/`, וכל אירוח שמגיש
@@ -100,16 +101,16 @@ Netlify מחיל את `dist/_headers` על כל תגובה ולא יכול לנ�
 node scripts/content-frame-site.mjs
 npx wrangler pages deploy dist-frame --project-name lumen-md-frame
 # האפליקציה, בנויה כך שתשתמש בו
-VITE_CONTENT_FRAME_URL=https://lumen-md-frame.pages.dev/ npm run build
+LUMEN_CONTENT_FRAME_URL=https://lumen-md-frame.pages.dev/ npm run build
 ```
 
 אם אתם מארחים אתר מסגרת משלכם, הוסיפו את ה-origin שלו ל-`frame-src` בקובץ
 ‏`security/policy.json` (הנתיב `app`), ואת ה-origin של האפליקציה שלכם
 ל-`frame-ancestors` של אתר המסגרת (המארח `content-frame-site`). אחר כך
 הריצו `npm run headers:write`. במגן המסגרות של האפליקציה עצמה אין צורך לשנות
-דבר: הוא סומך על ה-origin של `VITE_CONTENT_FRAME_URL` שאיתו נבנתה האפליקציה.
+דבר: הוא סומך על ה-origin של `LUMEN_CONTENT_FRAME_URL` שאיתו נבנתה האפליקציה.
 
-בנייה בלי `VITE_CONTENT_FRAME_URL` עדיין מציגה תמונות, וידאו, שמע ו-Gist
+בנייה בלי `LUMEN_CONTENT_FRAME_URL` עדיין מציגה תמונות, וידאו, שמע ו-Gist
 במסגרת שאין לה origin בכלל, כך ששום דבר בתוכה לא מגיע לאפליקציה. הטמעות כמו
 YouTube או Vimeo צריכות origin משלהן כדי לנגן, ולכן בבנייה כזו הן מופיעות
 כקישור שפותח את הנגן בלשונית חדשה.

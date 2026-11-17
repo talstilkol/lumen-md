@@ -10,6 +10,7 @@
  * `synth` answers { audio: Float32Array (transferred), ms } — the audio at
  * the voice's sample rate, and how long inference took.
  */
+import "../workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import * as ort from "onnxruntime-web/wasm";
 
 type In =

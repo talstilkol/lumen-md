@@ -1,12 +1,6 @@
 {
   "$comment": "Live-seam allow list (W11.I1, R4.1). Every register*/set* hook in src/ with no production caller must be listed here with its kind (pending | test-only | dead), the plan task that closes it, the reason, and an expiry date (YYYY-MM-DD, at most 183 days ahead). An expired entry fails `npm run hygiene`, as does a stale one (the seam is live now, or gone). Read by scripts/lib/liveSeams.mjs.",
   "seams": {
-    "setToolPermission": {
-      "kind": "pending",
-      "task": "W10.C2",
-      "reason": "per-tool MCP permissions from the servers screen",
-      "expires": "2026-12-31"
-    },
     "setArgon2idImplementation": {
       "kind": "pending",
       "task": "W10.D5",
@@ -35,12 +29,6 @@
       "kind": "test-only",
       "task": "W10.E1",
       "reason": "the real render handler behind a structured-clone boundary for tests (renderWorker, viewportPreview)",
-      "expires": "2027-05-14"
-    },
-    "setInjectionClassifier": {
-      "kind": "pending",
-      "task": "W10.E66",
-      "reason": "the prompt-injection classifier seam: ProtectAI v2 is registered once it is converted and hosted (plan 6.0, 15.9); until then the async guards give what the sync rules give",
       "expires": "2027-05-14"
     }
   }

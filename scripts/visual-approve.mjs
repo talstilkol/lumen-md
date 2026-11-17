@@ -15,6 +15,7 @@
  *           print   (e2e/print-golden.spec.ts)
  *           canvas  (e2e/canvas-note-cards.spec.ts)
  *           slides  (e2e/slides.spec.ts)
+ *           wave12  (e2e/viz-wave12.spec.ts: the W12.V1 charts and the W12.V3 tree)
  *           smoke   (e2e/visual-smoke.spec.ts, chromium)
  */
 import { spawnSync } from "node:child_process";
@@ -27,6 +28,8 @@ export const SUITES = {
   canvas: { config: "playwright.config.ts", files: ["e2e/canvas-note-cards.spec.ts"], project: "chromium" },
   slides: { config: "playwright.config.ts", files: ["e2e/slides.spec.ts"], project: "chromium" },
   smoke: { config: "playwright.config.ts", files: ["e2e/visual-smoke.spec.ts"], project: "chromium" },
+  // Wave g6 (Mac pack L5): the wave-12 chart and tree baselines, RTL and LTR (W12.V1, W12.V3).
+  wave12: { config: "playwright.config.ts", files: ["e2e/viz-wave12.spec.ts"], project: "chromium" },
 };
 
 /** The command and environment for a suite (exported for the test). */

@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import "./helpers/commandSections";
 import { render, screen, fireEvent, waitFor, renderHook } from "@testing-library/react";
 
 vi.mock("../ui/AiToast", () => ({ showAiToast: vi.fn() }));
@@ -38,7 +39,7 @@ describe("ThemeSettings panel", () => {
     render(<ThemeSettings open onClose={() => {}} />);
     expect(screen.getByRole("dialog", { name: "Theme" })).toBeTruthy();
     const radios = screen.getAllByRole("radio");
-    expect(radios.map((r) => r.textContent)).toEqual(["Default", "Sepia", "Nord", "High contrast"]);
+    expect(radios.map((r) => r.textContent)).toEqual(["Default", "Sepia", "Nord", "High contrast", "Ktav (Hebrew reading)"]);
     expect(radios[0].getAttribute("aria-checked")).toBe("true");
     expect(screen.getByLabelText("Font size")).toBeTruthy();
     expect(screen.getByLabelText("Line height")).toBeTruthy();

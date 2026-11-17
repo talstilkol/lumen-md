@@ -23,4 +23,6 @@
     <string name="capture_saved">נשמר בתיבה</string>
     <string name="capture_failed">השמירה נכשלה. הטקסט עדיין כאן.</string>
     <string name="tile_capture">לכידה</string>
+    <string name="tile_voice">פתק קולי ב-Lumen</string>
+    <string name="tile_voice_subtitle">הקלטה לתיבה</string>
 </resources>

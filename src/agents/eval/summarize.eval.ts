@@ -11,16 +11,18 @@
  *                              split built with the golden seed for all 20)
  *   LUMEN_EVAL_OUT             report directory, default eval/results
  *
- * Target (plan 6.11): ≥ 95 % of the sentences grounded. Key-word coverage is
- * reported as a second signal.
+ * Target (plan 6.11): ≥ 95 % of the sentences grounded. Key-word coverage and
+ * ROUGE-L / ROUGE-Lsum F1 against each item's reference (W10.C9, rouge.ts)
+ * are reported as further signals.
  */
 import { describe, it, expect, vi } from "vitest";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 vi.mock("../../billing/aiQuota", () => ({ chargeAiCommandDispatch: vi.fn(), consumeAiPrompt: vi.fn(() => true), aiQuotaStatus: () => ({ allowed: true, limit: Infinity }), AiQuotaExceededError: class extends Error {} }));
 
 import { summarize } from "../../ai/summarize";
+import { loadSplit, scoreSummary, summaryMarkdown, summaryTotals, type SummaryRow } from "../../../scripts/eval/lib/summaryReport";
 
 const url = process.env.LUMEN_EVAL_OLLAMA_URL || "http://localhost:11434";
 const model = process.env.LUMEN_EVAL_MODEL || "qwen2.5:7b";
@@ -37,40 +39,27 @@ describe.skipIf(!process.env.LUMEN_EVAL_SUMMARY)(`summary eval — ${model} @ ${
     localStorage.setItem("lumen.ollama.model", model);
     localStorage.setItem("lumen.ai.policy", "local-only");
 
-    const rows: Array<{ id: string; engine: string; produced: number; grounded: number; keywords: string; ms: number }> = [];
+    const rows: SummaryRow[] = [];
     for (const dir of dirs) {
-      const set = JSON.parse(readFileSync(join(dir, "sotu.json"), "utf8")) as { items: Array<{ id: string; document: string; keywords: string[] }> };
-      for (const item of set.items) {
+      for (const item of loadSplit(dir)) {
         const t0 = Date.now();
         const r = await summarize(item.document, { noChrome: true, sentences: 3 });
-        const text = r.sentences.join(" ").toLowerCase();
-        const kw = item.keywords.filter((k) => text.includes(k.toLowerCase())).length;
-        rows.push({ id: item.id, engine: r.engine, produced: r.sentences.length + r.dropped, grounded: r.sentences.length, keywords: `${kw}/${item.keywords.length}`, ms: Date.now() - t0 });
+        const sc = scoreSummary(item, r.sentences.join(" "));
+        rows.push({ id: item.id, engine: r.engine, produced: r.sentences.length + r.dropped, grounded: r.sentences.length, ...sc, ms: Date.now() - t0 });
         const x = rows[rows.length - 1];
         // hygiene-allow: progress output of a CLI eval run
-        console.log(`${x.id}  ${x.engine}  grounded ${x.grounded}/${x.produced}  key words ${x.keywords}  ${(x.ms / 1000).toFixed(1)} s`);
+        console.log(`${x.id}  ${x.engine}  grounded ${x.grounded}/${x.produced}  key words ${x.keywords}  ROUGE-L ${x.rougeL?.toFixed(3) ?? "—"}  ${(x.ms / 1000).toFixed(1)} s`);
       }
     }
-    const model_ = rows.filter((r) => r.engine !== "extractive");
-    const produced = model_.reduce((a, r) => a + r.produced, 0);
-    const grounded = model_.reduce((a, r) => a + r.grounded, 0);
-    const share = produced ? grounded / produced : 0;
+    const totals = summaryTotals(rows);
+    const { grounded, produced, groundedShare: share } = totals;
     const date = new Date().toISOString().slice(0, 10);
     const slug = model.replace(/[^\w.-]+/g, "_");
     mkdirSync(outDir, { recursive: true });
-    const md = [
-      `# Summary eval — ${model}, ${date}`,
-      "",
-      `Grounded sentences (model summaries, before dropping): **${grounded} / ${produced} (${(share * 100).toFixed(1)} %)** — target ≥ 95 % (plan 6.11).`,
-      `Documents the model summarised: ${model_.length} / ${rows.length} (the rest fell back to the extractive layer and are not counted).`,
-      "",
-      "| id | engine | grounded | key words | s |",
-      "|---|---|---|---|---|",
-      ...rows.map((r) => `| ${r.id} | ${r.engine} | ${r.grounded}/${r.produced} | ${r.keywords} | ${(r.ms / 1000).toFixed(1)} |`),
-    ].join("\n");
+    const md = summaryMarkdown(model, date, rows);
     writeFileSync(join(outDir, `summary-${date}-${slug}.md`), md + "\n");
-    writeFileSync(join(outDir, `summary-${date}-${slug}.json`), JSON.stringify({ model, url, date, grounded, produced, rows }, null, 2));
+    writeFileSync(join(outDir, `summary-${date}-${slug}.json`), JSON.stringify({ model, url, date, grounded, produced, rougeL: totals.rougeL, rougeLsum: totals.rougeLsum, rows }, null, 2));
     // hygiene-allow: tells the person running the eval where the report is
-    console.log(`\nGrounded ${grounded}/${produced} (${(share * 100).toFixed(1)} %). Report: ${join(outDir, `summary-${date}-${slug}.md`)}`);
+    console.log(`\nGrounded ${grounded}/${produced} (${(share * 100).toFixed(1)} %), ROUGE-L ${totals.rougeL?.toFixed(3) ?? "—"}. Report: ${join(outDir, `summary-${date}-${slug}.md`)}`);
   }, 60 * 60 * 1000);
 });

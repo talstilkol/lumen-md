@@ -1,0 +1,36 @@
+# Development set 2 (English): written as a held-out set, scored once (87.5%, first run in the PR), then used to tune the rules — so it is development data now.
+# N noun · V verb · A adjective · O other (function words, pronouns, adverbs, numbers, modals)
+Last/A week/N the/O city/N council/N approved/V a/O new/A budget/N for/O public/A transport/N
+The/O plan/N adds/V twelve/O bus/N lines/N and/O extends/V the/O light/A rail/N to/O the/O northern/A suburbs/N
+Residents/N welcomed/V the/O decision/N but/O some/O shop/N owners/N worry/V about/O the/O construction/N
+Work/N will/O begin/V in/O March/N and/O should/O finish/V within/O two/O years/N
+My/O grandmother/N grows/V tomatoes/N in/O a/O small/A garden/N behind/O her/O house/N
+Every/O morning/N she/O waters/V the/O plants/N and/O checks/V the/O leaves/N for/O insects/N
+In/O winter/N the/O rain/N turns/V the/O paths/N into/O mud/N
+Her/O grandchildren/N visit/V on/O holidays/N and/O she/O bakes/V a/O sweet/A cake/N for/O them/O
+A/O recent/A study/N found/V that/O sleep/N strengthens/V memory/N
+Researchers/N tested/V one/O hundred/O students/N over/O a/O month/N
+Those/O who/O slept/V eight/O hours/N remembered/V more/O words/N than/O the/O others/N
+The/O results/N appeared/V in/O a/O leading/A scientific/A journal/N
+Blue/A light/N from/O screens/N makes/V it/O harder/A for/O the/O brain/N to/O relax/V
+To/O install/V the/O program/N click/V the/O green/A button/N
+After/O installation/N the/O computer/N restarts/V automatically/O
+If/O an/O error/N message/N appears/V check/V your/O network/N connection/N
+The/O file/N is/V saved/V in/O the/O main/A folder/N
+The/O old/A city/N attracts/V thousands/O of/O tourists/N every/O year/N
+Its/O narrow/A streets/N are/V full/A of/O shops/N and/O cafes/N
+At/O the/O market/N you/O can/O buy/V spices/N and/O fresh/A fruit/N
+Our/O guide/N told/V us/O about/O the/O history/N of/O the/O place/N
+Two/O thousand/O years/N ago/O a/O great/A temple/N stood/V here/O
+Today/O only/O a/O few/O stones/N remain/V
+Our/O team/N won/V the/O last/A game/N
+The/O players/N ran/V fast/O and/O kicked/V hard/O
+The/O fans/N sang/V until/O late/O at/O night/N
+The/O new/A coach/N changed/V the/O whole/A system/N
+Writers/N often/O revise/V a/O draft/N many/O times/N before/O they/O publish/V it/O
+A/O clear/A sentence/N carries/V one/O idea/N
+Long/A paragraphs/N tire/V readers/N quickly/O
+Good/A editors/N cut/V unnecessary/A words/N without/O mercy/N
+The/O museum/N opens/V at/O nine/O and/O closes/V at/O six/O
+Children/N enter/V for/O free/A on/O weekends/N
+The/O library/N lends/V books/N and/O music/N

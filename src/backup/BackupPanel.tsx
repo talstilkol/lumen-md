@@ -13,7 +13,7 @@ import { getVaultBackend } from "../storage/vault";
 import { createFolderBackend, ensureFolderPermission, pickVaultFolder, vaultFolderHandle } from "../storage/vault/location";
 import { generateIdentity } from "../sync/e2ee/age";
 import { listBackups, restore, targetInsideVault } from "./backup";
-import { loadBackupConfig, saveBackupConfig, type BackupConfig } from "./config";
+import { loadBackupConfig, saveBackupConfig, WEBDAV_BACKUP_PASSWORD, type BackupConfig } from "./config";
 import { backupHealth, backupStatus, subscribeBackupStatus } from "./status";
 import { startBackups, targetFor } from "./start";
 import { HelpButton } from "../ui/HelpButton";
@@ -50,9 +50,11 @@ function Panel({ onClose }: { onClose: () => void }) {
   const [backups, setBackups] = useState<Array<{ name: string; at: number; encrypted: boolean }>>([]);
   const [path, setPath] = useState("");
   const [identity, setIdentity] = useState("");
+  const [dav, setDav] = useState({ url: "", username: "", password: "" });
 
   const refresh = async (c: BackupConfig | null) => {
-    setBackups(c ? await listBackups(await targetFor(c)).catch(() => []) : []);
+    // A target that cannot be built (the WebDAV password not on this device) lists nothing, as an unreachable one does.
+    setBackups(c ? await targetFor(c).then(listBackups).catch(() => []) : []);
   };
   useEffect(() => {
     void loadBackupConfig().then((c) => {
@@ -81,9 +83,40 @@ function Panel({ onClose }: { onClose: () => void }) {
     void refresh(c);
   }
 
+  /** W10.C15: a WebDAV server as the target (password to the secret store; plain or encrypted like a folder). */
+  async function chooseWebdav(encrypted: boolean) {
+    setError(null);
+    let u: URL;
+    try {
+      u = new URL(dav.url.trim());
+    } catch {
+      return setError(t("backup.webdav.badUrl"));
+    }
+    if (u.protocol !== "https:") return setError(t("backup.webdav.badUrl"));
+    if (!dav.username.trim() || !dav.password) return setError(t("backup.webdav.missing"));
+    // R8-M2: a plain archive is readable on the server; under local-only it is refused before anything is saved.
+    if (!encrypted && (await import("../ai/policy")).getAiPolicy() === "local-only") return setError(t("backup.webdav.plainLocalOnly"));
+    const { setSecret } = await import("../lib/secretStore");
+    await setSecret(WEBDAV_BACKUP_PASSWORD, dav.password);
+    let mode: BackupConfig["mode"] = { kind: "plain" };
+    if (encrypted) {
+      const id = await generateIdentity();
+      setKey(id);
+      mode = { kind: "age", recipient: id.recipient };
+    }
+    const c: BackupConfig = { kind: "webdav", url: u.href, username: dav.username.trim(), label: u.host, mode };
+    // Creates the lumen-backups/ folder and checks the server takes writes before anything is saved.
+    await targetFor(c, { probe: true });
+    await saveBackupConfig(c);
+    setDav({ url: "", username: "", password: "" });
+    setConfig(c);
+    startBackups();
+    void refresh(c);
+  }
+
   async function backupNow() {
     setError(null);
-    if (config) await ensureFolderPermission(config.handle, true);
+    if (config?.kind === "folder") await ensureFolderPermission(config.handle, true);
     await startBackups()
       .backupNow()
       .catch(fail);
@@ -122,6 +155,27 @@ function Panel({ onClose }: { onClose: () => void }) {
         </div>
         <p style={muted}>{t("backup.intro")}</p>
         <Status />
+        <details data-testid="backup-webdav">
+          <summary style={{ fontSize: 13 }}>{t("backup.webdav.title")}</summary>
+          <div style={{ display: "grid", gap: 6, marginTop: 6 }}>
+            <input dir="ltr" aria-label={t("backup.webdav.url")} placeholder={t("backup.webdav.url")} value={dav.url} onChange={(e) => setDav({ ...dav, url: e.target.value })} style={field} data-testid="backup-webdav-url" />
+            <input dir="ltr" aria-label={t("backup.webdav.user")} placeholder={t("backup.webdav.user")} value={dav.username} autoComplete="username" onChange={(e) => setDav({ ...dav, username: e.target.value })} style={field} data-testid="backup-webdav-user" />
+            <input dir="ltr" type="password" aria-label={t("backup.webdav.password")} placeholder={t("backup.webdav.password")} value={dav.password} autoComplete="current-password" onChange={(e) => setDav({ ...dav, password: e.target.value })} style={field} data-testid="backup-webdav-password" />
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {/* R8-M2: encrypted is the first, primary choice; plain comes second, with its warning. */}
+              <button type="button" className="btn btn-primary" onClick={() => void chooseWebdav(true).catch(fail)} data-testid="backup-webdav-age">
+                {t("backup.webdav.useAge")}
+              </button>
+              <button type="button" onClick={() => void chooseWebdav(false).catch(fail)} data-testid="backup-webdav-plain" aria-describedby="backup-webdav-plain-warning">
+                {t("backup.webdav.usePlain")}
+              </button>
+            </div>
+            <p id="backup-webdav-plain-warning" role="note" style={muted} data-testid="backup-webdav-plain-warning">
+              {t("backup.webdav.plainWarning")}
+            </p>
+            <p style={muted}>{t("backup.webdav.note")}</p>
+          </div>
+        </details>
         {config === undefined ? null : (
           <>
             <div style={{ fontSize: 13 }}>
@@ -211,6 +265,7 @@ export function openBackupPanel(): void {
     document.body.appendChild(host);
     root = createRoot(host);
   }
+  if (!host.isConnected) document.body.appendChild(host); // the page body was replaced since (tests, a re-mounted shell)
   const close = () => root?.render(null);
   root!.render(<Panel onClose={close} />);
 }

@@ -4,6 +4,7 @@
  * app serves from public/plugins/examples/.
  *
  *   node scripts/build-plugin-registry.mjs           # writes index.json, then scan.json
+ *   node scripts/build-plugin-registry.mjs --bump-serial  # raise index.json's serial now (review 11, M5), then --sign
  *   node scripts/build-plugin-registry.mjs --check   # exit 1 when either is out of date, a version fails its scan,
  *                                                    # or index.json.sig no longer matches index.json
  *   node scripts/build-plugin-registry.mjs --keygen <dir>   # owner, once: a new Ed25519 key pair in <dir>
@@ -68,7 +69,10 @@ if (process.argv.includes("--keygen")) {
   console.log(`VITE_PLUGIN_TRUSTED_KEYS=${trustedKeysEnv(k.spkiBase64)}`);
   process.exit(0);
 }
-const ALLOWED_EXTRA = new Set(["LICENSE", "LICENSE.md", "README.md"]);
+// W13.L5: author.sigstore.json is the author's keyless Sigstore signature of the version (scripts/lib/plugin-author.mjs).
+const ALLOWED_EXTRA = new Set(["LICENSE", "LICENSE.md", "README.md", "author.sigstore.json"]);
+const { verifyAuthor, versionFiles } = await import(pathToFileURL(join(ROOT, "scripts/lib/plugin-author.mjs")).href);
+const trustedRoot = process.env.LUMEN_SIGSTORE_TRUSTED_ROOT ? JSON.parse(readFileSync(process.env.LUMEN_SIGSTORE_TRUSTED_ROOT, "utf8")) : null;
 
 const problems = [];
 const found = new Map();
@@ -90,7 +94,16 @@ for (const name of readdirSync(DIR).sort()) {
   if (twin) problems.push(`${name}: ${manifest.id}@${manifest.version} is also in ${twin.path}`);
   const sha256 = existsSync(join(at, manifest.main)) ? createHash("sha256").update(readFileSync(join(at, manifest.main), "utf8")).digest("hex") : "";
   const manifestSha256 = createHash("sha256").update(readFileSync(join(at, "lumen-plugin.json"))).digest("hex");
-  found.set(manifest.id, [...versions, { name: manifest.name, version: manifest.version, path: name, sha256, manifestSha256 }]);
+  // W13.L5: a version with an author signature is listed as "verified author" only when the signature verifies and its
+  // identity is the manifest's publisher.github. A signature that does not verify fails the build.
+  let author;
+  if (existsSync(join(at, "author.sigstore.json"))) {
+    const f = versionFiles(at);
+    const r = await verifyAuthor({ bundle: f.bundle, statement: f.statement, github: f.manifest.publisher?.github, trustedRoot });
+    if (r.ok) author = { github: r.github, issuer: r.issuer };
+    else problems.push(`${name}: author signature: ${r.reason}`);
+  }
+  found.set(manifest.id, [...versions, { name: manifest.name, version: manifest.version, path: name, sha256, manifestSha256, ...(author ? { author } : {}) }]);
 }
 
 /** Semantic-version order (pre-releases before their release). */
@@ -116,10 +129,17 @@ const index = {
     "Static plugin registry (plan 11.2, W1.20, W4.32), built by scripts/build-plugin-registry.mjs: one folder per version; every version listed here is scanned (scripts/scan-plugins.mjs → scan.json); a version whose scan fails is not shown.",
   plugins: order.map((id) => {
     const versions = [...found.get(id)].sort((a, b) => semverCmp(a.version, b.version));
-    return { id, name: versions[versions.length - 1].name, versions: versions.map((v) => ({ version: v.version, path: v.path, sha256: v.sha256, manifestSha256: v.manifestSha256 })) };
+    // W11.S14: a takedown (review-plugins.mjs --takedown) stays until the version's folder is removed.
+    const before = previous.plugins.find((p) => p.id === id)?.versions ?? [];
+    const delisted = (v) => before.find((b) => b.version === v.version && b.path === v.path)?.delisted;
+    return { id, name: versions[versions.length - 1].name, versions: versions.map((v) => ({ version: v.version, path: v.path, sha256: v.sha256, manifestSha256: v.manifestSha256, ...(v.author ? { author: v.author } : {}), ...(delisted(v) ? { delisted: delisted(v) } : {}) })) };
   }),
 };
-const out = JSON.stringify(index, null, 2) + "\n";
+// Review 11, M5: the serial goes up with every change to what the index lists (the app refuses an older
+// index once it saw a newer one); unchanged content keeps it. --bump-serial raises it now (the owner, before --sign).
+const sameContent = JSON.stringify(index.plugins) === JSON.stringify(previous.plugins ?? []);
+const serial = (Number.isSafeInteger(previous.serial) ? previous.serial : 0) + (sameContent && !process.argv.includes("--bump-serial") ? 0 : 1);
+const out = JSON.stringify(serial > 0 ? { about: index.about, serial, plugins: index.plugins } : index, null, 2) + "\n";
 const stale = !existsSync(INDEX) || readFileSync(INDEX, "utf8") !== out;
 console.log(`${index.plugins.length} plugins in the registry${stale ? (check ? " — index.json is out of date: run node scripts/build-plugin-registry.mjs" : " — index.json written") : ""}`);
 if (!check && stale) writeFileSync(INDEX, out);

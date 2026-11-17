@@ -20,15 +20,20 @@
  * The schema test (settingsSchema.test.ts) scans the sources and fails
  * when a stored key or persisted field is missing here.
  *
- * Pure data: no imports, so the test and the export code load it alone.
+ * Pure data: one pure import (the filter fold, W13.E3), so the test and the
+ * export code load it alone.
  */
 
-export type SettingsTab = "general" | "appearance" | "ai" | "sync" | "fineTune" | "privacy" | "security" | "org";
+import { normalizeForFilter } from "../text/filterMatch";
+
+export type SettingsTab = "general" | "appearance" | "ai" | "calendar" | "mcp" | "sync" | "fineTune" | "privacy" | "security" | "org";
 
 export const SETTINGS_TABS: ReadonlyArray<{ id: SettingsTab; label: string }> = [
   { id: "general", label: "settings.general" },
   { id: "appearance", label: "themeSettings.title" },
   { id: "ai", label: "ai.settings.title" },
+  { id: "calendar", label: "settings.calendar" },
+  { id: "mcp", label: "settings.mcp" },
   { id: "sync", label: "collab.settings.title" },
   { id: "fineTune", label: "fineTune.title" },
   // Decision 2.41 (#372, W10.E70): the allowed image hosts, with revoke, inside the settings screen too.
@@ -91,7 +96,7 @@ export const SETTINGS: readonly SettingEntry[] = [
     // Labels are the languages' own names (SUPPORTED_LOCALES), not i18n keys.
     options: [
       { value: "en" }, { value: "he" }, { value: "ar" }, { value: "ru" },
-      { value: "fr" }, { value: "de" }, { value: "ja" }, { value: "zh-CN" },
+      { value: "fr" }, { value: "de" }, { value: "ja" }, { value: "zh-CN" }, { value: "fa" },
     ],
   }),
   app("rtl", { kind: "setting", tab: "general", label: "cmd.view.rtl.on", type: "boolean" }),
@@ -149,6 +154,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   local("lumen.ai.model.local-webgpu", { kind: "setting", tab: "ai", label: "cmd.ai.localModels", type: "text" }),
   local("lumen.ai.model.*", { kind: "setting", tab: "ai", type: "text" }),
   local("lumen.ai.executor", { kind: "setting", tab: "ai", label: "ai.settings.executor", type: "text" }),
+  // W11.I16: the engine ladder's WebNN rung, off unless turned on (agents/doctorLadder.ts).
+  local("lumen.ai.webnn", { kind: "setting", tab: "ai", type: "boolean", values: ["", "1"] }),
   local("lumen.ollama.baseUrl", { kind: "setting", tab: "ai", label: "ai.settings.ollama.url", type: "text" }),
   local("lumen.ollama.model", { kind: "setting", tab: "ai", label: "ai.settings.ollama.model", type: "text" }),
   local("lumen.grammar.endpoint", { kind: "setting", tab: "ai", label: "ai.settings.grammar", type: "text" }),
@@ -156,7 +163,7 @@ export const SETTINGS: readonly SettingEntry[] = [
   local("lumen.research.provider", { kind: "setting", tab: "ai", type: "text" }),
   // A consent: like the other opt-ins, never taken from an imported file.
   data("lumen.research.webConsent"),
-  local("lumen.ai.rerank", { kind: "setting", tab: "ai", label: "cmd.ai.rerankModel", type: "choice", options: [{ value: "lexical" }, { value: "model" }] }),
+  local("lumen.ai.rerank", { kind: "setting", tab: "ai", label: "cmd.ai.rerankModel", type: "choice", options: [{ value: "off" }, { value: "lexical" }, { value: "model" }] }),
   local("lumen.ai.imageText", { kind: "setting", tab: "ai", label: "cmd.image.altText", type: "boolean", values: ["off", ""] }),
   local("lumen.ai.styleProfile.active", { kind: "setting", tab: "ai", label: "ai.settings.style.use", type: "boolean", values: ["", "1"] }),
   local("lumen.fim.enabled", { kind: "setting", tab: "ai", type: "boolean", values: ["", "1"] }),
@@ -195,6 +202,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   // The provider settings kept for one OAuth sign-in round trip (sessionStorage).
   secret("lumen-sync-pending-oauth", "sync"),
   secret("lumen.sync.webdav.password", "sync"),
+  // W10.C15: the WebDAV backup target's password (backup/config.ts), in the secret store.
+  secret("lumen.backup.webdav.password", "sync"),
   secret("lumen.sync.s3.secretAccessKey", "sync"),
   secret("lumen.publish.github.token", "sync"),
   // The git CORS proxy sees the git traffic, token included: not imported.
@@ -210,6 +219,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   data("lumen.remoteImages.allowedHosts"),
   data("lumen.plantuml.krokiOptIn"),
   data("lumen.monitoring.consent"),
+  data("lumen.monitoring.performance"),
+  data("lumen.monitoring.dsn"),
   data("lumen.agents.untrustedNotes"),
   data("lumen.agents.provenanceBackfill.v1"),
   data("lumen.secrets.index"),
@@ -255,9 +266,22 @@ export const SETTINGS: readonly SettingEntry[] = [
   local("lumen.nikud.quality", { kind: "setting", tab: "general", type: "text" }),
   local("lumen.tts.settings", { kind: "setting", tab: "general", type: "json" }),
   local("lumen.bidiMarks", { kind: "setting", tab: "general", type: "boolean", values: ["", "1"] }),
+  // W13.H1: Word's cursor movement (visual by default); this device only, never synced.
+  local("lumen.cursorMovement", {
+    kind: "setting", tab: "general", label: "editor.cursorMovement", type: "choice",
+    options: [
+      { value: "visual", label: "editor.cursorMovement.visual" },
+      { value: "logical", label: "editor.cursorMovement.logical" },
+    ],
+  }),
+  // W13.V6: extra folders the tree, the index and the watcher skip (.git, node_modules… always); `!name` walks a default again.
+  local("lumen.index.ignore", { kind: "setting", tab: "general", label: "settings.indexIgnore", type: "list", maxItems: 50 }),
   local("lumen-reading", { kind: "setting", tab: "general", type: "json" }),
   local("lumen-reading-aids", { kind: "setting", tab: "general", type: "json" }),
   local("lumen-hebrew-typography", { kind: "setting", tab: "general", type: "json" }),
+  // W13.I5 / W13.I7: the digits of an Arabic or a Persian UI.
+  local("lumen-numerals-ar", { kind: "setting", tab: "general", type: "choice", options: [{ value: "latn" }, { value: "native" }] }),
+  local("lumen-numerals-fa", { kind: "setting", tab: "general", type: "choice", options: [{ value: "latn" }, { value: "native" }] }),
   // Secrets: account passwords and tokens, never exported or imported.
   secret("lumen.calendar.caldav.password", "sync"),
   secret("lumen.zotero.apiKey", "general"),
@@ -266,10 +290,20 @@ export const SETTINGS: readonly SettingEntry[] = [
   secret("lumen.collab.owner.*", "sync"),
   // Trust, consent and privacy switches: like the trust anchors above, never taken from an imported file.
   data("lumen.mcp.servers"),
+  // Which MCP tool definitions the user allowed to run, per vault (agents/mcp/approvals.ts).
+  data("lumen.mcp.approvals"),
   data("lumen.agents.trustedRepos"),
+  // W13.P1: the app lock (on / delay / this device's credential id): a privacy switch, never imported.
+  data("lumen-app-lock"),
   data("lumen.skills.allowed"),
   data("lumen.openSources"),
+  // Z7-M3: "always" for the Wikidata entity search; a consent, so never taken from an imported file.
+  data("lumen.wikidata.always"),
+  // R8-M1: the one-time consent to Tectonic's package downloads (latex/tectonicDesktop.ts); never imported.
+  data("lumen.latex.tectonicDownloads"),
   data("lumen.airplane"),
+  // W12.X3: the OpenAlex reference lookup, off by default; shown in the Privacy tab (so search finds it), never imported.
+  local("lumen.openAlex.enabled", { kind: "data", tab: "privacy", label: "openAlex.switch", type: "boolean", values: ["", "1"] }),
   data("lumen.usage.counting"),
   data("lumen.backup.enabled"),
   data("lumen.beta.v1"),
@@ -301,6 +335,63 @@ export const SETTINGS: readonly SettingEntry[] = [
   data("lumen.sync.speed.v1"),
   data("lumen.academicExport.v1"),
   data("lumen.whatsNew.seen"),
+
+  // ── Train 7 (W10.Z3 re-review of W10.A9): keys stored since train 5 ──
+  // User choices with no privacy effect.
+  local("lumen.ai.lmstudio.model", { kind: "setting", tab: "ai", type: "text" }),
+  local("lumen.attachmentCleanup", { kind: "setting", tab: "general", type: "choice", options: [{ value: "ask" }, { value: "always" }, { value: "never" }] }),
+  local("lumen.sync.conflictMode.v1", { kind: "setting", tab: "sync", type: "choice", options: [{ value: "merge" }, { value: "file" }] }),
+  local("lumen.backlinks.sort", { kind: "setting", tab: "general", type: "choice", options: [{ value: "name" }, { value: "modified" }] }),
+  // Wave g3 (W13), added by INT7 at integration: what the reading, writing and graph lanes keep on this device.
+  local("lumen.writing.level", { kind: "setting", tab: "general", type: "choice", options: [{ value: "everyday" }, { value: "professional" }, { value: "academic" }] }),
+  local("lumen.writing.rankWithModel", { kind: "setting", tab: "ai", type: "boolean", values: ["0", "1"] }),
+  local("lumen.writingChecks.v1", { kind: "setting", tab: "general", type: "json" }),
+  data("lumen.writingGoals.log.v1"),
+  // Wave g4 (W13.S1): how long this vault keeps old versions of notes and attachments (per vault).
+  local("lumen.history.retention.v1.*", { kind: "setting", tab: "general", type: "json" }),
+  // Wave g4 (W13.Y4): this device's text size over the system's (1–3.1; none: follow the system).
+  local("lumen.textScale.override", { kind: "setting", tab: "appearance", type: "number", min: 1, max: 3.1 }),
+  local("lumen.map.offline", { kind: "setting", tab: "privacy", type: "boolean", values: ["", "1"] }),
+  local("lumen-paged", { kind: "setting", tab: "general", type: "json" }),
+  local("lumen.compare", { kind: "setting", tab: "general", type: "json" }),
+  local("lumen-bilingual-mode", { kind: "setting", tab: "general", type: "text" }),
+  local("lumen.graph.engine", { kind: "setting", tab: "general", type: "choice", options: [{ value: "auto" }, { value: "gpu" }, { value: "standard" }, { value: "list" }] }),
+  // W13.I3: dates in the Hebrew calendar (src/i18n/format.ts).
+  local("lumen-date-calendar", { kind: "setting", tab: "general", type: "choice", options: [{ value: "hebrew" }] }),
+  // W13.R9's switch before it moved into the reading profile (lumen-reading): read once, then removed.
+  data("lumen.reading.sidenotes"),
+  // Secrets: the LM Studio API key, and the OneNote sign-in kept for one OAuth round trip.
+  secret("lumen.ai.lmstudio.key", "ai"),
+  secret("lumen-onenote-signin", "general"),
+  // Where text goes, opt-ins to a model, the update channel and feature flags: never taken from an imported file.
+  data("lumen.ai.lmstudio.url"),
+  data("lumen.ai.lmstudio.on"),
+  data("lumen.organizer.model"),
+  data("lumen.grammar.he.model"),
+  data("lumen.plugins.installed"),
+  // The highest registry-index serial seen per registry (review 11, M5): an imported file must never roll it back.
+  data("lumen.plugins.registrySerial"),
+  data("lumen-update-channel"),
+  data("lumen-flags"),
+  data("lumen-classic-look"),
+  // Measurements, caches, per-document state and bookkeeping.
+  data("lumen.pdf.spread"),
+  data("lumen.ollama.speculative"),
+  data("lumen.ollama.reproducible"),
+  data("lumen.ai.builtinGate"),
+  data("lumen-boot-edit"),
+  data("lumen.highlights.citeKeys"),
+  data("lumen.activation.v1"),
+  data("lumen.capturesAdded"),
+  data("lumen.install.count"),
+  data("lumen.storage.persistAskedAfterFirstSave"),
+  data("lumen-update-last-check"),
+  data("lumen-saved-searches-migrated"),
+  // T8 integration: keys the merged ports store (#982 academic calendar, #981 Yiddish dictionary) and the
+  // vault location the MCP approvals read (#978): a choice tied to this device, a user's word list, a path.
+  data("lumen.academic"),
+  data("lumen.dict.yi.v1"),
+  data("lumen-vault-location"),
 ];
 
 /** True when `key` is the entry's id, or matches it with `*` as a wildcard. */
@@ -329,13 +420,14 @@ export function searchSettings(
   query: string,
   translate: (key: string) => string,
 ): { entries: SettingEntry[]; tabs: Set<SettingsTab> } {
-  const q = query.trim().toLocaleLowerCase();
+  const q = normalizeForFilter(query.trim());
   const tabs = new Set<SettingsTab>();
   if (!q) {
     for (const tab of SETTINGS_TABS) tabs.add(tab.id);
     return { entries: SETTINGS.filter((e) => e.kind === "setting" && e.label), tabs };
   }
-  const hit = (s: string | undefined) => !!s && s.toLocaleLowerCase().includes(q);
+  // Niqqud, accents and geresh do not count (W13.E3).
+  const hit = (s: string | undefined) => !!s && normalizeForFilter(s).includes(q);
   for (const tab of SETTINGS_TABS) if (hit(translate(tab.label))) tabs.add(tab.id);
   const entries = SETTINGS.filter(
     (e) => !!e.label && !!e.tab && (hit(translate(e.label)) || hit(e.id)),

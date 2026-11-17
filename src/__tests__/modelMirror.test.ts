@@ -4,6 +4,7 @@
  * (scripts/models/mirror.mjs), offline.
  */
 import { describe, it, expect } from "vitest";
+import { spawnSync } from "node:child_process";
 import { handle, parseMirrorPath, releaseUrl } from "../../edge-workers/model-mirror/worker";
 import { fileDtype, keepPath, parseArgs, releaseNotes, selectModels } from "../../scripts/models/mirror.mjs";
 
@@ -92,5 +93,12 @@ describe("W4.14 mirror script (owner commands)", () => {
     expect(notes).toContain("Licence: MIT");
     expect(notes).toContain("Attribution: © someone");
     expect(notes).toContain("@ abc");
+  });
+
+  it("runs as the owner's command under plain Node, not only under Vite (g6 L3: modelHosting.ts imports ../lib/slug without an extension)", () => {
+    const r = spawnSync(process.execPath, ["--experimental-strip-types", "--no-warnings=ExperimentalWarning", "scripts/models/mirror.mjs", "--check"], { encoding: "utf8", timeout: 60_000 });
+    expect(r.stderr).not.toContain("ERR_MODULE_NOT_FOUND");
+    expect(r.status).toBe(0);
+    expect(r.stdout).toMatch(/models:mirror --check: \d+\/\d+ models can download without Hugging Face/);
   });
 });

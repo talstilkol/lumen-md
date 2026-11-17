@@ -1,6 +1,7 @@
 ---
 title: מעבר מ-Google Docs
 description: הופכים מסמכי Google Docs לפתקי Markdown ב-Lumen — מסמך אחד, או תיקייה שלמה מ-Drive.
+type: how-to
 ---
 
 ## מסמך אחד

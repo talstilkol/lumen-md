@@ -1,6 +1,7 @@
 ---
 title: מעבר מ-Bear
 description: מייצאים פתקי Bear כ-Markdown ומביאים אותם, עם התמונות, ל-Lumen.
+type: how-to
 ---
 
 ## ייצוא מ-Bear

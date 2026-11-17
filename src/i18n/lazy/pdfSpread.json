@@ -1,0 +1,8 @@
+{
+  "pdf.spread.even": "Two pages (cover alone)",
+  "pdf.spread.label": "Page layout",
+  "pdf.spread.ltr": "Book: left to right",
+  "pdf.spread.none": "One page",
+  "pdf.spread.odd": "Two pages",
+  "pdf.spread.rtl": "Book: right to left"
+}

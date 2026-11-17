@@ -1,6 +1,8 @@
 ---
 title: Meeting transcripts with speakers
 description: Transcribe a meeting recording on this device with who said what, name each speaker once, and get the meeting notes on top.
+type: how-to
+tasks: ["W10.B7", "W2.7"]
 ---
 
 `⌘K → "🎙 Transcribe a meeting recording (who said what)…"` takes an audio
@@ -45,6 +47,13 @@ everywhere in the note at once: every `**Name:**` label and the turns
 block. Other text (for example a task that mentions `S1`) is left alone.
 
 ## Accuracy
+
+**The DER has not been measured yet.** The unit tests run the pipeline on
+stand-in networks, so they show that the post-processing works, not how
+accurate the speakers are. `node scripts/eval/der.mjs --audio clip.wav --ref
+clip.rttm` runs pyannote 3.1 on a public clip with a human RTTM (VoxConverse
+or AMI, both CC BY 4.0) and scores it. It needs Python, pyannote.audio and a
+Hugging Face token, and without them it says "NOT measured".
 
 The target is a diarization error rate (DER) of at most 20% on five Hebrew
 golden recordings, and an hour of meeting processed in under 15 minutes on

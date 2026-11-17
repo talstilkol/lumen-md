@@ -8,12 +8,39 @@ import { getVaultBackend } from "../storage/vault";
 import { createFolderBackend, ensureFolderPermission } from "../storage/vault/location";
 import { toast } from "../store/useToastStore";
 import { t } from "../i18n";
-import { backendTarget, BackupError, type BackupTarget } from "./backup";
-import { loadBackupConfig, type BackupConfig } from "./config";
+import { backendTarget, BackupError, providerTarget, type BackupTarget } from "./backup";
+import { loadBackupConfig, WEBDAV_BACKUP_PASSWORD, type BackupConfig } from "./config";
 import { startBackupScheduler } from "./scheduler";
 import "./strings";
 
-export async function targetFor(c: BackupConfig): Promise<BackupTarget> {
+/**
+ * The archive store for a backup setting. `probe` (WebDAV, once when the user
+ * sets the server up): create the lumen-backups/ folder and check that the
+ * server takes writes, so a wrong password or address fails right away.
+ */
+export async function targetFor(c: BackupConfig, deps: { fetch?: typeof fetch; probe?: boolean } = {}): Promise<BackupTarget> {
+  if (c.kind === "webdav") {
+    // W10.C15: the sync's WebDAV provider (PROPFIND, PUT, GET, DELETE) as the target. It takes flat object names only
+    // (checkObjectName: no "/"), so it is rooted at the lumen-backups/ folder (created on first write) with no prefix.
+    const [{ webdavProvider }, { getSecret }] = await Promise.all([import("../sync/e2ee/providers/webdav"), import("../lib/secretStore")]);
+    const password = getSecret(WEBDAV_BACKUP_PASSWORD);
+    if (!password) throw new BackupError(t("backup.webdav.noPassword"));
+    const root = `${c.url.replace(/\/+$/, "")}/lumen-backups/`;
+    const provider = webdavProvider({ url: root, username: c.username, password }, deps.fetch ? { fetch: deps.fetch } : {});
+    if (deps.probe) await provider.probe();
+    const target = providerTarget(provider, c.label, "");
+    if (c.mode.kind !== "plain") return target;
+    // R8-M2: a plain archive is the vault readable on someone's server: each upload is in the privacy
+    // ledger, and local-only refuses it (an age-encrypted one is ciphertext, like sync).
+    const { recordPlainBackup } = await import("../ai/privacyLedger");
+    return {
+      ...target,
+      async write(name, data) {
+        if (recordPlainBackup(`${root}${name}`, data.byteLength).decision === "blocked") throw new BackupError(t("backup.webdav.plainLocalOnly"));
+        await target.write(name, data);
+      },
+    };
+  }
   // Without a click the browser may not grant the folder again: that is a failure the user sees and fixes in the panel.
   if (!(await ensureFolderPermission(c.handle, false))) throw new BackupError(t("backup.reconnect"));
   return backendTarget(createFolderBackend(c.handle), c.label);

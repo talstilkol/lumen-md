@@ -1,0 +1,9 @@
+{
+  "$comment": "W12.R4: handwriting text goes into search only when the ink recogniser (W7.11) has passed W11.H14 on the ivrit.ai handwriting benchmark. Set by the measurement run from its eval card; never by hand to switch the feature on.",
+  "plan": "W11.H14",
+  "benchmark": "ivrit.ai handwriting benchmark (W11.H14)",
+  "status": "not-measured",
+  "evalCard": null,
+  "cer": null,
+  "maxCer": 0.15
+}

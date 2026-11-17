@@ -1,0 +1,779 @@
+[
+  {
+    "id": "L6-W7.1-skills-eval",
+    "task": "W7.1",
+    "cmd": "npm run eval:skills",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "Ollama running at http://127.0.0.1:11434",
+      "ollama pull qwen2.5:7b"
+    ],
+    "minutes": 40
+  },
+  {
+    "id": "L6-W7.1-claude-base",
+    "task": "W7.1",
+    "cmd": "node --experimental-transform-types --no-warnings --import ./scripts/lib/ts-register.mjs scripts/skills/claude-base-trials.mjs run --tries 10",
+    "expect": {
+      "exit": 0,
+      "stdout": {
+        "path": "pass",
+        "equals": true
+      }
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "Claude Code CLI on PATH, signed in (claude --version)"
+    ],
+    "minutes": 30
+  },
+  {
+    "id": "L6-W7.3-e2e",
+    "task": "W7.3",
+    "cmd": "mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-W7.3-e2e.pw.json npx playwright test e2e/editor-gaps.spec.ts --project=chromium --project=firefox --reporter=json,list",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/mac-pack/L6/L6-W7.3-e2e.pw.json",
+          "path": "stats.unexpected",
+          "equals": 0
+        },
+        {
+          "file": "reports/mac-pack/L6/L6-W7.3-e2e.pw.json",
+          "path": "stats.expected",
+          "gte": 1
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "L6-W7.4-e2e",
+    "task": "W7.4",
+    "cmd": "mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-W7.4-e2e.pw.json npx playwright test e2e/bulk-properties.spec.ts e2e/bulk-properties-1k.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json,list",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/mac-pack/L6/L6-W7.4-e2e.pw.json",
+          "path": "stats.unexpected",
+          "equals": 0
+        },
+        {
+          "file": "reports/mac-pack/L6/L6-W7.4-e2e.pw.json",
+          "path": "stats.expected",
+          "gte": 1
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "a quiet machine (no other build running): the 1,000-note budget is 3 s"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L6-W7.5-golden",
+    "task": "W7.5",
+    "cmd": "LUMEN_EVAL_LAW=1 npx vitest run --config vitest.eval.config.ts src/agents/eval/askTheLaw.eval.ts",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "eval/results/ask-the-law@qwen2.5_7b.json",
+          "path": "pass",
+          "equals": true
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "Ollama running at http://127.0.0.1:11434",
+      "ollama pull qwen2.5:7b"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L6-W7.5-live",
+    "task": "W7.5",
+    "cmd": "node scripts/sources/live-check.mjs knesset",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "network to knesset.gov.il"
+    ],
+    "minutes": 2
+  },
+  {
+    "id": "L6-W7.6-live10",
+    "task": "W7.6",
+    "cmd": "node --experimental-transform-types --no-warnings --import ./scripts/lib/ts-register.mjs scripts/sources/datagov-live10.mjs",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "eval/results/datagov-live10.json",
+          "path": "ok",
+          "equals": 10
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "network to data.gov.il and apis.cbs.gov.il"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "L6-W7.6-docx",
+    "task": "W7.6",
+    "cmd": "npx vitest run src/__tests__/datagovExportDocx.test.ts src/__tests__/datagovSources.test.ts",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)"
+    ],
+    "minutes": 2
+  },
+  {
+    "id": "L6-W7.13-embed",
+    "task": "W7.13",
+    "cmd": "node scripts/golden/build-retrieval-hard.mjs && npm run eval:embed-compete",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "owner decision W7.13 licences (gate 0.10) recorded in eval/models/embedding-candidates.json",
+      "network to huggingface.co"
+    ],
+    "minutes": 90
+  },
+  {
+    "id": "L6-W7.15-measure",
+    "task": "W7.15",
+    "cmd": "ollama --version && node scripts/ollama-speculative.mjs measure --runs 3 && node scripts/ollama-speculative.mjs repro --prompts 20",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "Ollama running at http://127.0.0.1:11434",
+      "Ollama >= 0.34",
+      "the default model pulled (npm run models:day -- check lists it)"
+    ],
+    "minutes": 30
+  },
+  {
+    "id": "L6-W7.22-supply",
+    "task": "W7.22",
+    "cmd": "bash scripts/supply-chain/install-tools.sh && npm run supply:selftest",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "witness and cosign installable (install-tools.sh pins them)"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L6-W7.22-tamper",
+    "task": "W7.22",
+    "cmd": "node scripts/supply-chain/verify.mjs release/ && f=$(ls release/*.dmg release/*.zip 2>/dev/null | head -1) && cp \"$f\" /tmp/l6-tamper && printf x >> /tmp/l6-tamper && ! node scripts/supply-chain/verify.mjs /tmp/l6-tamper",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "a signed beta.1 in release/ (W11.L4)",
+      "network off for the verify (airplane mode)"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "L6-W10.M1-ci-local",
+    "task": "W10.M1",
+    "cmd": "npm ci && npm run ci:local -- --e2e && npx vitest run -u src/__tests__/commandIds.test.ts && npm run test:coverage && ls reports/mac-*.json",
+    "expect": {
+      "exit": 0,
+      "count": {
+        "glob": "reports/mac-*.json",
+        "gte": 1
+      }
+    },
+    "needs": [
+      "the train head checked out after the merge order in plan W10.M1 notes",
+      "Xcode CLT (WebKit)"
+    ],
+    "minutes": 240
+  },
+  {
+    "id": "L6-W10.M2-install",
+    "task": "W10.M2",
+    "cmd": "npm install --save-exact @noble/ciphers @noble/hashes hash-wasm libsodium-wrappers-sumo@0.8.4 age-encryption @capacitor/filesystem temml @mlc-ai/web-llm@0.2.86 @codemirror/view @codemirror/commands && npm install -D --save-exact esbuild@0.28.2 @guidepup/playwright ts-fsrs @stryker-mutator/core @stryker-mutator/vitest-runner fast-check && npm run lockfile:drift && npm ls --all > /dev/null && npm run -s typecheck:crypto-lib",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "network to registry.npmjs.org",
+      "then the integrity loop of docs/security/crypto-libs.md step 1 (lock = registry = npm pack) and commit package.json + package-lock.json",
+      "React 19 / eslint major on a separate branch (plan W10.M2 step 4)"
+    ],
+    "minutes": 60
+  },
+  {
+    "id": "L6-W10.M3-cargo",
+    "task": "W10.M3",
+    "cmd": "cd src-tauri && cargo update -p zip -p tauri-plugin-updater && cargo check --locked && cargo test && cargo audit && cargo deny check advisories bans && cd .. && npm run tauri:build && npm run audit:lock",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "rustup stable, cargo-audit, cargo-deny"
+    ],
+    "minutes": 120
+  },
+  {
+    "id": "L6-W10.M4-mobile",
+    "task": "W10.M4",
+    "cmd": "npm run mobile:check && npm run mobile:android -- --unsigned && npm run mobile:ios -- --no-upload && ls release/mobile/*.apk release/mobile/*.aab release/mobile/*.ipa",
+    "expect": {
+      "exit": 0,
+      "count": {
+        "glob": "release/mobile/*.{apk,aab,ipa}",
+        "gte": 2
+      }
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "Android SDK + JDK 21",
+      "Xcode with an iOS simulator runtime",
+      "mobile stack merged in order #675 -> #774 -> #782 -> #791"
+    ],
+    "minutes": 90
+  },
+  {
+    "id": "L6-W10.M5-mutation",
+    "task": "W10.M5",
+    "cmd": "node scripts/mutation/run.mjs --critical --receipt --runner vitest && npm run mutation:check",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "scripts/mutation/receipt.json",
+          "path": [
+            "modules",
+            "src/agents/runtime.ts",
+            "runner"
+          ],
+          "equals": "vitest"
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "unattended: hours"
+    ],
+    "minutes": 180
+  },
+  {
+    "id": "L6-W10.M6-perf",
+    "task": "W10.M6",
+    "cmd": "npm run build && npm run budget && npm run perf:gate -- --runs 5 --out reports/mac-pack/L6/perf-gate.md && npm run perf:inp",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "a quiet machine"
+    ],
+    "minutes": 60
+  },
+  {
+    "id": "L6-W10.M7-models-day",
+    "task": "W10.M7",
+    "cmd": "npm run models:day -- check && npm run models:day && npm run eval:ingest",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "Ollama running at http://127.0.0.1:11434",
+      "disk for the models models:day -- check lists"
+    ],
+    "minutes": 240
+  },
+  {
+    "id": "L6-W10.M8-convert",
+    "task": "W10.M8",
+    "cmd": "npm run models:convert && npm run models:registry && node -e \"const r=require('./models/registry.json');const n=Object.values(r.models).filter(m=>m.delivery==='download'&&m.hosting&&m.hosting.hf&&!m.hosting.revision).length;console.log(JSON.stringify({unpinned:n}));process.exit(n?1:0)\"",
+    "expect": {
+      "exit": 0,
+      "stdout": {
+        "path": "unpinned",
+        "equals": 0
+      }
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "Python 3.11 + optimum (convert.mjs lists them)",
+      "network to huggingface.co"
+    ],
+    "minutes": 180
+  },
+  {
+    "id": "L6-W10.M9-visual",
+    "task": "W10.M9",
+    "cmd": "npm run test:visual; npm run visual:approve && npm run test:visual && npm run docs:gifs && npm run docs:build",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "a person looks at each diff before visual:approve (it asks)"
+    ],
+    "minutes": 60
+  },
+  {
+    "id": "L6-W10.M10-data",
+    "task": "W10.M10",
+    "cmd": "curl -LO https://dumps.wikimedia.org/hewiktionary/latest/hewiktionary-latest-pages-articles.xml.bz2 && npm run lexicon:build -- hewiktionary-latest-pages-articles.xml.bz2 && node -e \"const m=require('./public/lexicon/manifest.json');console.log(JSON.stringify({count:m.count}));process.exit(m.count>=20000?0:1)\"",
+    "expect": {
+      "exit": 0,
+      "stdout": {
+        "path": "count",
+        "gte": 20000
+      }
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "network to dumps.wikimedia.org",
+      "bunzip2"
+    ],
+    "minutes": 30
+  },
+  {
+    "id": "L6-W10.M11-sr-plugins",
+    "task": "W10.M11",
+    "cmd": "npm run test:sr && mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-W10.M11-sr-plugins.pw.json npx playwright test e2e/plugins.spec.ts e2e/plugin-install.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json,list",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/mac-pack/L6/L6-W10.M11-sr-plugins.pw.json",
+          "path": "stats.unexpected",
+          "equals": 0
+        },
+        {
+          "file": "reports/mac-pack/L6/L6-W10.M11-sr-plugins.pw.json",
+          "path": "stats.expected",
+          "gte": 1
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "macOS VoiceOver allowed for the terminal (Guidepup setup: npx @guidepup/setup)"
+    ],
+    "minutes": 45
+  },
+  {
+    "id": "L6-W10.M12-nights",
+    "task": "W10.M12",
+    "cmd": "npm run nightly:install && echo 'day 0: installed; after three nights run: npm run nightly -- --status'",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/nightly/status.json",
+          "path": [
+            "0.5",
+            "met"
+          ],
+          "equals": true
+        }
+      ],
+      "after": "npm run nightly -- --status (on day 3)"
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "the Mac left on for three nights (launchd)",
+      "the fuzz and soak kinds are part of the nightly plan (scripts/nightly/run.mjs kindsDue)"
+    ],
+    "minutes": 15
+  },
+  {
+    "id": "L6-W10.M13-drill",
+    "task": "W10.M13",
+    "cmd": "mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-W10.M13-drill.pw.json npx playwright test e2e/data-safety.spec.ts e2e/sync-providers.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json,list && npm run drill:data-safety -- --json --out reports/mac-pack/L6",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/mac-pack/L6/L6-W10.M13-drill.pw.json",
+          "path": "stats.unexpected",
+          "equals": 0
+        },
+        {
+          "file": "reports/mac-pack/L6/L6-W10.M13-drill.pw.json",
+          "path": "stats.expected",
+          "gte": 1
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)"
+    ],
+    "minutes": 90
+  },
+  {
+    "id": "L6-W10.C7-xcode",
+    "task": "W10.C7",
+    "cmd": "npx vitest run src/__tests__/iosProject.test.ts && npx cap sync ios && xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug CODE_SIGNING_ALLOWED=NO build",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "Xcode",
+      "npm run build done (cap sync copies dist)"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L6-W10.C8-partial",
+    "task": "W10.C8",
+    "cmd": "mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-W10.C8-partial.pw.json npx playwright test e2e/voice-capture.spec.ts --project=chromium --reporter=json,list",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/mac-pack/L6/L6-W10.C8-partial.pw.json",
+          "path": "stats.unexpected",
+          "equals": 0
+        },
+        {
+          "file": "reports/mac-pack/L6/L6-W10.C8-partial.pw.json",
+          "path": "stats.expected",
+          "gte": 1
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)"
+    ],
+    "minutes": 5
+  },
+  {
+    "id": "L6-W10.C9-summaries",
+    "task": "W10.C9",
+    "cmd": "LUMEN_EVAL_SUMMARY_DIRS=eval/golden/summarize/hebsummaries-test npm run eval:summarize",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "Ollama running at http://127.0.0.1:11434",
+      "owner decision W11.O4 (HebSummaries licence) and its test split built into eval/golden/summarize/hebsummaries-test"
+    ],
+    "minutes": 60
+  },
+  {
+    "id": "L6-W10.C10-share",
+    "task": "W10.C10",
+    "cmd": "npx vitest run src/__tests__/chatImport.test.ts && npm run mobile:android -- --unsigned --skip-web && adb install -r release/mobile/*-debug.apk && adb shell am start -a android.intent.action.SEND -t text/plain --es android.intent.extra.TEXT '[12.11.2026, 10:00] דנה: לקנות חלב' com.lumen.editor && sleep 5 && adb exec-out screencap -p > reports/mac-pack/L6/W10.C10-share.png",
+    "expect": {
+      "exit": 0,
+      "count": {
+        "glob": "reports/mac-pack/L6/W10.C10-share.png",
+        "gte": 1
+      }
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "an Android emulator running (adb devices lists it)"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L6-W10.C14-gradle",
+    "task": "W10.C14",
+    "cmd": "npx cap sync android && cd android && ./gradlew assembleDebug && cd .. && npx vitest run src/__tests__/androidVaultPlugin.test.ts",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "@capacitor/filesystem installed (W10.M2)",
+      "Android SDK + JDK 21"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L6-W10.C16-organizer",
+    "task": "W10.C16",
+    "cmd": "npm run eval:agents -- --model qwen2.5:7b --url http://127.0.0.1:11434 --only organizer",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "Ollama running at http://127.0.0.1:11434",
+      "ollama pull qwen2.5:7b"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L6-W10.C25-profile",
+    "task": "W10.C25",
+    "cmd": "mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-W10.C25-profile.pw.json npx playwright test e2e/highlights-hub.spec.ts e2e/scan-highlights.spec.ts --project=chromium --trace on --reporter=json,list",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/mac-pack/L6/L6-W10.C25-profile.pw.json",
+          "path": "stats.unexpected",
+          "equals": 0
+        },
+        {
+          "file": "reports/mac-pack/L6/L6-W10.C25-profile.pw.json",
+          "path": "stats.expected",
+          "gte": 1
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "then open the trace (npx playwright show-trace) and confirm no loadIndex frame on the main thread"
+    ],
+    "minutes": 15
+  },
+  {
+    "id": "L6-W10.C31-native",
+    "task": "W10.C31",
+    "cmd": "npx vitest run src/__tests__/voiceTile.test.ts src/__tests__/iosProject.test.ts && cd android && ./gradlew assembleDebug && cd .. && xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "Android SDK + JDK 21",
+      "Xcode"
+    ],
+    "minutes": 25
+  },
+  {
+    "id": "L6-3.3-git",
+    "task": "3.3",
+    "cmd": "npx vitest run src/__tests__/gitMerge.test.ts src/__tests__/gitPull.test.ts src/__tests__/gitSync.test.ts src/__tests__/gitProxy.test.ts src/__tests__/gitMirror.test.ts && mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-3.3-git.pw.json npx playwright test e2e/data-safety.spec.ts --project=chromium --project=firefox --project=webkit -g \"git pull\" --reporter=json,list",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/mac-pack/L6/L6-3.3-git.pw.json",
+          "path": "stats.unexpected",
+          "equals": 0
+        },
+        {
+          "file": "reports/mac-pack/L6/L6-3.3-git.pw.json",
+          "path": "stats.expected",
+          "gte": 1
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)"
+    ],
+    "minutes": 15
+  },
+  {
+    "id": "L6-3.5-webdav",
+    "task": "3.5",
+    "cmd": "mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-3.5-webdav.pw.json npx playwright test e2e/sync-providers.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json,list",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/mac-pack/L6/L6-3.5-webdav.pw.json",
+          "path": "stats.unexpected",
+          "equals": 0
+        },
+        {
+          "file": "reports/mac-pack/L6/L6-3.5-webdav.pw.json",
+          "path": "stats.expected",
+          "gte": 1
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)"
+    ],
+    "minutes": 15
+  },
+  {
+    "id": "L6-3.6-collab",
+    "task": "3.6",
+    "cmd": "npx vitest run src/__tests__/collabRoomProof.test.ts && mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-3.6-collab.pw.json npx playwright test e2e/collab-persist.spec.ts e2e/collab-sharing.spec.ts --project=chromium --reporter=json,list",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/mac-pack/L6/L6-3.6-collab.pw.json",
+          "path": "stats.unexpected",
+          "equals": 0
+        },
+        {
+          "file": "reports/mac-pack/L6/L6-3.6-collab.pw.json",
+          "path": "stats.expected",
+          "gte": 1
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "the collab server the spec starts (docker/collab.yml or scripts/test-tiers.mjs E2E_COLLAB_WS)"
+    ],
+    "minutes": 15
+  },
+  {
+    "id": "L6-3.7-matrix",
+    "task": "3.7",
+    "cmd": "mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-3.7-matrix.pw.json npx playwright test e2e/data-safety.spec.ts e2e/sync-providers.spec.ts --project=chromium --project=firefox --project=webkit --reporter=json,list",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/mac-pack/L6/L6-3.7-matrix.pw.json",
+          "path": "stats.unexpected",
+          "equals": 0
+        },
+        {
+          "file": "reports/mac-pack/L6/L6-3.7-matrix.pw.json",
+          "path": "stats.expected",
+          "gte": 1
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "the same run as L6-W10.M13-drill: run once, read for both"
+    ],
+    "minutes": 0
+  },
+  {
+    "id": "L6-W12.E2-10k",
+    "task": "W12.E2",
+    "cmd": "mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-W12.E2-10k.pw.json npx playwright test e2e/entity-graph.spec.ts --project=perf -g \"10,000\" --reporter=json,list",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/mac-pack/L6/L6-W12.E2-10k.pw.json",
+          "path": "stats.unexpected",
+          "equals": 0
+        },
+        {
+          "file": "reports/mac-pack/L6/L6-W12.E2-10k.pw.json",
+          "path": "stats.expected",
+          "gte": 1
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "the dev server (the perf project needs window.__lumenTest: dev or a VITE_E2E=1 build)"
+    ],
+    "minutes": 15
+  },
+  {
+    "id": "L6-W12.E3-prefix",
+    "task": "W12.E3",
+    "cmd": "git clone --depth 1 https://github.com/OnlpLab/NEMO-Corpus eval/public/.data/nemo && git clone --depth 1 https://github.com/UniversalDependencies/UD_Hebrew-IAHLTwiki eval/public/.data/ud && npx tsx scripts/eval-entity-graph.mjs prefix --test-conllu eval/public/.data/ud/he_iahltwiki-ud-test.conllu --test-morph eval/public/.data/nemo/data/spmrl/gold/morph_gold_test.bmes --train-conllu eval/public/.data/ud/he_iahltwiki-ud-train.conllu --train-morph eval/public/.data/nemo/data/spmrl/gold/morph_gold_train.bmes",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "eval/results/entity-graph/prefix@rules.json",
+          "path": "accuracy",
+          "gte": 0.95
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "network to github.com",
+      "NEMO/UD file names as in the NEMO README (W12.O1: never committed)"
+    ],
+    "minutes": 20
+  },
+  {
+    "id": "L6-W12.E5-review",
+    "task": "W12.E5",
+    "cmd": "mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-W12.E5-review.pw.json npx playwright test e2e/entity-graph.spec.ts --project=chromium --project=firefox --project=webkit -g \"W12.E5\" --reporter=json,list",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/mac-pack/L6/L6-W12.E5-review.pw.json",
+          "path": "stats.unexpected",
+          "equals": 0
+        },
+        {
+          "file": "reports/mac-pack/L6/L6-W12.E5-review.pw.json",
+          "path": "stats.expected",
+          "gte": 1
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "L6-W12.E7-graph",
+    "task": "W12.E7",
+    "cmd": "mkdir -p reports/mac-pack/L6 && PLAYWRIGHT_JSON_OUTPUT_NAME=reports/mac-pack/L6/L6-W12.E7-graph.pw.json npx playwright test e2e/entity-graph.spec.ts --project=chromium --project=firefox --project=webkit -g \"W12.E7\" --reporter=json,list",
+    "expect": {
+      "exit": 0,
+      "json": [
+        {
+          "file": "reports/mac-pack/L6/L6-W12.E7-graph.pw.json",
+          "path": "stats.unexpected",
+          "equals": 0
+        },
+        {
+          "file": "reports/mac-pack/L6/L6-W12.E7-graph.pw.json",
+          "path": "stats.expected",
+          "gte": 1
+        }
+      ]
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)",
+      "fps on a GPU is W12.M1 (not in this lane)"
+    ],
+    "minutes": 10
+  },
+  {
+    "id": "L6-R12.8-leiden-axe",
+    "task": "R12.8",
+    "cmd": "npx vitest run src/__tests__/leiden.test.ts src/__tests__/vizGate.test.tsx src/__tests__/vizGraphViews.test.tsx",
+    "expect": {
+      "exit": 0
+    },
+    "needs": [
+      "the train head checked out, npm ci done (W10.M1 first)"
+    ],
+    "minutes": 5
+  }
+]

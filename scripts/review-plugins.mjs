@@ -6,7 +6,13 @@
  *   node scripts/review-plugins.mjs                 # writes public/plugins/examples/scorecards/<id>@<version>.json
  *   node scripts/review-plugins.mjs --check         # exit 1 when a scorecard is missing or stale, a version fails,
  *                                                   # or a failing version is still listed 24 h after its review
+ *   node scripts/review-plugins.mjs --takedown      # marks every listed version whose review on record failed
+ *                                                   # `delisted` in index.json (not shown, not installable);
+ *                                                   # then the owner re-signs: build-plugin-registry.mjs --sign
  *   … --dir <registry dir> --out <scorecards dir>   # another registry (the tests use this)
+ *   node scripts/review-plugins.mjs --ref <folder | git-url#sha[:subdir]> [--json <file>] [--md <file>]
+ *                                                   # W13.L6: a developer's preview of any branch, tag or commit:
+ *                                                   # failures, warnings and suggestions (exit 1 on a failure)
  *
  * Runs offline: `npm audit` is not run (a version with a lockfile is marked
  * "audit owed"). A version's package-lock.json is checked against
@@ -28,7 +34,26 @@ if (!process.execArgv.includes("--import")) {
 
 const args = process.argv.slice(2);
 const opt = (f) => (args.indexOf(f) >= 0 ? args[args.indexOf(f) + 1] : undefined);
-const { reviewPluginVersion, overdueTakedowns } = await import(pathToFileURL(join(ROOT, "src/plugins/runtime/review.ts")).href);
+const { reviewPluginVersion, overdueTakedowns, takedowns } = await import(pathToFileURL(join(ROOT, "src/plugins/runtime/review.ts")).href);
+
+if (args.includes("--ref")) {
+  // W13.L6: the registry's own review, on a ref the developer names, before submitting it.
+  const { resolveRef, reviewInput, suggestions, preview, previewMarkdown } = await import(pathToFileURL(join(ROOT, "scripts/lib/plugin-preview.mjs")).href);
+  let ref;
+  try {
+    ref = resolveRef(opt("--ref"));
+  } catch (e) {
+    console.error(`plugins:review: ${e.message}`);
+    process.exit(2);
+  }
+  const card = await reviewPluginVersion(reviewInput(ref.dir));
+  const p = preview(card, suggestions(ref.dir, card), ref);
+  const md = previewMarkdown(p);
+  if (opt("--json")) writeFileSync(opt("--json"), JSON.stringify(p, null, 2) + "\n");
+  if (opt("--md")) writeFileSync(opt("--md"), md + "\n");
+  console.log(md);
+  process.exit(p.failures.length ? 1 : 0);
+}
 const { inRange } = await import(pathToFileURL(join(ROOT, "scripts/audit-lock.mjs")).href);
 const knownBad = JSON.parse(readFileSync(join(ROOT, "security/known-bad.json"), "utf8")).entries.filter((e) => String(e.file).endsWith("package-lock.json"));
 const DIR = resolve(opt("--dir") ?? join(ROOT, "public/plugins/examples"));
@@ -76,6 +101,25 @@ if (args.includes("--check")) {
   for (const c of stale) console.log(`stale or missing: ${file(c)}`);
   for (const c of overdue) console.log(`overdue takedown (failed ${c.reviewedAt}, still listed): ${c.id}@${c.version}`);
   process.exit(stale.length || failing.length || overdue.length ? 1 : 0);
+}
+if (args.includes("--takedown")) {
+  // From the reviews on record (the clock started there); a version with no card yet is reviewed now.
+  const recorded = cards.map((c) => (existsSync(file(c)) ? JSON.parse(readFileSync(file(c), "utf8")) : c));
+  const down = takedowns(listed, recorded);
+  const at = new Date().toISOString();
+  for (const c of down) {
+    const v = index.plugins.find((p) => p.id === c.id).versions.find((x) => x.version === c.version);
+    v.delisted = { at, rules: [...new Set(c.findings.filter((f) => f.severity === "error").map((f) => f.rule))] };
+    console.log(`taken down: ${c.id}@${c.version} (failed ${c.reviewedAt}: ${v.delisted.rules.join(", ")})`);
+  }
+  if (down.length) {
+    // Review 11, M5: a takedown raises the index's serial, so the app refuses the older index (a replay) once it saw this one.
+    const { serial: _old, ...rest } = index;
+    const next = { about: rest.about, serial: (Number.isSafeInteger(index.serial) ? index.serial : 0) + 1, ...rest };
+    writeFileSync(join(DIR, "index.json"), JSON.stringify(next, null, 2) + "\n");
+    console.log(`index.json changed: re-sign it (LUMEN_PLUGIN_SIGNING_KEY=… node scripts/build-plugin-registry.mjs --sign)`);
+  } else console.log("nothing to take down");
+  process.exit(0);
 }
 mkdirSync(OUT, { recursive: true });
 for (const c of cards) writeFileSync(file(c), JSON.stringify(c, null, 2) + "\n");

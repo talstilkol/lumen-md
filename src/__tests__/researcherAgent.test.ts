@@ -71,7 +71,7 @@ function webScript(answer: unknown): (req: ExecutorRequest, n: number) => Execut
 }
 
 const GOOD = {
-  report: "Roses are pruned in early spring.[^1] Clean shears matter.[^1]",
+  report: "Roses are pruned in early spring.[^1] Clean shears prevent disease.[^1]",
   sources: [{ n: 1, url: "https://a.example/roses", title: "Roses" }],
   quotes: [
     { n: 1, i: 1, quote: "Prune roses in early spring" },
@@ -109,10 +109,12 @@ describe("researcher agent — web mode", () => {
     expect(r.sources).toBe(1);
     expect(r.unverified).toBe(0);
     expect(r.markdown.startsWith("---\nuntrusted: true\nresearch: searxng\n---\n# How do I prune roses?")).toBe(true);
-    expect(r.markdown).toContain("Roses are pruned in early spring.[^1] Clean shears matter.[^2]");
+    expect(r.markdown).toContain("Roses are pruned in early spring.[^1] Clean shears prevent disease.[^2]");
     expect(r.markdown).toContain("[^1]: [Roses](https://a.example/roses) — “Prune roses in early spring”");
     expect(r.markdown).toContain("[^2]: [Roses](https://a.example/roses) — “Clean shears prevent the spread of disease”");
-    expect(r.markdown).toContain("every quote checked against its source");
+    // R12.9: the count of deleted sentences is in every answer.
+    expect(r.deleted).toBe(0);
+    expect(r.markdown).toContain("0 sentences removed");
     // The agent made the three calls the prompt asks for, through the runtime.
     expect(ex.calls).toHaveLength(4);
     expect(net.mock.calls.map(([u]) => String(u))).toEqual([`${ENDPOINT}/search`, `${ENDPOINT}/extract?url=${encodeURIComponent("https://a.example/roses")}`]);
@@ -133,7 +135,7 @@ describe("researcher agent — web mode", () => {
     expect(ex.calls[3].messages[0].content).toContain("Security rule");
   });
 
-  it("flags what the model got wrong instead of dropping it: a missing quote, claims without a marker", async () => {
+  it("R12.9 cite-or-delete: what no exact quote backs is deleted, not flagged, and the note says how many went", async () => {
     registerExecutor(
       fakeExecutor(
         webScript({
@@ -144,15 +146,28 @@ describe("researcher agent — web mode", () => {
       ),
     );
     const r = await runResearch({ question: "Roses?" });
-    expect(r.unverified).toBe(3);
-    expect(r.markdown).toContain("Prune in spring.[^1] Roses are blue.[^2]");
-    expect(r.markdown).toContain("unsupported claim follows here, quite long. ⚠️ *no source cited*");
-    expect(r.markdown).toContain("without any footnote at all. ⚠️ *no source cited*");
-    expect(r.markdown).toMatch(/\[\^2\]: \[Roses\]\(https:\/\/a\.example\/roses\) ⚠️ \*no supporting quote given\*/);
-    expect(r.markdown).toContain("**3 quotes could not be verified**");
-    // A marker for a source the model never listed is refused by the `cited` validator; one it listed but did not read, by `verified`.
+    expect(r.deleted).toBe(3);
+    expect(r.unverified).toBe(0);
+    expect(r.markdown).toContain("Prune in spring.[^1]");
+    expect(r.markdown).not.toContain("Roses are blue");
+    expect(r.markdown).not.toContain("unsupported claim");
+    expect(r.markdown).not.toContain("unmarked paragraph");
+    expect(r.markdown).not.toContain("⚠️");
+    expect(r.markdown).toContain("[^1]: [Roses](https://a.example/roses) — “Prune roses in early spring”");
+    expect(r.markdown).not.toContain("[^2]:");
+    expect(r.markdown).toContain("3 sentences were removed: no exact quote in the sources backs them.");
+    // The flagging assembler is still there for the Claude route's shape of answers.
     const flagged = assembleReport("Bananas are blue.[^3]", new Map(), [{ n: 1, title: "Roses", link: "https://a.example/roses", text: PAGE }]);
     expect(flagged.body).toBe("Bananas are blue. ⚠️ *cites a source that wasn't read*");
+  });
+
+  it("R12.9: a Hebrew question gets the Hebrew count line; nothing left → the note says none is shown", async () => {
+    registerExecutor(fakeExecutor(webScript({ report: "ורדים כחולים.[^1]", sources: [{ n: 1, url: "https://a.example/roses", title: "Roses" }], quotes: [{ n: 1, quote: "Prune roses in early spring" }] })));
+    const r = await runResearch({ question: "מתי גוזמים ורדים?" });
+    expect(r.deleted).toBe(1);
+    expect(r.markdown).toContain("משפט אחד נמחק");
+    expect(r.markdown).toContain("לא מוצג דבר");
+    expect(r.markdown).not.toContain("ורדים כחולים");
   });
 
   it("the critic retries an answer whose quotes are not in the source, with 'quote word for word'", async () => {

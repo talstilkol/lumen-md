@@ -5,6 +5,7 @@ import { useToastStore } from "../../store/useToastStore";
 import { useAppStore } from "../../store/useStore";
 import type { CommandContext } from "./context";
 import { explainError } from "../../lib/userError";
+import "./commandBodiesStrings";
 
 type Sefaria = typeof import("../../sources/sefaria/app");
 const sefaria = (): Promise<Sefaria> => import("../../sources/sefaria/app");
@@ -90,4 +91,18 @@ export async function notesOnVerse(ctx: CommandContext): Promise<void> {
       useAppStore.getState().openTab({ name: pick.split("/").pop()!, content: await readWorkspaceFile(pick), workspaceName: pick });
     },
   });
+}
+
+/** W12.H2: a shared, encrypted study room on the reference here (havruta). */
+export async function studyHavruta(ctx: CommandContext): Promise<void> {
+  const s = await sefaria();
+  const here = selectionOrLine(ctx);
+  const ref = (here && (s.sourceRefsIn(here.text)[0] ?? s.parseSourceRef(here.text.trim()))) || s.refOfSourceNote(ctx.liveDoc().content) || s.parseSourceRef((await uiPrompt({ message: t("sources.prompt"), defaultValue: "" })) ?? "");
+  if (!ref) return;
+  try {
+    const { openStudyScreen } = await import("../../havruta/open");
+    await openStudyScreen({ ref });
+  } catch (e) {
+    useToastStore.getState().push({ kind: "error", title: t("sources.failed", { error: explainError(e) }) });
+  }
 }

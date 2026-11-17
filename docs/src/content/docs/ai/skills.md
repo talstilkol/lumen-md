@@ -1,6 +1,8 @@
 ---
 title: Agent skills
 description: Your own AI workflows as files in the vault — run them with "/" in the AI prompt or the command palette, with only the tools they declare and every change waiting for your approval.
+type: reference
+tasks: ["W11.I22", "W7.1"]
 ---
 
 A **skill** is a workflow you write once and run with `/`: "summarise what I
@@ -77,3 +79,9 @@ it makes asks you again, on top of the review screen.
 Lumen's formats: `.base` views, frontmatter, niqqud, Sefaria references and
 Israeli legal citation. Copy its folders into `~/.claude/skills/` (or your
 agent's skills folder).
+
+## Conformance
+
+`npm run skills:validate` runs a port of the reference validator (`skills-ref validate`, from agentskills/agentskills) on every skill in `packages/lumen-skills`. The starter skills are checked by the tests. The name must equal the folder name, and the fields and lengths must follow the spec. A body past the spec's budget (500 lines, about 5,000 tokens) gets a warning.
+
+A skill's instructions reach the model only when you run that skill. A list of skills offered to a model carries only names and descriptions.

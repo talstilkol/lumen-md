@@ -79,6 +79,15 @@ async function coldStart(page: Page): Promise<{ editableMs: number; cls: number;
   return { editableMs, cls, shellShowedNote: shell };
 }
 
+/** Notes in the vault the app opened, as its index counts them once built (window.__lumen.vaultIndex, src/storage/vaultIndexProbe.ts). */
+async function vaultFiles(page: Page): Promise<number> {
+  return page.evaluate(async () => {
+    const m = await (window as unknown as { __lumen: { vaultIndex(): Promise<{ ensureIndex(): Promise<void>; indexStats(): Promise<{ files: number }> }> } }).__lumen.vaultIndex();
+    await m.ensureIndex();
+    return (await m.indexStats()).files;
+  });
+}
+
 test.beforeEach(async ({ page }, info) => {
   // Every navigation: the layout shifts of this page load (one observer per load).
   await page.addInitScript(() => {
@@ -118,10 +127,19 @@ test("cold start: the last note is editable within budget, without layout shifts
   vaultOrSkip(await canSeed(page), browserName);
   await seedVault(page, 100);
   const hundred = await coldStart(page);
+  // The comparison means something only if each start opened the vault that was seeded (FC3, W2.21).
+  const hundredFiles = await vaultFiles(page);
   await seedVault(page, 10_000);
   const big = await coldStart(page);
+  const bigFiles = await vaultFiles(page);
   report("cold start → last note editable (100-note vault)", hundred.editableMs);
   report("cold start → last note editable (10,000-note vault)", big.editableMs);
+  report("notes the index saw after the 100-note start", hundredFiles, "notes");
+  report("notes the index saw after the 10,000-note start", bigFiles, "notes");
+  expect(hundredFiles, "the small start opened the 100-note vault").toBeGreaterThanOrEqual(100);
+  expect(hundredFiles).toBeLessThan(1_000);
+  expect(bigFiles, "the big start opened the 10,000-note vault").toBeGreaterThanOrEqual(10_000);
+  expect(hundred.cls).toBeLessThan(0.05);
   expect(big.cls).toBeLessThan(0.05);
   if (PROD) {
     expect(big.editableMs).toBeLessThan(budget);

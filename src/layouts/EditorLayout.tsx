@@ -6,9 +6,7 @@
  *  - deterministic ratio-based sync-scroll
  *  - editor and preview section refs
  */
-import { headingSlugger } from "../lib/slug";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { clampLineNumber } from "../editor/lineClamp";
 import type { EditorHandle } from "../editor/Editor";
 
 // The source editor drags the whole CodeMirror stack (~530KB gz). The page's
@@ -22,6 +20,7 @@ import { Preview } from "../renderer/Preview";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
 import { WritingGoalBanner } from "../ui/WritingGoalBanner";
 import { useAppStore } from "../store/useStore";
+import { setSidenoteLineNotes } from "../reading/sidenotesSetting";
 import type { ViewMode, SplitAxis } from "../store/useStore";
 import type { CollabSession } from "../collab/yjs";
 import { t } from "../i18n";
@@ -132,7 +131,12 @@ export function EditorLayout({
   docContentRef.current = docContent;
   const [tapToEdit] = useState(() => tapToEditHandlers(() => docContentRef.current));
 
-  // ── Deterministic sync-scroll ─────────────────────────────────
+  // ── Scroll sync in line space (plan W13.R7) ───────────────────
+  // The editor's top line and the preview's blocks (their `data-sl` source
+  // lines from the render worker) meet in one line space, so the same
+  // text is at the top of both panes to within a line, however differently
+  // each renders it (src/reading/scrollSync.ts, scrollLink.ts). The preview
+  // also marks the block that holds the caret.
   const editorSectionRef = useRef<HTMLElement | null>(null);
   const previewSectionRef = useRef<HTMLElement | null>(null);
 
@@ -144,207 +148,75 @@ export function EditorLayout({
   useEffect(() => {
     if (mode !== "split") return;
     if (syncScroll === "single") return;
-
-    let editorEl: HTMLElement | null = null;
-    let previewEl: HTMLElement | null = null;
-    // setTimeout (not requestAnimationFrame): rAF callbacks are starved in
-    // hidden/background tabs, which silently killed the sync there.
-    let debounceId: ReturnType<typeof setTimeout> | undefined;
-
-    // Wait for BOTH panes to mount. A one-shot timeout silently killed the
-    // sync whenever the lazy-loaded preview (or CodeMirror) took longer than
-    // the delay to appear — frequent on a cold dev server — so poll until
-    // both elements exist (bounded; gives up after ~8s).
+    let unlink: (() => void) | null = null;
+    let disposed = false;
+    // Wait for BOTH panes to mount (the editor and the preview are lazy);
+    // bounded, gives up after ~8s.
     let pollTries = 0;
     const timer = setInterval(() => {
-      editorEl = editorSectionRef.current?.querySelector(".cm-scroller") as HTMLElement | null;
-      previewEl = previewSectionRef.current?.querySelector("[data-preview-root]") as HTMLElement | null;
+      const editorEl = editorSectionRef.current?.querySelector(".cm-scroller") as HTMLElement | null;
+      const previewEl = previewSectionRef.current?.querySelector("[data-preview-root]") as HTMLElement | null;
       if (!editorEl || !previewEl) {
         if (++pollTries > 80) clearInterval(timer);
         return;
       }
       clearInterval(timer);
-
-      // Heading-anchored sync: ratio-based sync drifts because the editor's
-      // pixel height (monospace lines) and preview's pixel height (rendered
-      // markdown with images, tables, math) don't line up. We instead build a
-      // list of headings shared between the two panes and slide the inactive
-      // pane so its corresponding heading sits at the same viewport offset
-      // as the active pane's heading.
-
-      interface Anchor {
-        line: number; // 1-based line in the markdown source
-        slug: string;
-        previewEl: HTMLElement;
-      }
-      let anchors: Anchor[] = [];
-
-      const buildAnchors = () => {
-        if (!previewEl) return;
-        const view = editorRef.current?.getView();
-        const text = view ? view.state.doc.toString() : "";
-        const lines = text.split("\n");
-        const result: Anchor[] = [];
-        // Same slugger as rehype-slug (Unicode, repeats numbered), so
-        // Hebrew headings get the ids the preview actually has (T26).
-        const slugger = headingSlugger();
-        let inFence = false;
-        for (let i = 0; i < lines.length; i++) {
-          const ln = lines[i];
-          if (/^```/.test(ln.trim())) inFence = !inFence;
-          if (inFence) continue;
-          const m = /^(#{1,6})\s+(.+?)\s*#*\s*$/.exec(ln);
-          if (m) {
-            const slug = slugger.slug(m[2]);
-            const headingEl =
-              previewEl.querySelector<HTMLElement>(`#${CSS.escape(slug)}`) ??
-              previewEl.querySelector<HTMLElement>(`[id="${slug}"]`);
-            if (headingEl) {
-              result.push({ line: i + 1, slug, previewEl: headingEl });
-            }
-          }
-        }
-        anchors = result;
-      };
-
-      buildAnchors();
-      // Rebuild after the preview re-renders (debounced by RAF).
-      const previewObserver = new MutationObserver(() => {
-        cancelAnimationFrame(rebuildRaf);
-        rebuildRaf = requestAnimationFrame(buildAnchors);
+      void import("../reading/scrollLink").then(({ editorPane, previewPane, linkPanes }) => {
+        if (disposed) return;
+        const getView = () => editorRef.current?.getView() as unknown as import("../reading/scrollLink").EditorLike | null;
+        const ed = editorPane(editorEl, getView);
+        const pv = previewPane(previewEl, () => {
+          const v = editorRef.current?.getView();
+          return v ? v.state.doc.toString() : docContentRef.current;
+        });
+        const off = linkPanes(ed, pv, { followCaret: true });
+        unlink = () => {
+          off();
+          pv.dispose?.();
+        };
       });
-      let rebuildRaf = 0;
-      previewObserver.observe(previewEl, { childList: true, subtree: true });
-
-      let activePane: "editor" | "preview" | null = null;
-      let suppressBounceUntil = 0;
-
-      const setActive = (pane: "editor" | "preview") => {
-        activePane = pane;
-      };
-      const editorEnter = () => setActive("editor");
-      const previewEnter = () => setActive("preview");
-      editorEl.addEventListener("mouseenter", editorEnter);
-      editorEl.addEventListener("focusin", editorEnter);
-      previewEl.addEventListener("mouseenter", previewEnter);
-      previewEl.addEventListener("focusin", previewEnter);
-
-      function getEditorYForLine(line: number): number {
-        const view = editorRef.current?.getView();
-        if (!view) return 0;
-        // Anchors are rebuilt asynchronously by the MutationObserver after
-        // the preview re-renders. Between a doc shrink and that rebuild,
-        // an anchor.line value can exceed `doc.lines` and make `doc.line(n)`
-        // throw "Invalid line number N in M-line document". `clampLineNumber`
-        // keeps the sync code defensive — the slight visual offset corrects
-        // on the next rebuild a few ms later.
-        const safe = clampLineNumber(line, view.state.doc.lines);
-        if (safe === 0) return 0;
-        const docLine = view.state.doc.line(safe);
-        return view.lineBlockAt(docLine.from).top;
-      }
-
-      // Find the pair of anchors bracketing the given position. Returns the
-      // index of the anchor at-or-above the target (or -1 if scrolled before
-      // the first heading).
-      function bracket(value: number, getter: (a: Anchor) => number): { i: number; lower?: Anchor; upper?: Anchor } {
-        if (anchors.length === 0) return { i: -1 };
-        let i = -1;
-        for (let k = 0; k < anchors.length; k++) {
-          if (getter(anchors[k]) <= value + 0.5) i = k;
-          else break;
-        }
-        return { i, lower: anchors[i], upper: anchors[i + 1] };
-      }
-
-      const sync = (from: "editor" | "preview") => {
-        if (!editorEl || !previewEl) return;
-        suppressBounceUntil = performance.now() + 120;
-        if (from === "editor") {
-          // Where is the editor right now, and which two headings bracket it?
-          const editorTop = editorEl.scrollTop;
-          const { lower, upper } = bracket(editorTop, (a) => getEditorYForLine(a.line));
-          if (lower) {
-            const lowerEditorY = getEditorYForLine(lower.line);
-            const upperEditorY = upper ? getEditorYForLine(upper.line) : editorEl.scrollHeight;
-            const lowerPreviewY = lower.previewEl.offsetTop;
-            const upperPreviewY = upper ? upper.previewEl.offsetTop : previewEl.scrollHeight;
-            // Position within the section, normalised so editor and preview
-            // each scroll the same FRACTION of their own section. This keeps
-            // identical content at the top of both panes regardless of how
-            // much vertical space each side renders for the same words.
-            const sectionRatio = (editorTop - lowerEditorY) / Math.max(1, upperEditorY - lowerEditorY);
-            previewEl.scrollTop = Math.max(0, lowerPreviewY + sectionRatio * (upperPreviewY - lowerPreviewY));
-          } else if (upper) {
-            // Before the first heading — pin to the very top.
-            previewEl.scrollTop = 0;
-          } else {
-            const denom = Math.max(1, editorEl.scrollHeight - editorEl.clientHeight);
-            const ratio = editorEl.scrollTop / denom;
-            previewEl.scrollTop = ratio * Math.max(1, previewEl.scrollHeight - previewEl.clientHeight);
-          }
-        } else {
-          const previewTop = previewEl.scrollTop;
-          const { lower, upper } = bracket(previewTop, (a) => a.previewEl.offsetTop);
-          if (lower) {
-            const lowerPreviewY = lower.previewEl.offsetTop;
-            const upperPreviewY = upper ? upper.previewEl.offsetTop : previewEl.scrollHeight;
-            const lowerEditorY = getEditorYForLine(lower.line);
-            const upperEditorY = upper ? getEditorYForLine(upper.line) : editorEl.scrollHeight;
-            const sectionRatio = (previewTop - lowerPreviewY) / Math.max(1, upperPreviewY - lowerPreviewY);
-            editorEl.scrollTop = Math.max(0, lowerEditorY + sectionRatio * (upperEditorY - lowerEditorY));
-          } else if (upper) {
-            editorEl.scrollTop = 0;
-          } else {
-            const denom = Math.max(1, previewEl.scrollHeight - previewEl.clientHeight);
-            const ratio = previewEl.scrollTop / denom;
-            editorEl.scrollTop = ratio * Math.max(1, editorEl.scrollHeight - editorEl.clientHeight);
-          }
-        }
-      };
-
-      const onEditorScroll = () => {
-        if (performance.now() < suppressBounceUntil && activePane !== "editor") return;
-        if (activePane !== "editor") return;
-        clearTimeout(debounceId);
-        debounceId = setTimeout(() => sync("editor"), 16);
-      };
-
-      const onPreviewScroll = () => {
-        if (performance.now() < suppressBounceUntil && activePane !== "preview") return;
-        if (activePane !== "preview") return;
-        clearTimeout(debounceId);
-        debounceId = setTimeout(() => sync("preview"), 16);
-      };
-
-      editorEl.addEventListener("scroll", onEditorScroll, { passive: true });
-      previewEl.addEventListener("scroll", onPreviewScroll, { passive: true });
-
-      // Store cleanup on the ref so the unmount path can find it later.
-      const refWithCleanup = editorSectionRef as React.MutableRefObject<
-        HTMLElement | null
-      > & { _cleanup?: () => void };
-      refWithCleanup._cleanup = () => {
-        editorEl?.removeEventListener("scroll", onEditorScroll);
-        previewEl?.removeEventListener("scroll", onPreviewScroll);
-        editorEl?.removeEventListener("mouseenter", editorEnter);
-        editorEl?.removeEventListener("focusin", editorEnter);
-        previewEl?.removeEventListener("mouseenter", previewEnter);
-        previewEl?.removeEventListener("focusin", previewEnter);
-        previewObserver.disconnect();
-        clearTimeout(debounceId);
-        cancelAnimationFrame(rebuildRaf);
-      };
     }, 100);
-
     return () => {
+      disposed = true;
       clearInterval(timer);
-      const refWithCleanup = editorSectionRef as React.MutableRefObject<
-        HTMLElement | null
-      > & { _cleanup?: () => void };
-      refWithCleanup._cleanup?.();
+      unlink?.();
     };
   }, [mode, syncScroll, isVerticalSplit]);
+
+  // The margins mode (plan W13.R9) shows a shared note's comments by their source line.
+  useEffect(() => {
+    if (!collab) return;
+    let comments: typeof import("../collab/comments") | null = null;
+    void import("../collab/comments").then((m) => {
+      comments = m;
+    });
+    setSidenoteLineNotes(() => {
+      if (!comments) return [];
+      const text = collab.ytext.toString();
+      return comments.listComments(collab.commentsDoc, { onlyOpen: true }).flatMap((c) => {
+        const at = comments!.resolveAnchor(collab.doc, c);
+        if (!at) return [];
+        let line = 1;
+        for (let i = text.indexOf("\n"); i !== -1 && i < at.from; i = text.indexOf("\n", i + 1)) line++;
+        return [{ line, text: c.body, author: c.authorName }];
+      });
+    });
+    return () => setSidenoteLineNotes(null);
+  }, [collab]);
+
+  // Ctrl+Alt+Shift+← / → : the focus to the column on that side (plan W13.R7; what is on
+  // screen, so mirrored in RTL). Ctrl+Alt+← / → without Shift stay outline indent (W2.13).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!e.ctrlKey || !e.altKey || !e.shiftKey || e.metaKey || (e.key !== "ArrowLeft" && e.key !== "ArrowRight")) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const key = e.key;
+      void import("../reading/readingColumns").then((m) => m.moveColumn(key));
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, []);
 
   return (
     <div

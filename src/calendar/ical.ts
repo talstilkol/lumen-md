@@ -1,3 +1,4 @@
+import { compareNames } from "../i18n/collate";
 /**
  * iCalendar (RFC 5545), the part CalDAV task sync and ICS subscriptions need
  * (plan W7.20): unfolding and folding, text escaping, VTODO in and out, VEVENT
@@ -324,5 +325,5 @@ export function eventsOn(events: readonly CalEvent[], day: string): DayEvent[] {
     }
   }
   for (const ov of overrides.values()) if (ov.start.date === day && !out.some((x) => x.uid === ov.uid)) out.push({ uid: ov.uid, summary: ov.summary, location: ov.location, time: ov.start.time, endTime: ov.end?.time ?? null });
-  return out.sort((a, b) => (a.time ?? "").localeCompare(b.time ?? "") || a.summary.localeCompare(b.summary));
+  return out.sort((a, b) => compareNames((a.time ?? ""), b.time ?? "") || compareNames(a.summary, b.summary));
 }

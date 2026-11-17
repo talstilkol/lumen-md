@@ -4,6 +4,8 @@ import "./lib/trustedTypesInit";
 import "./privacy/airplaneBoot";
 // After a host move, before anything writes localStorage (plan W6.9; inert without VITE_MOVED_TO).
 import "./pwa/hostMoveBoot";
+// App lock (plan W13.P1): when it is on, the content stays hidden until the device's check passes.
+import { bootAppLock } from "./privacy/appLockBoot";
 import "./fonts";
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
@@ -29,10 +31,37 @@ import { adoptBootLocale, useAppStore } from "./store/useStore";
 import { applyBootEdit, takeBootEdit } from "./boot/bootNote";
 import "./index.css";
 import { windowLabel } from "./desktop/window";
+import { keepInstallPrompt } from "./pwa/installPrompt";
+import { missingFeatures, shouldNotify } from "./boot/supportCheck";
+import { loadCommandHints } from "./commands/hints";
+import { armBootOk, beginBoot, noteBootCrash } from "./boot/bootSentinel";
 
 // Plan W2.17: this window is a presentation's presenter view (opened by the slides), not the editor.
 const IS_PRESENTER = typeof location !== "undefined" && location.hash === "#lumen-presenter";
+// W13.T5 / T1: the boot sentinel. Only the main editor window counts a start
+// (a presenter, capture or share-link window is not the app starting).
+const WATCH_BOOT = !IS_PRESENTER && windowLabel() === "main" && !/^#view(?:-file)?(?:[=&]|$)/.test(location.hash);
+const BOOT = WATCH_BOOT ? beginBoot(__LUMEN_VERSION__) : null;
+const SafeModeBanner = React.lazy(() => import("./boot/SafeModeBanner").then((m) => ({ default: m.SafeModeBanner })));
+/** Rendered by the root error screen: this start did not succeed. */
+function BootCrashMark() {
+  noteBootCrash();
+  return null;
+}
 const PresenterView = React.lazy(() => import("./slides/PresenterView"));
+
+// Plan W11.P13: Chromium offers its install prompt once, early; keep it for the install dialog.
+if (typeof window !== "undefined") keepInstallPrompt();
+// W13.T2: a browser older than the support policy is told so, once per version (nothing is blocked).
+const UNSUPPORTED = missingFeatures();
+const SupportNotice = React.lazy(() => import("./boot/SupportNotice").then((m) => ({ default: m.SupportNotice })));
+const showSupportNotice = (() => {
+  try {
+    return shouldNotify(UNSUPPORTED, __LUMEN_VERSION__, localStorage);
+  } catch {
+    return shouldNotify(UNSUPPORTED, __LUMEN_VERSION__, null);
+  }
+})();
 
 // Every AI network request is recorded; local-only blocks cloud ones (T37).
 const lastBlockToast = new Map<string, number>();
@@ -72,9 +101,13 @@ try {
 startVaultSnapshots();
 // Usage counters on this device only (plan W4.26), loaded after start-up; nothing is sent.
 setTimeout(startUsageCounting, 3000);
+// The commands' hints: their English is a lazy chunk (commands/cmdHintStrings.ts), loaded once the app is idle.
+setTimeout(() => void loadCommandHints(), 2000);
 // Task reminders (plan 4.13.4), only when the user turned them on; loaded after start-up.
 try {
   if (localStorage.getItem("lumen.tasks.reminders") === "1") setTimeout(() => void import("./tasks/reminders").then((m) => m.startReminders()), 5000);
+  // Review 11, M5: a plugin version taken down after it was installed is disabled (reads only the signed index, and only with a plugin installed).
+  setTimeout(() => void import("./plugins/install").then((m) => m.disableDelisted()).catch(() => undefined), 4000);
 } catch {
   /* why: storage blocked: no reminders */
 }
@@ -103,6 +136,7 @@ void import("./lib/webVitals").then((m) => m.startLocalVitals()).catch(() => {
 // ─── Native Sync Dialog Capture (Milkdown overrides) ────────────────────
 const nativePrompt = window.prompt;
 window.prompt = function(message?: string, _defaultText?: string): string | null {
+  // filter-ok: matches Milkdown's own English prompt text, not a filter box.
   if (message?.toLowerCase().includes("link") || message?.toLowerCase().includes("image") || message?.toLowerCase().includes("url")) {
     setTimeout(() => {
       showAiToast(t("toast.useTheFloatingMenuOr"), "info");
@@ -185,6 +219,8 @@ if (location.pathname === "/oauth/onenote") void import("./storage/import/onenot
 else if (location.pathname.startsWith("/oauth/")) void import("./sync/e2ee/ui/launch").then((m) => m.oauthReturn(Promise.all([secretsReady, vaultReady])));
 // Plan W5.21: a classroom link (`#class=…`, never sent to any server) offers to join once the app is up.
 if (location.hash.startsWith("#class=")) void import("./sync/e2ee/classroom/launch").then((m) => m.classLinkReturn(Promise.all([secretsReady, vaultReady])));
+// Plan W12.S4: a role-vault invite (`#rolevault=…`, never sent to any server) offers to join, behind the sync.e2ee gate.
+else if (location.hash.startsWith("#rolevault=")) void import("./sync/e2ee/roles/ui/launch").then((m) => m.roleVaultLinkReturn(Promise.all([secretsReady, vaultReady])));
 void Promise.all([initLocale(), secretsReady, vaultReady])
   .then(([applied]) => {
     // initLocale falls back to English when the saved locale's chunk can't
@@ -210,6 +246,7 @@ function renderApp() {
 // W10.E20: what was typed in the boot shell's note goes into the open note before React replaces the shell.
 const bootEdit = IS_PRESENTER || showShare || windowLabel() === "capture" ? null : takeBootEdit();
 if (bootEdit) applyBootEdit(bootEdit, useAppStore);
+bootAppLock();
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <ErrorBoundary fallback={
@@ -218,6 +255,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           height: "100vh", background: "#0c0f17", color: "#e8e8e8",
           fontFamily: "Inter, system-ui, sans-serif", flexDirection: "column", gap: 16,
         }}>
+          <BootCrashMark />
           <h1 style={{ fontSize: 24, fontWeight: 600, margin: 0 }}>{t("boot.crashTitle")}</h1>
           <p style={{ fontSize: 14, opacity: 0.7, margin: 0 }}>{t("boot.crashBody")}</p>
           <button
@@ -250,7 +288,19 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <Suspense fallback={null}>
       <VaultFolderBanner />
     </Suspense>
+    {BOOT?.safeMode && (
+      <Suspense fallback={null}>
+        <SafeModeBanner />
+      </Suspense>
+    )}
     <ToastContainer />
+    {showSupportNotice && (
+      <Suspense fallback={null}>
+        <SupportNotice missing={UNSUPPORTED} version={__LUMEN_VERSION__} />
+      </Suspense>
+    )}
   </React.StrictMode>,
 );
+// The start counts as good once the app has stayed up for a moment without the error screen.
+if (WATCH_BOOT) armBootOk();
 }

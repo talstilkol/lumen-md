@@ -28,7 +28,7 @@ import { join } from "node:path";
  * (`npm run perf:inp`), never in the per-browser PR runs.
  */
 
-const REPORT_DIR = join(__dirname, "..", "reports", "perf");
+const REPORT_DIR = join(import.meta.dirname, "..", "reports", "perf");
 const CPU_SLOWDOWN = 4;
 
 interface Metrics {
@@ -214,7 +214,7 @@ for (const [label, bytes, budget] of [
 }
 
 // ── W11.Q5: real long texts ─────────────────────────────────────────────
-const CORPUS = process.env.LUMEN_EDITOR_CORPUS ?? join(__dirname, "..", "reports", "perf", "corpus");
+const CORPUS = process.env.LUMEN_EDITOR_CORPUS ?? join(import.meta.dirname, "..", "reports", "perf", "corpus");
 const REAL = [
   { key: "mobyDick", file: "moby-dick.md", title: "Moby-Dick", shows: "Moby-Dick; or, The Whale" },
   { key: "benYehuda2MB", file: "benyehuda-2mb.md", title: "Ben-Yehuda 2 MB", shows: "בן-יהודה" },
@@ -222,14 +222,20 @@ const REAL = [
 const REAL_BUDGET = 33;
 const corpusText = (file: string) => (existsSync(join(CORPUS, file)) ? readFileSync(join(CORPUS, file), "utf8") : null);
 const NO_CORPUS = `no ${CORPUS}/{moby-dick,benyehuda-2mb}.md: run \`npm run perf:editor-corpus -- --benyehuda <checkout>\` first`;
+/** The corpus file's text; the test is skipped when the corpus was not built on this machine. */
+function corpusOrSkip(file: string): string {
+  const text = corpusText(file);
+  // skip-reason: the real long texts (Moby-Dick, 2 MB of Ben-Yehuda) are built outside the repo by npm run perf:editor-corpus; without them there is nothing to type into | task: W11.Q5 | until: 2027-05-16
+  test.skip(text === null, NO_CORPUS);
+  return text!;
+}
 
 for (const doc of REAL) {
   test(`keypress → paint p95 < ${REAL_BUDGET} ms in ${doc.title}, source editor (CPU 4× slower)`, { tag: "@inp" }, async ({ page }) => {
-    const text = corpusText(doc.file);
-    test.skip(text === null, NO_CORPUS);
+    const text = corpusOrSkip(doc.file);
     test.setTimeout(300_000);
     await page.keyboard.press("ControlOrMeta+1");
-    await openNote(page, `inp-${doc.file}`, text!, doc.shows);
+    await openNote(page, `inp-${doc.file}`, text, doc.shows);
     await page.locator(".cm-content").first().click();
     await page.keyboard.press("ControlOrMeta+End");
     const p95 = quantile(await keyToPaint(page), 0.95);
@@ -240,8 +246,7 @@ for (const doc of REAL) {
 }
 
 test(`Moby-Dick in WYSIWYG: keypress → paint p95 < ${REAL_BUDGET} ms, or it opens in the source editor by itself`, { tag: "@inp" }, async ({ page }) => {
-  const text = corpusText("moby-dick.md");
-  test.skip(text === null, NO_CORPUS);
+  const text = corpusOrSkip("moby-dick.md");
   test.setTimeout(300_000);
   await page.keyboard.press("ControlOrMeta+4");
   await page.evaluate(
@@ -253,7 +258,7 @@ test(`Moby-Dick in WYSIWYG: keypress → paint p95 < ${REAL_BUDGET} ms, or it op
       await w.close();
       window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path: "inp-moby-wysiwyg.md" } }));
     },
-    { text: text! },
+    { text },
   );
   const notice = page.getByTestId("wysiwyg-ceiling-notice");
   const prose = page.locator(".ProseMirror").first();

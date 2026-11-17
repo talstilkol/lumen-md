@@ -59,7 +59,7 @@ GitHub Actions לא רצים על PR. הבדיקות רצות אצלך, ואחר
 
 ```bash
 npm run ci:local -- --changed      # מה שה־diff יכול לשבור: typecheck, ‏lint, ‏i18n, בדיקות, build
-npm run ci:local -- --install-hook # פעם אחת: אותו דבר כ־pre-push, אחרי בדיקת סחיפת ה־lockfile
+npm run ci:local -- --install-hook # ה־pre-push הזה לא מותקן מעצמו (הוא מריץ את הבדיקות בכל push); כך מצטרפים אליו, או git config lumen.ciLocalHook true לפני npm install
 ```
 
 ואז את בדיקת ה־PR, עם גוף ה־PR כקובץ:

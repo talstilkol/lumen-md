@@ -20,5 +20,14 @@
   "calendar.hebrewDates": "Show the Hebrew date next to dates in properties and database views",
   "calendar.workWeek": "Work week",
   "calendar.workWeek.monFri": "Monday–Friday",
-  "calendar.workWeek.sunThu": "Sunday–Thursday (Israel)"
+  "calendar.workWeek.sunThu": "Sunday–Thursday (Israel)",
+  "calendar.candleMinutes": "Candle lighting, minutes before sunset",
+  "calendar.city": "City for Shabbat and holiday times (picked by you, never located)",
+  "calendar.city.none": "None",
+  "calendar.timeline.conflict": "“{text}” falls in Shabbat or a holiday. Suggested: {when}",
+  "calendar.timeline.hint": "Drag a block, or focus it and use ↑/↓ (Shift: change its length). Write blocks in the note as “- 09:00–10:30 …”.",
+  "calendar.timeline.inRest": "in Shabbat or a holiday",
+  "calendar.timeline.move": "Move",
+  "calendar.timeline.rest": "Shabbat or yom tov in {city}: {from}–{to}",
+  "calendar.timeline.title": "Day plan"
 }

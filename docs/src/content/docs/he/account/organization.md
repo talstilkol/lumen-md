@@ -1,6 +1,8 @@
 ---
 title: הגדרות הארגון
 description: לתת שם לארגון, להגביל דומיינים של דוא״ל, לבדוק SSO וחברים.
+type: how-to
+untracked: "shipped before the plan (the organization release); no plan task covers it"
 ---
 
 פותחים את לוח הפקודות (`⌘K` / `Ctrl+K`) ומריצים **Organization settings…**.

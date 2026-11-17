@@ -26,6 +26,38 @@
       "vars": []
     },
     {
+      "key": "cmd.academic.choose",
+      "en": "Academic calendar: choose an institution…",
+      "vars": []
+    },
+    {
+      "key": "cmd.academic.choose.hint",
+      "en": "Semesters, Moed A and B and breaks in the daily note ({{academic}}) and for deadlines",
+      "vars": [
+        "academic"
+      ]
+    },
+    {
+      "key": "cmd.academic.ics",
+      "en": "Export the academic calendar (ICS)",
+      "vars": []
+    },
+    {
+      "key": "cmd.academic.ics.hint",
+      "en": "The chosen institution's year as a calendar file for Google Calendar or Apple Calendar",
+      "vars": []
+    },
+    {
+      "key": "cmd.agents.acp",
+      "en": "Ask an external agent (Claude Code, Codex, OpenCode)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.agents.acp.hint",
+      "en": "Desktop: the agent works in your vault over ACP; every file it writes waits in the review panel",
+      "vars": []
+    },
+    {
       "key": "cmd.ai.actionItems",
       "en": "AI: Extract Action Items",
       "vars": []
@@ -128,6 +160,16 @@
     {
       "key": "cmd.ai.chart.hint",
       "en": "Turn CSV or table data into an ECharts chart",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.claims",
+      "en": "AI: Paragraph → Claims",
+      "vars": []
+    },
+    {
+      "key": "cmd.ai.claims.hint",
+      "en": "Checkable claims from the paragraph at the cursor, each with an exact quote (R12.11)",
       "vars": []
     },
     {
@@ -312,7 +354,7 @@
     },
     {
       "key": "cmd.ai.rerankModel.hint",
-      "en": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: fast word matching.",
+      "en": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: the BM25 order, the default.",
       "vars": []
     },
     {
@@ -431,6 +473,16 @@
       "vars": []
     },
     {
+      "key": "cmd.app.install",
+      "en": "Install Lumen as an app…",
+      "vars": []
+    },
+    {
+      "key": "cmd.app.install.hint",
+      "en": "Its own window and icon; works offline",
+      "vars": []
+    },
+    {
       "key": "cmd.app.updateChannel",
       "en": "Update channel: switch between stable and beta",
       "vars": []
@@ -438,6 +490,31 @@
     {
       "key": "cmd.app.updateChannel.hint",
       "en": "Beta gets new features first; stable gets tested releases",
+      "vars": []
+    },
+    {
+      "key": "cmd.appLock.after",
+      "en": "Privacy: lock the app after…",
+      "vars": []
+    },
+    {
+      "key": "cmd.appLock.hint",
+      "en": "Hides your notes while Lumen is in the background; the device's own check unlocks it",
+      "vars": []
+    },
+    {
+      "key": "cmd.appLock.now",
+      "en": "Privacy: lock the app now",
+      "vars": []
+    },
+    {
+      "key": "cmd.appLock.off",
+      "en": "Privacy: turn the app lock off",
+      "vars": []
+    },
+    {
+      "key": "cmd.appLock.on",
+      "en": "Privacy: lock the app with Face ID / fingerprint",
       "vars": []
     },
     {
@@ -551,6 +628,16 @@
       "vars": []
     },
     {
+      "key": "cmd.capture.triageInbox",
+      "en": "📥 Inbox: sort with the local model",
+      "vars": []
+    },
+    {
+      "key": "cmd.capture.triageInbox.hint",
+      "en": "Tasks get a checkbox and a due date, every entry tags; you review before anything changes",
+      "vars": []
+    },
+    {
       "key": "cmd.chat.import",
       "en": "Import a WhatsApp or Telegram chat…",
       "vars": []
@@ -558,6 +645,36 @@
     {
       "key": "cmd.chat.import.hint",
       "en": "Exported chat → notes per day, with its media; on this device only",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.exportForZotero",
+      "en": "Citations: export the vault's sources for Zotero (CSL JSON)",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.exportRis",
+      "en": "Citations: export the vault's sources as RIS",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.fillReferencesOpenAlex",
+      "en": "Citations: fill references from OpenAlex…",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.fillReferencesOpenAlex.hint",
+      "en": "For a source note with a DOI: asks first, sends only the DOI, and writes nothing until you approve",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.fromDoi",
+      "en": "Cite from a DOI (CrossRef)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.cite.importZoteroFile",
+      "en": "Citations: import a Zotero export file (CSL JSON, BibTeX, RIS)",
       "vars": []
     },
     {
@@ -716,6 +833,21 @@
       "vars": []
     },
     {
+      "key": "cmd.edit.cursorMovement.hint",
+      "en": "Arrow keys in mixed Hebrew/English lines: visual (as drawn) or logical (text order). This device only.",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.cursorMovement.toLogical",
+      "en": "Cursor movement: switch to logical",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.cursorMovement.toVisual",
+      "en": "Cursor movement: switch to visual",
+      "vars": []
+    },
+    {
       "key": "cmd.edit.fixPdfHebrew",
       "en": "Fix reversed Hebrew (from a PDF)",
       "vars": []
@@ -743,6 +875,31 @@
     {
       "key": "cmd.edit.formatDocument.hint",
       "en": "Prettier: tidy Markdown, frontmatter and fenced code",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.hebrewLists.done.off",
+      "en": "Lists in this note are numbered 1. 2. 3.",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.hebrewLists.done.on",
+      "en": "Lists in this note are numbered א. ב. ג.",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.hebrewLists.hint",
+      "en": "For this note, in the preview, PDF and Word; the Markdown keeps 1. 2. 3.",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.hebrewLists.off",
+      "en": "Number lists with digits (1. 2. 3.)",
+      "vars": []
+    },
+    {
+      "key": "cmd.edit.hebrewLists.on",
+      "en": "Number lists with Hebrew letters (א. ב. ג.)",
       "vars": []
     },
     {
@@ -796,8 +953,67 @@
       "vars": []
     },
     {
+      "key": "cmd.entities.contradictions",
+      "en": "Where my notes disagree",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.contradictions.done",
+      "en": "{n} candidates: the report is in the review panel, waiting for you",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "cmd.entities.contradictions.failed",
+      "en": "Could not look for disagreements: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "cmd.entities.contradictions.hint",
+      "en": "Finds denials, corrections and differing values or dates between notes, with exact quotes; the report goes to the review panel",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.graph",
+      "en": "Entity graph",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.graph.hint",
+      "en": "Every entity and who cites whom, as a graph or a table",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.review",
+      "en": "Entity graph: proposals to review",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.wikidata",
+      "en": "Entity: link to Wikidata…",
+      "vars": []
+    },
+    {
+      "key": "cmd.entities.wikidata.notEntity",
+      "en": "Open an entity note first (a note under ישויות/).",
+      "vars": []
+    },
+    {
       "key": "cmd.epub.open",
       "en": "Open an EPUB for reading…",
+      "vars": []
+    },
+    {
+      "key": "cmd.export.latexPdf",
+      "en": "PDF from LaTeX (desktop, Tectonic)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.export.latexPdf.hint",
+      "en": "The LaTeX export compiled to PDF by Tectonic on this computer; TeX's errors with their lines when it fails",
       "vars": []
     },
     {
@@ -901,6 +1117,16 @@
       "vars": []
     },
     {
+      "key": "cmd.file.exportOdt",
+      "en": "Export to OpenDocument (ODT)",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportOdt.hint",
+      "en": "LibreOffice text document, right-to-left paragraphs kept",
+      "vars": []
+    },
+    {
       "key": "cmd.file.exportOpml",
       "en": "Export to OPML",
       "vars": []
@@ -928,6 +1154,16 @@
     {
       "key": "cmd.file.exportPdf.hint",
       "en": "colorful, exactly as shown",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportPdfUa",
+      "en": "Export accessible PDF (PDF/UA)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportPdfUa.hint",
+      "en": "Tagged: headings, image descriptions, table headers, language — then finished as PDF/UA-1",
       "vars": []
     },
     {
@@ -978,6 +1214,56 @@
     {
       "key": "cmd.file.exportSite.hint",
       "en": "Multi-page HTML site with sidebar nav + RSS (pages split on H1)",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportTypst",
+      "en": "Export to Typst (.typ)",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportTypst.hint",
+      "en": "Typst source with Hebrew right to left; compile it with typst",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportTypstPdf",
+      "en": "Export to PDF with Typst",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportTypstPdf.hint",
+      "en": "Compiled on this device by typst.ts, with a Hebrew font; nothing is sent",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportVcard",
+      "en": "Export people as vCard",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportVcard.hint",
+      "en": "Every person note as one vCard 4.0 file, downloaded on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.finishPdfUa",
+      "en": "Make a saved PDF accessible (PDF/UA)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.finishPdfUa.hint",
+      "en": "Adds the PDF/UA identification, the language and the shown title to a tagged PDF, on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.importVcard",
+      "en": "Import contacts (vCard)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.importVcard.hint",
+      "en": "A .vcf from your phone or Google becomes person notes; people already in the vault are merged",
       "vars": []
     },
     {
@@ -1265,6 +1551,16 @@
       "vars": []
     },
     {
+      "key": "cmd.help.safeMode",
+      "en": "Restart in safe mode",
+      "vars": []
+    },
+    {
+      "key": "cmd.help.safeMode.hint",
+      "en": "no plugins, CSS snippets or AI agents until you leave it — for when something you added keeps Lumen from working",
+      "vars": []
+    },
+    {
       "key": "cmd.help.setup",
       "en": "Set up Lumen…",
       "vars": []
@@ -1455,6 +1751,16 @@
       "vars": []
     },
     {
+      "key": "cmd.learning.plans",
+      "en": "Learning plans…",
+      "vars": []
+    },
+    {
+      "key": "cmd.learning.plans.hint",
+      "en": "Follow Daf Yomi, Mishnah Yomit or the daily Rambam: today's reading, a day marked learned, progress and review cards",
+      "vars": []
+    },
+    {
       "key": "cmd.lexicon.lookup",
       "en": "Look up the Hebrew word at the cursor",
       "vars": []
@@ -1485,6 +1791,26 @@
       "vars": []
     },
     {
+      "key": "cmd.mcp.ask",
+      "en": "Ask with my MCP servers…",
+      "vars": []
+    },
+    {
+      "key": "cmd.mcp.ask.hint",
+      "en": "The local agent uses your MCP servers' tools, asking before each one that needs it",
+      "vars": []
+    },
+    {
+      "key": "cmd.mcp.settings",
+      "en": "MCP servers…",
+      "vars": []
+    },
+    {
+      "key": "cmd.mcp.settings.hint",
+      "en": "Add outside MCP servers and choose what their tools may do",
+      "vars": []
+    },
+    {
       "key": "cmd.mobile.customizeToolbar",
       "en": "Customize the mobile toolbar",
       "vars": []
@@ -1507,6 +1833,26 @@
     {
       "key": "cmd.mobile.readLongNotes.on",
       "en": "Currently ON (tap the text to edit)",
+      "vars": []
+    },
+    {
+      "key": "cmd.mobile.scan",
+      "en": "Scan a document…",
+      "vars": []
+    },
+    {
+      "key": "cmd.mobile.scan.hint",
+      "en": "the camera finds the page; the PDF goes to attachments/ and its text, read on this device, into a new note",
+      "vars": []
+    },
+    {
+      "key": "cmd.mobile.spotlight",
+      "en": "Spotlight and Siri: which notes…",
+      "vars": []
+    },
+    {
+      "key": "cmd.mobile.spotlight.hint",
+      "en": "off, the 50 most recent, or all notes; locked and private notes never",
       "vars": []
     },
     {
@@ -1720,6 +2066,16 @@
       "vars": []
     },
     {
+      "key": "cmd.privacy.localData",
+      "en": "Privacy: what is stored on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.privacy.localData.hint",
+      "en": "Sizes per category; delete each one, or everything; save the report",
+      "vars": []
+    },
+    {
       "key": "cmd.reading.aids",
       "en": "Reading aids…",
       "vars": []
@@ -1730,8 +2086,53 @@
       "vars": []
     },
     {
+      "key": "cmd.reading.bookSpread",
+      "en": "Reading: book pages (two-page spread)",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.bookSpread.hint",
+      "en": "Turn pages like a book: page 1 on the right in Hebrew, ← for the next pages there; PageDown, Space",
+      "vars": []
+    },
+    {
       "key": "cmd.reading.mode",
       "en": "Reading mode",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.newFromCapture",
+      "en": "Reading list: new source from a captured page…",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.newFromCapture.hint",
+      "en": "The clipped page open now, or a link you type",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.newFromLibrary",
+      "en": "Reading list: new source from the citation library…",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.newFromLibrary.hint",
+      "en": "A Zotero, BibTeX or CSL-JSON item becomes a source note",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.profile",
+      "en": "Reading mode…",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.sidenotes",
+      "en": "Reading: margin notes (footnotes, comments, suggestions)",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.sidenotes.hint",
+      "en": "Each note next to its line: on the right in English, on the left in Hebrew; under its paragraph on a narrow screen",
       "vars": []
     },
     {
@@ -1835,6 +2236,11 @@
       "vars": []
     },
     {
+      "key": "cmd.roleVault.open",
+      "en": "Family or classroom vault…",
+      "vars": []
+    },
+    {
       "key": "cmd.save",
       "en": "Save",
       "vars": []
@@ -1842,6 +2248,16 @@
     {
       "key": "cmd.saveAs",
       "en": "Save as…",
+      "vars": []
+    },
+    {
+      "key": "cmd.screenshotToNote",
+      "en": "Screenshot to note…",
+      "vars": []
+    },
+    {
+      "key": "cmd.screenshotToNote.hint",
+      "en": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
       "vars": []
     },
     {
@@ -2000,6 +2416,16 @@
       "vars": []
     },
     {
+      "key": "cmd.sources.havruta",
+      "en": "Study with a partner (havruta)…",
+      "vars": []
+    },
+    {
+      "key": "cmd.sources.havruta.hint",
+      "en": "A shared, encrypted study room on this reference: notes and highlights travel, the text stays on each device",
+      "vars": []
+    },
+    {
       "key": "cmd.sources.insert",
       "en": "Insert a source from Sefaria…",
       "vars": []
@@ -2090,6 +2516,16 @@
       "vars": []
     },
     {
+      "key": "cmd.spell.yiddishDictionary",
+      "en": "Yiddish spelling: word list (download / remove)",
+      "vars": []
+    },
+    {
+      "key": "cmd.spell.yiddishDictionary.hint",
+      "en": "Offline Yiddish spell check (hunspell-yi, 2.4 MB, GPL)",
+      "vars": []
+    },
+    {
       "key": "cmd.split",
       "en": "Split editor + preview",
       "vars": []
@@ -2102,6 +2538,16 @@
     {
       "key": "cmd.student.lecture.hint",
       "en": "Record, tap “Important!”, and get a transcript with ▶ for each sentence, a summary and review cards — on this device.",
+      "vars": []
+    },
+    {
+      "key": "cmd.student.syllabus",
+      "en": "Create a syllabus…",
+      "vars": []
+    },
+    {
+      "key": "cmd.student.syllabus.hint",
+      "en": "A note with one heading per teaching week of the semester, from your institution's academic calendar, with its dates and days off",
       "vars": []
     },
     {
@@ -2221,6 +2667,16 @@
       "vars": []
     },
     {
+      "key": "cmd.text.transliterate",
+      "en": "Transliterate the selection (Yiddish, Ladino)",
+      "vars": []
+    },
+    {
+      "key": "cmd.text.transliterate.hint",
+      "en": "Yiddish ↔ YIVO romanisation, Ladino Latin ↔ Hebrew letters",
+      "vars": []
+    },
+    {
       "key": "cmd.tools.autoTag",
       "en": "🏷️ Auto-tag this note",
       "vars": []
@@ -2313,6 +2769,23 @@
       "vars": []
     },
     {
+      "key": "cmd.typesAll",
+      "en": "All {type}",
+      "vars": [
+        "type"
+      ]
+    },
+    {
+      "key": "cmd.typesPage",
+      "en": "Types: all objects by type",
+      "vars": []
+    },
+    {
+      "key": "cmd.typesStudio",
+      "en": "Types: Object Studio (new type, fields, rename)",
+      "vars": []
+    },
+    {
       "key": "cmd.usage",
       "en": "Help: Usage on this device",
       "vars": []
@@ -2368,6 +2841,16 @@
       "vars": []
     },
     {
+      "key": "cmd.vault.exportEverything",
+      "en": "Vault: export everything (exit test)",
+      "vars": []
+    },
+    {
+      "key": "cmd.vault.exportEverything.hint",
+      "en": "Notes, attachments, history, settings and AI profiles in open formats, with a SHA-256 manifest and what Obsidian shows differently",
+      "vars": []
+    },
+    {
       "key": "cmd.vault.import",
       "en": "Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…",
       "vars": []
@@ -2418,6 +2901,26 @@
       "vars": []
     },
     {
+      "key": "cmd.vaults.open",
+      "en": "Vaults…",
+      "vars": []
+    },
+    {
+      "key": "cmd.vaults.open.hint",
+      "en": "every vault on this device with its notes, sync and plugins; rename, move, delete, safe mode",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.asOf",
+      "en": "What I knew then",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.asOf.hint",
+      "en": "search the vault as it was on a past date",
+      "vars": []
+    },
+    {
       "key": "cmd.view.autoSave.hint",
       "en": "every {interval}s",
       "vars": [
@@ -2460,6 +2963,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.bilingual",
+      "en": "📖 Bilingual reader (columns / line under line)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.bilingual.hint",
+      "en": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
+      "vars": []
+    },
+    {
       "key": "cmd.view.calendar",
       "en": "Show / hide the calendar",
       "vars": []
@@ -2477,6 +2990,51 @@
     {
       "key": "cmd.view.canvas.hint",
       "en": "Infinite canvas for visual notes",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.columnNext",
+      "en": "View: focus the next column",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.columnNext.hint",
+      "en": "Ctrl+Alt+Shift+→ (mirrored in a right-to-left layout)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.columnPrev",
+      "en": "View: focus the previous column",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.columnPrev.hint",
+      "en": "Ctrl+Alt+Shift+← (mirrored in a right-to-left layout)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.daf",
+      "en": "📜 Page of the Talmud (daf)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.daf.hint",
+      "en": "The note's main text with its commentaries around it, as on a printed daf",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.digits.hint",
+      "en": "Numbers and dates in the interface; your notes are not changed",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.digits.latin",
+      "en": "Digits: use Latin digits (0123)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.digits.native",
+      "en": "Digits: use the language's own (٠١٢٣ / ۰۱۲۳)",
       "vars": []
     },
     {
@@ -2507,6 +3065,21 @@
     {
       "key": "cmd.view.graphView.hint",
       "en": "visual map of file connections",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.hebrewDates.hint",
+      "en": "Every date Lumen writes, in the UI language; your notes are not changed",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.hebrewDates.off",
+      "en": "Dates: show them in the Gregorian calendar",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.hebrewDates.on",
+      "en": "Dates: show them in the Hebrew calendar",
       "vars": []
     },
     {
@@ -2647,6 +3220,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.sideBySide",
+      "en": "Side-by-side translation",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.sideBySide.hint",
+      "en": "This note and its translation (Hebrew ↔ English) paragraph by paragraph, on a local model; saved next to the note as <note>.<lang>.md",
+      "vars": []
+    },
+    {
       "key": "cmd.view.smartSearch",
       "en": "Smart search (semantic + keyword)",
       "vars": []
@@ -2699,6 +3282,16 @@
     {
       "key": "cmd.view.theme.toLight",
       "en": "Switch to light theme",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.tripleLinked",
+      "en": "View: source + preview + outline, scroll linked",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.tripleLinked.hint",
+      "en": "Three columns that follow each other: scrolling and the caret stay on the same line",
       "vars": []
     },
     {
@@ -2817,6 +3410,206 @@
       "vars": []
     },
     {
+      "key": "cmd.writing.abstract",
+      "en": "Writing: titles, abstract and TL;DR",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.abstract.hint",
+      "en": "Three titles, a 150–250 word abstract and a one-line TL;DR — every sentence tied to a paragraph of the note, on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.argument",
+      "en": "Writing: Check the argument",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.argument.hint",
+      "en": "Claims without a source, logical leaps and common fallacies, each with its reason",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.coach",
+      "en": "Writing: Clarity & Style Coach",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.coach.hint",
+      "en": "Long sentences, passives, action nouns, hedges and wordy phrases, on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.consistency",
+      "en": "Writing: Check the vault's consistency",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.consistency.hint",
+      "en": "Names, dates, numbers and your glossary terms across all notes, against the entity graph — suggestions to review",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.expand",
+      "en": "Writing: Bullets → Paragraph",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.expand.hint",
+      "en": "One paragraph from the selected bullets, nothing invented; marked as AI text",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.explainChange",
+      "en": "Writing: explain my change",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.explainChange.hint",
+      "en": "Compare with an earlier version: a short summary and every change of a number, a negation or a name — on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.goals",
+      "en": "Writing: goals and weekly report",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.goals.hint",
+      "en": "A word or time target, readability and tone for this note; your week on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.harper",
+      "en": "Writing: English grammar (Harper, on this device)",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.harper.hint",
+      "en": "Local English grammar for the English parts of the note — suggestions to review",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.loanwords",
+      "en": "Writing: Hebrew alternatives to loanwords",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.loanwords.hint",
+      "en": "In the academic register: אימייל → דוא״ל, פידבק → משוב… — proposed, never applied; each term can be switched off",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.panel",
+      "en": "Writing: Show Suggestions",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.panel.hint",
+      "en": "The open writing suggestions of this note",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.proofreadHe",
+      "en": "Writing: Hebrew Proofreading",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.proofreadHe.hint",
+      "en": "Number gender, את/עם, the article in a construct — local rules, as suggestions",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.readability",
+      "en": "Writing: Readability of this note",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.readability.hint",
+      "en": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.registerHigh",
+      "en": "Writing: High Hebrew Register",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.registerHigh.hint",
+      "en": "עברית גבוהה ותקנית for the selection, meaning checked",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.registerSpoken",
+      "en": "Writing: Spoken Hebrew Register",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.registerSpoken.hint",
+      "en": "עברית מדוברת וטבעית for the selection, meaning checked",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.repetition",
+      "en": "Writing: repetition and clichés",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.repetition.hint",
+      "en": "Words repeated too soon (Hebrew prefixes and forms included), doubled words and clichés — on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.shorten",
+      "en": "Writing: Shorten by 30%",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.shorten.hint",
+      "en": "Within ±10% of the target, with no number or name lost or added",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.structure",
+      "en": "Writing: Review the note's structure",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.structure.hint",
+      "en": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.toneFormal",
+      "en": "Writing: Formal Tone (3 versions)",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.toneFormal.hint",
+      "en": "Rewrite the selection formally; numbers, names and negations are checked",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.toneFriendly",
+      "en": "Writing: Friendly Tone (3 versions)",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.toneFriendly.hint",
+      "en": "Rewrite the selection warmly; numbers, names and negations are checked",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.toneNeutral",
+      "en": "Writing: Neutral Tone (3 versions)",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.toneNeutral.hint",
+      "en": "Rewrite the selection plainly; numbers, names and negations are checked",
+      "vars": []
+    },
+    {
       "key": "desc.commandPalette",
       "en": "Search and run any command",
       "vars": []
@@ -2904,6 +3697,11 @@
     {
       "key": "desc.print",
       "en": "Open browser print dialog",
+      "vars": []
+    },
+    {
+      "key": "desc.reading.profile",
+      "en": "Choose how this note is read — page, focus and more — and save it for this note or for all notes",
       "vars": []
     },
     {

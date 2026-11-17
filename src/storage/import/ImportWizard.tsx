@@ -16,6 +16,7 @@ import { HelpButton } from "../../ui/HelpButton";
 import { explainError } from "../../lib/userError";
 import { Modal } from "../../ui/Modal";
 import { oneNoteConfig } from "./onenoteGraph";
+import { loadDeployedClientId, oneNoteClientId, setUserClientId } from "./onenoteClientId";
 import { prepareOneNoteGraphImport, startOneNoteSignIn, takeOneNoteHandoff } from "./onenoteSignIn";
 import { markActivation } from "../../metrics/count";
 import { runSampleSearch, sampleSearchQuery } from "../../onboarding/importFirst";
@@ -55,19 +56,52 @@ function Issues<T>({ title, items, line, testId }: { title: string; items: T[]; 
 
 export function ImportWizard({ open, onClose, initialSource, firstRun = false }: Props) {
   const [source, setSource] = useState<ImportSourceId>(initialSource ?? "obsidian");
+  // W13.F5: Pandoc is offered only when the desktop finds one installed (never in the browser).
+  const [pandocReady, setPandocReady] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    let live = true;
+    void import("./pandocBridge").then((m) => m.pandocStatus()).then((st) => live && setPandocReady(st.kind === "ready"));
+    return () => {
+      live = false;
+    };
+  }, [open]);
+  // W12.T7: a Notion database becomes a type as well as a .base.
+  const [notionTypes, setNotionTypes] = useState(true);
   const [step, setStep] = useState<Step>({ kind: "source" });
   const [error, setError] = useState<string | null>(null);
   const [savedReport, setSavedReport] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const folderRef = useRef<HTMLInputElement | null>(null);
-  // Plan W10.E49: offered only when the deployment has a Microsoft app registration.
-  const oneNote = oneNoteConfig();
+  // Plan W10.E49 / W4.19: offered once there is a Microsoft app client id — the user's own, or the
+  // deployment's runtime config (/lumen-runtime.json), read on open; never a build variable.
+  const [clientId, setClientId] = useState(() => oneNoteClientId());
+  const [idDraft, setIdDraft] = useState("");
+  useEffect(() => {
+    if (!open || clientId) return;
+    let live = true;
+    void loadDeployedClientId().then(() => {
+      if (live) setClientId(oneNoteClientId());
+    });
+    return () => {
+      live = false;
+    };
+  }, [open, clientId]);
+  const oneNote = clientId ? oneNoteConfig() : null;
+  const saveClientId = () => {
+    if (!setUserClientId(idDraft)) {
+      setError(t("importWizard.onenote.clientIdInvalid"));
+      return;
+    }
+    setError(null);
+    setClientId(oneNoteClientId());
+  };
 
   const prepare = useCallback(async (picked: Map<string, Uint8Array>, name: string, as: ImportSourceId) => {
     setError(null);
     setStep({ kind: "busy", text: t("importWizard.reading", { n: picked.size }) });
     try {
-      const prep = await prepareImport(picked, name, as);
+      const prep = await prepareImport(picked, name, as, { notionTypes: as === "notion" && notionTypes });
       if (!prep.vault.notes.size && !prep.vault.attachments.size) {
         setError(t("importWizard.error.nothing", { source: SOURCE_NAMES[as] }));
         setStep({ kind: "source" });
@@ -78,7 +112,7 @@ export function ImportWizard({ open, onClose, initialSource, firstRun = false }:
       setError(t("importWizard.error.failed", { error: explainError(e) }));
       setStep({ kind: "source" });
     }
-  }, []);
+  }, [notionTypes]);
 
   // Back from Microsoft's sign-in (`/oauth/onenote`): read the account's OneNote, then review.
   useEffect(() => {
@@ -88,7 +122,7 @@ export function ImportWizard({ open, onClose, initialSource, firstRun = false }:
     setSource("onenote");
     const cfg = oneNoteConfig();
     if ("error" in handoff || !cfg) {
-      setError(t("importWizard.onenote.failed", { error: "error" in handoff ? handoff.error : "VITE_ONENOTE_CLIENT_ID" }));
+      setError(t("importWizard.onenote.failed", { error: "error" in handoff ? handoff.error : t("importWizard.onenote.noClientId") }));
       return;
     }
     setError(null);
@@ -171,7 +205,7 @@ export function ImportWizard({ open, onClose, initialSource, firstRun = false }:
             <fieldset style={{ border: 0, padding: 0, margin: 0 }}>
               <legend style={{ fontSize: 13, fontWeight: 600, marginBottom: 6 }}>{t("importWizard.chooseSource")}</legend>
               <div role="radiogroup" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))", gap: 6 }}>
-                {IMPORT_SOURCES.map((s) => (
+                {IMPORT_SOURCES.filter((s) => s !== "pandoc" || pandocReady).map((s) => (
                   <button
                     key={s}
                     type="button"
@@ -189,6 +223,12 @@ export function ImportWizard({ open, onClose, initialSource, firstRun = false }:
             <p data-testid="import-how" style={{ margin: 0, fontSize: 13 }}>
               {t(`importWizard.how.${source}`)}
             </p>
+            {source === "notion" && (
+              <label style={{ display: "flex", gap: 6, alignItems: "center", fontSize: 13 }}>
+                <input type="checkbox" checked={notionTypes} onChange={(e) => setNotionTypes(e.currentTarget.checked)} data-testid="import-notion-types" />
+                {t("importWizard.notionTypes")}
+              </label>
+            )}
             <div
               data-testid="import-drop"
               onDragOver={(e) => e.preventDefault()}
@@ -223,6 +263,26 @@ export function ImportWizard({ open, onClose, initialSource, firstRun = false }:
                   {t("importWizard.onenote.signIn")}
                 </button>
                 <span style={muted}>{t("importWizard.onenote.signInNote")}</span>
+              </div>
+            )}
+            {source === "onenote" && !oneNote && (
+              <div data-testid="import-onenote-clientid" style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <label style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  {t("importWizard.onenote.clientIdLabel")}
+                  <input
+                    data-testid="import-onenote-clientid-input"
+                    dir="ltr"
+                    spellCheck={false}
+                    autoComplete="off"
+                    value={idDraft}
+                    onChange={(e) => setIdDraft(e.currentTarget.value)}
+                    style={{ minWidth: "22em", fontFamily: "var(--font-mono, monospace)" }}
+                  />
+                </label>
+                <button type="button" style={btn} data-testid="import-onenote-clientid-save" onClick={saveClientId}>
+                  {t("importWizard.onenote.clientIdSave")}
+                </button>
+                <span style={muted}>{t("importWizard.onenote.clientIdHint")}</span>
               </div>
             )}
           </>

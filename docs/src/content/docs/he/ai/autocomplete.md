@@ -1,6 +1,8 @@
 ---
 title: השלמה אוטומטית מקומית (FIM)
 description: השלמות תוך כדי הקלדה ממודל קוד במכשיר הזה — Ollama עם qwen2.5-coder, או המודל שבדפדפן — בלי שום מסלול לענן.
+type: how-to
+tasks: ["4.5"]
 ---
 
 `⌘K → "AI: Local Autocomplete (FIM) — On/Off"` מפעיל השלמות תוך כדי הקלדה.

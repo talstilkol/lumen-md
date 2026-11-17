@@ -32,6 +32,7 @@ export function checkFlags(registry, { keys = null, he = null, audit = null } = 
       if (f.requiresAudit !== "crypto") out.push(`${where}: requiresAudit must be "crypto"`);
       else if (f.stage !== "experimental" && !auditPublished(audit)) out.push(`${where}: stays "experimental" until security/crypto-audit.json names a published external audit report`);
     }
+    if ("design" in f && typeof f.design !== "boolean") out.push(`${where}: design must be true or false`);
     const beta = f.since?.beta;
     const stable = f.since?.stable;
     const valid = (v) => {

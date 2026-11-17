@@ -1,6 +1,8 @@
 ---
 title: Workspace search (BM25 + Smart)
 description: Fast keyword search by default, semantic embeddings on demand.
+type: how-to
+tasks: ["W12.A1", "W12.A2", "W10.B6", "W10.F16", "W7.13", "W9.7"]
 ---
 
 `⌘K → Search workspace…` opens the workspace search dialog (the palette
@@ -132,3 +134,25 @@ to the source notes.
 
 The conversation is kept in-dialog — multi-turn follow-ups remember the
 prior context.
+
+### Citations down to the paragraph
+
+Every `[n]` must come with a short exact quote, and Lumen checks it word
+for word against one paragraph of the cited note. Click a citation and the
+note opens with that whole paragraph selected. A claim with no verified
+quote is marked "not supported by a verified quote" in the answer itself.
+
+Paragraphs are found by an anchor that does not depend on line numbers: the
+paragraph's Obsidian block id (` ^id`) if it has one, or otherwise a
+fingerprint of its text, so nothing is written to your note. **Pin link**
+writes a real ` ^id` into the paragraph and copies `[[note#^id]]`, a link
+that survives edits and works in Obsidian too.
+
+### What Ask may read
+
+Ask uses the same folder and tag rules as the vault's MCP server: the
+`scope` in `.lumen/mcp.json` (see [MCP](/ai/mcp/)). A note that is out of
+scope is never retrieved, never sent to the model and never cited. The
+**Ask in** picker narrows it further to one folder or one tag; what the
+vault scope denies stays out either way. Notes locked with their own
+password are never included.

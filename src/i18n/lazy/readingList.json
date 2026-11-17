@@ -1,0 +1,11 @@
+{
+  "readingList.captureUrl": "The link of the page to add to the reading list",
+  "readingList.created": "New source: {path}",
+  "readingList.exists": "This is already a source: {path}",
+  "readingList.noLibrary": "The citation library is empty. Add a .bib or CSL-JSON file to the vault, or sync Zotero from the desktop app.",
+  "readingList.noMatch": "Nothing in the library matches “{query}”.",
+  "readingList.notAUrl": "“{text}” is not a web link (http or https).",
+  "readingList.pick": "Which item? ({count} found)",
+  "readingList.refused": "The source type refused this item. Check .lumen/types/source.yaml.",
+  "readingList.search": "Search the library: cite key, author, title or year (empty for all)"
+}

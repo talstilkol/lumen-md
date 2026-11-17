@@ -1,6 +1,7 @@
 ---
 title: Where Lumen runs
 description: What works on which host — Cloudflare Pages, Netlify, Vercel and the Docker image — and how each one is configured.
+type: how-to
 ---
 
 Lumen is a static app: `npm run build` produces `dist/`, and any host that
@@ -103,16 +104,16 @@ A deployment chooses its frame site when it builds:
 node scripts/content-frame-site.mjs
 npx wrangler pages deploy dist-frame --project-name lumen-md-frame
 # the app, built to use it
-VITE_CONTENT_FRAME_URL=https://lumen-md-frame.pages.dev/ npm run build
+LUMEN_CONTENT_FRAME_URL=https://lumen-md-frame.pages.dev/ npm run build
 ```
 
 If you host your own frame site, add its origin to `frame-src` in
 `security/policy.json` (route `app`) and the origins of your app to the
 frame site's `frame-ancestors` (host `content-frame-site`). Then run
 `npm run headers:write`. The app's own frame guard needs no edit: it trusts
-the origin of `VITE_CONTENT_FRAME_URL` that the build was made with.
+the origin of `LUMEN_CONTENT_FRAME_URL` that the build was made with.
 
-A build without `VITE_CONTENT_FRAME_URL` still shows images, video, audio
+A build without `LUMEN_CONTENT_FRAME_URL` still shows images, video, audio
 and Gists in a frame that has no origin at all, so nothing in it can reach
 the app. Embeds such as YouTube or Vimeo need an origin of their own to play,
 so in that build they appear as a link that opens the player in a new tab.

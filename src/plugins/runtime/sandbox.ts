@@ -14,6 +14,7 @@ import type { QuickJSContext, QuickJSHandle, QuickJSRuntime, QuickJSWASMModule }
 import { newQuickJSWASMModuleFromVariant, newVariant } from "quickjs-emscripten-core";
 import { isGranted, METHOD_CAPABILITY, networkGranted, PluginDenied, type Grants } from "./capabilities";
 import type { PluginManifest } from "./manifest";
+import { sandboxSurface } from "../api/surface";
 import { DEFAULT_LIMITS, memoryUsed, METHOD_RE, type SandboxLimits } from "./protocol";
 
 export interface SandboxHost {
@@ -58,6 +59,9 @@ const PRELUDE = `
 "use strict";
 (function () {
   const methods = __lumen_methods.split(",");
+  // W13.L1: a deprecated method still works, and says once, in the plugin's console, when it goes away.
+  const deprecated = JSON.parse(__lumen_deprecated);
+  const warned = new Set();
   const lumen = Object.create(null);
   const handlers = new Map();
   function call(method, args) {
@@ -66,7 +70,15 @@ const PRELUDE = `
   for (const m of methods) {
     const [ns, fn] = m.split(".");
     lumen[ns] ??= Object.create(null);
-    lumen[ns][fn] = (...args) => call(m, args);
+    lumen[ns][fn] = deprecated[m]
+      ? (...args) => {
+          if (!warned.has(m)) {
+            warned.add(m);
+            __lumen_log("warn", deprecated[m]);
+          }
+          return call(m, args);
+        }
+      : (...args) => call(m, args);
   }
   // Events: lumen.on(name, handler) → unsubscribe. Command handlers are events named "command:<id>".
   lumen.on = (name, handler) => {
@@ -81,6 +93,7 @@ const PRELUDE = `
     return call("commands.register", [cmd]);
   };
   lumen.manifest = Object.freeze(JSON.parse(__lumen_manifest));
+  lumen.apiVersion = __lumen_api_version;
   globalThis.__lumen_dispatch = (name, json) => {
     const payload = json === "" ? undefined : JSON.parse(json);
     const list = handlers.get(name) ?? [];
@@ -99,6 +112,8 @@ const PRELUDE = `
   Object.defineProperty(globalThis, "lumen", { value: lumen, writable: false, configurable: false, enumerable: true });
   delete globalThis.__lumen_methods;
   delete globalThis.__lumen_manifest;
+  delete globalThis.__lumen_deprecated;
+  delete globalThis.__lumen_api_version;
 })();
 `;
 
@@ -114,6 +129,8 @@ export function loadQuickJS(wasmUrl?: string): Promise<QuickJSWASMModule> {
 }
 
 export async function createSandbox(opts: SandboxOptions): Promise<Sandbox> {
+  // Before any engine is made: a plugin this Lumen cannot run is refused with the reason.
+  const surface = sandboxSurface(opts.manifest);
   const limits: SandboxLimits = { ...DEFAULT_LIMITS, ...opts.limits };
   const QuickJS = await loadQuickJS(opts.wasmUrl);
   const runtime: QuickJSRuntime = QuickJS.newRuntime();
@@ -239,6 +256,7 @@ export async function createSandbox(opts: SandboxOptions): Promise<Sandbox> {
   /** Capability check inside the sandbox — before anything reaches the host. */
   const refuse = (method: string, args: unknown[]): PluginDenied | null => {
     if (!METHOD_RE.test(method) || !(method in METHOD_CAPABILITY)) return new PluginDenied(opts.manifest.id, method, "no such method");
+    if (!surface.methods.includes(method)) return new PluginDenied(opts.manifest.id, method, `not in plugin API ${surface.apiVersion}`);
     const cap = METHOD_CAPABILITY[method];
     if (cap === "network") {
       const url = typeof args[0] === "string" ? args[0] : "";
@@ -257,16 +275,23 @@ export async function createSandbox(opts: SandboxOptions): Promise<Sandbox> {
     const level = context.getString(levelH);
     log(level === "warn" || level === "error" ? level : "log", context.getString(textH));
   });
-  const methodsH = context.newString(Object.keys(METHOD_CAPABILITY).join(","));
+  const methodsH = context.newString(surface.methods.join(","));
   const manifestH = context.newString(JSON.stringify(opts.manifest));
+  const deprecatedH = context.newString(JSON.stringify(surface.deprecated));
+  const apiVersionH = context.newString(surface.apiVersion);
   context.setProp(context.global, "__lumen_call", callFn);
   context.setProp(context.global, "__lumen_log", logFn);
   context.setProp(context.global, "__lumen_methods", methodsH);
   context.setProp(context.global, "__lumen_manifest", manifestH);
+  context.setProp(context.global, "__lumen_deprecated", deprecatedH);
+  context.setProp(context.global, "__lumen_api_version", apiVersionH);
   callFn.dispose();
   logFn.dispose();
   methodsH.dispose();
   manifestH.dispose();
+  deprecatedH.dispose();
+  apiVersionH.dispose();
+
 
   const dispose = () => {
     if (disposed) return;

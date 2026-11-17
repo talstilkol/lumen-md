@@ -1,0 +1,1009 @@
+{
+  "cmd.file.exportPdfUa": {
+    "ar": "4e92qr",
+    "de": "4e92qr",
+    "fr": "4e92qr",
+    "ja": "4e92qr",
+    "ru": "4e92qr",
+    "zh-CN": "4e92qr",
+    "fa": "4e92qr"
+  },
+  "cmd.file.exportPdfUa.hint": {
+    "ar": "1uz07l0",
+    "de": "1uz07l0",
+    "fr": "1uz07l0",
+    "ja": "1uz07l0",
+    "ru": "1uz07l0",
+    "zh-CN": "1uz07l0",
+    "fa": "1uz07l0"
+  },
+  "cmd.file.finishPdfUa": {
+    "ar": "1d4vebr",
+    "de": "1d4vebr",
+    "fr": "1d4vebr",
+    "ja": "1d4vebr",
+    "ru": "1d4vebr",
+    "zh-CN": "1d4vebr",
+    "fa": "1d4vebr"
+  },
+  "cmd.file.finishPdfUa.hint": {
+    "ar": "ntenfy",
+    "de": "ntenfy",
+    "fr": "ntenfy",
+    "ja": "ntenfy",
+    "ru": "ntenfy",
+    "zh-CN": "ntenfy",
+    "fa": "ntenfy"
+  },
+  "cmd.mcp.ask": {
+    "ar": "vubk2m",
+    "de": "vubk2m",
+    "fr": "vubk2m",
+    "ja": "vubk2m",
+    "ru": "vubk2m",
+    "zh-CN": "vubk2m"
+  },
+  "cmd.mcp.ask.hint": {
+    "ar": "upymcb",
+    "de": "upymcb",
+    "fr": "upymcb",
+    "ja": "upymcb",
+    "ru": "upymcb",
+    "zh-CN": "upymcb"
+  },
+  "cmd.mcp.settings": {
+    "ar": "x0ihz7",
+    "de": "x0ihz7",
+    "fr": "x0ihz7",
+    "ja": "x0ihz7",
+    "ru": "x0ihz7",
+    "zh-CN": "x0ihz7"
+  },
+  "cmd.mcp.settings.hint": {
+    "ar": "1b01jxe",
+    "de": "1b01jxe",
+    "fr": "1b01jxe",
+    "ja": "1b01jxe",
+    "ru": "1b01jxe",
+    "zh-CN": "1b01jxe"
+  },
+  "cmd.screenshotToNote": {
+    "ar": "11kn380",
+    "de": "11kn380",
+    "fr": "11kn380",
+    "ja": "11kn380",
+    "ru": "11kn380",
+    "zh-CN": "11kn380"
+  },
+  "cmd.screenshotToNote.hint": {
+    "ar": "l899cf",
+    "de": "l899cf",
+    "fr": "l899cf",
+    "ja": "l899cf",
+    "ru": "l899cf",
+    "zh-CN": "l899cf"
+  },
+  "cmd.cite.importZoteroFile": {
+    "ar": "1lfup3",
+    "de": "1lfup3",
+    "fr": "1lfup3",
+    "ja": "1lfup3",
+    "ru": "1lfup3",
+    "zh-CN": "1lfup3"
+  },
+  "cmd.cite.exportForZotero": {
+    "ar": "razw4v",
+    "de": "razw4v",
+    "fr": "razw4v",
+    "ja": "razw4v",
+    "ru": "razw4v",
+    "zh-CN": "razw4v"
+  },
+  "cmd.cite.exportRis": {
+    "ar": "18aclrs",
+    "de": "18aclrs",
+    "fr": "18aclrs",
+    "ja": "18aclrs",
+    "ru": "18aclrs",
+    "zh-CN": "18aclrs"
+  },
+  "cmd.file.exportTypstPdf": {
+    "ar": "cf5i90",
+    "de": "cf5i90",
+    "fr": "cf5i90",
+    "ja": "cf5i90",
+    "ru": "cf5i90",
+    "zh-CN": "cf5i90"
+  },
+  "cmd.file.exportTypstPdf.hint": {
+    "ar": "l02o2q",
+    "de": "l02o2q",
+    "fr": "l02o2q",
+    "ja": "l02o2q",
+    "ru": "l02o2q",
+    "zh-CN": "l02o2q"
+  },
+  "cmd.reading.bookSpread": {
+    "ar": "170n10c",
+    "de": "170n10c",
+    "fr": "170n10c",
+    "ja": "170n10c",
+    "ru": "170n10c",
+    "zh-CN": "170n10c"
+  },
+  "cmd.reading.bookSpread.hint": {
+    "ar": "8suv94",
+    "de": "8suv94",
+    "fr": "8suv94",
+    "ja": "8suv94",
+    "ru": "8suv94",
+    "zh-CN": "8suv94"
+  },
+  "cmd.reading.profile": {
+    "ar": "juohqg",
+    "de": "juohqg",
+    "fr": "juohqg",
+    "ja": "juohqg",
+    "ru": "juohqg",
+    "zh-CN": "juohqg"
+  },
+  "cmd.reading.sidenotes": {
+    "ar": "zylsvh",
+    "de": "zylsvh",
+    "fr": "zylsvh",
+    "ja": "zylsvh",
+    "ru": "zylsvh",
+    "zh-CN": "zylsvh"
+  },
+  "cmd.reading.sidenotes.hint": {
+    "ar": "15haiii",
+    "de": "15haiii",
+    "fr": "15haiii",
+    "ja": "15haiii",
+    "ru": "15haiii",
+    "zh-CN": "15haiii"
+  },
+  "cmd.view.bilingual": {
+    "ar": "1r6brfh",
+    "de": "1r6brfh",
+    "fr": "1r6brfh",
+    "ja": "1r6brfh",
+    "ru": "1r6brfh",
+    "zh-CN": "1r6brfh"
+  },
+  "cmd.view.bilingual.hint": {
+    "ar": "rki0be",
+    "de": "rki0be",
+    "fr": "rki0be",
+    "ja": "rki0be",
+    "ru": "rki0be",
+    "zh-CN": "rki0be"
+  },
+  "cmd.view.columnNext": {
+    "ar": "1ko4af8",
+    "de": "1ko4af8",
+    "fr": "1ko4af8",
+    "ja": "1ko4af8",
+    "ru": "1ko4af8",
+    "zh-CN": "1ko4af8"
+  },
+  "cmd.view.columnNext.hint": {
+    "ar": "1smdqlf",
+    "de": "1smdqlf",
+    "fr": "1smdqlf",
+    "ja": "1smdqlf",
+    "ru": "1smdqlf",
+    "zh-CN": "1smdqlf"
+  },
+  "cmd.view.columnPrev": {
+    "ar": "1vjvpog",
+    "de": "1vjvpog",
+    "fr": "1vjvpog",
+    "ja": "1vjvpog",
+    "ru": "1vjvpog",
+    "zh-CN": "1vjvpog"
+  },
+  "cmd.view.columnPrev.hint": {
+    "ar": "3tcta1",
+    "de": "3tcta1",
+    "fr": "3tcta1",
+    "ja": "3tcta1",
+    "ru": "3tcta1",
+    "zh-CN": "3tcta1"
+  },
+  "cmd.view.daf": {
+    "ar": "vw5inu",
+    "de": "vw5inu",
+    "fr": "vw5inu",
+    "ja": "vw5inu",
+    "ru": "vw5inu",
+    "zh-CN": "vw5inu"
+  },
+  "cmd.view.daf.hint": {
+    "ar": "1yqmwx6",
+    "de": "1yqmwx6",
+    "fr": "1yqmwx6",
+    "ja": "1yqmwx6",
+    "ru": "1yqmwx6",
+    "zh-CN": "1yqmwx6"
+  },
+  "cmd.view.tripleLinked": {
+    "ar": "12bs96p",
+    "de": "12bs96p",
+    "fr": "12bs96p",
+    "ja": "12bs96p",
+    "ru": "12bs96p",
+    "zh-CN": "12bs96p"
+  },
+  "cmd.view.tripleLinked.hint": {
+    "ar": "1wfkeuq",
+    "de": "1wfkeuq",
+    "fr": "1wfkeuq",
+    "ja": "1wfkeuq",
+    "ru": "1wfkeuq",
+    "zh-CN": "1wfkeuq"
+  },
+  "cmd.writing.abstract": {
+    "ar": "uia602",
+    "de": "uia602",
+    "fr": "uia602",
+    "ja": "uia602",
+    "ru": "uia602",
+    "zh-CN": "uia602"
+  },
+  "cmd.writing.abstract.hint": {
+    "ar": "1ce6sza",
+    "de": "1ce6sza",
+    "fr": "1ce6sza",
+    "ja": "1ce6sza",
+    "ru": "1ce6sza",
+    "zh-CN": "1ce6sza"
+  },
+  "cmd.writing.argument": {
+    "ar": "ivo2nv",
+    "de": "ivo2nv",
+    "fr": "ivo2nv",
+    "ja": "ivo2nv",
+    "ru": "ivo2nv",
+    "zh-CN": "ivo2nv"
+  },
+  "cmd.writing.argument.hint": {
+    "ar": "1hrlxft",
+    "de": "1hrlxft",
+    "fr": "1hrlxft",
+    "ja": "1hrlxft",
+    "ru": "1hrlxft",
+    "zh-CN": "1hrlxft"
+  },
+  "cmd.writing.coach": {
+    "ar": "d95pdy",
+    "de": "d95pdy",
+    "fr": "d95pdy",
+    "ja": "d95pdy",
+    "ru": "d95pdy",
+    "zh-CN": "d95pdy"
+  },
+  "cmd.writing.coach.hint": {
+    "ar": "gkzm3t",
+    "de": "gkzm3t",
+    "fr": "gkzm3t",
+    "ja": "gkzm3t",
+    "ru": "gkzm3t",
+    "zh-CN": "gkzm3t"
+  },
+  "cmd.writing.consistency": {
+    "ar": "cjubm2",
+    "de": "cjubm2",
+    "fr": "cjubm2",
+    "ja": "cjubm2",
+    "ru": "cjubm2",
+    "zh-CN": "cjubm2"
+  },
+  "cmd.writing.consistency.hint": {
+    "ar": "g14d6p",
+    "de": "g14d6p",
+    "fr": "g14d6p",
+    "ja": "g14d6p",
+    "ru": "g14d6p",
+    "zh-CN": "g14d6p"
+  },
+  "cmd.writing.expand": {
+    "ar": "1g4lfse",
+    "de": "1g4lfse",
+    "fr": "1g4lfse",
+    "ja": "1g4lfse",
+    "ru": "1g4lfse",
+    "zh-CN": "1g4lfse"
+  },
+  "cmd.writing.expand.hint": {
+    "ar": "1g99fgq",
+    "de": "1g99fgq",
+    "fr": "1g99fgq",
+    "ja": "1g99fgq",
+    "ru": "1g99fgq",
+    "zh-CN": "1g99fgq"
+  },
+  "cmd.writing.explainChange": {
+    "ar": "iifpym",
+    "de": "iifpym",
+    "fr": "iifpym",
+    "ja": "iifpym",
+    "ru": "iifpym",
+    "zh-CN": "iifpym"
+  },
+  "cmd.writing.explainChange.hint": {
+    "ar": "1nr4gif",
+    "de": "1nr4gif",
+    "fr": "1nr4gif",
+    "ja": "1nr4gif",
+    "ru": "1nr4gif",
+    "zh-CN": "1nr4gif"
+  },
+  "cmd.writing.goals": {
+    "ar": "1th1atl",
+    "de": "1th1atl",
+    "fr": "1th1atl",
+    "ja": "1th1atl",
+    "ru": "1th1atl",
+    "zh-CN": "1th1atl"
+  },
+  "cmd.writing.goals.hint": {
+    "ar": "1asplr2",
+    "de": "1asplr2",
+    "fr": "1asplr2",
+    "ja": "1asplr2",
+    "ru": "1asplr2",
+    "zh-CN": "1asplr2"
+  },
+  "cmd.writing.harper": {
+    "ar": "1cutlg2",
+    "de": "1cutlg2",
+    "fr": "1cutlg2",
+    "ja": "1cutlg2",
+    "ru": "1cutlg2",
+    "zh-CN": "1cutlg2"
+  },
+  "cmd.writing.harper.hint": {
+    "ar": "auaop3",
+    "de": "auaop3",
+    "fr": "auaop3",
+    "ja": "auaop3",
+    "ru": "auaop3",
+    "zh-CN": "auaop3"
+  },
+  "cmd.writing.loanwords": {
+    "ar": "412tow",
+    "de": "412tow",
+    "fr": "412tow",
+    "ja": "412tow",
+    "ru": "412tow",
+    "zh-CN": "412tow"
+  },
+  "cmd.writing.loanwords.hint": {
+    "ar": "1ntlnlf",
+    "de": "1ntlnlf",
+    "fr": "1ntlnlf",
+    "ja": "1ntlnlf",
+    "ru": "1ntlnlf",
+    "zh-CN": "1ntlnlf"
+  },
+  "cmd.writing.panel": {
+    "ar": "38e2pt",
+    "de": "38e2pt",
+    "fr": "38e2pt",
+    "ja": "38e2pt",
+    "ru": "38e2pt",
+    "zh-CN": "38e2pt"
+  },
+  "cmd.writing.panel.hint": {
+    "ar": "fa5enu",
+    "de": "fa5enu",
+    "fr": "fa5enu",
+    "ja": "fa5enu",
+    "ru": "fa5enu",
+    "zh-CN": "fa5enu"
+  },
+  "cmd.writing.proofreadHe": {
+    "ar": "1un8708",
+    "de": "1un8708",
+    "fr": "1un8708",
+    "ja": "1un8708",
+    "ru": "1un8708",
+    "zh-CN": "1un8708"
+  },
+  "cmd.writing.proofreadHe.hint": {
+    "ar": "1d2dd7e",
+    "de": "1d2dd7e",
+    "fr": "1d2dd7e",
+    "ja": "1d2dd7e",
+    "ru": "1d2dd7e",
+    "zh-CN": "1d2dd7e"
+  },
+  "cmd.writing.readability": {
+    "ar": "1osfmi2",
+    "de": "1osfmi2",
+    "fr": "1osfmi2",
+    "ja": "1osfmi2",
+    "ru": "1osfmi2",
+    "zh-CN": "1osfmi2"
+  },
+  "cmd.writing.readability.hint": {
+    "ar": "142qlz7",
+    "de": "142qlz7",
+    "fr": "142qlz7",
+    "ja": "142qlz7",
+    "ru": "142qlz7",
+    "zh-CN": "142qlz7"
+  },
+  "cmd.writing.registerHigh": {
+    "ar": "tn58fp",
+    "de": "tn58fp",
+    "fr": "tn58fp",
+    "ja": "tn58fp",
+    "ru": "tn58fp",
+    "zh-CN": "tn58fp"
+  },
+  "cmd.writing.registerHigh.hint": {
+    "ar": "1p8obwq",
+    "de": "1p8obwq",
+    "fr": "1p8obwq",
+    "ja": "1p8obwq",
+    "ru": "1p8obwq",
+    "zh-CN": "1p8obwq"
+  },
+  "cmd.writing.registerSpoken": {
+    "ar": "159s51r",
+    "de": "159s51r",
+    "fr": "159s51r",
+    "ja": "159s51r",
+    "ru": "159s51r",
+    "zh-CN": "159s51r"
+  },
+  "cmd.writing.registerSpoken.hint": {
+    "ar": "1xecjc9",
+    "de": "1xecjc9",
+    "fr": "1xecjc9",
+    "ja": "1xecjc9",
+    "ru": "1xecjc9",
+    "zh-CN": "1xecjc9"
+  },
+  "cmd.writing.repetition": {
+    "ar": "17awp92",
+    "de": "17awp92",
+    "fr": "17awp92",
+    "ja": "17awp92",
+    "ru": "17awp92",
+    "zh-CN": "17awp92"
+  },
+  "cmd.writing.repetition.hint": {
+    "ar": "r2w4ja",
+    "de": "r2w4ja",
+    "fr": "r2w4ja",
+    "ja": "r2w4ja",
+    "ru": "r2w4ja",
+    "zh-CN": "r2w4ja"
+  },
+  "cmd.writing.shorten": {
+    "ar": "1dz4xa9",
+    "de": "1dz4xa9",
+    "fr": "1dz4xa9",
+    "ja": "1dz4xa9",
+    "ru": "1dz4xa9",
+    "zh-CN": "1dz4xa9"
+  },
+  "cmd.writing.shorten.hint": {
+    "ar": "4i87j1",
+    "de": "4i87j1",
+    "fr": "4i87j1",
+    "ja": "4i87j1",
+    "ru": "4i87j1",
+    "zh-CN": "4i87j1"
+  },
+  "cmd.writing.structure": {
+    "ar": "t3xrdh",
+    "de": "t3xrdh",
+    "fr": "t3xrdh",
+    "ja": "t3xrdh",
+    "ru": "t3xrdh",
+    "zh-CN": "t3xrdh"
+  },
+  "cmd.writing.structure.hint": {
+    "ar": "13meg37",
+    "de": "13meg37",
+    "fr": "13meg37",
+    "ja": "13meg37",
+    "ru": "13meg37",
+    "zh-CN": "13meg37"
+  },
+  "cmd.writing.toneFormal": {
+    "ar": "1esfcd3",
+    "de": "1esfcd3",
+    "fr": "1esfcd3",
+    "ja": "1esfcd3",
+    "ru": "1esfcd3",
+    "zh-CN": "1esfcd3"
+  },
+  "cmd.writing.toneFormal.hint": {
+    "ar": "178hpvx",
+    "de": "178hpvx",
+    "fr": "178hpvx",
+    "ja": "178hpvx",
+    "ru": "178hpvx",
+    "zh-CN": "178hpvx"
+  },
+  "cmd.writing.toneFriendly": {
+    "ar": "117p9e3",
+    "de": "117p9e3",
+    "fr": "117p9e3",
+    "ja": "117p9e3",
+    "ru": "117p9e3",
+    "zh-CN": "117p9e3"
+  },
+  "cmd.writing.toneFriendly.hint": {
+    "ar": "1u31y5r",
+    "de": "1u31y5r",
+    "fr": "1u31y5r",
+    "ja": "1u31y5r",
+    "ru": "1u31y5r",
+    "zh-CN": "1u31y5r"
+  },
+  "cmd.writing.toneNeutral": {
+    "ar": "fq6ik9",
+    "de": "fq6ik9",
+    "fr": "fq6ik9",
+    "ja": "fq6ik9",
+    "ru": "fq6ik9",
+    "zh-CN": "fq6ik9"
+  },
+  "cmd.writing.toneNeutral.hint": {
+    "ar": "h89fnm",
+    "de": "h89fnm",
+    "fr": "h89fnm",
+    "ja": "h89fnm",
+    "ru": "h89fnm",
+    "zh-CN": "h89fnm"
+  },
+  "desc.reading.profile": {
+    "ar": "12myrs1",
+    "de": "12myrs1",
+    "fr": "12myrs1",
+    "ja": "12myrs1",
+    "ru": "12myrs1",
+    "zh-CN": "12myrs1"
+  },
+  "cmd.insert.embed.hint": {
+    "ar": "15wc57",
+    "de": "15wc57",
+    "fr": "15wc57",
+    "ja": "15wc57",
+    "ru": "15wc57",
+    "zh-CN": "15wc57"
+  },
+  "cmd.learning.plans.hint": {
+    "ar": "199zoak",
+    "de": "199zoak",
+    "fr": "199zoak",
+    "ja": "199zoak",
+    "ru": "199zoak",
+    "zh-CN": "199zoak"
+  },
+  "cmd.student.syllabus.hint": {
+    "ar": "p1d0ks",
+    "de": "p1d0ks",
+    "fr": "p1d0ks",
+    "ja": "p1d0ks",
+    "ru": "p1d0ks",
+    "zh-CN": "p1d0ks"
+  },
+  "cmd.view.sideBySide": {
+    "ar": "1320h2f",
+    "de": "1320h2f",
+    "fr": "1320h2f",
+    "ja": "1320h2f",
+    "ru": "1320h2f",
+    "zh-CN": "1320h2f"
+  },
+  "cmd.view.sideBySide.hint": {
+    "ar": "1bcg9d8",
+    "de": "1bcg9d8",
+    "fr": "1bcg9d8",
+    "ja": "1bcg9d8",
+    "ru": "1bcg9d8",
+    "zh-CN": "1bcg9d8"
+  },
+  "cmd.help.safeMode": {
+    "ar": "1dpszxr",
+    "de": "1dpszxr",
+    "fr": "1dpszxr",
+    "ja": "1dpszxr",
+    "ru": "1dpszxr",
+    "zh-CN": "1dpszxr",
+    "fa": "1dpszxr"
+  },
+  "cmd.help.safeMode.hint": {
+    "ar": "9ektud",
+    "de": "9ektud",
+    "fr": "9ektud",
+    "ja": "9ektud",
+    "ru": "9ektud",
+    "zh-CN": "9ektud",
+    "fa": "9ektud"
+  },
+  "cmd.mobile.spotlight": {
+    "ar": "u0r0zj",
+    "de": "u0r0zj",
+    "fr": "u0r0zj",
+    "ja": "u0r0zj",
+    "ru": "u0r0zj",
+    "zh-CN": "u0r0zj",
+    "fa": "u0r0zj"
+  },
+  "cmd.mobile.spotlight.hint": {
+    "ar": "9tm0ab",
+    "de": "9tm0ab",
+    "fr": "9tm0ab",
+    "ja": "9tm0ab",
+    "ru": "9tm0ab",
+    "zh-CN": "9tm0ab",
+    "fa": "9tm0ab"
+  },
+  "cmd.mobile.scan": {
+    "ar": "1ctbhh6",
+    "de": "1ctbhh6",
+    "fr": "1ctbhh6",
+    "ja": "1ctbhh6",
+    "ru": "1ctbhh6",
+    "zh-CN": "1ctbhh6",
+    "fa": "1ctbhh6"
+  },
+  "cmd.mobile.scan.hint": {
+    "ar": "1mfccdh",
+    "de": "1mfccdh",
+    "fr": "1mfccdh",
+    "ja": "1mfccdh",
+    "ru": "1mfccdh",
+    "zh-CN": "1mfccdh",
+    "fa": "1mfccdh"
+  },
+  "cmd.vaults.open": {
+    "ar": "2u4tg6",
+    "de": "2u4tg6",
+    "fr": "2u4tg6",
+    "ja": "2u4tg6",
+    "ru": "2u4tg6",
+    "zh-CN": "2u4tg6",
+    "fa": "2u4tg6"
+  },
+  "cmd.vaults.open.hint": {
+    "ar": "138zp6l",
+    "de": "138zp6l",
+    "fr": "138zp6l",
+    "ja": "138zp6l",
+    "ru": "138zp6l",
+    "zh-CN": "138zp6l",
+    "fa": "138zp6l"
+  },
+  "cmd.ai.organize": {
+    "ja": "1fssnyf"
+  },
+  "cmd.vault.check": {
+    "ja": "4ge0kk",
+    "de": "4ge0kk"
+  },
+  "cmd.view.asOf.hint": {
+    "ja": "rzvoys"
+  },
+  "cmd.cite.syncZotero": {
+    "de": "1f9pvbk"
+  },
+  "cmd.file.sampleVault.researcher": {
+    "de": "1mzdogp"
+  },
+  "cmd.file.sampleVault.student": {
+    "de": "6rb1fi"
+  },
+  "cmd.file.sampleVault.writer": {
+    "de": "1r9ay0"
+  },
+  "cmd.help.diagnostics.hint": {
+    "de": "q3xfgc"
+  },
+  "cmd.research.litReview": {
+    "de": "4nsx2y"
+  },
+  "cmd.tools.autoTag.hint": {
+    "fr": "ec3uub"
+  },
+  "cmd.view.tags.hint": {
+    "fr": "9ohb5c"
+  },
+  "cmd.export.latexProject.hint": {
+    "ar": "12rykyr",
+    "de": "12rykyr"
+  },
+  "cmd.file.importVcard.hint": {
+    "ar": "1x99suq",
+    "ru": "1x99suq",
+    "fr": "1x99suq",
+    "de": "1x99suq",
+    "ja": "1x99suq",
+    "zh-CN": "1x99suq"
+  },
+  "cmd.sources.datagovInsert.hint": {
+    "ar": "w1iesk",
+    "ru": "w1iesk",
+    "fr": "w1iesk",
+    "de": "w1iesk",
+    "ja": "w1iesk",
+    "zh-CN": "w1iesk"
+  },
+  "cmd.view.tags": {
+    "ar": "1pftjsh",
+    "ru": "1pftjsh",
+    "ja": "1pftjsh",
+    "zh-CN": "1pftjsh"
+  },
+  "cmd.view.backlinks": {
+    "ar": "pa2eo1",
+    "ru": "pa2eo1",
+    "fr": "pa2eo1",
+    "de": "pa2eo1",
+    "ja": "pa2eo1",
+    "zh-CN": "pa2eo1"
+  },
+  "cmd.view.hebrewDates.on": {
+    "ar": "e77oek",
+    "de": "e77oek",
+    "fr": "e77oek",
+    "ja": "e77oek",
+    "ru": "e77oek",
+    "zh-CN": "e77oek"
+  },
+  "cmd.view.hebrewDates.off": {
+    "ar": "1wbbsr3",
+    "de": "1wbbsr3",
+    "fr": "1wbbsr3",
+    "ja": "1wbbsr3",
+    "ru": "1wbbsr3",
+    "zh-CN": "1wbbsr3"
+  },
+  "cmd.view.hebrewDates.hint": {
+    "ar": "svyhbp",
+    "de": "svyhbp",
+    "fr": "svyhbp",
+    "ja": "svyhbp",
+    "ru": "svyhbp",
+    "zh-CN": "svyhbp"
+  },
+  "group.ai": {
+    "fa": "g8gdqo"
+  },
+  "group.collab": {
+    "fa": "1f1w5u8"
+  },
+  "group.edit": {
+    "fa": "1i1lcq9"
+  },
+  "group.file": {
+    "fa": "bygjtv"
+  },
+  "group.insert": {
+    "fa": "47reiw"
+  },
+  "group.plugins": {
+    "fa": "10renyj"
+  },
+  "group.recent": {
+    "fa": "mg65fi"
+  },
+  "group.security": {
+    "fa": "1i3q76j"
+  },
+  "group.templates": {
+    "fa": "it5x1k"
+  },
+  "group.tools": {
+    "fa": "15cdqf0"
+  },
+  "group.view": {
+    "fa": "q5w460"
+  },
+  "palette.close": {
+    "fa": "b1hmw3"
+  },
+  "palette.layoutHint": {
+    "fa": "vim9lb"
+  },
+  "palette.navigate": {
+    "fa": "10b9wna"
+  },
+  "palette.noMatch": {
+    "fa": "1jz4cft"
+  },
+  "palette.placeholder": {
+    "fa": "1g68bpc"
+  },
+  "palette.select": {
+    "fa": "4xe5v1"
+  },
+  "cmd.view.digits.native": {
+    "ar": "1fmo0rn",
+    "de": "1fmo0rn",
+    "fr": "1fmo0rn",
+    "ja": "1fmo0rn",
+    "ru": "1fmo0rn",
+    "zh-CN": "1fmo0rn",
+    "fa": "1fmo0rn"
+  },
+  "cmd.view.digits.latin": {
+    "ar": "nkay1b",
+    "de": "nkay1b",
+    "fr": "nkay1b",
+    "ja": "nkay1b",
+    "ru": "nkay1b",
+    "zh-CN": "nkay1b",
+    "fa": "nkay1b"
+  },
+  "cmd.view.digits.hint": {
+    "ar": "1i8bv0m",
+    "de": "1i8bv0m",
+    "fr": "1i8bv0m",
+    "ja": "1i8bv0m",
+    "ru": "1i8bv0m",
+    "zh-CN": "1i8bv0m",
+    "fa": "1i8bv0m"
+  },
+  "cmd.appLock.on": {
+    "ar": "1whd33t",
+    "de": "1whd33t",
+    "fr": "1whd33t",
+    "ja": "1whd33t",
+    "ru": "1whd33t",
+    "zh-CN": "1whd33t",
+    "fa": "1whd33t"
+  },
+  "cmd.appLock.off": {
+    "ar": "sapj48",
+    "de": "sapj48",
+    "fr": "sapj48",
+    "ja": "sapj48",
+    "ru": "sapj48",
+    "zh-CN": "sapj48",
+    "fa": "sapj48"
+  },
+  "cmd.appLock.now": {
+    "ar": "1ljuzee",
+    "de": "1ljuzee",
+    "fr": "1ljuzee",
+    "ja": "1ljuzee",
+    "ru": "1ljuzee",
+    "zh-CN": "1ljuzee",
+    "fa": "1ljuzee"
+  },
+  "cmd.appLock.after": {
+    "ar": "e1coge",
+    "de": "e1coge",
+    "fr": "e1coge",
+    "ja": "e1coge",
+    "ru": "e1coge",
+    "zh-CN": "e1coge",
+    "fa": "e1coge"
+  },
+  "cmd.appLock.hint": {
+    "ar": "1bb6whw",
+    "de": "1bb6whw",
+    "fr": "1bb6whw",
+    "ja": "1bb6whw",
+    "ru": "1bb6whw",
+    "zh-CN": "1bb6whw",
+    "fa": "1bb6whw"
+  },
+  "cmd.privacy.localData": {
+    "ar": "uzfx7n",
+    "de": "uzfx7n",
+    "fr": "uzfx7n",
+    "ja": "uzfx7n",
+    "ru": "uzfx7n",
+    "zh-CN": "uzfx7n",
+    "fa": "uzfx7n"
+  },
+  "cmd.privacy.localData.hint": {
+    "ar": "1fmc95s",
+    "de": "1fmc95s",
+    "fr": "1fmc95s",
+    "ja": "1fmc95s",
+    "ru": "1fmc95s",
+    "zh-CN": "1fmc95s",
+    "fa": "1fmc95s"
+  },
+  "cmd.vault.exportEverything": {
+    "ar": "1ij7bnn",
+    "de": "1ij7bnn",
+    "fr": "1ij7bnn",
+    "ja": "1ij7bnn",
+    "ru": "1ij7bnn",
+    "zh-CN": "1ij7bnn",
+    "fa": "1ij7bnn"
+  },
+  "cmd.vault.exportEverything.hint": {
+    "ar": "j6a11n",
+    "de": "j6a11n",
+    "fr": "j6a11n",
+    "ja": "j6a11n",
+    "ru": "j6a11n",
+    "zh-CN": "j6a11n",
+    "fa": "j6a11n"
+  },
+  "cmd.edit.cursorMovement.toLogical": {
+    "ar": "b4eiag",
+    "de": "b4eiag",
+    "fr": "b4eiag",
+    "ja": "b4eiag",
+    "ru": "b4eiag",
+    "zh-CN": "b4eiag",
+    "fa": "b4eiag"
+  },
+  "cmd.edit.cursorMovement.toVisual": {
+    "ar": "9js5b1",
+    "de": "9js5b1",
+    "fr": "9js5b1",
+    "ja": "9js5b1",
+    "ru": "9js5b1",
+    "zh-CN": "9js5b1",
+    "fa": "9js5b1"
+  },
+  "cmd.edit.cursorMovement.hint": {
+    "ar": "uernde",
+    "de": "uernde",
+    "fr": "uernde",
+    "ja": "uernde",
+    "ru": "uernde",
+    "zh-CN": "uernde",
+    "fa": "uernde"
+  },
+  "cmd.edit.hebrewLists.on": {
+    "ar": "8l18qn",
+    "de": "8l18qn",
+    "fr": "8l18qn",
+    "ja": "8l18qn",
+    "ru": "8l18qn",
+    "zh-CN": "8l18qn",
+    "fa": "8l18qn"
+  },
+  "cmd.edit.hebrewLists.off": {
+    "ar": "hh1olw",
+    "de": "hh1olw",
+    "fr": "hh1olw",
+    "ja": "hh1olw",
+    "ru": "hh1olw",
+    "zh-CN": "hh1olw",
+    "fa": "hh1olw"
+  },
+  "cmd.edit.hebrewLists.hint": {
+    "ar": "1u5q5a",
+    "de": "1u5q5a",
+    "fr": "1u5q5a",
+    "ja": "1u5q5a",
+    "ru": "1u5q5a",
+    "zh-CN": "1u5q5a",
+    "fa": "1u5q5a"
+  },
+  "cmd.edit.hebrewLists.done.on": {
+    "ar": "1vd8qss",
+    "de": "1vd8qss",
+    "fr": "1vd8qss",
+    "ja": "1vd8qss",
+    "ru": "1vd8qss",
+    "zh-CN": "1vd8qss",
+    "fa": "1vd8qss"
+  },
+  "cmd.edit.hebrewLists.done.off": {
+    "ar": "f4bxa5",
+    "de": "f4bxa5",
+    "fr": "f4bxa5",
+    "ja": "f4bxa5",
+    "ru": "f4bxa5",
+    "zh-CN": "f4bxa5",
+    "fa": "f4bxa5"
+  }
+}

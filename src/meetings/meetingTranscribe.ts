@@ -180,6 +180,51 @@ export async function diarizeRecording(samples: Float32Array, signal?: AbortSign
   return runDiarization(samples, models, signal);
 }
 
+/** How the tracks are proposed: the file as it is now (null: none) and a proposal to the review panel. */
+export interface TrackDeps {
+  read?: (path: string) => Promise<string | null>;
+  propose?: (change: { path: string; before: string | null; after: string }) => void;
+}
+
+/**
+ * `rec.m4a.vtt` and `rec.m4a.srt` beside `rec.m4a`, from the sentences already transcribed (nothing is transcribed
+ * again). Review Z7-M5: speech recognition output is an AI write, so the tracks are not written here. Each is
+ * proposed to the review panel (agents/staging, W10.C12) with the file as it is now as its `before`, and only the
+ * user's approval writes it, refused when the file changed after it was read. A track that already exists, such as
+ * one corrected by hand, is never replaced without that approval; a track that would not change is not proposed.
+ * The names keep the audio's extension, so two recordings with one stem never share a track. Returns the proposed
+ * paths.
+ */
+export async function writeTranscriptTracks(audioPath: string, sentences: readonly SpokenSentence[], deps: TrackDeps = {}): Promise<string[]> {
+  const { cuesFromSentences, toSrt, toWebVtt, trackPath } = await import("../media/webvtt");
+  const read =
+    deps.read ??
+    (async (p: string) => {
+      const ws = await import("../storage/workspace");
+      return (await ws.workspaceHasFile(p)) ? ws.readWorkspaceFile(p) : null;
+    });
+  const propose =
+    deps.propose ??
+    (await (async () => {
+      const { stageChange } = await import("../agents/staging");
+      return (c: { path: string; before: string | null; after: string }) =>
+        void stageChange({ kind: "file", path: c.path, before: c.before, after: c.after, summary: t("speakers.tracks.summary", { path: c.path }) }, { tool: "transcript_tracks", agentId: "transcriber" });
+    })());
+  const cues = cuesFromSentences(sentences);
+  const lang = /[\u0590-\u05FF]/.test(sentences.map((s) => s.text).join(" ")) ? "he" : undefined;
+  const out: string[] = [];
+  for (const [path, text] of [
+    [trackPath(audioPath, "vtt"), toWebVtt(cues, { language: lang })],
+    [trackPath(audioPath, "srt"), toSrt(cues)],
+  ] as const) {
+    const before = await read(path);
+    if (before === text) continue;
+    propose({ path, before, after: text });
+    out.push(path);
+  }
+  return out;
+}
+
 /* ─── The command ──────────────────────────────────────────────────── */
 
 export async function transcribeMeeting(file?: File | null, models: DiarizationModels = DIARIZATION_MODELS): Promise<void> {
@@ -218,6 +263,12 @@ export async function transcribeMeeting(file?: File | null, models: DiarizationM
     }
 
     const audioPath = await tf.keepAudio(picked);
+    // W12.F8: the same timed transcript as WebVTT and SubRip beside the audio, for the player and other apps,
+    // proposed for review (Z7-M5): only the user's approval writes them.
+    if (audioPath)
+      await writeTranscriptTracks(audioPath, spoken)
+        .then((paths) => paths.length && showAiToast(t("speakers.tracks.inReview", { path: paths[0] }), "info"))
+        .catch((e) => log.warn("transcript tracks", e));
     const linked = speakerTranscript(spoken, audioPath);
     const plain = plainTranscript(spoken);
     let body = `### ${picked.name}\n\n${linked}`;
@@ -258,6 +309,7 @@ export async function renameSpeakerInNote(): Promise<void> {
   const to = (await uiPrompt({ message: t("speakers.renamePrompt", { speaker: from }), defaultValue: from }))?.trim();
   if (!to || to === from) return;
   const next = renameSpeaker(useAppStore.getState().doc.content, from, to);
+  // ai-authorship: a rename the user asked for, not AI-written text
   useAppStore.getState().setContent(next);
   showAiToast(t("speakers.renamed", { from, to: to.replace(/[*\n:]/g, "").trim() }), "success");
 }

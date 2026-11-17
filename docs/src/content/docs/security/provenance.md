@@ -1,6 +1,7 @@
 ---
 title: Supply chain: how a release was built, and who released it
 description: Every lumen-md release file carries SLSA provenance signed by the build host and a keyless Sigstore signature from Tal's own login. One command checks both, offline if you like.
+type: explanation
 ---
 
 A minisign signature (W1.27) proves which key signed a file. It doesn't say

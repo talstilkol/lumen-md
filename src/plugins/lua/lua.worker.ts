@@ -4,6 +4,7 @@
  * app's CSP would block (wasmoon's own default fetches from unpkg). All
  * execution logic lives in ./luaRuntime so it can be unit-tested in Node.
  */
+import "../../ai/workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import { LuaFactory } from "wasmoon";
 import wasmUrl from "wasmoon/dist/glue.wasm?url";
 import { createLuaHandler, type LuaFactoryLike } from "./luaRuntime";

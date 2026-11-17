@@ -104,7 +104,46 @@ function swallowedWithoutWhy(): string[] {
   return out;
 }
 
+/**
+ * W10.A8 (audit r3): in storage and sync a handled error is never silent — a
+ * catch block or `.catch()` handler does something (reports with
+ * `swallowed()`/`log`, records, rethrows, falls back); a `why:` comment alone
+ * is not enough there.
+ */
+function silentIn(text: string, label: (line: number) => string, kind: ts.ScriptKind = ts.ScriptKind.TS): string[] {
+  const out: string[] = [];
+  const sf = ts.createSourceFile("scan." + (kind === ts.ScriptKind.TSX ? "tsx" : "ts"), text, ts.ScriptTarget.Latest, true, kind);
+  const line = (n: ts.Node) => sf.getLineAndCharacterOfPosition(n.getStart(sf)).line + 1;
+  const visit = (n: ts.Node): void => {
+    if (ts.isCatchClause(n) && n.block.statements.length === 0) out.push(`${label(line(n))} catch`);
+    if (ts.isCallExpression(n) && ts.isPropertyAccessExpression(n.expression) && n.expression.name.text === "catch") {
+      const h = n.arguments[0];
+      if (h && (ts.isArrowFunction(h) || ts.isFunctionExpression(h)) && ts.isBlock(h.body) && h.body.statements.length === 0) out.push(`${label(line(h))} .catch()`);
+    }
+    ts.forEachChild(n, visit);
+  };
+  visit(sf);
+  return out;
+}
+
 describe("code health (12.1)", () => {
+  it("W10.A8: no silent catch in storage or sync — every one reports, records, rethrows or falls back", () => {
+    const silent: string[] = [];
+    for (const dir of ["storage", "sync"]) {
+      for (const file of files(join(SRC, dir))) {
+        if (/[\\/]__tests__[\\/]|\.test\.tsx?$/.test(file)) continue;
+        const text = readFileSync(file, "utf8");
+        if (text.includes("catch")) silent.push(...silentIn(text, (l) => `${relative(SRC, file)}:${l}`, file.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS));
+      }
+    }
+    expect(silent).toEqual([]);
+    // The check itself: a why-only catch is silent, a reporting one is not.
+    const at = (l: number) => `f.ts:${l}`;
+    expect(silentIn("try { a(); } catch { /* why: x */ }\np.catch(() => {\n  // why: y\n});\n", at)).toEqual(["f.ts:1 catch", "f.ts:2 .catch()"]);
+    expect(silentIn('try { a(); } catch (e) { /* why: x */ swallowed("f: x", e); }\np.catch((e) => { throw e; });\n', at)).toEqual([]);
+  });
+
+
   it("every empty catch and empty .catch() handler says why, also in code shipped as a string", () => {
     expect(swallowedWithoutWhy()).toEqual([]);
   });

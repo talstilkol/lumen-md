@@ -72,7 +72,7 @@ export function createTauriBackend(invoke: TauriInvoke, root: string, opts: { av
     }
   };
   const norm = (path: string) => vaultSegments(path).join("/");
-  /** write / remove / writeIf / removeIf on one path, one at a time (2.28). */
+  /** write / remove / writeIf / removeIf / rename on one path, one at a time (2.28, Z6-L3). */
   const lock = new PathLock();
   const pathHeaders = (p: string, extra: Record<string, string> = {}) => ({ headers: { "x-vault-root": encodeURIComponent(root), "x-vault-path": encodeURIComponent(p), ...extra } });
   /**
@@ -80,6 +80,15 @@ export function createTauriBackend(invoke: TauriInvoke, root: string, opts: { av
    * nothing expected); false otherwise. Rust then compares these exact bytes
    * again and replaces the file in the same command, so the swap does not
    * span a round trip.
+   *
+   * Review Z6-L8: this costs about 3× the file over IPC (read here, then sent
+   * back with the new bytes). Sending only the expected SHA-256 needs Rust to
+   * hash, and lumen-vault is plain std + serde: that means a new crate (sha2,
+   * with its licence and cargo-deny review) or a hand-written hash in the
+   * vault's compare-and-swap. Neither can be built or `cargo test`ed offline,
+   * so the byte form stays until the Mac run; the change then is an
+   * `x-vault-expect-sha256` header next to `x-vault-expect`, the byte form kept
+   * for one release.
    */
   const current = async (path: string, p: string, expect: string | null): Promise<Uint8Array | null | false> => {
     const st = await call<VaultStat | null>(path, "vault_stat", { root, path: p });
@@ -162,7 +171,8 @@ export function createTauriBackend(invoke: TauriInvoke, root: string, opts: { av
       if (!r) return;
       const [a, b] = [r.src.join("/"), r.dst.join("/")];
       try {
-        await invoke("vault_rename", { root, from: a, to: b, overwrite: !!o.overwrite });
+        // Z6-L3: under the lock of both paths (ascending, PathLock.runAll), as write / writeIf on either path.
+        await lock.runAll([a, b], () => invoke("vault_rename", { root, from: a, to: b, overwrite: !!o.overwrite }));
       } catch (e) {
         const err = asVaultError(e, from);
         // Rust says which side: EEXIST is the target, ENOENT the source.

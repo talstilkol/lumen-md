@@ -197,8 +197,93 @@ export function stateFor(branch, files) {
 
 /** The reference-transaction hook (mark included, so a reinstall replaces only ours). */
 export const TXN_HOOK_MARK = "installed by `node scripts/lane-state.mjs install-hook` (W8.10)";
+/**
+ * The pre-push half (W8.10, so one command sets a clone up): `install-hook`
+ * also writes a pre-push hook that only notes the push, when there is none.
+ * A pre-push hook that already notes it (ci:local's, or ours) is kept as it
+ * is; anyone else's is never replaced (`refuse`: add the line yourself).
+ */
+export const PREPUSH_MARK = "lane-state pre-push half, installed by `node scripts/lane-state.mjs install-hook` (W8.10)";
+export const PREPUSH_LINE = 'printf \'%s\\n\' "$(cat)" | node scripts/lane-state.mjs pending "$1" || true';
+export function prePushPlan(existing) {
+  const content = `#!/bin/sh\n# ${PREPUSH_MARK}\n# Notes what this push sends, for the reference-transaction hook; never stops a push.\n${PREPUSH_LINE}\nexit 0\n`;
+  if (existing == null) return { action: "write", content };
+  if (existing.includes(PREPUSH_MARK) || existing.includes("lane-state.mjs pending")) return { action: "keep", content };
+  return { action: "refuse", content };
+}
+
 export function txnHookPlan(existing, { force = false } = {}) {
-  const content = `#!/bin/sh\n# ${TXN_HOOK_MARK}\n# Records a push in the lane's STATE.md once origin has it; never fails the transaction.\n[ "$1" = committed ] || exit 0\n[ -s "$(git rev-parse --git-path lumen-lane-pending.json)" ] || exit 0\nnode scripts/lane-state.mjs committed >/dev/null 2>&1 || true\nexit 0\n`;
+  const content = [
+    "#!/bin/sh",
+    `# ${TXN_HOOK_MARK}`,
+    "# Records a push in the lane's STATE.md once origin has it, and keeps the lane's hourly",
+    "# tick running (W10.E57); with no lane state set it does nothing. Never fails the transaction.",
+    '[ "$1" = committed ] || exit 0',
+    'if [ -n "$LUMEN_LANE_STATE$LUMEN_LANE_STATE_DIR" ] || git config --get lumen.laneState >/dev/null 2>&1 || git config --get lumen.laneStateDir >/dev/null 2>&1; then',
+    "  node scripts/lane-state.mjs ensure-watch </dev/null >/dev/null 2>&1 || true",
+    "fi",
+    '[ -s "$(git rev-parse --git-path lumen-lane-pending.json)" ] || exit 0',
+    "node scripts/lane-state.mjs committed >/dev/null 2>&1 || true",
+    "exit 0",
+    "",
+  ].join("\n");
   if (existing == null || existing.includes(TXN_HOOK_MARK)) return { action: "write", content };
   return { action: force ? "backup" : "refuse", content };
 }
+
+/**
+ * The hourly tick, started by the reference-transaction hook (W10.E57): which
+ * STATE.md to watch, and whether a watcher already runs for it.
+ * @param {{ file?: string; dir?: string } | null} cfg  the lane config
+ * @param {string[]} candidates  the STATE.md files of a --state-dir config
+ * @param {string | null} branch  the checkout's branch
+ * @param {(f: string) => string} read
+ * @param {{ pid: number; file: string } | null} running  the watcher on record
+ * @param {(pid: number) => boolean} alive
+ * @returns {{ action: "none"; why: string } | { action: "start"; file: string }}
+ */
+export function watchPlan(cfg, candidates, branch, read, running, alive) {
+  if (!cfg) return { action: "none", why: "no lane state" };
+  const file = cfg.file ?? (branch ? stateFor(branch, candidates.map((p) => [p, read(p)])) : null);
+  if (!file) return { action: "none", why: "no STATE.md lists this branch" };
+  if (running && running.file === file && alive(running.pid)) return { action: "none", why: "a watcher runs" };
+  return { action: "start", file };
+}
+
+
+/**
+ * The watch record (review 11, M2): one file in the repository's common git dir
+ * (`git rev-parse --git-common-dir`, shared by every linked worktree), keyed by
+ * the STATE.md path, so two worktrees of one clone share one watcher per STATE.md.
+ * An older record (`{ pid, file }`, one per worktree) reads as its one entry.
+ * @returns {Record<string, { pid: number; since?: string; repo?: string }>}
+ */
+export function parseWatchRecord(text) {
+  let v;
+  try {
+    v = JSON.parse(text ?? "");
+  } catch {
+    return {};
+  }
+  if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+  if (typeof v.pid === "number" && typeof v.file === "string") return { [v.file]: { pid: v.pid, since: v.since } };
+  const out = {};
+  for (const [k, e] of Object.entries(v)) if (e && typeof e === "object" && typeof e.pid === "number") out[k] = e;
+  return out;
+}
+
+/** The entry of `record` for `file` as watchPlan's `running`, or null. */
+export const runningFor = (record, file) => (file && record[file] ? { pid: record[file].pid, file } : null);
+
+/**
+ * Plan 0.13 step 2: after a push origin confirmed, the handoff of the
+ * worktree that pushed is regenerated (scripts/handoff.mjs --refresh, local
+ * data only: a hook makes no GitHub calls). null when nothing was confirmed
+ * or the checkout has no handoff script.
+ * @param {number} confirmed  pushes origin confirmed in this transaction
+ * @param {boolean} hasScript  scripts/handoff.mjs exists in the worktree
+ */
+export function handoffRefreshArgs(confirmed, hasScript) {
+  return confirmed > 0 && hasScript ? ["scripts/handoff.mjs", "--refresh", "--no-github"] : null;
+}
+

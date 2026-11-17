@@ -15,10 +15,11 @@
  *
  *   node scripts/privacy-ledger-check.mjs [--root <dir>] [--json]
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { isProductionSource, unregisteredNetworkCalls } from "./lib/prGate.mjs";
+import { builtWorkerGaps, workerSourceGaps, workerSources } from "./lib/workerLedgerScan.mjs";
 
 /** Every production file under `root`/src, with each line and the two above it. */
 export function sourceLines(root) {
@@ -42,18 +43,39 @@ export function ledgerGaps(root) {
   return unregisteredNetworkCalls(sourceLines(root), readFileSync(join(root, "src/ai/privacyLedger.ts"), "utf8"));
 }
 
+/**
+ * W13.P2: every worker — found by what starts it or what its built file
+ * does, never by its name — carries the ledger bridge. `dist` is scanned
+ * when a build is there.
+ */
+export function workerGaps(root, dist = join(root, "dist")) {
+  const source = workerSourceGaps(root).map((g) => ({ ...g, line: 1, text: "" }));
+  const built = builtWorkerGaps(dist);
+  return { gaps: [...source, ...(built?.gaps ?? []).map((g) => ({ ...g, line: 0, text: "" }))], sources: workerSources(root).length, built };
+}
+
 function main() {
   const argv = process.argv.slice(2);
   const at = argv.indexOf("--root");
   const root = resolve(at >= 0 ? argv[at + 1] : join(dirname(fileURLToPath(import.meta.url)), ".."));
-  const gaps = ledgerGaps(root);
+  const calls = ledgerGaps(root);
+  const workers = workerGaps(root);
+  const gaps = [...calls, ...workers.gaps];
   if (argv.includes("--json")) console.log(JSON.stringify(gaps, null, 2));
-  if (!gaps.length) {
-    console.log("privacy:ledger: every network call in src/ names a ledger host or carries its `// privacy-ledger:` note");
+  if (!workers.sources && existsSync(join(root, "src/ai/workerLedgerInstall.ts"))) {
+    // The app has a worker ledger bridge, so it has workers: a scan that finds none checks nothing.
+    console.error("✗ privacy:ledger: no worker found in src/ — the worker scan has nothing to check");
+    process.exitCode = 1;
     return;
   }
-  for (const g of gaps) console.error(`${g.file}:${g.line}: ${g.why}\n    ${g.text.slice(0, 160)}`);
-  console.error(`\n✗ privacy:ledger: ${gaps.length} network call(s) outside the privacy ledger. Route each through a ledger rule, or add \`// privacy-ledger: <rule>\` above it.`);
+  const builtNote = workers.built ? `${workers.built.workers} built worker file(s) in dist/assets scanned by content` : "no dist/ to scan (run after a build to check the built workers too)";
+  if (!gaps.length) {
+    console.log("privacy:ledger: every network call in src/ names a ledger host or carries its `// privacy-ledger:` note");
+    console.log(`privacy:ledger: every worker carries the ledger bridge — ${workers.sources} worker source(s), found by what starts them, not by name (argon2Worker.ts included); ${builtNote}`);
+    return;
+  }
+  for (const g of gaps) console.error(`${g.file}${g.line ? `:${g.line}` : ""}: ${g.why}${g.text ? `\n    ${g.text.slice(0, 160)}` : ""}`);
+  console.error(`\n✗ privacy:ledger: ${gaps.length} gap(s) outside the privacy ledger. Route each network call through a ledger rule, or add \`// privacy-ledger: <rule>\` above it; a worker imports src/ai/workerLedgerInstall.ts first.`);
   process.exitCode = 1;
 }
 

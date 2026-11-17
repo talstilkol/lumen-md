@@ -109,6 +109,7 @@ describe("the rule behind it", () => {
 });
 
 const traceDir = process.env.LUMEN_TRACE_DIR;
+// skip-reason: the full editing traces are a large outside checkout (LUMEN_TRACE_DIR); the committed real-trace fixtures always run | task: W11.S7 | until: 2027-05-16
 describe.skipIf(!traceDir || !existsSync(join(traceDir, "editing-traces")))("the whole pairs, from the traces on this machine", () => {
   it("each of the 4 pairs: nothing lost now", () => {
     const set = manifest.sets.find((s) => s.id === "editing-traces")!;

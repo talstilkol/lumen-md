@@ -54,9 +54,10 @@ describe("PageView", () => {
     expect(select).not.toBeNull();
   });
 
-  it("renders the preview content", async () => {
+  // W13.R10: the pages are the print export's document, in a frame (pagedPreview.test.ts, e2e/paged-preview.spec.ts).
+  it("renders the pages' frame, titled after the note", async () => {
     const { PageView } = await import("../ui/PageView");
     const { container } = render(<PageView markdownText="# My Document" />);
-    expect(container.textContent).toContain("My Document");
+    expect(container.querySelector("iframe[data-testid='paged-frame']")).not.toBeNull();
   });
 });

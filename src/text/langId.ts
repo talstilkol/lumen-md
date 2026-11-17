@@ -91,6 +91,17 @@ function lexicalVote(text: string, candidates: string[]): string | null {
   return ranked.length === 1 || ranked[0][1] > ranked[1][1] ? ranked[0][0] : null;
 }
 
+/** The lexical winner only when it is clear-cut: ≥ 3 votes and at least twice the runner-up's. */
+function strongLexicalVote(text: string, candidates: string[]): string | null {
+  const words = text.toLowerCase().match(/[\p{L}']+/gu) ?? [];
+  const ranked = candidates
+    .filter((l) => COMMON_SETS[l])
+    .map((l) => [l, words.filter((w) => COMMON_SETS[l].has(w)).length + 0.5 * (text.match(DIACRITICS[l] ?? /$^/g) ?? []).length] as [string, number])
+    .sort((a, b) => b[1] - a[1]);
+  if (!ranked.length || ranked[0][1] < 3) return null;
+  return ranked[0][1] >= 2 * (ranked[1]?.[1] ?? 0) ? ranked[0][0] : null;
+}
+
 /** franc's top guesses for one script, as BCP-47 tags with franc's 0–1 scores. */
 function trigramGuesses(prose: string, only?: string[]): Array<[string, number]> {
   return francAll(prose, { minLength: 1, ...(only ? { only } : {}) })
@@ -143,7 +154,16 @@ export function detectLanguage(text: string, opts: { prefer?: string[]; margin?:
   }
   const [best, bestScore] = all[0];
   const preferred = preferredHere[0];
-  const pick = preferred && preferred[1] >= bestScore * (opts.margin ?? 0.8) ? preferred[0] : best;
+  let pick = preferred && preferred[1] >= bestScore * (opts.margin ?? 0.8) ? preferred[0] : best;
+  // A sentence or two of Latin script: trigrams still misread plain English
+  // ("Please let me know when you receive the signed contract." came out
+  // French, confident, so English spelling skipped it — plan 6.10). Function
+  // words outvote them when they clearly agree on one language: at least 3
+  // hits and twice the runner-up.
+  if (script === "latin" && letters < 200) {
+    const strong = strongLexicalVote(sameScript, [...new Set([...prefer.filter((l) => COMMON_SETS[l]), "es", "it", "pt", "nl"])]);
+    if (strong && strong !== pick && all.some(([tag]) => tag === strong)) pick = strong;
+  }
   const second = all.find(([tag]) => tag !== pick)?.[1] ?? 0;
   return { lang: pick, script, confident: letters >= 30 && second < 0.98 };
 }

@@ -109,3 +109,21 @@ Every eval report carries a top-level `card` (built with `makeCard` in `scripts/
 - **כללי החלטה.** ברירת המחדל מוחלפת רק ב-+3 נקודות nDCG לפחות על WebFAQ-heb, עם רווחי סמך שלא חופפים. ‏reranker מופעל רק ב-+2 נקודות לפחות וב-p95 של 150 ms לכל היותר.
 - **הרצה.** ‏`python3 scripts/retrieval/fetch.py` (דורש רשת) כותב את הסטים, עם הגרסה הנעוצה שלהם, ל-`eval/public-data/` (מחוץ ל-git). אחר כך `npm run eval:retrieval-public` כותב כרטיס public לכל סט.
 - **‏MAFAT HSRC** מחכה להרשמה (W11.O4).
+
+## Ask the vault (plan W12.A3)
+
+`src/agents/eval/askVaultEval.ts` measures "Ask the vault" through the path the app runs: heading chunks, the app's BM25, the scope filter, the reranker off or on, the context builder and the citation checker.
+
+- **Retrieval.** nDCG@10 and Recall@20 with bootstrap intervals on the W11.I13 sets (WebFAQ-heb, Belebele heb and he→en), one card per reranker setting.
+- **Citations on HeQ.** Every HeQ paragraph is a note. A question's gold is the paragraph HeQ wrote it for. Per question: `cite_recall` (a verified citation names that paragraph), `cite_precision` (the share of verified citations that do), `unsupported_rate` (claims with no verified quote), and `gold_in_context`.
+- **Answers.** `LUMEN_ASK_MODEL` (with `LUMEN_ASK_MODEL_DIGEST`) answers through Ollama. Without it, a labelled no-LLM extractive baseline answers. It quotes the closest sentence and gives a floor for the steps after the model.
+- **Cards.** `eval/cards/ask-citations-heq-dev-*.json` come from the cloud run: the baseline on the committed 12-question dev split. They are tagged `dev` and are not a quality claim (on this split the baseline already scores 1.0). The public cards come from the Mac (W12.M1): `python3 scripts/retrieval/fetch.py` (it also fetches HeQ v1.1 test at the pinned commit and checks its sha256), then `LUMEN_ASK_MODEL=<model> LUMEN_ASK_MODEL_DIGEST=<digest> npm run eval:ask-vault`.
+
+## שאל את הכספת (משימה W12.A3)
+
+‏`src/agents/eval/askVaultEval.ts` מודד את "שאל את הכספת" במסלול שהאפליקציה מריצה: חיתוך לפי כותרות, ה-BM25 של האפליקציה, מסנן ההיקף, ה-reranker כבוי או דלוק, בניית ההקשר ובודק הציטוטים.
+
+- **אחזור.** ‏nDCG@10 ו-Recall@20 עם רווחי סמך bootstrap על הסטים של W11.I13 ‏(WebFAQ-heb, ‏Belebele בעברית ועברית→אנגלית), כרטיס לכל הגדרת reranker.
+- **ציטוטים על HeQ.** כל פסקה של HeQ היא פתק. ה-gold של שאלה הוא הפסקה ש-HeQ כתב אותה עבורה. לכל שאלה: ‏`cite_recall` (ציטוט מאומת מצביע על הפסקה הזאת), ‏`cite_precision` (חלק הציטוטים המאומתים שמצביעים עליה), ‏`unsupported_rate` (טענות בלי ציטוט מאומת) ו-`gold_in_context`.
+- **תשובות.** ‏`LUMEN_ASK_MODEL` (עם `LUMEN_ASK_MODEL_DIGEST`) עונה דרך Ollama. בלעדיו עונה קו בסיס מחלץ בלי LLM, שמתויג ככזה. הוא מצטט את המשפט הקרוב ביותר ונותן רצפה לשלבים שאחרי המודל.
+- **כרטיסים.** ‏`eval/cards/ask-citations-heq-dev-*.json` נוצרו בהרצה בענן: קו הבסיס על חלוקת ה-dev של 12 שאלות שבריפו. הם מתויגים `dev` ואינם טענת איכות (בחלוקה הזאת קו הבסיס כבר מקבל 1.0). הכרטיסים הציבוריים יגיעו מה-Mac ‏(W12.M1): ‏`python3 scripts/retrieval/fetch.py` (הוא מוריד גם את HeQ v1.1 test בקומיט הנעוץ ובודק את ה-sha256), ואז `LUMEN_ASK_MODEL=<model> LUMEN_ASK_MODEL_DIGEST=<digest> npm run eval:ask-vault`.

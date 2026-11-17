@@ -1,0 +1,12 @@
+{
+  "retention.created": "created that day",
+  "retention.done": "{n} tasks done",
+  "retention.edited": "{n} notes edited",
+  "retention.more": "…and {n} more",
+  "retention.nothingEdited": "No notes were edited this week.",
+  "retention.onThisDay": "On this day",
+  "retention.tags": "Tags",
+  "retention.turnOff": "Built on this device. Turn it off in Feature flags.",
+  "retention.week": "The week {from} – {to}",
+  "retention.words": "{n} words"
+}

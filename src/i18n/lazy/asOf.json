@@ -1,0 +1,20 @@
+{
+  "asOf.title": "What I knew then",
+  "asOf.close": "Close",
+  "asOf.date": "Vault as of",
+  "asOf.query": "Search the vault as it was",
+  "asOf.coverage": "History starts on {date}. Edits before that were never saved, so they cannot be shown.",
+  "asOf.noHistory": "No history yet. Saved versions show up here from now on.",
+  "asOf.results": "{count} notes matched",
+  "asOf.none": "Nothing matched in the vault as of this date.",
+  "asOf.banner": "This is how it was on {date}. Read-only.",
+  "asOf.compare": "Then vs now",
+  "asOf.restore": "Restore paragraph",
+  "asOf.restored": "Paragraph restored. Ctrl+Z undoes it.",
+  "asOf.openToRestore": "Open this note in the editor to restore a paragraph.",
+  "asOf.removed": "Deleted since",
+  "asOf.changed": "Changed since",
+  "asOf.added": "New since",
+  "asOf.same": "No change since then.",
+  "asOf.back": "Back to results"
+}

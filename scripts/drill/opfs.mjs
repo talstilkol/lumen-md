@@ -11,11 +11,16 @@
  *     getFile, move, createSyncAccessHandle → truncate / write / flush /
  *     getSize / close as real system calls, so SIGKILL tears what it tears);
  *   - `Worker` and `URL.createObjectURL`: the worker source the module builds
- *     runs in this process with its own `self`, messages queued as a
+ *     (or, since W11.Q10, the vault-io module worker the drill bundles next to
+ *     it) runs in this process with its own `self`, messages queued as a
  *     worker's are.
  */
 import * as fs from "node:fs";
+import { createRequire } from "node:module";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const require = createRequire(import.meta.url);
 
 const notFound = (what) => Object.assign(new Error(`${what} not found`), { name: "NotFoundError" });
 const mismatch = (what) => Object.assign(new Error(`${what} is the other kind`), { name: "TypeMismatchError" });
@@ -91,6 +96,17 @@ class DirHandle {
   }
 }
 
+/**
+ * A module worker's source as one classic script: bundled (its imports inlined)
+ * by esbuild, from the TypeScript file itself (a unit test) or from the
+ * script the drill already built in its place.
+ */
+function workerScript(url) {
+  const { buildSync } = require("esbuild");
+  const out = buildSync({ entryPoints: [fileURLToPath(url)], bundle: true, format: "iife", write: false, logLevel: "error", loader: { ".ts": "ts" } });
+  return out.outputFiles[0].text;
+}
+
 /** Install the browser APIs the module reaches for, with `root` as the origin's private folder (the latest call wins: the module's one worker follows it). */
 export function installOpfs(root) {
   const blobs = new Map();
@@ -108,7 +124,9 @@ export function installOpfs(root) {
       const scope = { onmessage: null, postMessage: (data) => setImmediate(() => this.onmessage?.({ data })) };
       this.scope = scope;
       // The module's worker source, run as a classic worker script runs: `self` and `navigator` are its globals.
-      this.started = blobs.get(url).text().then((src) => new Function("self", "navigator", src)(scope, { get storage() { return globalThis.navigator.storage; } }));
+      // A blob URL (the worker source the module built) or a module worker's file URL (W11.Q10's vault-io worker, built next to the bundle).
+      const source = typeof url === "string" && url.startsWith("blob:") ? blobs.get(url).text() : Promise.resolve(workerScript(new URL(String(url))));
+      this.started = source.then((src) => new Function("self", "navigator", src)(scope, { get storage() { return globalThis.navigator.storage; } }));
     }
     postMessage(msg) {
       void this.started.then(() => setImmediate(() => this.scope.onmessage({ data: msg })));

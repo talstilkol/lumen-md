@@ -6,6 +6,7 @@
 
 import { log } from "../../lib/logger";
 import { VaultError, type VaultData, type VaultEntry, type VaultEvent, type VaultListener } from "./types";
+import { compareNames } from "../../i18n/collate";
 
 // ── Paths ────────────────────────────────────────────────────────────────
 
@@ -44,7 +45,7 @@ export function vaultSegments(path: string): string[] {
 /** `list()` order: directories first, then files, each group by name. */
 export function compareVaultEntries(a: Pick<VaultEntry, "kind" | "name">, b: Pick<VaultEntry, "kind" | "name">): number {
   if (a.kind !== b.kind) return a.kind === "directory" ? -1 : 1;
-  return a.name.localeCompare(b.name);
+  return compareNames(a.name, b.name);
 }
 
 /**
@@ -78,8 +79,17 @@ export async function toBytes(data: VaultData): Promise<Uint8Array> {
 
 /**
  * Runs operations on one path one after another (2.28): a backend's
- * write / remove / writeIf / removeIf on the same path wait for each other,
- * so a compare-and-swap is never split by the backend's own writes.
+ * write / remove / writeIf / removeIf / rename on the same path wait for
+ * each other, so a compare-and-swap is never split by the backend's own
+ * writes.
+ *
+ * Lock order (review Z6-L3), so two holders never wait on each other:
+ *   1. a caller's lock (writeMany's `lock`, the sync round's), then this one;
+ *   2. several paths of this lock (rename: source and target) only through
+ *      `runAll`, in ascending code-unit order of the normalised path;
+ *   3. nothing that takes this lock is called while holding it (it is not
+ *      re-entrant): save recovery takes each target's lock on its own, and
+ *      is never started with one held.
  */
 export class PathLock {
   private readonly tails = new Map<string, Promise<void>>();
@@ -95,6 +105,13 @@ export class PathLock {
       if (this.tails.get(path) === tail) this.tails.delete(path);
     });
     return next;
+  }
+
+  /** `fn` holding every one of `paths` (duplicates once), taken in ascending order (rule 2 above). */
+  runAll<T>(paths: readonly string[], fn: () => Promise<T>): Promise<T> {
+    const sorted = [...new Set(paths)].sort();
+    const take = (i: number): Promise<T> => (i === sorted.length ? fn() : this.run(sorted[i], () => take(i + 1)));
+    return take(0);
   }
 }
 

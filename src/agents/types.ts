@@ -115,6 +115,8 @@ export type StagedChange = ChangeProposal & {
   noUndo?: true;
   /** Applied as a tracked change (CriticMarkup) because suggesting mode was on. */
   asSuggestion?: true;
+  /** The user edited the proposed text before deciding (`editStagedChange`, plan W13.A4). */
+  edited?: true;
 };
 
 /** What a write tool returns: the receipt of the staged change, never the write itself. */
@@ -221,6 +223,13 @@ export interface AgentTool<A = Record<string, unknown>, R = unknown> {
   offeredBy?: string[];
   /** A network tool that talks to its own server (an MCP server's URL), not the research service (review 21, C2). */
   networkTarget?: string;
+  /**
+   * The result can hold the user's own data although the tool is a network
+   * call: an MCP server the user connected reads their account (mail,
+   * calendar, drive). Under the Rule of Two the run is then private, like
+   * after a vault read (W11.I2 follow-up, FA).
+   */
+  privateResult?: boolean;
 }
 
 export interface ToolCall {
@@ -239,6 +248,8 @@ export interface ExecutorMessage {
   toolCallId?: string;
   /** Tool turn: the tool's name. */
   name?: string;
+  /** Images for a vision model, base64 without a data: prefix (Ollama's `images`; other executors ignore them). */
+  images?: string[];
 }
 
 export type ModelTier = "tiny" | "small" | "medium" | "large";
@@ -255,6 +266,11 @@ export interface ExecutorRequest {
   tools?: AgentTool[];
   /** When set, the answer must be JSON matching this schema. */
   schema?: JsonSchema;
+  /**
+   * Only a server on this computer (loopback): an Ollama or LM Studio elsewhere — even on the LAN, even
+   * outside the local-only policy — is refused. Set from AgentDefinition.loopbackOnly (the writing agents).
+   */
+  loopbackOnly?: boolean;
   /** Pins a model; otherwise the executor picks one for `tier`. */
   model?: string;
   tier?: ModelTier;
@@ -399,6 +415,8 @@ export interface AgentDefinition<I extends AgentInput = AgentInput, O = string> 
   validators?: Validator<O>[];
   /** Executors to try, in order. Default: the runtime's policy order. */
   executorPreference?: ExecutorId[];
+  /** Audit r4 A2.13: model servers on this computer only (ExecutorRequest.loopbackOnly), whatever the AI policy. */
+  loopbackOnly?: boolean;
   tier?: ModelTier;
   maxSteps?: number;
   /** Retries after a failed validation (default 2). Interactive agents set 0. */
@@ -455,13 +473,15 @@ export interface AgentRun<O = unknown> {
   endedAt: number;
   status: RunStatus;
   output?: O;
-  /** Stable code when failed (`no-executor`, `validation`, `parse`, `tool`, `aborted`, `error`). */
+  /** Stable code when failed (`no-executor`, `validation`, `parse`, `tool`, `aborted`, `error`, `runaway`: R12.18). */
   errorCode?: string;
   error?: string;
   attempts: number;
   steps: AgentStep[];
   suggestions: Suggestion[];
   tokens: { input: number; output: number; estimated: boolean };
+  /** R12.18: the runaway guard of the last attempt: the prompt by hash and size only, and every verdict above ok. */
+  guard?: { promptHash: string; promptChars: number; events: Array<{ action: string; reason: string; at: string }> };
   /** Key of the input (agent + user prompt): a retry picked in the panel applies to this input. */
   inputKey?: string;
   /** The run this one re-does: the user said its answer was not good (plan 5.6.3). */

@@ -21,6 +21,7 @@
  */
 import { writeWorkspaceBlob } from "../storage/workspace";
 import { notifyWorkspaceChanged } from "../storage/workspaceEvents";
+import { wordSlug } from "../lib/slug";
 
 export const ATTACHMENTS_DIR = "attachments";
 export const TITLE_MAX = 80;
@@ -126,13 +127,7 @@ export function clock(ms: number): string {
 
 /** `attachments/voice-2026-11-10-0905-first-words.webm` — the title's words, safe for any file system. */
 export function attachmentPath(when: Date, title: string, ext = "webm"): string {
-  const slug = title
-    .normalize("NFC")
-    .replace(/…$/, "")
-    .replace(/[^\p{L}\p{N}]+/gu, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 40)
-    .replace(/-+$/, "");
+  const slug = wordSlug(title.normalize("NFC").replace(/…$/, ""), { max: 40 });
   const stamp = `${when.getFullYear()}-${pad2(when.getMonth() + 1)}-${pad2(when.getDate())}-${pad2(when.getHours())}${pad2(when.getMinutes())}`;
   return `${ATTACHMENTS_DIR}/voice-${stamp}${slug ? `-${slug}` : ""}.${ext}`;
 }

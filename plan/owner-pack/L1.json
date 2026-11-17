@@ -1,0 +1,754 @@
+[
+  {
+    "id": "L1/W6.1",
+    "task": "W6.1",
+    "decision": "Approve promoting main in steps: train 1, then #356 and #432, each only after the full e2e and the data-safety drill pass on that head.",
+    "options": [
+      "A: promote in the three steps, each gated by `promote:check` (recommended)",
+      "B: one jump to the current train",
+      "C: wait for train 7 to be complete"
+    ],
+    "recommendation": "A",
+    "why": "`promote:check` refuses a head without e2e, drill and WebKit receipts (promoteCheck 8/8 in the cloud). Small steps keep the rollback to the previous tag under 5 minutes. B mixes 700+ commits into one unreviewable change.",
+    "sources": [
+      "scripts/promote/check.mjs",
+      "docs/src/content/docs/project/releasing.md",
+      "src/__tests__/promoteCheck.test.ts"
+    ],
+    "changes": "origin/main moves (fast-forward) to each step's head; nothing in the repo changes.",
+    "draftPr": null,
+    "check": "git fetch -q origin main && npm run promote:check -- origin/main"
+  },
+  {
+    "id": "L1/W6.2",
+    "task": "W6.2",
+    "decision": "After #432 reaches production, ask the search engines to recrawl and check the old foreign domain 14 days later.",
+    "options": [
+      "A: Google Search Console + Bing Webmaster, URL inspection on the app's own domain (recommended)",
+      "B: wait for a natural recrawl"
+    ],
+    "recommendation": "A",
+    "why": "live:meta already checks canonical, og, twitter, JSON-LD, robots and the sitemap (liveMeta 7/7, liveMetaDeploy 6/6 here); the only thing left is outside the repo.",
+    "sources": [
+      "scripts/live-meta.mjs",
+      "docs/owner/checklist.md items 10.72–10.75"
+    ],
+    "changes": "None in the repo. Owner session step devices/live-and-merge records the recrawl.",
+    "draftPr": null,
+    "check": "npm run live:meta -- https://lumen-md.vercel.app"
+  },
+  {
+    "id": "L1/W6.4",
+    "task": "W6.4",
+    "decision": "Commission the third independent crypto review, and acknowledge PR #1025's flag before it is lifted.",
+    "options": [
+      "A: request a free review (OSTIF / Open Source Technology Improvement Fund, or a university crypto group) and keep the attack tests as the gate meanwhile (recommended)",
+      "B: paid audit",
+      "C: no external review; ship E2EE off"
+    ],
+    "recommendation": "A, with C as the state until a report exists",
+    "why": "All 42 attack tests and 51/51 vectors pass here, but the plan's DoD points at scratchpad files ($S/rr7/*.test.ts) and a script that does not exist (scripts/crypto/vectors.py; the real one is scripts/sync-protocol/check_vectors.py). The DoD fix is proposed in the lane TSV.",
+    "sources": [
+      "security/attacks/",
+      "scripts/sync-protocol/check_vectors.py",
+      "docs/owner/checklist.md item 10.283",
+      "https://ostif.org"
+    ],
+    "changes": "plan/plan.json W6.4 dod → `npx vitest run security/attacks` and `python3 scripts/sync-protocol/check_vectors.py` (integrator; plan.json is off-limits to lanes).",
+    "draftPr": null,
+    "check": "npx vitest run security/attacks && python3 scripts/sync-protocol/check_vectors.py"
+  },
+  {
+    "id": "L1/W6.5",
+    "task": "W6.5",
+    "decision": "Create the free second host for the nightly factory.",
+    "options": [
+      "A: Oracle Cloud Always Free, Ampere A1 2 OCPU / 12 GB (recommended)",
+      "B: a home machine that stays on",
+      "C: GitHub Actions (refused by the owner's rule)"
+    ],
+    "recommendation": "A",
+    "why": "nightlyReceipts 19/19 here. The 3-browser e2e takes 90–110 min by design, so the '< 60 min' acceptance is unreachable without sharding across two hosts: accept 120 min or add a second free VM.",
+    "sources": [
+      "docs/src/content/docs/self-hosting/verification-factory.md",
+      "docs/owner/checklist.md item 8.60"
+    ],
+    "changes": "None in the repo; the factory writes receipts to the receipts repo.",
+    "draftPr": null,
+    "check": "npm run owner:session -- check accounts"
+  },
+  {
+    "id": "L1/W6.6",
+    "task": "W6.6",
+    "decision": "Apply for BrowserStack's open-source plan and store the Automate keys on the Mac.",
+    "options": [
+      "A: BrowserStack open source (recommended)",
+      "B: Sauce Labs open source",
+      "C: the owner's own iPhone and Mac Safari by hand"
+    ],
+    "recommendation": "A",
+    "why": "`safari:run` is already written for BrowserStack's SDK and promote:check refuses a head without a WebKit receipt (promoteCheck 8/8).",
+    "sources": [
+      "scripts/safari/run.mjs",
+      "docs/owner/checklist.md items 1.26, 1.27",
+      "https://www.browserstack.com/open-source"
+    ],
+    "changes": "None in the repo; BROWSERSTACK_USERNAME / BROWSERSTACK_ACCESS_KEY in the Mac's keychain.",
+    "draftPr": null,
+    "check": "node scripts/safari/run.mjs --dry-run"
+  },
+  {
+    "id": "L1/W6.9",
+    "task": "W6.9",
+    "decision": "Pick the second deployment host and when to leave Vercel Hobby.",
+    "options": [
+      "A: Cloudflare Pages as the second host now; Vercel Pro only when a first payment is near (recommended)",
+      "B: Netlify",
+      "C: stay on Hobby"
+    ],
+    "recommendation": "A",
+    "why": "Hobby forbids commercial use; `hosting:gate` passes today only because there are no payments. headers.mjs already emits both hosts' formats (11 sources match).",
+    "sources": [
+      "docs/src/content/docs/self-hosting/second-host.md",
+      "docs/src/content/docs/self-hosting/cut-over.md",
+      "https://vercel.com/docs/limits/fair-use-guidelines"
+    ],
+    "changes": "None until the cut-over; then the DNS record.",
+    "draftPr": null,
+    "check": "npm run hosts:parity && npm run hosting:gate"
+  },
+  {
+    "id": "L1/W6.10",
+    "task": "W6.10",
+    "decision": "Set the Ignored Build Step in the Vercel project.",
+    "options": [
+      "A: Project → Settings → Git → Ignored Build Step = `bash scripts/vercel-ignore.sh` (recommended)",
+      "B: vercel.ts ignoreCommand"
+    ],
+    "recommendation": "A",
+    "why": "vercelIgnore 12/12 here; `check:vercel-ignore` exits 2 without VERCEL_TOKEN (cannot read the setting), so the setting itself is the only gap.",
+    "sources": [
+      "scripts/vercel-ignore.sh",
+      "scripts/check-vercel-ignore.mjs",
+      "https://vercel.com/docs/project-configuration/git-settings"
+    ],
+    "changes": "Vercel project setting only.",
+    "draftPr": null,
+    "check": "VERCEL_TOKEN=… npm run check:vercel-ignore"
+  },
+  {
+    "id": "L1/W6.12",
+    "task": "W6.12",
+    "decision": "Turn on private vulnerability reporting, secret scanning, push protection, and create the human-reviewed label.",
+    "options": [
+      "A: all four now (recommended)",
+      "B: defer"
+    ],
+    "recommendation": "A",
+    "why": "All are free for public repos; securityChannels 5/5 here; SECURITY.md already points at private reporting.",
+    "sources": [
+      "https://docs.github.com/en/code-security/secret-scanning",
+      "SECURITY.md",
+      "src/__tests__/securityChannels.test.ts"
+    ],
+    "changes": "Repository settings; label `human-reviewed`.",
+    "draftPr": null,
+    "check": "npm run owner:session -- check accounts"
+  },
+  {
+    "id": "L1/W6.13",
+    "task": "W6.13",
+    "decision": "Find a second maintainer and two human reviewers for sensitive code.",
+    "options": [
+      "A: invite from the Hebrew open-source community (Hamakor) and past contributors (recommended)",
+      "B: paid reviewer"
+    ],
+    "recommendation": "A",
+    "why": "codeowners covers 325/325 sensitive files; the label counts only when added by someone other than the owner or the author (#551).",
+    "sources": [
+      "docs/src/content/docs/project/community.md",
+      "docs/owner/checklist.md items 1.47, 3.13, 3.14"
+    ],
+    "changes": "SECURITY.md: second maintainer's key; .github/CODEOWNERS: reviewers.",
+    "draftPr": null,
+    "check": "npm run codeowners:check"
+  },
+  {
+    "id": "L1/W6.14",
+    "task": "W6.14",
+    "decision": "Clear the advisories: merge or close the dependabot PRs down to ≤ 5, and run the audits where the registry is reachable.",
+    "options": [
+      "A: owner:session gpu/cargo-zip, then merge dependabot PRs that pass, close the superseded (recommended)",
+      "B: disable dependabot"
+    ],
+    "recommendation": "A",
+    "why": "The npm registry is blocked in the cloud, so `npm audit`, `cargo audit` and `cargo deny` can run only on the Mac or the factory.",
+    "sources": [
+      "docs/owner/checklist.md items 1.24, 1.25, 2.46–2.55",
+      ".github/dependabot.yml"
+    ],
+    "changes": "package-lock.json, src-tauri/Cargo.lock (via the dependabot PRs).",
+    "draftPr": null,
+    "check": "npm audit --audit-level=high && npm run audit:lock && (cd src-tauri && cargo audit && cargo deny check)"
+  },
+  {
+    "id": "L1/W6.17",
+    "task": "W6.17",
+    "decision": "Generate the held-out recipient key (X25519) and seal the first set.",
+    "options": [
+      "A: `npm run heldout -- keygen` on the Mac, key outside the checkout (recommended)",
+      "B: on the factory host"
+    ],
+    "recommendation": "A",
+    "why": "heldout 16/17 in the shim; the one failure is the end-to-end test, whose child process gets status null (timed out) in the shim, an environment limit.",
+    "sources": [
+      "docs/src/content/docs/ai/heldout.md",
+      "docs/owner/checklist.md items 4.47, 7.6"
+    ],
+    "changes": "eval/heldout recipient public key (the command writes it); never the private key.",
+    "draftPr": null,
+    "check": "npx vitest run src/__tests__/heldout.test.ts"
+  },
+  {
+    "id": "L1/W6.18",
+    "task": "W6.18",
+    "decision": "Create the Kaggle account for the free GPU model day.",
+    "options": [
+      "A: Kaggle (free T4/P100, phone verification) (recommended)",
+      "B: Google Colab",
+      "C: the Mac only"
+    ],
+    "recommendation": "A",
+    "why": "`models:cloud` is written for Kaggle; modelsCloud passes in the shim.",
+    "sources": [
+      "docs/src/content/docs/ai/models-cloud.md",
+      "docs/owner/checklist.md items 4.48, 8.39"
+    ],
+    "changes": "~/.kaggle/kaggle.json on the machine that runs it.",
+    "draftPr": null,
+    "check": "npm run models:cloud -- setup"
+  },
+  {
+    "id": "L1/W6.20",
+    "task": "W6.20",
+    "decision": "Run session 1 with `owner:session` and time it.",
+    "options": [
+      "A: run `npm run owner:session -- accounts` once and let it record actual minutes (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "The command records estimated vs actual minutes per step; session 1's estimate is 110 min (6 steps), above the 90-min target, so the measured time decides whether to split it.",
+    "sources": [
+      "scripts/owner/session.mjs",
+      "scripts/owner/steps.mjs",
+      "docs/src/content/docs/project/owner-session-command.md"
+    ],
+    "changes": "reports/owner/accounts/*.json (sealed receipts).",
+    "draftPr": null,
+    "check": "npm run owner:session -- status"
+  },
+  {
+    "id": "L1/W6.21",
+    "task": "W6.21",
+    "decision": "Approve the PR triage table, including category (f) closes.",
+    "options": [
+      "A: approve the table from `npm run pr:triage` and let it close with a comment (recommended)",
+      "B: close by hand"
+    ],
+    "recommendation": "A",
+    "why": "prTriage passes in the shim; the tool never closes a PR whose commits are not on main except approved category (f).",
+    "sources": [
+      "scripts/pr-triage.mjs",
+      "docs/src/content/docs/project/pr-triage.md",
+      "docs/owner/checklist.md items 10.76, 10.77"
+    ],
+    "changes": "None in the repo (PR states).",
+    "draftPr": null,
+    "check": "test \"$(gh api 'repos/talstilkol/lumen-md/pulls?state=open&per_page=100' --paginate --jq '.[].number' | wc -l)\" -le 40"
+  },
+  {
+    "id": "L1/W6.23",
+    "task": "W6.23",
+    "decision": "Deploy the share server and the relay on Cloudflare, and measure from Israel.",
+    "options": [
+      "A: Cloudflare Workers + Durable Objects free tier (recommended)",
+      "B: Fly.io"
+    ],
+    "recommendation": "A",
+    "why": "collab:deploy and share:deploy are written for wrangler; Cloudflare has a Tel Aviv PoP, which is what the p95 < 150 ms target needs.",
+    "sources": [
+      "scripts/collab-deploy.mjs",
+      "scripts/share-deploy.mjs",
+      "docs/owner/checklist.md items 1.34, 5.8–5.10, 6.8, 6.9"
+    ],
+    "changes": "Vercel env VITE_SYNC_RELAY_URL / VITE_SIGNALING_URL.",
+    "draftPr": null,
+    "check": "npm run share:latency && npm run share:scan"
+  },
+  {
+    "id": "L1/W6.27",
+    "task": "W6.27",
+    "decision": "Run the CAS conformance against real WebDAV, S3 and Drive accounts.",
+    "options": [
+      "A: Docker for WebDAV/S3 (MinIO) on the Mac, the owner's Drive token for Drive (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "Drive stays sync-only whatever the result (N7).",
+    "sources": [
+      "scripts/real-servers/",
+      "docs/owner/checklist.md items 1.33, 7.7"
+    ],
+    "changes": "None; the receipt table.",
+    "draftPr": null,
+    "check": "docker compose -f scripts/real-servers/docker-compose.yml up -d && node scripts/real-servers/wait.mjs"
+  },
+  {
+    "id": "L1/W6.28",
+    "task": "W6.28",
+    "decision": "Ask a Hebrew speaker to review the Hebrew docs.",
+    "options": [
+      "A: one reviewer from the beta group, the pages in docs-parity order (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "`docs:parity --strict` is green here; only the human review is left.",
+    "sources": [
+      "scripts/docs-parity.mjs"
+    ],
+    "changes": "None, or wording fixes in docs/src/content/docs/he/.",
+    "draftPr": null,
+    "check": "npm run docs:parity"
+  },
+  {
+    "id": "L1/W6.30",
+    "task": "W6.30",
+    "decision": "Install Guidepup on the Mac and recruit 3 screen-reader users.",
+    "options": [
+      "A: VoiceOver on the Mac, NVDA on a Windows host, users via the Israeli blind association (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "Guidepup needs OS permissions that only the owner can grant.",
+    "sources": [
+      "docs/src/content/docs/editor/screen-reader-automation.md",
+      "docs/src/content/docs/editor/screen-reader-testers.md",
+      "docs/owner/checklist.md items 3.7, 8.42"
+    ],
+    "changes": "package.json devDependencies @guidepup/* (owner commits the lockfile).",
+    "draftPr": null,
+    "check": "npm run test:sr"
+  },
+  {
+    "id": "L1/W6.31",
+    "task": "W6.31",
+    "decision": "Recruit 12 unmoderated testers and the 50-person beta.",
+    "options": [
+      "A: the drafts in launch/beta-recruitment.he.md, admins asked first (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "SUS and funnel tooling exist (scripts/beta-funnel.mjs, usability-analyze.mjs).",
+    "sources": [
+      "launch/beta-recruitment.he.md",
+      "docs/src/content/docs/project/beta-programme.md",
+      "docs/owner/checklist.md items 3.26–3.28"
+    ],
+    "changes": "None.",
+    "draftPr": null,
+    "check": "node scripts/usability-analyze.mjs"
+  },
+  {
+    "id": "L1/W6.32",
+    "task": "W6.32",
+    "decision": "Request Hosted Weblate libre hosting and install its GitHub app on this repo only.",
+    "options": [
+      "A: Hosted Weblate libre (recommended)",
+      "B: Crowdin open source"
+    ],
+    "recommendation": "A",
+    "why": "weblate.mjs already writes Weblate's component config; i18n:check guards each sync.",
+    "sources": [
+      "docs/src/content/docs/contributing/weblate.md",
+      "docs/owner/checklist.md items 1.36–1.40",
+      "https://hosted.weblate.org/hosting/"
+    ],
+    "changes": "src/i18n/review.ts `ar: \"reviewed\"` only after Arabic's startup set is 100% approved.",
+    "draftPr": null,
+    "check": "npm run i18n:check && npm run i18n:weblate"
+  },
+  {
+    "id": "L1/W6.33",
+    "task": "W6.33",
+    "decision": "Pin the 24 models and deploy the mirror from a machine that reaches Hugging Face.",
+    "options": [
+      "A: `npm run owner:models` on the factory host (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "Hugging Face answers 403 here; the e2e with HF blocked exists (e2e/model-mirror.spec.ts) and runs on the dev server.",
+    "sources": [
+      "docs/owner/checklist.md items 7.8, 7.9",
+      "scripts/models/mirror.mjs"
+    ],
+    "changes": "The model registry pins (written by the command) and VITE_MODEL_MIRROR_URL.",
+    "draftPr": null,
+    "check": "npm run models:mirror -- --check --strict"
+  },
+  {
+    "id": "L1/W6.35",
+    "task": "W6.35",
+    "decision": "Decide whether outside plugins come from a separate registry site, and invite 5 developers.",
+    "options": [
+      "A: keep the bundled registry until 5 outside plugins exist; then a separate site with its origin added to the CSP (recommended)",
+      "B: remote registry now"
+    ],
+    "recommendation": "A",
+    "why": "A remote registry is a CSP change (#536 note 10.87). The plugin e2e is 10 tests per browser (`--list`). QuickJS tested 0.23 ≠ pinned 0.32: re-run plugin-ecosystem after the pin.",
+    "sources": [
+      "docs/owner/checklist.md items 1.35, 3.8, 3.9, 10.87",
+      "e2e/plugin-ecosystem.spec.ts"
+    ],
+    "changes": "security/policy.json connect-src (only with option B).",
+    "draftPr": null,
+    "check": "npx playwright test e2e/plugin-ecosystem.spec.ts --project=chromium --project=firefox --project=webkit"
+  },
+  {
+    "id": "L1/W6.37",
+    "task": "W6.37",
+    "decision": "Send the legal packet to a university privacy clinic.",
+    "options": [
+      "A: Tel Aviv University privacy clinic first, then Haifa, then Reichman (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "`legal:packet` builds the zip; the outreach drafts are written.",
+    "sources": [
+      "legal/review-packet/outreach.he.md",
+      "docs/owner/checklist.md items 2.75, 3.15, 10.95"
+    ],
+    "changes": "legal/review-packet/recommendations.md (one row per recommendation when the opinion arrives).",
+    "draftPr": null,
+    "check": "npm run legal:packet"
+  },
+  {
+    "id": "L1/W6.38",
+    "task": "W6.38",
+    "decision": "Approve collecting ≥ 30 real files per format (8 formats) from consenting users.",
+    "options": [
+      "A: a consent form for beta testers, files redacted and kept outside the repo (recommended)",
+      "B: synthetic only, and report the gap"
+    ],
+    "recommendation": "A, with B as the honest report until it happens",
+    "why": "Only Evernote is third-party today; real files carry personal data, so they stay out of git.",
+    "sources": [
+      "docs/owner/checklist.md item 10.82",
+      "scripts/real-corpus/"
+    ],
+    "changes": "None in the repo; failures become tests.",
+    "draftPr": null,
+    "check": "ls scripts/real-corpus"
+  },
+  {
+    "id": "L1/W6.40",
+    "task": "W6.40",
+    "decision": "Deploy the content-frame site on its own origin.",
+    "options": [
+      "A: Cloudflare Pages project lumen-md-frame (recommended)",
+      "B: a second Vercel project"
+    ],
+    "recommendation": "A",
+    "why": "content-frame-origin e2e is 4 tests per browser; the frame must be a different origin from the app.",
+    "sources": [
+      "scripts/content-frame-site.mjs",
+      "docs/owner/checklist.md item 6.7",
+      "e2e/content-frame-origin.spec.ts"
+    ],
+    "changes": "Vercel env VITE_CONTENT_FRAME_URL.",
+    "draftPr": null,
+    "check": "curl -sI https://lumen-md-frame.pages.dev/ | grep -i content-security-policy"
+  },
+  {
+    "id": "L1/W6.42",
+    "task": "W6.42",
+    "decision": "Fix the train cadence: one small train a week.",
+    "options": [
+      "A: a weekly train cut every Sunday, promoted after the nightly receipt (recommended)",
+      "B: per milestone"
+    ],
+    "recommendation": "A",
+    "why": "main moved twice in 30 days; promote:check and the factory make a weekly train mechanical.",
+    "sources": [
+      "docs/owner/checklist.md item 10.80",
+      "scripts/train/build.mjs"
+    ],
+    "changes": "None (a calendar habit); scripts/nightly/scheduler.mjs runs the receipt.",
+    "draftPr": null,
+    "check": "git log origin/main --since='28 days ago' --first-parent --format=%cs | sort -u | wc -l"
+  },
+  {
+    "id": "L1/W6.46",
+    "task": "W6.46",
+    "decision": "Provide 20 real Notion exports for the database scenarios.",
+    "options": [
+      "A: export from the owner's or testers' Notion workspaces, redacted (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "The import works on synthetic exports; 18/20 real scenarios is the acceptance.",
+    "sources": [
+      "docs/owner/checklist.md items 8.47, 8.48"
+    ],
+    "changes": "None in the repo.",
+    "draftPr": null,
+    "check": "npm run test && npm run build && npm run budget"
+  },
+  {
+    "id": "L1/W6.47",
+    "task": "W6.47",
+    "decision": "Create a Zotero test key and provide 20 scanned Hebrew PDFs.",
+    "options": [
+      "A: a write key on a throwaway Zotero library (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "Zotero write is tested against a fake library only.",
+    "sources": [
+      "docs/owner/checklist.md items 1.30–1.32, 4.50, 4.51"
+    ],
+    "changes": "None; key in the keychain.",
+    "draftPr": null,
+    "check": "test -n \"$ZOTERO_API_KEY\""
+  },
+  {
+    "id": "L1/W11.O1",
+    "task": "W11.O1",
+    "decision": "Apply to SignPath Foundation for free Windows code signing.",
+    "options": [
+      "A: SignPath Foundation (OSS, MIT qualifies) (recommended)",
+      "B: Azure Trusted Signing (paid)",
+      "C: unsigned Windows builds"
+    ],
+    "recommendation": "A",
+    "why": "release-run.mjs already names SignPath; the docs are written (#792).",
+    "sources": [
+      "https://signpath.org",
+      "docs/src/content/docs/getting-started/desktop-updates.md"
+    ],
+    "changes": "None until approval; then W11.M11's signing step.",
+    "draftPr": null,
+    "check": "grep -n SignPath scripts/release-run.mjs"
+  },
+  {
+    "id": "L1/W11.O2",
+    "task": "W11.O2",
+    "decision": "Write to Resemble AI about Chatterbox Multilingual's training data.",
+    "options": [
+      "A: send the letter and record the answer, or none after 30 days (recommended)",
+      "B: drop Chatterbox"
+    ],
+    "recommendation": "A",
+    "why": "The voice model ships only with verified:true in its licence record; an answer decides that flag.",
+    "sources": [
+      "docs/legal/"
+    ],
+    "changes": "The model's licence record (verified flag).",
+    "draftPr": null,
+    "check": "true"
+  },
+  {
+    "id": "L1/W11.O3",
+    "task": "W11.O3",
+    "decision": "Send the legal packet, and choose the accessibility coordinator's contact details for the statement.",
+    "options": [
+      "A: the owner as coordinator, with a dedicated e-mail alias and the GitHub form (recommended)",
+      "B: GitHub form only (as today)"
+    ],
+    "recommendation": "A",
+    "why": "The Israeli accessibility regulations ask the statement to name the coordinator with contact details; today both statements say only 'the maintainer' and a form. The clinic (W6.37) should confirm the exact fields.",
+    "sources": [
+      "docs/src/content/docs/editor/accessibility-statement.md",
+      "docs/src/content/docs/he/editor/accessibility-statement.md"
+    ],
+    "changes": "Both statements, section 'Accessibility coordinator' / 'רכז הנגישות'.",
+    "draftPr": 1092,
+    "check": "grep -n 'Coordinator:' docs/src/content/docs/editor/accessibility-statement.md"
+  },
+  {
+    "id": "L1/W11.O4",
+    "task": "W11.O4",
+    "decision": "Register at MAFAT HSRC and record the NEMO and HebSummaries terms.",
+    "options": [
+      "A: register, keep credentials outside the repo, write the terms into task 0.10 (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "scripts/golden/defs.mjs already lists the HSRC sets; their use depends on the terms.",
+    "sources": [
+      "scripts/golden/defs.mjs"
+    ],
+    "changes": "The datasets' licence notes (task 0.10).",
+    "draftPr": null,
+    "check": "grep -n HSRC scripts/golden/defs.mjs"
+  },
+  {
+    "id": "L1/W11.O5",
+    "task": "W11.O5",
+    "decision": "Recruit 3 meeting reviewers and an annotator who did not write the grammar rules.",
+    "options": [
+      "A: from the beta group, paid in credit / thanks (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "Their files go to the held-out track, so the annotator must not be the rule author.",
+    "sources": [
+      "docs/src/content/docs/ai/heldout.md"
+    ],
+    "changes": "None; files in the held-out track.",
+    "draftPr": null,
+    "check": "true"
+  },
+  {
+    "id": "L1/W11.O6",
+    "task": "W11.O6",
+    "decision": "Order an external security review of the sync protocol and keyring.",
+    "options": [
+      "A: request through OSTIF / a free academic review before M3; E2EE stays off and marked until a report (recommended)",
+      "B: paid audit"
+    ],
+    "recommendation": "A",
+    "why": "e2ee-unaudited e2e (2 tests per browser) checks the 'not externally audited' label; it is in the Mac batch.",
+    "sources": [
+      "https://ostif.org",
+      "docs/sync-protocol.md",
+      "e2e/e2ee-unaudited.spec.ts"
+    ],
+    "changes": "None until the report.",
+    "draftPr": null,
+    "check": "npx playwright test e2e/e2ee-unaudited.spec.ts"
+  },
+  {
+    "id": "L1/W11.O7",
+    "task": "W11.O7",
+    "decision": "Submit the stores' privacy labels and DSA trader status, with Hebrew store pages.",
+    "options": [
+      "A: non-trader (no payments) now; switch when payments start (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "Trader status follows payments; store texts live in store/.",
+    "sources": [
+      "store/"
+    ],
+    "changes": "None in the repo.",
+    "draftPr": null,
+    "check": "ls store"
+  },
+  {
+    "id": "L1/W11.O8",
+    "task": "W11.O8",
+    "decision": "Open GitHub Sponsors and Open Collective; test the relay payment in sandbox; start pilots; check NetFree.",
+    "options": [
+      "A: GitHub Sponsors first (0% fees), Open Collective after acceptance (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "FUNDING.yml and support.html interlock (supportFunding.test.ts); the draft PR uncomments `github:` and turns the support page's 'coming' label into the link.",
+    "sources": [
+      ".github/FUNDING.yml",
+      "public/support.html",
+      "docs/src/content/docs/project/sustainability.md"
+    ],
+    "changes": ".github/FUNDING.yml `github: [talstilkol]`; public/support.html funding:github markers.",
+    "draftPr": 1091,
+    "check": "npx vitest run src/__tests__/supportFunding.test.ts"
+  },
+  {
+    "id": "L1/9.2",
+    "task": "9.2",
+    "decision": "Run the held-out spelling test (15.11).",
+    "options": [
+      "A: confirm the 50 Wikipedia pairs in session gpu/golden, then score the test split (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "Only the dev set is measured (recall 75%, FP 2.5–3.9%). The test split's 'wikipedia' part of the spelling set (scripts/golden/defs.mjs, 'Hebrew spelling errors', 38 test pairs) waits for the owner to confirm each pair (15.11); `heldout status` lists no spelling set yet.",
+    "sources": [
+      "docs/owner/checklist.md item 10.4",
+      "scripts/golden/defs.mjs",
+      "scripts/golden/owner.mjs"
+    ],
+    "changes": "None; the score goes into the plan through the golden receipt.",
+    "draftPr": null,
+    "check": "npm run owner:session -- check gpu"
+  },
+  {
+    "id": "L1/9.8",
+    "task": "9.8",
+    "decision": "Open the RTL table DOCX in real Word and confirm the alignment.",
+    "options": [
+      "A: open the fixture in Word for Mac and Word online (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "exportDocxRtlTables 10/10 here; the XML is checked, the rendering is not.",
+    "sources": [
+      "docs/owner/checklist.md items 10.5–10.9",
+      "src/__tests__/exportDocxRtlTables.test.ts"
+    ],
+    "changes": "None.",
+    "draftPr": null,
+    "check": "npx vitest run src/__tests__/exportDocxRtlTables.test.ts"
+  },
+  {
+    "id": "L1/W3.6",
+    "task": "W3.6",
+    "decision": "Open the template gallery's sample vault in Obsidian, and time its load.",
+    "options": [
+      "A: same session as W6.34 (Obsidian already installed) (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "template-gallery e2e is 2 tests per browser; the 'opens in Obsidian' check is manual.",
+    "sources": [
+      "e2e/template-gallery.spec.ts"
+    ],
+    "changes": "None.",
+    "draftPr": null,
+    "check": "npx playwright test e2e/template-gallery.spec.ts"
+  },
+  {
+    "id": "L1/W12.O1",
+    "task": "W12.O1",
+    "decision": "Get licences for the entity-graph data: HeRE, NEMO-Corpus and GLiNER weights.",
+    "options": [
+      "A: write to each author and keep the answers in docs/legal (recommended)",
+      "B: drop the unlicensed sets"
+    ],
+    "recommendation": "A, B for any without an answer in 30 days",
+    "why": "HeRE and NEMO-Corpus state no licence; without one they cannot ship.",
+    "sources": [
+      "docs/legal/"
+    ],
+    "changes": "docs/legal/ (one file per answer).",
+    "draftPr": null,
+    "check": "ls docs/legal"
+  },
+  {
+    "id": "L1/W12.O2",
+    "task": "W12.O2",
+    "decision": "Ask Sefaria for written approval of API use in havruta rooms and the 'Powered by Sefaria' badge.",
+    "options": [
+      "A: e-mail Sefaria's developer contact (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "The havruta rooms call the Sefaria API; the badge uses their name.",
+    "sources": [
+      "docs/src/content/docs/collab/havruta.md",
+      "https://developers.sefaria.org"
+    ],
+    "changes": "None until the answer.",
+    "draftPr": null,
+    "check": "true"
+  },
+  {
+    "id": "L1/W12.O3",
+    "task": "W12.O3",
+    "decision": "Run the havruta pilot: two pairs, one week, observed.",
+    "options": [
+      "A: after W12.O2's answer (recommended)"
+    ],
+    "recommendation": "A",
+    "why": "The pilot depends on Sefaria's approval.",
+    "sources": [
+      "docs/src/content/docs/collab/havruta.md"
+    ],
+    "changes": "None; an observation report.",
+    "draftPr": null,
+    "check": "true"
+  }
+]

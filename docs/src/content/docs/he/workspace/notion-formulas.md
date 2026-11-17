@@ -1,6 +1,8 @@
 ---
 title: הנוסחאות של Notion ב-Bases
 description: פונקציות הנוסחאות של Notion (תאריכים, טקסט, מספרים, רשימות עם current ו-index, ‏lookups דרך קשרים) בתוך נוסחאות ומסננים של ‎.base, ועוד שתיים לעברית.
+type: reference
+tasks: ["W6.46"]
 ---
 
 נוסחה או מסנן ב-`.base` יכולים להשתמש בפונקציות הנוסחאות של Notion לצד אלה

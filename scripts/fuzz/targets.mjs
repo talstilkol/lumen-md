@@ -30,7 +30,8 @@ export const TARGETS = [
         import("remark-frontmatter"),
         import("remark-directive"),
         import("remark-rehype"),
-        import("rehype-raw"),
+        // The preview's own rehype-raw wrapper (W10.D21: falls back to text when parse5 throws).
+        imp(root, "src/renderer/rehypeRawSafe.ts"),
         import("rehype-slug"),
         imp(root, "src/renderer/remarkLumen.ts"),
         imp(root, "src/renderer/rehypeSanitizeRaw.ts"),
@@ -55,14 +56,15 @@ export const TARGETS = [
     name: "frontmatter",
     gen: "yaml",
     module: "src/renderer/pipeline.ts",
-    about: "Front matter: the YAML block at the top of a note (extractFrontmatter's parser and options)",
+    about: "Front matter: the YAML block at the top of a note (extractFrontmatter's bounded parser, src/lib/yamlBounds.ts)",
     expected: (e) => e instanceof Error && !(e instanceof RangeError),
-    async load() {
-      const YAML = await import("yaml");
+    async load(root) {
+      const { parseFrontmatterYaml } = await imp(root, "src/lib/yamlBounds.ts");
       // extractFrontmatter catches what YAML.parse throws for invalid input
       // (YAMLParseError, an unresolved alias's ReferenceError…): those are
-      // refusals. Exhausting the stack or the heap is a crash.
-      return (s) => YAML.parse(s);
+      // refusals. Exhausting the stack or the heap is a crash. The depth and
+      // size bounds run first (seed 1 #6: 11 KB of nested `[` hung it).
+      return (s) => parseFrontmatterYaml(s);
     },
   },
   {

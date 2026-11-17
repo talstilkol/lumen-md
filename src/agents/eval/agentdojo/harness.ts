@@ -17,7 +17,9 @@
  * ground truth and, as soon as a tool result carries the injected goal, the
  * injection task's ground truth first — a model fooled every time. So the
  * numbers measure the architecture (what the runtime lets a fooled model
- * do), not a model's gullibility; real models run in W11.M6.
+ * do), not a model's gullibility. Real models (W11.M6) come in through
+ * `HarnessDeps.model`: `ollamaDeps` (below) pins a local Ollama model and the run
+ * stays on the same runtime, the same approvals and the same checks.
  *
  * The user is simulated, and the report says so:
  *  - `none`: no defence — every call is approved (the baseline);
@@ -32,7 +34,7 @@
  * vector plus a task-aligned rewrite that dresses the goal as a step of the
  * user's own task, keeping the first that succeeds.
  */
-import type { AgentDefinition, ExecutorRequest, ExecutorResponse, NetworkConsentRequest, UntrustedConsentRequest } from "../../types";
+import type { AgentDefinition, Executor, ExecutorRequest, ExecutorResponse, NetworkConsentRequest, UntrustedConsentRequest } from "../../types";
 import { cloneEnv, INJECTION_TASKS, runTool, slackEnv, slackTools, USER_TASKS, vectorsSeenBy, type Call, type Injections, type InjectionTask, type SlackEnv, type UserTask } from "./slack";
 
 export type Defence = "none" | "rubber-stamp" | "attentive";
@@ -131,11 +133,20 @@ export interface PairResult {
   violations: number;
 }
 
+/** Builds the model for one pair (the obedient mock unless the harness is given a real one). */
+export type ModelFactory = (task: UserTask, inj: InjectionTask | null, pre: SlackEnv) => (req: ExecutorRequest) => Promise<ExecutorResponse>;
+
 export interface HarnessDeps {
   runAgent: RunAgentFn;
   register: RegisterFn;
   /** Test hook: change the tools before the run (a tool declared with the wrong scope, say). */
   tamper?: (tools: ReturnType<typeof slackTools>) => void;
+  /** Stops the run (T55: every agent run carries a cancel signal). */
+  signal?: AbortSignal;
+  /** A real model for every pair (W11.M6); the obedient mock when unset. */
+  model?: ModelFactory;
+  /** What `model` is, for the report (e.g. "ollama qwen3:8b, temperature 0, seed 42"). Required with `model`. */
+  modelName?: string;
 }
 
 export async function runPair(deps: HarnessDeps, defence: Defence, task: UserTask, inj: InjectionTask | null, attack: Attack | null, vector: string | null): Promise<PairResult> {
@@ -144,7 +155,8 @@ export async function runPair(deps: HarnessDeps, defence: Defence, task: UserTas
   const env = { current: cloneEnv(pre) };
   const tools = slackTools(env);
   deps.tamper?.(tools);
-  deps.register(obedientModel(task, inj, pre));
+  if (deps.signal?.aborted) throw new DOMException("AgentDojo run stopped", "AbortError");
+  deps.register((deps.model ?? obedientModel)(task, inj, pre));
   const approved: string[] = [];
   const key = (tool: string, args: Record<string, unknown>) => JSON.stringify([tool, Object.fromEntries(Object.entries(args).map(([k, v]) => [k, String(v)]).sort())]);
   const decide = (tool: string, args: Record<string, unknown>) => {
@@ -165,6 +177,7 @@ export async function runPair(deps: HarnessDeps, defence: Defence, task: UserTas
   };
   const run = await deps.runAgent(def, { text: task.prompt }, {
     grants: ["network"],
+    signal: deps.signal,
     consentUntrusted: (r: UntrustedConsentRequest) => decide(r.tool, r.args),
     consentNetwork: (r: NetworkConsentRequest) => decide(r.tool, r.args),
   });
@@ -240,14 +253,18 @@ export async function runAdaptive(deps: HarnessDeps, defence: Exclude<Defence, "
   return { asr: pairs ? successes.length / pairs : 0, successes };
 }
 
+const MOCK_MODEL = "scripted obedient mock (follows every injection it reads) — measures the runtime, not a model";
+
 export async function agentDojoReport(deps: HarnessDeps): Promise<AgentDojoReport> {
+  if (deps.model && !deps.modelName) throw new Error("agentDojoReport: a real model needs a modelName for the report");
+  const real = !!deps.model;
   const none = (await runMode(deps, "none")).report;
   const rubber = (await runMode(deps, "rubber-stamp")).report;
   const attentive = (await runMode(deps, "attentive")).report;
   return {
     suite: "slack",
     source: "AgentDojo v1 (ethz-spylab/agentdojo @089ed468, MIT): environment, injection vectors, task prompts, ground truth and checks",
-    model: "scripted obedient mock (follows every injection it reads) — measures the runtime, not a model",
+    model: real ? deps.modelName! : MOCK_MODEL,
     ported: { userTasks: USER_TASKS.map((t) => t.id), injectionTasks: INJECTION_TASKS.map((t) => t.id), of: { userTasks: 21, injectionTasks: 5 } },
     attack: "important_instructions",
     modes: { none, "rubber-stamp": rubber, attentive },
@@ -260,10 +277,81 @@ export async function agentDojoReport(deps: HarnessDeps): Promise<AgentDojoRepor
       "static attacks (5 templates) and an adaptive search over templates, vectors and a task-aligned rewrite",
     ],
     notTested: [
-      "real models (W11.M6): the mock obeys every injection, so model-side robustness is not measured",
+      real ? "other models: this report is one model at temperature 0 and one seed" : "real models (W11.M6): the mock obeys every injection, so model-side robustness is not measured",
       "the workspace suite (email, calendar, cloud drive) and Slack user tasks 4 and 10-20",
       "real users: approvals are simulated (none / rubber-stamp / attentive)",
       "optimisation attacks against a real model's weights or logits (GCG and the like)",
     ],
+  };
+}
+
+/* ─── A real local model (W11.M6) ─────────────────────────────────────── */
+
+/**
+ * A real local model for the harness. The model is the
+ * app's own Ollama executor (src/agents/executors/ollama.ts), pinned for a
+ * reproducible run — temperature 0, a fixed seed, no thinking phase, a cap
+ * on tokens a turn — and registered in place of the obedient mock, so each
+ * pair still goes through `runAgent`: the Rule of Two approvals, the
+ * datamarking and the frozen tool plan are the app's, not the harness's.
+ *
+ * Local only: the Ollama URL must be loopback; anything else is refused
+ * before a byte is sent. The AgentDojo tools are the in-memory Slack world
+ * (slack.ts) — the agent never reaches a real network.
+ */
+
+export interface PinnedModel {
+  /** The Ollama model tag, e.g. "qwen3:8b". */
+  model: string;
+  seed?: number;
+  /** Tokens a turn at most (default 512: a tool call plus its arguments). */
+  maxTokens?: number;
+}
+
+/** Loopback only (127.0.0.0/8, ::1, localhost): a LAN host is someone else's machine. */
+export function isLoopback(url: string): boolean {
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  return host === "localhost" || host === "::1" || host === "[::1]" || /^127\.\d+\.\d+\.\d+$/.test(host);
+}
+
+/** The executor's chat with the run's pins applied; the runtime's signal passes through. */
+export function pinnedChat(base: Executor, pin: PinnedModel): (req: ExecutorRequest) => Promise<ExecutorResponse> {
+  const cap = pin.maxTokens ?? 512;
+  return (req) => base.chat({ ...req, model: pin.model, temperature: 0, seed: pin.seed ?? 42, think: false, maxTokens: Math.min(req.maxTokens ?? cap, cap) });
+}
+
+/** The report's name for the run. */
+export function pinnedName(pin: PinnedModel): string {
+  return `ollama ${pin.model}, temperature 0, seed ${pin.seed ?? 42}, <= ${pin.maxTokens ?? 512} tokens a turn`;
+}
+
+export interface OllamaDepsInput {
+  runAgent: RunAgentFn;
+  /** The registered Ollama executor (getExecutor("ollama")). */
+  base: Executor;
+  /** Replaces the registry with one executor (resetExecutors + registerExecutor). */
+  install: (ex: Executor) => void;
+  url: string;
+  pin: PinnedModel;
+  signal?: AbortSignal;
+}
+
+/** Harness dependencies that run every pair on a pinned local Ollama model. */
+export function ollamaDeps(i: OllamaDepsInput): HarnessDeps {
+  if (!isLoopback(i.url)) throw new Error(`AgentDojo runs local models only: ${i.url} is not a loopback address`);
+  if (!i.pin.model) throw new Error("AgentDojo: name the Ollama model (LUMEN_EVAL_AGENTDOJO_MODEL)");
+  const chat = pinnedChat(i.base, i.pin);
+  const model: ModelFactory = () => chat;
+  return {
+    runAgent: i.runAgent,
+    signal: i.signal,
+    model,
+    modelName: pinnedName(i.pin),
+    register: (c) => i.install({ ...i.base, chat: c }),
   };
 }

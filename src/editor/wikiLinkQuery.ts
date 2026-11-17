@@ -1,3 +1,4 @@
+import { compareNames } from "../i18n/collate";
 /** The pure half of ./wikiLinkComplete.ts (plan W1.25): what the cursor is completing, and the options. */
 
 /** Note names the list offers, given the vault's paths: Markdown files, by name without `.md`, the path as detail. */
@@ -8,7 +9,7 @@ export function noteOptions(paths: readonly string[]): Array<{ label: string; de
     const name = p.split("/").pop()!.replace(/\.mdx?$/i, "");
     out.push({ label: name, detail: p.includes("/") ? p.slice(0, p.lastIndexOf("/")) : "" });
   }
-  return out.sort((a, b) => a.label.localeCompare(b.label));
+  return out.sort((a, b) => compareNames(a.label, b.label));
 }
 
 /** The `[[query` the cursor is in, or null: from the `[[` to the cursor, before any `|`, `#` or `]`. */

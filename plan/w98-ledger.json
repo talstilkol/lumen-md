@@ -1,0 +1,494 @@
+{
+ "_about": "W9.8: every needs-code = y row of plan/decisions-2026-11-14.md, with its proof. done = commits that are ancestors of the train plus test files that hold the named test (or a probe for a docs/config row); deps-train = waits on one real npm install / cargo update; owner-act; open = code still owed. Checked by scripts/plan/w98-ledger.mjs (--runner runs every test file). Written by lane g2-L3 on verify/train-7 af2d0d7ce5.",
+ "rows": {
+  "2.9": {
+   "status": "done",
+   "commits": [
+    "2483bdca05"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/vaultLocation.test.ts",
+     "match": "(2.9, Codex P2 4306783259)"
+    }
+   ]
+  },
+  "2.12": {
+   "status": "done",
+   "commits": [
+    "d40c48b9f9"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/databaseFormulaView.test.tsx",
+     "match": "the first valid pair wins (2.12)"
+    }
+   ]
+  },
+  "2.17": {
+   "status": "done",
+   "commits": [
+    "f92ffe5f67",
+    "75d561f39b"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/pdfReviewFixes272.test.ts",
+     "match": "2.17: the text indexes take notes and plain text only"
+    }
+   ],
+   "note": "75d561f39b is the train-6 merge that ported isIndexableTextPath to workspaceIndexRead.ts"
+  },
+  "2.18": {
+   "status": "done",
+   "commits": [
+    "f92ffe5f67"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/pdfReaderModal.test.tsx",
+     "match": "2.18: a long PDF opens with page 1's size"
+    }
+   ]
+  },
+  "2.19": {
+   "status": "done",
+   "commits": [
+    "fa8cd877e5"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/pdfReviewFixes272.test.ts",
+     "match": "2.19: a PDF can't be renamed onto its own highlights note"
+    }
+   ]
+  },
+  "2.20": {
+   "status": "done",
+   "commits": [
+    "fa8cd877e5"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/pdfReviewFixes272.test.ts",
+     "match": "2.20: whitespace at the ends of a generated wiki path"
+    }
+   ]
+  },
+  "2.21": {
+   "status": "done",
+   "commits": [
+    "f92ffe5f67"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/pdfReaderModal.test.tsx",
+     "match": "2.21: the reader is modal"
+    }
+   ]
+  },
+  "2.22": {
+   "status": "done",
+   "commits": [
+    "fa8cd877e5"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/pdfReviewFixes272.test.ts",
+     "match": "2.22: the managed region is the marker pair"
+    }
+   ]
+  },
+  "2.23": {
+   "status": "done",
+   "commits": [
+    "fa8cd877e5"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/pdfReviewFixes272.test.ts",
+     "match": "2.23: the highlights list on narrow screens"
+    }
+   ]
+  },
+  "2.24": {
+   "status": "done",
+   "commits": [
+    "fa8cd877e5"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/pdfReviewFixes272.test.ts",
+     "match": "2.24: an encoded link resolves to the file it was made for"
+    }
+   ]
+  },
+  "2.25": {
+   "status": "done",
+   "commits": [
+    "f92ffe5f67"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/pdfReaderModal.test.tsx",
+     "match": "2.25: closing waits for every queued write"
+    }
+   ]
+  },
+  "2.26": {
+   "status": "done",
+   "commits": [
+    "fa8cd877e5",
+    "f92ffe5f67"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/pdfReviewFixes272.test.ts",
+     "match": "2.26: an annotation the reader can't show"
+    },
+    {
+     "file": "src/__tests__/pdfReaderModal.test.tsx",
+     "match": "2.26: a malformed annotation"
+    }
+   ]
+  },
+  "2.28": {
+   "status": "done",
+   "commits": [
+    "dd04b2f161"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/vaultBackend.contract.test.ts",
+     "match": "compare-and-swap: writeIf / removeIf (2.28)"
+    },
+    {
+     "file": "src/__tests__/vaultBackend.contract.test.ts",
+     "match": "compare-and-swap against another program (2.28)"
+    }
+   ]
+  },
+  "2.29": {
+   "status": "done",
+   "commits": [
+    "dd04b2f161"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/e2eeSync.test.ts",
+     "match": "never encrypts or uploads a change the tree check holds, round after round (2.29)"
+    }
+   ]
+  },
+  "2.30": {
+   "status": "done",
+   "commits": [
+    "dd04b2f161"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/e2eeSync.test.ts",
+     "match": "not VaultExistsError (2.30)"
+    }
+   ]
+  },
+  "2.31": {
+   "status": "done",
+   "commits": [
+    "dd04b2f161"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/e2eeUi.test.tsx",
+     "match": "brings the warning back (2.31)"
+    }
+   ]
+  },
+  "2.38": {
+   "status": "done",
+   "commits": [
+    "eae63aba62"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/aiSettingsPanel.test.tsx",
+     "match": "refuses to save an Ollama address the CSP blocks"
+    },
+    {
+     "file": "src/__tests__/ollamaProvider.test.ts",
+     "match": "never stores an address the CSP blocks"
+    }
+   ]
+  },
+  "2.79": {
+   "status": "done",
+   "commits": [
+    "2483bdca05"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/vaultLocation.test.ts",
+     "match": "folders in a move (2.79, Codex P2 4311163141)"
+    }
+   ]
+  },
+  "2.80": {
+   "status": "done",
+   "commits": [
+    "2483bdca05"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/historyVaultIdentity.test.ts",
+     "match": "another vault with the same path sees none of this vault's versions"
+    }
+   ]
+  },
+  "2.83": {
+   "status": "done",
+   "commits": [
+    "aeb77482d4"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/vaultWatcher.test.ts",
+     "match": "a folder that cannot be listed (2.83, Codex P2 4311564686)"
+    }
+   ]
+  },
+  "2.84": {
+   "status": "done",
+   "commits": [
+    "aeb77482d4"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/externalChanges.test.ts",
+     "match": "(2.84, Codex P2 4311564696)"
+    }
+   ]
+  },
+  "2.85": {
+   "status": "done",
+   "commits": [
+    "ba8c89c301"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/onboarding.test.tsx",
+     "match": "(2.85, Codex P2 4311616383)"
+    }
+   ]
+  },
+  "2.6": {
+   "status": "done",
+   "commits": [
+    "bfe1ffbab2"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/agentReviewApply.test.ts",
+     "match": "applies a change for an untitled document only to that document",
+     "needs": [
+      "@codemirror/commands"
+     ]
+    },
+    {
+     "file": "src/__tests__/agentReviewApply.test.ts",
+     "match": "refuses a change for an untitled document that is no longer open",
+     "needs": [
+      "@codemirror/commands"
+     ]
+    }
+   ],
+   "note": "the message names #223's review round, not the step; its two tests need @codemirror/commands (not in the cloud overlay): run on the Mac"
+  },
+  "2.39": {
+   "status": "done",
+   "commits": [
+    "73388182b8"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/searchRegexBudget.test.ts",
+     "match": "the /regex/ size cap (VaultIndex)"
+    },
+    {
+     "file": "src/__tests__/z6/searchRegexTimer.test.ts",
+     "match": ""
+    }
+   ],
+   "note": "the time limit (terminating a runaway worker) is searchRegexTimer.test.ts"
+  },
+  "2.41": {
+   "status": "done",
+   "commits": [
+    "af41127210"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/settingsScreen.test.tsx",
+     "match": "decision 2.41 (W10.E70)"
+    },
+    {
+     "file": "src/__tests__/imageHosts.test.tsx",
+     "match": ""
+    }
+   ]
+  },
+  "2.46": {
+   "status": "done",
+   "commits": [
+    "adb8ec2117"
+   ],
+   "probes": [
+    {
+     "file": "PRIVACY.he.md",
+     "contains": "(#469): מחיקה אחרי 90 יום, בלי כתובות IP ביומנים, וחדרים מוצפנים בלבד בשרת הפומבי."
+    }
+   ],
+   "note": "a docs row: the probe is the sentence the decision asked for"
+  },
+  "2.47": {
+   "status": "deps-train",
+   "note": "one deps train with a real npm install / cargo update; the npm registry is blocked in the cloud lanes"
+  },
+  "2.56": {
+   "status": "deps-train",
+   "note": "isomorphic-git 1.38.6 (lockfile 1.37.5)"
+  },
+  "2.57": {
+   "status": "deps-train",
+   "note": "@astrojs/starlight 0.42.8 (docs)"
+  },
+  "2.58": {
+   "status": "deps-train",
+   "note": "astro 7.4.5 (docs)"
+  },
+  "2.59": {
+   "status": "deps-train",
+   "note": "renderer vendors incl. katex 0.19 (lockfile 0.18.10)"
+  },
+  "2.60": {
+   "status": "deps-train",
+   "note": "tauri-plugin-dialog 2.8.4 (cargo update)"
+  },
+  "2.61": {
+   "status": "deps-train",
+   "note": "tauri-build 2.7.4 (cargo update)"
+  },
+  "2.62": {
+   "status": "deps-train",
+   "note": "tauri 2.12.5 (cargo update)"
+  },
+  "2.63": {
+   "status": "deps-train",
+   "note": "@tauri-apps/cli 2.12.2 (lockfile 2.10.1)"
+  },
+  "2.64": {
+   "status": "deps-train",
+   "note": "Playwright 1.64 and dev tools (lockfile @playwright/test 1.59.1)"
+  },
+  "2.65": {
+   "status": "deps-train",
+   "note": "vue 3.5.44 (lockfile 3.5.43)"
+  },
+  "2.66": {
+   "status": "deps-train",
+   "note": "yjs 13.6.33, y-codemirror.next 0.3.6"
+  },
+  "2.67": {
+   "status": "deps-train",
+   "note": "milkdown 7.22.3 group (lockfile @milkdown/core 7.20.0)"
+  },
+  "2.68": {
+   "status": "deps-train",
+   "note": "codemirror group minors"
+  },
+  "2.69": {
+   "status": "deps-train",
+   "note": "@y/websocket-server 0.1.5 (optional relay)"
+  },
+  "2.73": {
+   "status": "done",
+   "commits": [
+    "1329854b6e"
+   ],
+   "probes": [
+    {
+     "file": ".github/dependabot.yml",
+     "contains": "@types/node"
+    }
+   ],
+   "note": "owner-act left: close #153"
+  },
+  "2.78": {
+   "status": "owner-act",
+   "note": "needs the models and a machine to run them (nDCG@10 within the ceilings)"
+  },
+  "2.86": {
+   "status": "done",
+   "commits": [
+    "ba8c89c301"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/onboarding.test.tsx",
+     "match": "(2.85, Codex P2 4311616383)"
+    }
+   ],
+   "note": "the same code as 2.85"
+  },
+  "2.87": {
+   "status": "done",
+   "commits": [
+    "2483bdca05"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/vaultLocation.test.ts",
+     "match": "folders in a move (2.79, Codex P2 4311163141)"
+    }
+   ],
+   "note": "#235's code, as 2.79"
+  },
+  "2.88": {
+   "status": "done",
+   "commits": [
+    "2483bdca05"
+   ],
+   "tests": [
+    {
+     "file": "src/__tests__/historyVaultIdentity.test.ts",
+     "match": "another vault with the same path sees none of this vault's versions"
+    }
+   ],
+   "note": "#235's code, as 2.80"
+  },
+  "2.92": {
+   "status": "done",
+   "commits": [],
+   "tests": [
+    {
+     "file": "src/__tests__/clipperV2.test.ts",
+     "match": "takes #clip= from the address once"
+    },
+    {
+     "file": "src/__tests__/clipperV2.test.ts",
+     "match": "the bridge takes same-window messages only, and acknowledges them"
+    }
+   ],
+   "probes": [
+    {
+     "file": "docs/src/content/docs/plugins/web-clipper.md",
+     "contains": "with the browser extension, which hands the clip to the app"
+    }
+   ],
+   "note": "the receiver (#clip= and postMessage) is in src/hooks/useAppBootEffects.ts; #316's page says the extension hands the clip to the app"
+  },
+  "5.16": {
+   "status": "open",
+   "note": "the four relay routes live in sync-server/vault-relay.js; edge-workers/collab/worker.mjs (#469's Worker) has none of /v1/vault/o/. Porting them (with the roles, caps and address-free rate limits) is owed; deploying it and setting VITE_SYNC_RELAY_URL are owner-act"
+  }
+ }
+}

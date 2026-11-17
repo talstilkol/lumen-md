@@ -1,6 +1,7 @@
 ---
 title: בדיקות מוטציה
 description: איך Lumen בודק שהבדיקות של הקוד הקריטי לאבטחה, כמו ההצפנה, צרור המפתחות, מיזוג הסנכרון ויומן הפרטיות, באמת תופסות באגים.
+type: how-to
 ---
 
 כיסוי קוד אומר אילו שורות רצו, לא אם בדיקה הייתה שמה לב לכך שהן שגויות.
@@ -140,3 +141,14 @@ node scripts/mutation/run.mjs --critical --module privacyLedger --receipt --max 
 ```
 
 מודול שעוד לא נמצא בענף (הוא מגיע עם pull request אחר) מופיע ברשימה ומדולג.
+
+## בדיקה מול Stryker
+
+ציון מכלי שנכתב לפרויקט הזה אי אפשר להשוות לשום דבר מחוצה לו. לכן שלושה
+מודולים (`src/sync/gitMerge.ts`, ‏`src/sync/e2ee/keyring.ts`,
+‏`src/storage/zip.ts`) רצים גם ב-StrykerJS 10 עם ה-runner של Vitest במצב
+incremental (‏`stryker/stryker.calibrate.json`), עם אותם קבצי בדיקה.
+`node scripts/mutation/calibrate.mjs` משווה בין שני הציונים וכותב את
+`scripts/mutation/calibration.json`. אם הציון שלנו רחוק מזה של Stryker ביותר
+מ-5 נקודות, הוא **לא מאומת**: ‏`npm run mutation:check` מדפיס אותו ליד המספר של
+Stryker, ואף סטטוס לא רשאי לצטט אותו כבדוק.

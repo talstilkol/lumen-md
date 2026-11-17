@@ -1,6 +1,8 @@
 ---
 title: Tasks across the vault
 description: Checklist items with dates and priorities in any note, gathered by queries, a Today panel and reminders. Same syntax as the Obsidian Tasks plugin.
+type: how-to
+tasks: ["4.13"]
 ---
 
 Any checklist item in any note is a task. Lumen reads the format of the

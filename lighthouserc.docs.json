@@ -1,0 +1,15 @@
+{
+  "ci": {
+    "collect": {
+      "staticDistDir": "./docs/dist",
+      "numberOfRuns": 1,
+      "settings": { "preset": "desktop", "onlyCategories": ["accessibility"] }
+    },
+    "assert": {
+      "assertions": {
+        "categories:accessibility": ["error", { "minScore": 0.95 }]
+      }
+    },
+    "upload": { "target": "filesystem", "outputDir": "reports/lh/docs" }
+  }
+}

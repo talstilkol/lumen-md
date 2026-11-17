@@ -40,7 +40,7 @@ function setup() {
     mkdirSync(dirname(join(work, p)), { recursive: true });
     writeFileSync(join(work, p), t);
   };
-  for (const f of ["scripts/help-bundle.mjs", "scripts/help-merge-driver.mjs", "scripts/lane-merge.sh", ".gitattributes"]) {
+  for (const f of ["scripts/help-bundle.mjs", "scripts/help-merge-driver.mjs", "scripts/lane-merge.sh", "scripts/git-setup.mjs", ".gitattributes"]) {
     mkdirSync(dirname(join(work, f)), { recursive: true });
     copyFileSync(join(ROOT, f), join(work, f));
   }
@@ -104,6 +104,58 @@ describe("help shards and merges (W8.11)", () => {
       expect(ok.stderr).toContain("✓ help bundle");
       expect(r.shard()).toContain("alpha changed by lane a");
       expect(r.shard()).toContain("beta changed by lane b");
+    } finally {
+      r.done();
+    }
+  });
+
+  it("a clone that ran npm install (prepare → prepare.mjs → git-setup.mjs) merges with 0 help conflicts, no --install by hand", () => {
+    const r = setup();
+    try {
+      // package.json's prepare is what npm install runs in every clone.
+      expect(JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")).scripts.prepare).toBe("node scripts/prepare.mjs || exit 0");
+      expect(readFileSync(join(ROOT, "scripts/prepare.mjs"), "utf8")).toContain('"scripts/git-setup.mjs"');
+      const gs = (...a: string[]) => spawnSync(process.execPath, ["scripts/git-setup.mjs", ...a], { cwd: r.work, env: r.env, encoding: "utf8" });
+      expect(gs("--check").status).toBe(1);
+      const first = gs();
+      expect(first.status).toBe(0);
+      expect(first.stderr).toContain("merge.lumen-help.driver");
+      expect(gs("--check").status).toBe(0);
+      expect(gs().stderr).toBe(""); // idempotent: nothing left to write
+      expect(r.g("config", "--local", "merge.lumen-help.driver")).toBe("node scripts/help-merge-driver.mjs %O %A %B %P");
+      // The lanes driver's script is not in this checkout: git-setup leaves it alone.
+      expect(() => r.g("config", "--local", "merge.lumen-lanes.driver")).toThrow();
+      r.g("checkout", "-q", "lane-a");
+      r.g("merge", "-q", "--no-ff", "--no-edit", "lane-b");
+      expect(conflicted(r.g)).toEqual([]);
+    } finally {
+      r.done();
+    }
+  });
+
+  it("git-setup never fails an install: outside a work tree, or switched off, it writes nothing and exits 0", () => {
+    const r = setup();
+    try {
+      const out = mkdtempSync(join(tmpdir(), "lumen-no-git-"));
+      mkdirSync(join(out, "scripts"));
+      copyFileSync(join(ROOT, "scripts/git-setup.mjs"), join(out, "scripts/git-setup.mjs"));
+      copyFileSync(join(ROOT, "scripts/help-merge-driver.mjs"), join(out, "scripts/help-merge-driver.mjs"));
+      const bare = spawnSync(process.execPath, ["scripts/git-setup.mjs"], { cwd: out, env: { ...r.env, GIT_CEILING_DIRECTORIES: tmpdir() }, encoding: "utf8" });
+      expect(bare.status).toBe(0);
+      expect(bare.stderr).toBe("");
+      rmSync(out, { recursive: true, force: true });
+      const off = spawnSync(process.execPath, ["scripts/git-setup.mjs"], { cwd: r.work, env: { ...r.env, LUMEN_NO_GIT_SETUP: "1" }, encoding: "utf8" });
+      expect(off.status).toBe(0);
+      expect(() => r.g("config", "--local", "merge.lumen-help.driver")).toThrow();
+      // With the lanes driver present, both are set, with the same values their own --install writes.
+      mkdirSync(join(r.work, "scripts/lanes"), { recursive: true });
+      for (const f of ["merge-driver.mjs", "globs.mjs", "leases.mjs"]) copyFileSync(join(ROOT, "scripts/lanes", f), join(r.work, "scripts/lanes", f));
+      expect(spawnSync(process.execPath, ["scripts/git-setup.mjs"], { cwd: r.work, env: r.env }).status).toBe(0);
+      const after = r.g("config", "--local", "--get-regexp", "^merge\\.");
+      expect(spawnSync(process.execPath, ["scripts/lanes/merge-driver.mjs", "--install"], { cwd: r.work, env: r.env }).status).toBe(0);
+      expect(spawnSync(process.execPath, ["scripts/help-merge-driver.mjs", "--install"], { cwd: r.work, env: r.env }).status).toBe(0);
+      expect(r.g("config", "--local", "--get-regexp", "^merge\\.")).toBe(after);
+      expect(after).toContain("merge.lumen-lanes.driver node scripts/lanes/merge-driver.mjs %O %A %B %P");
     } finally {
       r.done();
     }

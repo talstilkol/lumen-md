@@ -1,6 +1,8 @@
 ---
 title: Batch jobs — pause, resume, progress
 description: Run tags, summaries or translations over a folder on this device, watch the progress live, and pause, resume or cancel the job — also after a reload.
+type: how-to
+tasks: ["5.8"]
 ---
 
 `AI: Batch over a Folder…` tags, summarises or translates every note in a

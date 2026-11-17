@@ -16,6 +16,10 @@
  *                 this machine (M2M100 via transformers.js, no cloud), shares
  *                 little with the English (chrF below 25)                   (warning)
  *   missing-key   no translation (the UI shows English)                      (info)
+ *   he-draft      a Hebrew string still listed in i18n/needs-review/: Hebrew is
+ *                 the product's own language, so a machine draft there is a bug
+ *                 (plan W13.I6). Approve it after review with
+ *                 `npm run i18n:draft -- --approve=he --keys=…`             (error)
  *
  * Exit status 1 when there is any error (a variable missing or extra), so CI
  * and the tests hold "0 missing variables". Warnings only go to the report.
@@ -24,7 +28,7 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const LOCALES = ["ar", "de", "fr", "he", "ja", "ru", "zh-CN"];
+export const LOCALES = ["ar", "de", "fa", "fr", "he", "ja", "ru", "zh-CN"];
 const CJK = new Set(["ja", "zh-CN"]);
 
 /** `{name}` placeholders (the `{{name}}` form counts as `name` too). */
@@ -108,10 +112,21 @@ export function localeStrings(root, locale) {
   return out;
 }
 
+/** The keys whose Hebrew is still a machine draft (listed under `he` in i18n/needs-review/). */
+export function hebrewDrafts(root) {
+  const dir = join(root, "i18n/needs-review");
+  if (!existsSync(dir)) return [];
+  const out = [];
+  for (const f of readdirSync(dir).filter((n) => n.endsWith(".json")).sort()) {
+    for (const [key, langs] of Object.entries(JSON.parse(readFileSync(join(dir, f), "utf8")))) if (langs && langs.he !== undefined) out.push(key);
+  }
+  return out.sort();
+}
+
 /** Review every locale. `back(locale, texts)` → English texts (optional back-translation). */
 export async function review(root, { back = null, deviationBelow = 25, sample = Infinity } = {}) {
   const en = englishStrings(root);
-  const findings = [];
+  const findings = hebrewDrafts(root).map((key) => ({ locale: "he", key, kind: "he-draft", level: "error", detail: "machine draft, not reviewed" }));
   const stats = {};
   for (const locale of LOCALES) {
     const tr = localeStrings(root, locale);
@@ -138,11 +153,11 @@ export async function review(root, { back = null, deviationBelow = 25, sample = 
 
 export function formatReport({ findings, stats }) {
   const count = (kind, locale) => findings.filter((f) => f.kind === kind && (!locale || f.locale === locale)).length;
-  const kinds = ["missing-var", "extra-var", "length", "untranslated", "deviation", "missing-key"];
+  const kinds = ["missing-var", "extra-var", "he-draft", "length", "untranslated", "deviation", "missing-key"];
   const lines = [
     "# Translation review (plan 9.4)",
     "",
-    `Missing variables: **${count("missing-var")}** · extra variables: **${count("extra-var")}**`,
+    `Missing variables: **${count("missing-var")}** · extra variables: **${count("extra-var")}** · unreviewed Hebrew drafts: **${count("he-draft")}**`,
     "",
     `| locale | translated | ${kinds.join(" | ")} |`,
     `|---|---|${kinds.map(() => "---").join("|")}|`,

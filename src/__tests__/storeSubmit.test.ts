@@ -7,6 +7,7 @@
  * @vitest-environment node
  */
 import { describe, expect, it } from "vitest";
+import "./helpers/commandSections";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 // @ts-expect-error — plain .mjs helpers without types

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<note version="0.3" xmlns:link="http://beatniksoftware.com/tomboy/link" xmlns:size="http://beatniksoftware.com/tomboy/size" xmlns="http://beatniksoftware.com/tomboy">
+  <title>משימות לשבוע</title>
+  <text xml:space="preserve"><note-content version="0.1">משימות לשבוע
+
+<list><list-item dir="rtl"><strikethrough>לשלם חשבון חשמל</strikethrough>
+</list-item><list-item dir="rtl">להתקשר ל<link:internal>דנה</link:internal>
+</list-item></list>
+<size:large><bold>הערות</bold></size:large>
+טקסט <bold>מודגש</bold> ו<italic>נטוי</italic> עם <link:url>https://example.org</link:url>.</note-content></text>
+  <last-change-date>2026-11-02T10:00:00.0000000+02:00</last-change-date>
+  <create-date>2026-11-01T09:00:00.0000000+02:00</create-date>
+  <tags><tag>system:notebook:בית</tag><tag>אישי</tag></tags>
+</note>

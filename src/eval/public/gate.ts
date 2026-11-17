@@ -15,6 +15,7 @@
  *   files under eval/public or eval/results.
  */
 import { validateManifest, type PublicManifest } from "./manifest";
+import { compareNames } from "../../i18n/collate";
 
 export interface PublicResult {
   schema: 1;
@@ -105,5 +106,5 @@ export function latestResults(results: readonly PublicResult[]): PublicResult[] 
     const cur = best.get(k);
     if (!cur || r.date > cur.date) best.set(k, r);
   }
-  return [...best.values()].sort((a, b) => a.task.localeCompare(b.task) || a.model.id.localeCompare(b.model.id));
+  return [...best.values()].sort((a, b) => compareNames(a.task, b.task) || compareNames(a.model.id, b.model.id));
 }

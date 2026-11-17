@@ -21,6 +21,7 @@
 import { createStore, get, set, del } from "idb-keyval";
 import type { SnapshotKeys } from "./snapshotSeal";
 import { summarize, type NoteSummary } from "./noteSummary";
+import { swallowed } from "../lib/logger";
 
 // The seal (./snapshotSeal.ts) loads with the first snapshot read or write, not with the
 // file tree at start-up (W4.9 startup budget); every use below is already async.
@@ -205,7 +206,8 @@ export async function readSnapshotManifest(raw: unknown, vault: string, keys: Sn
   try {
     const entries = decodeManifest(parseUtf8(await (await seal()).openSnapshot(keys, vault, raw, "manifest")), vault);
     return { entries, refused: !entries };
-  } catch {
+  } catch (e) {
+    swallowed("storage/indexSnapshot: the search snapshot's manifest did not open; the index is rebuilt", e);
     return { entries: null, refused: true };
   }
 }
@@ -214,7 +216,8 @@ export async function readSnapshotManifest(raw: unknown, vault: string, keys: Sn
 export async function readSnapshotBody(raw: unknown, vault: string, keys: SnapshotKeys, n: number): Promise<string[] | null> {
   try {
     return decodeBody(parseUtf8(await (await seal()).openSnapshot(keys, vault, raw, "body")), vault, n);
-  } catch {
+  } catch (e) {
+    swallowed("storage/indexSnapshot: the search snapshot's body did not open; the index is rebuilt", e);
     return null;
   }
 }
@@ -243,7 +246,8 @@ export async function readSnapshotRecord(raw: unknown, vault: string, keys?: Sna
 export async function snapshotRaw(): Promise<unknown> {
   try {
     return await get(KEY, db());
-  } catch {
+  } catch (e) {
+    swallowed("storage/indexSnapshot: the search snapshot could not be read from IndexedDB; the index is rebuilt", e);
     return undefined;
   }
 }
@@ -255,12 +259,14 @@ export async function loadSnapshot(vault: string, keys?: SnapshotKeys): Promise<
     if (refused) {
       lastSnapshotOutcome = "refused";
       // A tampered, foreign or wrong-kind record is never tried again.
-      await del(KEY, db()).catch(() => {
+      await del(KEY, db()).catch((err: unknown) => {
         // why: the record may already be gone; it is refused either way
+        swallowed("storage/indexSnapshot: the record may already be gone; it is refused either way", err);
       });
     } else if (snap) lastSnapshotOutcome = "restored";
     return snap;
-  } catch {
+  } catch (e) {
+    swallowed("storage/indexSnapshot: the search snapshot could not be loaded; the index is rebuilt", e);
     return null;
   }
 }
@@ -277,15 +283,17 @@ export async function saveSnapshot(vault: string, files: Iterable<SnapshotFile>,
     await set(KEY, await snapshotRecord(vault, files, keys), db());
   } catch {
     // Quota or private mode: the next open builds in full, as before.
-    await del(KEY, db()).catch(() => {
+    await del(KEY, db()).catch((err: unknown) => {
       // why: dropping a snapshot that could not be saved; if that fails too the next open checks it
+      swallowed("storage/indexSnapshot: dropping a snapshot that could not be saved; if that fails too the nex", err);
     });
   }
 }
 
 export async function dropSnapshot(): Promise<void> {
-  await del(KEY, db()).catch(() => {
+  await del(KEY, db()).catch((err: unknown) => {
     // why: no snapshot store (private mode): there is nothing to drop
+    swallowed("storage/indexSnapshot: no snapshot store (private mode): there is nothing to drop", err);
   });
 }
 

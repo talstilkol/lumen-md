@@ -25,7 +25,11 @@ const COLD = /@coldstart/;
 const RESPONSIVENESS = /@responsiveness/;
 /** Plan W11.P5: TTFV on a production build with no network (e2e/ttfv.spec.ts), only in the ttfv-* projects. */
 const TTFV = /@ttfv/;
-const NOT_IN_PR_RUNS = /@nightly|@inp|@coldstart|@responsiveness|@ttfv/;
+/** W11.Q4: the WYSIWYG ceiling's calibration (e2e/wysiwyg-ceiling-calibrate.spec.ts), only in the "calibrate" project. */
+const CALIBRATE = /@calibrate/;
+/** Plan W13.V1: INP in three engines with LoAF attribution (e2e/inp-engines.spec.ts), only in the inp-<engine> projects. */
+const INPX = /@inpx/;
+const NOT_IN_PR_RUNS = /@nightly|@inp|@coldstart|@responsiveness|@ttfv|@calibrate/;
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
 /** A Chromium executable to use when Playwright's own is not installed (docs/dev/ci-local.md). */
 const CHROMIUM = process.env.PW_CHROMIUM;
@@ -73,10 +77,18 @@ export default defineConfig({
       },
     },
     { name: "webkit", grepInvert: NOT_IN_PR_RUNS, use: { ...devices["Desktop Safari"] } },
+    // W13.M6 and later mobile screens: a phone (Pixel 7, touch, 412 px), only specs tagged @mobile.
+    { name: "mobile-chrome", grep: /@mobile/, use: { ...devices["Pixel 7"], ...(CHROMIUM ? { launchOptions: { executablePath: CHROMIUM } } : {}) } },
     // `npx playwright test --project=perf` (.github/workflows/nightly-perf.yml).
     { name: "perf", grep: NIGHTLY, use: { ...devices["Desktop Chrome"] } },
     // `npm run perf:inp`: 20 interactions and keypress → paint with the CPU 4× slower (plan W1.22).
-    { name: "inp", grep: INP, use: { ...devices["Desktop Chrome"] } },
+    { name: "inp", grep: INP, grepInvert: INPX, use: { ...devices["Desktop Chrome"] } },
+    // `npm run perf:inp` (plan W13.V1): the same 20 interactions in each engine, p75 ≤ 200 ms, LoAF in Chromium.
+    { name: "inp-chromium", grep: INPX, use: { ...devices["Desktop Chrome"], ...(CHROMIUM ? { launchOptions: { executablePath: CHROMIUM } } : {}) } },
+    { name: "inp-firefox", grep: INPX, use: { ...devices["Desktop Firefox"] } },
+    { name: "inp-webkit", grep: INPX, use: { ...devices["Desktop Safari"] } },
+    // `npm run perf:wysiwyg-ceiling`: WYSIWYG open time and typing at 50 KB–900 KB, CPU 4× slower (plan W11.Q4).
+    { name: "calibrate", grep: CALIBRATE, use: { ...devices["Desktop Chrome"] } },
     // `npm run perf:coldstart` against a production build (PLAYWRIGHT_BASE_URL): the desktop and a phone profile.
     { name: "coldstart", grep: COLD, use: { ...devices["Desktop Chrome"] } },
     { name: "coldstart-phone", grep: COLD, use: { ...devices["Pixel 7"] } },
@@ -112,7 +124,7 @@ export default defineConfig({
         // The page may reach the loopback collab server of e2e/collab-persist.spec.ts
         // (an e2e build adds the same origin: scripts/vercel-build.mjs).
         env: {
-          VITE_CONTENT_FRAME_URL: `http://127.0.0.1:${PORT}/content-frame.html`,
+          LUMEN_CONTENT_FRAME_URL: `http://127.0.0.1:${PORT}/content-frame.html`,
           VITE_CSP_CONNECT_EXTRA: [process.env.VITE_CSP_CONNECT_EXTRA, E2E_COLLAB_WS].filter(Boolean).join(" "),
         },
         url: BASE_URL,

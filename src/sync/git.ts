@@ -25,6 +25,8 @@ import type { PendingConflict, PullGit, SafePullResult } from "./gitPull";
 import { authFor, getCorsProxy } from "./gitProxy";
 import { writeIntoMirror } from "./gitMirror";
 import { getVaultBackend } from "../storage/vault";
+import { swallowed } from "../lib/logger";
+import { compareNames } from "../i18n/collate";
 
 type Fs = {
   promises: {
@@ -249,13 +251,15 @@ export async function cloneRepo(
   // Ensure parent and target dirs exist.
   try {
     await fs.promises.mkdir("/git");
-  } catch {
+  } catch (err) {
     /* why: the directory already exists */
+    swallowed("sync/git: the directory already exists", err);
   }
   try {
     await fs.promises.mkdir(dir);
-  } catch {
+  } catch (err) {
     /* why: the directory already exists */
+    swallowed("sync/git: the directory already exists", err);
   }
 
   const token = opts.token ?? (await getGitToken());
@@ -402,7 +406,7 @@ async function mirrorWorkspaceToGit(fs: Fs, dir: string, repoFolder: string, sig
       const path = rel ? `${rel}/${name}` : name;
       const st = await fs.promises.stat(`${dir}/${path}`).catch(() => null);
       if (st?.isDirectory()) await prune(path);
-      else if (st?.isFile() && !present.has(path) && !holdsFolder(path)) await fs.promises.unlink!(`${dir}/${path}`).catch(() => undefined);
+      else if (st?.isFile() && !present.has(path) && !holdsFolder(path)) await fs.promises.unlink!(`${dir}/${path}`).catch((e: unknown) => swallowed("sync/git: a file the pull removed could not be deleted from the working copy", e));
     }
   };
   await prune("");
@@ -556,7 +560,7 @@ export async function integrateIntoVault(
     onWritten: (path, text) => editor.onWritten(path, text),
     snapshot: async (path, text) => {
       const { recordSnapshot } = await import("../storage/history");
-      await recordSnapshot(path, text, "git-pull").catch(() => false);
+      await recordSnapshot(path, text, "git-pull").catch((e: unknown) => (swallowed("sync/git: the version before a pull could not be kept in the note's history", e), false));
     },
   });
   // Conflicts left from an earlier pull come back with the new ones (a new
@@ -690,5 +694,5 @@ export async function gitDiffEntries(
     },
   })) as GitFileChange[] | undefined;
   abort();
-  return (result ?? []).filter(Boolean).sort((a, b) => a.path.localeCompare(b.path));
+  return (result ?? []).filter(Boolean).sort((a, b) => compareNames(a.path, b.path));
 }

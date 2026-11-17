@@ -1,6 +1,8 @@
 ---
 title: Local autocomplete (FIM)
 description: Completions as you type from a coding model on this device — Ollama with qwen2.5-coder, or the in-browser model — with no cloud route at all.
+type: how-to
+tasks: ["4.5"]
 ---
 
 `⌘K → "AI: Local Autocomplete (FIM) — On/Off"` turns on completions as you

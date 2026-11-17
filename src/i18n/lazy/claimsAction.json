@@ -1,0 +1,6 @@
+{
+  "toast.claimsDone": "{{kept}} candidate claims · {{dropped}} dropped without a quote",
+  "toast.claimsExtracting": "Turning the paragraph into claims…",
+  "toast.claimsFailed": "Could not extract claims: {{error}}",
+  "toast.claimsNoParagraph": "Put the cursor in a paragraph first."
+}

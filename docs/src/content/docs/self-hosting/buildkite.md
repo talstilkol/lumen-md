@@ -1,6 +1,7 @@
 ---
 title: CI on Buildkite, without GitHub Actions
 description: Buildkite Free schedules lumen-md's gates on our own machines (the verification factory's host and a Mac) and posts a commit status for every gate on every PR, plus a signed receipt.
+type: how-to
 ---
 
 Lumen doesn't use GitHub Actions. The verification factory

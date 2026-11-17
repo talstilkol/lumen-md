@@ -1,6 +1,8 @@
 ---
 title: Screen readers, automated
 description: The Hebrew screen-reader journey run by Guidepup under VoiceOver and NVDA, and the accessibility-tree snapshots that run with every end-to-end test.
+type: reference
+tasks: ["W11.Q6", "W6.30", "W4.21"]
 ---
 
 Automated checks such as axe find only part of what blocks a screen reader

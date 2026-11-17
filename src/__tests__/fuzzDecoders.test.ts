@@ -45,6 +45,41 @@ describe("decoder fuzzing", () => {
     expect(r.status).toBe(0);
   }, 650_000);
 
+  it("--clock cpu times an input by its worker thread's CPU, not the wall clock (W10.D21)", () => {
+    const run = (...a: string[]) => spawnSync(process.execPath, [join(ROOT, "scripts", "fuzz", "run.mjs"), "--target", "urls", "--runs", "300", "--json", "--out", "fuzz-findings", ...a], { cwd: ROOT, encoding: "utf8", timeout: 300_000 });
+    const cpu = run("--clock", "cpu", "--slow-ms", "200", "--hang-ms", "5000");
+    const report = JSON.parse(cpu.stdout.trim().split("\n").pop()!) as { clock: string; slowMs: number; hangMs: number; results: Array<{ name: string; status: string; runs: number }> };
+    expect([report.clock, report.slowMs, report.hangMs]).toEqual(["cpu", 200, 5000]);
+    expect(report.results[0]).toMatchObject({ name: "urls", status: "ok", runs: 300 });
+    // The default is unchanged: the wall clock, and the watchdog at --slow-ms.
+    const wall = JSON.parse(run().stdout.trim().split("\n").pop()!) as { clock: string; slowMs: number; hangMs: number };
+    expect([wall.clock, wall.slowMs, wall.hangMs]).toEqual(["wall", 1000, 1000]);
+    expect(run("--clock", "sundial").status).toBe(2);
+    expect(run("--hang-ms", "0").status).toBe(2);
+  }, 650_000);
+
+  it("--clock cpu confirms a hang by running the input again alone: a machine stall is not a hang, a real hang still is", () => {
+    const run = (stall: string, ...a: string[]) => {
+      const r = spawnSync(process.execPath, [join(ROOT, "scripts", "fuzz", "run.mjs"), "--target", "urls", "--runs", "20", "--json", "--out", "fuzz-findings", "--slow-ms", "200", "--hang-ms", "800", ...a], { cwd: ROOT, encoding: "utf8", timeout: 300_000, env: { ...process.env, LUMEN_FUZZ_STALL: stall } });
+      return { code: r.status, res: (JSON.parse(r.stdout.trim().split("\n").pop()!) as { results: Array<{ status: string; runs: number; hangs: number; stalls?: number; slow: number }> }).results[0] };
+    };
+    // Input 5 is blocked for 2.5 s of wall time and no CPU (what a loaded machine does to a worker).
+    // Review 11, L7: a stall fails the run unless --allow-stalls (it could hide a hang the re-run missed).
+    const stalled = run("5:2500", "--clock", "cpu");
+    expect(stalled.res).toMatchObject({ status: "FAIL", runs: 20, hangs: 0, stalls: 1, slow: 0 });
+    expect(stalled.code).toBe(1);
+    const allowed = run("5:2500", "--clock", "cpu", "--allow-stalls");
+    expect(allowed.res).toMatchObject({ status: "ok", runs: 20, hangs: 0, stalls: 1, slow: 0 });
+    expect(allowed.code).toBe(0);
+    // Blocked again when run alone: a hang, and the run fails.
+    const hung = run("5:2500:always", "--clock", "cpu");
+    expect(hung.res).toMatchObject({ status: "FAIL", runs: 20, hangs: 1, stalls: 0 });
+    expect(hung.code).toBe(1);
+    // The wall clock (the default) is unchanged: no second chance.
+    const wall = run("5:2500");
+    expect(wall.res).toMatchObject({ status: "FAIL", hangs: 1, stalls: 0 });
+  }, 650_000);
+
   it("known findings expire within 90 days and never cover a crash", () => {
     const known = (JSON.parse(readFileSync(join(ROOT, "scripts", "fuzz", "known.json"), "utf8")) as { findings: Array<{ target: string; kind: string; found: string; expires: string }> }).findings;
     for (const k of known) {

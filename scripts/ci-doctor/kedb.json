@@ -1,0 +1,56 @@
+{
+ "schema": 1,
+ "note": "Known errors of local train runs (R12.12). Autonomy is never written here: kedb.mjs computes it from `outcomes`. Add an entry only once its cause is known.",
+ "entries": [
+  {
+   "id": "shim-stubbed-package",
+   "match": "^stubbed package ",
+   "class": "env",
+   "cause": "The offline shim v4 stands in for a package that is not installed on this machine (BRIEF-CODE-14, Known limits); the code under test never ran.",
+   "workaround": "Not a code failure. Rerun in the other runner (V4=browser) or count it as owed to the Mac run, where the package is installed.",
+   "runbook": "V4=browser <shim-v4>/v4.sh <worktree> <test file>",
+   "outcomes": []
+  },
+  {
+   "id": "unified-without-compiler",
+   "match": "^Cannot `processSync` without `compiler`$",
+   "class": "env",
+   "cause": "A unified pipeline ran with its remark/rehype plugins stubbed by the offline shim, so it has no compiler.",
+   "workaround": "Same as shim-stubbed-package: owed to the Mac run.",
+   "outcomes": []
+  },
+  {
+   "id": "shim-frozen-module-namespace",
+   "match": "^Cannot assign to read only property '.+' of object '\\[object Module\\]'$",
+   "class": "env",
+   "cause": "The test assigns to an ES module export; native ESM namespaces are read-only in the Node shim, while vitest's transform allows it.",
+   "workaround": "Check it in real vitest before calling it a bug; a test that needs it should use vi.mock or vi.spyOn on an object export.",
+   "outcomes": []
+  },
+  {
+   "id": "msw-server-missing",
+   "match": "^server is not defined$",
+   "class": "env",
+   "cause": "The test's MSW server comes from a setup file whose package (msw) is not installed offline.",
+   "workaround": "Owed to the Mac run.",
+   "outcomes": []
+  },
+  {
+   "id": "timeout-under-load",
+   "match": "^test timed out after ",
+   "class": "flaky",
+   "cause": "A real-time test timeout on a shared machine (load average around 45 on 2 CPUs).",
+   "workaround": "Rerun the file alone before trusting the failure (flake.mjs rerun).",
+   "runbook": "node scripts/ci-doctor/flake.mjs rerun <test file> --times 3",
+   "outcomes": []
+  },
+  {
+   "id": "locale-file-moved",
+   "match": "^ENOENT: no such file or directory, open 'src/i18n/locales/[\\w-]+\\.json'$",
+   "class": "code",
+   "cause": "The test reads the old one-file-per-locale layout; train 4 moved the locales into per-domain folders (src/i18n/locales/<lang>/<domain>.json).",
+   "workaround": "Read the per-domain files (or the loader) in the test.",
+   "outcomes": []
+  }
+ ]
+}

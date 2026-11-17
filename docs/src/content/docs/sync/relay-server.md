@@ -1,6 +1,8 @@
 ---
 title: The share servers on Cloudflare
 description: Deploy the live-share server and the encrypted sync relay to Cloudflare Workers with one command, then check the delay, the limits and that no note text is kept.
+type: how-to
+tasks: ["W6.23"]
 ---
 
 Lumen has two small servers. Both hold only encrypted data.

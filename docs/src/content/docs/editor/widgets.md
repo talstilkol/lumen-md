@@ -1,6 +1,8 @@
 ---
 title: Widgets, Shortcuts and Siri
 description: A Lumen widget on the home screen, Siri and Spotlight on iPhone, App Shortcuts on Android, and "Add to inbox" from the Shortcuts app — plus the steps to build them.
+type: how-to
+tasks: ["W11.P10", "W11.P8", "W10.C31", "W11.P9", "W10.C7", "W3.4"]
 ---
 
 Lumen is one tap away on the phone, in Hebrew and in English.

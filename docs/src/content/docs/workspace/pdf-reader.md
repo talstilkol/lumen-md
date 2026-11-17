@@ -1,6 +1,8 @@
 ---
 title: PDF reader and highlights
 description: Read PDFs in the vault, highlight text (Hebrew included), and keep every highlight as a W3C Web Annotation in a Markdown note that links back to the page.
+type: reference
+tasks: ["W12.R2", "W10.E64", "4.14", "W10.F8", "W8.4", "W6.47"]
 ---
 
 Lumen opens a PDF from your vault in a reader of its own. You can select
@@ -22,6 +24,18 @@ Everything happens on your device. The PDF is never uploaded.
 Pages are rendered only when they come near the screen, so long documents
 open quickly. Use **−** / **+** / **Fit width** to zoom, and type a number
 in the page box to jump to a page.
+
+## Two pages side by side
+
+**Page layout** in the toolbar shows **Two pages** (1–2, 3–4, …) or **Two
+pages (cover alone)** (1, then 2–3, 4–5, …, as a printed book with a cover
+opens). A Hebrew or Arabic book is laid out right to left: the first page
+of each spread is on the right. Lumen guesses the direction from the text of
+the first pages; the **Book: right to left** button switches it. In two-page
+view the arrow keys turn a whole spread in the book's direction (in a Hebrew
+book **←** is the next spread), and **Page Down** / **Page Up** work either
+way. The layout and direction are remembered per PDF, and your place is
+kept as the spread's first page.
 
 ## Highlight text
 
@@ -166,3 +180,16 @@ beside them, so you can still read, annotate and delete highlights there.
 - Encrypted (password-protected) PDFs don't open.
 - The PDF must be in the vault, which needs a browser with the Origin
   Private File System.
+
+## How these are checked
+
+- **OCR in the browser.** The text layer of a scanned page comes from
+  tesseract.js in your browser. `scripts/ocr/scanned-he/browser-cer.mjs` reads
+  the 20 scanned Hebrew test pages in Chromium the same way the reader does,
+  with the same models, and compares the character error rate with the
+  Tesseract command-line measurement (`measure.mjs`). The browser may be at
+  most one point worse.
+- **Sending to Zotero.** `scripts/zotero/write-test.mjs` sends three
+  highlights to a test Zotero library with the reader's own sender, reads
+  them back and compares every field. It then sends again and checks that no
+  duplicate was created.

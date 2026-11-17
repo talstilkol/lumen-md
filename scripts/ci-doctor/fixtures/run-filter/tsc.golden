@@ -1,0 +1,10 @@
+tsc
+5 שגיאות ב-2 קבצים
+---
+a.ts (3)
+  1:40 TS2322 Type 'number' is not assignable to type 'string'.
+  2:7 TS2322 Type 'string' is not assignable to type 'number'.
+  3:9 TS2552 Cannot find name 'undefinedVar'. Did you mean 'undefined'?
+b.ts (2)
+  1:19 TS2307 Cannot find module './missing' or its corresponding type declarations.
+  3:16 TS2322 Type 'string' is not assignable to type 'number'.

@@ -1,6 +1,8 @@
 ---
 title: Encrypted sync (E2EE)
 description: The end-to-end encrypted sync protocol — what is encrypted, what the sync service sees, rollback protection and its trust-on-first-use limit.
+type: how-to
+tasks: ["W11.S1", "W1.8", "3.5", "3.4"]
 ---
 
 :::caution[Experimental — not externally security-audited]
@@ -12,6 +14,18 @@ the command palette and choose **Turn on (experimental)**, or turn on
 backup of anything you can't afford to lose. The audit status is recorded
 in `security/crypto-audit.json`; this notice stays until a full report is
 published.
+
+The primitives themselves are **our own implementation, not an audited
+library**: ChaCha20-Poly1305, BLAKE2b, scrypt and Argon2id are plain
+TypeScript in `src/sync/e2ee/primitives/`. They pass the RFC test vectors,
+the 51 protocol vectors and an independent Python reader, which shows they
+compute the right values, not that they are free of side channels or other
+flaws. The planned move is to `@noble/ciphers` and `hash-wasm` for
+Argon2id, with our code kept only as a test oracle ([the plan, which
+says why these two](https://github.com/talstilkol/lumen-md/blob/main/docs/security/crypto-libs.md)).
+That move is **blocked for now**: the packages cannot be installed where
+this work is done (no access to the npm registry), so it waits for the
+owner's machine. The wire format does not change with it.
 :::
 
 Encrypted sync keeps a copy of your vault at a storage service

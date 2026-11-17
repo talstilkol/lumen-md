@@ -1,6 +1,7 @@
 ---
 title: מערכת העיצוב
 description: האסימונים של Lumen לצבע, ריווח, רדיוס, טיפוגרפיה, הגבהה ותנועה, הכללים שהקוד עומד בהם, והרכיבים המשותפים.
+type: how-to
 ---
 
 כל משטח ב-Lumen נבנה מאותה קבוצת אסימונים (tokens). הם משתני CSS
@@ -52,12 +53,49 @@ description: האסימונים של Lumen לצבע, ריווח, רדיוס, ט�
 משטח מחוץ ל-‎`src/ui`‎. חריג אמיתי מסומן בקוד
 ‎`design-allow: <סיבה>`‎.
 
-## רכיבים משותפים
+## ספריית הרכיבים
 
-| רכיב | איפה | בשביל מה |
-|---|---|---|
-| דו-שיחים | ‏`uiAlert`, ‏`uiConfirm`, ‏`uiPrompt`, ‏`uiSelect` (‏‎`src/ui/PromptDialog.tsx`‎) | כל שאלה ואישור; אף פעם לא `window.confirm` |
-| מסגרת חלון | ‏`.cmd-palette-backdrop` + ‏`.cmd-palette` (‏‎`src/ui/CommandPalette.css`‎) | חלוניות כמו סל המחזור, רופא ה-AI, הגדרות |
-| הודעות | ‏`showAiToast()` (‏‎`src/ui/AiToast.tsx`‎), ‏`toast.*` (‏‎`src/store/useToastStore.ts`‎) | הודעות קצרות; `action` לביטול |
-| כפתור סמל | ‏`.icon-btn` (‏‎`src/index.css`‎) | כפתורי סרגל וחלוניות |
-| פלטת הפקודות | ‏‎`src/ui/CommandPalette.tsx`‎ | לכל פעולה יש פקודה |
+<!-- machine translation of the English section; needs a native review -->
+
+לפני שכותבים משטח חדש, בונים אותו מהחלקים האלה. כל שורה נותנת את הייצוא ואת
+הקובץ שלו; ‏‎`src/__tests__/designLibrary.test.ts`‎ נכשל כששורה נותנת משהו
+שלא מיוצא שם, וכשרכיב שמשטחים רבים מייבאים חסר בטבלה.
+
+| רכיב | ייבוא | בשביל מה | מה מקבלים |
+|---|---|---|---|
+| ‏`Modal` | ‏‎`src/ui/Modal.tsx`‎ | כל חלון מודאלי | ‏`<dialog>` מקורי בשכבה העליונה; שאר הדף לא פעיל; Tab נשאר בפנים; Escape (ותנועת החזרה באנדרואיד) קורא ל-`onClose`; המיקוד חוזר למי שפתח; ‏`closedBy="none"` בזמן עבודה; ‏`embedded` ללשונית בתוך משטח אחר. צריך `aria-label` או `aria-labelledby`. רק הוא רשאי לקבוע `aria-modal` (כלל ה-lint ‏`lumen/modal-only`) |
+| ‏`uiAlert`, ‏`uiConfirm`, ‏`uiPrompt`, ‏`uiSelect` | ‏‎`src/ui/PromptDialog.tsx`‎ | כל שאלה, אישור וקלט קצר | מבוססי promise ‏(`await uiConfirm({ message })`), בנויים על `Modal`; ‏`password: true` לסוד, ‏`choices` לרשימה. אף פעם לא `window.confirm` / `prompt` |
+| ‏`EmptyState` | ‏‎`src/ui/EmptyState.tsx`‎ | חלונית שאין בה כלום | משפט אחד למה היא ריקה ופעולה אחת חובה שיוצאת מזה (`runCommand(id)`, ‏`learnHow(topic)`); ‏`role="status"`. ‏‎`scripts/check-empty-states.mjs`‎ מכשיל מחרוזת ריקה שמוצגת בלעדיו |
+| ‏`HelpButton`, ‏`openHelp` | ‏‎`src/ui/HelpButton.tsx`‎ | ה-״?״ ליד הגדרה או כותרת חלונית | פותח את העזרה שבאפליקציה על נושא; ‏`openHelp(topic)` מהקוד |
+| ‏`showAiToast` | ‏‎`src/ui/AiToast.tsx`‎ | הודעה קצרה שלא צריכה תשובה | ‏`info` / `success` / `error`; פעולה אחת אופציונלית (ביטול) ו-`learnMoreUrl`; שגיאות מוקראות מיד (`role="alert"`), השאר בנימוס (`role="status"`) |
+| ‏`ErrorBoundary` | ‏‎`src/ui/ErrorBoundary.tsx`‎ | סביב משטח שיכול להיכשל לבד | מציג את ה-`fallback` שלו, או כברירת מחדל את פעולות ההתאוששות (`ErrorActions`), במקום מסך לבן |
+| ‏`CommandPalette`, ‏`Command` | ‏‎`src/ui/CommandPalette.tsx`‎ | כל פעולה שיש באפליקציה | פעולה היא קודם פקודה (מזהה, כותרת, קיצור); תפריטים וכפתורים קוראים לאותה פקודה |
+| ‏`cmdIcons` | ‏‎`src/ui/cmdIcons.ts`‎ | הסמל של פקודה | סמל אחד לכל פקודה, זהה בפלטה, בתפריטים ובסרגל |
+| ‏`useFocusTrap` | ‏‎`src/ui/useFocusTrap.ts`‎ | משטח לא מודאלי שעדיין מחזיק מיקוד (חלון קופץ) | Tab מסתובב בפנים, Escape, החזרת מיקוד; ‏`Modal` כבר משתמש בו |
+| ‏`color`, ‏`shadow`, ‏`space`, ‏`radius`, ‏`text`, ‏`transition`, ‏`enter`, ‏`resolvedColor` | ‏‎`src/ui/tokens.ts`‎ | סגנונות בתוך הקוד | הטוקנים שלמעלה ב-TypeScript; ‏`transition()` מקבל רק `transform` ו-`opacity` |
+| ‏`.icon-btn` | ‏‎`src/index.css`‎ | כפתור סרגל או חלונית עם סמל בלבד | הריחוף, טבעת המיקוד והגודל של כל כפתור סמל; תנו לו `aria-label` |
+| ‏`.cmd-palette-backdrop`, ‏`.cmd-palette` | ‏‎`src/ui/CommandPalette.css`‎ | המסגרת של חלונית גדולה (סל המחזור, רופא ה-AI) | צבע הרקע, ההגבהה ותנועת הכניסה של הפלטה |
+| ‏`toast` | ‏‎`src/store/useToastStore.ts`‎ | הודעה מ-store או ממודול שאינו React | אותן הודעות כמו `showAiToast`, דרך ה-store |
+
+### שימוש יחד
+
+```tsx
+import { Modal } from "../ui/Modal";
+import { EmptyState, runCommand } from "../ui/EmptyState";
+import { HelpButton } from "../ui/HelpButton";
+import { uiConfirm } from "../ui/PromptDialog";
+import { color, space } from "../ui/tokens";
+
+<Modal aria-labelledby="trash-title" onClose={close}>
+  <h2 id="trash-title">{t("trash.title")} <HelpButton topic="trash" /></h2>
+  {items.length === 0 ? (
+    <EmptyState message={t("trash.empty")} action={{ label: t("trash.openFiles"), onClick: () => runCommand("files.open") }} />
+  ) : (
+    <ul style={{ padding: space[3], color: color.fg }}>…</ul>
+  )}
+  <button className="icon-btn" aria-label={t("trash.emptyAll")} onClick={async () => (await uiConfirm({ message: t("trash.confirmEmpty") })) && emptyAll()} />
+</Modal>
+```
+
+
+רכיב משותף חדש מקבל כאן שורה, באנגלית ובעברית, באותו שינוי.

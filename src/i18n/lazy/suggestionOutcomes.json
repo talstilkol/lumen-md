@@ -1,0 +1,15 @@
+{
+  "outcomes.clear": "Clear the counts",
+  "outcomes.col.accepted": "Accepted",
+  "outcomes.col.agent": "Agent",
+  "outcomes.col.cancelled": "Cancelled",
+  "outcomes.col.edited": "Edited first",
+  "outcomes.col.median": "Time to decide",
+  "outcomes.col.proposed": "Proposed",
+  "outcomes.col.rejected": "Rejected",
+  "outcomes.flagged": "For eval review",
+  "outcomes.intro": "Counted on this device only, from the review screen. An agent accepted less than {below} of the time after {min} decisions is marked for the eval to check.",
+  "outcomes.seconds": "{n} s",
+  "outcomes.share": "Include these counts in the weekly usage report I send",
+  "outcomes.title": "What happens to each agent's suggestions"
+}

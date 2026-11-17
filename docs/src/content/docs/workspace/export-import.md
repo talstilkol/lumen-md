@@ -1,6 +1,8 @@
 ---
 title: Export and import
 description: Take the whole vault out as a .zip or a folder, bring in an Obsidian vault or a Notion export, and convert single files to and from many formats.
+type: how-to
+tasks: ["W12.F3", "W10.B5", "W6.38"]
 ---
 
 Your notes are plain Markdown, and they can always leave Lumen.
@@ -32,9 +34,29 @@ finishes, a message says how many notes and files came in and where.
 
 **Out:** the *File* menu and the palette export the open note to HTML,
 Word (.doc), RTF, LaTeX, reStructuredText, AsciiDoc, Org-mode, OPML,
-slides (Reveal.js), EPUB, Jupyter (.ipynb), PowerPoint (.pptx), a static
-site, and PDF (`⌘K → Print / Save as PDF…`). Right-to-left text keeps its
-direction in the exported files.
+slides (Reveal.js), EPUB, Jupyter (.ipynb), PowerPoint (.pptx),
+OpenDocument (.odt, for LibreOffice), a static site, and PDF
+(`⌘K → Print / Save as PDF…`). Right-to-left text keeps its direction in
+the exported files: in .odt every Hebrew paragraph is `rl-tb` and a Hebrew
+table is laid out from the right.
+
+### What survives a Hebrew round trip
+
+Measured by `src/__tests__/officeRoundTrip.test.ts` on 30 Hebrew sections of
+these docs and 6 synthetic Hebrew notes (Markdown → format → Markdown):
+
+| Feature | ODT | Word (.docx) | EPUB |
+|---|---|---|---|
+| Headings, paragraphs, italic | 100% | 100% | 100% |
+| Bold | 100% | 90% | 100% |
+| Links | 100% | 50% (links to a heading in the same note are dropped) | 100% |
+| Lists (items and bullet/numbered) | 100% | 100% | 100% (nested, numbered from their start) |
+| Tables | 100% | 100% | 100% (a Hebrew table is `dir="rtl"`) |
+| Footnotes | 100% | 100% | kept as text |
+
+A Hebrew table stays right-to-left through Word and back. The 30 real
+LibreOffice .docx files of the import corpus come back to the same Markdown
+after Word → Markdown → Word → Markdown.
 
 **In:** open a file (`⌘O`) or drop it on the window. Besides Markdown and
 text, Lumen converts HTML, RTF, CSV / TSV, JSON, XML, Word (.docx and the

@@ -14,6 +14,7 @@
  * Pure.
  */
 import { ANNO_CONTEXT, anchorTextQuote, createTextQuoteSelector, encodeWikiPath, shortId, type Anchor, type TextPositionSelector, type TextQuoteSelector, type TextualBody } from "../pdf/annotations";
+import { compareNames } from "../i18n/collate";
 
 export const CHAPTER_SCHEME = "lumen:epub-chapter";
 
@@ -147,7 +148,7 @@ export function renderEpubBlock(bookPath: string, annotations: readonly EpubAnno
   const sorted = [...annotations].sort((a, b) => {
     const da = describeEpubAnnotation(a);
     const db = describeEpubAnnotation(b);
-    return da.chapter - db.chapter || (da.position?.start ?? 0) - (db.position?.start ?? 0) || a.created.localeCompare(b.created);
+    return da.chapter - db.chapter || (da.position?.start ?? 0) - (db.position?.start ?? 0) || compareNames(a.created, b.created);
   });
   const lines = sorted.map((a) => {
     const d = describeEpubAnnotation(a);

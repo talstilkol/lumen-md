@@ -57,3 +57,93 @@ export function rightsOfSefariaLicense(license: string | null | undefined): Righ
 export function keepIfAllowed<T>(rights: Rights, content: T): T | null {
   return mayCopy(rights) ? content : null;
 }
+
+/* ─── Licence lights for the Israeli registers (plan R12.19) ─────────── */
+
+/**
+ * A source's terms at a glance: green (open licence, commercial use
+ * allowed, credit asked), amber (the site's own terms, or terms not yet
+ * read: link and quote only), red (do not use).
+ */
+export type LicenceLight = "green" | "amber" | "red";
+
+export type RegisterSource = "amutot" | "companies" | "reshumot";
+
+export interface SourceTerms {
+  source: RegisterSource;
+  /** Who publishes it, in Hebrew and English. */
+  he: string;
+  en: string;
+  light: LicenceLight;
+  /** What a result may become in a note. */
+  rights: Rights;
+  /** False: the data never goes into anything Lumen ships or sells (a non-commercial source). */
+  commercial: boolean;
+  /** The page whose terms apply. */
+  termsUrl: string;
+  /** Where the data is read. */
+  host: string;
+  /**
+   * The day these terms were last read from the terms page, or null when they
+   * were not read by a person or a tool here (then the light is at most amber,
+   * or is the licence of the hosting site as documented by this repo).
+   */
+  checked: string | null;
+  /** One line on what the terms allow, shown with the light. */
+  noteHe: string;
+  noteEn: string;
+}
+
+/**
+ * The three registers. data.gov.il's open-data terms (used for
+ * `gov-open` above, W7.6) cover the non-profits and companies registers it
+ * hosts. Reshumot (the official gazette, ילקוט הפרסומים) is on gov.il under
+ * the site's terms of use: a link and a short quote, no copy, and kept out of
+ * anything commercial until its terms are read.
+ */
+export const REGISTER_TERMS: Record<RegisterSource, SourceTerms> = {
+  amutot: {
+    source: "amutot",
+    he: "רשם העמותות (רשות התאגידים) — data.gov.il",
+    en: "Registrar of Non-profits (Israeli Corporations Authority) — data.gov.il",
+    light: "green",
+    rights: "gov-open",
+    commercial: true,
+    termsUrl: "https://data.gov.il/terms",
+    host: "data.gov.il",
+    checked: null,
+    noteHe: "נתונים פתוחים של הממשלה: מותר להעתיק, גם לשימוש מסחרי, עם ציון המקור והתאריך.",
+    noteEn: "Government open data: may be copied, commercial use included, with the source and date credited.",
+  },
+  companies: {
+    source: "companies",
+    he: "רשם החברות (רשות התאגידים) — data.gov.il",
+    en: "Registrar of Companies (Israeli Corporations Authority) — data.gov.il",
+    light: "green",
+    rights: "gov-open",
+    commercial: true,
+    termsUrl: "https://data.gov.il/terms",
+    host: "data.gov.il",
+    checked: null,
+    noteHe: "נתונים פתוחים של הממשלה: מותר להעתיק, גם לשימוש מסחרי, עם ציון המקור והתאריך.",
+    noteEn: "Government open data: may be copied, commercial use included, with the source and date credited.",
+  },
+  reshumot: {
+    source: "reshumot",
+    he: "רשומות — ילקוט הפרסומים (gov.il)",
+    en: "Reshumot — the official gazette, Yalkut HaPirsumim (gov.il)",
+    light: "amber",
+    rights: "link-only",
+    commercial: false,
+    termsUrl: "https://www.gov.il/he/pages/terms_of_use",
+    host: "www.gov.il",
+    checked: null,
+    noteHe: "לפי תנאי השימוש של gov.il: קישור וציטוט קצר בלבד; לא נכנס לשום חבילה מסחרית.",
+    noteEn: "Under gov.il's terms of use: a link and a short quote only; never in a commercial bundle.",
+  },
+};
+
+/** May data from this source go into something commercial (a bundled dataset, a paid export)? Never for a non-commercial or red source. */
+export function mayBundle(terms: SourceTerms): boolean {
+  return terms.commercial && terms.light !== "red";
+}

@@ -1,6 +1,8 @@
 ---
 title: Local agents
 description: Every AI command runs through one local agent runtime — the model proposes, tools execute, validators decide, and an improvement agent steps in when there is no answer.
+type: reference
+tasks: ["R12.18", "W10.E66", "W10.E33", "7.2", "W1.33", "5.6"]
 ---
 
 Lumen's AI commands are **agents**: a definition of what to ask the
@@ -32,6 +34,11 @@ cloud provider may ever be contacted. The default on a fresh install is
    only **proposes** a change you approve, and a network tool goes out
    only when the AI policy or your consent allows it (see
    [Tools](#tools)).
+   A **runaway guard** (R12.18) watches the loop. The same tool call with
+   the same arguments twice is noted in the trace. A third time, or the
+   same error three times, stops the run with "Stopped a runaway run",
+   instead of letting it spend every step. The trace keeps the prompt's
+   hash and length, never its text.
 4. Parses the final answer (JSON when the agent declares a schema) and
    runs the agent's **validators** — a Mermaid diagram must compile, an
    ECharts option needs series and axes, tags must exist, offsets must

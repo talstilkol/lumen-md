@@ -11,6 +11,7 @@ import { join, resolve } from "node:path";
 // @ts-expect-error — plain .mjs module without types
 import { loadSet } from "../../scripts/lib/golden.mjs";
 import { readLocale } from "../../scripts/lib/i18n-files.mjs";
+import { lazyEnglish } from "./helpers/i18nLazy";
 import { detectLanguage, languageCode } from "../text/langId";
 import { dominantScript, languageFromScript, looksYiddish, proseForLanguage } from "../text/script";
 
@@ -85,6 +86,9 @@ describe("langid golden set (dev split) and a local stand-in for Tatoeba", () =>
     // OPML") is left out — it is not one language.
     // The per-domain layout (plan 0.3): src/i18n/locales/<lang>/<domain>.json.
     const en: Record<string, string> = readLocale("en");
+    // The English a translation is compared with: the startup locale and the lazy chunks (src/i18n/lazy) —
+    // a key whose English lives in a chunk and whose "translation" is still that English is not one (INT7).
+    const source: Record<string, string> = { ...lazyEnglish(), ...en };
     const latinWords = (t: string) => new Set((t.match(/[A-Za-z]{3,}/g) ?? []).map((w) => w.toLowerCase()));
     const files: Record<string, string> = { he: "he", ar: "ar", de: "de", fr: "fr", ja: "ja", ru: "ru", zh: "zh-CN" };
     const per: Record<string, [number, number]> = {};
@@ -93,7 +97,7 @@ describe("langid golden set (dev split) and a local stand-in for Tatoeba", () =>
       const enough = lang === "ja" || lang === "zh" ? (t.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/gu) ?? []).length >= 6 : (t.match(/\p{L}{2,}/gu) ?? []).length >= 3;
       if (!enough) return;
       if (lang !== "en") {
-        const src = latinWords(en[key] ?? "");
+        const src = latinWords(source[key] ?? "");
         if ([...latinWords(t)].some((w) => src.has(w))) return;
       }
       per[lang] ??= [0, 0];

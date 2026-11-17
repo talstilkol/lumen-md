@@ -1,6 +1,18 @@
 package com.lumen.editor;
 
 import android.content.Intent;
+import android.app.Activity;
+import android.content.IntentSender;
+import androidx.core.content.pm.ShortcutInfoCompat;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanner;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanning;
+import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult;
+import java.io.InputStream;
+import androidx.core.content.pm.ShortcutManagerCompat;
+import androidx.core.graphics.drawable.IconCompat;
 import android.net.Uri;
 import android.util.Base64;
 import com.getcapacitor.JSArray;
@@ -53,6 +65,148 @@ public class LumenNativePlugin extends Plugin {
     protected void handleOnResume() {
         super.handleOnResume();
         notifyListeners("resume", new JSObject());
+    }
+
+    /** W13.Y4 (EN 301 549 v4.1.1 user preferences): the system font scale (Settings → Display → Font size), 1.0 = default. */
+    @PluginMethod
+    public void getTextScale(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("scale", (double) getContext().getResources().getConfiguration().fontScale);
+        call.resolve(ret);
+    }
+
+    /** Plan W13.M1: the WebView says whether an overlay is open, so back closes it before it leaves the app. */
+    @PluginMethod
+    public void setBackState(PluginCall call) {
+        boolean overlay = Boolean.TRUE.equals(call.getBoolean("overlay", false));
+        if (getActivity() instanceof MainActivity) ((MainActivity) getActivity()).setBackState(overlay);
+        call.resolve();
+    }
+
+    /**
+     * Plan W13.M3: the most recent notes as dynamic App Shortcuts (long-press the
+     * icon). The WebView chooses them (never a locked or private note) and sends
+     * only the path and title; each opens lumen://open?path=…
+     */
+    @PluginMethod
+    public void setRecentNotes(PluginCall call) {
+        if (getActivity() == null) {
+            call.resolve();
+            return;
+        }
+        List<ShortcutInfoCompat> list = new ArrayList<>();
+        try {
+            JSArray notes = call.getArray("notes", new JSArray());
+            int max = Math.min(notes.length(), 4);
+            for (int i = 0; i < max; i++) {
+                org.json.JSONObject n = notes.getJSONObject(i);
+                String path = n.optString("path", "");
+                String title = n.optString("title", path);
+                if (path.isEmpty()) continue;
+                Uri link = new Uri.Builder().scheme("lumen").authority("open").appendQueryParameter("path", path).build();
+                Intent open = new Intent(Intent.ACTION_VIEW, link, getContext(), MainActivity.class);
+                String shortLabel = title.length() > 24 ? title.substring(0, 23) + "…" : title;
+                list.add(new ShortcutInfoCompat.Builder(getContext(), "note:" + Integer.toHexString(path.hashCode()))
+                    .setShortLabel(shortLabel.isEmpty() ? path : shortLabel)
+                    .setLongLabel(title.length() > 60 ? title.substring(0, 59) + "…" : title)
+                    .setIcon(IconCompat.createWithResource(getContext(), R.drawable.ic_shortcut_note))
+                    .setIntent(open)
+                    .setRank(i)
+                    .build());
+            }
+        } catch (JSONException e) {
+            call.reject("bad notes");
+            return;
+        }
+        ShortcutManagerCompat.setDynamicShortcuts(getContext(), list);
+        call.resolve();
+    }
+
+    /** Plan W13.M4: the scan in progress (one at a time). */
+    private PluginCall scanCall;
+    private static final int SCAN_REQUEST = 0x5CA4;
+
+    /**
+     * Plan W13.M4: ML Kit's document scanner (edges, flattening, clean-up, on
+     * the device, run by Google Play services). {@code allowService: false}
+     * (the app's "local only") or no Play services → "unavailable", and the
+     * WebView falls back to the ordinary photo picker.
+     */
+    @PluginMethod
+    public void scanDocument(PluginCall call) {
+        Activity activity = getActivity();
+        boolean allowService = Boolean.TRUE.equals(call.getBoolean("allowService", false));
+        if (activity == null || !allowService || GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(getContext()) != ConnectionResult.SUCCESS) {
+            JSObject r = new JSObject();
+            r.put("status", "unavailable");
+            call.resolve(r);
+            return;
+        }
+        int max = Math.max(1, Math.min(call.getInt("maxPages", 24), 50));
+        GmsDocumentScannerOptions options = new GmsDocumentScannerOptions.Builder()
+            .setGalleryImportAllowed(true)
+            .setPageLimit(max)
+            .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_JPEG, GmsDocumentScannerOptions.RESULT_FORMAT_PDF)
+            .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
+            .build();
+        GmsDocumentScanner scanner = GmsDocumentScanning.getClient(options);
+        scanCall = call;
+        scanner.getStartScanIntent(activity)
+            .addOnSuccessListener(sender -> {
+                try {
+                    activity.startIntentSenderForResult(sender, SCAN_REQUEST, null, 0, 0, 0);
+                } catch (IntentSender.SendIntentException e) {
+                    resolveScan("unavailable", null);
+                }
+            })
+            .addOnFailureListener(e -> resolveScan("unavailable", null));
+    }
+
+    @Override
+    protected void handleOnActivityResult(int requestCode, int resultCode, Intent data) {
+        super.handleOnActivityResult(requestCode, resultCode, data);
+        if (requestCode != SCAN_REQUEST || scanCall == null) return;
+        if (resultCode != Activity.RESULT_OK || data == null) {
+            resolveScan("cancelled", null);
+            return;
+        }
+        GmsDocumentScanningResult result = GmsDocumentScanningResult.fromActivityResultIntent(data);
+        if (result == null || result.getPages() == null || result.getPages().isEmpty()) {
+            resolveScan("cancelled", null);
+            return;
+        }
+        JSObject r = new JSObject();
+        JSArray pages = new JSArray();
+        try {
+            for (GmsDocumentScanningResult.Page page : result.getPages()) pages.put(base64Of(page.getImageUri()));
+            if (result.getPdf() != null) r.put("pdf", base64Of(result.getPdf().getUri()));
+        } catch (IOException e) {
+            resolveScan("unavailable", null);
+            return;
+        }
+        r.put("engine", "mlkit");
+        r.put("pages", pages);
+        resolveScan("ok", r);
+    }
+
+    private String base64Of(Uri uri) throws IOException {
+        try (InputStream in = getContext().getContentResolver().openInputStream(uri)) {
+            if (in == null) throw new IOException("no data");
+            java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+            byte[] buf = new byte[64 * 1024];
+            int n;
+            while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+            return Base64.encodeToString(out.toByteArray(), Base64.NO_WRAP);
+        }
+    }
+
+    private void resolveScan(String status, JSObject extra) {
+        PluginCall c = scanCall;
+        scanCall = null;
+        if (c == null) return;
+        JSObject r = extra != null ? extra : new JSObject();
+        r.put("status", status);
+        c.resolve(r);
     }
 
     @PluginMethod

@@ -7,6 +7,8 @@
  *
  * Backups: `backup()` writes a consistent copy with `VACUUM INTO` into
  * `<dir>/backups/collab-<timestamp>.sqlite` and keeps the newest `keep`.
+ * `purgeBackups(room)` takes a room deleted on request out of every backup
+ * too (plan W12.H3), so "End session" does not leave its ciphertext there.
  *
  * Sharing (plan W1.19): `room_owners` holds a SHA-256 of each claimed room's
  * owner secret (the secret itself stays on the owner's devices); `shares`
@@ -16,7 +18,7 @@
  * Sealed rooms (plan W2.20): `meta` holds `sealed:<room>` for each room the
  * server holds to ciphertext only (collab/sealed.mjs). Sealing is never undone.
  */
-import { mkdirSync, readdirSync, rmSync } from "node:fs";
+import { mkdirSync, readdirSync, rmSync, statSync, statfsSync } from "node:fs";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
@@ -74,6 +76,11 @@ export function openStore(dir, { keepBackups = 24 } = {}) {
       "ON CONFLICT(name) DO UPDATE SET state = excluded.state, updated_at = excluded.updated_at",
   );
   const sweepOld = db.prepare("DELETE FROM documents WHERE updated_at < ?");
+  // W12.H3: a room deleted on request ("end session"), and the shorter retention of study rooms.
+  const deleteDocs = db.prepare("DELETE FROM documents WHERE name = ? OR name = ?");
+  const deleteOwner = db.prepare("DELETE FROM room_owners WHERE room = ?");
+  const deleteShares = db.prepare("DELETE FROM shares WHERE room = ?");
+  const sweepPrefixed = db.prepare("DELETE FROM documents WHERE substr(name, 1, length(?)) = ? AND updated_at < ?");
   let closed = false;
   const sealedCache = new Map();
 
@@ -123,6 +130,84 @@ export function openStore(dir, { keepBackups = 24 } = {}) {
      */
     sweep(cutoffMs) {
       return Number(sweepOld.run(cutoffMs).changes);
+    },
+    /**
+     * W12.H3: delete `room` (its document, its comments document, its owner
+     * and its share links) at its participants' request. The sealed flag stays,
+     * so the name can only ever hold ciphertext. Returns whether a document was stored.
+     */
+    deleteRoom(room) {
+      const n = Number(deleteDocs.run(room, `${room}~comments`).changes);
+      deleteOwner.run(room);
+      deleteShares.run(room);
+      return n > 0;
+    },
+    /**
+     * W12.H3: take `room` (its document, its comments document, its owner and
+     * its share links) out of every backup in `<dir>/backups`, as deleteRoom
+     * does in the live database. Each backup is rewritten with VACUUM under
+     * secure_delete, so the deleted rows' bytes are not left in free pages.
+     * The sealed flag stays, as it does in the live database.
+     *
+     * Review Z7-M4: a backup holds every room, so one that fails here is
+     * never deleted for that. Only a file SQLite says is not a database or
+     * is corrupt (SQLITE_NOTADB, SQLITE_CORRUPT) is removed; any other
+     * failure (SQLITE_BUSY from an operator's sqlite3 or a copy job,
+     * SQLITE_FULL, a read-only mount) leaves the file as it was and names it
+     * in `failed`, for the caller to try again later. The deleted rows are
+     * overwritten in place (secure_delete); VACUUM, which needs about the
+     * file's size again in free space, only runs when that space is there,
+     * and a backup purged without it is counted in `unvacuumed`.
+     * Returns { purged, removed, failed: [file names], unvacuumed }.
+     */
+    purgeBackups(room, opts = {}) {
+      const dirBackups = join(dir, "backups");
+      const files = readdirSync(dirBackups).filter((f) => /^collab-.*\.sqlite$/.test(f));
+      const freeBytes = opts.freeBytes ?? ((p) => {
+        const s = statfsSync(p);
+        return Number(s.bavail) * Number(s.bsize);
+      });
+      let purged = 0;
+      let removed = 0;
+      let unvacuumed = 0;
+      const failed = [];
+      for (const f of files) {
+        const file = join(dirBackups, f);
+        let b = null;
+        try {
+          b = (opts.open ?? ((x) => new DatabaseSync(x)))(file);
+          b.exec("PRAGMA journal_mode = DELETE; PRAGMA secure_delete = ON;");
+          const n =
+            Number(b.prepare("DELETE FROM documents WHERE name = ? OR name = ?").run(room, `${room}~comments`).changes) +
+            Number(b.prepare("DELETE FROM room_owners WHERE room = ?").run(room).changes) +
+            Number(b.prepare("DELETE FROM shares WHERE room = ?").run(room).changes);
+          if (n > 0) {
+            // VACUUM writes a copy of the database (and a journal): about twice its size, with a margin.
+            if (freeBytes(dirBackups) >= 2 * statSync(file).size + 1024 * 1024) b.exec("VACUUM");
+            else unvacuumed++;
+            purged++;
+          }
+          b.close();
+          b = null;
+        } catch (e) {
+          try {
+            b?.close();
+          } catch {
+            /* already closed */
+          }
+          // errcode may be an extended code: its low byte is the primary one (11 SQLITE_CORRUPT, 26 SQLITE_NOTADB).
+          const primary = Number(e?.errcode) & 0xff;
+          if (primary === 11 || primary === 26) {
+            for (const x of [file, `${file}-journal`, `${file}-wal`, `${file}-shm`]) rmSync(x, { force: true });
+            removed++;
+          } else failed.push(f);
+        }
+      }
+      return { purged, removed, failed, unvacuumed };
+    },
+    /** W12.H3: retention for one kind of room (names starting with `prefix`): delete those not changed since `cutoffMs`. */
+    sweepPrefix(prefix, cutoffMs) {
+      return Number(sweepPrefixed.run(prefix, prefix, cutoffMs).changes);
     },
     getMeta(key) {
       return getMeta.get(key)?.value ?? null;

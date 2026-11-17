@@ -38,6 +38,8 @@ describe("SettingsScreen", () => {
       "General",
       "Theme",
       "AI settings",
+      "Calendar",
+      "MCP servers",
       "Collaboration settings",
       "Train AI on my style",
       "Privacy",

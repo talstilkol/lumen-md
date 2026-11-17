@@ -319,9 +319,10 @@ export class ProductAgent {
   }
 
   private async generateDeployConfig(_signal: AbortSignal): Promise<void> {
-    const hasHtml = this.spec!.fileStructure.some((f) => f.endsWith(".html"));
-
-    if (hasHtml) {
+    // A root page that opens src/index.html — only when the product has that page and no
+    // root index.html of its own: the generated page is never replaced by the redirect.
+    const files = this.spec!.fileStructure.map((f) => f.replace(/^\.?\//, ""));
+    if (files.includes("src/index.html") && !files.includes("index.html")) {
       const indexHtml = `<!DOCTYPE html>
 <html lang="en">
 <head>

@@ -4,6 +4,23 @@
   "source": "src/i18n/locales/en/toast.json",
   "entries": [
     {
+      "key": "toast.abstractFailed",
+      "en": "Could not write the abstract: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.abstractNoModel",
+      "en": "No local model answered: showing sentences taken from the note.",
+      "vars": []
+    },
+    {
+      "key": "toast.abstractWorking",
+      "en": "Writing the titles and the abstract…",
+      "vars": []
+    },
+    {
       "key": "toast.actionItemsAdded",
       "en": "✅ Action items added",
       "vars": []
@@ -83,6 +100,38 @@
       "vars": []
     },
     {
+      "key": "toast.appLock.afterPrompt",
+      "en": "Lock after how long in the background?",
+      "vars": []
+    },
+    {
+      "key": "toast.appLock.atOnce",
+      "en": "at once",
+      "vars": []
+    },
+    {
+      "key": "toast.appLock.minutes",
+      "en": "{n, plural, one {# min} other {# min}}",
+      "vars": []
+    },
+    {
+      "key": "toast.appLock.off",
+      "en": "App lock off.",
+      "vars": []
+    },
+    {
+      "key": "toast.appLock.on",
+      "en": "App lock on: Lumen locks after {after} in the background, and at every start.",
+      "vars": [
+        "after"
+      ]
+    },
+    {
+      "key": "toast.appLock.unavailable",
+      "en": "This device offers no Face ID, Touch ID, fingerprint or Windows Hello to the app, so the app lock can't be turned on here.",
+      "vars": []
+    },
+    {
       "key": "toast.appliedLink",
       "en": "✅ Links applied: {count}",
       "vars": [
@@ -124,11 +173,46 @@
       "vars": []
     },
     {
+      "key": "toast.claimsDone",
+      "en": "{{kept}} candidate claims · {{dropped}} dropped without a quote",
+      "vars": [
+        "kept",
+        "dropped"
+      ]
+    },
+    {
+      "key": "toast.claimsExtracting",
+      "en": "Turning the paragraph into claims…",
+      "vars": []
+    },
+    {
+      "key": "toast.claimsFailed",
+      "en": "Could not extract claims: {{error}}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.claimsNoParagraph",
+      "en": "Put the cursor in a paragraph first.",
+      "vars": []
+    },
+    {
       "key": "toast.completed",
       "en": "✅ {name} completed",
       "vars": [
         "name"
       ]
+    },
+    {
+      "key": "toast.cursorMovement.logical",
+      "en": "Cursor movement: logical — arrows follow the text order",
+      "vars": []
+    },
+    {
+      "key": "toast.cursorMovement.visual",
+      "en": "Cursor movement: visual — arrows follow the screen",
+      "vars": []
     },
     {
       "key": "toast.diagramFailed",
@@ -184,6 +268,13 @@
       ]
     },
     {
+      "key": "toast.digits",
+      "en": "Numbers now look like this: {sample}",
+      "vars": [
+        "sample"
+      ]
+    },
+    {
       "key": "toast.dismiss",
       "en": "Dismiss",
       "vars": []
@@ -216,6 +307,28 @@
     {
       "key": "toast.documentTranslated",
       "en": "✅ Document translated",
+      "vars": []
+    },
+    {
+      "key": "toast.explainChangeFailed",
+      "en": "Could not explain the change: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.explainChangeNoHistory",
+      "en": "This note has no earlier version yet. Save it, edit, and try again.",
+      "vars": []
+    },
+    {
+      "key": "toast.explainChangePick",
+      "en": "Compare the note now with which version?",
+      "vars": []
+    },
+    {
+      "key": "toast.explainChangeWorking",
+      "en": "Comparing the versions…",
       "vars": []
     },
     {
@@ -258,6 +371,20 @@
       "en": "Grammar check failed: {error}",
       "vars": [
         "error"
+      ]
+    },
+    {
+      "key": "toast.hebrewDates.off",
+      "en": "Dates now use the Gregorian calendar: today is {today}.",
+      "vars": [
+        "today"
+      ]
+    },
+    {
+      "key": "toast.hebrewDates.on",
+      "en": "Dates now use the Hebrew calendar: today is {today}.",
+      "vars": [
+        "today"
       ]
     },
     {
@@ -560,7 +687,7 @@
     },
     {
       "key": "toast.rerankModelOff",
-      "en": "Search reranking: word matching",
+      "en": "Search reranking: off (BM25 order)",
       "vars": []
     },
     {
@@ -570,7 +697,7 @@
     },
     {
       "key": "toast.rerankUnsupported",
-      "en": "The search reranking model needs WebGPU or the desktop app; this browser keeps the built-in reranking.",
+      "en": "The search reranking model needs WebGPU or the desktop app; this browser keeps the BM25 order.",
       "vars": []
     },
     {

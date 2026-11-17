@@ -1,3 +1,4 @@
+import { compareNames } from "../i18n/collate";
 /**
  * The database view's filter (plan 4.10): a small expression language over
  * a note's frontmatter, after Dataview's `WHERE` (MIT; the grammar is the
@@ -248,7 +249,7 @@ function compare(op: CmpOp, a: unknown, b: unknown): boolean {
   const x = comparable(a);
   const y = comparable(b);
   if (x === null || y === null) return false;
-  const d = typeof x === "number" && typeof y === "number" ? x - y : String(x).localeCompare(String(y));
+  const d = typeof x === "number" && typeof y === "number" ? x - y : compareNames(String(x), String(y));
   return op === "<" ? d < 0 : op === "<=" ? d <= 0 : op === ">" ? d > 0 : d >= 0;
 }
 

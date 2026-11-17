@@ -49,7 +49,13 @@ export function safeName(s: string): string {
   );
 }
 
-/** WhatsApp's own marks (*bold*, _italic_, ~strike~) as Markdown; lines that would start a Markdown block are escaped. */
+/**
+ * WhatsApp's own marks (*bold*, _italic_, ~strike~) as Markdown. WhatsApp's
+ * block formats (2024: bulleted lists "- " / "* ", numbered lists "1. ",
+ * quotes "> ") stay as they are — the same Markdown; messageBlock sets them
+ * apart from the message's lines. Other lines that would start a Markdown
+ * block (a heading, a table, a fence, a rule) are escaped.
+ */
 export function whatsappMarkdown(text: string): string {
   return text
     .split("\n")
@@ -59,11 +65,15 @@ export function whatsappMarkdown(text: string): string {
         .replace(/(^|[\s(והבכלמש])\*(\S(?:[^*\n]*\S)?)\*(?=$|[\s).,!?:;])/g, "$1**$2**")
         .replace(/(^|[\s(והבכלמש])_(\S(?:[^_\n]*\S)?)_(?=$|[\s).,!?:;])/g, "$1*$2*")
         .replace(/(^|[\s(והבכלמש])~(\S(?:[^~\n]*\S)?)~(?=$|[\s).,!?:;])/g, "$1~~$2~~");
-      if (/^\s*([#>+|]|[-*]\s|\d+[.)]\s|```|~~~|={3,}|-{3,})/.test(l)) l = "\\" + l.trimStart();
+      if (!isWhatsAppBlock(l) && /^\s*([#>+|]|[-*]\s|\d+[.)]\s|```|~~~|={3,}|-{3,})/.test(l)) l = "\\" + l.trimStart();
       return l;
     })
     .join("\n");
 }
+
+/** A line of one of WhatsApp's block formats: a list item ("- ", "* ", "1. ") or a quote ("> "). */
+const WHATSAPP_BLOCK = /^(?:[-*]|\d{1,3}\.|>)\s+\S/;
+const isWhatsAppBlock = (l: string): boolean => WHATSAPP_BLOCK.test(l) && !/^-{3,}\s*$|^\*{3,}\s*$/.test(l);
 
 const enc = (p: string) => p.split("/").map(encodeURIComponent).join("/");
 
@@ -94,13 +104,25 @@ function messageBlock(chat: ParsedChat, m: ChatMessage, opts: RenderOptions, wit
   while (lines.length > 1 && !lines[lines.length - 1].trim()) lines.pop();
   const [first = "", ...rest] = lines;
   // Inside the message's paragraph a line ends with two spaces (a line
-  // break); inside a code fence it stays as it is.
+  // break); inside a code fence it stays as it is. A list or a quote
+  // (WhatsApp's block formats) is a block of its own: a blank line before
+  // and after it, so it reads as a list or a quote and not as text.
   let fenced = /^\s*(```|~~~)/.test(first);
-  const out = [first.startsWith("```") ? head : `${head} ${first}`.trimEnd()];
+  const firstOwnBlock = first.startsWith("```") || (!fenced && isWhatsAppBlock(first));
+  const out = [firstOwnBlock ? head : `${head} ${first}`.trimEnd()];
   if (first.startsWith("```")) out.push(first);
+  let inBlock = false;
+  if (firstOwnBlock && !first.startsWith("```")) {
+    out.push("", first);
+    inBlock = true;
+  }
   for (const l of rest) {
     const prev = out.length - 1;
-    if (!fenced && !/^\s*(```|~~~)/.test(out[prev])) out[prev] += "  ";
+    const block = !fenced && isWhatsAppBlock(l);
+    if (!fenced && block !== inBlock && out[prev] !== "") {
+      out.push("");
+    } else if (!fenced && !block && !/^\s*(```|~~~)/.test(out[prev]) && out[prev] !== "") out[prev] += "  ";
+    if (!fenced) inBlock = block;
     out.push(l);
     if (/^\s*(```|~~~)/.test(l)) fenced = !fenced;
   }

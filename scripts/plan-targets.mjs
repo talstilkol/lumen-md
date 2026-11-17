@@ -24,6 +24,7 @@
  *
  *   npm run plan:targets                     # the report (markdown)
  *   npm run plan:targets -- --run            # also run the vitest and command evidence
+ *   npm run plan:targets -- --run --runner <cmd>   # vitest files through an offline runner: <cmd> <root> <file>
  *   npm run plan:targets -- --json           # the report as JSON
  *   npm run plan:targets -- --check          # exit 1 when an appendix clause has no target (or the text drifted)
  *   npm run plan:targets -- --strict         # exit 1 unless every target passed
@@ -152,7 +153,8 @@ export function evaluate(ev, ctx) {
     case "vitest":
     case "command": {
       if (ev.type === "vitest" && !existsSync(join(root, ev.file))) return { status: NOT, detail: `no measurement yet: ${ev.file} does not exist` };
-      const what = ev.type === "vitest" ? `npx vitest run ${ev.file}` : ev.cmd;
+      // --runner <cmd>: a vitest file goes through an offline runner (`<cmd> <root> <file>`, as dod --runner).
+      const what = ev.type === "vitest" ? (ctx.runner ? `${shq(ctx.runner)} ${shq(ctx.root)} ${shq(ev.file)}` : `npx vitest run ${ev.file}`) : ev.cmd;
       if (!ctx.run) return { status: NOT, detail: `not run (--run runs \`${what}\`)` };
       const code = ctx.exec(what);
       return { status: code === 0 ? PASS : FAIL, detail: `\`${what}\` exit ${code}` };
@@ -190,6 +192,9 @@ export function audit(targets, ctx) {
   for (const r of rows) counts[r.status]++;
   return { counts, rows };
 }
+
+/** A shell-quoted argument. */
+const shq = (x) => `'${String(x).replace(/'/g, "'\\''")}'`;
 
 const mark = { [PASS]: "✅ pass", [FAIL]: "❌ fail", [NOT]: "⬜ not measured" };
 const cell = (s) => String(s).replace(/\|/g, "\\|").replace(/\n/g, " ");
@@ -238,7 +243,7 @@ async function main() {
   const head = spawnSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).stdout?.trim() || null;
   const { report, problem } = head ? await loadE2e(root, head, opt("key") ? readFileSync(opt("key"), "utf8") : null) : { report: null, problem: "not a git checkout" };
   const exec = (cmd) => spawnSync("sh", ["-c", cmd], { cwd: root, stdio: "inherit" }).status ?? 1;
-  const result = audit(targets, { root, run: argv.includes("--run"), e2e: report, e2eProblem: problem, exec });
+  const result = audit(targets, { root, run: argv.includes("--run"), runner: opt("runner") ?? null, e2e: report, e2eProblem: problem, exec });
   if (argv.includes("--json")) console.log(JSON.stringify({ commit: head, coverage: cov, ...result }, null, 2));
   else {
     const md = markdown(result, cov, head?.slice(0, 12));

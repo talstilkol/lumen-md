@@ -1,3 +1,4 @@
+import { compareCodePoints } from "../i18n/collate";
 /**
  * Highlights by address (plan 4.15.4). Passages the user highlighted on a
  * page are kept per URL (the extension sends them with the clip; the
@@ -41,7 +42,7 @@ function save(all: Record<string, Highlight[]>): void {
   // Oldest pages go first once the store is full.
   if (keys.length > MAX_PAGES) {
     keys
-      .sort((a, b) => (all[a].at(-1)?.at ?? "").localeCompare(all[b].at(-1)?.at ?? ""))
+      .sort((a, b) => compareCodePoints((all[a].at(-1)?.at ?? ""), all[b].at(-1)?.at ?? ""))
       .slice(0, keys.length - MAX_PAGES)
       .forEach((k) => delete all[k]);
   }

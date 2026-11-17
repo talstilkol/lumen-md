@@ -18,9 +18,11 @@ import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { dateCell, type DateCellOptions } from "../daily/dateCells";
 import { deadlineText } from "../daily/deadlineText";
+import { chosen } from "../academic/registry";
 import { defaultIsrael, holidaysOn } from "../daily/hebrewCalendar";
 import { holidayLabel, nameLang } from "../daily/hebrewCalendarNames";
 import { dayOfValue } from "../daily/israeliTime";
+import { compareNames } from "../i18n/collate";
 
 const NONE = NO_VALUE;
 
@@ -80,7 +82,7 @@ export function sections(rows: DatabaseRow[], groupBy: string): Array<{ key: str
   return [...groups.keys()].sort(columnOrder).map((key) => ({ key, rows: groups.get(key)! }));
 }
 
-const columnOrder = (a: string, b: string) => (a === NONE ? 1 : b === NONE ? -1 : a.localeCompare(b));
+const columnOrder = (a: string, b: string) => (a === NONE ? 1 : b === NONE ? -1 : compareNames(a, b));
 const groupLabel = (key: string) => (key === NONE ? t("db.none") : key);
 
 function SectionHeading({ label, count }: { label: string; count: number }) {
@@ -169,7 +171,8 @@ interface CellDates {
 function useDateOptions(spec: DatabaseSpec): DateOpts {
   const locale = useAppStore((s) => s.locale) as string;
   const settings = useAppStore((s) => s.dailyNotes);
-  return useMemo(() => ({ locale, settings, hebrewDates: spec.hebrewDate }), [locale, settings, spec.hebrewDate]);
+  // W10.C27: the chosen academic calendar, so a deadline in a break or an exam period says so.
+  return useMemo(() => ({ locale, settings, hebrewDates: spec.hebrewDate, academic: chosen() }), [locale, settings, spec.hebrewDate]);
 }
 
 /** A cell's value: a date with its Hebrew date; the deadline column with its suggested working day and the working days left. */
@@ -191,6 +194,11 @@ function CellValue({ value, dates }: { value: unknown; dates: CellDates }) {
       {d?.moved && (
         <span role="note" data-testid="db-deadline-moved" style={{ fontSize: 11, color: "hsl(var(--warning, 35 90% 40%))" }}>
           ⚠ {d.moved}
+        </span>
+      )}
+      {d?.academic && (
+        <span role="note" data-testid="db-deadline-academic" style={{ fontSize: 11, color: "hsl(var(--warning, 35 90% 40%))" }}>
+          🎓 {d.academic}
         </span>
       )}
       {d && (
@@ -620,7 +628,7 @@ export function CalendarView({ rows, spec }: { rows: DatabaseRow[]; spec: Databa
   if (buckets.size === 0) {
     return <div style={{ padding: 12, color: "hsl(var(--fg-muted))", fontSize: 12 }}>{t("db.calendar.noDates", { field: dateField })}</div>;
   }
-  const sorted = [...buckets.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  const sorted = [...buckets.entries()].sort((a, b) => compareNames(a[0], b[0]));
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {sorted.map(([date, items]) => (
@@ -663,10 +671,11 @@ function CalendarDayHeader({ iso, opts }: { iso: string; opts: DateOpts }) {
 function CalendarDeadline({ value, opts }: { value: unknown; opts: DateOpts }) {
   const cell = dateCell(value, { ...opts, deadline: true });
   const d = cell?.deadline && deadlineText(cell.deadline);
-  if (!d?.moved) return null;
+  if (!d?.moved && !d?.academic) return null;
   return (
     <div role="note" data-testid="db-deadline-moved" style={{ fontSize: 11, color: "hsl(var(--warning, 35 90% 40%))" }}>
-      ⚠ {d.moved} · {d.left}
+      {d.moved ? `⚠ ${d.moved} · ${d.left}` : d.left}
+      {d.academic && ` · 🎓 ${d.academic}`}
     </div>
   );
 }

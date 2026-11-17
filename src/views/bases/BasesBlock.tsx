@@ -15,30 +15,43 @@
  * bundle); the map view loads Leaflet only when it is shown.
  */
 
-import { lazy, Suspense, useEffect, useMemo, useRef, useState, type JSX, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { AlertCircle } from "lucide-react";
-import { basesFileFromText, basesLatLng, parseBase, runBase, setViewSort, viewKind, type BaseModel, type BaseResult, type BaseRow, type BasesSort } from "./base";
+import { basesFileFromText, basesLatLng, moveFilter, parseBase, runBase, setViewSort, viewKind, type BaseModel, type BaseResult, type BaseRow, type BasesSort, type FilterScope } from "./base";
+import { applyKanbanSet, coverOf, coverStyle, kanbanColumns, kanbanGrouping, kanbanKeyTarget, planKanbanMove, type KanbanColumn } from "./kanban";
+import { filterKeyTarget, filterRows, type FilterRow } from "./filterRows";
 import { parseBaseEmbedMeta } from "./embed";
-import { isTagged, toText, type BasesFile, type BValue } from "./values";
+import { toText, type BasesFile, type BValue } from "./values";
 import type { DatabaseRow } from "../database";
 import { isOPFSAvailable, listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "../../storage/workspace";
 import { onWorkspaceChanged } from "../../storage/workspaceEvents";
 import { useAppStore } from "../../store/useStore";
 import { editNote } from "../databaseEdit";
 import { selectRows } from "../bulkEdit";
-import { addDays, csvToNotes, daysBetween, monthWeeks, moveDateInText, pinnedProperties, resultToCsv, rowsByDay, timelineItems, visibleWindow, writableKey } from "./viewsData";
+import { tableKeyMove, visibleWindow, writableKey } from "./viewsData";
 import { showAiToast } from "../../ui/AiToast";
 import { log } from "../../lib/logger";
-import { t } from "../../i18n";
+import { getLocale, isRTL, t } from "../../i18n";
 import "./basesBlockStrings";
 import { explainError } from "../../lib/userError";
 import { EmptyState, learnHow } from "../../ui/EmptyState";
+import { downloadCsv, importCsv } from "./basesCsv";
+import { nameCell, openFile, type ViewProps } from "./basesCells";
+import { CalendarView, TimelineView } from "./basesTimeViews";
+import { useVisibleRefresh } from "../../lib/visibleRefresh";
+// W13.G9: "Open as graph" — the dialog loads when the button is pressed.
+import { OpenAsGraph } from "../../ui/graph/OpenAsGraph";
 
 const DatabaseMapView = lazy(() => import("../DatabaseMapView"));
 // Bulk property editing (W7.4): the same bar as the database block, loaded on the first selection.
 const BulkEditBar = lazy(() => import("../BulkEditBar"));
+// W12.V1: the chart view loads ECharts and its strings only when it is shown.
+const BaseChartView = lazy(() => import("../../viz/BaseChartView"));
+// W12.V5: the Hebrew-calendar view, loaded when shown.
+const BaseHebrewCalendarView = lazy(() => import("../../viz/BaseHebrewCalendarView"));
 
 const muted = "hsl(var(--fg-muted))";
+const isRtl = () => typeof document !== "undefined" && document.documentElement.dir === "rtl";
 const danger = "hsl(var(--danger))";
 
 /** Every file of the workspace, as Bases sees it (notes with their text, attachments without). */
@@ -70,59 +83,11 @@ function findBase(files: readonly { path: string }[], target: string): string | 
   return byName?.path ?? null;
 }
 
-function openFile(path: string) {
-  window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path } }));
-}
-
-function FileLink({ path, label }: { path: string; label: string }) {
-  return (
-    <a
-      href={`#${encodeURIComponent(path)}`}
-      dir="auto"
-      onClick={(e) => {
-        e.preventDefault();
-        openFile(path);
-      }}
-      style={{ color: "hsl(var(--accent))", textDecoration: "none", fontWeight: 500 }}
-    >
-      {label}
-    </a>
-  );
-}
-
-/** One value in a cell: files and links open, lists join, true / false as ✓ / ✗. */
-function Cell({ value, files }: { value: BValue; files: readonly BasesFile[] }): JSX.Element | null {
-  if (value === null) return null;
-  if (typeof value === "boolean") return <span aria-label={String(value)}>{value ? "✓" : "✗"}</span>;
-  if (Array.isArray(value))
-    return (
-      <>
-        {value.map((v, i) => (
-          <span key={i}>
-            {i > 0 && ", "}
-            <Cell value={v} files={files} />
-          </span>
-        ))}
-      </>
-    );
-  if (isTagged(value)) {
-    if (value.$ === "file") return <FileLink path={value.file.path} label={value.file.basename} />;
-    if (value.$ === "link") {
-      const target = files.find((f) => f.path === value.path || f.basename === value.path || f.path.replace(/\.md$/i, "") === value.path);
-      return target ? <FileLink path={target.path} label={toText(value)} /> : <span dir="auto">{toText(value)}</span>;
-    }
-    if (value.$ === "image" && /^https:\/\//i.test(value.src)) return <img src={value.src} alt="" loading="lazy" style={{ maxInlineSize: 120, maxBlockSize: 80 }} />;
-  }
-  return <span dir="auto">{toText(value)}</span>;
-}
-
-function nameCell(row: BaseRow, id: string, files: readonly BasesFile[]): ReactNode {
-  // file.name in the first column opens the note, as in Obsidian.
-  if (id === "file.name" || id === "file.basename") return <FileLink path={row.file.path} label={row.file.ext === "md" ? row.file.basename : row.file.name} />;
-  return <Cell value={row.cells[id]} files={files} />;
-}
-
-export default function BasesBlock({ source, meta }: { source: string; meta?: string }) {
+/**
+ * `select` (W12.T3, a type's page): the rows come from these paths, chosen
+ * by the type registry, instead of the base's own `filters:`.
+ */
+export default function BasesBlock({ source, meta, select }: { source: string; meta?: string; select?: (files: readonly BasesFile[]) => ReadonlySet<string> }) {
   const embed = useMemo(() => parseBaseEmbedMeta(meta), [meta]);
   const activePath = useAppStore((s) => s.doc.workspaceName ?? null);
   const [files, setFiles] = useState<BasesFile[]>([]);
@@ -134,6 +99,8 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
   /** Notes selected in the table for a bulk edit (W7.4); the .base file itself is never written by it. */
   const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set());
   const anchorRef = useRef<string | null>(null);
+  // W12.V6: off screen (a long dashboard), a vault change waits until the base is seen again.
+  const [rootRef, schedule] = useVisibleRefresh();
 
   useEffect(() => {
     let cancelled = false;
@@ -162,12 +129,12 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
         if (!cancelled) setLoadError(explainError(e));
       })
       .finally(() => !cancelled && setLoading(false));
-    const off = onWorkspaceChanged(() => void load().catch(() => undefined), { debounceMs: 500 });
+    const off = onWorkspaceChanged(() => schedule(() => void load().catch(() => undefined)), { debounceMs: 500 });
     return () => {
       cancelled = true;
       off();
     };
-  }, [embed]);
+  }, [embed, schedule]);
 
   const text = embed ? (embedded?.text ?? null) : source;
   const parsed = useMemo(() => (text === null ? null : parseBase(text)), [text]);
@@ -184,8 +151,9 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
   const result: BaseResult | null = useMemo(() => {
     if (!base) return null;
     const views = sortOverride ? base.views.map((v, i) => (i === current ? { ...v, sort: sortOverride } : v)) : base.views;
+    if (select) return runBase({ ...base, views, filters: undefined }, files, { view: current, thisFile, only: select(files) });
     return runBase({ ...base, views }, files, { view: current, thisFile });
-  }, [base, files, current, sortOverride, thisFile]);
+  }, [base, files, current, sortOverride, thisFile, select]);
 
   if (loadError || (parsed && !parsed.ok)) {
     return (
@@ -208,7 +176,7 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
   const kind = viewKind(result.view);
   const order = result.rows.map((r) => r.file.path);
   const shownSelected = result.rows.filter((r) => selected.has(r.file.path) && r.file.ext === "md");
-  const select: TableSelect = {
+  const rowSelect: TableSelect = {
     has: (p) => selected.has(p),
     click: (p, e) => {
       const next = selectRows(order, selected, anchorRef.current, p, { shift: e.shiftKey, toggle: true });
@@ -239,9 +207,26 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
     }
   };
   const fileLabel = embedded?.path ?? (activePath?.toLowerCase().endsWith(".base") ? activePath : null);
+  // W12.T5: the filter order is written to the .base file: the embedded file, or the .base open in the editor.
+  const filterFile = embedded?.path ?? (!embed && !select && activePath?.toLowerCase().endsWith(".base") ? activePath : null);
+  const filtersEditable = !!filterFile && text !== null;
+  const reorderFilters = async (from: FilterScope & { index: number }, to: FilterScope & { index: number }) => {
+    if (!filterFile || text === null) return;
+    const w = moveFilter(text, from, to);
+    if (!w.ok) return showAiToast(t("base.error", { error: w.error }), "error");
+    try {
+      if (embedded) {
+        await writeWorkspaceFile(embedded.path, w.text);
+        setEmbedded({ path: embedded.path, text: w.text });
+      } else await editNote(filterFile, () => w.text);
+      showAiToast(t("base.filters.saved", { file: filterFile }));
+    } catch (e) {
+      showAiToast(t("base.error", { error: explainError(e) }), "error");
+    }
+  };
 
   return (
-    <div className="chart-block lumen-base" data-testid="base-block" data-view-kind={kind}>
+    <div ref={rootRef} className="chart-block lumen-base" data-testid="base-block" data-view-kind={kind}>
       <div className="chart-block-header">
         <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontWeight: 600 }} dir="auto">
@@ -257,6 +242,7 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
           <button type="button" onClick={() => void importCsv(base, fileLabel ?? result.view.name, files)} style={{ fontSize: 11 }} data-testid="base-csv-import">
             {t("base.csv.import")}
           </button>
+          {result.rows.length > 0 && <OpenAsGraph label={t("base.openAsGraph")} title={fileLabel ? fileLabel.replace(/^.*\//, "").replace(/\.base$/i, "") : result.view.name} rows={() => result.rows.map((r) => r.file)} testId="base-open-graph" />}
         </span>
         {base.views.length > 1 && (
           <div className="chart-block-tabs" role="tablist" aria-label={t("db.views")}>
@@ -289,6 +275,7 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
           ))}
         </div>
       )}
+      {filtersEditable && <FiltersPanel base={base} view={current} onMove={(from, to) => void reorderFilters(from, to)} />}
       {canSave && (
         <div style={{ paddingInline: 8, paddingBlockStart: 4 }}>
           <button type="button" onClick={() => void save()} style={{ fontSize: 11 }}>
@@ -308,12 +295,22 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
       )}
       <div style={{ padding: 8 }}>
         {result.rows.length === 0 && !loading && <EmptyState style={{ padding: 24, alignItems: "center", fontSize: 13 }} message={t("db.empty")} action={learnHow("workspace/obsidian-bases#three-ways-to-show-a-base")} />}
-        {result.rows.length > 0 && kind === "table" && <TableView result={result} files={files} sort={sortOverride ?? result.view.sort} onSort={clickSort} select={select} />}
+        {result.rows.length > 0 && kind === "table" && <TableView result={result} files={files} sort={sortOverride ?? result.view.sort} onSort={clickSort} select={rowSelect} />}
         {result.rows.length > 0 && kind === "calendar" && <CalendarView result={result} files={files} />}
         {result.rows.length > 0 && kind === "timeline" && <TimelineView result={result} files={files} />}
         {result.rows.length > 0 && kind === "cards" && <CardsView result={result} files={files} />}
         {result.rows.length > 0 && kind === "list" && <ListView result={result} files={files} />}
         {result.rows.length > 0 && kind === "kanban" && <KanbanView result={result} files={files} />}
+        {result.rows.length > 0 && kind === "chart" && (
+          <Suspense fallback={<div style={{ padding: 12, fontSize: 12, color: muted }}>{t("db.loading")}</div>}>
+            <BaseChartView base={base} result={result} dir={isRTL() ? "rtl" : "ltr"} locale={getLocale()} />
+          </Suspense>
+        )}
+        {result.rows.length > 0 && kind === "hebrew-calendar" && (
+          <Suspense fallback={<div style={{ padding: 12, fontSize: 12, color: muted }}>{t("db.loading")}</div>}>
+            <BaseHebrewCalendarView result={result} dir={isRTL() ? "rtl" : "ltr"} locale={getLocale()} />
+          </Suspense>
+        )}
         {result.rows.length > 0 && kind === "map" && (
           <Suspense fallback={<div style={{ padding: 12, fontSize: 12, color: muted }}>{t("db.loading")}</div>}>
             <MapView result={result} />
@@ -324,10 +321,68 @@ export default function BasesBlock({ source, meta }: { source: string; meta?: st
   );
 }
 
-interface ViewProps {
-  result: BaseResult;
-  files: readonly BasesFile[];
+/**
+ * The filter rows of the file (W12.T5, Obsidian 1.15): drag a row to
+ * reorder it, Alt+ArrowUp/Down to move it, and a button moves it between
+ * All views and This view. Every move is written into the `.base` with
+ * `moveFilter`, which keeps the rest of the file as written.
+ */
+export function FiltersPanel({ base, view, onMove }: { base: BaseModel; view: number; onMove: (from: FilterScope & { index: number }, to: FilterScope & { index: number }) => void }) {
+  const rows = filterRows(base, view);
+  const [drag, setDrag] = useState<FilterRow | null>(null);
+  if (!rows.all.length && !rows.view.length) return null;
+  const list = (title: string, items: FilterRow[], scope: FilterScope, other: FilterScope, otherLabel: string) => (
+    <div>
+      <div style={{ fontSize: 11, fontWeight: 600, marginBlock: 4 }}>{title}</div>
+      <ol style={{ margin: 0, paddingInlineStart: 18 }} onDragOver={(e) => e.preventDefault()} onDrop={(e) => {
+        e.preventDefault();
+        if (drag && (drag.scope.view !== scope.view)) onMove({ ...drag.scope, index: drag.index }, { ...scope, index: items.length });
+        setDrag(null);
+      }} data-scope={scope.view === null ? "all" : "view"}>
+        {items.map((r) => (
+          <li
+            key={`${r.index}-${r.text}`}
+            draggable
+            tabIndex={0}
+            data-filter={r.index}
+            aria-description={t("base.filters.drag")}
+            onDragStart={(e) => {
+              e.dataTransfer.effectAllowed = "move";
+              setDrag(r);
+            }}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (drag && !(drag.scope.view === r.scope.view && drag.index === r.index)) onMove({ ...drag.scope, index: drag.index }, { ...r.scope, index: r.index });
+              setDrag(null);
+            }}
+            onKeyDown={(e) => {
+              const to = filterKeyTarget(e.key, e.altKey, r, items.length);
+              if (to === null) return;
+              e.preventDefault();
+              onMove({ ...r.scope, index: r.index }, { ...r.scope, index: to });
+            }}
+            style={{ fontSize: 11, cursor: "grab", paddingBlock: 2 }}
+          >
+            <code dir="ltr">{r.text}</code>{" "}
+            <button type="button" style={{ fontSize: 10 }} onClick={() => onMove({ ...r.scope, index: r.index }, { ...other, index: other.view === null ? rows.all.length : rows.view.length })}>
+              {otherLabel}
+            </button>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+  return (
+    <details style={{ paddingInline: 8, fontSize: 11 }} data-testid="base-filters">
+      <summary>{t("base.filters.title")}</summary>
+      {list(t("base.filters.all"), rows.all, { view: null }, { view }, t("base.filters.moveToView"))}
+      {list(t("base.filters.view"), rows.view, { view }, { view: null }, t("base.filters.moveToAll"))}
+    </details>
+  );
 }
+
 
 function groupLabel(key: BValue): string {
   return key === null ? t("db.none") : toText(key);
@@ -348,8 +403,34 @@ interface TableSelect {
   total: number;
 }
 
-function TableView({ result, files, sort, onSort, select }: ViewProps & { sort: BasesSort[]; onSort: (id: string) => void; select: TableSelect }) {
+const NO_SELECT: TableSelect = { has: () => false, click: () => undefined, toggleAll: () => undefined, count: 0, total: 0 };
+
+export function TableView({ result, files, sort, onSort, select = NO_SELECT }: ViewProps & { sort: BasesSort[]; onSort: (id: string) => void; select?: TableSelect }) {
   const cols = result.columns;
+  // W12.T3: one cell is in the tab order (roving tabindex); arrows move it, as the text runs.
+  const [focus, setFocus] = useState<{ row: number; col: number }>({ row: 0, col: 0 });
+  const rowList = useMemo(() => (result.groups ? result.groups.flatMap((g) => g.rows) : result.rows), [result]);
+  const rowAt = useMemo(() => new Map(rowList.map((r, i) => [r, i])), [rowList]);
+  const onCellKey = (e: ReactKeyboardEvent<HTMLTableCellElement>, row: number, col: number) => {
+    if (e.key === "Enter" && (cols[col].id === "file.name" || cols[col].id === "file.basename")) {
+      e.preventDefault();
+      openFile(rowList[row].file.path);
+      return;
+    }
+    const rtl = getComputedStyle(e.currentTarget).direction === "rtl" || isRtl();
+    const next = tableKeyMove(e.key, { ctrl: e.ctrlKey || e.metaKey, rtl }, { row, col }, { rows: rowList.length, cols: cols.length });
+    if (!next) return;
+    e.preventDefault();
+    setFocus(next);
+    const scroller = e.currentTarget.closest("[data-testid=base-table-scroll]");
+    if (virtual && scroller) {
+      const index = items.findIndex((it) => it.kind === "row" && it.row === rowList[next.row]);
+      // Spacer rows keep the scrollbar true, so a row's top is its item index × the row height.
+      const top = index * ROW_H;
+      if (top < scroller.scrollTop || top > scroller.scrollTop + viewport - ROW_H) scroller.scrollTop = Math.max(0, top - viewport / 2);
+    }
+    requestAnimationFrame(() => (scroller?.querySelector(`[data-cell="${next.row}:${next.col}"]`) as HTMLElement | null)?.focus());
+  };
   const summaryIds = Object.keys(result.summaries);
   const items: TableItem[] = useMemo(() => {
     const out: TableItem[] = [];
@@ -368,7 +449,7 @@ function TableView({ result, files, sort, onSort, select }: ViewProps & { sort: 
   const cell = { padding: "4px 6px", borderBlockEnd: "1px solid hsl(var(--border))", blockSize: virtual ? ROW_H - 9 : undefined, whiteSpace: virtual ? ("nowrap" as const) : undefined, overflow: "hidden", textOverflow: "ellipsis" };
   return (
     <div ref={scroller} style={{ overflow: "auto", maxBlockSize: virtual ? viewport : undefined }} onScroll={virtual ? (e) => setScrollTop(e.currentTarget.scrollTop) : undefined} data-testid="base-table-scroll" data-virtual={virtual || undefined}>
-      <table style={{ inlineSize: "100%", borderCollapse: "collapse", fontSize: 12 }} aria-rowcount={virtual ? items.length + 1 : undefined}>
+      <table role="grid" style={{ inlineSize: "100%", borderCollapse: "collapse", fontSize: 12 }} aria-rowcount={virtual ? items.length + 1 : undefined}>
         <thead style={virtual ? { position: "sticky", insetBlockStart: 0, background: "hsl(var(--bg))", zIndex: 1 } : undefined}>
           <tr>
             <th scope="col" style={{ inlineSize: 24, padding: "4px 6px", borderBlockEnd: "1px solid hsl(var(--border))" }}>
@@ -418,11 +499,15 @@ function TableView({ result, files, sort, onSort, select }: ViewProps & { sort: 
                     />
                   )}
                 </td>
-                {cols.map((c) => (
-                  <td key={c.id} style={cell}>
-                    {nameCell(it.row, c.id, files)}
-                  </td>
-                ))}
+                {cols.map((c, ci) => {
+                  const ri = rowAt.get(it.row) ?? -1;
+                  const here = ri === focus.row && ci === focus.col;
+                  return (
+                    <td key={c.id} style={cell} tabIndex={here ? 0 : -1} data-cell={`${ri}:${ci}`} onKeyDown={(e) => onCellKey(e, ri, ci)} onFocus={() => (here ? undefined : setFocus({ row: ri, col: ci }))}>
+                      {nameCell(it.row, c.id, files)}
+                    </td>
+                  );
+                })}
               </tr>
             ),
           )}
@@ -445,22 +530,19 @@ function TableView({ result, files, sort, onSort, select }: ViewProps & { sort: 
   );
 }
 
-function CardsView({ result, files }: ViewProps) {
+export function CardsView({ result, files }: ViewProps) {
   const image = result.view.image;
+  const size = result.view.cardSize ?? 160;
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 8 }}>
-      {result.rows.map((r) => {
-        const img = image ? r.cells[image] : null;
-        const src = typeof img === "string" ? img : isTagged(img) && img.$ === "image" ? img.src : null;
-        return (
-          <div key={r.file.path} data-path={r.file.path} style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: 8, fontSize: 12 }}>
-            {src && /^https:\/\//i.test(src) && <img src={src} alt="" loading="lazy" style={{ inlineSize: "100%", maxBlockSize: 120, objectFit: "cover" }} />}
-            {result.columns.map((c) => (
-              <div key={c.id}>{nameCell(r, c.id, files)}</div>
-            ))}
-          </div>
-        );
-      })}
+    <div style={{ display: "grid", gridTemplateColumns: `repeat(auto-fill, minmax(${size}px, 1fr))`, gap: 8 }} data-testid="base-cards">
+      {result.rows.map((r) => (
+        <div key={r.file.path} data-path={r.file.path} style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: 8, fontSize: 12 }}>
+          {image && <Cover value={r.cells[image] ?? null} view={result.view} files={files} />}
+          {result.columns.map((c) => (
+            <div key={c.id}>{nameCell(r, c.id, files)}</div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
@@ -484,17 +566,110 @@ function ListView({ result, files }: ViewProps) {
   );
 }
 
-function KanbanView({ result, files }: ViewProps) {
-  if (!result.groups) return <div style={{ padding: 12, fontSize: 12, color: muted }}>{t("db.kanban.needGroup")}</div>;
+/** A cover image (W12.T5): Obsidian's Image property, Image fit and Image aspect ratio. */
+function Cover({ value, view, files }: { value: BValue; view: BaseResult["view"]; files: readonly BasesFile[] }) {
+  const c = coverOf(value);
+  if (!c) return null;
+  const st = coverStyle(view);
+  const box = { inlineSize: "100%", display: "block", ...(st.ratio ? { aspectRatio: `1 / ${st.ratio}` } : { maxBlockSize: 120 }), borderRadius: 4, marginBlockEnd: 4 } as const;
+  if ("color" in c) return <div data-testid="base-cover" data-fit={st.fit} style={{ ...box, blockSize: st.ratio ? undefined : 60, background: c.color }} />;
+  if ("link" in c) {
+    // A vault image: shown by name until the attachment loader resolves it (W12.T5 owes vault image covers).
+    const f = files.find((x) => x.path === c.link || x.name === c.link || x.basename === c.link);
+    return f ? <div data-testid="base-cover" data-fit={st.fit} data-link={f.path} style={{ ...box, blockSize: st.ratio ? undefined : 60, background: "hsl(var(--bg-subtle))" }} aria-label={f.name} /> : null;
+  }
+  return <img data-testid="base-cover" data-fit={st.fit} src={c.src} alt="" loading="lazy" style={{ ...box, objectFit: st.fit }} />;
+}
+
+/** Drop a card on a column (W12.T5): writes the grouped property, or moves the file for file.folder. */
+async function dropCard(row: BaseRow, property: string, column: KanbanColumn) {
+  const move = planKanbanMove(row, property, column);
+  const label = column.key ?? t("base.kanban.none");
+  if (move.kind === "refuse") {
+    if (move.reason === "same") return;
+    return showAiToast(move.reason === "notMarkdown" ? t("base.kanban.notMarkdown") : t("base.kanban.readOnly", { property }), "error");
+  }
+  try {
+    if (move.kind === "set") await editNote(move.path, (text) => applyKanbanSet(text, move));
+    else {
+      const { safeMove } = await import("../../storage/fileOps");
+      if (!(await safeMove(move.from, move.to))) return;
+      const { notifyWorkspaceChanged } = await import("../../storage/workspaceEvents");
+      notifyWorkspaceChanged({ kind: "structure", paths: [move.from, move.to] });
+    }
+    showAiToast(t("base.kanban.moved", { name: row.file.basename, column: label }));
+  } catch (e) {
+    showAiToast(t("base.moveFailed", { error: explainError(e) }), "error");
+  }
+}
+
+export function KanbanView({ result, files, onDrop = dropCard }: ViewProps & { onDrop?: (row: BaseRow, property: string, column: KanbanColumn) => void | Promise<void> }) {
+  const [dragging, setDragging] = useState<string | null>(null);
+  if (!result.groups || !result.view.groupBy) return <div style={{ padding: 12, fontSize: 12, color: muted }}>{t("db.kanban.needGroup")}</div>;
+  const property = result.view.groupBy.property;
+  const grouping = kanbanGrouping(property);
+  const movable = grouping.kind !== "readOnly";
+  const columns = kanbanColumns(result);
+  const width = result.view.cardSize ?? 180;
+  const byPath = new Map(columns.flatMap((c) => c.rows.map((r) => [r.file.path, r] as const)));
   return (
-    <div style={{ display: "flex", gap: 8, overflowX: "auto" }}>
-      {result.groups.map((g, i) => (
-        <section key={i} aria-label={groupLabel(g.key)} style={{ minInlineSize: 180, flex: "1 0 180px", background: "hsl(var(--bg-subtle))", borderRadius: 6, padding: 6 }}>
+    <div style={{ display: "flex", gap: 8, overflowX: "auto" }} data-testid="base-kanban" data-movable={movable || undefined}>
+      {!movable && (
+        <p role="note" style={{ fontSize: 11, color: muted, margin: 0 }} dir="auto">
+          {t("base.kanban.readOnly", { property })}
+        </p>
+      )}
+      {columns.map((col, ci) => (
+        <section
+          key={`${ci}-${col.key ?? "∅"}`}
+          /* empty-allow: the column of notes without a value (its label) */
+          aria-label={col.key ?? t("base.kanban.none")}
+          data-column={col.key ?? ""}
+          onDragOver={movable ? (e) => e.preventDefault() : undefined}
+          onDrop={
+            movable
+              ? (e) => {
+                  e.preventDefault();
+                  const row = byPath.get(e.dataTransfer.getData("text/x-lumen-path") || dragging || "");
+                  setDragging(null);
+                  if (row) void onDrop(row, property, col);
+                }
+              : undefined
+          }
+          style={{ minInlineSize: width, flex: `1 0 ${width}px`, background: "hsl(var(--bg-subtle))", borderRadius: 6, padding: 6 }}
+        >
           <h4 style={{ margin: "0 0 6px", fontSize: 12 }} dir="auto">
-            {groupLabel(g.key)} <span style={{ fontWeight: 400, color: muted }}>{g.rows.length}</span>
+            {/* empty-allow: the column of notes without a value (its heading) */}
+            {col.key ?? t("base.kanban.none")} <span style={{ fontWeight: 400, color: muted }}>{col.rows.length}</span>
           </h4>
-          {g.rows.map((r) => (
-            <div key={r.file.path} data-path={r.file.path} style={{ background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", borderRadius: 4, padding: 6, marginBlockEnd: 6, fontSize: 12 }}>
+          {col.rows.map((r) => (
+            <div
+              key={r.file.path}
+              data-path={r.file.path}
+              draggable={movable}
+              tabIndex={0}
+              aria-roledescription={movable ? t("base.kanban.card") : undefined}
+              aria-description={movable ? t("base.kanban.cardHint") : undefined}
+              onDragStart={
+                movable
+                  ? (e) => {
+                      e.dataTransfer.setData("text/x-lumen-path", r.file.path);
+                      e.dataTransfer.effectAllowed = "move";
+                      setDragging(r.file.path);
+                    }
+                  : undefined
+              }
+              onKeyDown={(e) => {
+                if (!movable) return;
+                const rtl = getComputedStyle(e.currentTarget).direction === "rtl" || isRtl();
+                const to = kanbanKeyTarget(e.key, { alt: e.altKey, rtl }, ci, columns.length);
+                if (to === null) return;
+                e.preventDefault();
+                void onDrop(r, property, columns[to]);
+              }}
+              style={{ background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", borderRadius: 4, padding: 6, marginBlockEnd: 6, fontSize: 12, cursor: movable ? "grab" : undefined }}
+            >
+              {result.view.image && <Cover value={r.cells[result.view.image] ?? null} view={result.view} files={files} />}
               {result.columns.map((c) => (
                 <div key={c.id}>{nameCell(r, c.id, files)}</div>
               ))}
@@ -521,247 +696,4 @@ function MapView({ result }: { result: BaseResult }) {
   );
   const fields = result.columns.filter((c) => c.id !== "file.name").map((c) => c.label);
   return <DatabaseMapView rows={rows} spec={{ location: "location" }} fields={fields} />;
-}
-
-/* ─── CSV (W1.12) ────────────────────────────────────────────────────── */
-
-function downloadCsv(result: BaseResult, name: string) {
-  const blob = new Blob(["\uFEFF", resultToCsv(result)], { type: "text/csv;charset=utf-8" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `${name.replace(/^.*\//, "").replace(/\.base$/i, "") || "base"}.csv`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-}
-
-/** Pick a CSV and add one note per row to a folder named after the base, with the properties its filter pins. */
-async function importCsv(base: BaseModel, name: string, files: readonly BasesFile[]) {
-  const file = await new Promise<File | null>((resolve) => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".csv,text/csv";
-    input.onchange = () => resolve(input.files?.[0] ?? null);
-    input.addEventListener("cancel", () => resolve(null));
-    input.click();
-  });
-  if (!file) return;
-  const folder = name.replace(/^.*\//, "").replace(/\.base$/i, "") || "Imported";
-  try {
-    const notes = csvToNotes(await file.text(), folder, { extra: pinnedProperties(base.filters), taken: new Set(files.map((f) => f.path)) });
-    for (const n of notes) await writeWorkspaceFile(n.path, n.content);
-    const { notifyWorkspaceChanged } = await import("../../storage/workspaceEvents");
-    notifyWorkspaceChanged({ kind: "structure", paths: notes.map((n) => n.path) });
-    showAiToast(t("base.csv.imported", { count: notes.length, folder }));
-  } catch (e) {
-    showAiToast(t("base.csv.failed", { error: explainError(e) }), "error");
-  }
-}
-
-/* ─── Calendar and timeline (W1.12) ──────────────────────────────────── */
-
-/** Move a row's date to `day`: only that property changes in the file. */
-async function moveRow(row: BaseRow, dateId: string, day: string, endId?: string) {
-  const key = writableKey(dateId);
-  if (!key) return showAiToast(t("base.move.readOnly", { property: dateId }), "error");
-  const oldStart = row.file.fm[key];
-  try {
-    await editNote(row.file.path, (text) => {
-      let next = moveDateInText(text, key, oldStart, day);
-      // A timeline item keeps its length: the end moves by as many days.
-      const endKey = endId ? writableKey(endId) : null;
-      const from = typeof oldStart === "string" ? oldStart.slice(0, 10) : oldStart instanceof Date ? oldStart.toISOString().slice(0, 10) : null;
-      const oldEnd = endKey ? row.file.fm[endKey] : undefined;
-      const endDay = typeof oldEnd === "string" ? oldEnd.slice(0, 10) : oldEnd instanceof Date ? oldEnd.toISOString().slice(0, 10) : null;
-      if (endKey && from && endDay && /^\d{4}-\d{2}-\d{2}$/.test(from) && /^\d{4}-\d{2}-\d{2}$/.test(endDay)) next = moveDateInText(next, endKey, oldEnd, addDays(endDay, daysBetween(from, day)));
-      return next;
-    });
-    showAiToast(t("base.moved", { name: row.file.basename, date: day }));
-  } catch (e) {
-    showAiToast(t("base.moveFailed", { error: explainError(e) }), "error");
-  }
-}
-
-/** Alt + arrow keys move an item a day (left / right, as the text runs) or a week (up / down). */
-function keyShift(e: ReactKeyboardEvent, rtl: boolean): number {
-  if (!e.altKey) return 0;
-  if (e.key === "ArrowUp") return -7;
-  if (e.key === "ArrowDown") return 7;
-  if (e.key === "ArrowLeft") return rtl ? 1 : -1;
-  if (e.key === "ArrowRight") return rtl ? -1 : 1;
-  return 0;
-}
-
-const isRtl = () => typeof document !== "undefined" && document.documentElement.dir === "rtl";
-
-function CalendarView({ result, files }: ViewProps) {
-  const locale = (useAppStore((s) => s.locale) as string) || "en";
-  const dateId = result.view.date ?? "note.date";
-  const byDay = useMemo(() => rowsByDay(result.rows, dateId), [result, dateId]);
-  const first = useMemo(() => [...byDay.keys()].sort()[0] ?? new Date().toISOString().slice(0, 10), [byDay]);
-  const [month, setMonth] = useState(() => ({ y: Number(first.slice(0, 4)), m: Number(first.slice(5, 7)) }));
-  const [over, setOver] = useState<string | null>(null);
-  const firstDay = ["he", "en", "ja", "ar"].includes(locale) ? (locale === "ar" ? 6 : 7) : 1;
-  const weeks = monthWeeks(month.y, month.m, firstDay);
-  const title = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(month.y, month.m - 1, 1)));
-  const weekday = new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" });
-  const undated = result.rows.length - [...byDay.values()].reduce((n, r) => n + r.length, 0);
-  const shift = (n: number) =>
-    setMonth(({ y, m }) => {
-      const k = y * 12 + m - 1 + n;
-      return { y: Math.floor(k / 12), m: (k % 12) + 1 };
-    });
-  const rtl = isRtl();
-  return (
-    <div data-testid="base-calendar">
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBlockEnd: 6 }}>
-        <button type="button" onClick={() => shift(-1)} aria-label={t("base.calendar.prev")}>
-          {rtl ? "›" : "‹"}
-        </button>
-        <strong data-testid="base-calendar-title">{title}</strong>
-        <button type="button" onClick={() => shift(1)} aria-label={t("base.calendar.next")}>
-          {rtl ? "‹" : "›"}
-        </button>
-        {undated > 0 && <span style={{ fontSize: 11, color: muted }}>{t("base.calendar.undated", { count: undated })}</span>}
-        <span id="base-move-hint" style={{ fontSize: 11, color: muted, marginInlineStart: "auto" }}>
-          {t("base.move.hint")}
-        </span>
-      </div>
-      <div role="grid" aria-label={title} style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0, 1fr))", gap: 2, fontSize: 11 }}>
-        {weeks[0].map((_, i) => (
-          <div key={`h${i}`} role="columnheader" style={{ color: muted, textAlign: "center" }}>
-            {weekday.format(new Date(Date.UTC(2024, 0, ((firstDay - 1 + i) % 7) + 1)))}
-          </div>
-        ))}
-        {weeks.flat().map((day, i) =>
-          day === null ? (
-            <div key={`e${i}`} role="gridcell" aria-hidden />
-          ) : (
-            <div
-              key={day}
-              role="gridcell"
-              data-day={day}
-              aria-label={day}
-              onDragOver={(e) => {
-                e.preventDefault();
-                setOver(day);
-              }}
-              onDragLeave={() => setOver((o) => (o === day ? null : o))}
-              onDrop={(e) => {
-                e.preventDefault();
-                setOver(null);
-                const path = e.dataTransfer.getData("text/x-lumen-path");
-                const row = result.rows.find((r) => r.file.path === path);
-                if (row) void moveRow(row, dateId, day);
-              }}
-              style={{ minBlockSize: 64, border: "1px solid hsl(var(--border))", borderRadius: 4, padding: 2, background: over === day ? "hsl(var(--accent) / 0.12)" : undefined }}
-            >
-              <div style={{ color: muted }}>{Number(day.slice(8))}</div>
-              {(byDay.get(day) ?? []).map((r) => (
-                <div
-                  key={r.file.path}
-                  data-path={r.file.path}
-                  draggable
-                  tabIndex={0}
-                  aria-describedby="base-move-hint"
-                  onDragStart={(e) => {
-                    e.dataTransfer.setData("text/x-lumen-path", r.file.path);
-                    e.dataTransfer.effectAllowed = "move";
-                  }}
-                  onKeyDown={(e) => {
-                    const n = keyShift(e, rtl);
-                    if (!n) return;
-                    e.preventDefault();
-                    void moveRow(r, dateId, addDays(day, n));
-                  }}
-                  style={{ background: "hsl(var(--bg-subtle))", borderRadius: 3, paddingInline: 3, marginBlockStart: 2, cursor: "grab", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                >
-                  {nameCell(r, result.columns[0]?.id ?? "file.name", files)}
-                </div>
-              ))}
-            </div>
-          ),
-        )}
-      </div>
-    </div>
-  );
-}
-
-const DAY_PX = 24;
-
-function TimelineView({ result, files }: ViewProps) {
-  const startId = result.view.date ?? "note.date";
-  const endId = result.view.end;
-  const { items, from, to } = useMemo(() => timelineItems(result.rows, startId, endId), [result, startId, endId]);
-  const [drag, setDrag] = useState<{ path: string; x: number; days: number } | null>(null);
-  const rtl = isRtl();
-  if (!from || !to) return <EmptyState style={{ padding: 12 }} message={t("base.timeline.empty", { property: startId })} action={learnHow("workspace/obsidian-bases#calendar-and-timeline-views-lumen")} />;
-  const span = daysBetween(from, to) + 1;
-  const months: Array<{ day: string; label: string }> = [];
-  for (let d = from; d <= to; d = addDays(d, 1)) if (d.endsWith("-01") || d === from) months.push({ day: d, label: d.slice(0, 7) });
-  return (
-    <div data-testid="base-timeline" style={{ overflowX: "auto" }}>
-      <div id="base-move-hint-tl" style={{ fontSize: 11, color: muted, marginBlockEnd: 4 }}>
-        {t("base.move.hint")}
-      </div>
-      <div style={{ position: "relative", inlineSize: span * DAY_PX, minInlineSize: "100%", fontSize: 11 }}>
-        <div style={{ position: "relative", blockSize: 16, color: muted }}>
-          {months.map((m) => (
-            <span key={m.day} style={{ position: "absolute", insetInlineStart: daysBetween(from, m.day) * DAY_PX }}>
-              {m.label}
-            </span>
-          ))}
-        </div>
-        {items.map((it) => {
-          const offset = daysBetween(from, it.start) + (drag?.path === it.row.file.path ? drag.days : 0);
-          const len = daysBetween(it.start, it.end) + 1;
-          return (
-            <div key={it.row.file.path} style={{ position: "relative", blockSize: 24 }}>
-              <div
-                data-path={it.row.file.path}
-                role="button"
-                tabIndex={0}
-                aria-describedby="base-move-hint-tl"
-                aria-label={`${it.row.file.basename}: ${it.start}${it.end !== it.start ? ` – ${it.end}` : ""}`}
-                onPointerDown={(e) => {
-                  (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
-                  setDrag({ path: it.row.file.path, x: e.clientX, days: 0 });
-                }}
-                onPointerMove={(e) => {
-                  if (drag?.path !== it.row.file.path) return;
-                  const dx = (e.clientX - drag.x) * (rtl ? -1 : 1);
-                  setDrag({ ...drag, days: Math.round(dx / DAY_PX) });
-                }}
-                onPointerUp={() => {
-                  if (drag?.path === it.row.file.path && drag.days) void moveRow(it.row, startId, addDays(it.start, drag.days), endId);
-                  setDrag(null);
-                }}
-                onKeyDown={(e) => {
-                  const n = keyShift(e, rtl);
-                  if (!n) return;
-                  e.preventDefault();
-                  void moveRow(it.row, startId, addDays(it.start, n), endId);
-                }}
-                style={{
-                  position: "absolute",
-                  insetInlineStart: offset * DAY_PX,
-                  inlineSize: Math.max(1, len) * DAY_PX - 2,
-                  insetBlock: 2,
-                  background: "hsl(var(--accent) / 0.25)",
-                  border: "1px solid hsl(var(--accent))",
-                  borderRadius: 4,
-                  paddingInline: 4,
-                  overflow: "hidden",
-                  whiteSpace: "nowrap",
-                  cursor: "grab",
-                  touchAction: "none",
-                }}
-              >
-                {nameCell(it.row, result.columns[0]?.id ?? "file.name", files)}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
 }

@@ -1,6 +1,8 @@
 ---
 title: Direction marks (bidi)
 description: See the invisible characters that set text direction, clean the ones that do nothing, fix reversed brackets, and catch Trojan Source text.
+type: how-to
+tasks: ["W5.4"]
 ---
 
 Hebrew and Arabic text pasted from a word processor, a web page or a chat

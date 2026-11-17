@@ -157,6 +157,13 @@ export function useCollab(docContent: string): UseCollabReturn {
     }
   }, [collab]);
 
+  // W12.H2: an invite to a study room (#havruta=…&password=…): the havruta screen asks, then joins.
+  useEffect(() => {
+    if (typeof location === "undefined" || !/[#&]havruta=/.test(location.hash)) return;
+    const timer = setTimeout(() => void import("../havruta/open").then((m) => m.joinHavrutaFromHash()).catch(() => undefined), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
   // On first load, if the URL contains #room=, offer to join.
   useEffect(() => {
     const hashRoom = readRoomFromHash();

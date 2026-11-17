@@ -6,6 +6,7 @@
  * are never written back anywhere.
  */
 import { eventsOn, parseEvents, type DayEvent } from "./ical";
+import { compareNames } from "../i18n/collate";
 
 export const BLOCK_START = "<!-- lumen-calendar:start -->";
 export const BLOCK_END = "<!-- lumen-calendar:end -->";
@@ -23,7 +24,7 @@ export function feedEventsOn(feeds: ReadonlyArray<{ name: string; ics: string }>
 /** One line per event: `- 09:00–10:30 Title · Place (Feed)`; all-day events first, without a time. */
 export function eventLines(feeds: readonly FeedEvents[], labels: { allDay: string; none: string }): string[] {
   const all = feeds.flatMap((f) => f.events.map((e) => ({ ...e, feed: f.name })));
-  all.sort((a, b) => (a.time ?? "").localeCompare(b.time ?? "") || a.summary.localeCompare(b.summary));
+  all.sort((a, b) => compareNames((a.time ?? ""), b.time ?? "") || compareNames(a.summary, b.summary));
   if (!all.length) return [`- ${labels.none}`];
   const md = (s: string) => s.replace(/([\\`*_[\]<>#|])/g, "\\$1").replace(/\r?\n/g, " ");
   return all.map((e) => {

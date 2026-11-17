@@ -1,6 +1,7 @@
 ---
 title: Mutation testing
 description: How Lumen checks that the tests of its security-critical code, such as encryption, the keyring, sync merges and the privacy ledger, really catch bugs.
+type: how-to
 ---
 
 Coverage tells you which lines ran, not whether a test would notice if they
@@ -145,3 +146,15 @@ node scripts/mutation/run.mjs --critical --module privacyLedger --receipt --max 
 
 A module that isn't on the branch yet (it comes with another pull request)
 is listed and skipped.
+
+## Checked against Stryker
+
+A score from a runner written for this project can't be compared with
+anything outside it. So three modules (`src/sync/gitMerge.ts`,
+`src/sync/e2ee/keyring.ts`, `src/storage/zip.ts`) are also run through
+StrykerJS 10 with its Vitest runner in incremental mode
+(`stryker/stryker.calibrate.json`), using the same test files.
+`node scripts/mutation/calibrate.mjs` compares the two scores and writes
+`scripts/mutation/calibration.json`. If our score is more than 5 points from
+Stryker's, it is **unverified**: `npm run mutation:check` prints it next to
+Stryker's number, and no status may quote it as checked.

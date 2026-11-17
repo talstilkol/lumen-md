@@ -49,8 +49,16 @@ const RECORDERS: Record<string, (src: string) => string[]> = {
   // Open sources (W7.24): each host under its source's reason; the gate itself records its callers' reasons.
   "src/sources/open/app.ts": (src) => [...src.matchAll(/reason: "([^"]+)"/g)].map((m) => m[1]),
   "src/sources/open/gate.ts": () => [],
+  // Wikidata entity linking (W12.E10): ledgerFetch with the ledger's own www.wikidata.org rule.
+  "src/ui/WikidataLink.tsx": () => [],
   // Signed plugin install (W10.B3): every registry download under its one fixed reason.
   "src/plugins/install.ts": (src) => [/const LEDGER_REASON = "([^"]+)"/.exec(src)![1]],
+  // A remote MCP server's tool listing (W10.C2, #978): "MCP server <name>".
+  "src/agents/mcp/registry.ts": (src) => [/reason: `([^`$]+)\$\{/.exec(src)![1]],
+  // A plain WebDAV backup (R8-M2): recordPlainBackup, with the ledger's own fixed reason.
+  "src/backup/start.ts": () => [],
+  // R8-M1: Tectonic's package downloads for LaTeX to PDF, under its one fixed reason.
+  "src/latex/tectonicDesktop.ts": (src) => [/export const TECTONIC_LEDGER_REASON = "([^"]+)"/.exec(src)![1]],
 };
 
 function walk(dir: string, out: string[] = []): string[] {
@@ -63,7 +71,7 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-const RECORDING_CALL = /\b(recordBrowserService|recordBlockedRequest|recordPluginRequest|recordAppUpdateCheck|recordSpeechVoice|recordSpeechRecognition|guardedFetch|ledgerFetch)\(/;
+const RECORDING_CALL = /\b(recordBrowserService|recordBlockedRequest|recordPluginRequest|recordAppUpdateCheck|recordSpeechVoice|recordSpeechRecognition|recordPlainBackup|guardedFetch|ledgerFetch)\(/;
 
 describe("PRIVACY.he.md / PRIVACY.md map every privacy-ledger route (plan W4.29)", () => {
   it("every module that records into the ledger is known here", () => {

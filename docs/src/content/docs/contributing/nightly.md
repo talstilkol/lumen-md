@@ -1,6 +1,7 @@
 ---
 title: Nightly runs and receipts
 description: npm run nightly runs the flake hunt, the perf checks, the review triage and the weekly health on your own machine, and writes a signed report for each, without GitHub Actions.
+type: how-to
 ---
 
 Lumen doesn't use GitHub Actions, so the scheduled runs (plan 0.11) and the
@@ -231,3 +232,16 @@ The script checks the file against `security/github-ruleset.schema.json`
 difference from what GitHub has. It exits 1 on drift, and 2 when the API
 can't be read, which never counts as a match. The `triage` kind runs it every
 night.
+
+## When a run is red: the local ci-doctor (R12.12)
+
+Everything runs on this machine, from the log of a local or train run. No GitHub Actions and no network.
+
+| Command | What it does |
+|---|---|
+| `npm run ci:filter -- run -- <cmd…>` | Runs a command and prints a short summary. It never cuts an error line. The full output is kept for 7 days in `.ci-doctor/`; get it back with `npm run ci:filter -- expand <id> --grep RE`. |
+| `npm run ci:sig -- red.log` | Gives one signature per failure: a 12-digit key built from the test name, the error head and the first stack frame in the repo, all masked. Paths, timings, ids and colours don't change the key; another error does. Failures are grouped into kinds with Drain. |
+| `npm run ci:kedb -- red.log` | Matches each failure against `scripts/ci-doctor/kedb.json`, the known errors with their cause, class (env / code / flaky) and workaround. A runbook's autonomy (suggest → ask → auto) is computed from its recorded outcomes with a Wilson interval. It is never written by hand, and one failure in the last three takes `auto` away. |
+| `npm run ci:flake -- rerun <test file> --times 3` | Reruns the file alone and records each run. It then classifies the file as real, flaky, isolation (passes alone, fails in the full run) or unknown. Set `CI_DOCTOR_RUNNER` to the runner this machine has; the default is `npx vitest run {file}`. |
+| `npm run ci:flake -- add <file> --test NAME --reason TEXT` | Quarantines a test. It is refused unless the history shows the test flaky, and the quarantine expires within 14 days. `ci:flake -- check` exits 1 on an expired or invalid entry. No gate reads the quarantine yet (W10.M12). |
+| `npm run ci:culprit -- --good <sha> --bad <sha> --log red.log -- npx vitest run {files}` | Runs `git bisect` in a temporary worktree on the red log's failing files only. With `--first-parent` (the default) it names the train merge and its PR; with `--all` it names the commit. Your checkout is not touched. |

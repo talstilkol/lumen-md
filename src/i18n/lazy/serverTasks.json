@@ -1,0 +1,10 @@
+{
+  "serverTasks.cancel": "Cancel",
+  "serverTasks.cancelLabel": "Cancel {tool} on {server}",
+  "serverTasks.status.cancelled": "Cancelled",
+  "serverTasks.status.completed": "Done",
+  "serverTasks.status.failed": "Failed",
+  "serverTasks.status.input_required": "Waiting for your answer",
+  "serverTasks.status.working": "Working",
+  "serverTasks.title": "Tasks on MCP servers"
+}

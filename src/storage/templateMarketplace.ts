@@ -15,12 +15,13 @@
  * cache when needed.
  */
 
-import { log } from "../lib/logger";
+import { log, swallowed } from "../lib/logger";
 import { connectAllowedByCsp } from "../lib/cspConnect";
 import { isOPFSAvailable, listWorkspace, readWorkspaceFile, workspaceHasFile, writeWorkspaceFile } from "./workspace";
 import { fetchWithRetry } from "../lib/fetchRetry";
 import { getLocale } from "../i18n";
 import { TEMPLATES_CHANGED_EVENT } from "./templateEvents";
+import { compareNames } from "../i18n/collate";
 
 export interface MarketplaceTemplate {
   id: string;
@@ -192,8 +193,9 @@ function rememberInstalledName(id: string, name: string): void {
     const names = readInstalledNames();
     names[id] = name;
     localStorage.setItem(INSTALLED_NAMES_KEY, JSON.stringify(names));
-  } catch {
+  } catch (err) {
     /* why: private mode — fall back to an id-derived name */
+    swallowed("storage/templateMarketplace: private mode — fall back to an id-derived name", err);
   }
 }
 
@@ -230,7 +232,7 @@ export async function listInstalledTemplates(): Promise<InstalledTemplate[]> {
     const id = rest.replace(/\.md$/i, "");
     out.push({ id, name: names[id] || nameFromId(id), path: e.path });
   }
-  out.sort((a, b) => a.name.localeCompare(b.name));
+  out.sort((a, b) => compareNames(a.name, b.name));
   return out;
 }
 
@@ -245,8 +247,9 @@ function bumpDownloads(id: string): void {
     const parsed: Record<string, number> = raw ? JSON.parse(raw) : {};
     parsed[id] = (parsed[id] ?? 0) + 1;
     localStorage.setItem(LOCAL_DOWNLOADS_KEY, JSON.stringify(parsed));
-  } catch {
+  } catch (err) {
     /* why: private mode — counter is best-effort */
+    swallowed("storage/templateMarketplace: private mode — counter is best-effort", err);
   }
 }
 
@@ -255,8 +258,9 @@ function mergeLocalDownloads(templates: MarketplaceTemplate[]): MarketplaceTempl
   try {
     const raw = localStorage.getItem(LOCAL_DOWNLOADS_KEY);
     local = raw ? JSON.parse(raw) : {};
-  } catch {
+  } catch (err) {
     /* why: storage denied or corrupt counter: show the server counts only */
+    swallowed("storage/templateMarketplace: storage denied or corrupt counter: show the server counts only", err);
   }
   return templates.map((t) => ({
     ...t,
@@ -282,8 +286,9 @@ export function getMarketplaceBackendUrl(): string | null {
           "Set VITE_MARKETPLACE_URL (or VITE_CSP_CONNECT_EXTRA) at build time to allow it.",
       );
     }
-  } catch {
+  } catch (err) {
     /* why: private mode */
+    swallowed("storage/templateMarketplace: private mode", err);
   }
   const env = (import.meta as ImportMeta & { env?: { VITE_MARKETPLACE_URL?: string } }).env
     ?.VITE_MARKETPLACE_URL;
@@ -350,8 +355,9 @@ export async function recordRemoteInstall(id: string): Promise<void> {
   try {
     // privacy-ledger: the deployment's own endpoint (the template marketplace backend); not AI traffic: listed in audit mode (network)
     await fetch(`${backend}/items/${encodeURIComponent(id)}/install`, { method: "POST" });
-  } catch {
+  } catch (err) {
     /* why: the install counter is best effort; the template is installed either way */
+    swallowed("storage/templateMarketplace: the install counter is best effort; the template is installed either w", err);
   }
 }
 

@@ -1,0 +1,227 @@
+{
+ "card": {
+  "schema": 1,
+  "tag": "dev",
+  "model": {
+   "name": "scripted drafts (no model): this measures the rules around the model",
+   "digest": "n/a (no model weights)"
+  },
+  "seed": 11,
+  "temperature": 0,
+  "dataset": {
+   "name": "claim-extractor-synthetic",
+   "version": "1",
+   "license": "MIT (written for lumen-md; synthetic, no real data)"
+  },
+  "n": 20,
+  "metrics": {
+   "precision": {
+    "value": 1,
+    "ci95": [
+     1,
+     1
+    ],
+    "method": "bootstrap"
+   },
+   "recall": {
+    "value": 1,
+    "ci95": [
+     1,
+     1
+    ],
+    "method": "bootstrap"
+   },
+   "claimsWithoutQuote": {
+    "value": 0,
+    "ci95": [
+     0,
+     0
+    ],
+    "method": "bootstrap"
+   }
+  }
+ },
+ "perCase": [
+  {
+   "id": "cl-01",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-02",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-03",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-04",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-05",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-06",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-07",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-08",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-09",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-10",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-11",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-12",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-13",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-14",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-15",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-16",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-17",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-18",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-19",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  },
+  {
+   "id": "cl-20",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "reasonOk": 3,
+   "noQuote": 0
+  }
+ ],
+ "note": "SYNTHETIC set written for R12.11 (tag dev). A real-model run (Ollama on the Mac) is owed."
+}

@@ -10,8 +10,9 @@ import { StatusBar } from "./ui/StatusBar";
 import { ScrollProgress } from "./ui/ScrollProgress";
 import { SearchReplace } from "./ui/SearchReplace";
 import { LocalGraphPanel, CanvasWhiteboard, PluginGallery, TemplateGallery, AuditLog, SettingsScreen, ReadingSettings, PrivacyLedgerPanel, TrashPanel, PropertiesPanel, QuickCapture, ImageHostsPanel, AiDoctorPanel, AgentReviewPanel } from "./appPanels";
-import { FIRST_RUN_SOURCES, OPEN_IMPORT_EVENT, importFromSearch, readOpenImport, type OpenImportDetail } from "./onboarding/importEvent";
+import { useImportPreset } from "./hooks/useImportPreset";
 const ImportWizard = lazy(() => import("./storage/import/ImportWizard").then(m => ({ default: m.ImportWizard })));
+const InstallDialog = lazy(() => import("./pwa/InstallDialog").then((m) => ({ default: m.InstallDialog })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
 // PDF reader (plan 4.14): pdf.js and the reader load only when a PDF is opened.
@@ -19,6 +20,7 @@ const PdfReader = lazy(() => import("./pdf/PdfReaderOverlay").then(m => ({ defau
 const EpubReader = lazy(() => import("./epub/EpubReader").then(m => ({ default: m.EpubReaderOverlay })));
 // W10.E19 (8.2): every dialog and panel that is hidden at start loads on first open.
 const CommandPalette = lazy(() => import("./ui/CommandPalette").then((m) => ({ default: m.CommandPalette })));
+const FileViewerOverlay = lazy(() => import("./viewers/FileViewerOverlay"));
 import { AiFab } from "./ui/AiFab";
 import { FileTree } from "./ui/FileTree";
 import { SidebarResizer } from "./ui/SidebarResizer";
@@ -52,13 +54,12 @@ import { useTauriMenu } from "./hooks/useTauriMenu";
 import { useAgentReview } from "./hooks/useAgentReview";
 import { EditorLayout } from "./layouts/EditorLayout";
 import { useAuth } from "./auth/useAuth";
+import { useConfigHealth } from "./hooks/useConfigHealth";
 import { docIdentity } from "./renderer/previewDoc";
 import { auditScope } from "./ui/auditScope";
-import { useEntitlement } from "./billing/useEntitlement";
-import { useAppStore, isNarrowScreen } from "./store/useStore";
+import { narrowQuery } from "./mobile/windowClass";
+import { useAppStore, isNarrowScreen, tabIdOf } from "./store/useStore";
 import { t } from "./i18n";
-import { localLlmAvailable } from "./ai/localLlm";
-import { assessConfigHealth } from "./lib/configHealth";
 import { historyKey } from "./storage/history";
 import { isOPFSAvailable, readWorkspaceFile } from "./storage/workspace";
 import { ErrorBoundary } from "./ui/ErrorBoundary";
@@ -74,12 +75,15 @@ const UsabilitySelfPanel = lazy(() => import("./ui/UsabilitySelfPanel").then((m)
 import { explainError } from "./lib/userError";
 import { useEdgeSwipes, useLongNotesOpenForReading } from "./mobile/useMobileGestures";
 import { FeatureFlagsHost } from "./ui/FeatureFlagsHost";
+import { TypePageHost } from "./types/TypePageHost";
+import { WikidataHost } from "./ui/WikidataHost";
+import { EntityGraphHost } from "./ui/EntityGraphHost";
 import { useDesktopShell } from "./desktop/useDesktopShell";
 // W6.25: App.tsx split into hooks and components, behaviour unchanged.
 import { useAppBootEffects } from "./hooks/useAppBootEffects";
 import { useAppShortcuts } from "./hooks/useAppShortcuts";
 import { useAutosave } from "./hooks/useAutosave";
-import { useCommandEvents } from "./hooks/useCommandEvents";
+import { runCommandById, useCommandEvents } from "./hooks/useCommandEvents";
 import { useDocFileActions } from "./hooks/useDocFileActions";
 import { useLaunchActions } from "./hooks/useLaunchActions";
 import { useOpenFileEvent } from "./hooks/useOpenFileEvent";
@@ -88,9 +92,13 @@ import { useWindowEvent } from "./hooks/useWindowEvent";
 import { useOpenedOnce } from "./hooks/useOpenedOnce";
 const GraphOverlay = lazy(() => import("./ui/GraphOverlay").then((m) => ({ default: m.GraphOverlay })));
 import { DropHint } from "./ui/DropHint";
+// W13.R7: the linked three-column view is a reading mode; its root carries the marker (src/reading/modes.ts).
+import { modeRoot } from "./reading/modeRoot";
+import { useWindowTitle } from "./ui/useWindowTitle";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
+  useWindowTitle(doc.name);
   // Side effects that own no App state: reading options, snippets, update check, theme, locale, plugins… (W6.25)
   useAppBootEffects();
   const setContent = useAppStore((s) => s.setContent);
@@ -101,6 +109,7 @@ export default function App() {
   const reorderTabs = useAppStore((s) => s.reorderTabs);
   const mode = useAppStore((s) => s.mode);
   const showOutline = useAppStore((s) => s.showOutline);
+  const syncScroll = useAppStore((s) => s.syncScroll);
   const outlineSheet = useAppStore((s) => s.outlineSheet);
   // Phone width (plan 10.2.4): the outline shows as a bottom sheet, opened on demand.
   const [narrow, setNarrow] = useState(isNarrowScreen);
@@ -111,7 +120,7 @@ export default function App() {
   }, []);
   useEffect(() => {
     if (typeof window.matchMedia !== "function") return;
-    const mq = window.matchMedia("(max-width: 760px)");
+    const mq = window.matchMedia(narrowQuery()); // W13.M1: < 600 dp in the app, ≤ 760 px elsewhere
     const on = () => setNarrow(mq.matches);
     mq.addEventListener?.("change", on);
     return () => mq.removeEventListener?.("change", on);
@@ -128,21 +137,9 @@ export default function App() {
   const grammarCheck = useAppStore((s) => s.grammarCheck);
   const typewriterMode = useAppStore((s) => s.typewriterMode);
   const suggestingMode = useAppStore((s) => s.suggestingMode);
-  const aiKey = useAppStore((s) => s.aiKey);
-  const useLocalAi = useAppStore((s) => s.useLocalAi);
   const editorRef = useRef<EditorHandle | null>(null);
-  const authStatus = useAuth((s) => s.status);
-  const authProviderName = useAuth((s) => s.provider.name);
-  const authError = useAuth((s) => s.error);
   const authUserId = useAuth((s) => s.user?.id);
   const authOrgId = useAuth((s) => s.user?.orgId);
-  const entitlementLoading = useEntitlement((s) => s.loading);
-  const entitlement = useEntitlement((s) => s.entitlement);
-  const capabilitiesCloudSync = useEntitlement((s) => s.capabilities.cloudSync);
-  const hasWebGPU = useMemo(() => {
-    if (typeof window === "undefined" || typeof navigator === "undefined") return false;
-    return localLlmAvailable().available;
-  }, []);
   // A usability session (W1.29, self-guided W4.25) survives a reload: reopen its panel.
   const [usabilityOpen, setUsabilityOpen] = useState<null | "moderated" | "unmoderated">(() => {
     try {
@@ -177,6 +174,7 @@ export default function App() {
   const [agentReviewOpen, setAgentReviewOpen] = useState(false);
   const openAgentReview = useCallback(() => setAgentReviewOpen(true), []);
   const [importOpen, setImportOpen] = useState(false);
+  const [installOpen, setInstallOpen] = useState(false);
   const [trashOpen, setTrashOpen] = useState(false);
   const [propertiesOpen, setPropertiesOpen] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
@@ -191,6 +189,7 @@ export default function App() {
   const [runtimeMetricsOpen, setRuntimeMetricsOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
+  useWindowEvent("lumen-open-focus", () => setFocusMode(true));
   const [tourOpen, setTourOpen] = useState(false);
   const [setupOpen, setSetupOpen] = useState(false);
 
@@ -201,33 +200,8 @@ export default function App() {
   // Share targets, shortcuts, files opened with Lumen, phone widgets; the Welcome note and first-run setup (W6.25).
   useLaunchActions({ setCaptureOpen, setCaptureVoice, setPaletteOpen, setSearchQuery, setSearchOpen, setSetupOpen });
 
-  const configHealth = useMemo(
-    () =>
-      assessConfigHealth({
-        authStatus,
-        authProviderName,
-        authError,
-        userId: authUserId,
-        entitlementLoading,
-        entitlement,
-        capabilitiesCloudSync,
-        aiKey,
-        useLocalAi,
-        hasWebGPU,
-      }),
-    [
-      authStatus,
-      authProviderName,
-      authError,
-      authUserId,
-      entitlementLoading,
-      entitlement,
-      capabilitiesCloudSync,
-      aiKey,
-      useLocalAi,
-      hasWebGPU,
-    ],
-  );
+  // The configuration health report: sign-in, plan, AI key or local model (W10.E28: its own hook).
+  const configHealth = useConfigHealth();
 
   // Open, save, new, export and workspace actions, and the recent files (W6.25).
   const {
@@ -240,7 +214,7 @@ export default function App() {
   }, []);
 
   // PDF / EPUB readers and every `lumen-open-file` (W6.25).
-  const { pdfView, setPdfView, epubView, setEpubView, registerPdfSaveGate } = useOpenFileEvent(handleOpenFromWorkspace);
+  const { pdfView, setPdfView, epubView, setEpubView, fileView, setFileView, registerPdfSaveGate } = useOpenFileEvent(handleOpenFromWorkspace);
 
   // Automations (W5.24): a lazy chunk that starts only when the vault has a rules file.
   useEffect(() => {
@@ -325,7 +299,15 @@ export default function App() {
 
   useCommandEvents(commands);
   useWindowEvent("lumen-open-ai-settings", () => setSettingsTab("ai"));
-  useWindowEvent("lumen-open-settings", (e) => setSettingsTab((e as CustomEvent<{ tab?: SettingsTab }>).detail?.tab ?? "general"));
+  // W13.E1: Vim's :q closes the open tab (:w runs file.save through lumen-run-command).
+  useWindowEvent("lumen-vim-quit", () => closeTabAction(tabIdOf(useAppStore.getState().doc)));
+  // W13.E4: `focus` names a setting to open on (lumen://settings/<id>, settings/settingsLink.ts).
+  const [settingsFocus, setSettingsFocus] = useState<string | undefined>(undefined);
+  useWindowEvent("lumen-open-settings", (e) => {
+    const d = (e as CustomEvent<{ tab?: SettingsTab; focus?: string }>).detail;
+    setSettingsFocus(d?.focus);
+    setSettingsTab(d?.tab ?? "general");
+  });
   useWindowEvent("lumen-open-privacy-ledger", () => setPrivacyOpen(true));
   // A saved search in the sidebar (plan W2.12) opens the dialog on its query.
   useWindowEvent("lumen-open-search", (e) => {
@@ -345,10 +327,24 @@ export default function App() {
     // Trash older than 30 days is deleted for good, once per start.
     const purge = window.setTimeout(() => {
       void import("./storage/trash").then((m) => (isOPFSAvailable() ? m.purgeExpiredTrash() : 0)).catch(() => 0);
+      // W13.S1: old versions past the vault's retention go too (the newest version of every file always stays).
+      void import("./storage/historyRetention").then((m) => m.runRetention()).catch(() => null);
     }, 5000);
     return () => {
       window.removeEventListener("lumen-open-trash", onOpen);
       window.clearTimeout(purge);
+    };
+  }, []);
+  // W13.Y4: the system text size (Dynamic Type, Android font scale) or this device's own, re-read on resume.
+  useEffect(() => {
+    let stop: (() => void) | null = null;
+    let live = true;
+    void import("./a11y/systemTextSize").then((m) => {
+      if (live) stop = m.installSystemTextSize();
+    });
+    return () => {
+      live = false;
+      stop?.();
     };
   }, []);
   useWindowEvent("lumen-open-ai-doctor", () => setAiDoctorOpen(true));
@@ -356,22 +352,9 @@ export default function App() {
   // the status bar counts the waiting ones, a toast announces new ones.
   const agentReviewPending = useAgentReview(editorRef, openAgentReview);
   useWindowEvent("lumen-open-agent-review", openAgentReview);
-  // W11.P6: the first run's "Bring your notes" opens the wizard on the source picked there.
-  const [importPreset, setImportPreset] = useState<OpenImportDetail>({});
-  useWindowEvent(OPEN_IMPORT_EVENT, (e) => {
-    setImportPreset(readOpenImport(e, FIRST_RUN_SOURCES));
-    setImportOpen(true);
-  });
-  // W11.P7: a `?import=<source>` link (the "Leaving Evernote or Notion?" page) opens the wizard on that source, once.
-  useEffect(() => {
-    const source = importFromSearch(window.location.search);
-    if (!source) return;
-    const url = new URL(window.location.href);
-    url.searchParams.delete("import");
-    window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
-    setImportPreset({ source });
-    setImportOpen(true);
-  }, []);
+  // W11.P6/P7: the first run's "Bring your notes" and a `?import=<source>` link open the wizard on that source.
+  const importPreset = useImportPreset(() => setImportOpen(true));
+  useWindowEvent("lumen-open-install", () => setInstallOpen(true));
 
   // Comment-anchor click in the editor → window event from
   // commentDecorations.ts. Open the side panel + jump the panel
@@ -402,9 +385,9 @@ export default function App() {
       useAppStore.getState().setTheme(cur === "dark" ? "light" : "dark");
     },
     onSetMode: (mode) => useAppStore.getState().setMode(mode),
-    onExportHtml: () => commands.find((c) => c.id === "file.exportHtml")?.action(),
-    onExportPdf: () => commands.find((c) => c.id === "file.exportPdf")?.action(),
-    onPrint: () => commands.find((c) => c.id === "file.print")?.action(),
+    onExportHtml: () => runCommandById("file.exportHtml"),
+    onExportPdf: () => runCommandById("file.exportPdf"),
+    onPrint: () => runCommandById("file.print"),
     onQuickCapture: () => setCaptureOpen(true),
   });
 
@@ -481,12 +464,13 @@ export default function App() {
             preview sections inflate to the full document height, their inner
             scrollers never overflow, and pane scrolling + scroll-sync go
             dead — the whole page scrolls as one block instead. */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }} {...modeRoot("triple", mode === "split" && showOutline && syncScroll === "all")}>
           <DocTabs
             tabs={openTabs.map((t) => ({
               id: t.id,
               name: t.name,
               dirty: t.dirty,
+              workspaceName: t.workspaceName,
             }))}
             activeId={tabId(doc)}
             onSelect={(id) => {
@@ -609,6 +593,9 @@ export default function App() {
       <AiToastContainer />
       <HelpHost />
       <FeatureFlagsHost />
+      <TypePageHost />
+      <WikidataHost />
+      <EntityGraphHost />
       <AiSuggestionsPanel />
       <AiInlinePromptOverlay />
       <MobileKeyboardBarHost />
@@ -653,6 +640,13 @@ export default function App() {
         </Suspense>
       )}
 
+      {/* Notebook, data file and map file viewers (plan W12.F4, F5, F7) */}
+      {fileView && (
+        <Suspense fallback={null}>
+          <FileViewerOverlay key={`${fileView.path}#${fileView.seq}`} view={fileView} onClose={() => setFileView(null)} onOpenAsText={(path, text) => { setFileView(null); handleOpenFromWorkspace(path, text); }} />
+        </Suspense>
+      )}
+
       {/* Graph View overlay */}
       {graphOpen && (
         <Suspense fallback={null}>
@@ -679,12 +673,13 @@ export default function App() {
             // pro users have no org, so their own id is the scope.
             orgId={auditScope({ id: authUserId ?? "", orgId: authOrgId }) || "personal"}
           />}
-          {settingsTab && <SettingsScreen key={settingsTab} tab={settingsTab} onClose={() => setSettingsTab(null)} onOpenAuditLog={() => { setSettingsTab(null); setAuditLogOpen(true); }} />}
+          {settingsTab && <SettingsScreen key={`${settingsTab}:${settingsFocus ?? ""}`} tab={settingsTab} focus={settingsFocus} onClose={() => setSettingsTab(null)} onOpenAuditLog={() => { setSettingsTab(null); setAuditLogOpen(true); }} />}
           {aiDoctorOpen && <AiDoctorPanel open={aiDoctorOpen} onClose={() => setAiDoctorOpen(false)} />}
           {agentReviewOpen && <AgentReviewPanel open={agentReviewOpen} onClose={() => setAgentReviewOpen(false)} />}
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
           {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
           {importOpen && <ImportWizard open={importOpen} initialSource={importPreset.source} firstRun={importPreset.firstRun} onClose={() => setImportOpen(false)} />}
+          {installOpen && <InstallDialog open={installOpen} onClose={() => setInstallOpen(false)} />}
           {propertiesOpen && <PropertiesPanel open={propertiesOpen} onClose={() => setPropertiesOpen(false)} text={doc.content} applyEdit={applyPropertiesEdit} />}
           {captureOpen && <QuickCapture open={captureOpen} voice={captureVoice} onClose={() => { setCaptureOpen(false); setCaptureVoice(false); }} />}
           {imageHostsOpen && <ImageHostsPanel open={imageHostsOpen} onClose={() => setImageHostsOpen(false)} />}

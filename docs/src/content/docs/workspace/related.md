@@ -1,6 +1,8 @@
 ---
 title: Related notes while writing
 description: The notes closest to the paragraph you are writing, and the notes it mentions without a link — on this device, without slowing typing.
+type: how-to
+tasks: ["W10.B19", "W2.2"]
 ---
 
 **⌘K → Related notes: show / hide** opens a small panel next to the editor.

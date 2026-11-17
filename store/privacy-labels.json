@@ -15,6 +15,13 @@
         "linkedToUser": false,
         "usedForTracking": false,
         "condition": "Only in a build made with a crash-reporting key (VITE_SENTRY_DSN), and only after the user turns error reports on (Settings; off by default, refused under the local-only policy). A report holds the error's class name and where in the code, never its message, note text, titles, paths or the page address (src/lib/telemetry.ts)."
+      },
+      {
+        "category": "Diagnostics",
+        "type": "Performance Data",
+        "linkedToUser": false,
+        "usedForTracking": false,
+        "condition": "Only with an error tracker (VITE_SENTRY_DSN, or one the user sets) and only after the user turns performance reports on (Settings → Security; off by default, a separate switch from error reports, plan W11.S19). One report per session with counts of web-vitals ratings per metric; no timings, no page address."
       }
     ],
     "note": "Everything under optionalFeatures is sent by the user's own choice to the service the user set up (their own key or account); the developer receives none of it, except error reports, which go to whoever runs the error tracker the build names (VITE_SENTRY_DSN)."
@@ -29,6 +36,11 @@
         "type": "App info and performance: Crash logs",
         "optional": true,
         "condition": "Only in a build made with a crash-reporting key (VITE_SENTRY_DSN), and only after the user turns error reports on (off by default, refused under the local-only policy)."
+      },
+      {
+        "type": "App info and performance: Diagnostics",
+        "optional": true,
+        "condition": "Only with an error tracker and only after the user turns performance reports on (off by default, separate from error reports): counts of web-vitals ratings per session, no timings."
       }
     ]
   },
@@ -64,7 +76,9 @@
       "routes": [
         "Research service",
         "Agent tool ",
-        "Zotero Web API (your library; writes only the PDF highlights you send)"
+        "Zotero Web API (your library; writes only the PDF highlights you send)",
+        "OpenAlex: the references of a DOI (citation graph, only when you turn it on)",
+        "CrossRef DOI lookup: the DOI you asked for only"
       ]
     },
     {
@@ -113,6 +127,24 @@
       ]
     },
     {
+      "feature": "Outside MCP servers you add",
+      "ledgerCategory": "network",
+      "sends": "A request for the list of that server's tools; what a tool call sends is listed as the agent's tool request",
+      "turnedOnBy": "Adding and enabling a remote MCP server in Settings → MCP servers, then \"Show tools\" or an agent run that uses it; not in airplane mode, and refused under local-only",
+      "routes": [
+        "MCP server "
+      ]
+    },
+    {
+      "feature": "LaTeX to PDF with Tectonic (desktop)",
+      "ledgerCategory": "network",
+      "sends": "Tectonic's own requests for TeX packages it has not cached: your IP address and the package names, never the document",
+      "turnedOnBy": "Exporting a PDF from LaTeX in the desktop app with Tectonic installed, after allowing its downloads once; cache only (no request) in airplane mode and under local-only",
+      "routes": [
+        "Tectonic: TeX packages from its bundle server (LaTeX to PDF)"
+      ]
+    },
+    {
       "feature": "Other requests in audit mode",
       "ledgerCategory": "network",
       "sends": "Whatever that request carries; listed so an audit can compare",
@@ -129,6 +161,15 @@
       "routes": [
         "Sync storage: your Dropbox (audit mode)",
         "Sync storage: your Google Drive (audit mode)"
+      ]
+    },
+    {
+      "feature": "Backups to your WebDAV server",
+      "ledgerCategory": "third-party",
+      "sends": "The vault archive, encrypted (age) or plain as you choose, to the server you set; a plain one is readable there",
+      "turnedOnBy": "Setting up a WebDAV backup in Backups (encrypted is the first choice); a plain backup is refused under local-only",
+      "routes": [
+        "Plain backup to your WebDAV server (the vault archive, not encrypted)"
       ]
     },
     {
@@ -161,12 +202,21 @@
     {
       "feature": "Public sources (Sefaria, the Knesset, government data)",
       "ledgerCategory": "cloud-text",
-      "sends": "Only the reference, name or search words you asked for; nothing from your notes",
-      "turnedOnBy": "Searching one of these sources; refused under local-only",
+      "sends": "Only the reference or search words you asked for; nothing from your notes",
+      "turnedOnBy": "Searching one of these sources, after you agree to that search; under local-only too, listed as consented in the ledger",
       "routes": [
         "Jewish sources (Sefaria): the reference only",
         "Knesset records (OData): the law or bill name only",
         "Government data (data.gov.il, CBS): the search words or dataset id only"
+      ]
+    },
+    {
+      "feature": "Wikidata (entity linking)",
+      "ledgerCategory": "cloud-text",
+      "sends": "The name of the entity you asked to link; nothing from your notes",
+      "turnedOnBy": "Searching Wikidata, after you agree (this once, or always on this device); refused under local-only, whatever you agreed",
+      "routes": [
+        "Wikidata search: the entity name only"
       ]
     },
     {

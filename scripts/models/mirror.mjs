@@ -48,6 +48,11 @@ import { execFileSync } from "node:child_process";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const REGISTRY = join(ROOT, "models", "registry.json");
+// Run as a command (npm run models:mirror, owner:models), Node strips the
+// types but cannot resolve the app's Vite-style imports without an extension
+// (modelHosting.ts → "../lib/slug"); the hooks resolve them. Under Vite
+// (the tests import this file) nothing is registered.
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await import("../lib/ts-register.mjs");
 const H = await import(join(ROOT, "src", "ai", "modelHosting.ts"));
 
 /** ONNX dtype of a file name (as transformers.js names them), "config" for the rest. */

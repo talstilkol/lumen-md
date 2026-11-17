@@ -11,7 +11,8 @@
  *   npm run bench:models -- --split test --dir <test split> --write
  *
  * Options
- *   --engines a,b      engines from src/bench/engines (default: all)
+ *   --engines a,b      engines from src/bench/engines (default: all); a family's
+ *                      variant is <file>:<model>, e.g. ollama:gemma3:4b
  *   --backends …       webgpu (default) and/or wasm (WebGPU hidden from the page)
  *   --split dev|test   golden split (default dev); test needs --dir (built in CI)
  *   --limit N          first N items per part (a smoke run: never written)
@@ -21,6 +22,10 @@
  *   --headless         default: a window (GPUs are more reliable headed)
  *   --channel chrome   use installed Chrome instead of Playwright's Chromium
  *   --no-prime         measure the first load (cold cache: download included)
+ *   --captions-out F   also write each caption engine's captions, { engine: { id: caption } },
+ *                      for the owner's rating sheet (scripts/caption/rating-sheet.mjs, plan 6.6).
+ *                      The only outputs ever written; with --split test they are held-out
+ *                      data: keep the file off the repo.
  *
  * Only numbers leave the page: no item, input or output is printed or
  * written (the test split is held out).
@@ -59,6 +64,7 @@ export function parseArgs(argv) {
     headless: has("--headless"),
     channel: opt("--channel"),
     prime: !has("--no-prime"),
+    captionsOut: opt("--captions-out"),
   };
 }
 
@@ -87,16 +93,19 @@ async function openPage(browser, url, backend) {
 }
 
 /** One engine on one backend → a result row (numbers only). */
+/** Captions kept for the rating sheet (--captions-out): "<engine>@<backend>" → { id: caption }. */
+const captionsOf = {};
+
 async function measure({ browser, url, pid, id, backend, opts }) {
   const probe = await openPage(browser, url, backend);
   const meta = await probe.page.evaluate((e) => window.lumenBench.describe(e), id);
   const env = await probe.page.evaluate(() => window.lumenBench.env());
   const at = new Date().toISOString().slice(0, 10);
-  const row = { engine: id, label: meta.label, set: meta.set, models: meta.models, backend, split: opts.split, at, limited: !!opts.limit, status: "measured", device: null, items: 0 };
+  const row = { engine: id, label: meta.label, set: meta.set, task: meta.task ?? meta.set, models: meta.models, backend, split: opts.split, at, limited: !!opts.limit, status: "measured", device: null, items: 0 };
   try {
     if (backend === "wasm" && env.webgpu) return { ...row, status: "error", error: "WebGPU was not hidden from the page" };
-    const task = TASKS[meta.set];
-    if (!task) return { ...row, status: "no-task", note: `scripts/bench/tasks.mjs has no task for ${meta.set}` };
+    const task = TASKS[row.task];
+    if (!task) return { ...row, status: "no-task", note: `scripts/bench/tasks.mjs has no task for ${row.task}` };
     const { manifest, problems } = (() => {
       try {
         return { manifest: JSON.parse(readFileSync(join(GOLDEN, meta.set, "manifest.json"), "utf8")), problems: [] };
@@ -112,7 +121,8 @@ async function measure({ browser, url, pid, id, backend, opts }) {
       const per = new Map();
       items = items.filter((it) => (per.set(it.part, (per.get(it.part) ?? 0) + 1), per.get(it.part) <= opts.limit));
     }
-    const payload = task.payload({ items, corpus });
+    // A task may load the app's TypeScript first (ts-module.mjs), so both steps may be async.
+    const payload = await task.payload({ items, corpus });
     if (opts.prime) {
       // Download and compile once (the browser caches the weights), then measure on a fresh page.
       await probe.page.evaluate(([e, p]) => window.lumenBench.run(e, p), [id, { shared: payload.shared, items: payload.items.slice(0, 1) }]);
@@ -122,7 +132,8 @@ async function measure({ browser, url, pid, id, backend, opts }) {
     const r = await probe.page.evaluate(([e, p]) => window.lumenBench.run(e, p), [id, payload]);
     const m = mem.stop();
     if (r.error) return { ...row, status: "error", device: r.device, error: r.error };
-    const quality = task.score(items, r.outputs);
+    const quality = await task.score(items, r.outputs);
+    if (opts.captionsOut && meta.set === "caption") captionsOf[`${id}@${backend}`] = Object.fromEntries(Object.entries(r.outputs ?? {}).filter(([, v]) => typeof v === "string"));
     return {
       ...row,
       status: missing.length ? "partial" : "measured",
@@ -198,6 +209,11 @@ async function main() {
   mkdirSync(dirname(out), { recursive: true });
   writeFileSync(out, JSON.stringify({ generatedAt: new Date().toISOString(), split: opts.split, env, rows: rows.map(({ env: _e, ...r }) => r) }, null, 2) + "\n");
   console.log(`numbers → ${out}`);
+  if (opts.captionsOut) {
+    mkdirSync(dirname(opts.captionsOut), { recursive: true });
+    writeFileSync(opts.captionsOut, JSON.stringify(captionsOf, null, 1) + "\n");
+    console.log(`captions for the rating sheet → ${opts.captionsOut}${opts.split === "test" ? " (held-out test data: do not commit)" : ""}`);
+  }
   if (opts.write) {
     const path = join(ROOT, "models", "registry.json");
     const { registry, written, skipped } = applyMeasurements(JSON.parse(readFileSync(path, "utf8")), rows, env ?? {});

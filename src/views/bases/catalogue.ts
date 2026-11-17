@@ -40,7 +40,10 @@ export const BASES_UNSUPPORTED: ReadonlySet<string> = new Set(["global.icon", "g
 export const BASES_LEGACY_GLOBALS = ["not", "empty"] as const;
 
 // W6.46: Notion's formula functions too (./notion.ts); an Obsidian global of the same name keeps its meaning.
-const GLOBAL_SET: ReadonlySet<string> = new Set<string>([...BASES_GLOBALS.filter((n) => !BASES_UNSUPPORTED.has(`global.${n}`)), "html", ...BASES_LEGACY_GLOBALS, ...NOTION_FUNCTIONS]);
+/** Lumen's own globals, beyond the Bases reference: workdays(from, to[, "mon-fri"]) (W10.C26). */
+export const LUMEN_GLOBALS = ["workdays"] as const;
+
+const GLOBAL_SET: ReadonlySet<string> = new Set<string>([...BASES_GLOBALS.filter((n) => !BASES_UNSUPPORTED.has(`global.${n}`)), "html", ...BASES_LEGACY_GLOBALS, ...NOTION_FUNCTIONS, ...LUMEN_GLOBALS]);
 const METHOD_NAMES: ReadonlySet<string> = new Set(
   BASES_DOCUMENTED.filter((n) => !n.startsWith("global.")).map((n) => n.slice(n.indexOf(".") + 1)).concat(["upper", "length", "toLowerCase", "toUpperCase", "includes", "matches", "prop"]),
 );

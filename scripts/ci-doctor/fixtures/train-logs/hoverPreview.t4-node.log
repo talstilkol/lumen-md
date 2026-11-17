@@ -1,0 +1,46 @@
+FAIL previewMarkdown > from a heading (numbered like the preview), or just the block 
+    stubbed package remark-gfm: remark-gfm.call()
+FAIL renderPreview > renders the note, from cache the second time; well under 150 ms 
+    stubbed package remark-frontmatter: remark-frontmatter.call()
+An update to Root inside a test was not wrapped in act(...).
+
+When testing, code that causes React state updates should be wrapped into act(...):
+
+act(() => {
+  /* fire events that update state */
+});
+/* assert on the output */
+
+This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act
+FAIL HoverCard > describes the link while it shows, and says when the note doesn't exist 
+    expect(received).toContain(expected) // indexOf
+    
+    Expected substring: "Later text."
+    Received string:    "No note named “Plans” yet"
+    
+    Ignored nodes: comments, script, style
+    [36m<html>[39m
+      [36m<head />[39m
+      [36m<body>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"lumen-hover-card"[39m
+          [33mdata-ms[39m=[32m"131.1"[39m
+          [33mdata-show[39m=[32m"true"[39m
+          [33mdata-testid[39m=[32m"hover-preview"[39m
+          [33mid[39m=[32m"lumen-hover-card-1"[39m
+          [33mrole[39m=[32m"tooltip"[39m
+          [33mstyle[39m=[32m"left: 8px; top: 6px;"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"lumen-hover-card-empty"[39m
+          [36m>[39m
+            [0mNo note named “Plans” yet[0m
+          [36m</div>[39m
+        [36m</div>[39m
+FAIL review fixes (PR #250) > the editor's hover skips [[links]] inside code 
+    markdown is not a function
+FAIL review fixes (PR #250) > a block id: not one in code, and just the list item it marks 
+    stubbed package remark-directive: remark-directive.call()
+FAIL review fixes (PR #250) > a note saved since the last hover shows its new text 
+    stubbed package remark-gfm: remark-gfm.call()
+pass 5 fail 6

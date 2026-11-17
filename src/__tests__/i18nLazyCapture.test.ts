@@ -42,7 +42,8 @@ const DOMAINS = [
     file: "capture.json",
     prefix: "capture.",
     module: "capture/strings.ts",
-    users: ["capture/quickCapture.ts", "ui/QuickCapture.tsx"],
+    // triageActions (W10.C21): the "sort the inbox" command, imported dynamically by the command palette.
+    users: ["capture/quickCapture.ts", "capture/triageActions.ts", "ui/QuickCapture.tsx"],
     // Loaded with the capture box (QuickCapture.tsx imports it dynamically).
     sameChunk: ["capture/voiceCapture.ts"],
     min: 15,
@@ -51,7 +52,8 @@ const DOMAINS = [
     file: "fineTune.json",
     prefix: "fineTune.",
     module: "ui/fineTuneStrings.ts",
-    users: ["ui/FineTuneSettings.tsx"],
+    // W10.A10: the settings screen names the fine-tune tab before its panel loads (00f9bea233).
+    users: ["ui/FineTuneSettings.tsx", "ui/SettingsScreen.tsx"],
     sameChunk: [] as string[],
     min: 20,
   },

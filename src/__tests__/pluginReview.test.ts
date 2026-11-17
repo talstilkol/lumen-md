@@ -11,7 +11,7 @@ import { spawnSync } from "node:child_process";
 import { cpSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CSS_ALLOWED_ORIGINS, TAKEDOWN_MS, cssFindings, decodeCssEscapes, isOpenSourceLicense, overdueTakedowns, reviewPluginVersion, type KnownBad, type Scorecard } from "../plugins/runtime/review";
+import { CSS_ALLOWED_ORIGINS, TAKEDOWN_MS, cssFindings, decodeCssEscapes, isOpenSourceLicense, overdueTakedowns, reviewPluginVersion, takedowns, type KnownBad, type Scorecard } from "../plugins/runtime/review";
 // @ts-expect-error — plain .mjs helpers without types
 import { findingsProblems, privacyLabel, renderSecurityPage } from "../../scripts/lib/securityPage.mjs";
 // @ts-expect-error — plain .mjs without types
@@ -159,6 +159,62 @@ describe("the registry: every real plugin version reviewed through the CLI", () 
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+describe("W11.S14: a failing version is taken down, as code", () => {
+  const cli = join(process.cwd(), "scripts/review-plugins.mjs");
+  it("takedowns(): every listed version whose review failed, and none already delisted", () => {
+    const card = (v: string, passed: boolean) => ({ id: "p", version: v, passed, reviewedAt: "2026-11-15T00:00:00.000Z" }) as Scorecard;
+    const cards = [card("1.0.0", false), card("1.1.0", true), card("1.2.0", false)];
+    expect(takedowns([{ id: "p", version: "1.0.0" }, { id: "p", version: "1.1.0" }, { id: "p", version: "1.2.0" }], cards).map((c) => c.version)).toEqual(["1.0.0", "1.2.0"]);
+    expect(takedowns([{ id: "p", version: "1.1.0" }], cards)).toEqual([]);
+  });
+
+  it("--takedown delists the failing version in index.json with its rules; the passing one stays; the 24 h clock stops", () => {
+    const dir = mkdtempSync(join(tmpdir(), "takedown-"));
+    try {
+      for (const name of ["word-stats", "toc"]) cpSync(`public/plugins/examples/${name}`, join(dir, name), { recursive: true });
+      writeFileSync(join(dir, "word-stats/main.js"), readFileSync(join(dir, "word-stats/main.js"), "utf8") + `\neval("x");\n`);
+      const entry = (name: string) => {
+        const m = JSON.parse(readFileSync(join(dir, name, "lumen-plugin.json"), "utf8"));
+        return { id: m.id, name: m.name, versions: [{ version: m.version, path: name }] };
+      };
+      writeFileSync(join(dir, "index.json"), JSON.stringify({ plugins: [entry("word-stats"), entry("toc")] }));
+      const run = (...a: string[]) => spawnSync(process.execPath, [cli, "--dir", dir, "--in-repo", ...a], { encoding: "utf8" });
+      run(); // the reviews on record
+      // The failed review is 25 h old: overdue while it is still listed.
+      const cardFile = join(dir, "scorecards/lumen.example.word-stats@1.0.0.json");
+      const card = JSON.parse(readFileSync(cardFile, "utf8")) as Scorecard;
+      writeFileSync(cardFile, JSON.stringify({ ...card, reviewedAt: new Date(Date.now() - TAKEDOWN_MS - 3600_000).toISOString() }, null, 2) + "\n");
+      expect(run("--check").stdout).toContain("overdue takedown");
+
+      const t = run("--takedown");
+      expect(t.status, t.stdout + t.stderr).toBe(0);
+      expect(t.stdout).toContain("taken down: lumen.example.word-stats@1.0.0");
+      const index = JSON.parse(readFileSync(join(dir, "index.json"), "utf8"));
+      const ws = index.plugins.find((p: { id: string }) => p.id === "lumen.example.word-stats").versions[0];
+      expect(ws.delisted.rules).toEqual([...new Set(rules(card))]);
+      expect(ws.delisted.rules.length).toBeGreaterThan(0);
+      expect(Date.parse(ws.delisted.at)).toBeGreaterThan(Date.now() - 60_000);
+      expect(index.plugins.find((p: { id: string }) => p.id !== "lumen.example.word-stats").versions[0].delisted).toBeUndefined();
+      // Review 11, M5: the takedown raises the serial (the app refuses the older index once it saw this one).
+      expect(index.serial).toBe(1);
+      // No longer listed: not overdue. The failing version itself still fails the check until its folder goes.
+      const after = run("--check");
+      expect(after.stdout).not.toContain("overdue takedown");
+      expect(after.status).toBe(1);
+      expect(run("--takedown").stdout).toContain("nothing to take down");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("the app neither lists nor installs a delisted version", () => {
+    const gallery = readFileSync("src/plugins/runtime/SandboxedPlugins.tsx", "utf8");
+    expect(gallery).toMatch(/p\.versions\.filter\(\(v\) => !v\.delisted\)/);
+    const builder = readFileSync("scripts/build-plugin-registry.mjs", "utf8");
+    expect(builder).toMatch(/delisted\(v\) \? \{ delisted: delisted\(v\) \}/);
   });
 });
 

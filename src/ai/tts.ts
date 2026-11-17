@@ -192,6 +192,23 @@ export function voiceFor(lang: string, allowNetwork = networkVoicesAllowed(), ch
   return pick ?? voices.find((v) => v.lang.toLowerCase() === lang.toLowerCase()) ?? voices.find((v) => v.lang.toLowerCase().startsWith(base)) ?? (base === "he" ? voices.find((v) => v.lang.toLowerCase().startsWith("iw")) : undefined);
 }
 
+/**
+ * Say one word with an on-device voice only (W13.R5's immersive reader): a
+ * network voice would send the word away, so none is used even when they
+ * are allowed. False when this device has no voice for the language.
+ */
+export function speakWordLocally(word: string, lang: string): boolean {
+  if (typeof speechSynthesis === "undefined" || typeof SpeechSynthesisUtterance === "undefined") return false;
+  const voice = voiceFor(lang, false);
+  if (!voice) return false;
+  const u = new SpeechSynthesisUtterance(word);
+  u.voice = voice;
+  u.lang = voice.lang;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+  return true;
+}
+
 export interface WordRange {
   from: number;
   to: number;
@@ -457,6 +474,13 @@ export async function readAloudCommand(deps: {
   rate?: number;
   /** Ask before a network voice is used; omitted: never ask (local voices only). */
   confirmNetworkVoice?: () => Promise<boolean>;
+  /**
+   * Where the sentence and the word being read go (null: none any more).
+   * Omitted: the editor's highlight (the lumen-speech-* events). The PDF
+   * reader passes its own, since its text is not the note's (W2.6).
+   */
+  onRange?: (range: { from: number; to: number } | null) => void;
+  onWord?: (range: { from: number; to: number } | null) => void;
 }): Promise<void> {
   if (isSpeaking()) {
     stopSpeaking();
@@ -475,8 +499,8 @@ export async function readAloudCommand(deps: {
     const key = noteKeyOf(deps.doc);
     const sentences = speakableSentences(content);
     const startAt = resumeIndex(sentences, key);
-    const range = (detail: unknown) => window.dispatchEvent(new CustomEvent("lumen-speech-range", { detail }));
-    const word = (detail: unknown) => window.dispatchEvent(new CustomEvent("lumen-speech-word", { detail }));
+    const range = deps.onRange ?? ((detail: { from: number; to: number } | null) => window.dispatchEvent(new CustomEvent("lumen-speech-range", { detail })));
+    const word = deps.onWord ?? ((detail: { from: number; to: number } | null) => window.dispatchEvent(new CustomEvent("lumen-speech-word", { detail })));
     let last = -1;
     const onSentence = (s: Sentence, i: number) => {
       last = i;
@@ -514,6 +538,51 @@ export async function readAloudCommand(deps: {
         }
         if (last === sentences.length - 1 && !ctl.signal.aborted) savePosition(key, null, 0);
         return;
+      }
+      // W11.H8: Chatterbox, only after the public CER gate (W11.H9) passed and its runtime is there — today never.
+      const cb = await import("./tts/chatterbox");
+      const runtime = await cb.chatterboxForReadAloud();
+      if (!isCurrentRun(run)) return;
+      if (runtime) {
+        const ctl = new AbortController();
+        neuralAbort = ctl;
+        try {
+          const [{ pointHebrew }, { uiConfirm }] = await Promise.all([import("./nikudService"), import("../ui/PromptDialog")]);
+          const rest = sentences.slice(startAt);
+          await cb.playChatterbox(rest, { runtime, nikud: (text) => pointHebrew(text, { consent: { confirm: uiConfirm, t: deps.t } }), onSentence: (i) => onSentence(rest[i], startAt + i) }, ctl.signal);
+        } finally {
+          if (neuralAbort === ctl) neuralAbort = null;
+          range(null);
+        }
+        if (last === sentences.length - 1 && !ctl.signal.aborted) savePosition(key, null, 0);
+        return;
+      }
+    }
+    // Plan 6.2 (W10.E65): a pinned Kokoro voice for English, when one exists (none yet — decision 15.10). On the device.
+    if (hebrewRatio(content) < 0.2) {
+      const kokoro = await import("./tts/kokoro");
+      const pack = kokoro.ENGLISH_VOICES.length ? await kokoro.englishNeuralVoice() : null;
+      if (!isCurrentRun(run)) return;
+      if (pack) {
+        const ctl = new AbortController();
+        neuralAbort = ctl;
+        try {
+          const { uiConfirm } = await import("../ui/PromptDialog");
+          const engine = await kokoro.loadKokoro(pack, {
+            consent: (p, bytes) => uiConfirm({ title: deps.t("tts.kokoro.title"), message: deps.t("tts.kokoro.body", { voice: p.id, mb: String(Math.round(bytes / 1e6)), license: p.license }), okLabel: deps.t("tts.kokoro.ok") }),
+          });
+          if (startAt > 0) deps.toast(deps.t("tts.resumed", { n: startAt + 1, total: sentences.length }), "info");
+          await kokoro.speakKokoro(engine, sentences, { rate, startAt, source: content, signal: ctl.signal, wordRanges, onSentence, onWord: (_s, w) => word({ from: w.from, to: w.to }), onFirstAudio: (ms) => log.info(`kokoro read-aloud: first audio after ${Math.round(ms)} ms`) });
+          if (last === sentences.length - 1 && !ctl.signal.aborted) savePosition(key, null, 0);
+          return;
+        } catch (e) {
+          // why: no consent, no phonemizer or a bad file — the system voices read it instead, below
+          log.info("kokoro read-aloud not used", e);
+        } finally {
+          if (neuralAbort === ctl) neuralAbort = null;
+          range(null);
+          word(null);
+        }
       }
     }
     // No voice on this device, but the browser offers network voices: ask once (never under local-only).

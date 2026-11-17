@@ -1,6 +1,8 @@
 ---
 title: Voice commands, on this device
 description: Say "new note", "search…" or "add task…" in Hebrew or English. Lumen recognises the speech and the command locally, and asks before anything that deletes.
+type: how-to
+tasks: ["W5.20"]
 ---
 
 Run **Voice command** from the command palette, then say one command. Lumen

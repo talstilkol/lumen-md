@@ -1,6 +1,8 @@
 ---
 title: Writing a book
 description: Chapters as notes in order, word goals per chapter and per book, today's words and a streak, and the book assembled into a Hebrew EPUB 3 and a print-ready PDF.
+type: how-to
+tasks: ["W5.8"]
 ---
 
 A book in Lumen is a folder of notes, one per chapter, and an **index
@@ -72,6 +74,18 @@ page); an English chapter inside it reads left to right. Links to other
 notes become plain text (they lead nowhere in a book); links to the web
 stay. The book keeps the same identifier across exports, so a reader keeps
 your place and highlights.
+
+### Accessibility (EPUB Accessibility 1.1)
+
+The book says how it can be read before it is opened: its package lists the
+access modes (text, and visual when there are images), what makes it
+accessible (headings and a table of contents, reading order, text that can
+be resized, text alternatives when every image has one, a page list), that it
+has no hazards (no flashing, motion or sound), and a one-sentence summary in
+the book's language. The book paginates itself — a page at every chapter and
+then every ~300 words, between paragraphs — so a class can say "page 12" and
+every reader lands in the same place. A Hebrew book opens from the right.
+The single-note EPUB export does the same.
 
 ## Print and PDF
 

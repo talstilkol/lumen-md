@@ -1,6 +1,8 @@
 ---
 title: Organization settings
 description: Name your organization, restrict e-mail domains, check SSO and members.
+type: how-to
+untracked: "shipped before the plan (the organization release); no plan task covers it"
 ---
 
 Open the command palette (`⌘K` / `Ctrl+K`) and run **Organization settings…**.

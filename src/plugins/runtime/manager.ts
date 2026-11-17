@@ -20,6 +20,8 @@ import type { PluginManifest } from "./manifest";
 import type { UiNode } from "./uiTree";
 import { describeBasesUpdate } from "./permissions";
 import { listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "../../storage/workspace";
+import { applyTextEdits, validateEdits } from "../api/edits";
+import { assertNotSafeMode } from "../../boot/bootSentinel";
 
 export const LIMITS = {
   commandsPerPlugin: 50,
@@ -122,6 +124,14 @@ export function appServices(): HostServices {
     "document.setText": (_p, text) => void useAppStore.getState().setContent(str(text, "text", 10 * 1024 * 1024)),
     "document.insertText": (_p, text) => insertAtCursor(str(text, "text", 1024 * 1024)),
     "document.replaceSelection": (_p, text) => insertAtCursor(str(text, "text", 1024 * 1024)),
+    // Plugin API 1.1.0 (W13.L1): one undoable change in the editor; without an editor, the same edits on the stored text.
+    "document.applyEdits": (_p, edits) => {
+      const store = useAppStore.getState();
+      const valid = validateEdits(edits, store.doc.content.length);
+      const handled = !window.dispatchEvent(new CustomEvent("lumen-plugin-edits", { detail: { edits: valid }, cancelable: true }));
+      if (!handled) store.setContent(applyTextEdits(store.doc.content, valid));
+      return valid.length;
+    },
 
     "vault.list": async (_p, dir) => {
       const d = dir === undefined || dir === "" ? "" : pluginVaultPath(dir);
@@ -293,7 +303,20 @@ export interface StartOptions {
   services?: HostServices;
 }
 
+/** Thrown when the installed copy of this version was disabled (its registry took it down): it is never started. */
+export class PluginDisabledError extends Error {
+  constructor(id: string, version: string, rules: string[]) {
+    super(`${id}@${version} was taken down by its registry (${rules.join(", ") || "delisted"}); it is disabled and is not started`);
+    this.name = "PluginDisabledError";
+  }
+}
+
 export async function startPlugin(opts: StartOptions): Promise<PluginInstance> {
+  // W13.T5: safe mode starts no plugin, not even one the user asks for, until they leave it.
+  assertNotSafeMode("plugin");
+  // Review 12, L2: the install record's `disabled` flag (review 11, M5) is enforced here, the one way a plugin starts.
+  const record = (await (await import("../install")).installedPlugins())[opts.manifest.id];
+  if (record?.disabled && record.version === opts.manifest.version) throw new PluginDisabledError(record.id, record.version, record.disabled.rules);
   if (running.has(opts.manifest.id)) await stopPlugin(opts.manifest.id);
   const entry: Running = { instance: null as unknown as PluginInstance, commands: [], langs: new Set(), renders: new Map() };
   // Register before the load: the plugin's top-level code calls the services while it starts.

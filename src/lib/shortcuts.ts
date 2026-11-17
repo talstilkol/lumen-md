@@ -39,12 +39,17 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { id: "view.preview", combo: "Mod+3", scope: "app" },
   { id: "view.wysiwyg", combo: "Mod+4", scope: "app" },
   { id: "help.shortcuts", combo: "Mod+/", scope: "app" },
+  // W13.E4: the settings screen, its search field focused (Obsidian, VS Code and macOS use ⌘,).
+  { id: "settings.open", combo: "Mod+,", scope: "app" },
   { id: "note.today", combo: "Mod+Alt+D", scope: "global" },
   { id: "note.capture", combo: "Mod+Alt+N", scope: "global" },
   { id: "cite.insert", combo: "Mod+Alt+C", scope: "global" },
   // The open-sources dialog (plan W7.24). Not Mod+Shift+S: that is Save as.
   { id: "sources.open", combo: "Mod+Alt+S", scope: "global" },
   { id: "help.open", combo: "F1", scope: "global" },
+  // Another window (plan W3.9, W13.M5): bound by the desktop menu bar (src-tauri/src/lib.rs) and the
+  // iPad's UIKeyCommand; in a browser the key stays the browser's.
+  { id: "window.new", combo: "Mod+Shift+N", scope: "global" },
   // The outline mode's keys (plan W2.x), bound by the editor's outline keymap (editor/outlineExtension.ts).
   { id: "outline.moveUp", combo: "Alt+Shift+↑", scope: "editor" },
   { id: "outline.moveDown", combo: "Alt+Shift+↓", scope: "editor" },
@@ -70,6 +75,14 @@ export const SHORTCUTS: readonly Shortcut[] = [
   // W11.H4: switch the paragraph's direction (both editors' keymaps).
   { id: "edit.toggleDirection", combo: "Mod+Shift+X", scope: "editor" },
   { id: "edit.complete", combo: "Ctrl+Space", scope: "editor" },
+  // W13.E2: smart lists in the source editor (editor/smartListsExtension.ts). Enter, Tab and
+  // Backspace keep their meaning outside a list; Alt+↑/↓ move a whole item with its children.
+  { id: "list.moveUp", combo: "Alt+↑", scope: "editor" },
+  { id: "list.moveDown", combo: "Alt+↓", scope: "editor" },
+  { id: "list.toggleTask", combo: "Mod+↵", scope: "editor" },
+  { id: "list.lineBreak", combo: "Shift+↵", scope: "editor" },
+  // W13.E5: the next occurrence as another cursor (editor/multiCursor.ts); Alt+drag (a rectangle) is a mouse gesture.
+  { id: "edit.selectNextOccurrence", combo: "Mod+D", scope: "editor" },
   { id: "file.print", combo: "Mod+P", scope: "browser" },
 ];
 

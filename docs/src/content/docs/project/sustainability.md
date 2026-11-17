@@ -1,6 +1,7 @@
 ---
 title: Sustainability
 description: How Lumen pays for itself without ads, accounts or locked features. Donations through GitHub Sponsors and Open Collective, an optional paid relay that sees only ciphertext, and every cost in the open.
+type: explanation
 ---
 
 Lumen is open source and mostly built by one person. This page is the plan for keeping it running. The live, script-free summary is the [support page](https://lumen-md.vercel.app/support.html). The prices themselves are on the [pricing page](/project/pricing/): the relay is $4 a month or $40 a year (plan W11.P12).

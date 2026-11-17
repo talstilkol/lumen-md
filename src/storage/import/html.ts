@@ -20,6 +20,7 @@ const TOKEN = new RegExp(`${MARK}(\\d+)${MARK}`, "g");
 
 export function htmlToNote(html: string, refs: HtmlRefs = {}): string {
   const doc = parseInertDocument(html, "text/html");
+  notionBlocks(doc);
   nestStrayLists(doc);
   // An image wrapped in a link to itself (Notion's figures) is the image: the link would swallow it.
   for (const a of Array.from(doc.querySelectorAll("a[href]"))) {
@@ -49,6 +50,45 @@ export function htmlToNote(html: string, refs: HtmlRefs = {}): string {
   let text = md;
   for (let i = 0; i < 3 && text.includes(MARK); i++) text = text.replace(TOKEN, (_, n: string) => out[Number(n)] ?? "");
   return text.replace(/^(\s*)\[([ x])\] /gm, "$1- [$2] ");
+}
+
+/**
+ * Notion's HTML export (lane T8): every list item is a list of its own
+ * (`<ul class="bulleted-list">` per item), which reads as loose lists with a
+ * blank line between items: neighbours of one kind are one list again. A
+ * to-do's checkbox is a `<div class="checkbox checkbox-on|off">`: it becomes
+ * the task marker. A figure's caption is its image's text, and the figure a
+ * block of its own (so it does not run into the table before it).
+ */
+export function notionBlocks(root: Document): void {
+  for (const box of Array.from(root.querySelectorAll("ul.to-do-list > li > div.checkbox"))) {
+    const input = root.createElement("input");
+    input.setAttribute("type", "checkbox");
+    if (box.classList.contains("checkbox-on")) input.setAttribute("checked", "");
+    box.replaceWith(input);
+  }
+  for (const kind of ["ul.bulleted-list", "ol.numbered-list", "ul.to-do-list", "ul.toggle"]) {
+    for (const list of Array.from(root.querySelectorAll(kind))) {
+      if (!list.isConnected) continue;
+      for (let next = list.nextElementSibling; next && next.matches(kind); next = list.nextElementSibling) {
+        list.append(...Array.from(next.children));
+        next.remove();
+      }
+    }
+  }
+  for (const fig of Array.from(root.querySelectorAll("figure"))) {
+    const img = fig.querySelector("img");
+    const cap = fig.querySelector("figcaption");
+    if (!img) continue;
+    const caption = (cap?.textContent ?? "").replace(/\s+/g, " ").trim();
+    if (caption && !img.getAttribute("alt")) {
+      img.setAttribute("alt", caption);
+      cap?.remove();
+    }
+    const p = root.createElement("p");
+    p.append(...Array.from(fig.childNodes));
+    fig.replaceWith(p);
+  }
 }
 
 /**

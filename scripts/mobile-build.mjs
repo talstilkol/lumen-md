@@ -16,12 +16,13 @@
  * --dry-run prints the exact commands without running them. Keys are the owner's
  * (plan 15.7) and are read from the environment only; nothing is written to the repo.
  */
+import { energyProblems } from "./lib/mobileEnergy.mjs";
 import { spawnSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import path from "node:path";
 import { isBeta, sha256sums } from "./lib/release.mjs";
-import { androidCommands, androidOutputs, androidPreflight, buildNumber, compileSdkOf, exportOptionsPlist, iosCommands, iosPreflight, javaMajor, newestBuildTools, parseApksigner, parseJarsigner, shellLine, xcodeMajor } from "./lib/mobileBuild.mjs";
+import { androidAdaptiveItems, androidCommands, androidOutputs, androidPreflight, buildNumber, compileSdkOf, exportOptionsPlist, iosCommands, iosPreflight, javaMajor, newestBuildTools, parseApksigner, parseJarsigner, shellLine, xcodeMajor } from "./lib/mobileBuild.mjs";
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "release", "mobile");
@@ -194,13 +195,30 @@ function writeSums() {
   writeFileSync(path.join(OUT, "SHA256SUMS"), sha256sums(names.map((name) => ({ name, data: readFileSync(path.join(OUT, name)) }))));
 }
 
+function adaptiveFacts() {
+  const r = (p) => (exists(p) ? readFileSync(path.join(ROOT, p), "utf8") : "");
+  let config = null;
+  try {
+    config = JSON.parse(r("capacitor.config.json"));
+  } catch {
+    config = null;
+  }
+  return { manifest: r("android/app/src/main/AndroidManifest.xml"), config, mainActivity: r("android/app/src/main/java/com/lumen/editor/MainActivity.java"), css: r("src/index.css") };
+}
+
 function check() {
+  // W13.M1: checked from the files, so it runs (and blocks) on any machine.
+  const m = report("Android 16 (API 36): any size, edge to edge, predictive back", androidAdaptiveItems(adaptiveFacts()));
+  if (m.length) process.exitCode = 1;
   const a = report("Android", androidPreflight(androidFacts(false)));
   const key = iosKey();
   try {
     const i = report("iOS", iosPreflight(iosFacts(key)));
-    console.log(`\nAndroid: ${a.length ? `${a.length} missing` : "ready"} · iOS: ${i.length ? `${i.length} missing` : "ready"}`);
-    if (a.length || i.length) process.exitCode = 1;
+    // W13.V4: the battery report, measured on real phones, within 1.5 × the system notes app.
+    const energyFile = path.join(ROOT, "docs/perf/mobile-energy.md");
+    const e = report("Energy", energyProblems(existsSync(energyFile) ? readFileSync(energyFile, "utf8") : "").map((what) => ({ ok: false, blocking: true, what, fix: "run the 30-minute script on the phone and fill the row: docs/perf/mobile-energy.md" })));
+    console.log(`\nAndroid: ${a.length ? `${a.length} missing` : "ready"} · iOS: ${i.length ? `${i.length} missing` : "ready"} · energy: ${e.length ? `${e.length} missing` : "within budget"}`);
+    if (a.length || i.length || e.length) process.exitCode = 1;
   } finally {
     if (key?.temp) rmSync(path.dirname(key.path), { recursive: true, force: true });
   }

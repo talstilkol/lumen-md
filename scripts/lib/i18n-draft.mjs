@@ -22,9 +22,10 @@
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ROOT, domainOf, formatJson, placeholders, sortedObject } from "./i18n-files.mjs";
+import { glossaryPrompt } from "./i18n-glossary.mjs";
 
 export const REVIEW_DIR = join(ROOT, "i18n", "needs-review");
-export const DRAFT_LOCALES = ["ar", "de", "fr", "he", "ja", "ru", "zh-CN"];
+export const DRAFT_LOCALES = ["ar", "de", "fa", "fr", "he", "ja", "ru", "zh-CN"];
 
 /** FNV-1a of the English text: a draft goes stale when its source changes. */
 export function sourceHash(text) {
@@ -150,21 +151,24 @@ export function approve(review, lang, keys) {
 
 // ── Engines ─────────────────────────────────────────────────────────────
 
-const LANGUAGE_NAMES = { ar: "Arabic", de: "German", fr: "French", he: "Hebrew", ja: "Japanese", ru: "Russian", "zh-CN": "Simplified Chinese" };
+const LANGUAGE_NAMES = { ar: "Arabic", de: "German", fr: "French", he: "Hebrew", ja: "Japanese", ru: "Russian", "zh-CN": "Simplified Chinese", fa: "Persian (Farsi)" };
 
 /**
  * Ollama on this machine (`OLLAMA_HOST`, default http://127.0.0.1:11434).
  * One request per language: a JSON array in, a JSON array out.
  */
-export function ollamaEngine({ host = "http://127.0.0.1:11434", model = "qwen2.5:7b", fetchImpl = fetch } = {}) {
+export function ollamaEngine({ host = "http://127.0.0.1:11434", model = "qwen2.5:7b", fetchImpl = fetch, glossary = null } = {}) {
   return {
     id: `ollama:${model}`,
     async translate(texts, lang) {
+      // W13.I4: Lumen's terms have one approved translation (i18n/glossary.json); the draft uses it.
+      const terms = glossary ? glossaryPrompt(glossary, lang) : "";
       const system = [
         `Translate the user interface strings of a Markdown editor from English to ${LANGUAGE_NAMES[lang] ?? lang}.`,
         "Reply with a JSON object {\"t\": [...]} holding exactly one translation per input string, in the same order.",
         "Keep every token like ⟦0⟧ exactly as it is. Keep keyboard keys (⌘, Esc, Tab, Ctrl), emoji and leading symbols.",
         "Use the usual UI wording of that language; short and plain.",
+        ...(terms ? [`Always use these translations of the app's terms: ${terms}.`] : []),
       ].join(" ");
       const res = await fetchImpl(`${host.replace(/\/+$/, "")}/api/chat`, {
         method: "POST",

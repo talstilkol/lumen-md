@@ -9,7 +9,7 @@
  * Firefox asks the user once, Safari grants it to installed apps.
  */
 
-import { log } from "../lib/logger";
+import { log, swallowed } from "../lib/logger";
 
 export type PersistenceStatus = "persisted" | "denied" | "unsupported";
 
@@ -47,8 +47,9 @@ export async function storageState(
       usage = est.usage ?? 0;
       quota = est.quota;
     }
-  } catch {
+  } catch (err) {
     /* why: no estimate */
+    swallowed("storage/persistentStorage: no estimate", err);
   }
   return { persisted, usage, quota };
 }

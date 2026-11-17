@@ -60,6 +60,11 @@ export interface AtomicFs {
    * they are (the integrity check reports them).
    */
   readFile?(path: string): Promise<Uint8Array>;
+  /**
+   * Review Z6-L3: run the recovery of the note at `path` under that path's lock (the backend's per-path lock),
+   * so it is never split by a write, writeIf or rename of the note. The note's presence is checked again inside.
+   */
+  lockTarget?<T>(path: string, fn: () => Promise<T>): Promise<T>;
 }
 
 const TMP_PREFIX = ".lumen-tmp~";
@@ -296,25 +301,31 @@ export async function recoverDir(fs: AtomicFs, dir: string, opts: { names?: stri
     }
   };
   const out: RecoveryAction[] = [];
+  const locked = <T,>(path: string, fn: () => Promise<T>) => (fs.lockTarget ? fs.lockTarget(path, fn) : fn());
   for (const [target, { tmp, old, jnl }] of byTarget) {
     const path = inDir(dir, target);
-    let action: RecoveryAction["action"] = "cleaned";
-    if (!present.has(target) && old.length) {
-      // Between steps 2 and 3: the temporary file of the same save is complete.
-      const ids = new Set(old.map((n) => leftovers.get(n)!.id));
-      const complete = tmp.filter((n) => ids.has(leftovers.get(n)!.id)).sort();
-      const pick = complete[complete.length - 1];
-      if (pick) {
-        await fs.rename(inDir(dir, pick), path);
-        action = "promoted";
-      } else {
-        await fs.rename(inDir(dir, old.sort()[old.length - 1]), path);
-        action = "restored";
-      }
-    }
-    await removeAll([...tmp, ...old]);
-    await removeAll(jnl);
-    out.push({ path, action });
+    out.push(
+      await locked(path, async () => {
+        let action: RecoveryAction["action"] = "cleaned";
+        // Under the note's lock the listing may be stale: a note written since it was taken is kept, not replaced.
+        if (!present.has(target) && old.length && !(fs.lockTarget && (await fs.exists(path)))) {
+          // Between steps 2 and 3: the temporary file of the same save is complete.
+          const ids = new Set(old.map((n) => leftovers.get(n)!.id));
+          const complete = tmp.filter((n) => ids.has(leftovers.get(n)!.id)).sort();
+          const pick = complete[complete.length - 1];
+          if (pick) {
+            await fs.rename(inDir(dir, pick), path);
+            action = "promoted";
+          } else {
+            await fs.rename(inDir(dir, old.sort()[old.length - 1]), path);
+            action = "restored";
+          }
+        }
+        await removeAll([...tmp, ...old]);
+        await removeAll(jnl);
+        return { path, action };
+      }),
+    );
   }
   // Fail closed: without its journal nothing says which note an old version
   // belongs to, so it stays (the integrity check reports it). A temporary
@@ -339,6 +350,8 @@ export interface HandleOps<F> {
   move(src: string[], dst: string[], source: F, target: null): Promise<void>;
   removeAt(parts: string[], path: string): Promise<void>;
   writeAt(parts: string[], data: Uint8Array, path: string): Promise<void>;
+  /** The backend's per-path lock for one note's recovery (AtomicFs.lockTarget). */
+  lockTarget?<T>(path: string, fn: () => Promise<T>): Promise<T>;
   segments(path: string): string[];
   /** Size of a file entry; null for a folder. */
   fileSize(found: F): Promise<number | null>;
@@ -368,6 +381,7 @@ export async function recoverHandleDir<F>(o: HandleOps<F>, dir: string, names: s
         if (!f || !o.fileBytes) throw new Error(`"${p}" cannot be read`);
         return o.fileBytes(f);
       },
+      ...(o.lockTarget ? { lockTarget: o.lockTarget } : {}),
     },
     dir,
     { names },

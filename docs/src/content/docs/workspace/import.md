@@ -1,6 +1,8 @@
 ---
 title: Import from other apps
-description: Bring notes from Obsidian, Notion, Evernote, Bear, Apple Notes, Google Keep, Logseq or OneNote — into a new folder, with a report, undone in one click.
+description: Bring notes from Obsidian, Notion, Evernote, Bear, Apple Notes, Google Keep, Logseq, OneNote, Roam, Craft, Day One, Apple Journal, Samsung Notes, Airtable, Tomboy or any TextBundle app — into a new folder, with a report, undone in one click.
+type: how-to
+tasks: ["W4.19", "W10.E49", "W10.E48", "W1.26"]
 ---
 
 **File → Import notes from another app…** (or the command palette) opens
@@ -33,10 +35,30 @@ is taken. One click — **Undo the import** in the wizard, or the command
 | Google Keep | Google Takeout (Keep only), the .zip | checklists as tasks; labels as tags; colour and pin as properties; archived notes in `Archive/`; trashed notes left out |
 | Logseq | the graph folder, or a .zip | page properties as frontmatter; `TODO`/`DONE` as tasks; block references `((id))` and `{{embed}}` as `[[Page#^id]]` / `![[…]]`; journals named by date (`2024-01-31`); `a___b` pages as folders |
 | OneNote | pages or sections saved as *Single File Web Page* (`.mht`) | a note per page, its images and attached files next to it |
+| Roam Research | ⋯ → *Export All* → *JSON*: the `.json`, or the .zip as it came | a note per page; the blocks stay an outline (a heading block becomes a heading, `{{table}}` a table); `Name:: value` at the top of a page becomes a property; a block something refers to gets a `^id` and `((uid))`, `{{embed: ((uid))}}`, `[text](((uid)))` become `![[Page#^id]]` / `[[Page#^id\|text]]`; daily notes go to `journal/2021-01-02.md` and every link follows; `a/b` pages become folders; files Roam keeps on its servers stay links (nothing is downloaded) and the report says so |
+| Craft | *Export* → *Markdown* (or *TextBundle*), the .zip or the folder | a note per document, images next to it; `craftdocs://` links to a document of the export become `[[wikilinks]]`, and to a block `[[Document#^id]]` when the export carries the block's id; a link to something not in the export keeps its text and is reported; `<mark>` → `==…==` |
+| TextBundle | `.textbundle` folders or `.textpack` files (Ulysses, iA Writer and other editors), or a .zip of them | a note per bundle, named after it, its `assets/` in `assets/<note>/` with every link (Markdown or `<img>`) following; an asset no link points at is listed at the end of the note, so none is lost; the app that wrote it as the property `source` |
+| Day One | *File → Export → JSON*, the .zip as it came | a note per entry in `<journal>/<year>/`; photos, videos, audio and PDFs (by their MD5) where the entry shows them, the rest listed below it; place, `coordinates` (shown on the map), weather, tags, star and dates as properties; a file the export lacks is reported |
+| Apple Journal | the exported folder (`Entries/`, `Resources/`), or a .zip | a note per entry, dated from its header (English or Hebrew); the prompt as a quote; photos and audio embedded; place, state of mind, activity, contact and media as properties |
+| Samsung Notes | notes shared as *Text file* or *PDF file* | a text note per file (☑ / □ become tasks); a PDF gets a note that shows it; Samsung's own `.sdocx` is reported (share as text or PDF instead) |
+| Airtable | each table's *Download CSV*, picked together; or a base saved from Airtable's API as JSON | a folder per table with a note per record and a `.base` that shows them; numbers and checkboxes typed, multiple selects as lists, a linked record as a `[[link]]`; attachments stay links to Airtable (nothing is fetched) |
+| Tomboy / Gnote | the notes folder, or its `.note` files | a note per note; notebooks as folders; bold, italic, strikethrough, highlight, monospace, links; lists, and tasks in a TODO note; a template to `Templates/` |
 
 Dates are kept as the properties `created` and `updated` (a browser cannot
 set a file's own dates). Hebrew names — files, folders, tags, properties —
 stay as they are; only characters a file system refuses are replaced.
+
+## Other formats, through your Pandoc (desktop)
+
+If [Pandoc](https://pandoc.org) 2.15 or later is installed on the computer,
+the wizard offers **Pandoc** for the formats Lumen has no importer of its own
+for: DocBook, MediaWiki, Jira, OPML, txt2tags, DokuWiki, Textile, Creole,
+TWiki, TikiWiki, Vimwiki, Muse, FictionBook, man pages, Haddock and POD.
+Lumen does not include Pandoc (it is GPL software): it runs the copy you
+installed, with `--sandbox` (it reads the one file and writes the result,
+nothing else, no network) and a fixed set of options, and each run is listed
+in the privacy ledger. Without Pandoc, and in the browser, the choice is not
+shown.
 
 ## The report
 
@@ -62,9 +84,11 @@ the folder to the trash instead, so nothing of yours is lost.
   the report lists each one. Locked notes need unlocking in Notes first.
 - OneNote's own `.one` files cannot be read; export pages or sections as
   `.mht`. A direct import through Microsoft Graph (sign in, read only:
-  `Notes.Read`) is built for deployments that register an app with Microsoft
-  (`VITE_ONENOTE_CLIENT_ID`); the sign-in token stays in memory and is sent
-  only to graph.microsoft.com. On such a deployment, picking OneNote shows
+  `Notes.Read`) needs an app registered with Microsoft: the deployment can
+  name one in `/lumen-runtime.json` (`{"onenote": {"clientId": "…"}}`), or
+  you can register your own free app in Microsoft Entra and paste its client
+  ID into the wizard (it stays in this browser). The sign-in token stays in
+  memory and is sent only to graph.microsoft.com. With a client ID, picking OneNote shows
   **Sign in to Microsoft and import from OneNote**: after the sign-in the
   wizard reads every notebook, section group and page, and shows the usual
   review before anything is written.
@@ -77,6 +101,12 @@ the folder to the trash instead, so nothing of yours is lost.
 (`src/__tests__/fixtures/import/exports.ts`): 0 attachments lost, at least
 98 % of internal links resolved, the Notion database as a `.base` with the
 same columns and rows, and an undo that gives back the same vault hash.
-`e2e/import-wizard.spec.ts` runs the wizard in the browser. The golden
+`e2e/import-wizard.spec.ts` runs the wizard in the browser. Roam, Craft and
+TextBundle have their own tests (`importRoam`, `importCraft`,
+`importTextbundle`), as do Day One, Apple Journal, Samsung Notes, Tomboy and
+Airtable (`importDayOne`, `importJournal`, `importAirtable`), and `npm run
+import:diff` with no folders converts Obsidian Importer's own test exports
+(Keep, Roam, TextBundle, Tomboy, Apple Journal, Airtable, CSV) and compares
+lumen-md's output with the importer's recorded output, metric by metric. The golden
 exports are written from each app's documented format; real exports from
 the apps are the owner's check.

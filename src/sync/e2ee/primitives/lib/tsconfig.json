@@ -1,0 +1,6 @@
+{
+  "//": "Review Z6-L7: the primitives over the audited libraries (W10.D13) are outside the root tsconfig.json until the Mac run installs the packages (docs/security/crypto-libs.md, 10.M). This project checks them on their own: `npm run typecheck:crypto-lib`, and ESLint's typed rules find it as the nearest tsconfig. Remove it with the root exclude.",
+  "extends": "../../../../../tsconfig.json",
+  "include": ["."],
+  "exclude": []
+}

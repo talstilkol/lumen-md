@@ -33,9 +33,10 @@
    "quote": "Workspace search folds niqqud, final letters (ם/מ, ן/נ…) and the prefix letters ו ה ב כ ל מ ש"
   },
   "ui-languages": {
-   "en": "The interface is in 8 languages; Hebrew and Arabic mirror the layout.",
+   "en": "The interface is in 8 languages, six of them in beta (machine-translated); Hebrew and Arabic mirror the layout.",
+   "he": "הממשק ב-8 שפות, שש מהן בבטא (תרגום מכונה); בעברית ובערבית הממשק מתהפך.",
    "source": "docs/src/content/docs/editor/hebrew.md",
-   "quote": "The interface is in 8 languages: English, Hebrew, Arabic, Russian, French, German, Japanese and Chinese."
+   "quote": "English and Hebrew in full, and Arabic, Russian, French, German, Japanese and Chinese in beta"
   },
   "plugin-no-access": {
    "en": "Every plugin runs with no access by default.",

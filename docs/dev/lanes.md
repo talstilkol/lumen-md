@@ -81,7 +81,7 @@ hold the same group.
 | **search** | `src/ui/SearchDialog.tsx`, `src/ui/SearchReplace.tsx`, `src/ai/semanticSearch.ts`, `src/ai/neuralSearch.ts`, `src/ai/search.worker.ts`, `src/storage/workspaceIndex.ts`, `src/storage/searchHistory.ts`, `src/editor/searchHighlight.ts` |
 | **settings** | `src/ui/*Settings*.tsx`, `src/ui/AiSettingsPanel.tsx`, `src/lib/themeSettings.ts`, `src/lib/orgSettings.ts`, `src/lib/configHealth.ts` |
 | **ci** | `.github/**`, `scripts/**`, `playwright.config.ts`, `lighthouserc.json`, the build half of `vite.config.ts`, `Dockerfile`, `fly.toml` |
-| **commands** | `src/commands/**`, `src/ui/CommandPalette.*`, `src/ui/KeyboardShortcuts.tsx`, `src/editor/slashCommands.ts`, `src/editor/keymapExtra.ts` |
+| **commands** | `src/commands/**`, `src/ui/CommandPalette.*`, `src/ui/KeyboardShortcuts.tsx`, `src/editor/keymapExtra.ts` |
 | **i18n** | `src/i18n/**`, `i18n/keys.json` |
 | **tree** | `src/ui/FileTree.*`, `src/ui/FileContextMenu.tsx`, `src/ui/TrashPanel.tsx`, `src/storage/workspace*.ts`, `src/storage/fileOps.ts`, `src/storage/trash.ts` |
 | **history** | `src/storage/history.ts`, `src/ui/VersionHistory.tsx`, `src/collab/versionHistory.ts` |
@@ -196,3 +196,25 @@ the heads origin has, tasks, pushes, what it waits on, the next step), and a
 resumed lane starts with `node scripts/lane-state.mjs resume <STATE.md>`,
 which says per branch whether to push, open a PR, or push nothing. The
 template and the resume steps are in [lane-state.md](lane-state.md).
+## Leases, claims and merge rules (plan R12.13)
+
+For six sessions at once, three small tools in `scripts/lanes/` turn the
+conflict groups above into checks:
+
+- **Leases.** Before a session starts, the coordinator writes its lane's globs
+  into `plan/LEASES.json` (`lanes.<id>.globs`; `shared` lists files every lane
+  may touch). With `LUMEN_LANE=<id>` set, a commit that stages a file outside
+  the lease is refused by the pre-commit hook, with the reason in Hebrew and
+  English. `scripts/lane.sh` turns the hook on for every lane it opens
+  (`node scripts/lanes/leases.mjs install-hook`: `core.hooksPath=.githooks`,
+  never over another hooksPath you set).
+  `node scripts/lanes/leases.mjs lint` reports two lanes holding the same path.
+- **Claims.** `node scripts/lanes/claims.mjs claim <task>` before working on a
+  plan task; a second session gets "already claimed by …" and picks another.
+  Claims live in the common git directory, shared by every worktree, never
+  committed.
+- **Merge rules.** `node scripts/lanes/merge-driver.mjs --install` once per
+  checkout. `.gitattributes` sends the files listed in `plan/LEASES.json`
+  `merge` to it: a lane's status file takes the lane's side, a generated file
+  keeps the train's side and is rebuilt afterwards (`regen`), a sorted list is
+  merged as the sorted union. Without the driver, git merges as before.

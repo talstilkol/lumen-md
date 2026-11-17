@@ -4,6 +4,7 @@ import { uiAlert, uiConfirm, uiPrompt, uiSelect } from "../../ui/PromptDialog";
 import { useToastStore } from "../../store/useToastStore";
 import type { CommandContext } from "./context";
 import { explainError } from "../../lib/userError";
+import { aiOperation } from "../../ai/aiAbort";
 import { isSourceEnabled, setSourceEnabled } from "../../sources/open/gate";
 
 type Knesset = typeof import("../../sources/knesset/app");
@@ -127,7 +128,14 @@ export async function askLaw(ctx: CommandContext): Promise<void> {
   const a = pick === null || pick === undefined ? null : answers[Number(pick)];
   if (!a) return;
   // With a model on this device: a short answer from the section, checked by the critic.
-  const answer = await k.answerLawQuestion(q, a, await k.localLawChat());
+  // T55: an AI operation, so Esc (or "AI: Cancel") stops the answer and its critic.
+  const op = aiOperation();
+  let answer: Awaited<ReturnType<typeof k.answerLawQuestion>>;
+  try {
+    answer = await k.answerLawQuestion(q, a, await k.localLawChat(), op.signal);
+  } finally {
+    op.end();
+  }
   const lines = [a.markdown];
   if (answer) {
     lines.push("", `**${t("knesset.answerLabel")}:** ${answer.claim}`, "", `_${answer.verified ? t("knesset.answerVerified", { section: a.section.number }) : t("knesset.answerNotVerified", { section: a.section.number })}_`);

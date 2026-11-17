@@ -1,6 +1,8 @@
 ---
 title: Grounded summaries on this device
 description: Summaries made on this device whose every sentence is copied from the text and checked against it — Chrome's Summarizer for English, a local model for Hebrew, and a model-free fallback.
+type: reference
+tasks: ["6.11"]
 ---
 
 `⌘K → "AI: Summarize This Note (on this device)"` and **Summarize** in the

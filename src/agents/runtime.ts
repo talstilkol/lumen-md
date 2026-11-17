@@ -9,7 +9,7 @@
  *   runAgentOrThrow(...)       → the output, or AgentRunError carrying the run
  */
 
-import type { AgentDefinition, AgentInput, AgentRun, AgentStep, ExecutorMessage, ExecutorId, ModelTier, RetryPatch, RunOptions, ToolCall, ToolContext, ToolScope } from "./types";
+import type { AgentDefinition, AgentInput, AgentRun, AgentStep, Executor, ExecutorMessage, ExecutorId, ExecutorRequest, ExecutorResponse, ModelTier, RetryPatch, RunOptions, ToolCall, ToolContext, ToolScope } from "./types";
 import { DEFAULT_EXECUTOR_ORDER, getExecutor, listExecutors, measuredModel, pickExecutor } from "./executors";
 import { parseProtocolTurn, protocolSchema, toolResultMessage } from "./protocol";
 import { repairCall, retryMessage } from "./toolRepair";
@@ -23,7 +23,22 @@ import { noteAiOutput } from "../ai/authorship";
 import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAiPrompt } from "../billing/aiQuota";
 import { mergeOutputs, splitText } from "./runtimeText";
 import { freezeTools, guardUntrustedResult, loadGuard, logTainted, unmarkDelta, unmarkReply } from "./ruleOfTwo";
+import { createRunGuard, stops, type GuardVerdict } from "./runGuard";
+import { safeModeBlocks } from "../boot/bootSentinel";
 import { isAbort, truncate, type ToolEnv, execTool, modelTools, systemPrompt, inputTextOf, languageMode, sameLanguage, inputKeyOf } from "./runtimeSteps";
+
+/** The agent's memory block, or null (not allowed, no file, or no workspace here). */
+async function agentMemoryFor(agentId: string): Promise<string | null> {
+  try {
+    const m = await import("./memory/agentMemory");
+    if (!m.memoryReaders().has(agentId)) return null;
+    const ws = await import("../storage/workspace");
+    return await m.memoryFor(agentId, async (p) => ((await ws.workspaceHasFile(p)) ? ws.readWorkspaceFile(p) : null));
+  } catch {
+    return null; // why: the memory is optional; a run never fails for it
+  }
+}
+
 export { sameScript, sameLanguage, inputKeyOf } from "./runtimeSteps";
 export { mergeOutputs, splitText } from "./runtimeText";
 
@@ -103,6 +118,8 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     return run;
   };
 
+  // W13.T5: safe mode runs no agent (and none after leaving it with agents kept off).
+  if (safeModeBlocks("agent")) return finish("failed", { errorCode: "safe-mode", error: "safe mode: AI agents are off" });
   const grants = new Set<ToolScope>(["read", ...(opts.grants ?? [])]);
   const missing = (def.requires ?? []).filter((g) => !grants.has(g));
   if (missing.length) {
@@ -299,8 +316,10 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     // A model without native tools speaks JSON-ReAct; where the executor can
     // constrain output, every turn is held to the protocol's schema (5.3.5).
     const turnSchema = offered.length && !nativeTools && executor.supportsSchema(model) ? protocolSchema(offered, def.outputSchema) : undefined;
+    // W13.A3: the facts in AGENT-MEMORY.md, only for an agent the user allowed (the file is not read otherwise; each read is logged).
+    const memory = await agentMemoryFor(def.id);
     const messages: ExecutorMessage[] = [
-      { role: "system", content: systemPrompt(def, modelInput, nativeTools, patch) + (toolEnv.taint.length ? `\n\n${guard.UNTRUSTED_NOTICE}` : "") },
+      { role: "system", content: systemPrompt(def, modelInput, nativeTools, patch) + (memory ? `\n\n${memory}` : "") + (toolEnv.taint.length ? `\n\n${guard.UNTRUSTED_NOTICE}` : "") },
       { role: "user", content: def.user(modelInput) + (patch.promptSuffix ? `\n\n${patch.promptSuffix}` : "") },
       ...context,
     ];
@@ -312,15 +331,19 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     // a second invalid turn in a row stops the run and asks the user.
     let invalidTurns = 0;
     let askUser: { tool: string; problem: string } | null = null;
+    // R12.18: the same call or error over and over stops the run.
+    const rg = createRunGuard();
+    let runaway: GuardVerdict | null = null;
 
     try {
-      for (let i = 0; i < maxSteps && finalText === null && !askUser; i++) {
+      for (let i = 0; i < maxSteps && finalText === null && !askUser && !runaway; i++) {
         if (opts.signal?.aborted) throw new DOMException("aborted", "AbortError");
         // The chat adapter charges at dispatch, after its own checks.
         if (executor.id !== "chat") chargeOnce();
         const t0 = Date.now();
         const sent = await executor.chat({
           charge: chargeOnce,
+          loopbackOnly: def.loopbackOnly,
           messages,
           tools: nativeTools ? offered : undefined,
           schema: nativeSchema ? def.outputSchema : turnSchema,
@@ -387,10 +410,19 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
           const detail = [r.note, guardNote, repairNote, argsText].filter(Boolean).join(" · ");
           step({ kind: "tool", ms: Date.now() - t1, label: call.name, ok: r.error === undefined, detail: r.error ?? detail });
           messages.push({ role: "tool", content: body, toolCallId: call.id, name: call.name });
+          // A call the user declined (plan 2.7) is the user's answer, not the model failing in a loop: the
+          // same declined error is not counted (the same call still is). R12.18 with the injection set.
+          const declined = typeof r.error === "string" && r.error.includes(guard.UNTRUSTED_DENIED);
+          const v = rg.observe({ error: declined ? null : r.error, call });
+          if (v.action !== "ok") step({ kind: "validate", ms: 0, label: "runaway", ok: !stops(v), detail: `${v.action}: ${v.reason}` });
+          if (stops(v)) {
+            runaway = v;
+            break;
+          }
         }
         invalidTurns = turnInvalid ? invalidTurns + 1 : 0;
       }
-      if (finalText === null && !askUser) {
+      if (finalText === null && !askUser && !runaway) {
         failure = { kind: "empty", attempt, maxRetries, tier, executor: executor.id, reason: `no final answer after ${maxSteps} steps`, inputChars, splittable: !!def.splittable };
       }
     } catch (e) {
@@ -401,6 +433,9 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
       failure = { kind: "error", attempt, maxRetries, tier, executor: executor.id, reason: msg, inputChars, splittable: !!def.splittable };
     }
 
+    // The log keeps the prompt's hash and size, never its text (R12.18).
+    run.guard = rg.log(messages.slice(0, 2).map((m) => m.content).join("\n"));
+    if (runaway) return finish("failed", { errorCode: "runaway", error: `Stopped a runaway run: ${runaway.reason} (${runaway.action}). Change the request and run it again.` });
     if (askUser) {
       const ask: { tool: string; problem: string } = askUser;
       return finish("failed", {
@@ -532,6 +567,50 @@ export async function callTool<R = unknown>(name: string, args: Record<string, u
     throw new ToolError(code, r.error);
   }
   return r.result as R;
+}
+
+/**
+ * One request to a model on this device for a module that is not an agent
+ * definition (the entity-relation extractor, the HeRE eval adapter, "Ask the
+ * law"): it still goes through the runtime (plan 5.5.3), so it is in the
+ * trace like any run — the engine, the model, how long, and whether it
+ * failed; never the prompt or the answer. No tools are passed (the request
+ * cannot write or reach the network), and a cloud executor is refused.
+ */
+export async function runLocalRequest(executor: Executor, req: Omit<ExecutorRequest, "tools">, meta: { agentId: string; commandId?: string }): Promise<ExecutorResponse> {
+  if (executor.id === "chat") throw new Error(`${meta.agentId}: a local engine only, not the cloud`);
+  const startedAt = Date.now();
+  const run: AgentRun = {
+    id: newRunId(),
+    agentId: meta.agentId,
+    commandId: meta.commandId,
+    executor: executor.id,
+    model: req.model ?? null,
+    startedAt,
+    endedAt: 0,
+    status: "ok",
+    attempts: 1,
+    steps: [],
+    suggestions: [],
+    tokens: { input: 0, output: 0, estimated: true },
+  };
+  try {
+    const res = await executor.chat({ ...req, tools: undefined, signal: req.signal });
+    run.model = res.model || run.model;
+    if (res.usage) run.tokens = { input: res.usage.inputTokens, output: res.usage.outputTokens, estimated: res.usage.estimated };
+    run.steps.push({ kind: "model", at: startedAt, ms: Date.now() - startedAt, label: run.model ?? executor.id, ok: true });
+    return res;
+  } catch (e) {
+    const aborted = isAbort(e, req.signal);
+    run.status = aborted ? "aborted" : "failed";
+    run.errorCode = aborted ? "aborted" : "error";
+    run.error = aborted ? "aborted" : e instanceof Error ? e.name : "error";
+    run.steps.push({ kind: "model", at: startedAt, ms: Date.now() - startedAt, label: run.model ?? executor.id, ok: false });
+    throw e;
+  } finally {
+    run.endedAt = Date.now();
+    void recordRun(run).catch(() => undefined); // why: a trace that can't be stored never fails the request
+  }
 }
 
 export async function runAgentOrThrow<I extends AgentInput, O = string>(def: AgentDefinition<I, O>, input: I, opts: RunOptions = {}): Promise<O> {

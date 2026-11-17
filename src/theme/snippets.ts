@@ -13,6 +13,7 @@ import { recordStyleRequest } from "../ai/privacyLedger";
 import { log } from "../lib/logger";
 import { listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "../storage/workspace";
 import { sanitizeCss, type SanitizeResult } from "./cssSanitizer";
+import { compareNames } from "../i18n/collate";
 
 export const SNIPPET_DIRS = [".lumen/snippets", ".obsidian/snippets"] as const;
 const STYLE_ATTR = "data-lumen-snippet";
@@ -46,7 +47,7 @@ export async function listSnippets(): Promise<SnippetInfo[]> {
       if (!byName.has(name)) byName.set(name, { path: e.path, name });
     }
   }
-  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
+  return [...byName.values()].sort((a, b) => compareNames(a.name, b.name));
 }
 
 export async function loadSnippet(info: SnippetInfo): Promise<LoadedSnippet> {

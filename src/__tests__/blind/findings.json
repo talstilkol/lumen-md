@@ -1,0 +1,38 @@
+{
+  "note": "Plan W6.15 — what the blind suites found, per module, recorded in the repo (also when 0). Sources: the findings tables in the bodies of PR #507 (F-1–F-11), #562 (F-12, 0 bugs), #756 (X-BL-1–3) and #776 (their fixes). kind: bug = the code (or its doc) was wrong; ambiguity / info = the spec was unclear, nothing to fix. A bug that is open has an it.fails case naming its id; a fixed one has none. blindFindings.test.ts holds this file to the suites.",
+  "modules": {
+    "keyring": { "suites": ["blindE2eeKeyring.test.ts"], "sensitive": true, "bugsFound": 0, "open": 0 },
+    "engine": { "suites": ["blindE2eeEngine.test.ts"], "sensitive": true, "bugsFound": 1, "open": 0 },
+    "manifest": { "suites": ["blindE2eeManifest.test.ts"], "sensitive": true, "bugsFound": 1, "open": 0 },
+    "header": { "suites": ["blindE2eeHeader.test.ts"], "sensitive": true, "bugsFound": 1, "open": 0 },
+    "lockedNote": { "suites": ["blindLockedNote.test.ts"], "sensitive": true, "bugsFound": 0, "open": 0 },
+    "redaction": { "suites": ["blindRedaction.test.ts"], "sensitive": true, "bugsFound": 2, "open": 0 },
+    "imageMetadata": { "suites": ["blindImageMetadata.test.ts"], "sensitive": true, "bugsFound": 1, "open": 0 },
+    "airplane": { "suites": ["blindAirplane.test.ts"], "sensitive": true, "bugsFound": 0, "open": 0 },
+    "workerLedger": { "suites": ["blindWorkerLedger.test.ts"], "sensitive": true, "bugsFound": 0, "open": 0 },
+    "vault-relay": { "suites": ["blindRelay.test.ts"], "sensitive": true, "bugsFound": 0, "open": 0 },
+    "linkShare": { "suites": ["blindLinkShare.test.ts"], "sensitive": true, "bugsFound": 1, "open": 0 },
+    "privacyLedger": { "suites": ["blindPrivacyLedger.test.ts"], "sensitive": true, "bugsFound": 0, "open": 0 },
+    "atomic": { "suites": ["blindAtomic.test.ts"], "sensitive": false, "bugsFound": 1, "open": 0 },
+    "integrity": { "suites": ["blindIntegrity.test.ts", "blindIntegrityPerf.test.ts"], "sensitive": false, "bugsFound": 1, "open": 0 },
+    "contentFrame": { "suites": ["blindContentFrame.test.ts", "blindContentFrameDom.test.ts"], "sensitive": false, "bugsFound": 1, "open": 0 },
+    "usageMetrics": { "suites": ["blindUsageMetrics.test.ts"], "sensitive": false, "bugsFound": 1, "open": 0 }
+  },
+  "findings": [
+    { "id": "F-1", "module": "atomic", "kind": "bug", "severity": "medium", "status": "fixed", "pr": 507, "fixedIn": "#356 ecb426ad9", "what": "a 239-byte note name got a 266-byte temporary name" },
+    { "id": "F-2", "module": "integrity", "kind": "ambiguity", "severity": "low", "status": "noted", "pr": 507, "what": "an orphan temp file removed by the folder repair can still be listed under skipped" },
+    { "id": "F-3", "module": "usageMetrics", "kind": "bug", "severity": "low", "status": "fixed", "pr": 507, "fixedIn": "lane R3 (12.11)", "what": "ids named after Object.prototype members counted from the inherited function" },
+    { "id": "F-4", "module": "usageMetrics", "kind": "ambiguity", "severity": "low", "status": "noted", "pr": 507, "what": "FEATURE_ID accepts typed-looking ids; the report allowlist keeps them out" },
+    { "id": "F-5", "module": "privacyLedger", "kind": "info", "severity": "info", "status": "noted", "pr": 507, "what": "bytesOut also counts the query string" },
+    { "id": "F-6", "module": "contentFrame", "kind": "bug", "severity": "low", "status": "fixed", "pr": 507, "fixedIn": "lane R3 (12.11)", "what": "unknown kinds and javascript:/data:/http: sources came back as requests" },
+    { "id": "F-7", "module": "linkShare", "kind": "bug", "severity": "low", "status": "fixed", "pr": 507, "fixedIn": "#448", "what": "non-public hosts (fd00::/fe80::/IPv4-mapped/localhost forms) taken for public" },
+    { "id": "F-8", "module": "redaction", "kind": "bug", "severity": "medium", "status": "fixed", "pr": 507, "fixedIn": "#473", "what": "a redact mark with attributes or a self-closing slash kept the secret in the export" },
+    { "id": "F-9", "module": "redaction", "kind": "bug", "severity": "medium", "status": "fixed", "pr": 507, "fixedIn": "#473", "what": "Redact selection across an existing closing mark left the rest in every export" },
+    { "id": "F-10", "module": "vault-relay", "kind": "ambiguity", "severity": "low", "status": "noted", "pr": 507, "what": "an oversized object closes the connection instead of a status" },
+    { "id": "F-11", "module": "integrity", "kind": "bug", "severity": "low", "status": "fixed", "pr": 507, "fixedIn": "docs corrected (12.11)", "inSuite": false, "what": "the docs promised 10,000 notes in < 5 s; Chromium took ~10 s" },
+    { "id": "F-12", "module": "workerLedger", "kind": "info", "severity": "info", "status": "noted", "pr": 562, "inSuite": false, "what": "the doc comment says another host fails; the deployment's own host is blocked too" },
+    { "id": "X-BL-1", "module": "manifest", "kind": "bug", "severity": "security", "status": "fixed", "pr": 756, "fixedIn": "#776", "also": ["engine"], "what": "a manifest from another branch passed as unproven instead of a fork" },
+    { "id": "X-BL-2", "module": "imageMetadata", "kind": "bug", "severity": "low", "status": "fixed", "pr": 756, "fixedIn": "#776", "what": "GIF bytes declared as JPEG passed through unchanged" },
+    { "id": "X-BL-3", "module": "header", "kind": "bug", "severity": "low", "status": "fixed", "pr": 756, "fixedIn": "#776", "what": "the kdf.ts comment listed Argon2id options below the spec's 37 MiB floor (docs only)" }
+  ]
+}

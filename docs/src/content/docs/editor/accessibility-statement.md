@@ -3,6 +3,8 @@ title: Accessibility statement
 description: How accessible Lumen is — the standard it follows (Israeli Standard 5568, WCAG), what works, known gaps, and how to report a barrier.
 appVersion: 0.1.0
 reviewed: 2026-11-15
+type: explanation
+tasks: ["W11.Q7", "W6.30", "W3.8"]
 ---
 
 This statement covers the Lumen app (web, desktop and mobile builds) at
@@ -46,6 +48,12 @@ status.
   scrolling stop.
 
 ## How it is checked
+
+These checks are written. For this version none of the end-to-end specs
+(`e2e/…`) has run yet, the nightly Mac does not exist yet, and no CI runs
+them on each build: they run on the owner's machine before the release. The
+[conformance report](/editor/acr/) marks every status that rests on one of
+them as **not yet verified** until that run is recorded.
 
 - axe-core (WCAG 2.0/2.1 A and AA) on six surfaces, in Hebrew and English,
   in light and dark mode (`e2e/a11y.spec.ts`).

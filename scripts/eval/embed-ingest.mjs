@@ -8,7 +8,9 @@
  *
  * Writes each row's numbers into eval/models/embedding-candidates.json
  * (`measured`) and the app's model into src/ai/embeddingDefault.json (null
- * keeps the built-in one), by the rules in scripts/lib/embedIngest.mjs.
+ * keeps the built-in one), by the rules in scripts/lib/embedIngest.mjs. A
+ * run whose card is dev or synthetic (review Z6-M5) records its rows as dev
+ * numbers and leaves src/ai/embeddingDefault.json untouched.
  * Exit 1 when the run is not taken.
  */
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
@@ -19,8 +21,9 @@ import { acceptEmbedRun, embedDefault, withMeasured } from "../lib/embedIngest.m
 const root = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const argv = process.argv.slice(2);
 const opt = (n) => (argv.includes(`--${n}`) ? argv[argv.indexOf(`--${n}`) + 1] : undefined);
-const MANIFEST = join(root, "eval/models/embedding-candidates.json");
-const DEFAULT = join(root, "src/ai/embeddingDefault.json");
+// `--manifest` / `--default`: other files to write (tests); the repository's by default.
+const MANIFEST = opt("manifest") ? resolve(opt("manifest")) : join(root, "eval/models/embedding-candidates.json");
+const DEFAULT = opt("default") ? resolve(opt("default")) : join(root, "src/ai/embeddingDefault.json");
 
 function newest() {
   const dir = join(root, "eval/results");
@@ -43,9 +46,14 @@ if (!a.ok) {
 }
 const date = /(\d{4}-\d\d-\d\d)/.exec(basename(file))?.[1] ?? null;
 const rel = file.startsWith(root) ? file.slice(root.length + 1) : basename(file);
-const { entry, why } = embedDefault(report, manifest, { file: rel, date });
-console.log(`embed-ingest: ${rel}: ${entry ? `the app's model becomes ${entry.id} at ${entry.dims} dimensions` : "the built-in model stays"} (${why})`);
+const { entry, why, keep } = embedDefault(report, manifest, { file: rel, date });
+console.log(`embed-ingest: ${rel}: ${keep ? "the app's model is not changed" : entry ? `the app's model becomes ${entry.id} at ${entry.dims} dimensions` : "the built-in model stays"} (${why})`);
 if (argv.includes("--check")) process.exit(0);
 writeFileSync(MANIFEST, JSON.stringify(withMeasured(manifest, report, { file: rel, date }), null, 2) + "\n");
+// Z6-M5: a dev or synthetic card never writes the app's default, not even to null.
+if (keep) {
+  console.log(`wrote ${basename(MANIFEST)} (measured, as dev numbers); ${basename(DEFAULT)} left as it is`);
+  process.exit(0);
+}
 writeFileSync(DEFAULT, JSON.stringify({ about: "Written by npm run eval:embed-ingest (plan W7.13): the measured winner of the embeddings competition, or null for the built-in multilingual-e5-small. Never by hand.", default: entry }, null, 2) + "\n");
-console.log(`wrote ${basename(MANIFEST)} (measured) and src/ai/embeddingDefault.json`);
+console.log(`wrote ${basename(MANIFEST)} (measured) and ${basename(DEFAULT)}`);

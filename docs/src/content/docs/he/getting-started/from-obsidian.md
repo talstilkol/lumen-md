@@ -1,6 +1,7 @@
 ---
 title: מעבר מ-Obsidian
 description: מביאים כספת Obsidian ל-Lumen — פתקים, קבצים מצורפים, קישורים ו-Bases — ומה משתנה בדרך.
+type: how-to
 ---
 
 כספת Obsidian היא תיקייה של קובצי Markdown, וכך גם כספת Lumen: אין מה להמיר.

@@ -336,6 +336,32 @@ per desktop OS for the desktop bundles) produces, in `release/`:
 downloads page (`/download/`) renders: every file
 with its SHA-256 and signatures.
 
+### Signed tags and the source VSA (plans W13.T3, W13.T4)
+
+`npm run release:verify` checks the source side of a release too, and fails
+without it:
+
+- **Signed tag.** The tag `v<version>` must be SSH-signed (`git tag -s` with
+  `gpg.format=ssh`) by a key in [`security/allowed_signers`](security/allowed_signers)
+  for the `git` namespace, and point at the commit the release names (the
+  trusted comment of `SHA256SUMS.minisig`). `--publish` signs it with
+  `LUMEN_TAG_SIGNING_KEY`; preflight refuses a key that is not in the file.
+  The signature is verified in Node (OpenSSH's SSHSIG format), and where
+  `ssh-keygen` is installed `git -c gpg.ssh.allowedSignersFile=security/allowed_signers verify-tag v<version>`
+  must agree. The file is code: a change to it is a change to who can release,
+  and it goes through review. (Sigstore's gitsign was considered; SSH keeps the
+  check offline and needs no OIDC identity at tag time.)
+- **Source VSA (SLSA 1.2 Source track, level 2).** `release/source-vsa.json`:
+  a Verification Summary Attestation for the release commit, signed (DSSE,
+  Ed25519) by a key in [`security/source-vsa.json`](security/source-vsa.json),
+  `PASSED` at `SLSA_SOURCE_LEVEL_2`. Level 2 needs: the committed ruleset
+  protects the branch from force pushes and deletion, the server's rulesets
+  (read with `gh api`) say the same, and the commit descends from the previous
+  release. `--publish` writes it with `LUMEN_SOURCE_VSA_KEY`; for every train
+  head, `npm run release:source-vsa -- --trains --fetch --key <pem>` writes one
+  per head into `security/source-vsa/` (with the last verified head of each
+  branch, so a rewritten history fails the next run).
+
 ### Signing and updates (plan 11.5)
 
 Every key is optional: without it the step is skipped with a warning and the

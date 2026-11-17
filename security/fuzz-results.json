@@ -1,0 +1,20 @@
+{
+ "$comment": "W11.S12: fuzz runs published on /security and /he/security (scripts/security-page.mjs). One row per run: the commit fuzzed, the decoder (scripts/fuzz/targets.mjs), the inputs and seed (inputs are a pure function of seed and index), the clock that timed them (cpu: process CPU time, so host load does not count), and the counts. A run with crashes, hangs or slow inputs names its finding in security/findings.json.",
+ "runs": [
+  {
+   "date": "2026-11-16",
+   "commit": "b6b7741e4e",
+   "target": "markdown",
+   "inputs": 1000000,
+   "seed": 1,
+   "clock": "cpu",
+   "slowMs": 200,
+   "hangMs": 5000,
+   "crashes": 0,
+   "hangs": 0,
+   "slow": 0,
+   "maxMs": 69.1,
+   "how": "two runs of 500,000 inputs each (seed 1, --clock cpu --slow-ms 200 --hang-ms 5000, builtin engine): 2,575.5 s and 2,577.4 s, slowest inputs 69.1 ms and 56.0 ms CPU (lane g2-L8, W10.D21; known.json emptied in b6b7741e4e)"
+  }
+ ]
+}

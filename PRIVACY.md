@@ -30,7 +30,10 @@ You don't have to take this page's word for it. The privacy ledger (⌘K → *Pr
 None of these runs on its own. Each starts only when you turn a feature on, or when the
 deployment's build configures it. The "In the ledger" name is exactly what the privacy
 ledger panel shows. The `local-only` policy blocks every path that carries user content
-(categories `cloud-ai`, `cloud-text`, `research`, `third-party`, `monitoring`, `plugin`).
+(categories `cloud-ai`, `cloud-text`, `research`, `third-party`, `monitoring`, `plugin`),
+except a request you agree to at the moment it is made (the public sources and the agent's
+network tools): that one goes, and the ledger lists it as consented. The Wikidata search
+is refused under `local-only` even then.
 
 | Path | What leaves | Where to | What is kept there, and for how long | In the ledger (category) |
 |---|---|---|---|---|
@@ -53,13 +56,19 @@ ledger panel shows. The `local-only` policy blocks every path that carries user 
 | Update check (desktop app) | App version and platform only | `Desktop update check (app version and platform only)` | GitHub Releases' logs | `static-asset` |
 | Jewish sources | The reference you asked for ("Berakhot 2a"), nothing from your notes | `Jewish sources (Sefaria): the reference only` (sefaria.org), when you look one up | Sefaria's policy | `cloud-text` |
 | Knesset records | The law or bill name you asked for, nothing from your notes | `Knesset records (OData): the law or bill name only` (knesset.gov.il), when you look one up | The Knesset's policy | `cloud-text` |
+| Wikidata (entity linking) | The name of the one entity you asked to link, nothing from your notes, only after you agree (this once, or always on this device: an app setting, never kept in or taken from a vault). Refused under the `local-only` policy, whatever you agreed | `Wikidata search: the entity name only` (www.wikidata.org), when you search | Wikimedia's privacy policy; the data you get back is CC0 | `cloud-text` |
+| OpenAlex (citation graph) | The DOIs of the sources you asked about, nothing from your notes; off until you turn the lookup on | `OpenAlex: the references of a DOI (citation graph, only when you turn it on)` (api.openalex.org), when you fill references | OpenAlex's terms; the data you get back is CC0 | `research` |
+| CrossRef (DOI lookup) | **Off in this version, pending the owner's approval** (nothing is sent). Once on: the DOI you typed, nothing from your notes; asked first each time | `CrossRef DOI lookup: the DOI you asked for only` (api.crossref.org), when you run "Cite from a DOI" | Crossref's terms; the metadata you get back is public | `research` |
+| Outside MCP servers you add | A request for that server's list of tools; what a tool call sends is the agent-tool row above | `MCP server <server name>`, when you press "Show tools" or an agent run uses the server; every server is off until you turn it on, and local-only blocks remote ones | Per the server you added | `network` |
 | Government data | The search words, dataset id or series id you asked for | `Government data (data.gov.il, CBS): the search words or dataset id only` (data.gov.il, apis.cbs.gov.il), when you search | The government site's policy | `cloud-text` |
 | Zotero | Requests to your Zotero library with your own key; it writes only the PDF highlights you send and confirm | `Zotero Web API (your library; writes only the PDF highlights you send)` (api.zotero.org) | In your Zotero library, per Zotero's policy | `research` |
 | Publish to Bluesky (Standard.site) | The note you publish, as a public record (marked `<redact>` passages and hidden comments removed first), and your handle and App Password for that sign-in only | `Publish to the AT Protocol (Standard.site), your PDS`, and `AT Protocol identity lookup (plc.directory)` to find your account's server, only after you confirm | Public, in your AT Protocol account until you remove it; relays and apps keep their own copies | `third-party` |
 | Calendar connections | For CalDAV: your tasks, to the calendar server you set, with your user name and password. For a subscription: a read-only request to the ICS address you added | `CalDAV task sync (your calendar server)`, `Calendar subscription (ICS, read only)`, only once you set one up | On your calendar server, per its operator; the ICS host's logs | `third-party` |
 | Themes and CSS snippets | A file request from a stylesheet you installed (a font or an image) | `A stylesheet (theme or CSS snippet) loaded it` | The host's logs. Listed so you can see it | `third-party` |
 | Encrypted sync on the local network | Your notes, end-to-end encrypted, to your other device only | `Encrypted sync on the local network (no cloud)` | On your other device. Nothing goes to a server | `local-ai` |
+| Backups to your WebDAV server | The vault archive. Encrypted (age, the first choice): ciphertext only. Plain: your notes as they are, readable by whoever runs the server | `Plain backup to your WebDAV server (the vault archive, not encrypted)`, for each plain upload (an encrypted one is ciphertext, like sync, and not listed) | On the WebDAV server you set, until you delete it. A plain backup is refused under local-only | `third-party` |
 | Encrypted sync storage, as audit mode names it | The vault, end-to-end encrypted (see "Encrypted sync" below) | `Sync storage: your Dropbox (audit mode)`, `Sync storage: your Google Drive (audit mode)`: listed only with audit mode on; no rule blocks your own sync | At your provider until you delete it | `network` |
+| LaTeX to PDF with Tectonic (desktop) | Tectonic, a program you install, fetches the TeX packages it has not cached: your IP address and the package names, never the document | `Tectonic: TeX packages from its bundle server (LaTeX to PDF)` (relay.fullyjustified.net, Tectonic's bundle server), for each compile after you allow its downloads once. In airplane mode or under local-only it runs with `--only-cached`: no request | The bundle server's logs, per its operator | `network` |
 | Any other request (audit mode) | Whatever that request carries | `Other request (audit mode)`: with audit mode on, every off-device request the rules above don't name is listed too | Per the destination | `network` |
 
 Two suffixes can follow any ledger name: `(worker: <name>)` for a request from a Web

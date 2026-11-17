@@ -44,6 +44,11 @@ type RunnerId = Exclude<ExecutorId, "transformers">;
 const ModelSourcesSection = lazy(() => import("./ModelSourcesSection").then((m) => ({ default: m.ModelSourcesSection })));
 type Status = { available: boolean; detail?: string } | "checking";
 
+// W13.A4: the suggestion report, with its strings, in its own chunk.
+const SuggestionOutcomesSection = lazy(() => import("./SuggestionOutcomesSection"));
+// W13.A3: which agents may read the agent memory.
+const AgentMemorySection = lazy(() => import("./AgentMemorySection"));
+
 const box: React.CSSProperties = {
   padding: "12px 14px",
   borderRadius: 8,
@@ -653,6 +658,18 @@ export function AiSettingsPanel({ open, onClose, embedded = false }: Props) {
             <div style={row}>
               <button type="button" style={ghost} onClick={() => runCommand("ai.styleProfile")}>{t("cmd.ai.styleProfile")}</button>
             </div>
+          </section>
+
+          <section style={box} aria-labelledby="ai-set-memory" data-testid="ai-set-memory">
+            <Suspense fallback={null}>
+              <AgentMemorySection captionStyle={caption} mutedStyle={muted} />
+            </Suspense>
+          </section>
+
+          <section style={box} aria-labelledby="ai-set-outcomes" data-testid="ai-set-outcomes">
+            <Suspense fallback={null}>
+              <SuggestionOutcomesSection captionStyle={caption} mutedStyle={muted} buttonStyle={ghost} />
+            </Suspense>
           </section>
 
           <section style={box} aria-labelledby="ai-set-trace">

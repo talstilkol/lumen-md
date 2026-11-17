@@ -1,6 +1,8 @@
 ---
 title: סיכומים מעוגנים במכשיר הזה
 description: סיכומים שנוצרים במכשיר הזה, שכל משפט בהם מועתק מהטקסט ונבדק מולו — ה-Summarizer של Chrome לאנגלית, מודל מקומי לעברית, וגיבוי בלי מודל.
+type: reference
+tasks: ["6.11"]
 ---
 
 `⌘K → "AI: Summarize This Note (on this device)"` והכפתור **סיכום** בחלונית

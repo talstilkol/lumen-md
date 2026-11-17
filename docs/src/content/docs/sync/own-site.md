@@ -1,6 +1,8 @@
 ---
 title: Publish to your own site
 description: Turn the notes you pick into a website with navigation, search and right-to-left pages, on your own GitHub Pages or as a .zip for any static host.
+type: how-to
+tasks: ["W12.S5", "4.18"]
 ---
 
 `⌘K → Publish site…` turns the notes you pick into a static website that
@@ -23,6 +25,16 @@ you host yourself. Lumen runs no server for it, and the site belongs to you.
   so the site has no dead links and does not reveal where an unpublished note
   lives. Images and other files the notes reference are copied along. A file
   that cannot be found stays a plain link, and the result says how many.
+- **A digital garden.** Under each page: the pages that link to it
+  (backlinks), a small graph of the pages around it (a picture of plain
+  links, no script), and its tags (`tags:` in the frontmatter or `#tag` in
+  the text), each with a page listing every page that has it. Hovering over
+  or tabbing to a link to another page shows its first lines; Escape hides
+  them. Each page gets its own language from its text, so a Hebrew note on
+  an English site is marked as Hebrew.
+- **Hebrew search** finds a word with or without one common prefix: searching
+  ירושלים finds בירושלים, and בירושלים finds ירושלים. Short words (four
+  letters or fewer) are not cut down, so שלום is never searched as לום (which would also find כלום).
 - `index.md` at the vault root becomes the home page. Without one, the home
   page lists every page. A `404.html` and a `.nojekyll` are included.
 

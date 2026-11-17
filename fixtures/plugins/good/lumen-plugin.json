@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "id": "org.example.reading-time",
+  "name": "Reading time",
+  "version": "1.0.0",
+  "description": "Fixture for the developer preview scan (W13.L6): shows how long the open note takes to read, Hebrew and English.",
+  "author": "Lumen fixtures",
+  "license": "MIT",
+  "main": "main.js",
+  "repository": "https://github.com/example/reading-time",
+  "targetApiVersion": "1.1.0",
+  "publisher": { "github": "example" },
+  "capabilities": [
+    { "id": "commands", "reason": "Adds the “Reading time” command" },
+    { "id": "document:read", "reason": "Counts the words of the open note" },
+    { "id": "notifications", "reason": "Shows the result" }
+  ]
+}

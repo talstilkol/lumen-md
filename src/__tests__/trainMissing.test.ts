@@ -12,7 +12,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 // @ts-expect-error — plain .mjs script without type declarations
-import { DECISIONS_FILE, ancestry, checkDecisions, classify, openPulls, report, run } from "../../scripts/train-missing.mjs";
+import { DECISIONS_FILE, ancestry, checkDecisions, classify, onlyBotCommits, openPulls, pullCommits, report, run } from "../../scripts/train-missing.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
 const tmp = mkdtempSync(join(tmpdir(), "train-missing-"));
@@ -67,7 +67,7 @@ describe("the decisions file", () => {
       ],
     });
     expect(bad).toEqual([
-      'decisions[0] (#5): decision "later" is not one of in, rejected, replaced',
+      'decisions[0] (#5): decision "later" is not one of in, deferred, rejected, replaced',
       "decisions[1] (#6): no reason (at least a sentence)",
       "decisions[2] (#7): head is not a commit sha (10 to 40 hex)",
       'decisions[3] (#8): "in" names the task or PR that brings it (via)',
@@ -111,6 +111,71 @@ describe("classify", () => {
   });
 });
 
+describe("dependabot PRs follow a rebase (by number, author and title); no other PR does", () => {
+  const bot = (number: number, sha: string, title: string, login = "dependabot[bot]") => ({ number, title, head: { sha }, base: { ref: "main" }, user: { login } });
+  const T = "chore(deps): Bump the yjs group across 1 directory with 2 updates";
+  const inTrain = () => false;
+  const c = (author = "dependabot[bot]", committer = "web-flow", verified = true) => ({ author: { login: author }, committer: { login: committer }, commit: { verification: { verified } } });
+  const botOnly = () => [c(), c("dependabot[bot]", "dependabot[bot]")];
+
+  it("a dependabot decision with the PR's title holds after the bot rebased the PR", () => {
+    const file = { decisions: [{ pr: 162, head: "5b8963441b", decision: "rejected", author: "dependabot[bot]", title: T, reason: "bumps go in as one lockfile update on the Mac" }] };
+    const v = classify([bot(162, "32169deb10425c4d63b2f65fcaeb45096bb8352e", T)], file, inTrain, botOnly);
+    expect(v.ok).toBe(true);
+    expect(v.decided[0]).toMatchObject({ pr: 162, decision: "rejected", rebasedFrom: "5b8963441b" });
+    expect(report(v, "t").some((l: string) => l.startsWith("· #162 (dependabot) rebased to 32169deb10"))).toBe(true);
+  });
+
+  it("stale when the title changed (a new bump), when the author is not dependabot, or when the decision does not say dependabot", () => {
+    const file = { decisions: [{ pr: 162, head: "5b8963441b", decision: "rejected", author: "dependabot[bot]", title: T, reason: "bumps go in as one lockfile update on the Mac" }] };
+    expect(classify([bot(162, "32169deb10", T.replace("2 updates", "3 updates"))], file, inTrain, botOnly).stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
+    expect(classify([bot(162, "32169deb10", T, "someone")], file, inTrain, botOnly).stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
+    const plain = { decisions: [{ pr: 162, head: "5b8963441b", decision: "rejected", reason: "bumps go in as one lockfile update on the Mac" }] };
+    expect(classify([bot(162, "32169deb10", T)], plain, inTrain, botOnly).stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
+  });
+
+  it("stale when anyone but the bot pushed a commit, or the commits cannot be read (R8b-L3)", () => {
+    const file = { decisions: [{ pr: 162, head: "5b8963441b", decision: "rejected", author: "dependabot[bot]", title: T, reason: "bumps go in as one lockfile update on the Mac" }] };
+    const stale = (commitsOf?: (n: number) => unknown) => classify([bot(162, "32169deb10", T)], file, inTrain, commitsOf).stale.map((r: { pr: number }) => r.pr);
+    expect(stale(() => [c(), c("someone", "someone")])).toEqual([162]);
+    expect(stale(() => [c(), c("dependabot[bot]", "someone")])).toEqual([162]);
+    expect(stale(() => [c(), c("dependabot[bot]", "web-flow", false)])).toEqual([162]);
+    expect(stale(() => [c(), { author: null, committer: { login: "web-flow" }, commit: { verification: { verified: true } } }])).toEqual([162]);
+    expect(stale(() => [])).toEqual([162]);
+    expect(stale(() => ({ message: "Not Found" }))).toEqual([162]);
+    expect(stale(() => { throw new Error("rate limited"); })).toEqual([162]);
+    expect(stale(undefined)).toEqual([162]);
+    expect(stale(botOnly)).toEqual([]);
+    expect(onlyBotCommits(botOnly())).toBe(true);
+  });
+
+  it("only a 'rejected' decision follows a rebase: 'in' and 'replaced' need a new look", () => {
+    for (const extra of [{ decision: "in", via: "W6.14" }, { decision: "replaced", by: "#1" }]) {
+      const file = { decisions: [{ pr: 162, head: "5b8963441b", author: "dependabot[bot]", title: T, reason: "bumps go in as one lockfile update on the Mac", ...extra }] };
+      const v = classify([bot(162, "32169deb10", T)], file, inTrain, botOnly);
+      expect(v.stale.map((r: { pr: number }) => r.pr)).toEqual([162]);
+      expect(v.problems).toEqual([expect.stringMatching(/only a "rejected" dependabot decision/)]);
+    }
+  });
+
+  it("reads a PR's commits page by page", () => {
+    const asked: string[] = [];
+    const api = (path: string) => {
+      asked.push(path);
+      return path.endsWith("page=1") ? Array.from({ length: 100 }, () => c()) : [c()];
+    };
+    expect(pullCommits(api, "o/r", 162)).toHaveLength(101);
+    expect(asked).toEqual([1, 2].map((p) => `repos/o/r/pulls/162/commits?per_page=100&page=${p}`));
+  });
+
+  it("the file may name only dependabot as an author, and then the title too", () => {
+    const at = (d: Record<string, unknown>) => checkDecisions({ decisions: [{ pr: 7, head: "aaaa000007", decision: "rejected", reason: "a reason long enough", ...d }] });
+    expect(at({ author: "someone" })).toEqual([expect.stringMatching(/author may only be "dependabot\[bot\]"/)]);
+    expect(at({ author: "dependabot[bot]" })).toEqual([expect.stringMatching(/names the PR's title/)]);
+    expect(at({ author: "dependabot[bot]", title: "chore(deps): x" })).toEqual([]);
+  });
+});
+
 describe("openPulls", () => {
   it("reads every page of 100 until a short one", () => {
     const pages: Record<number, Pull[]> = {
@@ -147,6 +212,14 @@ describe("run, with real git", () => {
     expect(first.undecided.map((x: { pr: number }) => x.pr)).toEqual([2]);
     expect(first.ok).toBe(false);
     writeFileSync(join(r.dir, DECISIONS_FILE), JSON.stringify({ decisions: [{ pr: 2, head: r.y, decision: "in", via: "train 5", reason: "goes into the next train" }] }));
+    expect(run({ cwd: r.dir, api, git }).ok).toBe(true);
+    // Review 11, L13: a file that names an older train head is stale, even with every PR decided.
+    const decisions = [{ pr: 2, head: r.y, decision: "in", via: "train 5", reason: "goes into the next train" }];
+    writeFileSync(join(r.dir, DECISIONS_FILE), JSON.stringify({ train: "verify/train-4", trainHead: "af2d0d7ce51c8c549ab3dada1e8ce4b6ad5d9545", decisions }));
+    const stale = run({ cwd: r.dir, api, git });
+    expect(stale.ok).toBe(false);
+    expect(stale.lines.join("\n")).toMatch(/decided at verify\/train-4 @ af2d0d7ce5, but verify\/train-4 is at/);
+    writeFileSync(join(r.dir, DECISIONS_FILE), JSON.stringify({ train: "verify/train-4", trainHead: r.train, decisions }));
     expect(run({ cwd: r.dir, api, git }).ok).toBe(true);
   });
 

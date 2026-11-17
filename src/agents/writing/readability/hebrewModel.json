@@ -1,0 +1,52 @@
+{
+ "version": 1,
+ "features": [
+  "wordLen",
+  "sentLen",
+  "rare",
+  "ambiguous"
+ ],
+ "mean": [
+  4.647554,
+  12.42619,
+  0.183921,
+  0.151064
+ ],
+ "sd": [
+  0.659301,
+  7.971372,
+  0.129149,
+  0.104328
+ ],
+ "intercept": 3,
+ "weights": [
+  0.608391,
+  0.761871,
+  0.209835,
+  0.127214
+ ],
+ "noFreq": {
+  "features": [
+   "wordLen",
+   "sentLen",
+   "ambiguous"
+  ],
+  "mean": [
+   4.647554,
+   12.42619,
+   0.151064
+  ],
+  "sd": [
+   0.659301,
+   7.971372,
+   0.104328
+  ],
+  "intercept": 3,
+  "weights": [
+   0.72972,
+   0.823367,
+   0.116056
+  ]
+ },
+ "corpus": "src/agents/writing/readability/corpusHe.eval.ts (train split)"
+}

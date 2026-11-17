@@ -2,7 +2,7 @@
   "pluginGallery.builtIn": "Built into Lumen",
   "pluginGallery.categories": "Categories",
   "pluginGallery.categoriesLabel": "Plugin categories",
-  "pluginGallery.close": "Close plugin gallery",
+  "pluginGallery.close": "Close plugin gallery (Esc)",
   "pluginGallery.comingSoon": "More plugins coming soon ·",
   "pluginGallery.counts": "{installed} installed · {available} available",
   "pluginGallery.homepage": "{name} homepage",

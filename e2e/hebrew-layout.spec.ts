@@ -79,3 +79,38 @@ test("the palette finds a command typed with the wrong layout", async ({ page })
   const first = page.locator('[role="option"]').first();
   await expect(first).toContainText("חיפוש");
 });
+
+/*
+ * Plan W13.H4: a user's string in the chrome is isolated — the note name in
+ * the title bar and the tab in <bdi>, the window title in FSI…PDI — so
+ * "פתק (2).md" keeps its brackets and "README.md" stays readable in a Hebrew
+ * interface. The brackets are checked where they are drawn: in an isolate
+ * of the name's own direction, "(" comes before "2" in reading order.
+ */
+test("user strings in the chrome are isolated: title bar, tabs, window title", async ({ page }) => {
+  for (const name of ["פתק (2).md", "README.md", "שלום world 123.md"]) {
+    await page.evaluate((n) => {
+      localStorage.setItem("lumen-md", JSON.stringify({ state: { locale: "he", doc: { name: n, content: "# x\n", dirty: false, workspaceName: null } }, version: 0 }));
+    }, name);
+    await page.reload();
+    await expect(page.locator(".cm-content").first()).toBeVisible({ timeout: 20_000 });
+    await expect.poll(() => page.evaluate(() => document.title)).toBe(`\u2068${name}\u2069 — Lumen`);
+    const bdi = page.locator("bdi", { hasText: name }).first();
+    await expect(bdi).toBeVisible();
+    if (name.startsWith("פתק")) {
+      const order = await bdi.evaluate((el) => {
+        const t = el.firstChild as Text;
+        const at = (i: number) => {
+          const r = document.createRange();
+          r.setStart(t, i);
+          r.setEnd(t, i + 1);
+          return r.getBoundingClientRect().left;
+        };
+        const open = t.data.indexOf("(");
+        return { open: at(open), two: at(open + 1) };
+      });
+      // An RTL isolate: "(" is drawn to the right of "2", so the brackets read "(2)".
+      expect(order.open).toBeGreaterThan(order.two);
+    }
+  }
+});

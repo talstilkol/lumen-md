@@ -29,6 +29,7 @@ import { DARK_DATA_KEY, SLUG_PLACEHOLDER } from "./renderProtocol";
 import { markdownSyntax } from "./syntax";
 import { defaultCalloutTitle, remarkObsidian } from "./remarkObsidian";
 import { rehypeDirAuto } from "./rehypeDirAuto";
+import { rehypeSourceLines, SOURCE_LINES_KEY } from "./rehypeSourceLines";
 import { rehypeMathIsolate } from "../lib/mathIsolate";
 import { rehypeSanitizeRaw } from "./rehypeSanitizeRaw";
 // rehype-raw is dynamically imported in buildFullProcessor() — it pulls in
@@ -80,6 +81,8 @@ export const SPECIAL_LANGS = new Set([
   "chart",
   "csv",
   "tsv",
+  // A small spreadsheet kept as CSV, with formulas (plan W12.X1).
+  "sheet",
   "json-table",
   "insights",
   "jsonl",
@@ -112,6 +115,14 @@ export const SPECIAL_LANGS = new Set([
   // Embedded queries and Dataview blocks (plan W2.12).
   "query",
   "dataview",
+  // Analysis of Competing Hypotheses: evidence × hypotheses (plan R12.20).
+  "ach",
+  // Folders, nested tags or headings as a tree / sunburst (plan W12.V3).
+  "structure",
+  // The Hebrew month grid of the daily notes, and the year's activity (plan W12.V5).
+  "hebrew-calendar",
+  // Claims and sources with supports / contradicts / qualifies (plan W12.V4).
+  "argument-map",
   // Single-language live previews — render the snippet inside a tiny
   // sandboxed iframe so users can experiment with HTML/CSS/JS/GLSL/SVG
   // without writing the full boilerplate of an `htmlpreview` block.
@@ -227,7 +238,8 @@ function hastResult(this: { compiler?: unknown }) {
 }
 
 /** Parse + the Lumen dialect transforms that run before embeds are expanded. */
-function buildDialect() {
+/** `textImageEmbeds: false` for embedded notes: their `![[image]]` is left to remarkEmbeds (plan 4.7). */
+function buildDialect(textImageEmbeds = true) {
   return unified()
     .use(remarkParse)
     .use(remarkRenderHost)
@@ -237,7 +249,7 @@ function buildDialect() {
     // W1.3 — Obsidian callouts, %%comments%%, ==highlights==, ![[image|300]].
     // Before soft breaks (a callout's title ends at the first line break)
     // and before wiki links (an embed is not a link).
-    .use(remarkObsidian, { calloutTitle: (kind: string, type: string) => active.calloutTitle(kind, type) })
+    .use(remarkObsidian, { calloutTitle: (kind: string, type: string) => active.calloutTitle(kind, type), textImageEmbeds })
     .use(remarkBreaks)
     .use(remarkAdmonitions)
     .use(remarkColumns)
@@ -253,7 +265,7 @@ let embedParser: ReturnType<typeof buildDialect> | null = null;
  * the host's remaining passes then run over the spliced-in nodes.
  */
 function parseEmbeddedNote(markdown: string): MdastRoot {
-  embedParser ??= buildDialect();
+  embedParser ??= buildDialect(false);
   return embedParser.runSync(embedParser.parse(prepareCriticMarkup(markdown))) as MdastRoot;
 }
 
@@ -355,7 +367,8 @@ async function buildFullProcessor(
   // rehype-raw pulls in parse5 (~40 KB gz); only docs with inline HTML
   // pay for it (M12-followup-2).
   const [rehypeRaw, rehypeKatex] = await Promise.all([
-    opts.raw ? import("rehype-raw").then((m) => m.default) : null,
+    // rehypeRawSafe: rehype-raw, falling back to text when parse5 throws (W10.D21).
+    opts.raw ? import("./rehypeRawSafe").then((m) => m.default) : null,
     opts.math ? loadKatex() : null,
   ]);
   let p = buildBase();
@@ -365,7 +378,7 @@ async function buildFullProcessor(
   // so heading ids are computed from the rendered text.
   p = p.use(rehypeCriticMarkup);
   p = blockSlugs ? p.use(blockSlugs) : p.use(rehypeSlug);
-  p = p.use(rehypeDirAuto);
+  p = p.use(rehypeDirAuto).use(rehypeSourceLines);
   // W5.14 — each formula an LTR isolate, so it keeps its order inside Hebrew.
   // Plan 8.1 step 2: rehype-katex runs once per distinct formula (./math.ts).
   if (rehypeKatex) p = p.use(rehypeKatexCached(rehypeKatex)).use(rehypeMathIsolate);
@@ -407,8 +420,9 @@ function hasMath(source: string): boolean {
 }
 
 /** The vfile input: the prepared source, plus the embed context for remarkEmbeds. */
-function input(markdownText: string, embeds?: EmbedContext, renderHost?: RenderHost, dark?: boolean) {
+function input(markdownText: string, embeds?: EmbedContext, renderHost?: RenderHost, dark?: boolean, lines?: boolean) {
   const data: Record<string, unknown> = {};
+  if (lines) data[SOURCE_LINES_KEY] = true;
   if (dark !== undefined) data[DARK_DATA_KEY] = dark;
   if (embeds) data[EMBEDS_DATA_KEY] = embeds;
   if (renderHost) data[HOST_DATA_KEY] = renderHost;
@@ -421,9 +435,9 @@ function input(markdownText: string, embeds?: EmbedContext, renderHost?: RenderH
  * loaded when the text (or a note it embeds) needs them. Citations are
  * expanded by the caller (they need the vault's library).
  */
-export async function renderHast(markdownText: string, isDark: () => boolean, embeds?: EmbedContext, variant?: Variant, renderHost?: RenderHost): Promise<HastRoot> {
+export async function renderHast(markdownText: string, isDark: () => boolean, embeds?: EmbedContext, variant?: Variant, renderHost?: RenderHost, lines?: boolean): Promise<HastRoot> {
   const proc = await getFullProcessor(isDark, variant ?? (await documentVariant(markdownText, embeds)));
-  const file = await proc.process(input(markdownText, embeds, renderHost, isDark()));
+  const file = await proc.process(input(markdownText, embeds, renderHost, isDark(), lines));
   return file.result as HastRoot;
 }
 
@@ -444,7 +458,7 @@ export async function documentVariant(markdownText: string, embeds?: EmbedContex
  * tree and heading ids as `renderHast`, minus everything that needs a lazy
  * chunk — no Shiki, no KaTeX, no rehype-raw.
  */
-export function renderHastFast(markdownText: string, embeds?: EmbedContext, renderHost?: RenderHost): HastRoot {
-  fastProcessor ??= toHast(buildBase().use(rehypeCriticMarkup).use(rehypeSlug).use(rehypeDirAuto));
-  return fastProcessor.processSync(input(markdownText, embeds, renderHost)).result as HastRoot;
+export function renderHastFast(markdownText: string, embeds?: EmbedContext, renderHost?: RenderHost, lines?: boolean): HastRoot {
+  fastProcessor ??= toHast(buildBase().use(rehypeCriticMarkup).use(rehypeSlug).use(rehypeDirAuto).use(rehypeSourceLines));
+  return fastProcessor.processSync(input(markdownText, embeds, renderHost, undefined, lines)).result as HastRoot;
 }

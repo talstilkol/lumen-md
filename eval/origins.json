@@ -152,6 +152,10 @@
   "unlinked/notes": {
    "origin": "synthetic",
    "why": "written for this set"
+  },
+  "related-real/links": {
+   "origin": "real",
+   "why": "links people wrote between their notes in 10 public Obsidian vaults (W4.30 corpus), used as published; only the link to the gold note is removed from the query"
   }
  },
  "synthetic": {
@@ -162,12 +166,24 @@
   "retrieval-hard/hard": {
    "origin": "synthetic",
    "why": "real HeQ questions and paragraphs, but each query rewritten here by rule (synonym, prefix, spelling, acronym, loanword): real text with variation we injected"
+  },
+  "cite-gate/cases": {
+   "origin": "synthetic",
+   "why": "written for this repository by gen.py (R12.9): sources, questions and answers invented, labels by construction"
+  },
+  "claims/cases": {
+   "origin": "synthetic",
+   "why": "written for this repository by gen.py (R12.11): invented names, scripted model drafts, labels by construction"
   }
  },
  "fixtures": {
   "academic": {
    "origin": "synthetic",
    "why": "written for the tests"
+  },
+  "apa7-he-guides.json": {
+   "origin": "derived-from-docs",
+   "why": "examples transcribed from the published Bar-Ilan and Haifa library APA 7 guides (W11.H15); the fixture's own `about` says transcription is not yet checked by eye"
   },
   "apple-notes-synthetic": {
    "origin": "synthetic",
@@ -205,9 +221,17 @@
    "origin": "synthetic",
    "why": "provenance not recorded: treated as synthetic"
   },
+  "dates-he": {
+   "origin": "synthetic",
+   "why": "gold.synthetic.json: Hebrew date phrases written for the R12.6 tests"
+  },
   "eval-ingest": {
    "origin": "synthetic",
    "why": "made-up eval runs for evalIngest.test.ts; not measurements of any model (README)"
+  },
+  "format-roundtrip": {
+   "origin": "synthetic",
+   "why": "baseline.json: scores measured here by formatRoundTrip.test.ts, not data"
   },
   "golden": {
    "origin": "synthetic",
@@ -220,6 +244,14 @@
   "gps-photos.json": {
    "origin": "synthetic",
    "why": "written for the tests"
+  },
+  "gpx-public": {
+   "origin": "real",
+   "why": "GPX test files of gpxpy, copied unchanged at a pinned commit, Apache-2.0 (README, LICENSE-gpxpy)"
+  },
+  "hebcal-learning": {
+   "origin": "real",
+   "why": "the published daily Rambam schedule from hebcal-learning's test data at a pinned commit, BSD-2-Clause"
   },
   "highlight-import": {
    "origin": "synthetic",
@@ -236,6 +268,14 @@
   "ink": {
    "origin": "synthetic",
    "why": "written for the tests"
+  },
+  "ipynb-public": {
+   "origin": "real",
+   "why": "Jupyter's own documentation notebooks, copied unchanged, BSD-3-Clause (README)"
+  },
+  "israeli-import": {
+   "origin": "synthetic",
+   "why": "written by hand for lane T8 in the shapes Word, Google Docs, Notion, Apple Notes and WhatsApp export; no third-party text (its README); real exports remain W10.O9"
   },
   "json-canvas": {
    "origin": "real",
@@ -257,6 +297,10 @@
    "origin": "synthetic",
    "why": "written for the tests"
   },
+  "mcp": {
+   "origin": "synthetic",
+   "why": "stand-in MCP servers written for the stdio and reference-server tests (W10.C1, #728 via #978); no recorded traffic"
+  },
   "md-spec": {
    "origin": "real",
    "why": "the official CommonMark and GFM spec test files, vendored unmodified"
@@ -273,6 +317,10 @@
    "origin": "synthetic",
    "why": "written for the tests"
   },
+  "notionScenarios.ts": {
+   "origin": "synthetic",
+   "why": "the twenty W8.2 Notion export scenarios, made here (its header)"
+  },
   "obsidian": {
    "origin": "synthetic",
    "why": "written for the tests (Obsidian syntax), not from a real vault"
@@ -288,6 +336,14 @@
   "obsidian-importer": {
    "origin": "real",
    "why": "Obsidian Importer's own sample Keep exports and expected output at tag 3.1.15, copied unchanged (SOURCES.md); its authors' examples, not users' exports"
+  },
+  "office-roundtrip": {
+   "origin": "synthetic",
+   "why": "baseline.json: scores measured here by officeRoundTrip.test.ts, not data"
+  },
+  "openlaw": {
+   "origin": "synthetic",
+   "why": "real law titles with made-up section paraphrases, in the gkour/israeli_law shape (README)"
   },
   "owner-checklist": {
    "origin": "synthetic",
@@ -313,6 +369,10 @@
    "origin": "synthetic",
    "why": "despite the name: 7 of 8 formats are ours (render.py, notion_wa.py, LibreOffice on our documents); only evernote/ is third-party (manifest.json origin per format)"
   },
+  "registers": {
+   "origin": "synthetic",
+   "why": "*.synthetic.json: data.gov.il datastore responses written for the R12.19 tests"
+  },
   "relatedGold.ts": {
    "origin": "synthetic",
    "why": "generated: pairs built to share keywords"
@@ -329,6 +389,10 @@
    "origin": "synthetic",
    "why": "provenance not recorded: treated as synthetic"
   },
+  "sefaria-tools": {
+   "origin": "synthetic",
+   "why": "responses written from Sefaria's documented OpenAPI schema, not fetched (SOURCES.md)"
+  },
   "slideNotes.ts": {
    "origin": "synthetic",
    "why": "written for the tests"
@@ -341,9 +405,33 @@
    "origin": "synthetic",
    "why": "written for the tests"
   },
+  "yiddish-words.txt": {
+   "origin": "synthetic",
+   "why": "a YIVO-spelling word list written for Lumen's transliteration round trip (W7.9, #576 via #981), CC0 (its header)"
+  },
   "zotero-web": {
    "origin": "synthetic",
    "why": "shaped like the documented Web API responses (SOURCES.md), not captured"
+  },
+  "ivritNormalizerHand.json": {
+   "origin": "synthetic",
+   "why": "50 inputs written for the ivrit.ai normaliser port (W11.H6) to hit each HebrewTextNormalizer step; expected strings worked out by reading the upstream code, no leaderboard data (the fixture's $comment)"
+  },
+  "spell-en-common.json": {
+   "origin": "synthetic",
+   "why": "modern sentences with well-known everyday misspellings, written for this repo by lane g2-L7 (plan 6.10), CC0-1.0; no third-party corpus (the fixture's about)"
+  },
+  "macPackL3": {
+   "origin": "synthetic",
+   "why": "a Playwright 1.56.1 JSON report of a throwaway spec written for macPackL3.test.ts (a.spec.mjs: passing, failing and skipped tests); real tool output, no outside data"
+  },
+  "wycheproof": {
+   "origin": "real",
+   "why": "C2SP/wycheproof's chacha20_poly1305_test.json, copied unchanged at a pinned commit with its sha256, Apache-2.0 (README)"
+  },
+  "writing": {
+   "origin": "synthetic",
+   "why": "W13.W6-W10 writing-agent sets written for lumen-md (synthetic vault, structure docs, labelled arguments, FK texts); dev only"
   }
  }
 }

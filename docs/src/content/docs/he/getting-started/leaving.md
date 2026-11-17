@@ -1,6 +1,7 @@
 ---
 title: עוזבים את Evernote או Notion?
 description: איך מוציאים את הפתקים מ-Evernote, ‏Notion, ‏Apple Notes, ‏Google Keep, ‏OneNote או Obsidian, ומכניסים אותם ל-Lumen בצעד אחד, עם לחיצה אחת לביטול.
+type: how-to
 ---
 
 Lumen שומר את הפתקים שלך כקובצי Markdown פשוטים במכשיר שלך. כדי להביא

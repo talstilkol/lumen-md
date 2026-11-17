@@ -1,6 +1,8 @@
 ---
 title: Testing with screen reader users
 description: The kit for sessions with three Hebrew screen reader users — who to ask, the invitation, consent, the tasks, how a session is scored, and what happens to each barrier.
+type: how-to
+tasks: ["W6.30"]
 ---
 
 axe and the scripted readers find only part of what blocks people. Israeli

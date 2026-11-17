@@ -11,6 +11,8 @@ import type { IndexEngine } from "./vaultIndexProtocol";
 import { sameNote, utf8Length } from "./indexSnapshot";
 import { summarize } from "./noteSummary";
 import { cache, type ReadNote } from "./workspaceIndexState";
+import { swallowed } from "../lib/logger";
+import { PROGRESS_MIN, startIndexProgress } from "./indexProgress";
 
 /** Notes sent to the worker per message while building. */
 export const UPSERT_BATCH = 500;
@@ -46,7 +48,9 @@ export async function indexFile(e: { path: string; name: string; modified: numbe
     const modified = e.modified ?? (await mtimeOf(e.path));
     const content = await readWorkspaceFile(e.path);
     return { file: { path: e.path, name: e.name, modified, size: utf8Length(content), ...summarize(content) }, content };
-  } catch {
+  } catch (err) {
+    // Gone since the listing: left out. Anything else leaves a note out of search: said once.
+    if (!(err instanceof VaultNotFoundError)) swallowed("storage/workspaceIndexRead: a note could not be read for the index; it is left out of search", err);
     return null;
   }
 }
@@ -54,10 +58,19 @@ export async function indexFile(e: { path: string; name: string; modified: numbe
 /** Run `fn` over `items` with at most `limit` in flight (a 10k vault must not open 10k reads at once). */
 export async function mapLimit<T>(items: T[], limit: number, fn: (x: T) => Promise<void>): Promise<void> {
   let i = 0;
+  // W13.V6: a large batch shows "Indexing 3,200 / 10,000" in the status bar while it runs.
+  const progress = items.length >= PROGRESS_MIN ? startIndexProgress(items.length) : null;
   const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (i < items.length) await fn(items[i++]);
+    while (i < items.length) {
+      await fn(items[i++]);
+      progress?.tick();
+    }
   });
-  await Promise.all(workers);
+  try {
+    await Promise.all(workers);
+  } finally {
+    progress?.end();
+  }
 }
 
 export const nameOf = (path: string) => path.split("/").pop() ?? path;
@@ -126,7 +139,8 @@ export async function recordVault(): Promise<string> {
     const id = crypto.randomUUID();
     await backend.write(VAULT_ID_PATH, `${id}\n`);
     return ok(id);
-  } catch {
+  } catch (e) {
+    swallowed("storage/workspaceIndexRead: the vault id could not be written; the index is keyed by the backend's id", e);
     return inner.id;
   }
 }
@@ -136,7 +150,8 @@ export async function fillingEncrypted(): Promise<boolean> {
   try {
     if (!getVaultBackend().available()) return true;
     return (await vaultEncryptionReady()) !== "none";
-  } catch {
+  } catch (e) {
+    swallowed("storage/workspaceIndexRead: the vault's encryption state could not be read; treated as encrypted", e);
     return true;
   }
 }

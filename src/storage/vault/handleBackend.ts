@@ -24,6 +24,7 @@ import {
   type VaultEvent,
   type VaultStat,
 } from "./types";
+import { swallowed } from "../../lib/logger";
 
 export interface DirectoryHandleBackendOptions {
   id: string;
@@ -40,7 +41,20 @@ export interface DirectoryHandleBackendOptions {
    * path segments relative to `root`.
    */
   writeFallback?: (segments: string[], data: VaultData) => Promise<void>;
-  /** Is a `writeFallback` save still running (its temporary files are not leftovers yet)? */
+  /**
+   * W11.Q10: the write to try first (OPFS: the sync-access-handle worker).
+   * Resolves true when it wrote the file, false when this engine cannot use
+   * it, and the usual path (createWritable, else writeFallback) runs instead.
+   */
+  writePrimary?: (segments: string[], data: VaultData) => Promise<boolean>;
+  /**
+   * The #856 follow-up: the read to try first (OPFS: the worker, batched).
+   * Resolves the file's bytes, or null when the usual main-thread read
+   * should answer (not found there, or this engine cannot use it). The
+   * usual read reports not-found and recovers interrupted saves.
+   */
+  readPrimary?: (segments: string[]) => Promise<Blob | null>;
+  /** Is a `writeFallback` or `writePrimary` save still running (its temporary files are not leftovers yet)? */
   writesPending?: () => boolean;
 }
 
@@ -116,14 +130,20 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
     }
   }
 
-  /** fileAt, finishing an interrupted save of the file first when it is missing. */
-  async function fileRecovered(path: string): Promise<FileSystemFileHandle> {
+  /**
+   * The file at `path`, read under its path lock, finishing an interrupted save of it first when it is missing.
+   * Review Z7-M2: the OPFS worker's atomic save renames the note away and back, so between the two renames the name
+   * does not exist. Every write of the note holds this lock until the worker has answered, so a read under it never
+   * falls into that window. Recovery runs outside the lock (it takes the lock itself for each note, Z6-L3).
+   */
+  async function fileRecovered(path: string): Promise<File> {
     const parts = vaultSegments(path);
+    const once = () => pathLock.run(parts.join("/"), async () => (await fileAt(parts, path)).getFile());
     try {
-      return await fileAt(parts, path);
+      return await once();
     } catch (e) {
       if (!(e instanceof VaultNotFoundError) || !parts.length || !(await recoverIn(parts.slice(0, -1)))) throw e;
-      return await fileAt(parts, path);
+      return await once();
     }
   }
 
@@ -137,6 +157,7 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
       if (isMissing(e)) throw new VaultError("EKIND", path, `Cannot write "${path}": a file or folder of that name is in the way`);
       throw e;
     }
+    if (o.writePrimary && (await o.writePrimary(parts, data))) return;
     if (typeof (handle as { createWritable?: unknown }).createWritable !== "function") {
       if (!o.writeFallback) throw new Error("This browser cannot write files here.");
       return o.writeFallback(parts, data);
@@ -213,7 +234,7 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
       // partial tree at the target: it would block a retry, or sit at the
       // name of an original that a replace moved to the trash. The source
       // is untouched either way.
-      if (!target || cleared) await removeAt(dstParts, dst).catch(() => undefined);
+      if (!target || cleared) await removeAt(dstParts, dst).catch((e: unknown) => swallowed("storage/vault/handleBackend: a half-made copy at the move target could not be removed", e));
       throw e;
     }
     await removeAt(src, src.join("/"));
@@ -256,12 +277,57 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
           if (f.kind !== "file") throw new Error("a folder, not a file");
           return new Uint8Array(await (await f.handle.getFile()).arrayBuffer());
         },
+        // Z6-L3: each note's recovery under its path lock; recoverIn is never called with a path lock held.
+        lockTarget: (path, fn) => pathLock.run(vaultSegments(path).join("/"), fn),
       },
       key,
       names,
     );
     clean.add(key);
     return true;
+  }
+
+  /** rename's work, holding the path locks of `r.src` and `r.dst` (no event). */
+  async function renameLocked(r: NonNullable<ReturnType<typeof checkRename>>, from: string, to: string, opts: { overwrite?: boolean }): Promise<void> {
+    const target = await lookup(r.dst);
+    const source = await lookup(r.src);
+    if (!source) throw new VaultNotFoundError(from);
+    const alias = !!target && (await sameEntry(source.handle, target.handle));
+    if (target && !alias && !opts.overwrite) throw new WorkspaceConflictError(to);
+    // The textual checks (checkRename) miss aliases on a case-insensitive
+    // or normalising real folder: "Folder" → "folder/sub" is a move into
+    // itself, and replacing a folder that holds the source deletes it.
+    if (source.kind === "directory") {
+      for (const h of await existingAncestors(r.dst)) {
+        if (await sameEntry(source.handle, h)) throw new VaultError("EINVAL", to, `Cannot move "${from}" into itself`);
+      }
+    }
+    if (target && !alias && target.kind === "directory") {
+      for (const h of await existingAncestors(r.src)) {
+        if (await sameEntry(target.handle, h)) throw new VaultError("EINVAL", to, `Cannot replace "${to}" with "${from}", which is inside it`);
+      }
+    }
+    if (alias) {
+      // Two spellings of one entry (a case-only or normalisation-only
+      // rename on a case-insensitive / normalising real folder): go
+      // through a temporary name, or "replacing" the target would delete
+      // the source itself.
+      const tmp = [...r.dst.slice(0, -1), `.lumen-rename-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`];
+      await move(r.src, tmp, source, null);
+      const staged = await lookup(tmp);
+      if (!staged) throw new VaultNotFoundError(tmp.join("/"));
+      try {
+        await move(tmp, r.dst, staged, null);
+      } catch (e) {
+        // Put the entry back under its original name rather than leave it
+        // only under the hidden temporary one.
+        const left = await lookup(tmp).catch(() => null);
+        if (left) await move(tmp, r.src, left, null).catch((e: unknown) => swallowed("storage/vault/handleBackend: a file set aside for a move could not be put back; it is under its temporary name", e));
+        throw e;
+      }
+    } else {
+      await move(r.src, r.dst, source, target);
+    }
   }
 
   /** What the lazy compare-and-swap (./cas.ts) needs of this backend. */
@@ -276,7 +342,8 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
   const swap = async (path: string, type: "write" | "delete", run: (cas: typeof import("./cas"), parts: string[]) => Promise<boolean>) => {
     const parts = vaultSegments(path);
     const p = parts.join("/");
-    // An interrupted atomic save of this file (./atomic.ts) is finished or undone first, as read() does.
+    // An interrupted atomic save of this file (./atomic.ts) is finished or undone first, as read() does: before the
+    // lock is taken (the recovery takes it for each note it restores, Z6-L3), and the swap compares again under it.
     if (parts.length && !(await lookup(parts))) await recoverIn(parts.slice(0, -1));
     const ok = await pathLock.run(p, async () => run(await import("./cas"), parts));
     if (ok) emit({ type, path: p });
@@ -326,6 +393,8 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
     async stat(path): Promise<VaultStat | null> {
       const parts = vaultSegments(path);
       let found = await lookup(parts);
+      // Z7-M2: not there may be a save between its two renames; ask again once this note's write has finished.
+      if (!found && parts.length) found = await pathLock.run(parts.join("/"), () => lookup(parts));
       if (!found && parts.length && (await recoverIn(parts.slice(0, -1)))) found = await lookup(parts);
       if (!found) return null;
       if (found.kind === "directory") return { kind: "directory", size: 0, mtime: 0 };
@@ -341,11 +410,15 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
     },
 
     async read(path) {
-      return await (await fileRecovered(path)).getFile();
+      const fast = o.readPrimary ? await o.readPrimary(vaultSegments(path)) : null;
+      if (fast) return fast;
+      return await fileRecovered(path);
     },
 
     async readText(path) {
-      return await (await (await fileRecovered(path)).getFile()).text();
+      const fast = o.readPrimary ? await o.readPrimary(vaultSegments(path)) : null;
+      if (fast) return await fast.text();
+      return await (await fileRecovered(path)).text();
     },
 
     async readMany(paths) {
@@ -375,8 +448,9 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
               if (!h) continue;
               try {
                 out.set(parts.join("/"), await h.getFile());
-              } catch {
+              } catch (err) {
                 // why: held by a writer or gone: left to read()
+                swallowed("storage/vault/handleBackend: held by a writer or gone: left to read()", err);
               }
             }
           };
@@ -458,47 +532,10 @@ export function createDirectoryHandleBackend(o: DirectoryHandleBackendOptions): 
     async rename(from, to, opts = {}) {
       const r = checkRename(from, to);
       if (!r) return;
-      const target = await lookup(r.dst);
-      const source = await lookup(r.src);
-      if (!source) throw new VaultNotFoundError(from);
-      const alias = !!target && (await sameEntry(source.handle, target.handle));
-      if (target && !alias && !opts.overwrite) throw new WorkspaceConflictError(to);
-      const dst = r.dst.join("/");
-      // The textual checks (checkRename) miss aliases on a case-insensitive
-      // or normalising real folder: "Folder" → "folder/sub" is a move into
-      // itself, and replacing a folder that holds the source deletes it.
-      if (source.kind === "directory") {
-        for (const h of await existingAncestors(r.dst)) {
-          if (await sameEntry(source.handle, h)) throw new VaultError("EINVAL", to, `Cannot move "${from}" into itself`);
-        }
-      }
-      if (target && !alias && target.kind === "directory") {
-        for (const h of await existingAncestors(r.src)) {
-          if (await sameEntry(target.handle, h)) throw new VaultError("EINVAL", to, `Cannot replace "${to}" with "${from}", which is inside it`);
-        }
-      }
-      if (alias) {
-        // Two spellings of one entry (a case-only or normalisation-only
-        // rename on a case-insensitive / normalising real folder): go
-        // through a temporary name, or "replacing" the target would delete
-        // the source itself.
-        const tmp = [...r.dst.slice(0, -1), `.lumen-rename-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`];
-        await move(r.src, tmp, source, null);
-        const staged = await lookup(tmp);
-        if (!staged) throw new VaultNotFoundError(tmp.join("/"));
-        try {
-          await move(tmp, r.dst, staged, null);
-        } catch (e) {
-          // Put the entry back under its original name rather than leave it
-          // only under the hidden temporary one.
-          const left = await lookup(tmp).catch(() => null);
-          if (left) await move(tmp, r.src, left, null).catch(() => undefined);
-          throw e;
-        }
-      } else {
-        await move(r.src, r.dst, source, target);
-      }
-      emit({ type: "rename", path: dst, from: r.src.join("/") });
+      // Z6-L3: under the lock of the source and the target path (in ascending order, PathLock.runAll), so a rename
+      // onto a note never lands between a writeIf's compare and its swap.
+      await pathLock.runAll([r.src.join("/"), r.dst.join("/")], () => renameLocked(r, from, to, opts));
+      emit({ type: "rename", path: r.dst.join("/"), from: r.src.join("/") });
     },
 
     async remove(path) {

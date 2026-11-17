@@ -14,6 +14,7 @@ const SandboxedPlugins = lazy(() => import("../plugins/runtime/SandboxedPlugins"
 import { HelpButton } from "./HelpButton";
 import "./pluginGalleryStrings";
 import { Modal } from "./Modal";
+import { matchesAnyFilter } from "../text/filterMatch";
 
 interface RemotePluginEntry {
   id: string;
@@ -297,12 +298,7 @@ export function PluginGallery({ open, onClose }: Props) {
   const filtered = allAvailable.filter((p) => {
     if (!matchesCategory(p.id)) return false;
     if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      p.name.toLowerCase().includes(q) ||
-      (p.description ?? "").toLowerCase().includes(q) ||
-      (p.author ?? "").toLowerCase().includes(q)
-    );
+    return matchesAnyFilter([p.name, p.description, p.author], search);
   });
 
   const handleInstall = async (plugin: LumenPlugin) => {
@@ -673,7 +669,7 @@ export function PluginGallery({ open, onClose }: Props) {
                               textDecoration: "none",
                             }}
                           >
-                            <ExternalLink size={12} />
+                            <ExternalLink size={12} className="icon-dir" />
                           </a>
                         );
                       })()}

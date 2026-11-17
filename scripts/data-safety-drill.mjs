@@ -3,6 +3,7 @@
  * Data-safety drill on the merged code (plan W4.33).
  *
  *   node scripts/data-safety-drill.mjs [--kills 200] [--full-disk <dir>] [--out reports] [--json]
+ *   node scripts/data-safety-drill.mjs --report <file> [--real <counters.json>] [--runner <cmd>]   (W13.S7, ./drill/sync3.mjs)
  *
  * Every way the app saves a note to a real folder is driven through four
  * kinds of trouble, on a real disk, in real processes:
@@ -100,7 +101,7 @@ const randomBody = (max = 3000) => "שלום עולם, hello world. ".repeat(1 +
 // ── Loading the save paths from this checkout ────────────────────────────
 
 /** Bundle a module of src/ for Node, with only the pieces a backend needs. */
-async function bundle(entry, outFile) {
+async function bundle(entry, outFile, format = "esm") {
   // The saving processes load what the drill built.
   if (args[0] === "--child") return outFile;
   const { build } = await import("esbuild");
@@ -108,7 +109,7 @@ async function bundle(entry, outFile) {
   await build({
     entryPoints: [join(repo, entry)],
     bundle: true,
-    format: "esm",
+    format,
     platform: "node",
     outfile: outFile,
     logLevel: "error",
@@ -234,6 +235,9 @@ async function loadPaths(work) {
   });
   // W10.E40: the OPFS and desktop paths run the shipped modules, not ports (scripts/drill/).
   if (atomicMod) {
+    // W11.Q10 (#856): writes and reads go to a module worker, `new URL("./vault-io.worker.ts", import.meta.url)`;
+    // next to the bundled opfs.mjs that URL names the worker built here (one script, run as the worker's source).
+    await bundle("src/storage/vault/vault-io.worker.ts", join(work, "vault-io.worker.ts"), "iife");
     const opfs = await import(pathToFileURL(await bundle("src/storage/vault/opfs.ts", join(work, "opfs.mjs"))).href);
     paths.push(opfsSyncPath(opfs, atomicMod));
   }
@@ -315,6 +319,13 @@ if (args[0] === "--external") {
       await fsp.rm(tmp, { force: true });
     }
   }
+}
+
+// ── Plan W13.S7: the three-device sync drill (`--report <file>` [--real <counters.json>] [--runner <cmd>]) ──
+if (args.includes("--report")) {
+  const { syncThreeDevices } = await import("./drill/sync3.mjs");
+  const real = arg("--real", null);
+  process.exit(syncThreeDevices(repo, resolve(repo, arg("--report", "reports/drill/sync-3-devices.json")), { real: real && resolve(repo, real), runner: arg("--runner", null) }));
 }
 
 // ── The parent ───────────────────────────────────────────────────────────

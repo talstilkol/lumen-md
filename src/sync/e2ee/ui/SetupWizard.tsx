@@ -34,6 +34,7 @@ import { HelpButton } from "../../../ui/HelpButton";
 import { UnauditedNotice } from "./unaudited";
 import { Modal } from "../../../ui/Modal";
 import { encodeQr, qrPath } from "../../../lib/qr";
+import { copySecret } from "../../../privacy/secretClipboard";
 
 const muted: React.CSSProperties = { fontSize: 13, color: "hsl(var(--fg-muted))" };
 const errorStyle: React.CSSProperties = { fontSize: 13, color: "hsl(var(--danger))" };
@@ -236,7 +237,7 @@ export function SetupWizard({
                   {t("e2ee.guide.lossWarning")}
                 </div>
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <button type="button" onClick={() => void navigator.clipboard?.writeText(words.join(" ")).catch(() => undefined)}>
+                  <button type="button" onClick={() => void copySecret(words.join(" "))} title={t("privacy.secretCopy.hint")}>
                     {t("e2ee.guide.copy")}
                   </button>
                   <button type="button" aria-expanded={showQr} onClick={() => setShowQr(!showQr)} data-testid="sync-setup-qr-toggle">

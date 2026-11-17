@@ -27,6 +27,7 @@ const confirm = vi.hoisted(() => ({ fn: vi.fn(async () => true) }));
 vi.mock("../ui/PromptDialog", () => ({ uiConfirm: (...a: unknown[]) => confirm.fn(...(a as [])) }));
 
 import { refreshOllama } from "../agents/executors/ollama";
+import { t } from "../i18n";
 import { registerExecutor, resetExecutors } from "../agents/executors";
 import { runAgent } from "../agents/runtime";
 import { clearTrace } from "../agents/trace";
@@ -102,7 +103,7 @@ describe("model manager — Ollama pull from the panel", () => {
     f.push({ status: "success" });
     f.end();
 
-    await waitFor(() => expect(screen.getByRole("status").textContent).toBe("qwen3:4b is installed"));
+    await waitFor(() => expect(screen.getByText("qwen3:4b is installed").getAttribute("role")).toBe("status"));
     expect(screen.queryByTestId("ollama-pull-progress")).toBeNull();
     await waitFor(() => expect(screen.getByText("Installed: qwen2.5:7b, qwen3:4b")).toBeTruthy());
     expect(vi.mocked(refreshOllama).mock.calls.length).toBeGreaterThan(listedBefore);
@@ -119,7 +120,9 @@ describe("model manager — Ollama pull from the panel", () => {
     f.push({ status: "pulling manifest" });
     f.push({ error: "pull model manifest: file does not exist" });
     f.end();
-    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe("Download failed: Ollama: pull model manifest: file does not exist"));
+    // W3.2: the record's words go to the log; the screen says what happened in words.
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe(`Download failed: ${t("error.unknown")}`));
+    expect(screen.getByRole("alert").textContent).not.toContain("manifest");
     expect(screen.getByRole("button", { name: "Download" })).toBeTruthy();
   });
 
@@ -134,7 +137,7 @@ describe("model manager — Ollama pull from the panel", () => {
     await waitFor(() => expect(f.requests).toHaveLength(1));
     f.push({ status: "success" });
     f.end();
-    await waitFor(() => expect(screen.getByRole("status").textContent).toBe("qwen3:4b is installed"));
+    await waitFor(() => expect(screen.getByText("qwen3:4b is installed").getAttribute("role")).toBe("status"));
     expect(f.requests).toHaveLength(1);
   });
 
@@ -155,7 +158,7 @@ describe("model manager — Ollama pull from the panel", () => {
     expect(f.requests[0].body).toEqual({ model: "llama3.1:8b", stream: true });
     f.push({ status: "success" });
     f.end();
-    await waitFor(() => expect(screen.getByRole("status").textContent).toBe("llama3.1:8b is installed"));
+    await waitFor(() => expect(screen.getByText("llama3.1:8b is installed").getAttribute("role")).toBe("status"));
   });
 
   it("waits for an edited Ollama address to be saved before downloading", async () => {

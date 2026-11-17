@@ -32,6 +32,12 @@ export const RECORDERS = {
   "src/publish/standardSite.ts": (src) => [/export const ATPROTO_REASON = "([^"]+)"/.exec(src)[1]],
   "src/sources/open/app.ts": (src) => [...src.matchAll(/reason: "([^"]+)"/g)].map((m) => m[1]),
   "src/sources/open/gate.ts": () => [],
+  // Wikidata entity linking (W12.E10): ledgerFetch with the ledger's own www.wikidata.org rule.
+  "src/ui/WikidataLink.tsx": () => [],
+  // W10.C2 (#728 via #978): listing a remote MCP server's tools; its tool calls go through the network gate (agents/network.ts).
+  "src/agents/mcp/registry.ts": (src) => [/reason: `([^`$]+)\$\{/.exec(src)[1]],
+  // R8-M1: a LaTeX-to-PDF compile that may let Tectonic download TeX packages (recordProcessCall).
+  "src/latex/tectonicDesktop.ts": (src) => [/export const TECTONIC_LEDGER_REASON = "([^"]+)"/.exec(src)[1]],
 };
 
 /** A call that records into the ledger (or fetches through it). */

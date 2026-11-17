@@ -1,6 +1,7 @@
 ---
 title: Owner sessions
 description: Everything only the owner can do — accounts, GPU runs, golden data, devices — in three sittings ordered by dependency, with the time and the exact command for each, and free cloud devices instead of owning test phones.
+type: how-to
 ---
 
 **Run it as a command:** `npm run owner:session -- accounts|gpu|devices` prints each step, runs and verifies it, and records a signed receipt ([Owner session command](/project/owner-session-command/), plan W6.20). It regroups the items below into 14 steps.

@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { fileViewerKind } from "../viewers/fileViewers";
 // The tree's own rules (width, background, the border that faces the editor,
 // header, rows, row actions). Nothing imported this file, so the tree drew
 // unstyled: no border, no hover, row actions always shown (e2e rtl-parity 6).
@@ -18,10 +19,13 @@ import type { WorkspaceNode } from "../storage/workspace";
 import { t } from "../i18n";
 import { uiAlert, uiConfirm, uiPrompt } from "./PromptDialog";
 import { FileContextMenu, buildFileActions } from "./FileContextMenu";
+import { compareWithPicked, pickForCompare, pickedForCompare } from "../reading/comparePick";
 import { useAppStore } from "../store/useStore";
 import { duplicateFile, movedPath, renamedFileName, safeMoveWithCompanion, undoTrash, withoutCompanions, type MoveResult } from "../storage/fileOps";
 import { flushActiveWorkspaceDoc, syncOpenDocsAfterMove, trashWithOpenEdits } from "../store/openDocs";
-import { renderChildren } from "./fileTreeRows";
+import { renderChildren, type RenderCtx } from "./fileTreeRows";
+// W10.E16: the virtual list is only for a large vault, so it loads on use (off the startup path).
+const VirtualFileTree = lazy(() => import("./VirtualFileTree").then((m) => ({ default: m.VirtualFileTree })));
 export { visibleChildren } from "./fileTreeRows";
 // Saved searches (plan W2.12): a small chunk of its own, off the startup path.
 const SavedSearches = lazy(() => import("./SavedSearches"));
@@ -358,8 +362,9 @@ export function FileTree({
 
   async function open(node: WorkspaceNode) {
     if (node.kind !== "file") return;
-    // A PDF or an EPUB opens in its reader (plans 4.14, W1.14), not as text.
-    if (/\.(pdf|epub)$/i.test(node.path)) {
+    // A PDF or an EPUB opens in its reader (plans 4.14, W1.14), not as text; a
+    // notebook, a data file or a map file in its viewer (W12.F4, F5, F7).
+    if (/\.(pdf|epub)$/i.test(node.path) || fileViewerKind(node.path)) {
       window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path: node.path } }));
       return;
     }
@@ -461,6 +466,28 @@ export function FileTree({
       </aside>
     );
   }
+
+  const treeCtx: RenderCtx = {
+    activePath,
+    collapsed,
+    editingPath,
+    editValue,
+    setEditValue,
+    setEditingPath,
+    inputRef,
+    toggle,
+    open,
+    commitRename,
+    remove,
+    newFile,
+    newFolder,
+    selectedPaths,
+    toggleSelect,
+    openContextMenu: (x, y, n) => setContextMenu({ x, y, node: n }),
+    fileLimit,
+    shownAll,
+    showAll: (dir) => setShownAll((prev) => new Set(prev).add(dir)),
+  };
 
   return (
     <aside className="file-tree" aria-label={t("tree.title")} data-testid="file-tree" data-ready={String(listed)}>
@@ -646,29 +673,16 @@ export function FileTree({
               </button>
             </div>
           )}
-          <ul className="file-tree-list" role="tree">
-            {renderChildren(displayedTree, "", 0, {
-                activePath,
-                collapsed,
-                editingPath,
-                editValue,
-                setEditValue,
-                setEditingPath,
-                inputRef,
-                toggle,
-                open,
-                commitRename,
-                remove,
-                newFile,
-                newFolder,
-                selectedPaths,
-                toggleSelect,
-                openContextMenu: (x, y, n) => setContextMenu({ x, y, node: n }),
-                fileLimit,
-                shownAll,
-                showAll: (dir) => setShownAll((prev) => new Set(prev).add(dir)),
-            })}
-          </ul>
+          {/* W10.E16: a large vault scrolls a virtual list; a small one keeps the nested tree. */}
+          {fileLimit !== null ? (
+            <Suspense fallback={<ul className="file-tree-list" role="tree">{renderChildren(displayedTree, "", 0, treeCtx)}</ul>}>
+              <VirtualFileTree nodes={displayedTree} ctx={treeCtx} />
+            </Suspense>
+          ) : (
+            <ul className="file-tree-list" role="tree">
+              {renderChildren(displayedTree, "", 0, treeCtx)}
+            </ul>
+          )}
         </>
       )}
       {contextMenu && (
@@ -693,6 +707,15 @@ export function FileTree({
               contextMenu.node.kind === "directory"
                 ? () => newFolder(contextMenu.node.path)
                 : undefined,
+            // Plan W13.R8: pick a note, then compare another with it, word by word.
+            onPickForCompare: () => pickForCompare(contextMenu.node.path, contextMenu.node.name),
+            compareWith: (() => {
+              const kept = pickedForCompare();
+              const node = contextMenu.node;
+              return kept && kept.path !== node.path
+                ? { label: kept.label, onSelect: () => void compareWithPicked(node.path, node.name, readWorkspaceFile).catch((e: unknown) => toast.error(explainError(e, "open"))) }
+                : undefined;
+            })(),
           })}
         />
       )}

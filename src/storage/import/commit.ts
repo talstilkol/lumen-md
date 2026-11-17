@@ -13,12 +13,14 @@
  * the folder since, the folder goes to the trash instead (nothing of
  * theirs is deleted for good).
  */
-import { createWorkspaceFolder, deleteWorkspaceFile, listWorkspace, listWorkspaceTree, readWorkspaceBlob, workspaceHasEntry, writeWorkspaceBlob, writeWorkspaceFile } from "../workspace";
+import { createWorkspaceFolder, deleteWorkspaceFile, listWorkspace, listWorkspaceFolder, listWorkspaceTree, readWorkspaceBlob, workspaceHasEntry, writeWorkspaceBlob, writeWorkspaceFile } from "../workspace";
 import { moveToTrash } from "../trash";
-import { convertExport, detectImportSource, expandArchives, stripWrapper } from "./convert";
+import { convertExport, detectImportSource, openExport } from "./convert";
 import { linkStats } from "./links";
 import { safeName } from "./names";
+import { TYPES_DIR, typeFilePath } from "../../types/typeSchema";
 import type { ConvertedVault, ImportReport, ImportSourceId, LinkStats } from "./types";
+import { swallowed } from "../../lib/logger";
 
 export const IMPORT_ROOT = "Imported";
 const UNDO_KEY = "lumen-last-import";
@@ -39,6 +41,8 @@ export interface UndoRecord {
   /** SHA-256 per file written (path inside the folder → hex), to see if anything changed since. */
   digests: Record<string, string>;
   at: number;
+  /** W12.T7: type files written outside the folder (vault path → SHA-256); undo removes those still unchanged. */
+  typeFiles?: Record<string, string>;
 }
 
 async function sha256(data: Uint8Array | string): Promise<string> {
@@ -49,7 +53,7 @@ async function sha256(data: Uint8Array | string): Promise<string> {
 
 /** The free folder for an import called `name`. */
 export async function importFolderFor(name: string): Promise<string> {
-  const base = `${IMPORT_ROOT}/${safeName(name.replace(/\.(zip|bearbk|enex|mht|mhtml|json)$/i, ""), "import")}`;
+  const base = `${IMPORT_ROOT}/${safeName(name.replace(/\.(zip|bearbk|enex|mht|mhtml|json|textpack|textbundle|csv|note|sdocx)$/i, ""), "import")}`;
   if (!(await workspaceHasEntry(base))) return base;
   let n = 2;
   while (await workspaceHasEntry(`${base} ${n}`)) n++;
@@ -69,18 +73,35 @@ export async function readPicked(list: ArrayLike<File>): Promise<{ files: Map<st
 }
 
 /** Convert without writing. `source` null: detect it. */
-export async function prepareImport(picked: Map<string, Uint8Array>, name: string, source: ImportSourceId | null): Promise<PreparedImport> {
-  const opened = stripWrapper(await expandArchives(picked));
-  const junk = [...opened.keys()].filter((p) => /(^|\/)__MACOSX(\/|$)|(^|\/)\.DS_Store$/.test(p));
-  for (const p of junk) opened.delete(p);
-  const detected = detectImportSource([...opened.keys()]);
+export async function prepareImport(picked: Map<string, Uint8Array>, name: string, source: ImportSourceId | null, opts: { notionTypes?: boolean } = {}): Promise<PreparedImport> {
+  const { opened, junk } = await openExport(picked);
+  const detected = detectImportSource([...opened.keys()], opened);
   const chosen = source ?? detected;
   const folder = await importFolderFor(name);
   // Apple Notes' own database (W10.E48) needs an async read (gzip'd bodies); its HTML exports go the usual way.
   const noteStore = chosen === "appleNotes" && [...opened.keys()].some((p) => /(^|\/)NoteStore\.sqlite$/i.test(p));
-  const vault = noteStore ? await (await import("./appleNotes")).convertAppleNotesStore(opened) : convertExport(chosen, opened, folder);
+  // Review Z7-L3: the vault's own type ids, so an imported database never takes one (and its schema) over.
+  const existingTypeIds = opts.notionTypes ? (await listWorkspaceFolder(TYPES_DIR)).filter((n) => n.endsWith(".yaml")).map((n) => n.slice(0, -".yaml".length)) : [];
+  // W13.F5: the user's own Pandoc, through the desktop (async, a process per file).
+  const vault = noteStore
+    ? await (await import("./appleNotes")).convertAppleNotesStore(opened)
+    : chosen === "pandoc"
+      ? await (await import("./pandocBridge")).convertWithPandoc(opened)
+      : convertExport(chosen, opened, folder, { ...opts, existingTypeIds });
   for (const p of junk) vault.skipped.push({ path: p, reason: "appFolder" });
   return { source: chosen, detected, name, folder, vault, links: linkStats(vault) };
+}
+
+/** `text` with the front-matter lines `type: <id>` for the ids in `ids` removed (Z7-L3). */
+export function withoutTypes(text: string, ids: ReadonlySet<string>): string {
+  return text.replace(/^(\uFEFF?---\r?\n)([\s\S]*?)(\r?\n---[ \t]*(?:\r?\n|$))/, (_m, open: string, body: string, close: string) => {
+    const eol = open.endsWith("\r\n") ? "\r\n" : "\n";
+    const kept = body.split(/\r?\n/).filter((l) => {
+      const m = /^type:\s*(["']?)([^"'\s]+)\1\s*$/.exec(l);
+      return !(m && ids.has(m[2]));
+    });
+    return `${open}${kept.join(eol)}${close}`;
+  });
 }
 
 /** Write a prepared import into its folder. */
@@ -91,8 +112,13 @@ export async function commitImport(prep: PreparedImport, now = Date.now()): Prom
   await createWorkspaceFolder(folder);
   const digests: Record<string, string> = {};
   const undo: UndoRecord = { folder, createdRoot, digests, at: now };
+  // Z7-L3: a type file of the same id that appeared after the import was prepared is kept, and the rows are then
+  // not marked with that type (its schema is not theirs). Prepared imports already avoid the vault's own ids.
+  const clash = new Set<string>();
+  for (const [id] of prep.vault.types ?? []) if (await workspaceHasEntry(typeFilePath(id))) clash.add(id);
   try {
-    for (const [path, text] of prep.vault.notes) {
+    for (const [path, note] of prep.vault.notes) {
+      const text = clash.size ? withoutTypes(note, clash) : note;
       await writeWorkspaceFile(`${folder}/${path}`, text);
       digests[path] = await sha256(text);
     }
@@ -100,9 +126,19 @@ export async function commitImport(prep: PreparedImport, now = Date.now()): Prom
       await writeWorkspaceBlob(`${folder}/${path}`, new Blob([data as unknown as BlobPart]));
       digests[path] = await sha256(data);
     }
+    // W12.T7: a database's type, at the vault's types folder; an existing type of that id is never replaced.
+    for (const [id, yaml] of prep.vault.types ?? []) {
+      const path = typeFilePath(id);
+      if (await workspaceHasEntry(path)) {
+        prep.vault.warnings.push({ path, reason: "typeExists", detail: id });
+        continue;
+      }
+      await writeWorkspaceFile(path, yaml);
+      (undo.typeFiles ??= {})[path] = await sha256(yaml);
+    }
   } catch (e) {
     // Half an import is worse than none: take back what was written.
-    await undoImport(undo, { force: true }).catch(() => undefined);
+    await undoImport(undo, { force: true }).catch((e: unknown) => swallowed("storage/import/commit: undoing a failed import failed; its notes stay in the import folder", e));
     throw e;
   }
   const written = new Set((await listWorkspace({ includeAssets: true })).map((f) => f.path));
@@ -117,6 +153,7 @@ export async function commitImport(prep: PreparedImport, now = Date.now()): Prom
     warnings: prep.vault.warnings,
     links: prep.links,
     attachmentsLost: Math.max(lost, prep.vault.sourceAttachments - prep.vault.attachments.size, 0),
+    ...(prep.vault.typeReport?.length ? { typeReport: prep.vault.typeReport } : {}),
     at: now,
   };
   saveUndo(undo);
@@ -139,9 +176,10 @@ export async function addToImport(u: UndoRecord, name: string, text: string): Pr
 export function saveUndo(u: UndoRecord): void {
   try {
     localStorage.setItem(UNDO_KEY, JSON.stringify(u));
-  } catch {
+  } catch (err) {
     // why: storage is blocked or full (private mode, quota): the setting holds for this session only
     /* private mode: undo still works while the wizard is open */
+    swallowed("storage/import/commit: storage is blocked or full (private mode, quota): the setting holds fo", err);
   }
 }
 
@@ -184,6 +222,12 @@ export async function undoImport(u: UndoRecord, opts: { force?: boolean } = {}):
     await moveToTrash([u.folder], { [u.folder]: "directory" });
     result = "trashed";
   } else await deleteWorkspaceFile(u.folder);
+  // W12.T7: the type files it added, unless they were edited since.
+  for (const [path, digest] of Object.entries(u.typeFiles ?? {})) {
+    if (!(await workspaceHasEntry(path))) continue;
+    const now = await sha256(new Uint8Array(await (await readWorkspaceBlob(path)).arrayBuffer()));
+    if (opts.force || now === digest) await deleteWorkspaceFile(path);
+  }
   if (u.createdRoot && (await workspaceHasEntry(IMPORT_ROOT))) {
     const left = (await listWorkspace({ includeAssets: true })).some((f) => f.path.startsWith(`${IMPORT_ROOT}/`));
     if (!left && (await isEmptyFolder(IMPORT_ROOT))) await deleteWorkspaceFile(IMPORT_ROOT);
@@ -202,8 +246,9 @@ function clearUndo(u: UndoRecord): void {
   try {
     const cur = lastImport();
     if (cur && cur.folder === u.folder && cur.at === u.at) localStorage.removeItem(UNDO_KEY);
-  } catch {
+  } catch (err) {
     // why: storage is blocked or full (private mode, quota): the setting holds for this session only
     /* nothing stored */
+    swallowed("storage/import/commit: storage is blocked or full (private mode, quota): the setting holds fo", err);
   }
 }

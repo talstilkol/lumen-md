@@ -1,5 +1,6 @@
 /** "Voice dictation" loads the dictation module on use and starts it in the chosen language. */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import "./helpers/commandSections";
 import { renderHook } from "@testing-library/react";
 
 const dialogs = vi.hoisted(() => ({ prompt: null as string | null }));

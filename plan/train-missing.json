@@ -1,8 +1,9 @@
 {
  "about": "W10.F7: a decision for every open PR whose head is not in the train (npm run train:missing). in = a task or train brings it; rejected = it will not go in, and why; replaced = what carries it instead. A decision is about one head: a PR that moves needs a new one.",
- "train": "verify/train-4",
- "trainHead": "fcf760fde8e409096db31657461af8b1c7b8cd14",
- "decided": "2026-11-14",
+ "train": "verify/train-7",
+ "trainHead": "13c6d1e58a35e59d526f17c1568d2db1c6706ebb",
+ "decided": "2026-11-17",
+ "note": "Integrator INT7 (17.11): wave g3 (#1131-#1171, 41 PRs) is merged into verify/train-7 from a6ef1580a2; their heads are in the train. W13 statuses stay as plan.json has them (the WIP gate refuses wave-13 starts). trainHead is the integration head this file was checked against (before this commit). Integrator INT8 (17.11): the 31 drafts of lanes F12, FC3, FC1 and FC2 (#1172-#1202) are merged into verify/int8-stage on top of INT7's 53dd679c5e and pushed to verify/train-7 with it; trainHead is the stage head this file was checked against (before this commit). Integrator INT9 (17.11): the 52 drafts of lanes F13a, F13b and wave g4 L1-L8 (#1203-#1254) are merged into verify/int9-stage on top of INT8's 49fe18ccb8 and pushed to verify/train-7 with it; trainHead is the stage head this file was checked against (before this commit).",
  "decisions": [
   {
    "pr": 109,
@@ -14,13 +15,13 @@
    "pr": 151,
    "head": "2c52581e59a851c6b896cbf56d01d08df2f78c24",
    "decision": "rejected",
-   "reason": "bumps a GitHub Actions workflow; the repo runs no GitHub Actions (owner's rule), so it changes nothing that runs."
+   "reason": "bumps a GitHub Actions workflow; the repo runs no GitHub Actions (owner's rule)."
   },
   {
    "pr": 152,
    "head": "a9449f1d95d5bd83cf151f6e419aca1e679b453d",
    "decision": "rejected",
-   "reason": "bumps a GitHub Actions workflow; the repo runs no GitHub Actions (owner's rule), so it changes nothing that runs."
+   "reason": "bumps a GitHub Actions workflow; the repo runs no GitHub Actions (owner's rule)."
   },
   {
    "pr": 153,
@@ -32,847 +33,1443 @@
    "pr": 154,
    "head": "c34346208d5d80bc37868bf0540000fa16e45eab",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 160,
-   "head": "58797fa3303e9394409c9da531368e443754a824",
+   "head": "be387b87940ff36be8a1c7a452949cf8bb17db4f",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run. Re-keyed by lane F8 (review 8) after dependabot rebased it on 16.11; decided by number, author and title from now on.",
+   "author": "dependabot[bot]",
+   "title": "chore(deps): Bump the codemirror group across 1 directory with 9 updates"
   },
   {
    "pr": 161,
-   "head": "7a5c4df8b57dbabb5298926fad9a904c240cc07b",
+   "head": "391c306900fa6bca4026de1f0b3d4f47d2bf70ae",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run. Re-keyed by lane F8 (review 8) after dependabot rebased it on 16.11; decided by number, author and title from now on.",
+   "author": "dependabot[bot]",
+   "title": "chore(deps): Bump the milkdown group across 1 directory with 13 updates"
   },
   {
    "pr": 162,
-   "head": "5b8963441b40667d9d7e5232d9b8b7e15a7875ab",
+   "head": "32169deb10425c4d63b2f65fcaeb45096bb8352e",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run. Re-keyed by lane F8 (review 8) after dependabot rebased it on 16.11; decided by number, author and title from now on.",
+   "author": "dependabot[bot]",
+   "title": "chore(deps): Bump the yjs group across 1 directory with 2 updates"
   },
   {
    "pr": 164,
    "head": "23bf8f36fcd502d2b9574b01a2429ce2eb4e56b1",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 165,
    "head": "ea798791e76e230448c1583094d56ea9695f35cb",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 166,
    "head": "f99cde0f28261d24b8b6f2e04b8b5bf3db08ff9e",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 167,
    "head": "e54c5bcd010ad2d879181f44db792d389750e7ef",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 168,
    "head": "a2b1e9b5031412c110672b00c3d97fd575d2ef79",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
-  },
-  {
-   "pr": 204,
-   "head": "42c847468cd8184202c24d6b8de8f3afe93646a3",
-   "decision": "in",
-   "via": "W10.F9 (#646)",
-   "reason": "#646 merges #204's head (ci-doctor --around/--window, 42c8474)."
-  },
-  {
-   "pr": 235,
-   "head": "2483bdca05a45e279a1da77c80d6250b7b714203",
-   "decision": "in",
-   "via": "W10.F4 (#635)",
-   "reason": "#235's last commit (2.9, 2.79, 2.80 move-safety fixes) is ported onto train-4's split vault code in #635."
-  },
-  {
-   "pr": 258,
-   "head": "aeb77482d4f3b4eccee38d55768ddf4c47632afe",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: a folder that can't be listed is not a mass delete (2.83, 2.84)."
-  },
-  {
-   "pr": 261,
-   "head": "ba8c89c30141f477b77576feca4f77ec22811f8e",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: setup waits while a slow start-up is still restoring the vault (2.85, 2.86)."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 264,
-   "head": "58f5da66049f9c475af003549c3eb8507b678ebf",
+   "head": "ef8639c2bdca0b42434dd9d0d7b2fdc71523fddc",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
-  },
-  {
-   "pr": 265,
-   "head": "12b772c5ce51c2cc9314c73e389ed51d170d1dc7",
-   "decision": "in",
-   "via": "W10.F6 (#637)",
-   "reason": "#637 merges #265's head (chore/dod 12b772c5ce); chore/dod keeps moving, each later head goes in the same way."
-  },
-  {
-   "pr": 267,
-   "head": "d40c48b9f9e9b3ce3e4914d3af97550bae848fe0",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: coordinate object aliases parsed independently (decision 2.12)."
-  },
-  {
-   "pr": 272,
-   "head": "fa8cd877e52c901f4b8160dedd1e03d0ca436ab5",
-   "decision": "in",
-   "via": "W10.F8",
-   "reason": "the PDF reader review fixes 2.17-2.26 (fa8cd877)."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run. Re-keyed by lane F8 (review 8) after dependabot rebased it on 16.11; decided by number, author and title from now on.",
+   "author": "dependabot[bot]",
+   "title": "chore(deps-dev): Bump the dev-tools group across 1 directory with 6 updates"
   },
   {
    "pr": 275,
    "head": "e1ecaeaaee9696787c86919dfa8b21325b345c1b",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: compare-and-swap writeIf/removeIf in every vault backend; e2ee fixes 2.29-2.31."
-  },
-  {
-   "pr": 277,
-   "head": "eae63aba62f60887aabf1fdc4f5827edda733158",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: refuse an Ollama address the CSP blocks (decision 2.38)."
-  },
-  {
-   "pr": 291,
-   "head": "9262efa53614f47827487764139740f6a81779ea",
    "decision": "replaced",
-   "by": "#544 (W10.F15)",
-   "reason": "the same 4 feat/sync-crypto commits, all in #544's head; the rest is in train-4."
+   "reason": "superseded: CAS writeIf/removeIf + e2ee 2.29-2.31 are in train 7 via #932 (receipt/label owed per train 7 STATE).",
+   "by": "#932 (dd04b2f161, port of #275 onto the split engine)"
   },
   {
    "pr": 294,
    "head": "7fbd23f59cceafb18a19321786557dfbfa47f79e",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 296,
    "head": "b34d83617e936aacaf533136b9cdb947a939b227",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 306,
    "head": "4a807c4b7f5259d422054529fbd7a11be5aeb9fd",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: bounded /regex/ search by note size and time (decision 2.39)."
+   "decision": "replaced",
+   "reason": "superseded: 44e55ea3e8 \"port #306's /regex/ budget onto train 6\" and fcc954fefe are in train 7; searchRegexBudget 6/0 on 3100c18c43.",
+   "by": "#929 (port of #306 onto train 6) + #934 (Z6 fix fcc954fefe)"
   },
   {
    "pr": 316,
    "head": "6a0c27b1586f7e7c653b8ce4a08dbbd9ddece30f",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: the Web Clipper page describes the receiver that exists (decision 2.92)."
+   "decision": "replaced",
+   "reason": "superseded: webClipperDocs (decision 2.92) is in train 7 and 12/0 on 3100c18c43.",
+   "by": "#922 (port of #316, 58dce362fa)"
   },
   {
    "pr": 317,
    "head": "54bfd1154f27a0bf01ea591129b6eb0964025ac9",
    "decision": "replaced",
-   "by": "train-4",
-   "reason": "merging it into train-4 changes nothing (git merge-tree gives train-4's own tree): the version is already there."
+   "reason": "superseded: the version is already in train 7 (merge-tree result == train tree).",
+   "by": "verify/train-7 (git merge-tree gives 3100c18c43's own tree)"
   },
   {
    "pr": 318,
    "head": "88e5c6e5792170f96c798172efacf14e4a5e2477",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 319,
    "head": "126d130f0b99ca34f71a8e322da5d9d02cacaf37",
    "decision": "replaced",
-   "by": "train-4",
-   "reason": "merging it into train-4 changes nothing (git merge-tree gives train-4's own tree): the version is already there."
+   "reason": "superseded: the version is already in train 7 (merge-tree result == train tree).",
+   "by": "verify/train-7 (git merge-tree gives 3100c18c43's own tree)"
   },
   {
    "pr": 320,
    "head": "458ba8a45f0b20129fbf720d3db58081f89df4ae",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 323,
    "head": "3808db68943a13088d21aa66b226a4d7ade1a10b",
    "decision": "replaced",
-   "by": "train-4",
-   "reason": "merging it into train-4 changes nothing (git merge-tree gives train-4's own tree): the version is already there."
+   "reason": "superseded: the version is already in train 7 (merge-tree result == train tree).",
+   "by": "verify/train-7 (git merge-tree gives 3100c18c43's own tree)"
   },
   {
    "pr": 324,
    "head": "533d9c7a76ed60ebe219897f60640d19f02a2e5c",
    "decision": "replaced",
-   "by": "train-4",
-   "reason": "merging it into train-4 changes nothing (git merge-tree gives train-4's own tree): the version is already there."
+   "reason": "superseded: the version is already in train 7 (merge-tree result == train tree).",
+   "by": "verify/train-7 (git merge-tree gives 3100c18c43's own tree)"
   },
   {
    "pr": 325,
-   "head": "43050c0baece87ba1feaccfec174d404ec1f1b49",
+   "head": "27052b832aa9e89a9004818b27e20384e90fd640",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run. Re-keyed by lane F8 (review 8) after dependabot rebased it on 16.11; decided by number, author and title from now on.",
+   "author": "dependabot[bot]",
+   "title": "chore(deps): Bump the renderer-vendors group across 1 directory with 4 updates"
   },
   {
    "pr": 326,
    "head": "b935bbbea6d4da49fdfc2a936f4d9f144639a086",
    "decision": "replaced",
-   "by": "#612 (ws 8.22.2)",
-   "reason": "a newer dependabot PR bumps the same package further."
+   "reason": "a newer dependabot PR bumps the same package further.",
+   "by": "#612 (ws 8.22.2)"
   },
   {
    "pr": 327,
    "head": "b3ba2f697636c4fb96745c543ee9e3a3040d250e",
    "decision": "replaced",
-   "by": "#534 (astro 7.4.12)",
-   "reason": "a newer dependabot PR bumps the same package further."
+   "reason": "a newer dependabot PR bumps the same package further.",
+   "by": "#534 (astro 7.4.12)"
   },
   {
    "pr": 328,
    "head": "9667c3fadd6ed40e193a77ac41d84c42da0ff2be",
    "decision": "replaced",
-   "by": "#614 (starlight 0.42.10)",
-   "reason": "a newer dependabot PR bumps the same package further."
+   "reason": "a newer dependabot PR bumps the same package further.",
+   "by": "#614 (starlight 0.42.10)"
   },
   {
    "pr": 329,
    "head": "74b7cad09132b8bd14bd6b124e83d69632c21015",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 340,
    "head": "29270ef009df04c14c525567b815ef20e8cd770f",
    "decision": "replaced",
-   "by": "#500, #569/#605 and W10.E28-E30",
-   "reason": "12.1 from 9.11 with 47 conflicts today: the max-lines gate is #500, the splits came through #569/#605, the rest is W10.E28-E30; its empty-catch lint rule is already in train-4."
+   "reason": "superseded: max-lines gate #500, splits #569/#605, the rest W10.E28-E30, all in train 7 (decision kept from train 4, head unchanged).",
+   "by": "#500, #569/#605 and W10.E28-E30"
   },
   {
    "pr": 356,
    "head": "ecb426ad9554e56b6264b09a91a7bc18a0dec533",
    "decision": "replaced",
-   "by": "train-4",
-   "reason": "every commit is patch-equivalent to one in train-4 (git cherry: 0 unique)."
-  },
-  {
-   "pr": 399,
-   "head": "44d1f9f6d7abeab074929363c20deed91eaa1dc9",
-   "decision": "replaced",
-   "by": "#544 (W10.F15)",
-   "reason": "its 4 commits not in train-4 (44d1f9f6d7, fa0fafd23d, a26f9af574, 6e739abfcd: feat/sync-crypto) are all in #544's head; the rest is in train-4."
-  },
-  {
-   "pr": 422,
-   "head": "9dad38fda356f9807750d0027b0f11e9736420c0",
-   "decision": "in",
-   "via": "W10.F26",
-   "reason": "desktop windows, tray capture, Cargo.lock (W3.9)."
-  },
-  {
-   "pr": 431,
-   "head": "3268d71dab0ef0e611e497606faec91ad345228d",
-   "decision": "replaced",
-   "by": "verify/train-2..4 and #626",
-   "reason": "the old train-1 integration PR; trains 2-4 replaced it, and #626 brings train 1's last 11 commits."
-  },
-  {
-   "pr": 448,
-   "head": "f3861f8884be9c28238afddfcd88ffcc2f249e87",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: four share-link fixes (RR4-448, review 2) after the merged head."
-  },
-  {
-   "pr": 451,
-   "head": "aae88fe95a7003f4bca5ade9f4470f8f0788dae2",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: four airplane-mode fixes after the merged head (RR6-451, review 8)."
-  },
-  {
-   "pr": 455,
-   "head": "d124512a276a4a0280521bca29283fd9e17db54f",
-   "decision": "in",
-   "via": "W10.F13",
-   "reason": "the weekly vitest mutation run (d124512a27)."
-  },
-  {
-   "pr": 456,
-   "head": "adb8ec2117b9b947edc57334d2edcb280eeca69f",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: the share-server DPIA states #469's three actions as done (decision 2.46)."
+   "reason": "superseded: every commit is patch-equivalent to one in train 7 (git cherry 3100c18c43 <head>: 0 \"+\").",
+   "by": "verify/train-7 (git cherry: 0 unique commits against 3100c18c43)"
   },
   {
    "pr": 469,
    "head": "18620faf2785cf77a471896714af7d8465641d4b",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: the vault relay's four routes in the public Worker (decision 5.16)."
+   "decision": "replaced",
+   "reason": "superseded/decided: train 6 chose one vault relay (edge-workers/vault-relay, decision 2.46); #927 carried the rest of #469.",
+   "by": "#927 (port of #469, e8c8d4c06c: one vault relay, decision 2.46)"
   },
   {
    "pr": 472,
    "head": "7d29b4a9b50f598ad84fe237dca82ad8fb95d5ab",
    "decision": "replaced",
-   "by": "#544 (W10.F15)",
-   "reason": "the same 4 feat/sync-crypto commits, all in #544's head; the rest is in train-4."
-  },
-  {
-   "pr": 481,
-   "head": "0b0ad06c4a7a9c00d881b2e74f934b7020204048",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: the CODEOWNERS additions after 'Merge #481 head 870c6c311f'."
-  },
-  {
-   "pr": 499,
-   "head": "1329854b6ebd6db390f7babfc9692f0daa1832e6",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: decision 2.73 (dependabot ignores @types/node majors for mcp-server), after 'Merge #499 head 8ba89395c4'."
-  },
-  {
-   "pr": 500,
-   "head": "dc4b14ffe7e3c4d250b50ea21ecc2ae030dc65e3",
-   "decision": "in",
-   "via": "W10.F14 (local verify/train-5)",
-   "reason": "the max-lines gate and App split, in the local train-5 (c92553af4b) that becomes train 6's base."
+   "reason": "superseded: the 4 feat/sync-crypto commits are in #544's head, an ancestor of train 7; the rest was in train 4.",
+   "by": "#544 (in train 7)"
   },
   {
    "pr": 511,
    "head": "57bc573db3ae9e0c0af3f5d24a0ddfc01f735f35",
-   "decision": "in",
-   "via": "W10.F27",
-   "reason": "verification levels from signed receipts, on chore/dod (W6.7)."
+   "decision": "replaced",
+   "reason": "superseded: #955 redoes W6.7 on train 7's receipt code (its body: \"#511 did W6.7 on an old base\").",
+   "by": "#955 (W10.G9: verification level from receipts, on train 7)"
   },
   {
    "pr": 513,
    "head": "5b35ab7af85ecc0d2af04a2ffdb34c233aa40b91",
-   "decision": "in",
-   "via": "W10.F27",
-   "reason": "the works-for-the-user board (W6.44), after #511 on chore/dod."
-  },
-  {
-   "pr": 528,
-   "head": "febce98998cdbc5a0381ada63d36fbc038661e62",
-   "decision": "in",
-   "via": "W10.F14 (local verify/train-5)",
-   "reason": "the content frame on its own site, in the local train-5."
-  },
-  {
-   "pr": 531,
-   "head": "24244c74fbe20d1b0f164fce3107bedeed06826e",
-   "decision": "in",
-   "via": "W10.F14 (local verify/train-5)",
-   "reason": "share server and relay on Workers, in the local train-5."
+   "decision": "replaced",
+   "reason": "W6.44 areas board re-applied on the T8 integration on top of #955 (its receipts.mjs replaces #511's): area-bars.mjs, areas.mjs, planAreas.test.ts and the plan:check hook as on #734's head, plan/areas.json with #734's 372 entries + the 446 tasks added since.",
+   "by": "7a35be85ef port(plan) on verify/train-7 (T8 integration)"
   },
   {
    "pr": 532,
    "head": "0023af8b01ec3513b26ca3ca64b273fef09d264e",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 533,
    "head": "7580ebd99c9ba6023359fd7ae8e349a2860eebab",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 534,
    "head": "b759f9ee40d64e2178d73668e4afc6a719768764",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
-  },
-  {
-   "pr": 539,
-   "head": "70e16bd03d32497dbf1eb4142a942b901096a8f1",
-   "decision": "replaced",
-   "by": "#620 (W10.F17)",
-   "reason": "#620 carries #539 onto verify/train-4."
-  },
-  {
-   "pr": 541,
-   "head": "b3f378f4d35fcfdd890b73d9f49a5660dd58a413",
-   "decision": "in",
-   "via": "W10.F18",
-   "reason": "the unmoderated usability round; rebased on train 6 there."
-  },
-  {
-   "pr": 544,
-   "head": "29c95591113f8aa619500e6556428664030bebdf",
-   "decision": "in",
-   "via": "W10.F15",
-   "reason": "SAS pairing (security); carries feat/sync-crypto's review 16/34 fixes."
-  },
-  {
-   "pr": 545,
-   "head": "f6acf9ba34458acafbc78103cc0f563e682a020c",
-   "decision": "in",
-   "via": "W10.F15",
-   "reason": "the SAS comparison UI (security)."
-  },
-  {
-   "pr": 546,
-   "head": "5576cb001d6f5c9256bb14a0ae7ab637cbde365d",
-   "decision": "in",
-   "via": "W10.F11",
-   "reason": "the e2e skip reduction 39 -> 15 under the W4.12 gate."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 550,
    "head": "19a727d8156256e9fa2364a4fd0c95f625688403",
-   "decision": "in",
-   "via": "train 6 (no W10 task names it yet)",
-   "reason": "finished work not in any train: SLSA provenance and Sigstore bundles (W7.22)."
-  },
-  {
-   "pr": 553,
-   "head": "d5518751abaf2479098813f96f5f06ab09236704",
-   "decision": "in",
-   "via": "W10.F15",
-   "reason": "one embed-provider list in security/policy.json."
+   "decision": "replaced",
+   "reason": "superseded: #658 carries #550's W7.22 tooling (renamed provenance-lib.mjs) and is in train 7.",
+   "by": "#658 (W10.F19)"
   },
   {
    "pr": 555,
    "head": "c1e6b47a8a4b8f15bf7e9705b2c906466b2f5278",
    "decision": "replaced",
-   "by": "train-4",
-   "reason": "every commit is patch-equivalent to one in train-4 (git cherry: 0 unique)."
+   "reason": "superseded: every commit is patch-equivalent to one in train 7 (git cherry 3100c18c43 <head>: 0 \"+\").",
+   "by": "verify/train-7 (git cherry: 0 unique commits against 3100c18c43)"
   },
   {
    "pr": 556,
    "head": "a6d395f63a284dafdff323ee1e31c6c8fa195794",
-   "decision": "in",
-   "via": "train 6 (no W10 task names it yet)",
-   "reason": "finished work not in any train: review receipts only from collaborators, signed (W6.11: train-4's gate accepts a receipt from anyone)."
-  },
-  {
-   "pr": 557,
-   "head": "7e3ad362a568732edfec4341f2893d8a0d3bb231",
-   "decision": "in",
-   "via": "W10.F19",
-   "reason": "the release provenance gate (W7.22)."
-  },
-  {
-   "pr": 559,
-   "head": "49b3682e4fed698e435bbdcd120f068322fb9af0",
-   "decision": "in",
-   "via": "W10.F23",
-   "reason": "editor: image size reset, attachments with their note, copy as HTML (W7.3)."
+   "decision": "replaced",
+   "reason": "superseded: collaborator-only signed receipts are in train 7 via W10.D3 #649, reworked by #878.",
+   "by": "#649 (8544cedc64) + #878"
   },
   {
    "pr": 562,
    "head": "8dbdceead36cdf351eacc6cc2595c7c3e09ec8fd",
-   "decision": "in",
-   "via": "train 6 (no W10 task names it yet)",
-   "reason": "finished work not in any train: blind suites for the e2ee header, manifest, worker ledger; pr:check refuses hand-edited snapshots (W6.15)."
+   "decision": "replaced",
+   "reason": "superseded: newer blind suites and the hand-edited-snapshot rule are in train 7 (train 6 skip analysis).",
+   "by": "#756, #776 (W10.D18/D19) and #709 (W10.D20), #507"
   },
   {
    "pr": 565,
    "head": "1305f8bbef9b03c6dcdbbecf6be5f4d88b48b957",
    "decision": "replaced",
-   "by": "train-4",
-   "reason": "every commit is patch-equivalent to one in train-4 (git cherry: 0 unique)."
-  },
-  {
-   "pr": 566,
-   "head": "3fd62bff61b6b58a3cd0a49c88bc36ec30d9bab8",
-   "decision": "in",
-   "via": "W10.F5 (#626)",
-   "reason": "#626 merges #566's head (gateEnv keeps the e2e collab socket out of vitest) on top of train 1's commits."
-  },
-  {
-   "pr": 567,
-   "head": "2329e5a2bef089f302fc3045127267d7779b98a3",
-   "decision": "in",
-   "via": "train 6 (no W10 task names it yet)",
-   "reason": "finished work not in any train: fuzzing .base, .excalidraw, PDF annotations, plugin manifests; two .base bugs fixed."
+   "reason": "superseded: every commit is patch-equivalent to one in train 7 (git cherry 3100c18c43 <head>: 0 \"+\").",
+   "by": "verify/train-7 (git cherry: 0 unique commits against 3100c18c43)"
   },
   {
    "pr": 568,
    "head": "95492d5f9299f0ea0e6079b4fc3e1c8c842e880c",
    "decision": "rejected",
-   "reason": "a release-branch PR (release-beta1 rebuilt from train 3): it lands on chore/release-beta1, not on a train; its provenance-gate commit is #557 (W10.F19)."
-  },
-  {
-   "pr": 569,
-   "head": "e5692a5fa6f6c62e383c15b6fc8821a419c20699",
-   "decision": "replaced",
-   "by": "#605 (W10.F12)",
-   "reason": "#569's head is an ancestor of #605's head."
-  },
-  {
-   "pr": 570,
-   "head": "2af386bcaab94f68896a815431b1ef228db59989",
-   "decision": "in",
-   "via": "train 6 (no W10 task names it yet)",
-   "reason": "finished work not in any train: i18n:drift counts the lazy English (Buildkite pipeline)."
-  },
-  {
-   "pr": 571,
-   "head": "3429b8e78347d1b69ab74d3fe2d03cf8cc06d0ea",
-   "decision": "in",
-   "via": "W10.F23",
-   "reason": "bulk property edit, undone in one step (W7.4)."
+   "reason": "a release-branch PR (release-beta1 rebuilt from train 3): it lands on chore/release-beta1, not a train (decision kept, head unchanged)."
   },
   {
    "pr": 575,
    "head": "2331e1035820bd84707f2b97eb2cf4ceca0ef743",
-   "decision": "in",
-   "via": "train 6 (new head of an already merged PR; no W10 task names it yet)",
-   "reason": "its earlier head is in the train; the new commit is a fix not carried yet: the commit after the fold-in (#575's own manifest gate and Workers Builds config)."
-  },
-  {
-   "pr": 576,
-   "head": "1b44f978962b8b79f18db4b24c58742d5db76008",
-   "decision": "in",
-   "via": "W10.F22",
-   "reason": "Yiddish and Ladino (W7.9)."
-  },
-  {
-   "pr": 580,
-   "head": "04de1d274bc3dcdc887ae2819eda2968cf990006",
-   "decision": "in",
-   "via": "train 6 (no W10 task names it yet)",
-   "reason": "finished work not in any train: pr-check's test repo carries the budget script's source-map helper (0.19)."
-  },
-  {
-   "pr": 586,
-   "head": "60a0d0484b74f54b76502e31fa0930ed54462783",
-   "decision": "in",
-   "via": "W10.F16",
-   "reason": "one structured-output path (W7.14)."
-  },
-  {
-   "pr": 590,
-   "head": "6d02d1f6254344b277734f2442b55f4378b27e33",
-   "decision": "in",
-   "via": "W10.F16",
-   "reason": "speculative decoding, pinned off for evals."
-  },
-  {
-   "pr": 594,
-   "head": "36b68563478e1e84ac4ab0bbd444705471d7090e",
-   "decision": "in",
-   "via": "W10.F24",
-   "reason": "the Israeli academic calendar (W7.8)."
-  },
-  {
-   "pr": 595,
-   "head": "79d32daeb3f94bd9a46e6d57bede4ad00273fc3b",
-   "decision": "in",
-   "via": "W10.F24",
-   "reason": "highlights scanned from a printed page (W7.2)."
+   "decision": "replaced",
+   "reason": "superseded: #575's manifest rules ported in #923; #561 replaces #575 (plan W7.23).",
+   "by": "#923 (a187ca6dbb) and #561 (b14d1fdc5b)"
   },
   {
    "pr": 596,
    "head": "4535c57746883adda28056f0812a261b662ee32f",
-   "decision": "in",
-   "via": "train 6 (no W10 task names it yet)",
-   "reason": "finished work not in any train: publish to the AT Protocol and the fediverse (W7.19)."
-  },
-  {
-   "pr": 598,
-   "head": "4417807a536715ac755ac61ee2c63d91e8f65308",
-   "decision": "in",
-   "via": "W10.F25",
-   "reason": "20 Notion database scenarios and their fixes (W8.2)."
-  },
-  {
-   "pr": 600,
-   "head": "9f40a35458b214195990eea77e8bb80f7d38f517",
-   "decision": "in",
-   "via": "W10.F25",
-   "reason": "tesseract.js CER on the 20 scanned pages (W8.4)."
-  },
-  {
-   "pr": 602,
-   "head": "aa3f9a2b7143dda849ee75c265da625590137191",
-   "decision": "in",
-   "via": "W10.F16",
-   "reason": "the Hebrew embeddings / reranker competition harness (W7.13, W9.7)."
-  },
-  {
-   "pr": 603,
-   "head": "584172b6f867945d99ce827b03e97cd204232e26",
-   "decision": "in",
-   "via": "W10.F24",
-   "reason": "Hebrew handwriting measurement design (W7.11)."
-  },
-  {
-   "pr": 605,
-   "head": "2041505607537a146ecb3571abb381f368d96ff7",
-   "decision": "in",
-   "via": "W10.F12",
-   "reason": "startup 218 KB: command bodies load on use (part already in train-4 as 'Merge #605 head 2041505607')."
-  },
-  {
-   "pr": 608,
-   "head": "97ad0f42c8d34ef407227999bcdc3db772346160",
-   "decision": "in",
-   "via": "W10.F10",
-   "reason": "e2e/plugins.spec.ts, after W10.B1/B2."
-  },
-  {
-   "pr": 611,
-   "head": "87624fb27e5ac5bda0c0baf37046f042ab22be8e",
-   "decision": "in",
-   "via": "W10.F26",
-   "reason": "TTS: Hebrew numbers, tts:voice (W2.6)."
+   "decision": "replaced",
+   "reason": "superseded: plan W7.19 names #587, which is in train 7; #596 was the other design.",
+   "by": "#587 (W7.19, chosen in review 20: ce51ca55e8)"
   },
   {
    "pr": 612,
    "head": "8b27b2db480f6c5a55d81d7133f7cebcc48ce1ef",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 613,
    "head": "f1c69343301c8356ba96c68a9cfd4ce6efba861b",
    "decision": "replaced",
-   "by": "#534 (astro 7.4.12)",
-   "reason": "a newer dependabot PR bumps the same package further."
+   "reason": "a newer dependabot PR bumps the same package further.",
+   "by": "#534 (astro 7.4.12)"
   },
   {
    "pr": 614,
    "head": "6896be3970c9a51bada56c60298b215d8045d38c",
    "decision": "rejected",
-   "reason": "dependency bumps are not merged one PR at a time into a train: they go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9), which needs npm install, so it is owed to the Mac run."
-  },
-  {
-   "pr": 615,
-   "head": "a43a7141c2f151f351bc871ef263d037b682afbb",
-   "decision": "in",
-   "via": "W10.F26",
-   "reason": "the WCAG 2.2 ACR from axe-core (W3.8)."
-  },
-  {
-   "pr": 617,
-   "head": "330817b7ed24cf55cb8de6bbd5db90590dcd52e1",
-   "decision": "in",
-   "via": "W10.F20",
-   "reason": "npm run owner:checklist, on chore/dod then the train."
-  },
-  {
-   "pr": 618,
-   "head": "243a3f9f02a0c07d83879fe018b3a413290d4337",
-   "decision": "in",
-   "via": "W10.F27",
-   "reason": "plan fixes on chore/dod (9.8 P0, W9.2 after W9.4, no taken domain in the plan)."
-  },
-  {
-   "pr": 619,
-   "head": "f885336f8b982ccc20c34913877d0ed606c1fd6d",
-   "decision": "in",
-   "via": "W10.F21",
-   "reason": "every low and info finding of reviews 6-34."
-  },
-  {
-   "pr": 620,
-   "head": "1f0564cab107502c1fde0314f5e384019dbca6a1",
-   "decision": "in",
-   "via": "W10.F17",
-   "reason": "#539's lockfile drift and lane state, carried onto verify/train-4."
-  },
-  {
-   "pr": 621,
-   "head": "9031e57099091344bb98cc8f3ea595baeeb2d65f",
-   "decision": "in",
-   "via": "train 6 (wave 10 PR, W1.36 step 1)",
-   "reason": "a wave-10 PR on verify/train-4, made for train 6 to merge."
-  },
-  {
-   "pr": 622,
-   "head": "6d09bb12d716609ba31cda4ff5cd5d7b97278aca",
-   "decision": "in",
-   "via": "train 6 (wave 10 PR, 13.1)",
-   "reason": "a wave-10 PR on verify/train-4, made for train 6 to merge."
+   "reason": "dependency bumps go in as one update with a fresh lockfile and the full test run (W6.14, lockfile drift gate W8.9); needs npm install, owed to the Mac run."
   },
   {
    "pr": 623,
    "head": "d363921deadbb059953bbaae798cd0bbe603ff24",
-   "decision": "in",
-   "via": "train 6 (wave 10 PR, decision 2.41)",
-   "reason": "a wave-10 PR on verify/train-4, made for train 6 to merge."
-  },
-  {
-   "pr": 624,
-   "head": "a26175b20dc8a563b273bcf2476d164e66fe36f8",
-   "decision": "in",
-   "via": "train 6 (wave 10 PR, W6.22)",
-   "reason": "a wave-10 PR on verify/train-4, made for train 6 to merge."
+   "decision": "replaced",
+   "reason": "superseded: same Privacy tab, in train 7 via #790 (train 7 STATE: skipped as superseded).",
+   "by": "#790 (W10.E70)"
   },
   {
    "pr": 625,
    "head": "8f1fd377fadf75540416f23e4a8ccaa6e54d511f",
-   "decision": "in",
-   "via": "train 6 (wave 10 PR, W8.10)",
-   "reason": "a wave-10 PR on verify/train-4, made for train 6 to merge."
-  },
-  {
-   "pr": 626,
-   "head": "55cf1e8d732cf0dbc3e267f98a5c163aec382f14",
-   "decision": "in",
-   "via": "W10.F1 (#626)",
-   "reason": "train 1's 11 dropped commits, the 38-minute calculation and #566, for train 6."
-  },
-  {
-   "pr": 627,
-   "head": "702e2c64ebcd79ad70fc8cd95ba1709d52bd8a70",
-   "decision": "in",
-   "via": "train 6 (wave 10 PR, W10.C12)",
-   "reason": "a wave-10 PR on verify/train-4, made for train 6 to merge."
-  },
-  {
-   "pr": 628,
-   "head": "3a425190757301456f57de77fe29d6fc3742aae5",
-   "decision": "in",
-   "via": "train 6 (wave 10 PR, W10.C30)",
-   "reason": "a wave-10 PR on verify/train-4, made for train 6 to merge."
-  },
-  {
-   "pr": 629,
-   "head": "69c12d780655cf4e0e288f5e23d462bf1066bb24",
-   "decision": "in",
-   "via": "train 6 (wave 10 PR, W10.C29)",
-   "reason": "a wave-10 PR on verify/train-4, made for train 6 to merge."
-  },
-  {
-   "pr": 630,
-   "head": "f9204ed7abc6bd9b8a5f906d6901b790a17b09f9",
-   "decision": "in",
-   "via": "train 6 (wave-10 PR: W10.D15)",
-   "reason": "a wave-10 PR made for train 6 to merge."
-  },
-  {
-   "pr": 631,
-   "head": "8b3f8dfc100a0800cdbe9c1940f1ca68f359539f",
-   "decision": "in",
-   "via": "train 6 (wave-10 PR: W10.B1, W10.B2)",
-   "reason": "a wave-10 PR made for train 6 to merge."
-  },
-  {
-   "pr": 632,
-   "head": "3f681db6b5dfb39437f308852e57383b2fe0d071",
-   "decision": "in",
-   "via": "train 6 (wave-10 PR: wave 10)",
-   "reason": "a wave-10 PR made for train 6 to merge."
-  },
-  {
-   "pr": 633,
-   "head": "19801f2cd5b0da4371ed5e334359b2fa12e6c317",
-   "decision": "in",
-   "via": "train 6 (wave-10 PR: W10.B17)",
-   "reason": "a wave-10 PR made for train 6 to merge."
-  },
-  {
-   "pr": 634,
-   "head": "46290b8ca06fabfec9f1dbac5bf867c6ac9e7179",
-   "decision": "in",
-   "via": "train 6 (wave-10 PR: W10.C8)",
-   "reason": "a wave-10 PR made for train 6 to merge (stacked on w10/w10.c-live-seam-gate)."
-  },
-  {
-   "pr": 635,
-   "head": "62c7c19190edf460d678ce5243a164cd7b3b5652",
-   "decision": "in",
-   "via": "W10.F4",
-   "reason": "the #235 port, for train 6."
-  },
-  {
-   "pr": 636,
-   "head": "da6ccb2ec810ecf351a3f2b075aea5e6dad4f623",
-   "decision": "in",
-   "via": "train 6 (wave-10 PR: W10.D9)",
-   "reason": "a wave-10 PR made for train 6 to merge."
-  },
-  {
-   "pr": 637,
-   "head": "3a867a4965abddb3b87b4ce31f48d4b8673ec5b5",
-   "decision": "in",
-   "via": "W10.F6",
-   "reason": "#265's head (chore/dod) for train 6."
-  },
-  {
-   "pr": 638,
-   "head": "04f689c3123e77e2111b885b697f246487b0c992",
-   "decision": "in",
-   "via": "train 6 (wave-10 PR: W10.B4)",
-   "reason": "a wave-10 PR made for train 6 to merge."
-  },
-  {
-   "pr": 639,
-   "head": "15a24f7692fe3c26950e18d0d54fe9f7dadb9cb0",
-   "decision": "in",
-   "via": "train 6 (wave-10 PR: W10.C9)",
-   "reason": "a wave-10 PR made for train 6 to merge (stacked on w10/w10.c8-live-voice-transcriber)."
-  },
-  {
-   "pr": 640,
-   "head": "c3f055218e6badbeecec9e28eba534b4740ffdea",
    "decision": "replaced",
-   "by": "verify/train-5 (W10.F14)",
-   "reason": "the train-5 lane's work-in-progress PR, marked do-not-merge: train 5 is pushed as verify/train-5 and becomes train 6's base, so the PR itself never merges."
-  },
-  {
-   "pr": 641,
-   "head": "45f2635a5c7c48986cffa24c925a597905b76463",
-   "decision": "in",
-   "via": "train 6 (wave-10 PR: W10.B15)",
-   "reason": "a wave-10 PR made for train 6 to merge."
-  },
-  {
-   "pr": 642,
-   "head": "a9b074261f8f7c3d20e884cd7f5984a0eb2c5071",
-   "decision": "in",
-   "via": "train 6 (wave-10 PR: W10.D5)",
-   "reason": "a wave-10 PR made for train 6 to merge."
-  },
-  {
-   "pr": 643,
-   "head": "8d674ee03c9db94b6bf52ee043cb6cf9e790c17b",
-   "decision": "in",
-   "via": "train 6 (wave-10 PR: W10.G11)",
-   "reason": "a wave-10 PR made for train 6 to merge."
-  },
-  {
-   "pr": 644,
-   "head": "b7d247d78cec56ee5c6c9e23f3e75d3ab9e16240",
-   "decision": "in",
-   "via": "train 6 (wave-10 PR: W10.C17)",
-   "reason": "a wave-10 PR made for train 6 to merge."
+   "reason": "superseded: train 7 has the lane-state check from 01bbef5fe4 (#741), a later design of W8.10.",
+   "by": "#741 (W10.E56/E57: STATE.md after every push and every hour)"
   },
   {
    "pr": 645,
    "head": "a8021397840b61ba827a7ea72cec5a9a6c330e11",
-   "decision": "in",
-   "via": "train 6 (wave-10 PR: W10.C18)",
-   "reason": "a wave-10 PR made for train 6 to merge."
+   "decision": "replaced",
+   "reason": "superseded: the Privacy tab with allowed image hosts is in train 7 via #790 (train 6 skip).",
+   "by": "#790 (W10.E70)"
   },
   {
-   "pr": 646,
-   "head": "6d263755fd3e3692dc2bc157f721dddc6f5f698b",
+   "pr": 714,
+   "head": "30333c6121635dcbce977c5a9aab8fdc6a359962",
+   "decision": "replaced",
+   "reason": "superseded: W11.S14 is in train 7 via #701 and #924 (train 7 STATE).",
+   "by": "#701 + #924 (port of #714's checks)"
+  },
+  {
+   "pr": 720,
+   "head": "28df9345628ab2db54e6fd0403196ba873eaf20d",
+   "decision": "rejected",
+   "reason": "obsolete: both comments it corrected are true again in train 7 — the in-app recorder exists (W10.E52, #830) and the global-shortcut plugin is in the build (W10.C13, #657); its text would be false now."
+  },
+  {
+   "pr": 734,
+   "head": "76fa2616fb4147a3ef2af09433daabd25232869c",
+   "decision": "replaced",
+   "reason": "its #513 part (the areas board and #734's 19 area entries) re-applied on the T8 integration on top of #955; its #511 part is replaced by #955, its #502 part is in train 7.",
+   "by": "7a35be85ef port(plan) on verify/train-7 (T8 integration)"
+  },
+  {
+   "pr": 736,
+   "head": "6c409b7ea983cb4bd71bf93a351b106bf69d9de3",
+   "decision": "replaced",
+   "reason": "superseded: refTriggerLedgerRule.test.ts and the comment fix are in train 7 (91% of added lines; the rest is the test's older wording).",
+   "by": "#880 (replays #699/#736)"
+  },
+  {
+   "pr": 779,
+   "head": "d0c19e0dd9293e1d10598a4c38d47a3c4db705bb",
+   "decision": "replaced",
+   "reason": "superseded: its one line (graph.table. prefix) is covered: train 7's i18nLazyEnglish lists every graph.table.* key.",
+   "by": "#886/#889/#902 (graph.table.* keys listed in the lazy registry)"
+  },
+  {
+   "pr": 825,
+   "head": "dc6bd2d7fa24f16da012c83c837533eda9d6a066",
+   "decision": "replaced",
+   "reason": "superseded: 98% of its added lines are in train 7; #879 is an ancestor.",
+   "by": "#879 (restack of #825)"
+  },
+  {
+   "pr": 826,
+   "head": "1bccc019c2fdbf4f6ae3691c0672ace9a69782ce",
+   "decision": "replaced",
+   "reason": "superseded: 99% of its added lines are in train 7; #884 is an ancestor.",
+   "by": "#884 (restack of #826)"
+  },
+  {
+   "pr": 835,
+   "head": "8546a88b671134edc3de7576eeb7a71574f288cf",
+   "decision": "replaced",
+   "reason": "superseded: 98% of its added lines are in train 7; #880 is an ancestor.",
+   "by": "#880 (restack of #835)"
+  },
+  {
+   "pr": 845,
+   "head": "23574078d749813fd43e19375604a65ae253d700",
+   "decision": "replaced",
+   "reason": "superseded: 100% of its added lines are in train 7; #881 is an ancestor.",
+   "by": "#881 (restack of #845)"
+  },
+  {
+   "pr": 910,
+   "head": "b7534f345a9fa9e3b6f4ca208faf12178fbb7f9c",
+   "decision": "replaced",
+   "reason": "superseded: RTL theme check in train 7 via #926 (train 7 STATE).",
+   "by": "#926 (re-stack of #910)"
+  },
+  {
+   "pr": 985,
+   "head": "2a016e18b1e09a8283a90e21ff9f8163686d73bf",
+   "decision": "replaced",
+   "reason": "Lane D1 (16.11, under the owner's delegation of 16.11.2026 21:53): the owner's WIP decisions are now written (plan.schedule.wipDecisions, record plan/decisions-2026-11-16-d1.md §1). #985's first commit 643c440e0f is in the train via #999; its second, 2a016e18b1, did not cherry-pick cleanly onto the train (it predates #1053's wipGate), so #1109 carries it as a port with both gates. Before: strict-WIP commit awaits owner WIP decisions. Lane INT2: #985's first commit 643c440e0f is in the train via #999 (fix/a6-plan-sync-core); its second commit 2a016e18b1 (--wip-strict by default) turns plan:check red until the owner records plan.schedule.wipDecisions, so it is not decided. The schema has no 'pending' (or 'in, partially'), so train:missing fails on this entry on purpose rather than claim 'in'.",
+   "by": "#1109 (fix/d1-decisions: 2a016e18b1 ported onto verify/train-7 f090c20812 beside #1053, with the per-wave wipDecisions)"
+  },
+  {
+   "pr": 1080,
+   "head": "dea50af7307387a6348d38ce6b33edeb974b77c3",
+   "decision": "deferred",
+   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the OWNER-DECISION draft makes npm run lint a preview gate, and it is merged only after lint is green on the owner's Mac (owner pack L3-0.4). Review 12, L5 (lane F12, 17.11): recorded as deferred, not in.",
+   "via": "0.4",
+   "until": "lint green on the owner's Mac (owner pack L3-0.4)"
+  },
+  {
+   "pr": 1084,
+   "head": "1f543aa8bbf339c021cbccb371db1e8c8720e0cc",
+   "decision": "deferred",
+   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the OWNER-DECISION draft switches on the GitHub Sponsors and Open Collective links, and those accounts do not exist yet (owner pack L5.O-W5.25). Review 12, L5 (lane F12, 17.11): recorded as deferred, not in.",
+   "via": "W5.25",
+   "until": "the owner's decision on GitHub Sponsors"
+  },
+  {
+   "pr": 1090,
+   "head": "b897044511d1a9c2f276b9fa73a52b0f55ab1b1f",
+   "decision": "deferred",
+   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the MIT grant for israelconnect reuse is the owner's own signature (owner pack L6-R12.1-licence); the delegation does not sign licences for the owner. Review 12, L5 (lane F12, 17.11): recorded as deferred, not in.",
+   "via": "R12.1",
+   "until": "the owner's MIT grant for israelconnect reuse"
+  },
+  {
+   "pr": 1091,
+   "head": "17538b4b2117d4902a7cdf1bdb1dc84d671e0baa",
+   "decision": "deferred",
+   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the OWNER-DECISION draft adds the GitHub Sponsors link, and the account does not exist yet (owner pack L1/W11.O8). Review 12, L5 (lane F12, 17.11): recorded as deferred, not in.",
+   "via": "W11.O8",
+   "until": "the owner's decision on GitHub Sponsors"
+  },
+  {
+   "pr": 1092,
+   "head": "75797920dc0b78fd3c47a3003211c1a2ff4b6a62",
+   "decision": "deferred",
+   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the draft holds placeholders for the accessibility coordinator's contact, which only the owner can supply (owner pack L1/W11.O3). Review 12, L5 (lane F12, 17.11): recorded as deferred, not in.",
+   "via": "W11.O3",
+   "until": "the accessibility coordinator's real details from the owner"
+  },
+  {
+   "pr": 1101,
+   "head": "a89d7d4c43a9d21f9762a54351a138795704dfd8",
+   "decision": "deferred",
+   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: SECURITY.md may name private vulnerability reporting as the first channel only after the owner turns it on (the PUT was refused from here; owner pack L7-W10.D15). Review 12, L5 (lane F12, 17.11): recorded as deferred, not in.",
+   "via": "W10.D15",
+   "until": "the owner turns on private vulnerability reporting (owner pack L7-W10.D15)"
+  },
+  {
+   "pr": 1110,
+   "head": "cbe80ecee97aa78977bc19e29856ff1427d50557",
    "decision": "in",
-   "via": "W10.F9",
-   "reason": "#204's head (ci-doctor --around/--window) for train 6."
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W11.I2"
+  },
+  {
+   "pr": 1111,
+   "head": "6be55fc6e48f170662bbbd611af156833ff208c2",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.C23"
+  },
+  {
+   "pr": 1116,
+   "head": "7182bf6d11d27f7444cbf1a0bb8b850e20113248",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.G10"
+  },
+  {
+   "pr": 1117,
+   "head": "c2f0b82e4e1c6da02ba97e18dc5eae065ab075eb",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.D20"
+  },
+  {
+   "pr": 1118,
+   "head": "8cee5892e21ff841ed267250ad1049498c82b93d",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W6.39"
+  },
+  {
+   "pr": 1119,
+   "head": "db968e91bea84716179bbaba0d150a8a1581a5dc",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.C11"
+  },
+  {
+   "pr": 1120,
+   "head": "2f5a271d350bfcca7c7696978761bc16fef9fecc",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W13.X1"
+  },
+  {
+   "pr": 1121,
+   "head": "60d1fdb63f20187004cc90678d5efaaa3ff3e157",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.E57"
+  },
+  {
+   "pr": 1122,
+   "head": "264dd06fc6f74bf4ccbbda89bf169b151e7169b9",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W2.12"
+  },
+  {
+   "pr": 1123,
+   "head": "06f959d5841020b7fb72ef42e829e19a524f4dcd",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W6.39"
+  },
+  {
+   "pr": 1124,
+   "head": "31b0c7a5d43129f788aeca90d00fe806e81dc5be",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W11.S13"
+  },
+  {
+   "pr": 1125,
+   "head": "63251c3c0617d19c5d32cc3ab9488f500e7c3363",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W6.39"
+  },
+  {
+   "pr": 1126,
+   "head": "d6a80e249b7e699f66031b07de69a8e2310a54b3",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.F17"
+  },
+  {
+   "pr": 1127,
+   "head": "a02f230187becb828fb3d00584d62d953bb92ab7",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.B19"
+  },
+  {
+   "pr": 1128,
+   "head": "bb95c43ed1d8c672dd84f7b2f0851e646d44101e",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "R12.6"
+  },
+  {
+   "pr": 1129,
+   "head": "2693853277488725227295ce5878c2373b14fd8c",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.A8"
+  },
+  {
+   "pr": 1130,
+   "head": "4a1709cceb5697ebcef10433ecef76d30aaf65e6",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.C30"
+  },
+  {
+   "pr": 1131,
+   "head": "da22b4d704e07e11956b327a7eb697f5862999dd",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R10"
+  },
+  {
+   "pr": 1132,
+   "head": "d58b9e0d60466c56c033f4b2fbbc99b07d6d2c2f",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R1"
+  },
+  {
+   "pr": 1133,
+   "head": "319b51832138d866b900d4415096873401e29f69",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.W11"
+  },
+  {
+   "pr": 1134,
+   "head": "1a9c9d145a993cb6463f4c0c60e38661fe2f4a69",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.G11"
+  },
+  {
+   "pr": 1135,
+   "head": "5e77c1bce25b096e7c5dbcd30e91a6143b67dda9",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R11"
+  },
+  {
+   "pr": 1136,
+   "head": "19ae3bd83fcd2721212be1597cc33c65c7a1e9ad",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.G12"
+  },
+  {
+   "pr": 1137,
+   "head": "4e417ec4e7c46615feca02e57ca4229cd340fb40",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.W12"
+  },
+  {
+   "pr": 1138,
+   "head": "5221f81bce3b149e6b5a809783630f34049b8612",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R12"
+  },
+  {
+   "pr": 1139,
+   "head": "373950350ad5d825f464a1c416dfd91d0235b3f3",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R2"
+  },
+  {
+   "pr": 1140,
+   "head": "719d0f9d087c2de34fd3ecc03cd4e4d0b3ef6f96",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R13"
+  },
+  {
+   "pr": 1141,
+   "head": "8cd69373289560ff28a6c8bf649143773f340902",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.W1"
+  },
+  {
+   "pr": 1142,
+   "head": "764ee4310a12a745687bf120bbf263f97a1fffd1",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.W3"
+  },
+  {
+   "pr": 1143,
+   "head": "989033036090a4350f945acea40e0c596d8526b2",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.W4"
+  },
+  {
+   "pr": 1144,
+   "head": "603cb6e567b55ad2969fb3576c6772569efb227f",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.W16"
+  },
+  {
+   "pr": 1145,
+   "head": "7d63622a90cd41a035f03b2eb54b9728ecc69c83",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.W5"
+  },
+  {
+   "pr": 1146,
+   "head": "fe965567bbe28b162831581993100571a8ef9669",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.W2"
+  },
+  {
+   "pr": 1147,
+   "head": "a26a6c5a5a5797e2956f665b681227ca37ab3377",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R7"
+  },
+  {
+   "pr": 1148,
+   "head": "227872e24afc7b1a0e4935a1b66d1fe310a7932a",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R14"
+  },
+  {
+   "pr": 1149,
+   "head": "ad1a5ca9228f61da9452006df302cfd663923b62",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R3"
+  },
+  {
+   "pr": 1150,
+   "head": "a0223f5fab8bd4c6d33d8a53acc0be0e979f8c0e",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.G9"
+  },
+  {
+   "pr": 1151,
+   "head": "53841363a921aa02ef51206dad7ee7f083e0ddb2",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R4"
+  },
+  {
+   "pr": 1152,
+   "head": "8bee936522e284bfdf2993ebf272989d8596ccb3",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R8"
+  },
+  {
+   "pr": 1153,
+   "head": "368fe1bafd684f5b9e1d7816e97771f3a410253c",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.W6"
+  },
+  {
+   "pr": 1154,
+   "head": "e2da61939fb475036281b2d44df6c36dd62106a0",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.W7"
+  },
+  {
+   "pr": 1155,
+   "head": "4b45895af5ade3fd8fe54d000bca899c58f73713",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.W8"
+  },
+  {
+   "pr": 1156,
+   "head": "6bcd35e3adc475aaf8c85fa432075cf83843084a",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.W9"
+  },
+  {
+   "pr": 1157,
+   "head": "5ce290797f2a2c45d9f0ab4e8e7ad066fdb971b7",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.W10"
+  },
+  {
+   "pr": 1158,
+   "head": "19b981e423db3f6c0103045a6be0aafd3124d9e3",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "the next integration"
+  },
+  {
+   "pr": 1159,
+   "head": "263ad66bc1e8537b676f52a4f6cea1dabfcc97de",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.G10"
+  },
+  {
+   "pr": 1160,
+   "head": "51594ff7839d90aff4e4ef72de073aceb44eb671",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R9"
+  },
+  {
+   "pr": 1161,
+   "head": "b1384065db7038ead6f2d690513506caccd4056a",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R6"
+  },
+  {
+   "pr": 1162,
+   "head": "52ca0026e9cf7a60aac69d69156563728ea405a8",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.R5"
+  },
+  {
+   "pr": 1163,
+   "head": "5ee50779dcd5df8a13543994987cfeeb37f95d95",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.G8"
+  },
+  {
+   "pr": 1164,
+   "head": "4f26ad69e618c825a3ad68f32b83af3a1ff71141",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.G1"
+  },
+  {
+   "pr": 1165,
+   "head": "b740685007dd7537d9371f43baa931706d9030a5",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.G2"
+  },
+  {
+   "pr": 1166,
+   "head": "e15b05ef9c46e454f89a743eaee9559065df325f",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.G3"
+  },
+  {
+   "pr": 1167,
+   "head": "cf0dae0d1e4299e58384d46dacb631517480ee93",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.G4"
+  },
+  {
+   "pr": 1168,
+   "head": "d6e7b275118cbaf254661afc8743b15f0bd98e6b",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.G5"
+  },
+  {
+   "pr": 1169,
+   "head": "7c060d4e0770dd380548e1912d858164a610e28e",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.G6"
+  },
+  {
+   "pr": 1170,
+   "head": "33038fb18d4c19d23c6216b72c4b6469973baee9",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.G7"
+  },
+  {
+   "pr": 1171,
+   "head": "5749ac0739ce311c90391c20186495f8b241c769",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
+   "via": "W13.G13"
+  },
+  {
+   "pr": 1172,
+   "head": "ad81597bb878860c1e9aa2481b5c6ecfd85bb9c1",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC3"
+  },
+  {
+   "pr": 1173,
+   "head": "87fec937164aa67e49a65a482abd2ecb0d1e48b6",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC3"
+  },
+  {
+   "pr": 1174,
+   "head": "ec8d60d0a20fb2ea77c907445c9370176b017380",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC3"
+  },
+  {
+   "pr": 1175,
+   "head": "5d8be30cadcdcffc7c799565d7c5cd993e5f932f",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC3"
+  },
+  {
+   "pr": 1176,
+   "head": "0ebb315ad1fa81d8231e9176cca0ac48d9b09ea8",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC3"
+  },
+  {
+   "pr": 1177,
+   "head": "7084197b8c883d42df0323e8688a50313a0b0b09",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F12"
+  },
+  {
+   "pr": 1178,
+   "head": "40e5881afa1a2383b5f5d130e063622f6747211e",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F12"
+  },
+  {
+   "pr": 1179,
+   "head": "8270f0753a1e5e866601a7cb8150df71323620cb",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F12"
+  },
+  {
+   "pr": 1180,
+   "head": "095bde8c7166057b202f35c6730c813895ca591b",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F12"
+  },
+  {
+   "pr": 1181,
+   "head": "fcbddecac4f5543cb22989de9d8e59d2441bd85e",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F12"
+  },
+  {
+   "pr": 1182,
+   "head": "b2583dd3662f9c744ab0783ddb883a74a2bb5c5a",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F12"
+  },
+  {
+   "pr": 1183,
+   "head": "ac2edaa40598ecb4b84ba6e36bf14f0d60266f7e",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1184,
+   "head": "9c34bd559de3b51f73cbf98ad76daaff4d21dc69",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1185,
+   "head": "fa98cae75759a7001eafa57aa419e03ee6aac47b",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1186,
+   "head": "2fa02c0447ec4a4750ffa97299d1a8b40dabb1bf",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1187,
+   "head": "d1924f63309ab2acae12ae673007483b68c4b78c",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1188,
+   "head": "134f63895d2604941e154a86493479cb308def35",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1189,
+   "head": "6c5557476ade5a5b1fd0f4c4c2a6f3d001866f3d",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1190,
+   "head": "2c8da392f4d654e9c69e479bfbcf008c79668398",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1191,
+   "head": "3e30f694dc7c301d9f160b71841bfff7b9fa3935",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1192,
+   "head": "556b8590f316ebff51b8e14ca9efce2e31bb254b",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1193,
+   "head": "ff98cf6fb789a7d7f7c211315fd342d5c733c63b",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1194,
+   "head": "f252529e456b2cce02d9bf6e81ef391a124d4594",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1195,
+   "head": "a7ebbe9eea4a3f5dfa816e0418d749ff9477843d",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1196,
+   "head": "1afce28c4e23d277aa22c814419360577fcecb73",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1197,
+   "head": "3b954767c84506234a3a8b0b44ba8381cb29d72b",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1198,
+   "head": "06def6f303ffbd16ebbe92060e96f38972ae53fa",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1199,
+   "head": "b247b6b0a545d4e4d0e04f5e743974d394ea1956",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1200,
+   "head": "6bea42e3a035c2ee277d0ae0b32747f9b3aefc70",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1201,
+   "head": "35adf4b53a1498c90ca859a3bcab127ee2ab0650",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1202,
+   "head": "ecf22466348ddbc29d788aae3ee663773dc9a8f7",
+   "decision": "in",
+   "reason": "Integrator INT8 (17.11): merged into verify/int8-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1203,
+   "head": "1bbac2ad4443b7cf1fae4d5c97d6b0fac49f0c08",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L7"
+  },
+  {
+   "pr": 1204,
+   "head": "958f782e3278434bb72acbc10c944974c337bba7",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13a"
+  },
+  {
+   "pr": 1205,
+   "head": "d345f25818ef48a0366516725d7d2f92aad50576",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L6"
+  },
+  {
+   "pr": 1206,
+   "head": "779557c41f9abc5a82c3dc837e13b365ce64a8bc",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L1"
+  },
+  {
+   "pr": 1207,
+   "head": "2592f84994176ddee1a265619a842d26fc882187",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L2"
+  },
+  {
+   "pr": 1208,
+   "head": "5d854bf6ccf8a915f6a703ad55101394be9af4ff",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L7"
+  },
+  {
+   "pr": 1209,
+   "head": "82b7eba89c2643672629fa6fa55245feadc67099",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13a"
+  },
+  {
+   "pr": 1210,
+   "head": "489a0a5c475f4109970897472884a3e210354e17",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L4"
+  },
+  {
+   "pr": 1211,
+   "head": "6e3512f6b343564608ba50b219b6a1980837695d",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L4"
+  },
+  {
+   "pr": 1212,
+   "head": "42a75076b70eb4b2b481dbfced3b69cc90b9b8db",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L4"
+  },
+  {
+   "pr": 1213,
+   "head": "042c1751afc3042533a9e3428cf98617adb5c44d",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L5"
+  },
+  {
+   "pr": 1214,
+   "head": "9a747cccaf8c2873290b06f5bc91175d334755f0",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L7"
+  },
+  {
+   "pr": 1215,
+   "head": "aa7ef1af0be5469661ccb331523744484bc145e4",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L2"
+  },
+  {
+   "pr": 1216,
+   "head": "5986c7d2dbf8c921d80b09afaa0834b3cf1ca9df",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L1"
+  },
+  {
+   "pr": 1217,
+   "head": "186c3d68c0a3acb0afa53fc6523891d210e15c54",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13b"
+  },
+  {
+   "pr": 1218,
+   "head": "d56289b810a601d50d040eabf27930b72159ded1",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13b"
+  },
+  {
+   "pr": 1219,
+   "head": "1df448f7d793d53c2b31d3264f5de81cc2f3a038",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13b"
+  },
+  {
+   "pr": 1220,
+   "head": "66d10a7f985fbe0a8e6158d5ef4c0048a6e8a7d6",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13b"
+  },
+  {
+   "pr": 1221,
+   "head": "cab0c60564ef6861654b493dd5c7c78b18c2618e",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13a"
+  },
+  {
+   "pr": 1222,
+   "head": "6b72a4a47a165ed9b33f0a13fd6d161696e82a04",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L7"
+  },
+  {
+   "pr": 1223,
+   "head": "3babe0219ff49b2957dd73e7d9bc09376286c45d",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L2"
+  },
+  {
+   "pr": 1224,
+   "head": "52b436f470a9dd94153a6ee50ff002997ed47f7d",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L3"
+  },
+  {
+   "pr": 1225,
+   "head": "acc6170270391302a766c3d8ec918615fc46cffa",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L3"
+  },
+  {
+   "pr": 1226,
+   "head": "9f74669369e45375c404808d5db8008716d048e1",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L3"
+  },
+  {
+   "pr": 1227,
+   "head": "e570e55b97598d1749c08f75c9d2e2beee190bdb",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L3"
+  },
+  {
+   "pr": 1228,
+   "head": "d687805f1ae88f038f5629997d36c84518dba748",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L2"
+  },
+  {
+   "pr": 1229,
+   "head": "644db8832cea5104124fdb9fa8c42dab8a2ed692",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L3"
+  },
+  {
+   "pr": 1230,
+   "head": "b38d27155690805d6629ec215421aa8a3392d401",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L4"
+  },
+  {
+   "pr": 1231,
+   "head": "0bbbe79ec28662c6382cc088c689ef2696a7153a",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L4"
+  },
+  {
+   "pr": 1232,
+   "head": "a9c384b79363e86d0ebde17c7f6dba8781d2f66d",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1233,
+   "head": "b68ef62f13908ea731451bada600cf95ea390472",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1234,
+   "head": "ddda400df2081ab8015b36490935e52908015822",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1235,
+   "head": "b8ccb256c51071fd20a4eea1f64516cc54e2584a",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1236,
+   "head": "a08db7cd2c380079b152679f9fa04dffbb7d0817",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1237,
+   "head": "a94e61c266833c94bb3c7a4fc9896e8c02ffed7b",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1238,
+   "head": "f83b3c711da28e2f8d68c3e22055268c1cd1ff0f",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1239,
+   "head": "9db60bcc0443c2fcdb34744bbed7409160809c79",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1240,
+   "head": "61ad3a8310854a80d0b1d9513c8d8778cdef2634",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L8"
+  },
+  {
+   "pr": 1241,
+   "head": "27cce11de20194b5ec6001b7b9e6d188be03fb90",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13a"
+  },
+  {
+   "pr": 1242,
+   "head": "d68f02b613eb1cb8dfe225977739ec588c322d9f",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L2"
+  },
+  {
+   "pr": 1243,
+   "head": "cb19b1e7d114c61594db54099d09d91730eb05e4",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "lane F13a"
+  },
+  {
+   "pr": 1244,
+   "head": "9e97d88b362ed99bfb23f996f819e60e3e47b17c",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L6"
+  },
+  {
+   "pr": 1245,
+   "head": "68bb195229df1e76aa96772c69fb22364c50e15b",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L6"
+  },
+  {
+   "pr": 1246,
+   "head": "6babedb70777b30f590e8ab21ee5b0f0222157d3",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L1"
+  },
+  {
+   "pr": 1247,
+   "head": "5a22353f610e615766bc0aa2ea0e43ffeb640bdf",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L7"
+  },
+  {
+   "pr": 1248,
+   "head": "be41096b806e43fdb4798413ff500ac4afcae143",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L6"
+  },
+  {
+   "pr": 1249,
+   "head": "fd033a1ba76ff51fbd93f0739aa89b3f0e57534e",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L1"
+  },
+  {
+   "pr": 1250,
+   "head": "81afd285c77e7a278e7cbf75df3307e37d0a74fe",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L5"
+  },
+  {
+   "pr": 1251,
+   "head": "881a5c35404b13e95e562547da94d1b2940493b5",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L5"
+  },
+  {
+   "pr": 1252,
+   "head": "172c001b074e23ea151ac86f6252965bee8f45e1",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L5"
+  },
+  {
+   "pr": 1253,
+   "head": "12e97fbde220c3a5822396621bc62733e66c7a79",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L1"
+  },
+  {
+   "pr": 1254,
+   "head": "cde3512cec49d238c3b8fb51cbaec3a0a4838704",
+   "decision": "in",
+   "reason": "Integrator INT9 (17.11): merged into verify/int9-stage (git merge --no-ff of this head, checked through REST) and pushed to verify/train-7 with that integration; the head is an ancestor of the train once the push lands.",
+   "via": "wave g4 lane L5"
   }
  ]
 }

@@ -279,8 +279,8 @@ describe("FirstRun", () => {
     const onDone = vi.fn();
     render(<FirstRun onDone={onDone} />);
     // French hasn't been loaded in this file yet: picking it starts the fetch.
-    fireEvent.click(screen.getByRole("radio", { name: "Français" }));
-    expect(screen.getByRole("radio", { name: "Français" })).toHaveProperty("checked", true);
+    fireEvent.click(screen.getByRole("radio", { name: /^Français/ }));
+    expect(screen.getByRole("radio", { name: /^Français/ })).toHaveProperty("checked", true);
     for (let i = 0; i < 3; i++) fireEvent.click(screen.getAllByRole("button").at(-1)!);
     fireEvent.click(screen.getAllByRole("radio")[1]); // the empty vault, second of the start paths (labels may still be English or French)
     fireEvent.click(screen.getAllByRole("button").at(-1)!);

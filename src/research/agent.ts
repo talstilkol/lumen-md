@@ -15,6 +15,7 @@
  *
  * Caps: sources and answer length; every model call is in the run's trace.
  */
+import { answerLang, referenceSection } from "./references";
 import { anthropicWebResearch, type CitedBlock } from "../ai/anthropicProvider";
 import { getActiveProvider, getProviderKey, parseJsonResponse } from "../ai/llm";
 import { recordUsage } from "../ai/usage";
@@ -22,6 +23,8 @@ import { chargeAiCommandDispatch } from "../billing/aiQuota";
 import { APPROXIMATE_AT, quoteCoverage } from "./citations";
 import { getResearchSettings, researchEndpoint, type ResearchSettings } from "./client";
 import { assertCloudAllowed, getAiPolicy, isLocalOrigin } from "../ai/policy";
+import { citeOrDelete, deletedLine } from "../agents/cite/gate";
+import { hasHebrew } from "../text/hebrew";
 
 export interface ResearchOptions {
   question: string;
@@ -41,6 +44,8 @@ export interface ResearchResult {
   sources: number;
   /** Footnotes whose quote couldn't be found in the source text. */
   unverified: number;
+  /** Researcher agent (R12.9): sentences the cite-or-delete gate removed, because no exact quote backs them. */
+  deleted?: number;
 }
 
 /** Plan 2.7, for the Claude web-search route, whose results never pass through our cleaning. */
@@ -138,6 +143,8 @@ export function citedBlocksToMarkdown(
     "",
     body.trim(),
     "",
+    // W10.E38: the reference list (APA by default), every cited page once.
+    ...referenceSection(blocks.flatMap((b) => b.citations), "apa", answerLang(question)),
     ...defs,
     "",
   ].join("\n");
@@ -285,6 +292,38 @@ export function assembleReport(report: string, quotes: Map<number, string[]>, so
   return { body: flaggedBody, defs, cited, unverified };
 }
 
+/**
+ * The cite-or-delete gate on the agent's report (R12.9): every sentence is
+ * tied to an exact quote the verifier picked from a source the run read, or
+ * it is deleted. The footnote quote is the source's own slice at known
+ * offsets; a library note's footnote links the paragraph when it has a
+ * `^id`. Nothing unverified is shown, so `unverified` stays 0 and `deleted`
+ * says what went.
+ */
+export function gatedReport(report: string, quotes: Map<number, string[]>, sources: ReadSource[], lang: "en" | "he"): { body: string; defs: string[]; cited: Set<number>; deleted: number; kept: number; line: string } {
+  // A fenced code block is one unit to the gate, like a sentence.
+  const g = citeOrDelete(report, sources.map((s) => ({ n: s.n, id: s.link, text: s.text, note: s.link.startsWith("[[") })), { modelQuotes: quotes });
+  const byN = new Map(sources.map((s) => [s.n, s]));
+  const defs: string[] = [];
+  const cited = new Set<number>();
+  const ids = new Map<string, number>(); // source + span → footnote number
+  const body = g.body.replace(/\{\{cite:(\d+)\}\}/g, (_m, k: string) => {
+    const e = g.evidence[Number(k)];
+    const src = byN.get(e.n)!;
+    cited.add(e.n);
+    const key = `${e.n}:${e.start}:${e.end}`;
+    let id = ids.get(key);
+    if (!id) {
+      id = defs.length + 1;
+      ids.set(key, id);
+      const link = src.link.startsWith("[[") && e.anchor?.startsWith("^") ? src.link.replace(/\]\]$/, `#${e.anchor}]]`) : src.link;
+      defs.push(footnote(id, { title: src.title, url: link }, e.text));
+    }
+    return `[^${id}]`;
+  });
+  return { body, defs, cited, deleted: g.deletedCount, kept: g.kept.length, line: deletedLine(g.deletedCount, g.kept.length, lang) };
+}
+
 const stemOf = (p: string) => p.replace(/^.*\//, "").replace(/\.md$/i, "");
 
 /** The clip-library folders that have notes (`Library/`, `ספרייה/`). */
@@ -361,30 +400,31 @@ export async function agentResearch(o: ResearchOptions, settings: ResearchSettin
     else list.push(quote);
     quotes.set(q.n, list);
   }
-  const { body, defs, cited, unverified } = assembleReport(out.report.trim(), quotes, read);
+  const lang = hasHebrew(o.question) ? "he" : "en";
+  const { body, defs, cited, deleted, kept, line } = gatedReport(out.report.trim(), quotes, read, lang);
   // An answer that cites none of the sources read isn't research (the validator refuses it first).
-  if (!cited.size) throw new Error("The answer didn't cite any of the sources it read — try again or rephrase the question.");
+  if (!cited.size && !deleted) throw new Error("The answer didn't cite any of the sources it read — try again or rephrase the question.");
   const route: ResearchResult["route"] = mode === "library" ? "library" : (settings.provider as ProxyProvider);
   const uncited = read.filter((s) => !cited.has(s.n));
   const headline =
     mode === "library"
-      ? `*From your library only (nothing left this device) · ${read.length} notes · ${unverified ? `**${unverified} quote${unverified === 1 ? "" : "s"} could not be verified**` : "every quote checked against its note"}.*`
-      : `*Researched ${new Date().toISOString().slice(0, 10)} with ${PROVIDER_LABEL[settings.provider as ProxyProvider] ?? settings.provider} search · ${read.length} sources read · ${
-          unverified ? `**${unverified} quote${unverified === 1 ? "" : "s"} could not be verified**` : "every quote checked against its source"
-        }.*`;
+      ? `*From your library only (nothing left this device) · ${read.length} notes · ${line}*`
+      : `*Researched ${new Date().toISOString().slice(0, 10)} with ${PROVIDER_LABEL[settings.provider as ProxyProvider] ?? settings.provider} search · ${read.length} sources read · ${line}*`;
   const markdown = [
     researchFrontmatter(route),
     `# ${title(o.question)}`,
     "",
     headline,
     "",
-    body,
+    kept ? body : lang === "he" ? "_אף משפט בתשובה לא נקשר לציטוט מדויק, ולכן לא מוצג דבר._" : "_No sentence of the answer could be tied to an exact quote, so none is shown._",
     "",
+    // W10.E38: the cited web sources as a reference list (a library note is a [[link]], not a reference).
+    ...(mode === "library" ? [] : referenceSection(read.filter((s) => cited.has(s.n)).map((s) => ({ title: s.title, url: s.link })), "apa", answerLang(o.question))),
     ...(uncited.length ? ["## Also read", "", ...uncited.map((s) => (mode === "library" ? `- ${s.link}` : `- [${s.title}](${s.link})`)), ""] : []),
     ...defs,
     "",
   ].join("\n");
-  return { markdown, route, sources: read.length, unverified };
+  return { markdown, route, sources: read.length, unverified: 0, deleted };
 }
 
 /* ─── Library research (T34): the clipped pages, nothing leaves the device ─ */

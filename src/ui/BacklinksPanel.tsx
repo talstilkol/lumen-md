@@ -95,8 +95,8 @@ export function BacklinksPanel({ filePath, onOpen }: Props) {
               {hits.map((h, i) => (
                 <li key={i} role="listitem">
                   <button type="button" className="backlink-item" onClick={() => onOpen(h.fromPath)} title={h.fromPath}>
-                    <span className="backlink-from">{h.fromName}</span>
-                    <span className="backlink-snippet">{h.snippet}</span>
+                    <span className="backlink-from" dir="auto">{h.fromName}</span>
+                    <span className="backlink-snippet" dir="auto">{h.snippet}</span>
                   </button>
                 </li>
               ))}

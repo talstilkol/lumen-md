@@ -17,6 +17,7 @@ import { VaultIndex } from "./search.js";
 import { parseFrontmatter, serializeFrontmatter } from "../frontmatter.js";
 import { BasesUnavailableError, planBasesUpdate, proposeBatch, queryVaultBase } from "./bases.js";
 import { anchorAt, hasRules, inScope, lineOf, noteAnchors, type ScopeRules } from "./scope.js";
+import { problemsText, typesDeps, typesEngine, TypesUnavailableError } from "./types.js";
 
 export interface ToolDef {
   name: string;
@@ -36,6 +37,8 @@ export interface ToolResult {
   anchors?: string[];
   /** W11.I7: the call touched a note outside the client's scope (logged as denied; answered as if absent). */
   outOfScope?: boolean;
+  /** W12.T4: the call was refused for this reason (a schema error); logged as denied, nothing queued. */
+  refused?: string;
 }
 
 export interface ToolContext {
@@ -99,6 +102,35 @@ export const TOOLS: readonly ToolDef[] = [
       type: "object",
       properties: { path: str(), set: { type: "object", description: "Keys to set." }, unset: { type: "array", items: { type: "string" } } },
       required: ["path"],
+    },
+  },
+  {
+    name: "list_types",
+    scope: "read",
+    description: "The vault's object types (W12.T4: .lumen/types/<id>.yaml): id, Hebrew and English label, activating tag, parent type and field count. JSON.",
+    inputSchema: { type: "object", properties: {} },
+  },
+  {
+    name: "get_type",
+    scope: "read",
+    description: "One type's schema: every field (inherited ones first) with its kind (text, number, date, hebrew-date, select, multi-select, relation, checkbox, url, formula, rollup), options, relation target, default and whether it is computed. JSON.",
+    inputSchema: { type: "object", properties: { type: str("Type id or label, e.g. 'book' or 'ספר'.") }, required: ["type"] },
+  },
+  {
+    name: "create_object",
+    scope: "propose",
+    description:
+      "Propose a new note of a type. The values are checked against the type's schema: an unknown field, a value of the wrong kind, an option not in the list or a relation to a note of another type is an error and nothing is proposed. A valid object waits for the user's approval in Lumen.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        type: str("Type id or label."),
+        title: str("The note's title (also its file name when path is not given)."),
+        path: str("Vault-relative path of the new note (optional)."),
+        values: { type: "object", description: "field: value. Relations are '[[Note]]' links (a list when the field takes several); dates are YYYY-MM-DD." },
+        body: str("Markdown after the frontmatter (default: '# <title>')."),
+      },
+      required: ["type"],
     },
   },
   {
@@ -178,6 +210,10 @@ export async function callTool(ctx: ToolContext, name: string, rawArgs: unknown)
   let target: string | undefined;
   try {
     const result = await run(ctx, client, def, args, (p) => (target = p));
+    if (result.refused) {
+      await appendLedger(ctx.vault, { client, tool: def.name, scope: def.scope, path: target, decision: "denied", bytesOut: 0, reason: result.refused.slice(0, 200) });
+      return result;
+    }
     if (result.outOfScope) {
       await appendLedger(ctx.vault, { client, tool: def.name, scope: def.scope, path: target, decision: "denied", bytesOut: 0, reason: OUT_OF_SCOPE });
       return result;
@@ -333,6 +369,34 @@ async function run(ctx: ToolContext, client: string, def: ToolDef, args: Record<
         ),
         batchId: batch.id,
       };
+    }
+    case "list_types":
+    case "get_type":
+    case "create_object": {
+      let e;
+      try {
+        e = await typesEngine();
+      } catch (err) {
+        if (err instanceof TypesUnavailableError) return text(err.message, true);
+        throw err;
+      }
+      const deps = typesDeps(ctx.vault);
+      if (def.name === "list_types") return text(JSON.stringify(await e.listTypes(deps)));
+      if (def.name === "get_type") {
+        const t = await e.getType(deps, String(args.type ?? ""));
+        return t ? text(JSON.stringify(t)) : text(`No type '${String(args.type ?? "")}'.`, true);
+      }
+      const plan = await e.planObject(deps, args);
+      if (!plan.ok) {
+        const msg = `Lumen: the object does not fit the type's schema; nothing was proposed.\n${problemsText(plan.problems)}`;
+        return { ...text(msg, true), refused: `schema: ${plan.problems.map((p) => p.field).join(", ")}` };
+      }
+      const rel = notePath(plan.path);
+      onPath(rel);
+      const existing = await readNote(ctx.vault, rel);
+      if (!mayChange(rel, existing, plan.text)) return refuseChange(rel);
+      if (existing !== null) return text(`${rel} already exists; choose another title or path.`, true);
+      return propose(ctx, client, def.name, rel, null, plan.text);
     }
     default:
       return text(`Unknown tool: ${def.name}`, true);

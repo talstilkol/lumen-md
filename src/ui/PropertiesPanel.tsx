@@ -10,9 +10,9 @@
  * mirrors correctly in Hebrew / Arabic.
  */
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
-import { ExternalLink, Plus, SlidersHorizontal, X } from "lucide-react";
-import { t } from "../i18n";
+import { lazy, Suspense, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { BookOpen, ExternalLink, Plus, SlidersHorizontal, X } from "lucide-react";
+import { getLocale, t } from "../i18n";
 import { toast } from "../store/useToastStore";
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { headingSlug } from "../lib/slug";
@@ -29,8 +29,19 @@ import {
   type PropertyValue,
 } from "../properties/frontmatter";
 import "./propertiesPanelStrings";
+import { describeValue, inferValueType } from "../properties/valueTypes";
+import "../citations/openAlexStrings";
+import { sourceDoi } from "../citations/fillReferences";
 import { HelpButton } from "./HelpButton";
 import { explainError } from "../lib/userError";
+import { useAppStore } from "../store/useStore";
+import type { TypedNote } from "../types/TypedFields";
+import { useTypeRegistry } from "../types/vaultTypes";
+import { fieldsOfNote } from "../types/typeRegistry";
+import { basesFileFromText } from "../views/bases/base";
+
+// W12.T2: the typed-object form, loaded with its strings only when a panel opens.
+const TypedFields = lazy(() => import("../types/TypedFields"));
 
 interface Props {
   open: boolean;
@@ -41,7 +52,7 @@ interface Props {
   applyEdit: (edit: (text: string) => string) => void;
 }
 
-const TYPES: PropertyType[] = ["text", "number", "date", "list", "checkbox", "link"];
+const TYPES: PropertyType[] = ["text", "number", "date", "list", "checkbox", "link", "amount", "address"];
 const TYPE_STORE = "lumen.propertyTypes";
 
 function typeLabel(type: PropertyType): string {
@@ -58,7 +69,28 @@ function typeLabel(type: PropertyType): string {
       return t("props.type.checkbox");
     case "link":
       return t("props.type.link");
+    case "amount":
+      return t("props.type.amount");
+    case "address":
+      return t("props.type.address");
   }
+}
+
+/** How an amount or address value was read, under its input (plan R12.17). */
+function ValueReading({ value }: { value: unknown }) {
+  const line = describeValue(value, getLocale(), {
+    approx: t("props.reading.approx"),
+    lowerBound: t("props.reading.lowerBound"),
+    upperBound: t("props.reading.upperBound"),
+    apartment: t("props.reading.apartment"),
+    poBox: t("props.reading.poBox"),
+  });
+  if (!line) return null;
+  return (
+    <span dir="auto" data-testid="property-reading" style={{ display: "block", fontSize: 10, color: "hsl(var(--fg-muted))" }}>
+      {t("props.readAs", { value: line })}
+    </span>
+  );
 }
 
 /** Types the user picked for a key (a remembered per-viewer convenience). */
@@ -308,7 +340,7 @@ function ValueEditor({
               title={t("props.openLink", { target: inner })}
               onClick={() => (isUrl ? window.open(s, "_blank", "noopener,noreferrer") : void openNote(inner))}
             >
-              <ExternalLink size={12} aria-hidden />
+              <ExternalLink size={12} aria-hidden className="icon-dir" />
             </button>
           )}
         </div>
@@ -319,6 +351,7 @@ function ValueEditor({
         <>
           <CommitInput label={label} value={v === null ? "" : String(v)} list={listId} onCommit={(s) => onChange(s === "" ? null : s)} />
           {datalist(suggestions)}
+          {(type === "amount" || type === "address") && <ValueReading value={v} />}
         </>
       );
   }
@@ -343,8 +376,13 @@ async function openNote(target: string) {
 
 export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
   const parsed = useMemo(() => parseProperties(text), [text]);
+  // Plan W12.X3: a source note with a DOI offers "Fill references from OpenAlex" (gated, reviewed).
+  const hasDoi = useMemo(() => sourceDoi(text) !== null, [text]);
   const [types, setTypes] = useState<Record<string, PropertyType>>(loadTypes);
-  const [vault, setVault] = useState<{ suggestions: PropertySuggestions; notes: string[] } | null>(null);
+  const [vault, setVault] = useState<{ suggestions: PropertySuggestions; notes: string[]; typed: TypedNote[] } | null>(null);
+  const typeReg = useTypeRegistry();
+  const notePath = useAppStore((s) => s.doc.workspaceName ?? s.doc.name ?? "");
+  const locale = useAppStore((s) => s.locale) as string;
   const [newKey, setNewKey] = useState("");
   const [newType, setNewType] = useState<PropertyType>("text");
   const keyListId = useId();
@@ -363,6 +401,7 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
           // W2.22: the frontmatter block the index keeps is all the suggestions read.
           suggestions: collectPropertySuggestions(files.map((f) => ({ path: f.path, content: f.frontmatter ?? "" }))),
           notes: files.filter((f) => /\.(md|markdown)$/i.test(f.path)).map((f) => f.name.replace(/\.(md|markdown)$/i, "")),
+          typed: (await import("../types/TypedFields")).typedNotesFromIndex(files),
         });
       } catch {
         /* why: no workspace: no suggestions */
@@ -398,7 +437,8 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
 
   if (!open) return null;
 
-  const typeOf = (p: Property): PropertyType => (p.editable ? types[p.key] ?? p.type : p.type);
+  // Text that reads as an amount or an address shows as that type (R12.17).
+  const typeOf = (p: Property): PropertyType => (p.editable ? types[p.key] ?? inferValueType(p.value, p.key) : p.type);
   const changeType = (p: Property, to: PropertyType) => {
     const next = { ...types, [p.key]: to };
     setTypes(next);
@@ -406,6 +446,9 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
     edit((cur) => setProperty(cur, p.key, convertValue(p.value, to)));
   };
   const present = new Set(parsed.properties.map((p) => p.key));
+  // Keys the typed form shows are not listed twice (W12.T2); `type` stays in the list, so it can be changed.
+  const typedKeys = new Set<string>();
+  if (typeReg && typeReg.types.size) for (const f of fieldsOfNote(typeReg, basesFileFromText(notePath || "note.md", text)).fields) typedKeys.add(f.name.normalize("NFC").toLowerCase());
   const addProperty = () => {
     const key = newKey.trim();
     if (!key) return;
@@ -468,7 +511,12 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
           // empty-action: the "Add property" row at the bottom of this panel
           <div style={{ fontSize: 12, color: "hsl(var(--fg-muted))", paddingBlockEnd: 8 }}>{t("props.empty")}</div>
         )}
-        {parsed.properties.map((p) => {
+        {typeReg && typeReg.types.size > 0 && parsed.status !== "invalid" && (
+          <Suspense fallback={null}>
+            <TypedFields reg={typeReg} text={text} path={notePath} notes={vault?.typed ?? []} locale={locale} applyEdit={edit} />
+          </Suspense>
+        )}
+        {parsed.properties.filter((p) => !typedKeys.has(p.key.normalize("NFC").toLowerCase())).map((p) => {
           const type = typeOf(p);
           return (
             <div
@@ -522,6 +570,17 @@ export function PropertiesPanel({ open, onClose, text, applyEdit }: Props) {
             </div>
           );
         })}
+        {hasDoi && (
+          <button
+            type="button"
+            data-testid="props-fill-references"
+            onClick={() => void import("../citations/fillReferencesAction").then((m) => m.fillReferencesForOpenNote())}
+            style={{ ...iconBtn, color: "hsl(var(--accent))", fontSize: 12, gap: 6, alignItems: "center", marginBlockStart: 8 }}
+          >
+            <BookOpen size={12} aria-hidden />
+            {t("openAlex.fill.button")}
+          </button>
+        )}
       </div>
 
       {parsed.status !== "invalid" && (

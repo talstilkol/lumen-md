@@ -5,6 +5,7 @@
 import { ChevronDown, ChevronRight, FilePlus2, FileText, FolderPlus, FolderOpen, Folder as FolderIcon, Pencil, Trash2 } from "lucide-react";
 import type { WorkspaceNode } from "../storage/workspace";
 import { t } from "../i18n";
+import { PresenceDot } from "./PresenceDot";
 
 /**
  * The children of one folder to render: the first `limit` rows (folders
@@ -80,8 +81,6 @@ function renderNode(
   const isFolder = node.kind === "directory";
   const isOpen = !ctx.collapsed.has(node.path);
   const isActive = node.path === ctx.activePath;
-  const isEditing = ctx.editingPath === node.path;
-  const isSelected = ctx.selectedPaths.has(node.path);
 
   return (
     <li
@@ -90,6 +89,25 @@ function renderNode(
       aria-expanded={isFolder ? isOpen : undefined}
       aria-selected={isActive}
     >
+      {rowOf(node, depth, ctx)}
+      {isFolder && isOpen && node.children && (
+        <ul className="file-tree-list" role="group">
+          {renderChildren(node.children, node.path, depth + 1, ctx)}
+        </ul>
+      )}
+    </li>
+  );
+}
+
+/** One row: the chevron, the icon, the name (or its rename field) and the row's buttons. */
+export function rowOf(node: WorkspaceNode, depth: number, ctx: RenderCtx): React.ReactNode {
+  const isFolder = node.kind === "directory";
+  const isOpen = !ctx.collapsed.has(node.path);
+  const isActive = node.path === ctx.activePath;
+  const isEditing = ctx.editingPath === node.path;
+  const isSelected = ctx.selectedPaths.has(node.path);
+
+  return (
       <div
         className={`file-tree-item ${isActive ? "active" : ""}${isSelected ? " selected" : ""}`}
         data-path={node.path}
@@ -112,7 +130,7 @@ function renderNode(
             title={isOpen ? t("tree.collapse") : t("tree.expand")}
             aria-label={isOpen ? t("tree.collapse") : t("tree.expand")}
           >
-            {isOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+            {isOpen ? <ChevronDown size={13} /> : <ChevronRight size={13} className="icon-dir" />}
           </button>
         ) : (
           <span style={{ width: 14, display: "inline-block" }} />
@@ -164,9 +182,11 @@ function renderNode(
             title={node.path}
             aria-checked={isSelected ? true : undefined}
           >
-            {node.name}
+            <bdi>{node.name}</bdi>
           </button>
         )}
+        {/* W13.S6: another device of a shared vault has this note open. */}
+        {!isFolder && <PresenceDot path={node.path} />}
 
         {isFolder && (
           <>
@@ -224,12 +244,7 @@ function renderNode(
           <Trash2 size={13} />
         </button>
       </div>
-
-      {isFolder && isOpen && node.children && (
-        <ul className="file-tree-list" role="group">
-          {renderChildren(node.children, node.path, depth + 1, ctx)}
-        </ul>
-      )}
-    </li>
   );
 }
+
+export type { RenderCtx };

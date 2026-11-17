@@ -53,6 +53,20 @@
       "icon": "Link"
     },
     {
+      "id": "file.publishAtproto",
+      "label": "Publish to Bluesky (Standard.site)…",
+      "group": "File",
+      "hint": "This note as a public record in your AT Protocol account",
+      "icon": "Link"
+    },
+    {
+      "id": "file.unpublishAtproto",
+      "label": "Remove from Bluesky (Standard.site)…",
+      "group": "File",
+      "hint": "Delete this note's public record from your account",
+      "icon": "Link"
+    },
+    {
       "id": "file.exportDocx",
       "label": "Export to Word (.doc)",
       "group": "File",
@@ -64,6 +78,12 @@
       "label": "Insert a citation [@key]…",
       "group": "Tools",
       "shortcut": "⌥⌘C",
+      "icon": "FileText"
+    },
+    {
+      "id": "cite.fromDoi",
+      "label": "Cite from a DOI (CrossRef)…",
+      "group": "Tools",
       "icon": "FileText"
     },
     {
@@ -100,6 +120,31 @@
       "icon": "FileText"
     },
     {
+      "id": "cite.importZoteroFile",
+      "label": "Citations: import a Zotero export file (CSL JSON, BibTeX, RIS)",
+      "group": "Tools",
+      "icon": "FileText"
+    },
+    {
+      "id": "cite.exportForZotero",
+      "label": "Citations: export the vault's sources for Zotero (CSL JSON)",
+      "group": "Tools",
+      "icon": "Download"
+    },
+    {
+      "id": "cite.exportRis",
+      "label": "Citations: export the vault's sources as RIS",
+      "group": "Tools",
+      "icon": "Download"
+    },
+    {
+      "id": "cite.fillReferencesOpenAlex",
+      "label": "Citations: fill references from OpenAlex…",
+      "group": "Tools",
+      "hint": "For a source note with a DOI: asks first, sends only the DOI, and writes nothing until you approve",
+      "icon": "FileText"
+    },
+    {
       "id": "file.exportRtf",
       "label": "Export to RTF",
       "group": "File",
@@ -117,6 +162,20 @@
       "label": "Export to LaTeX (.tex)",
       "group": "File",
       "hint": "Article-class LaTeX with hyperref + listings",
+      "icon": "Download"
+    },
+    {
+      "id": "file.exportTypst",
+      "label": "Export to Typst (.typ)",
+      "group": "File",
+      "hint": "Typst source with Hebrew right to left; compile it with typst",
+      "icon": "Download"
+    },
+    {
+      "id": "file.exportTypstPdf",
+      "label": "Export to PDF with Typst",
+      "group": "File",
+      "hint": "Compiled on this device by typst.ts, with a Hebrew font; nothing is sent",
       "icon": "Download"
     },
     {
@@ -145,6 +204,27 @@
       "label": "Export to OPML",
       "group": "File",
       "hint": "Outline interchange format (RSS readers, mind-maps)",
+      "icon": "Download"
+    },
+    {
+      "id": "file.exportOdt",
+      "label": "Export to OpenDocument (ODT)",
+      "group": "File",
+      "hint": "LibreOffice text document, right-to-left paragraphs kept",
+      "icon": "Download"
+    },
+    {
+      "id": "file.importVcard",
+      "label": "Import contacts (vCard)…",
+      "group": "File",
+      "hint": "A .vcf from your phone or Google becomes person notes; people already in the vault are merged",
+      "icon": "Download"
+    },
+    {
+      "id": "file.exportVcard",
+      "label": "Export people as vCard",
+      "group": "File",
+      "hint": "Every person note as one vCard 4.0 file, downloaded on this device",
       "icon": "Download"
     },
     {
@@ -190,6 +270,20 @@
       "icon": "Download"
     },
     {
+      "id": "file.exportPdfUa",
+      "label": "Export accessible PDF (PDF/UA)…",
+      "group": "File",
+      "hint": "Tagged: headings, image descriptions, table headers, language — then finished as PDF/UA-1",
+      "icon": "Download"
+    },
+    {
+      "id": "file.finishPdfUa",
+      "label": "Make a saved PDF accessible (PDF/UA)…",
+      "group": "File",
+      "hint": "Adds the PDF/UA identification, the language and the shown title to a tagged PDF, on this device",
+      "icon": "Download"
+    },
+    {
       "id": "file.exportMarkdown",
       "label": "Export Markdown",
       "group": "File",
@@ -230,6 +324,27 @@
       "label": "Split view",
       "group": "View",
       "shortcut": "⌘2",
+      "icon": "Columns2"
+    },
+    {
+      "id": "view.sideBySide",
+      "label": "Side-by-side translation",
+      "group": "View",
+      "hint": "This note and its translation (Hebrew ↔ English) paragraph by paragraph, on a local model; saved next to the note as <note>.<lang>.md",
+      "icon": "Columns2"
+    },
+    {
+      "id": "view.daf",
+      "label": "📜 Page of the Talmud (daf)",
+      "group": "View",
+      "hint": "The note's main text with its commentaries around it, as on a printed daf",
+      "icon": "Columns2"
+    },
+    {
+      "id": "view.bilingual",
+      "label": "📖 Bilingual reader (columns / line under line)",
+      "group": "View",
+      "hint": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
       "icon": "Columns2"
     },
     {
@@ -292,6 +407,13 @@
       "icon": "FileText"
     },
     {
+      "id": "learning.plans",
+      "label": "Learning plans…",
+      "group": "File",
+      "hint": "Follow Daf Yomi, Mishnah Yomit or the daily Rambam: today's reading, a day marked learned, progress and review cards",
+      "icon": "FileText"
+    },
+    {
       "id": "pdf.open",
       "label": "Open a PDF for reading…",
       "group": "File",
@@ -306,6 +428,13 @@
       "icon": "FileText"
     },
     {
+      "id": "student.syllabus",
+      "label": "Create a syllabus…",
+      "group": "File",
+      "hint": "A note with one heading per teaching week of the semester, from your institution's academic calendar, with its dates and days off",
+      "icon": "FileText"
+    },
+    {
       "id": "note.capture",
       "label": "Quick capture",
       "group": "File",
@@ -313,9 +442,23 @@
       "icon": "FileText"
     },
     {
+      "id": "capture.triageInbox",
+      "label": "📥 Inbox: sort with the local model",
+      "group": "File",
+      "hint": "Tasks get a checkbox and a due date, every entry tags; you review before anything changes",
+      "icon": "Sparkles"
+    },
+    {
       "id": "epub.open",
       "label": "Open an EPUB for reading…",
       "group": "File",
+      "icon": "FileText"
+    },
+    {
+      "id": "view.readingProfile",
+      "label": "Reading mode…",
+      "group": "File",
+      "hint": "Choose how this note is read — page, focus and more — and save it for this note or for all notes",
       "icon": "FileText"
     },
     {
@@ -521,6 +664,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "ai.claims",
+      "label": "AI: Paragraph → Claims",
+      "group": "Tools",
+      "hint": "Checkable claims from the paragraph at the cursor, each with an exact quote (R12.11)",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.translate",
       "label": "AI: Translate Document",
       "group": "Tools",
@@ -672,6 +822,7 @@
       "label": "Settings",
       "group": "View",
       "hint": "Search settings",
+      "shortcut": "⌘,",
       "icon": "Sparkles"
     },
     {
@@ -756,10 +907,24 @@
       "icon": "Save"
     },
     {
+      "id": "vault.exportEverything",
+      "label": "Vault: export everything (exit test)",
+      "group": "File",
+      "hint": "Notes, attachments, history, settings and AI profiles in open formats, with a SHA-256 manifest and what Obsidian shows differently",
+      "icon": "Save"
+    },
+    {
       "id": "vault.import",
       "label": "Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…",
       "group": "File",
       "hint": "Into a new folder — nothing existing is overwritten; one click undoes it",
+      "icon": "Save"
+    },
+    {
+      "id": "app.install",
+      "label": "Install Lumen as an app…",
+      "group": "File",
+      "hint": "Its own window and icon; works offline",
       "icon": "Save"
     },
     {
@@ -857,6 +1022,12 @@
       "icon": "Sparkles"
     },
     {
+      "id": "roleVault.open",
+      "label": "Family or classroom vault…",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
       "id": "tasks.open",
       "label": "Tasks: Today and upcoming",
       "group": "Tools",
@@ -915,7 +1086,7 @@
       "id": "ai.rerankModel",
       "label": "AI: Rerank search with the local model",
       "group": "AI Prompts",
-      "hint": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: fast word matching.",
+      "hint": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: the BM25 order, the default.",
       "icon": "Sparkles"
     },
     {
@@ -979,6 +1150,13 @@
       "label": "Save a diagnostics file",
       "group": "Tools",
       "hint": "version, settings, vault size and recent errors — no note text, no keys — to attach to an issue",
+      "icon": "FileText"
+    },
+    {
+      "id": "help.safeMode",
+      "label": "Restart in safe mode",
+      "group": "Tools",
+      "hint": "no plugins, CSS snippets or AI agents until you leave it — for when something you added keeps Lumen from working",
       "icon": "FileText"
     },
     {
@@ -1080,6 +1258,13 @@
       "action": "store:toggleRtl"
     },
     {
+      "id": "view.hebrewCalendarDates",
+      "label": "Dates: show them in the Hebrew calendar",
+      "group": "View",
+      "hint": "Every date Lumen writes, in the UI language; your notes are not changed",
+      "icon": "PanelRightOpen"
+    },
+    {
       "id": "lang.en",
       "label": "Language: English",
       "group": "View",
@@ -1095,44 +1280,51 @@
     },
     {
       "id": "lang.ar",
-      "label": "Language: العربية (beta)",
+      "label": "Language: العربية — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "right-to-left",
       "icon": "PanelRightOpen"
     },
     {
       "id": "lang.ru",
-      "label": "Language: Русский (beta)",
+      "label": "Language: Русский — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "left-to-right",
       "icon": "PanelRightOpen"
     },
     {
       "id": "lang.fr",
-      "label": "Language: Français (beta)",
+      "label": "Language: Français — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "left-to-right",
       "icon": "PanelRightOpen"
     },
     {
       "id": "lang.de",
-      "label": "Language: Deutsch (beta)",
+      "label": "Language: Deutsch — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "left-to-right",
       "icon": "PanelRightOpen"
     },
     {
       "id": "lang.ja",
-      "label": "Language: 日本語 (beta)",
+      "label": "Language: 日本語 — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "left-to-right",
       "icon": "PanelRightOpen"
     },
     {
       "id": "lang.zh-CN",
-      "label": "Language: 简体中文 (beta)",
+      "label": "Language: 简体中文 — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "left-to-right",
+      "icon": "PanelRightOpen"
+    },
+    {
+      "id": "lang.fa",
+      "label": "Language: فارسی — Beta (machine translation, awaiting native review)",
+      "group": "View",
+      "hint": "right-to-left",
       "icon": "PanelRightOpen"
     },
     {
@@ -1161,6 +1353,13 @@
       "label": "Version History",
       "group": "View",
       "hint": "restore previous versions",
+      "icon": "PanelRightOpen"
+    },
+    {
+      "id": "view.asOf",
+      "label": "What I knew then",
+      "group": "View",
+      "hint": "search the vault as it was on a past date",
       "icon": "PanelRightOpen"
     },
     {
@@ -1221,10 +1420,24 @@
       "icon": "FileText"
     },
     {
+      "id": "privacy.appLock",
+      "label": "Privacy: lock the app with Face ID / fingerprint",
+      "group": "Security",
+      "hint": "Hides your notes while Lumen is in the background; the device's own check unlocks it",
+      "icon": "Network"
+    },
+    {
       "id": "privacy.airplane",
       "label": "Airplane mode (no network)…",
       "group": "Security",
       "hint": "Off: stop every network request and list every attempt",
+      "icon": "Network"
+    },
+    {
+      "id": "privacy.localData",
+      "label": "Privacy: what is stored on this device",
+      "group": "Security",
+      "hint": "Sizes per category; delete each one, or everything; save the report",
       "icon": "Network"
     },
     {
@@ -1415,6 +1628,12 @@
       "icon": "Link"
     },
     {
+      "id": "edit.hebrewListNumbering",
+      "label": "Number lists with Hebrew letters (א. ב. ג.)",
+      "group": "Edit",
+      "hint": "For this note, in the preview, PDF and Word; the Markdown keeps 1. 2. 3."
+    },
+    {
       "id": "edit.formatDocument",
       "label": "Format document",
       "group": "Edit",
@@ -1487,6 +1706,13 @@
       "label": "Clean direction marks and fix brackets",
       "group": "Edit",
       "hint": "Remove marks that change nothing on screen and swap brackets typed backwards — one undo",
+      "icon": "Pencil"
+    },
+    {
+      "id": "edit.cursorMovement",
+      "label": "Cursor movement: switch to logical",
+      "group": "Edit",
+      "hint": "Arrow keys in mixed Hebrew/English lines: visual (as drawn) or logical (text order). This device only.",
       "icon": "Pencil"
     },
     {
@@ -1921,6 +2147,13 @@
       "icon": "Link"
     },
     {
+      "id": "sources.havruta",
+      "label": "Study with a partner (havruta)…",
+      "group": "Insert",
+      "hint": "A shared, encrypted study room on this reference: notes and highlights travel, the text stays on each device",
+      "icon": "Link"
+    },
+    {
       "id": "book.open",
       "label": "Book: chapters, goals and export",
       "group": "View",
@@ -1940,6 +2173,13 @@
       "group": "File",
       "hint": "main.tex for LuaLaTeX / XeLaTeX with Hebrew right to left, math, [@key] citations from the vault's .bib, and the images, in a ZIP",
       "icon": "Download"
+    },
+    {
+      "id": "export.latexPdf",
+      "label": "PDF from LaTeX (desktop, Tectonic)…",
+      "group": "File",
+      "hint": "The LaTeX export compiled to PDF by Tectonic on this computer; TeX's errors with their lines when it fails",
+      "icon": "Printer"
     },
     {
       "id": "automations.new",
@@ -2046,6 +2286,274 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "entities.review",
+      "label": "Entity graph: proposals to review",
+      "icon": "FileText"
+    },
+    {
+      "id": "entities.graph",
+      "label": "Entity graph",
+      "hint": "Every entity and who cites whom, as a graph or a table",
+      "icon": "Network"
+    },
+    {
+      "id": "entities.contradictions",
+      "label": "Where my notes disagree",
+      "hint": "Finds denials, corrections and differing values or dates between notes, with exact quotes; the report goes to the review panel",
+      "icon": "FileText"
+    },
+    {
+      "id": "entities.wikidata",
+      "label": "Entity: link to Wikidata…",
+      "icon": "FileText"
+    },
+    {
+      "id": "reading.newFromLibrary",
+      "label": "Reading list: new source from the citation library…",
+      "group": "Insert",
+      "hint": "A Zotero, BibTeX or CSL-JSON item becomes a source note",
+      "icon": "Quote"
+    },
+    {
+      "id": "reading.newFromCapture",
+      "label": "Reading list: new source from a captured page…",
+      "group": "Insert",
+      "hint": "The clipped page open now, or a link you type",
+      "icon": "Link"
+    },
+    {
+      "id": "ai.screenshotToNote",
+      "label": "Screenshot to note…",
+      "group": "Tools",
+      "hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "mcp.settings",
+      "label": "MCP servers…",
+      "group": "Tools",
+      "hint": "Add outside MCP servers and choose what their tools may do",
+      "icon": "Network"
+    },
+    {
+      "id": "mcp.ask",
+      "label": "Ask with my MCP servers…",
+      "group": "Tools",
+      "hint": "The local agent uses your MCP servers' tools, asking before each one that needs it",
+      "icon": "Network"
+    },
+    {
+      "id": "text.transliterate",
+      "label": "Transliterate the selection (Yiddish, Ladino)",
+      "group": "Edit",
+      "hint": "Yiddish ↔ YIVO romanisation, Ladino Latin ↔ Hebrew letters",
+      "icon": "Pencil"
+    },
+    {
+      "id": "spell.yiddishDictionary",
+      "label": "Yiddish spelling: word list (download / remove)",
+      "group": "Tools",
+      "hint": "Offline Yiddish spell check (hunspell-yi, 2.4 MB, GPL)",
+      "icon": "Download"
+    },
+    {
+      "id": "academic.choose",
+      "label": "Academic calendar: choose an institution…",
+      "group": "Tools",
+      "hint": "Semesters, Moed A and B and breaks in the daily note ({{academic}}) and for deadlines",
+      "icon": "FileText"
+    },
+    {
+      "id": "academic.ics",
+      "label": "Export the academic calendar (ICS)",
+      "group": "Tools",
+      "hint": "The chosen institution's year as a calendar file for Google Calendar or Apple Calendar",
+      "icon": "Download"
+    },
+    {
+      "id": "writing.coach",
+      "label": "Writing: Clarity & Style Coach",
+      "group": "Tools",
+      "hint": "Long sentences, passives, action nouns, hedges and wordy phrases, on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.proofreadHe",
+      "label": "Writing: Hebrew Proofreading",
+      "group": "Tools",
+      "hint": "Number gender, את/עם, the article in a construct — local rules, as suggestions",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.toneFormal",
+      "label": "Writing: Formal Tone (3 versions)",
+      "group": "Tools",
+      "hint": "Rewrite the selection formally; numbers, names and negations are checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.toneNeutral",
+      "label": "Writing: Neutral Tone (3 versions)",
+      "group": "Tools",
+      "hint": "Rewrite the selection plainly; numbers, names and negations are checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.toneFriendly",
+      "label": "Writing: Friendly Tone (3 versions)",
+      "group": "Tools",
+      "hint": "Rewrite the selection warmly; numbers, names and negations are checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.registerHigh",
+      "label": "Writing: High Hebrew Register",
+      "group": "Tools",
+      "hint": "עברית גבוהה ותקנית for the selection, meaning checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.registerSpoken",
+      "label": "Writing: Spoken Hebrew Register",
+      "group": "Tools",
+      "hint": "עברית מדוברת וטבעית for the selection, meaning checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.shorten",
+      "label": "Writing: Shorten by 30%",
+      "group": "Tools",
+      "hint": "Within ±10% of the target, with no number or name lost or added",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.expand",
+      "label": "Writing: Bullets → Paragraph",
+      "group": "Tools",
+      "hint": "One paragraph from the selected bullets, nothing invented; marked as AI text",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.panel",
+      "label": "Writing: Show Suggestions",
+      "group": "Tools",
+      "hint": "The open writing suggestions of this note",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "view.tripleLinked",
+      "label": "View: source + preview + outline, scroll linked",
+      "group": "View",
+      "hint": "Three columns that follow each other: scrolling and the caret stay on the same line",
+      "icon": "Columns2"
+    },
+    {
+      "id": "view.columnNext",
+      "label": "View: focus the next column",
+      "group": "View",
+      "hint": "Ctrl+Alt+Shift+→ (mirrored in a right-to-left layout)"
+    },
+    {
+      "id": "view.columnPrev",
+      "label": "View: focus the previous column",
+      "group": "View",
+      "hint": "Ctrl+Alt+Shift+← (mirrored in a right-to-left layout)"
+    },
+    {
+      "id": "reading.sidenotes",
+      "label": "Reading: margin notes (footnotes, comments, suggestions)",
+      "group": "View",
+      "hint": "Each note next to its line: on the right in English, on the left in Hebrew; under its paragraph on a narrow screen",
+      "icon": "Columns2"
+    },
+    {
+      "id": "reading.bookSpread",
+      "label": "Reading: book pages (two-page spread)",
+      "group": "View",
+      "hint": "Turn pages like a book: page 1 on the right in Hebrew, ← for the next pages there; PageDown, Space",
+      "icon": "Columns2"
+    },
+    {
+      "id": "writing.consistency",
+      "label": "Writing: Check the vault's consistency",
+      "group": "Tools",
+      "hint": "Names, dates, numbers and your glossary terms across all notes, against the entity graph — suggestions to review",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.structure",
+      "label": "Writing: Review the note's structure",
+      "group": "Tools",
+      "hint": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.argument",
+      "label": "Writing: Check the argument",
+      "group": "Tools",
+      "hint": "Claims without a source, logical leaps and common fallacies, each with its reason",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.readability",
+      "label": "Writing: Readability of this note",
+      "group": "Tools",
+      "hint": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.harper",
+      "label": "Writing: English grammar (Harper, on this device)",
+      "group": "Tools",
+      "hint": "Local English grammar for the English parts of the note — suggestions to review",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.repetition",
+      "label": "Writing: repetition and clichés",
+      "group": "Edit",
+      "hint": "Words repeated too soon (Hebrew prefixes and forms included), doubled words and clichés — on this device",
+      "icon": "Pencil"
+    },
+    {
+      "id": "writing.loanwords",
+      "label": "Writing: Hebrew alternatives to loanwords",
+      "group": "Edit",
+      "hint": "In the academic register: אימייל → דוא״ל, פידבק → משוב… — proposed, never applied; each term can be switched off",
+      "icon": "Pencil"
+    },
+    {
+      "id": "writing.explainChange",
+      "label": "Writing: explain my change",
+      "group": "Edit",
+      "hint": "Compare with an earlier version: a short summary and every change of a number, a negation or a name — on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.abstract",
+      "label": "Writing: titles, abstract and TL;DR",
+      "group": "Edit",
+      "hint": "Three titles, a 150–250 word abstract and a one-line TL;DR — every sentence tied to a paragraph of the note, on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.goals",
+      "label": "Writing: goals and weekly report",
+      "group": "Edit",
+      "hint": "A word or time target, readability and tone for this note; your week on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "types.page",
+      "label": "Types: all objects by type",
+      "icon": "Table"
+    },
+    {
+      "id": "types.studio",
+      "label": "Types: Object Studio (new type, fields, rename)",
+      "icon": "Box"
     }
   ],
   "full": [
@@ -2128,6 +2636,20 @@
       "icon": "Link"
     },
     {
+      "id": "file.publishAtproto",
+      "label": "Publish to Bluesky (Standard.site)…",
+      "group": "File",
+      "hint": "This note as a public record in your AT Protocol account",
+      "icon": "Link"
+    },
+    {
+      "id": "file.unpublishAtproto",
+      "label": "Remove from Bluesky (Standard.site)…",
+      "group": "File",
+      "hint": "Delete this note's public record from your account",
+      "icon": "Link"
+    },
+    {
       "id": "file.exportDocx",
       "label": "Export to Word (.doc)",
       "group": "File",
@@ -2139,6 +2661,12 @@
       "label": "Insert a citation [@key]…",
       "group": "Tools",
       "shortcut": "⌥⌘C",
+      "icon": "FileText"
+    },
+    {
+      "id": "cite.fromDoi",
+      "label": "Cite from a DOI (CrossRef)…",
+      "group": "Tools",
       "icon": "FileText"
     },
     {
@@ -2175,6 +2703,31 @@
       "icon": "FileText"
     },
     {
+      "id": "cite.importZoteroFile",
+      "label": "Citations: import a Zotero export file (CSL JSON, BibTeX, RIS)",
+      "group": "Tools",
+      "icon": "FileText"
+    },
+    {
+      "id": "cite.exportForZotero",
+      "label": "Citations: export the vault's sources for Zotero (CSL JSON)",
+      "group": "Tools",
+      "icon": "Download"
+    },
+    {
+      "id": "cite.exportRis",
+      "label": "Citations: export the vault's sources as RIS",
+      "group": "Tools",
+      "icon": "Download"
+    },
+    {
+      "id": "cite.fillReferencesOpenAlex",
+      "label": "Citations: fill references from OpenAlex…",
+      "group": "Tools",
+      "hint": "For a source note with a DOI: asks first, sends only the DOI, and writes nothing until you approve",
+      "icon": "FileText"
+    },
+    {
       "id": "file.exportRtf",
       "label": "Export to RTF",
       "group": "File",
@@ -2192,6 +2745,20 @@
       "label": "Export to LaTeX (.tex)",
       "group": "File",
       "hint": "Article-class LaTeX with hyperref + listings",
+      "icon": "Download"
+    },
+    {
+      "id": "file.exportTypst",
+      "label": "Export to Typst (.typ)",
+      "group": "File",
+      "hint": "Typst source with Hebrew right to left; compile it with typst",
+      "icon": "Download"
+    },
+    {
+      "id": "file.exportTypstPdf",
+      "label": "Export to PDF with Typst",
+      "group": "File",
+      "hint": "Compiled on this device by typst.ts, with a Hebrew font; nothing is sent",
       "icon": "Download"
     },
     {
@@ -2220,6 +2787,27 @@
       "label": "Export to OPML",
       "group": "File",
       "hint": "Outline interchange format (RSS readers, mind-maps)",
+      "icon": "Download"
+    },
+    {
+      "id": "file.exportOdt",
+      "label": "Export to OpenDocument (ODT)",
+      "group": "File",
+      "hint": "LibreOffice text document, right-to-left paragraphs kept",
+      "icon": "Download"
+    },
+    {
+      "id": "file.importVcard",
+      "label": "Import contacts (vCard)…",
+      "group": "File",
+      "hint": "A .vcf from your phone or Google becomes person notes; people already in the vault are merged",
+      "icon": "Download"
+    },
+    {
+      "id": "file.exportVcard",
+      "label": "Export people as vCard",
+      "group": "File",
+      "hint": "Every person note as one vCard 4.0 file, downloaded on this device",
       "icon": "Download"
     },
     {
@@ -2265,6 +2853,20 @@
       "icon": "Download"
     },
     {
+      "id": "file.exportPdfUa",
+      "label": "Export accessible PDF (PDF/UA)…",
+      "group": "File",
+      "hint": "Tagged: headings, image descriptions, table headers, language — then finished as PDF/UA-1",
+      "icon": "Download"
+    },
+    {
+      "id": "file.finishPdfUa",
+      "label": "Make a saved PDF accessible (PDF/UA)…",
+      "group": "File",
+      "hint": "Adds the PDF/UA identification, the language and the shown title to a tagged PDF, on this device",
+      "icon": "Download"
+    },
+    {
       "id": "file.exportMarkdown",
       "label": "Export Markdown",
       "group": "File",
@@ -2305,6 +2907,27 @@
       "label": "Split view",
       "group": "View",
       "shortcut": "⌘2",
+      "icon": "Columns2"
+    },
+    {
+      "id": "view.sideBySide",
+      "label": "Side-by-side translation",
+      "group": "View",
+      "hint": "This note and its translation (Hebrew ↔ English) paragraph by paragraph, on a local model; saved next to the note as <note>.<lang>.md",
+      "icon": "Columns2"
+    },
+    {
+      "id": "view.daf",
+      "label": "📜 Page of the Talmud (daf)",
+      "group": "View",
+      "hint": "The note's main text with its commentaries around it, as on a printed daf",
+      "icon": "Columns2"
+    },
+    {
+      "id": "view.bilingual",
+      "label": "📖 Bilingual reader (columns / line under line)",
+      "group": "View",
+      "hint": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
       "icon": "Columns2"
     },
     {
@@ -2367,6 +2990,13 @@
       "icon": "FileText"
     },
     {
+      "id": "learning.plans",
+      "label": "Learning plans…",
+      "group": "File",
+      "hint": "Follow Daf Yomi, Mishnah Yomit or the daily Rambam: today's reading, a day marked learned, progress and review cards",
+      "icon": "FileText"
+    },
+    {
       "id": "pdf.open",
       "label": "Open a PDF for reading…",
       "group": "File",
@@ -2381,6 +3011,13 @@
       "icon": "FileText"
     },
     {
+      "id": "student.syllabus",
+      "label": "Create a syllabus…",
+      "group": "File",
+      "hint": "A note with one heading per teaching week of the semester, from your institution's academic calendar, with its dates and days off",
+      "icon": "FileText"
+    },
+    {
       "id": "note.capture",
       "label": "Quick capture",
       "group": "File",
@@ -2388,9 +3025,23 @@
       "icon": "FileText"
     },
     {
+      "id": "capture.triageInbox",
+      "label": "📥 Inbox: sort with the local model",
+      "group": "File",
+      "hint": "Tasks get a checkbox and a due date, every entry tags; you review before anything changes",
+      "icon": "Sparkles"
+    },
+    {
       "id": "epub.open",
       "label": "Open an EPUB for reading…",
       "group": "File",
+      "icon": "FileText"
+    },
+    {
+      "id": "view.readingProfile",
+      "label": "Reading mode…",
+      "group": "File",
+      "hint": "Choose how this note is read — page, focus and more — and save it for this note or for all notes",
       "icon": "FileText"
     },
     {
@@ -2603,6 +3254,13 @@
       "icon": "Sparkles"
     },
     {
+      "id": "ai.claims",
+      "label": "AI: Paragraph → Claims",
+      "group": "Tools",
+      "hint": "Checkable claims from the paragraph at the cursor, each with an exact quote (R12.11)",
+      "icon": "Sparkles"
+    },
+    {
       "id": "ai.translate",
       "label": "AI: Translate Document",
       "group": "Tools",
@@ -2754,6 +3412,7 @@
       "label": "Settings",
       "group": "View",
       "hint": "Search settings",
+      "shortcut": "⌘,",
       "icon": "Sparkles"
     },
     {
@@ -2838,10 +3497,24 @@
       "icon": "Save"
     },
     {
+      "id": "vault.exportEverything",
+      "label": "Vault: export everything (exit test)",
+      "group": "File",
+      "hint": "Notes, attachments, history, settings and AI profiles in open formats, with a SHA-256 manifest and what Obsidian shows differently",
+      "icon": "Save"
+    },
+    {
       "id": "vault.import",
       "label": "Import notes from another app (Obsidian, Notion, Evernote, Bear, Keep, Logseq, OneNote…)…",
       "group": "File",
       "hint": "Into a new folder — nothing existing is overwritten; one click undoes it",
+      "icon": "Save"
+    },
+    {
+      "id": "app.install",
+      "label": "Install Lumen as an app…",
+      "group": "File",
+      "hint": "Its own window and icon; works offline",
       "icon": "Save"
     },
     {
@@ -2939,6 +3612,12 @@
       "icon": "Sparkles"
     },
     {
+      "id": "roleVault.open",
+      "label": "Family or classroom vault…",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
       "id": "tasks.open",
       "label": "Tasks: Today and upcoming",
       "group": "Tools",
@@ -2997,7 +3676,7 @@
       "id": "ai.rerankModel",
       "label": "AI: Rerank search with the local model",
       "group": "AI Prompts",
-      "hint": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: fast word matching.",
+      "hint": "On: bge-reranker-v2-m3 on this device (one-time ~570 MB download). Off: the BM25 order, the default.",
       "icon": "Sparkles"
     },
     {
@@ -3061,6 +3740,13 @@
       "label": "Save a diagnostics file",
       "group": "Tools",
       "hint": "version, settings, vault size and recent errors — no note text, no keys — to attach to an issue",
+      "icon": "FileText"
+    },
+    {
+      "id": "help.safeMode",
+      "label": "Restart in safe mode",
+      "group": "Tools",
+      "hint": "no plugins, CSS snippets or AI agents until you leave it — for when something you added keeps Lumen from working",
       "icon": "FileText"
     },
     {
@@ -3162,6 +3848,13 @@
       "action": "store:toggleRtl"
     },
     {
+      "id": "view.hebrewCalendarDates",
+      "label": "Dates: show them in the Hebrew calendar",
+      "group": "View",
+      "hint": "Every date Lumen writes, in the UI language; your notes are not changed",
+      "icon": "PanelRightOpen"
+    },
+    {
       "id": "lang.en",
       "label": "Language: English",
       "group": "View",
@@ -3177,44 +3870,51 @@
     },
     {
       "id": "lang.ar",
-      "label": "Language: العربية (beta)",
+      "label": "Language: العربية — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "right-to-left",
       "icon": "PanelRightOpen"
     },
     {
       "id": "lang.ru",
-      "label": "Language: Русский (beta)",
+      "label": "Language: Русский — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "left-to-right",
       "icon": "PanelRightOpen"
     },
     {
       "id": "lang.fr",
-      "label": "Language: Français (beta)",
+      "label": "Language: Français — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "left-to-right",
       "icon": "PanelRightOpen"
     },
     {
       "id": "lang.de",
-      "label": "Language: Deutsch (beta)",
+      "label": "Language: Deutsch — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "left-to-right",
       "icon": "PanelRightOpen"
     },
     {
       "id": "lang.ja",
-      "label": "Language: 日本語 (beta)",
+      "label": "Language: 日本語 — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "left-to-right",
       "icon": "PanelRightOpen"
     },
     {
       "id": "lang.zh-CN",
-      "label": "Language: 简体中文 (beta)",
+      "label": "Language: 简体中文 — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "left-to-right",
+      "icon": "PanelRightOpen"
+    },
+    {
+      "id": "lang.fa",
+      "label": "Language: فارسی — Beta (machine translation, awaiting native review)",
+      "group": "View",
+      "hint": "right-to-left",
       "icon": "PanelRightOpen"
     },
     {
@@ -3243,6 +3943,13 @@
       "label": "Version History",
       "group": "View",
       "hint": "restore previous versions",
+      "icon": "PanelRightOpen"
+    },
+    {
+      "id": "view.asOf",
+      "label": "What I knew then",
+      "group": "View",
+      "hint": "search the vault as it was on a past date",
       "icon": "PanelRightOpen"
     },
     {
@@ -3352,10 +4059,24 @@
       "icon": "Link"
     },
     {
+      "id": "privacy.appLock",
+      "label": "Privacy: lock the app with Face ID / fingerprint",
+      "group": "Security",
+      "hint": "Hides your notes while Lumen is in the background; the device's own check unlocks it",
+      "icon": "Network"
+    },
+    {
       "id": "privacy.airplane",
       "label": "Airplane mode (no network)…",
       "group": "Security",
       "hint": "Off: stop every network request and list every attempt",
+      "icon": "Network"
+    },
+    {
+      "id": "privacy.localData",
+      "label": "Privacy: what is stored on this device",
+      "group": "Security",
+      "hint": "Sizes per category; delete each one, or everything; save the report",
       "icon": "Network"
     },
     {
@@ -3574,6 +4295,12 @@
       "icon": "Link"
     },
     {
+      "id": "edit.hebrewListNumbering",
+      "label": "Number lists with Hebrew letters (א. ב. ג.)",
+      "group": "Edit",
+      "hint": "For this note, in the preview, PDF and Word; the Markdown keeps 1. 2. 3."
+    },
+    {
       "id": "edit.formatDocument",
       "label": "Format document",
       "group": "Edit",
@@ -3635,30 +4362,6 @@
       "icon": "Pencil"
     },
     {
-      "id": "billing.upgradePro",
-      "label": "Billing: Upgrade to Pro",
-      "group": "Tools",
-      "icon": "Sparkles"
-    },
-    {
-      "id": "billing.upgradeTeam",
-      "label": "Billing: Upgrade to Team",
-      "group": "Tools",
-      "icon": "Sparkles"
-    },
-    {
-      "id": "billing.manage",
-      "label": "Billing: Manage subscription",
-      "group": "Tools",
-      "icon": "Sparkles"
-    },
-    {
-      "id": "billing.managePersonal",
-      "label": "Billing: Manage personal subscription",
-      "group": "Tools",
-      "icon": "Sparkles"
-    },
-    {
       "id": "view.bidiMarks",
       "label": "Show direction marks",
       "group": "View",
@@ -3670,6 +4373,13 @@
       "label": "Clean direction marks and fix brackets",
       "group": "Edit",
       "hint": "Remove marks that change nothing on screen and swap brackets typed backwards — one undo",
+      "icon": "Pencil"
+    },
+    {
+      "id": "edit.cursorMovement",
+      "label": "Cursor movement: switch to logical",
+      "group": "Edit",
+      "hint": "Arrow keys in mixed Hebrew/English lines: visual (as drawn) or logical (text order). This device only.",
       "icon": "Pencil"
     },
     {
@@ -3787,6 +4497,30 @@
       "group": "Edit",
       "hint": "Puts Hebrew copied from a PDF back in reading order, keeping numbers and English the right way round, and fixes final letters",
       "icon": "Pencil"
+    },
+    {
+      "id": "billing.upgradePro",
+      "label": "Billing: Upgrade to Pro",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "billing.upgradeTeam",
+      "label": "Billing: Upgrade to Team",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "billing.manage",
+      "label": "Billing: Manage subscription",
+      "group": "Tools",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "billing.managePersonal",
+      "label": "Billing: Manage personal subscription",
+      "group": "Tools",
+      "icon": "Sparkles"
     },
     {
       "id": "ai.settings",
@@ -4119,6 +4853,13 @@
       "icon": "Link"
     },
     {
+      "id": "sources.havruta",
+      "label": "Study with a partner (havruta)…",
+      "group": "Insert",
+      "hint": "A shared, encrypted study room on this reference: notes and highlights travel, the text stays on each device",
+      "icon": "Link"
+    },
+    {
       "id": "book.open",
       "label": "Book: chapters, goals and export",
       "group": "View",
@@ -4138,6 +4879,13 @@
       "group": "File",
       "hint": "main.tex for LuaLaTeX / XeLaTeX with Hebrew right to left, math, [@key] citations from the vault's .bib, and the images, in a ZIP",
       "icon": "Download"
+    },
+    {
+      "id": "export.latexPdf",
+      "label": "PDF from LaTeX (desktop, Tectonic)…",
+      "group": "File",
+      "hint": "The LaTeX export compiled to PDF by Tectonic on this computer; TeX's errors with their lines when it fails",
+      "icon": "Printer"
     },
     {
       "id": "automations.new",
@@ -4244,6 +4992,274 @@
       "hint": "One search over Sefaria, the Knesset, data.gov.il and the Ben-Yehuda library, with each result's rights",
       "shortcut": "⌥⌘S",
       "icon": "Quote"
+    },
+    {
+      "id": "entities.review",
+      "label": "Entity graph: proposals to review",
+      "icon": "FileText"
+    },
+    {
+      "id": "entities.graph",
+      "label": "Entity graph",
+      "hint": "Every entity and who cites whom, as a graph or a table",
+      "icon": "Network"
+    },
+    {
+      "id": "entities.contradictions",
+      "label": "Where my notes disagree",
+      "hint": "Finds denials, corrections and differing values or dates between notes, with exact quotes; the report goes to the review panel",
+      "icon": "FileText"
+    },
+    {
+      "id": "entities.wikidata",
+      "label": "Entity: link to Wikidata…",
+      "icon": "FileText"
+    },
+    {
+      "id": "reading.newFromLibrary",
+      "label": "Reading list: new source from the citation library…",
+      "group": "Insert",
+      "hint": "A Zotero, BibTeX or CSL-JSON item becomes a source note",
+      "icon": "Quote"
+    },
+    {
+      "id": "reading.newFromCapture",
+      "label": "Reading list: new source from a captured page…",
+      "group": "Insert",
+      "hint": "The clipped page open now, or a link you type",
+      "icon": "Link"
+    },
+    {
+      "id": "ai.screenshotToNote",
+      "label": "Screenshot to note…",
+      "group": "Tools",
+      "hint": "The image on the clipboard (or a file) as text, read on this device, previewed before it is inserted",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "mcp.settings",
+      "label": "MCP servers…",
+      "group": "Tools",
+      "hint": "Add outside MCP servers and choose what their tools may do",
+      "icon": "Network"
+    },
+    {
+      "id": "mcp.ask",
+      "label": "Ask with my MCP servers…",
+      "group": "Tools",
+      "hint": "The local agent uses your MCP servers' tools, asking before each one that needs it",
+      "icon": "Network"
+    },
+    {
+      "id": "text.transliterate",
+      "label": "Transliterate the selection (Yiddish, Ladino)",
+      "group": "Edit",
+      "hint": "Yiddish ↔ YIVO romanisation, Ladino Latin ↔ Hebrew letters",
+      "icon": "Pencil"
+    },
+    {
+      "id": "spell.yiddishDictionary",
+      "label": "Yiddish spelling: word list (download / remove)",
+      "group": "Tools",
+      "hint": "Offline Yiddish spell check (hunspell-yi, 2.4 MB, GPL)",
+      "icon": "Download"
+    },
+    {
+      "id": "academic.choose",
+      "label": "Academic calendar: choose an institution…",
+      "group": "Tools",
+      "hint": "Semesters, Moed A and B and breaks in the daily note ({{academic}}) and for deadlines",
+      "icon": "FileText"
+    },
+    {
+      "id": "academic.ics",
+      "label": "Export the academic calendar (ICS)",
+      "group": "Tools",
+      "hint": "The chosen institution's year as a calendar file for Google Calendar or Apple Calendar",
+      "icon": "Download"
+    },
+    {
+      "id": "writing.coach",
+      "label": "Writing: Clarity & Style Coach",
+      "group": "Tools",
+      "hint": "Long sentences, passives, action nouns, hedges and wordy phrases, on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.proofreadHe",
+      "label": "Writing: Hebrew Proofreading",
+      "group": "Tools",
+      "hint": "Number gender, את/עם, the article in a construct — local rules, as suggestions",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.toneFormal",
+      "label": "Writing: Formal Tone (3 versions)",
+      "group": "Tools",
+      "hint": "Rewrite the selection formally; numbers, names and negations are checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.toneNeutral",
+      "label": "Writing: Neutral Tone (3 versions)",
+      "group": "Tools",
+      "hint": "Rewrite the selection plainly; numbers, names and negations are checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.toneFriendly",
+      "label": "Writing: Friendly Tone (3 versions)",
+      "group": "Tools",
+      "hint": "Rewrite the selection warmly; numbers, names and negations are checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.registerHigh",
+      "label": "Writing: High Hebrew Register",
+      "group": "Tools",
+      "hint": "עברית גבוהה ותקנית for the selection, meaning checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.registerSpoken",
+      "label": "Writing: Spoken Hebrew Register",
+      "group": "Tools",
+      "hint": "עברית מדוברת וטבעית for the selection, meaning checked",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.shorten",
+      "label": "Writing: Shorten by 30%",
+      "group": "Tools",
+      "hint": "Within ±10% of the target, with no number or name lost or added",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.expand",
+      "label": "Writing: Bullets → Paragraph",
+      "group": "Tools",
+      "hint": "One paragraph from the selected bullets, nothing invented; marked as AI text",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.panel",
+      "label": "Writing: Show Suggestions",
+      "group": "Tools",
+      "hint": "The open writing suggestions of this note",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "view.tripleLinked",
+      "label": "View: source + preview + outline, scroll linked",
+      "group": "View",
+      "hint": "Three columns that follow each other: scrolling and the caret stay on the same line",
+      "icon": "Columns2"
+    },
+    {
+      "id": "view.columnNext",
+      "label": "View: focus the next column",
+      "group": "View",
+      "hint": "Ctrl+Alt+Shift+→ (mirrored in a right-to-left layout)"
+    },
+    {
+      "id": "view.columnPrev",
+      "label": "View: focus the previous column",
+      "group": "View",
+      "hint": "Ctrl+Alt+Shift+← (mirrored in a right-to-left layout)"
+    },
+    {
+      "id": "reading.sidenotes",
+      "label": "Reading: margin notes (footnotes, comments, suggestions)",
+      "group": "View",
+      "hint": "Each note next to its line: on the right in English, on the left in Hebrew; under its paragraph on a narrow screen",
+      "icon": "Columns2"
+    },
+    {
+      "id": "reading.bookSpread",
+      "label": "Reading: book pages (two-page spread)",
+      "group": "View",
+      "hint": "Turn pages like a book: page 1 on the right in Hebrew, ← for the next pages there; PageDown, Space",
+      "icon": "Columns2"
+    },
+    {
+      "id": "writing.consistency",
+      "label": "Writing: Check the vault's consistency",
+      "group": "Tools",
+      "hint": "Names, dates, numbers and your glossary terms across all notes, against the entity graph — suggestions to review",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.structure",
+      "label": "Writing: Review the note's structure",
+      "group": "Tools",
+      "hint": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.argument",
+      "label": "Writing: Check the argument",
+      "group": "Tools",
+      "hint": "Claims without a source, logical leaps and common fallacies, each with its reason",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.readability",
+      "label": "Writing: Readability of this note",
+      "group": "Tools",
+      "hint": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.harper",
+      "label": "Writing: English grammar (Harper, on this device)",
+      "group": "Tools",
+      "hint": "Local English grammar for the English parts of the note — suggestions to review",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.repetition",
+      "label": "Writing: repetition and clichés",
+      "group": "Edit",
+      "hint": "Words repeated too soon (Hebrew prefixes and forms included), doubled words and clichés — on this device",
+      "icon": "Pencil"
+    },
+    {
+      "id": "writing.loanwords",
+      "label": "Writing: Hebrew alternatives to loanwords",
+      "group": "Edit",
+      "hint": "In the academic register: אימייל → דוא״ל, פידבק → משוב… — proposed, never applied; each term can be switched off",
+      "icon": "Pencil"
+    },
+    {
+      "id": "writing.explainChange",
+      "label": "Writing: explain my change",
+      "group": "Edit",
+      "hint": "Compare with an earlier version: a short summary and every change of a number, a negation or a name — on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.abstract",
+      "label": "Writing: titles, abstract and TL;DR",
+      "group": "Edit",
+      "hint": "Three titles, a 150–250 word abstract and a one-line TL;DR — every sentence tied to a paragraph of the note, on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.goals",
+      "label": "Writing: goals and weekly report",
+      "group": "Edit",
+      "hint": "A word or time target, readability and tone for this note; your week on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "types.page",
+      "label": "Types: all objects by type",
+      "icon": "Table"
+    },
+    {
+      "id": "types.studio",
+      "label": "Types: Object Studio (new type, fields, rename)",
+      "icon": "Box"
     }
   ],
   "autoSaveOn": [
@@ -4264,32 +5280,49 @@
     "file.exportHtml",
     "file.publishSite",
     "file.shareLink",
+    "file.publishAtproto",
+    "file.unpublishAtproto",
     "file.exportDocx",
     "cite.insert",
+    "cite.fromDoi",
     "cite.legal",
     "cite.legalFromCase",
     "cite.syncZotero",
     "file.exportAcademic",
     "cite.syncZoteroWeb",
+    "cite.importZoteroFile",
+    "cite.exportForZotero",
+    "cite.exportRis",
+    "cite.fillReferencesOpenAlex",
     "file.exportRtf",
     "file.exportMarkdownAiMarks",
     "file.exportLatex",
+    "file.exportTypst",
+    "file.exportTypstPdf",
     "file.exportRst",
     "file.exportAdoc",
     "file.exportOrg",
     "file.exportOpml",
+    "file.exportOdt",
+    "file.importVcard",
+    "file.exportVcard",
     "file.exportReveal",
     "file.exportEpub",
     "file.exportIpynb",
     "file.exportSite",
     "file.exportPptx",
     "file.exportPdf",
+    "file.exportPdfUa",
+    "file.finishPdfUa",
     "file.exportMarkdown",
     "edit.redact",
     "file.notePassword",
     "file.print",
     "view.source",
     "view.split",
+    "view.sideBySide",
+    "view.daf",
+    "view.bilingual",
     "view.preview",
     "view.wysiwyg",
     "view.outline",
@@ -4298,10 +5331,14 @@
     "view.pageView",
     "view.workspace",
     "note.today",
+    "learning.plans",
     "pdf.open",
     "student.lecture",
+    "student.syllabus",
     "note.capture",
+    "capture.triageInbox",
     "epub.open",
+    "view.readingProfile",
     "view.reading",
     "view.highlights",
     "view.review",
@@ -4331,6 +5368,7 @@
     "ai.productAgent",
     "ai.diagram",
     "ai.actionItems",
+    "ai.claims",
     "ai.translate",
     "ai.chart",
     "ai.analyse",
@@ -4365,7 +5403,9 @@
     "arabic.removeTashkeel",
     "vault.backups",
     "vault.export",
+    "vault.exportEverything",
     "vault.import",
+    "app.install",
     "vault.importUndo",
     "vault.importChat",
     "vault.importMail",
@@ -4380,6 +5420,7 @@
     "sync.open",
     "sync.setup",
     "classroom.open",
+    "roleVault.open",
     "tasks.open",
     "ai.cancel",
     "note.read",
@@ -4398,6 +5439,7 @@
     "help.feedback",
     "help.open",
     "help.diagnostics",
+    "help.safeMode",
     "help.credits",
     "help.usage",
     "help.beta",
@@ -4412,6 +5454,7 @@
     "nikud.remove",
     "tools.checkGrammar",
     "view.rtl",
+    "view.hebrewCalendarDates",
     "lang.en",
     "lang.he",
     "lang.ar",
@@ -4420,10 +5463,12 @@
     "lang.de",
     "lang.ja",
     "lang.zh-CN",
+    "lang.fa",
     "i18n.suggest",
     "view.findReplace",
     "view.graphView",
     "view.versionHistory",
+    "view.asOf",
     "insert.table",
     "view.autoSave",
     "view.canvas",
@@ -4432,7 +5477,9 @@
     "view.plugins",
     "settings.trustedRepos",
     "view.readingOptions",
+    "privacy.appLock",
     "privacy.airplane",
+    "privacy.localData",
     "privacy.networkMonitor",
     "template.meeting-notes",
     "template.blog-post",
@@ -4459,6 +5506,7 @@
     "ai.prompt.he.formal",
     "ai.prompt.he.explain",
     "editor.copyBlockLink",
+    "edit.hebrewListNumbering",
     "edit.formatDocument",
     "edit.formatCodeBlock",
     "edit.suggesting.toggle",
@@ -4470,6 +5518,7 @@
     "edit.suggesting.prev",
     "view.bidiMarks",
     "edit.bidiFix",
+    "edit.cursorMovement",
     "edit.hebrewTypography",
     "outline.moveUp",
     "outline.moveDown",
@@ -4533,11 +5582,65 @@
     "sources.insertSefaria",
     "sources.saveOffline",
     "sources.notesOnVerse",
+    "sources.havruta",
     "book.open",
     "book.addChapter",
     "export.latexProject",
+    "export.latexPdf",
     "automations.new",
     "automations.dryRun",
-    "automations.undo"
+    "automations.undo",
+    "sources.knessetLaw",
+    "sources.knessetBill",
+    "sources.knessetProtocol",
+    "sources.askLaw",
+    "sources.datagovInsert",
+    "sources.cbsSeries",
+    "sources.datasetRefresh",
+    "sources.benyehudaDownload",
+    "sources.benyehudaSearch",
+    "sources.benyehudaQuote",
+    "sources.benyehudaHighlight",
+    "sources.open",
+    "entities.review",
+    "entities.graph",
+    "entities.contradictions",
+    "entities.wikidata",
+    "reading.newFromLibrary",
+    "reading.newFromCapture",
+    "ai.screenshotToNote",
+    "mcp.settings",
+    "mcp.ask",
+    "text.transliterate",
+    "spell.yiddishDictionary",
+    "academic.choose",
+    "academic.ics",
+    "writing.coach",
+    "writing.proofreadHe",
+    "writing.toneFormal",
+    "writing.toneNeutral",
+    "writing.toneFriendly",
+    "writing.registerHigh",
+    "writing.registerSpoken",
+    "writing.shorten",
+    "writing.expand",
+    "writing.panel",
+    "view.tripleLinked",
+    "view.columnNext",
+    "view.columnPrev",
+    "reading.sidenotes",
+    "reading.bookSpread",
+    "writing.consistency",
+    "writing.structure",
+    "writing.argument",
+    "writing.readability",
+    "writing.harper",
+    "writing.repetition",
+    "writing.loanwords",
+    "writing.explainChange",
+    "writing.abstract",
+    "writing.goals",
+    "types.page",
+    "types.studio"
   ]
 }

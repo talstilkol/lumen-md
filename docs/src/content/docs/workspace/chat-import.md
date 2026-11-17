@@ -1,6 +1,8 @@
 ---
 title: WhatsApp and Telegram chats into notes
 description: Import an exported WhatsApp or Telegram chat into notes, one per day or one per chat, with its media, entirely on this device.
+type: how-to
+tasks: ["W5.7"]
 ---
 
 Decisions, recipes and study material often live in a chat. **⌘K → Import

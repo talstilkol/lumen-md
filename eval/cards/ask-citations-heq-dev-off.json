@@ -1,0 +1,59 @@
+{
+  "card": {
+    "schema": 1,
+    "tag": "dev",
+    "model": {
+      "name": "extractive-baseline (no LLM, W12.A3)",
+      "digest": "none:extractive-baseline-v1"
+    },
+    "seed": 1,
+    "temperature": 0,
+    "dataset": {
+      "name": "heq (golden dev split)",
+      "version": "f46d2ff1b796a95e897530f167ae0d5bed123fe1",
+      "license": "CC-BY-4.0 AND CC-BY-SA-4.0",
+      "source": "https://github.com/NNLP-IL/Hebrew-Question-Answering-Dataset/tree/f46d2ff1b796a95e897530f167ae0d5bed123fe1"
+    },
+    "n": 12,
+    "metrics": {
+      "cite_recall": {
+        "value": 1,
+        "ci95": [
+          1,
+          1
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      },
+      "unsupported_rate": {
+        "value": 0,
+        "ci95": [
+          0,
+          0
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      },
+      "gold_in_context": {
+        "value": 1,
+        "ci95": [
+          1,
+          1
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      },
+      "cite_precision": {
+        "value": 1,
+        "ci95": [
+          1,
+          1
+        ],
+        "method": "bootstrap",
+        "resamples": 1000
+      }
+    }
+  },
+  "retriever": "ask-path(chunks,bm25,scope,rerank=off)",
+  "questions": 12
+}

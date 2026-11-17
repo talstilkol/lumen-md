@@ -31,7 +31,9 @@ import { inlineMathSpans } from "../lib/mathIsolate";
 import { zip } from "./zip";
 import { BIBLIOGRAPHY_HEADING, COVER_LABELS, splitCover, type AcademicTemplate, type CoverFields, type PageNumberFormat } from "./academicTemplates";
 import { exportReadyText } from "./exportReady";
+import { listNumberingOfMarkdown } from "../lib/hebrewListNumbering";
 import { BULLET_NUM_ID, buildDocumentRels, buildFootnotes, buildNumbering, buildPageFooter, buildSettings, buildStyles, esc, FIRST_ORDERED_NUM_ID, FOOTER_REL, M, MAX_LIST_LEVEL, R, sectionBreak, sectPrXml, W, type ExtraRel } from "./docxParts";
+import { swallowed } from "../lib/logger";
 
 const DOCX_MIME =
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -515,6 +517,9 @@ function markdownToBody(md: string, ctx: DocxCtx): string {
           text: lm[3],
         });
         i++;
+        // A soft-wrapped item continues on the next lines (CommonMark lazy
+        // continuation); they belong to the item, not to a paragraph after it (W12.F3).
+        while (i < lines.length && continuesBlock(lines, i)) items[items.length - 1].text += " " + lines[i++].trim();
       }
       out.push(listBlockXml(items, ctx));
       continue;
@@ -533,11 +538,25 @@ function markdownToBody(md: string, ctx: DocxCtx): string {
       continue;
     }
 
-    out.push(bodyParaXml(parseInline(line), ctx));
+    // A paragraph is every line up to a blank line or the next block: soft-wrapped
+    // lines join with a space (W12.F3). A hard break (two trailing spaces or a
+    // backslash) still ends the Word paragraph, as before.
+    let text = line.trim();
     i++;
+    while (!/( {2,}|\\)$/.test(lines[i - 1]) && i < lines.length && continuesBlock(lines, i)) text += " " + lines[i++].trim();
+    out.push(bodyParaXml(parseInline(text.replace(/\\$/, "")), ctx));
   }
 
   return out.join("");
+}
+
+/** Line `i` is a soft-wrapped continuation: not blank and not the start of another block. */
+function continuesBlock(lines: string[], i: number): boolean {
+  const l = lines[i];
+  if (!l.trim()) return false;
+  if (/^\s*(```|~~~|\$\$\s*$|#{1,6}\s|>)/.test(l) || listMarker.test(l) || /^\s*([-*_])\1{2,}\s*$/.test(l)) return false;
+  if (/\|/.test(l) && (isTableSep(l) || (i + 1 < lines.length && isTableSep(lines[i + 1])))) return false;
+  return true;
 }
 
 /** A centred line of the title page; an empty value is left out. */
@@ -680,7 +699,7 @@ function buildDocxParts(content: string, opts: DocxOptions = {}): { name: string
     { name: "word/document.xml", data: documentXml },
     { name: "word/_rels/document.xml.rels", data: buildDocumentRels(ctx.hyperlinks, extra) },
     { name: "word/styles.xml", data: buildStyles(academic?.template) },
-    { name: "word/numbering.xml", data: buildNumbering(ctx.orderedNumIds) },
+    { name: "word/numbering.xml", data: buildNumbering(ctx.orderedNumIds, listNumberingOfMarkdown(content)) },
     ...parts,
   ];
 }
@@ -742,8 +761,9 @@ export async function exportToDocx(content: string, fileName: string, opts: Docx
         document.body.removeChild(a);
       }
       URL.revokeObjectURL(url);
-    } catch {
+    } catch (err) {
       // why: already torn down
+      swallowed("storage/exportDocx: already torn down", err);
     }
   }, 100);
 }

@@ -56,6 +56,15 @@ export function buildVaultTransferCommands(): Command[] {
       action: async () => (await import("./vaultActions")).exportVault(),
     },
     {
+      // W13.P3: everything Lumen keeps, in open formats, with a SHA-256 manifest and an Obsidian report.
+      id: "vault.exportEverything",
+      label: t("cmd.vault.exportEverything"),
+      hint: t("cmd.vault.exportEverything.hint"),
+      icon: cmdIcons.Save,
+      group: t("group.file"),
+      action: async () => (await import("./vaultActions")).exportEverything(),
+    },
+    {
       id: "vault.import",
       label: t("cmd.vault.import"),
       hint: t("cmd.vault.import.hint"),
@@ -63,6 +72,17 @@ export function buildVaultTransferCommands(): Command[] {
       group: t("group.file"),
       action: () => {
         window.dispatchEvent(new Event("lumen-open-import"));
+      },
+    },
+    {
+      // Plan W11.P13: <install>, navigator.install() or the kept prompt; otherwise this browser's steps.
+      id: "app.install",
+      label: t("cmd.app.install"),
+      hint: t("cmd.app.install.hint"),
+      icon: cmdIcons.Save,
+      group: t("group.file"),
+      action: () => {
+        window.dispatchEvent(new Event("lumen-open-install"));
       },
     },
     {

@@ -9,6 +9,7 @@
  * - Hspell's 340k-word list, when the user downloaded it (AGPL-3.0, never
  *   bundled), does the spelling instead.
  */
+import "./workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import { buildDictionary, hebrewRules, hebrewSpelling } from "./hebrewSpell";
 import { offlineHebrewChecks, parseFrequencyList, type FrequencyList } from "./hebrewFreq";
 import type { GrammarMatch } from "./grammar";

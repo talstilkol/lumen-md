@@ -1,6 +1,8 @@
 ---
 title: Jewish sources from Sefaria
 description: Quote a verse, a mishnah or a Talmud folio by its reference, with each text's licence. Keep a copy for offline use, and see every note that cites the same verse.
+type: reference
+tasks: ["W5.1"]
 ---
 
 Type a reference the way you write it, such as `בראשית א:א`, `ב״ר א, א`,

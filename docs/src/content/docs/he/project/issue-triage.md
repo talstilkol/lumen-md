@@ -1,6 +1,7 @@
 ---
 title: מיון issues
 description: איך issue חדש ב-GitHub מקבל תוויות, בדיקת כפילות וקישור למשימה בתוכנית תוך 24 שעות.
+type: how-to
 ---
 
 כל issue חדש ב-[talstilkol/lumen-md](https://github.com/talstilkol/lumen-md/issues)

@@ -1,6 +1,8 @@
 ---
 title: AI-written text
 description: Text the AI wrote is shown lighter until you edit it — in the editor, saved per note, and optionally in the export.
+type: how-to
+tasks: ["5.9"]
 ---
 
 Whatever an AI command puts into your note — a draft from **Write**, a

@@ -1,6 +1,8 @@
 ---
 title: Auto-tag + link suggestions
 description: AI assistants that read your workspace and propose structure.
+type: how-to
+tasks: ["0.18"]
 ---
 
 Lumen ships two opt-in agents that scan a note (and the rest of your

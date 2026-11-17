@@ -27,7 +27,9 @@ ledger) מופיע מסלול שלא מתועד כאן.
 אף אחד מהמסלולים האלה לא פועל מעצמו. כל אחד מתחיל רק כשאתם מפעילים תכונה, או כשמי
 שמפעיל את השרת הגדיר אותו בבנייה. השם בעמודה "בפנקס" הוא בדיוק מה שחלונית "פנקס
 הפרטיות" מציגה. מדיניות `local-only` חוסמת כל מסלול שמעביר תוכן של משתמש (הקטגוריות
-`cloud-ai`,‏ `cloud-text`,‏ `research`,‏ `third-party`,‏ `monitoring`,‏ `plugin`).
+`cloud-ai`,‏ `cloud-text`,‏ `research`,‏ `third-party`,‏ `monitoring`,‏ `plugin`),
+חוץ מבקשה שאתם מסכימים לה ברגע שהיא נשלחת (המקורות הציבוריים וכלי הרשת של הסוכן): היא
+יוצאת, והפנקס מציג אותה כבקשה בהסכמה. חיפוש Wikidata נחסם ב-`local-only` גם אז.
 
 | מסלול | מה יוצא | לאן | מה נשמר שם ולכמה זמן | בפנקס (קטגוריה) |
 |---|---|---|---|---|
@@ -50,13 +52,19 @@ ledger) מופיע מסלול שלא מתועד כאן.
 | בדיקת עדכונים (אפליקציה למחשב) | גרסה ומערכת הפעלה בלבד | `Desktop update check (app version and platform only)` | יומני GitHub Releases | `static-asset` |
 | מקורות יהודיים | ההפניה שביקשתם ("ברכות ב ע״א"), ושום דבר מהפתקים | `Jewish sources (Sefaria): the reference only` (‏sefaria.org), כשאתם מחפשים מקור | לפי מדיניות ספריא | `cloud-text` |
 | רשומות הכנסת | שם החוק או הצעת החוק שביקשתם, ושום דבר מהפתקים | `Knesset records (OData): the law or bill name only` (‏knesset.gov.il), כשאתם מחפשים | לפי מדיניות הכנסת | `cloud-text` |
+| Wikidata (קישור ישויות) | שם הישות האחת שביקשתם לקשר, ושום דבר מהפתקים, רק אחרי שהסכמתם (הפעם, או תמיד במכשיר הזה: הגדרה של האפליקציה, שלא נשמרת בכספת ולא נלקחת ממנה). נחסם במדיניות `local-only`, גם אם הסכמתם | `Wikidata search: the entity name only` (‏www.wikidata.org), כשאתם מחפשים | לפי מדיניות הפרטיות של ויקימדיה; הנתונים שחוזרים הם CC0 | `cloud-text` |
+| OpenAlex (גרף ציטוטים) | ה-DOI של המקורות ששאלתם עליהם, ושום דבר מהפתקים; כבוי עד שמפעילים את החיפוש | `OpenAlex: the references of a DOI (citation graph, only when you turn it on)` (‏api.openalex.org), כשממלאים הפניות | לפי תנאי OpenAlex; הנתונים שחוזרים הם CC0 | `research` |
+| CrossRef (חיפוש DOI) | **כבוי בגרסה הזו, ממתין לאישור הבעלים** (לא נשלח דבר). אחרי שיופעל: ה-DOI שהקלדתם, ושום דבר מהפתקים; בשאלה לפני כל בקשה | `CrossRef DOI lookup: the DOI you asked for only` (‏api.crossref.org), כשמריצים ״ציטוט מ-DOI״ | לפי תנאי Crossref; המטא-נתונים שחוזרים ציבוריים | `research` |
+| שרתי MCP חיצוניים שהוספתם | בקשה לרשימת הכלים של השרת; מה שקריאה לכלי שולחת מופיע בשורת כלי הרשת של סוכן | `MCP server <שם השרת>`, כשלוחצים ״הצגת כלים״ או כשסוכן משתמש בשרת; כל שרת כבוי עד שמפעילים אותו, ו״מקומי בלבד״ חוסם שרתים מרוחקים | לפי השרת שהוספתם | `network` |
 | נתונים ממשלתיים | מילות החיפוש, מזהה מאגר הנתונים או הסדרה שביקשתם | `Government data (data.gov.il, CBS): the search words or dataset id only` (‏data.gov.il,‏ apis.cbs.gov.il), כשאתם מחפשים | לפי מדיניות האתר הממשלתי | `cloud-text` |
 | Zotero | בקשות לספרייה שלכם ב-Zotero עם המפתח שלכם; נכתבות רק ההדגשות מ-PDF שאתם שולחים ומאשרים | `Zotero Web API (your library; writes only the PDF highlights you send)` (‏api.zotero.org) | בספרייה שלכם ב-Zotero, לפי מדיניות Zotero | `research` |
 | פרסום ב-Bluesky (‏Standard.site) | הפתק שאתם מפרסמים, כרשומה ציבורית (קטעים שסומנו `<redact>` והערות מוסתרות מוסרים קודם), ושם המשתמש וה-App Password להתחברות הזו בלבד | `Publish to the AT Protocol (Standard.site), your PDS`, וגם `AT Protocol identity lookup (plc.directory)` כדי למצוא את השרת של החשבון, רק אחרי שאישרתם | ציבורי, בחשבון ה-AT Protocol שלכם עד שתסירו; ממסרים ואפליקציות שומרים עותקים משלהם | `third-party` |
 | חיבורי לוח שנה | ב-CalDAV: המשימות שלכם, לשרת לוח השנה שהגדרתם, עם שם המשתמש והסיסמה. במינוי: בקשת קריאה בלבד לכתובת ה-ICS שהוספתם | `CalDAV task sync (your calendar server)`,‏ `Calendar subscription (ICS, read only)`, רק אחרי שהגדרתם חיבור | בשרת לוח השנה, לפי מי שמפעיל אותו; ביומני שרת ה-ICS | `third-party` |
 | ערכות נושא וקטעי CSS | בקשת קובץ מגיליון סגנון שהתקנתם (גופן או תמונה) | `A stylesheet (theme or CSS snippet) loaded it` | ביומני השרת. מופיע כדי שתראו אותו | `third-party` |
 | סנכרון מוצפן ברשת המקומית | הפתקים, מוצפנים מקצה לקצה, רק למכשיר השני שלכם | `Encrypted sync on the local network (no cloud)` | במכשיר השני. שום דבר לא עובר בשרת | `local-ai` |
+| גיבויים לשרת ה-WebDAV שלכם | ארכיון הכספת. מוצפן (age, הבחירה הראשונה): רק טקסט מוצפן. רגיל: הפתקים כמו שהם, וכל מי שמפעיל את השרת יכול לקרוא אותם | `Plain backup to your WebDAV server (the vault archive, not encrypted)`, לכל העלאה רגילה (העלאה מוצפנת היא טקסט מוצפן, כמו סנכרון, ולא נרשמת) | בשרת ה-WebDAV שהגדרתם, עד שתמחקו. גיבוי רגיל נחסם במדיניות "מקומי בלבד" | `third-party` |
 | אחסון הסנכרון המוצפן, כפי שמצב הביקורת מציג אותו | הכספת, מוצפנת מקצה לקצה (ראו "סנכרון מוצפן" למטה) | `Sync storage: your Dropbox (audit mode)`,‏ `Sync storage: your Google Drive (audit mode)`: מופיעים רק כשמצב הביקורת פועל; אף כלל לא חוסם את הסנכרון שלכם | אצל הספק שלכם, עד שאתם מוחקים | `network` |
+| LaTeX ל-PDF עם Tectonic (שולחן העבודה) | Tectonic, תוכנה שאתם מתקינים, מוריד את חבילות ה-TeX שאין לו במטמון: כתובת ה-IP שלכם ושמות החבילות, ואף פעם לא את המסמך | `Tectonic: TeX packages from its bundle server (LaTeX to PDF)` (‏relay.fullyjustified.net, שרת החבילות של Tectonic), לכל הידור אחרי שאישרתם את ההורדות פעם אחת. במצב טיסה או במדיניות "מקומי בלבד" הוא רץ עם `--only-cached`: בלי בקשה | ביומנים של שרת החבילות, לפי המפעיל שלו | `network` |
 | כל בקשה אחרת (מצב ביקורת) | מה שהבקשה נושאת | `Other request (audit mode)`: כשמצב הביקורת פועל, כל בקשה שיוצאת מהמכשיר ושהכללים למעלה לא מזהים מופיעה גם היא | לפי היעד | `network` |
 
 שתי סיומות יכולות להופיע אחרי כל שם בפנקס: `(worker: <שם>)` לבקשה מתוך Web Worker,

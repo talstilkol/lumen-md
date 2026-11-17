@@ -1,0 +1,18 @@
+{
+  "safeMode.agents": "AI agents",
+  "safeMode.back": "Back",
+  "safeMode.badge": "Safe mode",
+  "safeMode.chooseLegend": "Turn back on",
+  "safeMode.hide": "Hide",
+  "safeMode.leave": "Leave safe mode…",
+  "safeMode.leaveNow": "Leave safe mode",
+  "safeMode.pluginsNote": "Plugins stay off until you start each one in Settings → Plugins.",
+  "safeMode.reasonCrash": "Lumen did not finish starting last time ({count}×), so it opened in safe mode.",
+  "safeMode.reasonManual": "You opened Lumen in safe mode.",
+  "safeMode.rollbackHint": "This version failed to start twice. The desktop app goes back to {version}, the last version that worked, by itself.",
+  "safeMode.rolledBack": "Lumen {from} failed to start twice, so the previous version, {to}, was restored. {from} will not be offered again; a fixed version will be.",
+  "safeMode.show": "Safe mode: show details",
+  "safeMode.snippet": "CSS snippet: {name}",
+  "safeMode.title": "Safe mode",
+  "safeMode.whatIsOff": "Plugins, CSS snippets and AI agents are off. Your notes are untouched."
+}

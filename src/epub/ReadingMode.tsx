@@ -107,7 +107,7 @@ function ReadingView({ onClose }: { onClose: () => void }) {
   const theme = THEMES[prefs.theme];
   const style = { "--epub-bg": theme.bg, "--epub-fg": theme.fg, "--epub-mark": theme.mark, "--epub-size": `${prefs.fontSize}px`, "--epub-width": `${prefs.width}ch` } as CSSProperties;
   return (
-    <div ref={rootRef} className={`epub-reader epub-theme-${prefs.theme}`} style={style} role="dialog" aria-label={t("reading.title")} tabIndex={-1} onKeyDown={onKey} data-testid="reading-mode" data-ready={String(rendered !== null)}>
+    <div ref={rootRef} className={`epub-reader epub-theme-${prefs.theme}`} style={style} role="dialog" aria-label={t("reading.title")} tabIndex={-1} onKeyDown={onKey} data-testid="reading-mode" data-reading-mode="reader" data-ready={String(rendered !== null)}>
       <div className="epub-toolbar">
         <span className="epub-title" dir="auto">{doc.name}</span>
         <HelpButton topic="workspace/epub-reader#reading-mode-for-clipped-pages" />

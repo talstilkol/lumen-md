@@ -6,6 +6,7 @@ name = "lumen"
 version = "0.1.0"
 description = "Lumen — markdown, illuminated"
 authors = ["Lumen contributors"]
+license = "MIT"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -45,6 +46,10 @@ lumen-desktop = { path = "desktop" }
 # Finding the other device on the local network (plan W2.19): mDNS and the
 # pairing-code rendezvous, std only.
 lumen-lan-mdns = { path = "lan-mdns" }
+
+# MCP servers on stdio (plan W7.18, W10.C1): which commands may run, the process and its
+# lines, std only (tested offline with rustc --test); src/mcp_stdio.rs is the glue (desktop only).
+lumen-mcp-stdio = { path = "mcp-stdio" }
 
 [target.'cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))'.dependencies]
 # One instance: a second launch forwards its files and links (Windows, Linux).

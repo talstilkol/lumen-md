@@ -1,0 +1,6 @@
+{
+  "spotlight.mode.all": "Spotlight and Siri: all notes, up to 5,000 (title and a short snippet; never locked or private notes).",
+  "spotlight.mode.off": "Spotlight and Siri: no notes. Anything indexed before is removed.",
+  "spotlight.mode.recent": "Spotlight and Siri: the 50 most recent notes (title and a short snippet; never locked or private notes).",
+  "spotlight.notSaved": "This choice could not be saved on this device, so no notes are indexed."
+}

@@ -1,0 +1,359 @@
+{
+ "card": {
+  "schema": 1,
+  "tag": "dev",
+  "model": {
+   "name": "none: the gate is deterministic; the answers are scripted adversarial model outputs",
+   "digest": "n/a (no model weights)"
+  },
+  "seed": 12,
+  "temperature": 0,
+  "dataset": {
+   "name": "cite-gate-synthetic",
+   "version": "1",
+   "license": "MIT (written for lumen-md; synthetic, no real data)"
+  },
+  "n": 30,
+  "metrics": {
+   "keptPrecision": {
+    "value": 1,
+    "ci95": [
+     1,
+     1
+    ],
+    "method": "bootstrap"
+   },
+   "keptRecall": {
+    "value": 1,
+    "ci95": [
+     1,
+     1
+    ],
+    "method": "bootstrap"
+   },
+   "lieDeletionRate": {
+    "value": 1,
+    "ci95": [
+     1,
+     1
+    ],
+    "method": "bootstrap"
+   },
+   "fabricatedQuotesShown": {
+    "value": 0,
+    "ci95": [
+     0,
+     0
+    ],
+    "method": "bootstrap"
+   }
+  }
+ },
+ "gate": {
+  "minSupport": 0.75
+ },
+ "units": 210,
+ "perCase": [
+  {
+   "id": "cg-01",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-02",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-03",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-04",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-05",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-06",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-07",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-08",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-09",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-10",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-11",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-12",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-13",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-14",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-15",
+   "lang": "en",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-16",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-17",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-18",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-19",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-20",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-21",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-22",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-23",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-24",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-25",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-26",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-27",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-28",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-29",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  },
+  {
+   "id": "cg-30",
+   "lang": "he",
+   "tp": 2,
+   "fp": 0,
+   "fn": 0,
+   "tn": 5,
+   "fabricated": 0,
+   "units": 7
+  }
+ ],
+ "note": "SYNTHETIC set written for R12.9 (tag dev): it shows the gate's behaviour on known lies, not quality on real answers."
+}

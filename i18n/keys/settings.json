@@ -516,7 +516,7 @@
     },
     {
       "key": "pluginGallery.close",
-      "en": "Close plugin gallery",
+      "en": "Close plugin gallery (Esc)",
       "vars": []
     },
     {
@@ -897,6 +897,11 @@
       ]
     },
     {
+      "key": "privacy.secretCopy.hint",
+      "en": "Copied as a secret: marked sensitive, and cleared from the clipboard after 60 seconds",
+      "vars": []
+    },
+    {
       "key": "privacy.staticAssets",
       "en": "Static files: {n}",
       "vars": [
@@ -906,6 +911,11 @@
     {
       "key": "privacy.tab.mcp",
       "en": "MCP clients",
+      "vars": []
+    },
+    {
+      "key": "privacy.tab.memory",
+      "en": "Agent memory",
       "vars": []
     },
     {

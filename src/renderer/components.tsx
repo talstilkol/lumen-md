@@ -1,6 +1,7 @@
 import { Component, createContext, lazy, Suspense, useContext, useEffect, useRef, useState, useSyncExternalStore, type ComponentType } from "react";
 import type { JSX } from "react";
 import { isAssetName, readWorkspaceBlob } from "../storage/workspace";
+import { blobUrlScope, cachedBlobUrl, storeBlobUrl } from "./blobUrlCache";
 import { log } from "../lib/logger";
 import { scheduleIdle } from "../lib/idle";
 import { t } from "../i18n";
@@ -18,6 +19,7 @@ import {
 const ChartBlock = lazy(() => import("../plugins/ChartBlock"));
 const MermaidBlock = lazy(() => import("../plugins/MermaidBlock"));
 const CsvBlock = lazy(() => import("../plugins/CsvBlock"));
+const SheetBlock = lazy(() => import("../plugins/SheetBlock"));
 const DatasetBlock = lazy(() => import("../plugins/DatasetBlock"));
 const JsonTableBlock = lazy(() => import("../plugins/JsonTableBlock"));
 const InsightsBlock = lazy(() => import("../plugins/InsightsBlock"));
@@ -32,10 +34,18 @@ const HtmlPreviewBlock = lazy(() => import("../plugins/HtmlPreviewBlock"));
 const BibtexBlock = lazy(() => import("../plugins/BibtexBlock"));
 const PluginBlockView = lazy(() => import("../plugins/runtime/PluginBlock"));
 const TasksBlock = lazy(() => import("../plugins/TasksBlock"));
+const MediaEmbedBlock = lazy(() => import("../media/MediaEmbed"));
+const EmbedEditor = lazy(() => import("../editor/EmbedEditor"));
+// W13.G6: `![[Entity]]` as an infobox card.
+const EntityInfoboxEmbed = lazy(() => import("../ui/entity/EntityInfoboxBlock"));
 const DataBlock = lazy(() => import("../plugins/DataBlock"));
 const DatabaseBlock = lazy(() => import("../views/DatabaseBlock"));
 const BasesBlock = lazy(() => import("../views/bases/BasesBlock"));
 const QueryBlock = lazy(() => import("../views/QueryBlock"));
+const AchBlock = lazy(() => import("../plugins/AchBlock"));
+const StructureBlock = lazy(() => import("../viz/StructureBlock"));
+const HebrewCalendarBlock = lazy(() => import("../viz/HebrewCalendarBlock"));
+const ArgumentMapBlock = lazy(() => import("../viz/ArgumentMapBlock"));
 const LiveCssBlock = lazy(() => import("../plugins/LiveCssBlock"));
 const LiveJsBlock = lazy(() => import("../plugins/LiveJsBlock"));
 const LivePyBlock = lazy(() => import("../plugins/LivePyBlock"));
@@ -247,6 +257,9 @@ const Csv = withSuspense<BlockProps>(
   "data",
 );
 
+// A ```sheet block (plan W12.X1): CSV with A1 formulas on the formula engine.
+const Sheet = withSuspense<BlockProps>((props) => <SheetBlock source={getText(props.children)} />, "data");
+
 // A ```dataset block (plan W7.6): the table or chart of its local CSV snapshot.
 const Dataset = withSuspense<BlockProps>((props) => <DatasetBlock source={getText(props.children)} />, "data");
 
@@ -319,6 +332,16 @@ const Bibtex = withSuspense<BlockProps>(
 );
 
 const Tasks = withSuspense<BlockProps>((props) => <TasksBlock source={getText(props.children)} />, "tasks");
+// `![[rec.m4a]]` / `![[talk.mp4]]` (W12.F8): the player and its transcript track.
+const MediaEmbedComp = withSuspense<BlockProps & { target?: string }>((props) => <MediaEmbedBlock target={String(props.target ?? "")} />, "media");
+
+const Ach = withSuspense<BlockProps>((props) => <AchBlock source={getText(props.children)} />, "competing hypotheses");
+
+const Structure = withSuspense<BlockProps>((props) => <StructureBlock source={getText(props.children)} />, "structure");
+
+const HebrewCalendar = withSuspense<BlockProps>((props) => <HebrewCalendarBlock source={getText(props.children)} />, "hebrew calendar");
+
+const ArgumentMap = withSuspense<BlockProps>((props) => <ArgumentMapBlock source={getText(props.children)} />, "argument map");
 
 // `lumen-data` covers the SQL / Pandas / JS-object / auto-detect family.
 // The fence language flows through as `props.lang` so DataBlock can pick
@@ -399,15 +422,9 @@ const LiveSql = withSuspense<BlockProps>(
  * URLs survive across re-renders within the page lifetime (no revoke); OPFS
  * assets are tiny relative to a long-lived editor session, so this is a fair
  * trade. `![[image.png]]` embeds carry the file's version (mtime): an image
- * saved over at the same path is read again.
+ * saved over at the same path is read again. The cache is scoped by vault
+ * (./blobUrlCache.ts, Codex P2 on #235).
  */
-const blobUrlCache = new Map<string, { url: string; version: string }>();
-
-/** The cached URL for `key`, if it was made from this version of the file. */
-function cachedBlobUrl(key: string, version: string): string | undefined {
-  const c = blobUrlCache.get(key);
-  return c && c.version === version ? c.url : undefined;
-}
 
 function isOpfsAssetSrc(src: string | undefined): src is string {
   if (!src) return false;
@@ -493,6 +510,17 @@ function gatedMedia(Tag: "video" | "audio") {
     return <Tag {...(props as React.HTMLAttributes<HTMLElement>)} />;
   };
 }
+/** W12.U1: edit an embedded block in place (only in the live preview, never in a static or hover render). */
+function LumenEmbedEdit(props: { path?: string; range?: string; note?: string }) {
+  const isStatic = useContext(StaticRenderContext);
+  if (isStatic || !props.path || !props.range) return null;
+  return (
+    <Suspense fallback={null}>
+      <EmbedEditor path={String(props.path)} range={String(props.range)} note={String(props.note ?? "")} />
+    </Suspense>
+  );
+}
+
 const LumenVideo = gatedMedia("video");
 const LumenAudio = gatedMedia("audio");
 
@@ -512,7 +540,9 @@ function LumenImg(props: ImgProps) {
   // old value — not even for the one render before the effect runs (it may be
   // another site's image the gate has since stopped judging). Other srcs
   // render straight from the prop.
-  const tag = `${key ?? ""}|${version}`;
+  // The vault is part of the tag: after a switch the same path is another file.
+  const vault = key ? blobUrlScope() : "";
+  const tag = `${vault}|${key ?? ""}|${version}`;
   const [resolved, setResolved] = useState<{ for: string; url: string | undefined }>(() => ({
     for: tag,
     url: key ? cachedBlobUrl(key, version) : undefined,
@@ -529,8 +559,8 @@ function LumenImg(props: ImgProps) {
       .then((blob) => {
         if (cancelled) return;
         const url = URL.createObjectURL(imageBlob(blob, key));
-        blobUrlCache.set(key, { url, version });
-        setResolved({ for: tag, url });
+        // Read in a vault that is no longer open: neither kept nor shown.
+        setResolved({ for: tag, url: storeBlobUrl(key, version, url, vault) ? url : undefined });
       })
       .catch(() => {
         if (!cancelled) setResolved({ for: tag, url: undefined });
@@ -538,7 +568,7 @@ function LumenImg(props: ImgProps) {
     return () => {
       cancelled = true;
     };
-  }, [key, version, tag]);
+  }, [key, version, tag, vault]);
   const shown = !key ? src : resolved.for === tag ? resolved.url : cachedBlobUrl(key, version);
   // The author-supplied `alt` is forwarded via {...rest}. We default to
   // the basename of the src when nothing is provided so screen-readers
@@ -610,6 +640,15 @@ function LumenEmbedFile(props: { path?: string; name?: string; kind?: string; ch
   );
 }
 
+/** `![[Entity]]` (./embeds, W13.G6): the entity's infobox, loaded on demand. */
+function LumenEntityInfobox(props: { path?: string; text?: string }) {
+  return (
+    <Suspense fallback={null}>
+      <EntityInfoboxEmbed path={props.path} text={props.text} />
+    </Suspense>
+  );
+}
+
 function normalize(src: string): string {
   return src.replace(/^\.\//, "").replace(/^\//, "");
 }
@@ -674,6 +713,7 @@ export const components: Record<string, LumenBlock> = {
   "lumen-mermaid": Mermaid as unknown as LumenBlock,
   "lumen-csv": Csv as unknown as LumenBlock,
   "lumen-tsv": Csv as unknown as LumenBlock,
+  "lumen-sheet": Sheet as unknown as LumenBlock,
   "lumen-jsontable": JsonTable as unknown as LumenBlock,
   "lumen-insights": Insights as unknown as LumenBlock,
   "lumen-code-doctor": CodeDoctor as unknown as LumenBlock,
@@ -688,12 +728,17 @@ export const components: Record<string, LumenBlock> = {
   "lumen-bibtex": Bibtex as unknown as LumenBlock,
   "lumen-pluginblock": PluginBlockComp as unknown as LumenBlock,
   "lumen-tasks": Tasks as unknown as LumenBlock,
+  "lumen-mediaembed": MediaEmbedComp as unknown as LumenBlock,
   "lumen-data": DataBlockComp as unknown as LumenBlock,
   "lumen-database": Database as unknown as LumenBlock,
   "lumen-dataset": Dataset as unknown as LumenBlock,
   "lumen-base": Base as unknown as LumenBlock,
   "lumen-query": Query as unknown as LumenBlock,
   "lumen-dataview": Query as unknown as LumenBlock,
+  "lumen-ach": Ach as unknown as LumenBlock,
+  "lumen-structure": Structure as unknown as LumenBlock,
+  "lumen-hebrew-calendar": HebrewCalendar as unknown as LumenBlock,
+  "lumen-argument-map": ArgumentMap as unknown as LumenBlock,
   "lumen-livecss": LiveCss as unknown as LumenBlock,
   "lumen-livejs": LiveJs as unknown as LumenBlock,
   "lumen-livesvg": LiveSvg as unknown as LumenBlock,
@@ -711,6 +756,8 @@ export const components: Record<string, LumenBlock> = {
   iframe: LumenIframe as unknown as LumenBlock,
   // `![[file.pdf]]` card.
   "lumen-embed-file": LumenEmbedFile as unknown as LumenBlock,
+  "lumen-embed-edit": LumenEmbedEdit as unknown as LumenBlock,
+  "lumen-entity-infobox": LumenEntityInfobox as unknown as LumenBlock,
   // GFM task-list checkboxes get an aria-label so they aren't announced bare.
   input: LumenInput as unknown as LumenBlock,
 };

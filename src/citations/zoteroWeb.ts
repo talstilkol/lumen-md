@@ -20,6 +20,7 @@
  * header to api.zotero.org — a cloud route in the privacy ledger.
  */
 import type { CslItem } from "./csl";
+import { compareNames } from "../i18n/collate";
 
 export const ZOTERO_API = "https://api.zotero.org";
 export const ZOTERO_KEY_SECRET = "lumen.zotero.apiKey";
@@ -206,7 +207,7 @@ export async function syncZoteroWeb(prev: ZoteroWebState, get: WebGet): Promise<
 export function stateCsl(state: ZoteroWebState): CslItem[] {
   return Object.entries(state.items)
     .filter(([, it]) => !it.parent && it.csl)
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) => compareNames(a, b))
     .map(([key, it]) => ({ ...(it.csl as CslItem), id: (it.csl as CslItem).id ?? key }));
 }
 
@@ -224,12 +225,12 @@ export function itemNotes(state: ZoteroWebState, citeKeyOf: (itemKey: string) =>
   const children = new Map<string, Array<[string, StoredItem]>>();
   for (const [k, it] of Object.entries(state.items)) if (it.parent) children.set(it.parent, [...(children.get(it.parent) ?? []), [k, it]]);
   const out: ItemNote[] = [];
-  for (const [parentKey, kids] of [...children].sort(([a], [b]) => a.localeCompare(b))) {
+  for (const [parentKey, kids] of [...children].sort(([a], [b]) => compareNames(a, b))) {
     const parent = state.items[parentKey];
     const cite = citeKeyOf(parentKey);
     if (!parent || !cite) continue;
-    const notes = kids.filter(([, k]) => k.note).sort(([a], [b]) => a.localeCompare(b));
-    const pdfs = kids.filter(([, k]) => k.attachment && /pdf/i.test(k.attachment.contentType)).sort(([a], [b]) => a.localeCompare(b));
+    const notes = kids.filter(([, k]) => k.note).sort(([a], [b]) => compareNames(a, b));
+    const pdfs = kids.filter(([, k]) => k.attachment && /pdf/i.test(k.attachment.contentType)).sort(([a], [b]) => compareNames(a, b));
     if (!notes.length && !pdfs.length) continue;
     const cols = parent.collections.map((c) => state.collections[c]?.name).filter((x): x is string => !!x);
     const title = (parent.csl?.title ?? parent.title ?? cite).replace(/\n/g, " ");

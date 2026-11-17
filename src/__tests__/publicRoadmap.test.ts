@@ -12,10 +12,13 @@ import {
   buildModel,
   renderRoadmap,
   roadmapState,
+  publicTitle,
   run,
   ROADMAP_FILE,
   // @ts-expect-error — plain .mjs script without type declarations
 } from "../../scripts/plan/build.mjs";
+// @ts-expect-error — plain .mjs script without type declarations
+import { auditClaims } from "../../scripts/security/audit-claims.mjs";
 
 const ROOT = resolve(__dirname, "..", "..");
 const plan = () => JSON.parse(readFileSync(join(ROOT, "plan/plan.json"), "utf8"));
@@ -26,6 +29,14 @@ const data = (html: string): [number, string, Row[]][] => {
 };
 
 describe("public roadmap (14.5)", () => {
+  it("a title loses its PR numbers and commit hashes, and reads without them (audit A4)", () => {
+    expect(publicTitle("אשף ייבוא מכל מקור (חיזוק לייבוא הקיים ב-#176)")).toBe("אשף ייבוא מכל מקור (חיזוק לייבוא הקיים)");
+    expect(publicTitle("4.2 תיקוני בטיחות העברת כספת מ-#235 \u200f2483bdca")).toBe("4.2 תיקוני בטיחות העברת כספת");
+    expect(publicTitle("רכבת 6 — הגרסה המלאה ל-Mac: רכבת 5 + W9.8 + #617, #618, #619 + משימות הקוד האחרונות בענן")).toBe("רכבת 6 — הגרסה המלאה ל-Mac: רכבת 5 + W9.8 + משימות הקוד האחרונות בענן");
+    expect(publicTitle("שער על מובי דיק (Gutenberg #2701)")).toBe("שער על מובי דיק (Gutenberg #2701)");
+    expect(publicTitle("A title with no reference")).toBe("A title with no reference");
+  });
+
   it("is the checked-in page, regenerated and checked with the board", () => {
     expect(run({ root: ROOT, check: true }).stale).toEqual([]);
     expect(readFileSync(join(ROOT, ROADMAP_FILE), "utf8")).toBe(renderRoadmap(buildModel(plan())));
@@ -44,7 +55,7 @@ describe("public roadmap (14.5)", () => {
     const rows = data(renderRoadmap(buildModel(p)));
     expect(rows.map(([n, title]) => [n, title])).toEqual(p.phases.map((ph: { title: string }, i: number) => [i, ph.title]));
     p.phases.forEach((ph: { tasks: { id: string; title: string; status?: string }[] }, i: number) => {
-      expect(rows[i][2]).toEqual(ph.tasks.map((t) => [t.id, roadmapState(t.status), t.title]));
+      expect(rows[i][2]).toEqual(ph.tasks.map((t) => [t.id, roadmapState(t.status), publicTitle(t.title)]));
     });
   });
 
@@ -59,11 +70,31 @@ describe("public roadmap (14.5)", () => {
     for (const o of p.owner) expect(html).not.toContain(o.title);
     expect(html).not.toMatch(/\d+ ש׳ \d+ דק׳/); // no estimates
     expect(html).not.toContain("#1"); // no PR numbers
+    // Audit A4: no internal reference in any title — no PR number, no commit hash (an outside catalogue number, "Gutenberg #2701", stays).
+    for (const [, title] of data(html).flatMap((r) => r[2]).map((r) => [r[0], r[2]])) {
+      expect(title.replace(/Gutenberg #\d+/g, ""), title).not.toMatch(/#\d/);
+      expect(title, title).not.toMatch(/\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*\d)[0-9a-f]{7,40}\b/);
+    }
     // The counts in the hero come from the data.
     const rows = data(html).flatMap((r) => r[2]);
     const done = rows.filter((r) => r[1] === "done").length;
     expect(html).toContain(`${done} הושלמו`);
     expect(html).toContain(`aria-valuenow="${done}"`);
+  });
+
+  // INT4a: the rows sat on one line, so the audit-claim scan (W11.S1) read two
+  // tasks' titles as one sentence: W13.S5's "ביקורת אבטחה" (audit funding) next
+  // to W13.S6's "מוצפנת" was flagged as a claim that the crypto is audited.
+  it("puts each task on its own line, so the audit-claim scan reads one title at a time (W11.S1)", () => {
+    const p = plan();
+    const last = p.phases[p.phases.length - 1].tasks;
+    const at = last.length;
+    last.push({ ...last[at - 1], id: "X.1", title: "funding for a security audit", dep: [] }, { ...last[at - 1], id: "X.2", title: "encrypted presence in the shared vault", dep: [] });
+    const rows = data(renderRoadmap(buildModel(p))).at(-1)![2];
+    expect(rows.slice(-2).map((r) => r[0])).toEqual(["X.1", "X.2"]);
+    expect(auditClaims(renderRoadmap(buildModel(p)))).toEqual([]);
+    expect(auditClaims(renderRoadmap(buildModel(plan())))).toEqual([]);
+    expect(auditClaims("a security audit of the encryption")).not.toEqual([]);
   });
 
   it("renders with the external script under the app's CSP (no inline script, no handlers)", () => {

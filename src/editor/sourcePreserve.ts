@@ -123,7 +123,8 @@ export function createSourcePreserver(
   const eol = (s: string) => (crlf ? s.replace(/\r?\n/g, "\r\n") : s);
 
   const restore = (M: string): string => {
-    if (O.length === 0) return eol(M);
+    // A body of blank lines only (a template's frontmatter and an empty line): unedited, it is kept as it is.
+    if (O.length === 0) return M === serializedAtLoad ? original : eol(M);
     if (M === serializedAtLoad && cToO.size === C.length && paired.size === O.length) return original;
     const Mb = split(M);
     const mText = Mb.map((b) => M.slice(b.start, b.end));
@@ -157,7 +158,10 @@ export function createSourcePreserver(
 
     let out = "";
     const first = pieces[0];
-    if (first.o === 0) out += original.slice(0, O[0].start);
+    const lead = original.slice(0, O[0].start);
+    // The blank lines before the first block (after the frontmatter, say) are the
+    // file's, not a block's: an edit to the first block keeps them (W10.E47).
+    if (first.o === 0 || /^\s*$/.test(lead)) out += lead;
     else if (first.m === 0) out += eol(M.slice(0, Mb[0].start));
     for (let k = 0; k < pieces.length; k++) {
       const p = pieces[k];

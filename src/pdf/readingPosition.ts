@@ -72,6 +72,8 @@ export function positionAt(pages: readonly PageBox[], scrollTop: number): { page
   if (!pages.length) return { page: 1, offset: 0 };
   let i = 0;
   while (i + 1 < pages.length && pages[i + 1].top <= scrollTop) i++;
+  // W12.R2: pages side by side in a spread share a top; the position is the spread's first page.
+  while (i > 0 && pages[i - 1].top === pages[i].top) i--;
   const p = pages[i];
   const offset = p.height > 0 ? Math.min(1, Math.max(0, (scrollTop - p.top) / p.height)) : 0;
   return { page: i + 1, offset: Math.round(offset * 10_000) / 10_000 };

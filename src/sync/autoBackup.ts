@@ -10,7 +10,7 @@
  */
 
 import { useAppStore } from "../store/useStore";
-import { log } from "../lib/logger";
+import { log, swallowed } from "../lib/logger";
 import { getHistoryVault, historyKey, recordSnapshot } from "../storage/history";
 
 const AUTO_BACKUP_INTERVAL_MS = 30_000;
@@ -47,7 +47,7 @@ export function startAutoBackup(): void {
       flushNow();
       // A vault pass too (plan 3.2) — best effort: a hidden tab usually
       // keeps running long enough; a closed one may cut it short.
-      void snapshotVault().catch(() => 0);
+      void snapshotVault().catch((e: unknown) => (swallowed("sync/autoBackup: the vault snapshot on hiding the tab failed", e), 0));
     }
   };
   window.addEventListener("pagehide", onPageHide);
@@ -139,13 +139,22 @@ export async function snapshotVault(): Promise<number> {
   if (!ws.isOPFSAvailable()) return 0;
   const vault = getHistoryVault();
   if (vault === null) return 0;
+  // The pass belongs to the vault it started in: every read goes through
+  // that vault's backend, and the pass stops if the active vault changes,
+  // so one vault's text is never filed in another's history.
+  const [{ getVaultBackend }, { readText }] = await Promise.all([import("../storage/vault"), import("../storage/textCodec")]);
+  const backend = getVaultBackend();
+  const still = () => getVaultBackend() === backend && getHistoryVault() === vault;
   let written = 0;
   const list = await ws.listWorkspace({ includeAssets: false });
   for (const e of list) {
+    if (!still()) break;
     const seen = `${vault}|${e.path}`;
     if (ws.isAssetName(e.path) || LEGACY_BACKUP.test(e.path) || vaultSeen.get(seen) === e.modified) continue;
     try {
-      const content = await ws.readWorkspaceFile(e.path);
+      // As ws.readWorkspaceFile reads (keeps a BOM, W4.30), through this pass's own backend.
+      const content = await readText(await backend.read(e.path));
+      if (!still()) break;
       if (await recordSnapshot(e.path, content, "vault", Date.now(), undefined, vault)) written++;
       vaultSeen.set(seen, e.modified);
     } catch (err) {
@@ -242,10 +251,10 @@ export function startVaultSnapshots(): () => void {
       void migrateLegacyBackups()
         .catch((e) => log.warn("[history] backup migration failed", (e as Error).message))
         .then(() => snapshotVault())
-        .catch(() => 0),
+        .catch((e: unknown) => (swallowed("sync/autoBackup: the first vault snapshot failed", e), 0)),
     60_000,
   );
-  vaultTimer = setInterval(() => void snapshotVault().catch(() => 0), VAULT_SNAPSHOT_EVERY_MS);
+  vaultTimer = setInterval(() => void snapshotVault().catch((e: unknown) => (swallowed("sync/autoBackup: a periodic vault snapshot failed", e), 0)), VAULT_SNAPSHOT_EVERY_MS);
   return () => {
     clearTimeout(first);
     if (vaultTimer) clearInterval(vaultTimer);

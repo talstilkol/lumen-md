@@ -1,6 +1,7 @@
 ---
 title: בדיקות בכל ענף (Vercel)
 description: השערים של Lumen רצים בבניית Vercel של כל ענף, בלי GitHub Actions — מה רץ, מה המשמעות של סטטוס אדום, ולאן עברו בדיקות ה-CI הישנות.
+type: how-to
 ---
 
 ‏`main` ורכבות האינטגרציה (`verify/…`) מקבלים בנייה ב-Vercel כשהם נדחפים,
@@ -84,6 +85,23 @@ node scripts/vercel-build.mjs --dry-run    # print the gates, run nothing
 אחר (shim לבדיקות לא מקוונות) מחזיק בגרסאות שה-lockfile לא נועל. לתיקון
 סחיפה, מתקינים מחדש עם `npm ci`. אם `package.json` השתנה, יוצרים את ה-lockfile
 מחדש עם `npm install --package-lock-only` ומבצעים לו commit.
+
+לתיעוד יש בדיקות משלו: לכל עמוד יש סוג Diátaxis (מדריך, איך עושים, עיון
+או הסבר), כל עמוד תכונה נוקב במשימה שלו בתוכנית, וכל דוגמה שמסומנת `run` —
+כמו שתי אלה — רצה ועוברת:
+
+```sh run
+node scripts/docs-meta.mjs --check    # expect: every one typed
+node scripts/docs-parity.mjs --strict
+```
+
+```js run
+const { bannerFor } = await import(process.cwd() + "/scripts/lib/docsMeta.mjs");
+const tasks = new Map([["W1.1", { verified: "built" }], ["W1.2", { verified: "browser" }]]);
+console.log(bannerFor(["W1.2"], tasks) === null ? "verified: no banner" : "?");
+console.log(bannerFor(["W1.1"], tasks).includes("Beta") ? "built: beta banner" : "?");
+// expect: built: beta banner
+```
 
 ## מה לא רץ בבנייה
 

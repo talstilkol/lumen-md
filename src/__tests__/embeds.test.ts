@@ -370,6 +370,22 @@ describe("embeds — pipeline", () => {
     expect(root.querySelector("img")?.getAttribute("data-lumen-version")).toBe("1234");
   });
 
+  it("an image embed is resolved in the workspace, not left as a bare src, and the host's can still be resized (4.7, W1.3)", () => {
+    const md = "Look ![[pic.png|300]] and ![[gone.png]]\n\n![[Pics]]";
+    const vault = { ...VAULT, "Pics.md": "inner ![[pic.png]]" };
+    const root = document.createElement("div");
+    root.innerHTML = renderToStaticMarkup(renderMarkdownFast(md, { embeds: ctxFor(md, "host.md", vault) }));
+    const imgs = [...root.querySelectorAll("img")];
+    // No `<img src="pic.png">` the browser would ask the server for: every image is a workspace file.
+    expect(imgs.map((i) => i.getAttribute("data-lumen-path"))).toEqual(["attachments/pic.png", "attachments/pic.png"]);
+    expect(root.querySelector('img.obsidian-embed, img[src="pic.png"], img[src="gone.png"]')).toBeNull();
+    expect(root.querySelector<HTMLElement>("span.lumen-embed-notice")?.dataset.embedTarget).toBe("gone.png");
+    // The host's own image keeps its source offset for drag-to-resize; the embedded note's does not (another file).
+    expect(imgs[0].getAttribute("data-md-offset")).toBe(String(md.indexOf("![[pic.png|300]]")));
+    expect(imgs[0].getAttribute("data-md-target")).toBe("pic.png");
+    expect(imgs[1].hasAttribute("data-md-offset")).toBe(false);
+  });
+
   it("collects embedded sources transitively for the pipeline's raw / math choice", () => {
     expect(embeddedTexts("![[L1]]", ctxFor("![[L1]]"))).toEqual([VAULT["L1.md"], VAULT["L2.md"], VAULT["L3.md"]]);
     expect(embeddedTexts("![[Self]]", ctxFor("![[Self]]", "Self.md"))).toEqual([]);

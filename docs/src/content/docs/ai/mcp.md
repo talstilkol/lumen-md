@@ -1,6 +1,8 @@
 ---
 title: MCP and the lumen CLI
 description: Let Claude Desktop, Claude Code or your IDE search and read your vault — off by default, with scopes per client, and every change waits for your approval.
+type: reference
+tasks: ["W13.X1", "W12.T4", "W11.I7", "W11.I8", "W7.18", "W8.1"]
 ---
 
 Lumen's vault can be used from outside the app in two ways:
@@ -45,8 +47,8 @@ npx -p @lumen-md/mcp-server lumen mcp status
 | Scope | Tools |
 |---|---|
 | `search` | `search_notes` — BM25 over Hebrew and English (prefix letters ו ה ב ל מ ש כ and niqqud are handled) |
-| `read` | `read_note`, `list_notes`, `list_tags`, `get_backlinks`, `bases_query` |
-| `propose` | `create_note`, `append_note`, `write_note`, `update_frontmatter`, `bases_update` — proposals only |
+| `read` | `read_note`, `list_notes`, `list_tags`, `get_backlinks`, `list_types`, `get_type`, `bases_query` |
+| `propose` | `create_note`, `append_note`, `write_note`, `update_frontmatter`, `create_object`, `bases_update` — proposals only |
 
 `lumen mcp enable <client>` without `--scopes` grants `search,read`. Add
 `propose` only for a client you want suggestions from. `lumen mcp disable
@@ -58,6 +60,12 @@ npx -p @lumen-md/mcp-server lumen mcp status
 
 Give each client its own `--client` name — the one you enabled. (Without
 it, the server uses the name the client reports when it connects.)
+
+The name is the client's own word, not a proof: a client that reports another
+client's name gets that client's tools, and the app that starts the server
+chooses `--client` anyway. So grants keep apart the apps you set up, not an app
+that lies about itself. Enable only apps you trust with the scopes you give,
+and writes still wait for your approval whatever the name.
 
 **Claude Desktop** — `~/Library/Application Support/Claude/claude_desktop_config.json`
 (macOS; `%APPDATA%\Claude\` on Windows):
@@ -197,6 +205,33 @@ lumen bases update --edits edits.json --approve   # each diff at the terminal; t
 Bases need the engine bundle: build the server with `npm ci` in the
 repository root first, then `npm run build` in `mcp-server/`.
 
+## Types
+
+A type is a file in the vault, `.lumen/types/<id>.yaml`. It has labels, an
+activating tag, one `extends` parent and typed fields. The notes stay plain
+frontmatter.
+
+- `list_types` lists the types.
+- `get_type` gives one type's fields, inherited ones first, with their
+  kinds, options and relation targets.
+- `create_object` proposes a new note of a type. Its values are checked
+  against the schema first. An unknown field, a value of the wrong kind, an
+  option that is not in the list, or a relation to a note of another type is
+  an error. When there is an error nothing is proposed, and the ledger
+  records `denied` with the reason `schema: <fields>`. A valid object is one
+  proposal in the approval queue, inside the client's folder and tag scope.
+
+From a terminal:
+
+```bash
+lumen types                                   # the types
+lumen types show book                         # its fields; --json for JSON
+lumen new "Dune" --type book --set pages=412 --set 'author=[[Frank Herbert]]'
+```
+
+Like `lumen new`, `lumen new --type` writes directly, because you are at
+your terminal. A value that does not fit the type writes nothing.
+
 ## Lumen as a client: outside servers for the local agents
 
 The other way round: Lumen's own agents can use tools of other MCP servers,
@@ -206,6 +241,19 @@ your files. Nothing is connected until you add a server and turn it on.
 - **Servers:** local ones (a command on this computer, desktop app only, or a
   `127.0.0.1` address) and remote ones (Streamable HTTP). Lumen speaks MCP
   2026-07-28 and falls back to the older handshake for older servers.
+- **A program runs only as you approved it:** the first time, the desktop
+  app shows the program's full path, its sha256, each argument and the
+  folder in its own dialog, and the approval is for exactly that: that file,
+  those arguments, that folder, and every file an argument names (a script,
+  for example, or the file in `--config=file`). If one byte of them changes,
+  or the arguments do, nothing starts until you approve again. Settings → MCP
+  servers → *Check approval* / *Withdraw approval*. Refused outright: shells,
+  code written in the command line or read from stdin, a folder where an
+  interpreter takes its program, and a program, file or working folder inside
+  one of your vaults. Not pinned, and the dialog says so: files the program
+  loads by itself (modules a script imports, plugins, a folder's contents) and
+  what a package runner such as `npx`, `uvx`, `pnpm dlx` or
+  `deno run https://…` downloads each time it starts.
 - **Permission per server and per tool:** *read* (runs without asking, only
   for tools the server marks read-only), *ask* (you approve each call, the
   default) or *block* (never offered to the model).
@@ -243,6 +291,39 @@ The vault is `--vault <dir>`, else `$LUMEN_VAULT`, else the current folder.
 `new`, `append` and `daily` are you at the keyboard, so they write directly
 (logged as client `cli`). Install with `npm i -g @lumen-md/mcp-server`, or
 run from a clone with `npm run lumen -- search …`.
+
+### Talking to the running app
+
+Forty more commands, in eight groups (files, links, tags, properties,
+search, tasks, daily notes, vault), go through the running app over a
+private socket, so they see what the app sees and their changes land in the
+app's review screen:
+
+```bash
+lumen help                                   # every command; lumen help move
+lumen move "Recipes/Cake.md" "Baking/"       # updates every link to it
+lumen backlinks Cake --json                  # JSON for every command
+lumen tags:rename work job                   # nested tags too (#work/a → #job/a)
+lumen property:set "Plan" status done
+lumen orphans | lumen unresolved | lumen deadends
+lumen changes                                # what waits for your review
+lumen approve <id>                           # at a terminal: shows it, asks for yes
+```
+
+- **Writes are proposals.** A command that changes the vault proposes one
+  change set; nothing is written until you approve it, and it is written
+  only if every file still has the text it was computed from. `--yes`
+  writes at once only when you turned that on in Lumen's settings.
+- **The socket is yours alone.** A Unix socket (a named pipe on Windows)
+  and a 256-bit token in a file only your user can read. Nothing listens on
+  the network.
+- **No `eval`.** Running code inside the app would bypass the review screen,
+  so every command is a fixed operation.
+- **The app closed?** Read commands answer from the disk; a write starts
+  Lumen and waits for it, or with `--offline` leaves the change in the vault
+  for review. `lumen host --vault <dir>` serves the same commands without the
+  app (a server, a CI machine).
+- `--lang he` (or a Hebrew `LANG`) gives Hebrew help and messages.
 
 ## Speed
 

@@ -483,7 +483,13 @@ export function excalidrawToJsonCanvas(file: Pick<ExcalidrawFile, "elements" | "
           }
         }
       } else if (el.link && el.type !== "text" && !orig) {
-        n = /^[a-z][a-z0-9+.-]*:/i.test(el.link) ? { id: el.id, type: "link", url: el.link, ...box } : { id: el.id, type: "file", file: el.link, ...box };
+        // A file target with a fragment (a PDF highlight card, W12.R1) keeps it as the node's subpath.
+        const hash = el.link.indexOf("#");
+        n = /^[a-z][a-z0-9+.-]*:/i.test(el.link)
+          ? { id: el.id, type: "link", url: el.link, ...box }
+          : hash > 0
+            ? { id: el.id, type: "file", file: el.link.slice(0, hash), subpath: el.link.slice(hash), ...box }
+            : { id: el.id, type: "file", file: el.link, ...box };
       } else {
         n = { ...(orig?.type === "text" ? orig : {}), id: el.id, type: "text", text, ...box } as JcTextNode;
       }

@@ -1,6 +1,8 @@
 ---
 title: EPUB reader and reading mode
 description: Read EPUB books in the vault (Hebrew right-to-left included), highlight them like PDFs, and read clipped pages in a calm reading mode.
+type: how-to
+tasks: ["W1.14"]
 ---
 
 Lumen opens EPUB books from your vault in a reader of its own. Your books,

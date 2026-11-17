@@ -1,6 +1,7 @@
 ---
 title: Android and iOS builds
 description: How the Android APK and iOS IPA are built on every pull request, what is unsigned until the store accounts exist, and which secrets sign them.
+type: how-to
 ---
 
 Lumen's mobile apps are the same web build wrapped by Capacitor: `android/`
@@ -87,8 +88,11 @@ for each build.
 ### Without a Mac or an Android SDK: Codemagic
 
 `codemagic.yaml` runs the same two commands on Codemagic's macOS M2 machines.
-It has no `triggering:` section, so nothing builds on a push. You start each
-build by hand in the Codemagic UI. On 12.11.2026, Codemagic's pricing page
+You start the signed builds by hand in the Codemagic UI. One workflow starts
+by itself: **`pr-build`** runs on every pull request into `main` and builds
+the Android debug APK and an iOS simulator build, unsigned and without any
+environment group, so it needs no key. A newer push to the same pull request
+cancels the older run. On 12.11.2026, Codemagic's pricing page
 said a **personal account gets 500 free macOS M2 minutes a month**, reset on
 the 1st. It also said there are no free minutes on Linux or Windows, and no
 free minutes for Teams. So both workflows use the Mac, and an iOS build of

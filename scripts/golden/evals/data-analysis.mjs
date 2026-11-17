@@ -18,8 +18,10 @@
  *                         contract and the scoring end to end. NOT the
  *                         model's score.
  *   --programs model      the analyst agent's programs from a running
- *                         Ollama (OLLAMA_URL, ANALYST_MODEL): the real score.
- *                         Not runnable here (no model on this machine).
+ *                         Ollama (OLLAMA_URL, default http://127.0.0.1:11434,
+ *                         loopback only; ANALYST_MODEL): the real score.
+ *                         The agent's own prompt and validator, temperature 0,
+ *                         seed 42, one repair turn (data-analysis.model.mjs).
  *
  * Prints scores only.
  */
@@ -29,6 +31,7 @@ import { tsImport } from "tsx/esm/api";
 import { loadSet } from "../../lib/golden.mjs";
 import { GOLDEN, ROOT } from "../common.mjs";
 import { REFERENCE_PROGRAMS } from "./data-analysis.reference.mjs";
+import { ollamaWriteCode } from "./data-analysis.model.mjs";
 
 const require = createRequire(join(ROOT, "package.json"));
 
@@ -68,22 +71,28 @@ if (isMain) {
   const csv = table.csv;
   const { analyse, matchesGolden } = await tsImport(join(ROOT, "src/agents/analyst.ts"), import.meta.url);
   const report = { set: "data-analysis", split: "dev", programs: mode, items: items.length, target: 0.85 };
+  let writeCodeFor = (it) => async () => REFERENCE_PROGRAMS[it.id];
   if (mode === "model") {
-    report.notRunnable = "needs a real model (Tal's 15.13): no Ollama on this machine";
-  } else {
+    const url = process.env.OLLAMA_URL || "http://127.0.0.1:11434";
+    const model = process.env.ANALYST_MODEL || "";
+    const { analystAgent } = await tsImport(join(ROOT, "src/agents/defs/analyst.ts"), import.meta.url);
+    const writeCode = ollamaWriteCode({ url, model, def: analystAgent });
+    writeCodeFor = () => writeCode;
+    Object.assign(report, { model, url, note: "the analyst agent's prompt and validator on a local Ollama model, temperature 0, seed 42" });
+  }
+  {
     const run = await sandbox();
     let correct = 0;
     const missing = [];
     const kinds = {};
     for (const it of items) {
-      const code = REFERENCE_PROGRAMS[it.id];
-      if (!code) {
+      if (mode !== "model" && !REFERENCE_PROGRAMS[it.id]) {
         missing.push(it.id);
         continue;
       }
       let good = false;
       try {
-        const r = await analyse(it.question, csv, { writeCode: async () => code, run: (c, inputs) => run(c, inputs) });
+        const r = await analyse(it.question, csv, { writeCode: writeCodeFor(it), run: (c, inputs) => run(c, inputs) });
         good = matchesGolden(r.answer.answer, it.answer, it.tolerance);
       } catch {
         good = false;
@@ -95,7 +104,8 @@ if (isMain) {
         kinds[it.kind].correct++;
       }
     }
-    Object.assign(report, { correct, accuracy: items.length ? correct / items.length : 0, kinds, missing, note: "reference programs: validates the pipeline, not a model score" });
+    Object.assign(report, { correct, accuracy: items.length ? correct / items.length : 0, kinds, missing, pass: mode === "model" ? correct / Math.max(1, items.length) >= report.target : undefined });
+    if (mode !== "model") report.note = "reference programs: validates the pipeline, not a model score";
   }
   const out = opt("--out");
   if (out) (await import("node:fs")).writeFileSync(out, JSON.stringify(report, null, 2) + "\n");

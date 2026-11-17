@@ -5,7 +5,7 @@
  * notes, the template gallery in both languages, the public docs) plus
  * synthetic ones that exercise one feature each.
  */
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { WELCOME_DOC } from "../../welcome";
 import { WELCOME_DOC_HE } from "../../welcome.he";
@@ -282,13 +282,23 @@ const SYNTHETIC: Record<string, string> = {
   ].join("\n"),
 };
 
+/**
+ * The templates in the set, by name (W10.Z3): the gallery grew from 21 to 67
+ * files (W3.6 and later), and reading the folder made the "50-document set"
+ * 96 documents, 46 of them without a snapshot. The set is the one the
+ * snapshots were made from; a template added later is not in it until its
+ * snapshot is made with the real pipeline (the Mac run).
+ */
+export const SNAPSHOT_TEMPLATES = ["CONTRIBUTING", "book-review", "daily-journal-pro", "literature-note", "okrs-quarterly", "one-on-one", "rfc", "sprint-retro", "trip-plan", "user-interview", "weekly-review"] as const;
+export const SNAPSHOT_TEMPLATES_HE = ["book-review", "daily-journal-pro", "literature-note", "okrs-quarterly", "one-on-one", "rfc", "sprint-retro", "trip-plan", "user-interview", "weekly-review"] as const;
+
 export function renderDocs(): RenderDoc[] {
   const docs: RenderDoc[] = [
     { name: "welcome-en", markdown: WELCOME_DOC },
     { name: "welcome-he", markdown: WELCOME_DOC_HE },
   ];
-  for (const f of readdirSync(join(root, "public/templates")).filter((n) => n.endsWith(".md")).sort()) docs.push({ name: `template-${f.replace(/\.md$/, "")}`, markdown: read(`public/templates/${f}`) });
-  for (const f of readdirSync(join(root, "public/templates/he")).filter((n) => n.endsWith(".md")).sort()) docs.push({ name: `template-he-${f.replace(/\.md$/, "")}`, markdown: read(`public/templates/he/${f}`) });
+  for (const f of SNAPSHOT_TEMPLATES) docs.push({ name: `template-${f}`, markdown: read(`public/templates/${f}.md`) });
+  for (const f of SNAPSHOT_TEMPLATES_HE) docs.push({ name: `template-he-${f}`, markdown: read(`public/templates/he/${f}.md`) });
   for (const rel of ["public/tutorials/index.md", "public/plugins/CONTEST.md", "public/plugins/JUDGING_RUBRIC.md", "public/plugins/CONTRIBUTING.md", "CONTRIBUTING.md", "CODE_OF_CONDUCT.md", "SECURITY.md", "DEPLOY.md"]) {
     docs.push({ name: `doc-${rel.replace(/\.md$/, "").replace(/[/.]/g, "-").toLowerCase()}`, markdown: read(rel) });
   }

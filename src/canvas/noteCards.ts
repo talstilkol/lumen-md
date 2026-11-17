@@ -16,6 +16,7 @@
  */
 
 import type { ExBase, ExEmbeddableElement, ExcalidrawElement, ExShapeElement, ExTextElement } from "./tldrawToExcalidraw";
+import { compareNames } from "../i18n/collate";
 
 export type { ExEmbeddableElement };
 
@@ -65,7 +66,7 @@ export function resolveNoteRef(ref: string, notes: readonly string[]): string | 
   const exact = notes.find((n) => n.toLowerCase() === lower);
   if (exact) return exact;
   const name = lower.split("/").pop()!;
-  const byName = notes.filter((n) => n.toLowerCase().split("/").pop() === name).sort((a, b) => a.length - b.length || a.localeCompare(b));
+  const byName = notes.filter((n) => n.toLowerCase().split("/").pop() === name).sort((a, b) => a.length - b.length || compareNames(a, b));
   return byName[0] ?? null;
 }
 

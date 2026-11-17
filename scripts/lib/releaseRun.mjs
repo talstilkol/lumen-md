@@ -445,10 +445,18 @@ export function parseRunArgs(argv) {
   const has = (f) => rest.includes(f);
   if (has("--dry-run") && has("--publish")) throw new Error("--dry-run and --publish together: pick one");
   if (has("--publish") && has("--fake-build")) throw new Error("--fake-build is for dry runs only: a fake bundle is never published");
-  const known = new Set(["--dry-run", "--publish", "--fake-build", "--no-repro", "--no-desktop", "--skip-checks", "--offline"]);
-  const unknown = rest.filter((a) => !known.has(a));
+  const known = new Set(["--dry-run", "--publish", "--fake-build", "--no-repro", "--no-desktop", "--skip-checks", "--offline", "--rollout"]);
+  // W13.T1: --rollout N, the share of devices offered the release first (default: 5 for stable, 100 for a beta).
+  const ri = rest.indexOf("--rollout");
+  let rollout = null;
+  if (ri >= 0) {
+    rollout = Number(rest[ri + 1]);
+    if (!Number.isFinite(rollout) || rollout <= 0 || rollout > 100) throw new Error("--rollout takes a percent above 0 and at most 100");
+  }
+  const unknown = rest.filter((a, i) => !known.has(a) && !(ri >= 0 && i === ri + 1));
   if (unknown.length) throw new Error(`unknown option ${unknown.join(", ")}`);
   return {
+    rollout,
     version: String(version).replace(/^v/, ""),
     publish: has("--publish"),
     dryRun: !has("--publish"),
@@ -486,6 +494,9 @@ export function preflight(o, f) {
     add(f.updaterPub && !f.updaterPubIsTest, "the updater public key (LUMEN_UPDATER_PUBKEY or security/updater-key.pub) is a real key", "cp ~/.tauri/lumen-updater.key.pub security/updater-key.pub && git add security/updater-key.pub && git commit -m 'chore(release): the updater public key'");
     add(f.releaseKey, "the release signing key (LUMEN_RELEASE_KEY, plan W1.27) opens with LUMEN_RELEASE_PASSPHRASE", "export LUMEN_RELEASE_KEY=~/.lumen-release/lumen-release.key LUMEN_RELEASE_PASSPHRASE=… (made once: node scripts/supply-chain/keys.mjs)");
     add(f.releasePub, "security/release-key.pub is committed and matches LUMEN_RELEASE_KEY", "cp ~/.lumen-release/lumen-release.pub security/release-key.pub && git add security/release-key.pub && git commit -m 'chore(release): the release public key'");
+    // W13.T4 / T3: the tag is SSH-signed by an allowed signer, and the source VSA by a trusted source key.
+    add(f.tagSigner, "LUMEN_TAG_SIGNING_KEY is an SSH key whose public half is in security/allowed_signers (signed release tags)", "ssh-keygen -t ed25519 -f ~/.ssh/lumen-release-tag, add its line to security/allowed_signers (see the file), commit, then export LUMEN_TAG_SIGNING_KEY=~/.ssh/lumen-release-tag");
+    add(f.sourceSigner, "LUMEN_SOURCE_VSA_KEY is the Ed25519 key listed in security/source-vsa.json (SLSA source VSA)", "make the key as security/source-vsa.json says, add its public half there, commit, then export LUMEN_SOURCE_VSA_KEY=~/.lumen-release/source-vsa.key.pem");
     // W11.S15: without SignPath the release goes out with an unsigned Windows installer, and says so.
     add(f.signPath, "SignPath is set up for Windows (SIGNPATH_API_TOKEN, SIGNPATH_ORGANIZATION_ID, SIGNPATH_PROJECT_SLUG, SIGNPATH_SIGNING_POLICY_SLUG)", "apply to SignPath Foundation (W11.O1), then export the four SIGNPATH_* values; without them the Windows installer is released unsigned and marked so", false);
   } else {

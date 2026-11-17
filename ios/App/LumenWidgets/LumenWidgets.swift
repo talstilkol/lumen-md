@@ -66,6 +66,8 @@ struct LumenWidgetBundle: WidgetBundle {
         if #available(iOS 18.0, *) {
             LumenCaptureControl()
         }
+        // W13.M2: the capture Live Activity (Lock Screen and Dynamic Island).
+        CaptureLiveActivity()
     }
 }
 

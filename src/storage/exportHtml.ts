@@ -3,6 +3,7 @@ import { fetchWithRetry } from "../lib/fetchRetry";
 import { markdownBaseDirection, scriptLanguage, type BaseDirection } from "../lib/textDirection";
 import { escapeHtml } from "../lib/escapeHtml";
 import { exportReadyText } from "./exportReady";
+import { swallowed } from "../lib/logger";
 
 export interface HtmlDocumentOptions {
   /** <title> text. */
@@ -16,8 +17,9 @@ export interface HtmlDocumentOptions {
   /** Markup inserted before the rendered body (e.g. a nav bar). */
   before?: string;
   /**
-   * `lang` attribute of <html>. Defaults to "he" / "ar" when the document's
-   * first strong character is Hebrew / Arabic, else "en".
+   * `lang` attribute of <html>. Defaults to the front matter's `lang:` (or
+   * "yi" for a Yiddish note), else "he" / "ar" when the document's first
+   * strong character is Hebrew / Arabic, else "en".
    */
   lang?: string;
   /**
@@ -39,7 +41,9 @@ export async function renderHtmlDocument(
 ): Promise<string> {
   const isDark = Boolean(opts.isDark);
   const dir = opts.dir ?? markdownBaseDirection(markdown);
-  const lang = opts.lang ?? (dir === "rtl" ? scriptLanguage(markdown) : null) ?? "en";
+  // A front matter `lang:` or a Yiddish note (plan W7.9) names its language; otherwise the script decides.
+  const { noteLanguage } = await import("../text/noteLanguage");
+  const lang = opts.lang ?? noteLanguage(markdown)?.tag ?? (dir === "rtl" ? scriptLanguage(markdown) : null) ?? "en";
   // Render to a React tree, then stringify.
   const tree = await renderMarkdown(markdown, () => isDark);
   const { renderToStaticMarkup } = await import("react-dom/server");
@@ -135,8 +139,9 @@ async function collectStyles(): Promise<string> {
         // privacy-ledger: a stylesheet the open page already loaded (its href), for the HTML export: listed in audit mode (network)
         const res = await fetchWithRetry(href, {}, { label: "exportHtml.stylesheet", maxRetries: 2, baseDelayMs: 600, maxDelayMs: 2500 });
         if (res.ok) chunks.push(await res.text());
-      } catch {
+      } catch (err) {
         /* why: network unavailable; skip */
+        swallowed("storage/exportHtml: network unavailable; skip", err);
       }
     }
   }

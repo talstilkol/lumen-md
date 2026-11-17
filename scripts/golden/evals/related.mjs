@@ -71,3 +71,43 @@ export function recallAt(Index, related, vaults, pairs, k = 5) {
   }
   return { pairs: pairs.length, hit, recall: pairs.length ? Math.round((hit / pairs.length) * 1000) / 1000 : 0, perVault };
 }
+
+/**
+ * The related-real golden set's items (eval/golden/related-real: vault,
+ * from, to, query_sha256) back to pairs with their query, rebuilt from the
+ * corpus. An item whose pair is no longer a real link of the corpus, or
+ * whose query changed, is refused: the score would not be the set's.
+ * `hash` is sha256 (hex) of a string.
+ */
+export function pairsOfItems(items, vaults, hash) {
+  const byId = new Map(realLinkPairs(vaults).map((p) => [`${p.vault}:${p.from}→${p.to}`, p]));
+  return items.map((it) => {
+    const p = byId.get(`${it.vault}:${it.from}→${it.to}`);
+    if (!p) throw new Error(`related-real: ${it.id} is not a link of the corpus`);
+    if (hash(p.query) !== it.query_sha256) throw new Error(`related-real: ${it.id}: its query changed (corpus drift)`);
+    return p;
+  });
+}
+
+/** Score the set with the app's index class and relatedNotes: { "recall@5": … } over the items given. */
+export function scoreWith(Index, related, { items, vaults, hash }) {
+  const pairs = pairsOfItems(items, vaults, hash);
+  const r = recallAt(Index, related, vaults, pairs, 5);
+  return { "recall@5": r.recall, pairs: r.pairs };
+}
+
+/** Build one TypeScript module of the app through Vite, in memory (CI only). */
+async function bundle(rel) {
+  const { build } = await import("vite");
+  const { fileURLToPath } = await import("node:url");
+  const out = await build({ configFile: false, logLevel: "silent", build: { write: false, minify: false, lib: { entry: fileURLToPath(new URL(rel, import.meta.url)), formats: ["es"], fileName: "m" } } });
+  const chunk = (Array.isArray(out) ? out[0] : out).output.find((o) => o.type === "chunk");
+  return import(`data:text/javascript;base64,${Buffer.from(chunk.code).toString("base64")}`);
+}
+
+/** run-evals.mjs entry: Recall@5 of the app's related notes on the test split. */
+export async function score({ items }) {
+  const [{ Bm25Index }, { relatedNotes }, { corpusVaults }, { sha256 }] = await Promise.all([bundle("../../../src/search/bm25.ts"), bundle("../../../src/related/related.ts"), import("../sets/related-real.mjs"), import("../fetch.mjs")]);
+  const { "recall@5": recall } = scoreWith(Bm25Index, relatedNotes, { items, vaults: corpusVaults(), hash: sha256 });
+  return { "recall@5": recall };
+}

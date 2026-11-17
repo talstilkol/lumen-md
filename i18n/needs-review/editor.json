@@ -1,0 +1,132 @@
+{
+  "block.codeDoctor.bestEffort": {
+    "ar": "8ap5u5",
+    "ru": "8ap5u5",
+    "fr": "8ap5u5",
+    "de": "8ap5u5",
+    "ja": "8ap5u5",
+    "zh-CN": "8ap5u5"
+  },
+  "block.codeDoctor.fixesReady": {
+    "ar": "19j2bkn",
+    "ru": "19j2bkn",
+    "fr": "19j2bkn",
+    "de": "19j2bkn",
+    "ja": "19j2bkn",
+    "zh-CN": "19j2bkn"
+  },
+  "block.codeDoctor.parsesCleanly": {
+    "ar": "17u0zg3",
+    "ru": "17u0zg3",
+    "fr": "17u0zg3",
+    "de": "17u0zg3",
+    "ja": "17u0zg3",
+    "zh-CN": "17u0zg3"
+  },
+  "block.codeDoctor.partial": {
+    "ar": "1ezuydg",
+    "ru": "1ezuydg",
+    "fr": "1ezuydg",
+    "de": "1ezuydg",
+    "ja": "1ezuydg",
+    "zh-CN": "1ezuydg"
+  },
+  "block.insights.estFiles": {
+    "ar": "1xz6lo6",
+    "ru": "1xz6lo6",
+    "fr": "1xz6lo6",
+    "de": "1xz6lo6",
+    "ja": "1xz6lo6",
+    "zh-CN": "1xz6lo6"
+  },
+  "docTabs.menu": {
+    "ar": "zjkkt4",
+    "de": "zjkkt4",
+    "fr": "zjkkt4",
+    "ja": "zjkkt4",
+    "ru": "zjkkt4",
+    "zh-CN": "zjkkt4",
+    "fa": "zjkkt4"
+  },
+  "docTabs.moveEarlier": {
+    "ar": "go64xc",
+    "de": "go64xc",
+    "fr": "go64xc",
+    "ja": "go64xc",
+    "ru": "go64xc",
+    "zh-CN": "go64xc",
+    "fa": "go64xc"
+  },
+  "docTabs.moveLater": {
+    "ar": "1mepiyu",
+    "de": "1mepiyu",
+    "fr": "1mepiyu",
+    "ja": "1mepiyu",
+    "ru": "1mepiyu",
+    "zh-CN": "1mepiyu",
+    "fa": "1mepiyu"
+  },
+  "editor.cursorMovement": {
+    "ar": "x3n27l",
+    "de": "x3n27l",
+    "fr": "x3n27l",
+    "ja": "x3n27l",
+    "ru": "x3n27l",
+    "zh-CN": "x3n27l",
+    "fa": "x3n27l"
+  },
+  "editor.cursorMovement.logical": {
+    "ar": "pptv79",
+    "de": "pptv79",
+    "fr": "pptv79",
+    "ja": "pptv79",
+    "ru": "pptv79",
+    "zh-CN": "pptv79",
+    "fa": "pptv79"
+  },
+  "editor.cursorMovement.visual": {
+    "ar": "91tcut",
+    "de": "91tcut",
+    "fr": "91tcut",
+    "ja": "91tcut",
+    "ru": "91tcut",
+    "zh-CN": "91tcut",
+    "fa": "91tcut"
+  },
+  "mode.preview": {
+    "fa": "1yfnwtz"
+  },
+  "mode.source": {
+    "fa": "r5qyuw"
+  },
+  "mode.split": {
+    "fa": "6a1ocj"
+  },
+  "outline.filter": {
+    "ar": "api0n6",
+    "de": "api0n6",
+    "fr": "api0n6",
+    "ja": "api0n6",
+    "ru": "api0n6",
+    "zh-CN": "api0n6",
+    "fa": "api0n6"
+  },
+  "outline.filterCount": {
+    "ar": "15jteiw",
+    "de": "15jteiw",
+    "fr": "15jteiw",
+    "ja": "15jteiw",
+    "ru": "15jteiw",
+    "zh-CN": "15jteiw",
+    "fa": "15jteiw"
+  },
+  "outline.filterNoMatch": {
+    "ar": "1ssj0iz",
+    "de": "1ssj0iz",
+    "fr": "1ssj0iz",
+    "ja": "1ssj0iz",
+    "ru": "1ssj0iz",
+    "zh-CN": "1ssj0iz",
+    "fa": "1ssj0iz"
+  }
+}

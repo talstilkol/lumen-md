@@ -1,0 +1,26 @@
+jest
+24 עברו · 1 נכשלו
+---
+ ❯ src/booking.test.ts (5 tests | 1 failed) 9ms
+   × booking > applies VAT 4ms
+     → expected 117 to be 118
+
+ FAIL  src/booking.test.ts > booking > applies VAT
+AssertionError: expected 117 to be 118 // Object.is equality
+
+- Expected
++ Received
+
+- 118
++ 117
+
+ ❯ src/booking.test.ts:14:27
+     12|   it('applies VAT', () => {
+     13|     const t = total(100);
+     14|     expect(t).toBe(118);
+       |               ^
+     15|   });
+
+Test Files  1 failed | 2 passed (3)
+Tests  1 failed | 24 passed (25)
+Duration  412ms

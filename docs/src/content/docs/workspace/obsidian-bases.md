@@ -1,6 +1,8 @@
 ---
 title: Obsidian Bases (.base files)
 description: Open, embed and edit Obsidian Bases files — what is supported, what is not, and how the golden set is checked.
+type: how-to
+tasks: ["W12.V1", "W4.30", "W1.12"]
 ---
 
 A vault that comes from Obsidian keeps its **Bases**: `.base` files (YAML)
@@ -149,6 +151,35 @@ views:
   stays as it was. A timeline bar keeps its length, so its end moves by
   the same number of days.
 - In Obsidian these view types show as a table.
+
+## Chart views (Lumen)
+
+```yaml
+views:
+  - type: chart
+    name: Pages by status
+    chart: bar           # bar | line | pie | scatter | heatmap | calendar
+    x: status            # the category (a date for line and calendar, a number for scatter)
+    y: pages             # optional: without it each note counts 1
+    series: author       # optional: one series per value (heatmap: the rows)
+    aggregate: sum       # count | sum | avg | min | max (default: sum with y, count without)
+```
+
+- The chart is drawn from the view's rows, after its filters, formulas,
+  relations and rollups. A note whose `x` is a list (tags, links) counts in
+  each of its values.
+- **Calendar** is a heatmap of weeks × weekdays: one cell per day, coloured
+  by the count or the sum. It is Gregorian; the Hebrew-calendar view is a
+  separate view.
+- Every chart has its **data table**: "Show the table" swaps the picture for
+  a table with exactly the chart's numbers, and it is shown on its own when
+  the chart can't be drawn. **Tab** to the chart, then the arrow keys move
+  from point to point (in Hebrew ← is "next", as the first point is on the
+  right); Home and End go to the ends, and each point is read out.
+- Right to left, the category axis starts on the right and the value axis
+  and legend sit on the right. Labels keep their own direction, so a
+  Hebrew label with a number or an English name is not scrambled.
+- In Obsidian this view type shows as a table.
 
 ## Big bases and CSV
 

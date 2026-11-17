@@ -22,6 +22,9 @@ export function hastToReact(tree: HastRoot): ReactElement {
     jsx,
     jsxs,
     components,
+    // Raw HTML may carry a style attribute that is not CSS (`<svg style=x>`):
+    // drop it instead of throwing, which failed the whole preview (W10.D21, fuzz #618854).
+    ignoreInvalidStyle: true,
   } as unknown as Parameters<typeof rehypeReact>[0]) as unknown as ReactCompiler;
   return compiler.stringify(tree);
 }

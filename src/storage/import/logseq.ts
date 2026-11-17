@@ -10,6 +10,7 @@
 import { claimPath, dirOf, mdDest, relativeTo, resolveRel, safeName, stemOf } from "./names";
 import { withFrontmatter } from "./frontmatter";
 import { emptyVault, type ConvertedVault } from "./types";
+import { swallowed } from "../../lib/logger";
 
 const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
 
@@ -31,9 +32,10 @@ export function pageName(fileStem: string): string {
   let s = fileStem;
   try {
     s = decodeURIComponent(s.replace(/%(?![0-9a-f]{2})/gi, "%25"));
-  } catch {
+  } catch (err) {
     // why: not percent-encoded: the file name is the page name
     /* as written */
+    swallowed("storage/import/logseq: not percent-encoded: the file name is the page name", err);
   }
   return s.replace(/___/g, "/");
 }
@@ -157,9 +159,10 @@ export function convertLogseq(files: Map<string, Uint8Array>): ConvertedVault {
         let decoded = d;
         try {
           decoded = decodeURIComponent(d);
-        } catch {
+        } catch (err) {
           // why: not percent-encoded: the link target is used as written
           /* as written */
+          swallowed("storage/import/logseq: not percent-encoded: the link target is used as written", err);
         }
         const target = assetPaths.get(resolveRel(dirOf(page.src), decoded).normalize("NFC").toLowerCase());
         return target ? `${open}${mdDest(relativeTo(dirOf(page.path), target))}${close}` : m;

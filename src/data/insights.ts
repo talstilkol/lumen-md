@@ -11,6 +11,7 @@
  */
 
 import type { ChartSuggestion } from "./suggest";
+import { compareNames } from "../i18n/collate";
 
 export type InsightsRecord = { [key: string]: unknown };
 
@@ -227,7 +228,7 @@ export function frequencyTable(records: InsightsRecord[], field: string): Freque
       count,
       probability: total === 0 ? 0 : count / total,
     }))
-    .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
+    .sort((a, b) => b.count - a.count || compareNames(a.value, b.value));
   return { field, total, entries };
 }
 
@@ -254,7 +255,7 @@ export function coOccurrence(
     for (const k of seen) counts.set(k, (counts.get(k) ?? 0) + 1);
   }
   const labels = [...counts.entries()]
-    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .sort((a, b) => b[1] - a[1] || compareNames(a[0], b[0]))
     .slice(0, topN)
     .map(([k]) => k);
   const idx = new Map(labels.map((l, i) => [l, i]));
@@ -295,7 +296,7 @@ export function groupSummary(records: InsightsRecord[], field: string): GroupSum
       count,
       share: total === 0 ? 0 : count / total,
     }))
-    .sort((a, b) => b.count - a.count || a.group.localeCompare(b.group));
+    .sort((a, b) => b.count - a.count || compareNames(a.group, b.group));
 }
 
 /**

@@ -12,6 +12,7 @@ import {
   isAssetName,
 } from "../storage/workspace";
 import { extractFrontmatter } from "../renderer/pipeline";
+import { compareNames } from "../i18n/collate";
 
 export interface TagBucket {
   tag: string;
@@ -53,7 +54,7 @@ export async function buildTagsIndex(): Promise<TagsIndex> {
   const untagged: string[] = [];
   let totalNotes = 0;
 
-  for (const f of indexedFiles().sort((a, b) => a.path.localeCompare(b.path))) {
+  for (const f of indexedFiles().sort((a, b) => compareNames(a.path, b.path))) {
     if (!/\.(md|markdown)$/i.test(f.path)) continue;
     if (isAssetName(f.name)) continue;
     totalNotes++;
@@ -75,7 +76,7 @@ export async function buildTagsIndex(): Promise<TagsIndex> {
   // Sort buckets by descending size so the densest tags surface first.
   const out: TagBucket[] = [...buckets.entries()]
     .map(([tag, paths]) => ({ tag, count: paths.length, paths: paths.sort() }))
-    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+    .sort((a, b) => b.count - a.count || compareNames(a.tag, b.tag));
 
   return { buckets: out, totalNotes, untaggedPaths: untagged.sort() };
 }

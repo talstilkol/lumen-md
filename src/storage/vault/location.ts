@@ -28,10 +28,10 @@ import { createTauriBackend, isDesktopApp, loadTauriInvoke, type TauriInvoke } f
 import { createMobileBackend, isMobileApp, loadMobileBridge, mobileFsFor, type MobileBridge, type MobileStore } from "./mobile";
 import { observeDirectoryHandle, watchExternalChanges } from "./watcher";
 import { warnUnreadable } from "./watchNotice";
-import { VaultMoveConflictError, refuseEncryptedMove, VaultPermissionError, allEntries, bytes, parentsOf, preflight, saveLateWrites, same, sha256, targetBytes, trashLeftovers } from "./moveCheck";
+import { VaultMoveConflictError, refuseEncryptedMove, VaultPermissionError, allEntries, bytes, desktopRootKey, desktopRootsNestedOnDisk, dropStaleCopies, foldersNested, parentsOf, preflight, saveLateWrites, same, sha256, targetBytes, trashLeftovers } from "./moveCheck";
 import { __resetIdentity, activeVaultId, adoptIdentity, enterIdentity, identityOrNull } from "./identity";
 import type { MoveReport } from "./moveCheck";
-export { VaultMoveConflictError, VaultEncryptedMoveError, VaultPermissionError } from "./moveCheck";
+export { VaultMoveConflictError, VaultEncryptedMoveError, VaultNestingUnknownError, VaultPermissionError } from "./moveCheck";
 export type { MoveReport } from "./moveCheck";
 
 // ── Persistence ──────────────────────────────────────────────────────────
@@ -537,9 +537,9 @@ export async function chooseMobileVaultFolder(): Promise<MoveReport | null> {
   return moveVault(to);
 }
 
-/** Phone: work in a folder on the device from now on, without copying (e.g. notes already there). Its name, or null. */
-export async function openMobileFolderAsVault(): Promise<string | null> {
-  const loc = await pickMobileLocation();
+/** Phone: work in a folder on the device from now on, without copying (a picked one, or `given`: a vault from the vault screen, W13.M6). Its name, or null. */
+export async function openMobileFolderAsVault(given?: Extract<StoredLocation, { kind: "mobile" }>): Promise<string | null> {
+  const loc = given ?? (await pickMobileLocation());
   if (!loc) return null;
   await kv.set(LOCATION_KEY, loc);
   await cancelPendingMove(); // its source is no longer the vault
@@ -650,6 +650,9 @@ export async function moveVault(
   const source = getVaultBackend();
   if (!source.available()) throw new Error("The current vault is not available.");
   if (await sameLocation(fromLoc, to)) throw new Error("The vault is already there.");
+  // A folder inside the vault, or the vault inside the folder: copying would write into the source itself (Codex P2 4575404797).
+  const nested = fromLoc.kind === "folder" && to.kind === "folder" ? await foldersNested(fromLoc.handle, to.handle) : fromLoc.kind === "desktop" && to.kind === "desktop" && (await desktopRootsNestedOnDisk(fromLoc.root, to.root, desktopInvoke ?? undefined)); // R8-L10, R8b-L1
+  if (nested) throw new Error("The vault cannot move into a folder inside itself, or into a folder that contains it.");
   // The vault keeps its identity where it goes: its history follows it (2.80).
   const fromId = activeVaultId() ?? (await idOf(fromLoc));
   const target = backendFor(to);
@@ -722,6 +725,8 @@ export async function moveVault(
       const there = await targetBytes(target, path);
       if (!there || !same(there, await bytes(source, path))) throw new Error(`“${path}” changed or went missing during the move; resume to copy it again.`);
     }
+    // A copy an interrupted run made of a note gone from the source since must not come back (Codex P2 4575404801).
+    if (await dropStaleCopies(target, written, copied)) await kv.set(MOVE_KEY, record);
     // The desktop app remembers its folder too (or forgets it when the vault leaves it).
     if (to.kind === "desktop") await (await desktop())("vault_use", { root: to.root });
     else await releaseDesktopFolder();
@@ -769,7 +774,7 @@ export async function cancelPendingMove(): Promise<void> {
 
 async function sameLocation(a: StoredLocation, b: StoredLocation): Promise<boolean> {
   if (a.kind === "opfs" || b.kind === "opfs") return a.kind === b.kind;
-  if (a.kind === "desktop" || b.kind === "desktop") return a.kind === "desktop" && b.kind === "desktop" && a.root === b.root;
+  if (a.kind === "desktop" || b.kind === "desktop") return a.kind === "desktop" && b.kind === "desktop" && desktopRootKey(a.root) === desktopRootKey(b.root);
   if (a.kind === "mobile" || b.kind === "mobile") {
     if (a.kind !== "mobile" || b.kind !== "mobile" || a.store !== b.store) return false;
     return a.store !== "saf" || (b.store === "saf" && a.uri === b.uri);

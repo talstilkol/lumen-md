@@ -7,27 +7,61 @@ import { useEffect, useRef } from "react";
 import type { Command } from "../ui/CommandPalette";
 import { announceCommand } from "../research/usability/commandEvents";
 import { countCommand } from "../metrics/count";
+import { builtWithSections, loadCommandSections } from "../commands/sectionsLoader";
+
+function findCommand(list: Command[], id: string): Command | undefined {
+  for (const c of list) {
+    if (c.id === id) return c;
+    const child = c.children ? findCommand(c.children as Command[], id) : undefined;
+    if (child) return child;
+  }
+  return undefined;
+}
+
+function run(cmd: Command): void {
+  announceCommand(cmd.id);
+  countCommand(cmd.id);
+  void cmd.action();
+}
+
+/** Runs a palette command by id, through the listener below (so it waits for the domains' chunk, plan 0.2). */
+export function runCommandById(id: string): void {
+  window.dispatchEvent(new CustomEvent("lumen-run-command", { detail: { id } }));
+}
 
 export function useCommandEvents(commands: Command[]): void {
   // The suggestions panel (and other UIs) re-run a palette command by id.
   const commandsRef = useRef(commands);
   commandsRef.current = commands;
+  // Plan 0.2: a command asked for before the domains' chunk arrived runs
+  // once the rebuilt list has it. Review 10 M1: "arrived" is decided from the
+  // list this hook was given, not from the loader (the chunk can be there
+  // before the list is rebuilt), and a failed load drops what was waiting.
+  const waitingRef = useRef<string[]>([]);
+  useEffect(() => {
+    if (!waitingRef.current.length) return;
+    const complete = builtWithSections(commands);
+    const still: string[] = [];
+    for (const id of waitingRef.current) {
+      const cmd = findCommand(commands, id);
+      if (cmd) run(cmd);
+      else if (!complete) still.push(id);
+    }
+    waitingRef.current = still;
+  }, [commands]);
   useEffect(() => {
     const onRun = (e: Event) => {
       const id = (e as CustomEvent<{ id?: string }>).detail?.id;
-      const find = (list: typeof commands): (typeof commands)[number] | undefined => {
-        for (const c of list) {
-          if (c.id === id) return c;
-          const child = c.children ? find(c.children as typeof commands) : undefined;
-          if (child) return child;
-        }
-        return undefined;
-      };
-      const cmd = id ? find(commandsRef.current) : undefined;
-      if (cmd) {
-        announceCommand(cmd.id);
-        countCommand(cmd.id);
-        void cmd.action();
+      if (!id) return;
+      const cmd = findCommand(commandsRef.current, id);
+      if (cmd) run(cmd);
+      else if (!builtWithSections(commandsRef.current)) {
+        waitingRef.current.push(id);
+        void loadCommandSections().catch((err: unknown) => {
+          // Not run later by surprise when another caller's retry succeeds.
+          waitingRef.current = waitingRef.current.filter((w) => w !== id);
+          console.warn("[lumen] command palette chunk failed to load", err);
+        });
       }
     };
     // The usage dialog (plan W4.26) needs every command id to name the unused ones; the beta panel's report (W6.31) names only these.

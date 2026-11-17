@@ -1,6 +1,7 @@
 ---
 title: Moving from Obsidian
 description: Bring an Obsidian vault into Lumen — notes, attachments, links and Bases — and what changes on the way.
+type: how-to
 ---
 
 An Obsidian vault is a folder of Markdown files, and so is a Lumen vault:

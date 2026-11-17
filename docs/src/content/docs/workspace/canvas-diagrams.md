@@ -1,6 +1,8 @@
 ---
 title: Diagrams on the canvas (Mermaid and "draw me")
 description: Turn Mermaid into shapes you can edit on the canvas, or describe a diagram and let a model on this device draw it.
+type: how-to
+tasks: ["W2.18"]
 ---
 
 **Diagram…** in the canvas bar opens the diagram dialog. The diagram is

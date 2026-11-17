@@ -18,12 +18,15 @@
  * 429 and 503 are retried after Retry-After (at most 5 tries).
  *
  * Turning it on (the owner): register an app in Microsoft Entra (SPA, the
- * redirect URI below), set VITE_ONENOTE_CLIENT_ID, and add
- * https://login.microsoftonline.com and https://graph.microsoft.com to
- * VITE_CSP_CONNECT_EXTRA. Without a client id the source is not offered.
+ * redirect URI below), put its client id in the deployment's
+ * `/lumen-runtime.json` (W4.19, onenoteClientId.ts: a runtime config, not a
+ * build variable), and add https://login.microsoftonline.com and
+ * https://graph.microsoft.com to VITE_CSP_CONNECT_EXTRA. A user can also
+ * enter their own app's client id in the import wizard. Without a client id
+ * the sign-in is not offered.
  */
 
-import { publicEnv } from "../../lib/publicEnv";
+import { oneNoteClientId } from "./onenoteClientId";
 import { htmlToNote } from "./html";
 import { claimPath, dirOf, mdEmbed, safeName } from "./names";
 import { isoDate, withFrontmatter } from "./frontmatter";
@@ -42,7 +45,7 @@ export interface OneNoteAuthConfig {
 
 /** The app's configuration, or null when no client id is set (then the sign-in is not offered). */
 export function oneNoteConfig(origin: string = typeof location !== "undefined" ? location.origin : ""): OneNoteAuthConfig | null {
-  const clientId = publicEnv("VITE_ONENOTE_CLIENT_ID");
+  const clientId = oneNoteClientId();
   if (!clientId || !origin) return null;
   return { clientId, redirectUri: `${origin}/oauth/onenote`, tenant: "common" };
 }

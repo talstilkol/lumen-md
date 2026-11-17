@@ -8,6 +8,8 @@
 
 # ── Cryptography: end-to-end sync, collaboration, the encrypted vault, secrets ──
 /src/sync/e2ee/                          @talstilkol
+/src/sync/e2ee/roles/                    @talstilkol
+/security/attacks/w12-s4-role-vault.test.ts @talstilkol
 /src/collab/encryption.ts                @talstilkol
 /src/storage/encryption.ts               @talstilkol
 /src/storage/vault/encrypted/            @talstilkol
@@ -34,6 +36,8 @@
 /src/ai/workerLedgerInstall.ts           @talstilkol
 /src/ai/policy.ts                        @talstilkol
 /src/lib/telemetry.ts                    @talstilkol
+/src/lib/monitoringScrub.ts              @talstilkol
+/src/lib/sentryMonitor.ts                @talstilkol
 
 # ── CSP, headers and security policy ──
 /src/build/cspEndpoints.ts               @talstilkol
@@ -51,11 +55,13 @@
 /src/lib/markupSanitizer.ts              @talstilkol
 /src/lib/urlSanitizer.ts                 @talstilkol
 /src/renderer/rehypeSanitizeRaw.ts       @talstilkol
+/src/renderer/rehypeRawSafe.ts           @talstilkol
 /src/plugins/runtime/capabilities.ts     @talstilkol
 /src/plugins/plantumlPolicy.ts           @talstilkol
 
 # ── Relays, sharing, privacy and redaction (reviews 4 and 6: the receipt gate's sensitive list) ──
 /sync-server/                            @talstilkol
+/sync-server/vault-relay-roles.js        @talstilkol
 /edge-workers/                           @talstilkol
 /src/collab/roomProof.ts                 @talstilkol
 /src/collab/roomToken.ts                 @talstilkol
@@ -75,9 +81,16 @@
 # ── Every other door an export leaves by: each must call prepareForExport (review 8, RR8-481-1) ──
 /src/storage/exportDocx.ts               @talstilkol
 /src/storage/exportHtml.ts               @talstilkol
+/src/storage/exportOdt.ts                @talstilkol
+/src/storage/exportTypst.ts              @talstilkol
 /src/ui/PrintExport.tsx                  @talstilkol
 /src/commands/domains/export.ts          @talstilkol
+# W12.R3: highlights written as an APA note inside the vault (nothing leaves the device).
+/src/highlights/apaExport.ts             @talstilkol
+/src/highlights/apaExportRun.ts          @talstilkol
 /src/publish/site.ts                     @talstilkol
+/src/entities/export.ts                  @talstilkol
+/src/entities/wikidata.ts                @talstilkol
 /src/cli/publish.ts                      @talstilkol
 /src/cli/convert.ts                      @talstilkol
 
@@ -151,8 +164,11 @@
 /src/storage/exportAll.ts                @talstilkol
 /src/storage/exportDocx.ts               @talstilkol
 /src/storage/exportFormats.ts            @talstilkol
+/src/storage/exportOutline.ts            @talstilkol
 /src/storage/exportHtml.ts               @talstilkol
+/src/storage/exportOdt.ts                @talstilkol
 /src/storage/exportPptx.ts               @talstilkol
+/src/storage/exportTypst.ts              @talstilkol
 /src/ui/PrintExport.tsx                  @talstilkol
 /src/ui/PublishSiteDialog.tsx            @talstilkol
 /src/ui/canvasExport.ts                  @talstilkol
@@ -233,11 +249,14 @@
 /src/playground/runner.ts                @talstilkol
 /src/plugins/LiveSvgBlock.tsx            @talstilkol
 /src/renderer/pipeline.ts                @talstilkol
+/src/viewers/NotebookView.tsx            @talstilkol
 /vite.config.ts                          @talstilkol
 
 # ── Agent tools and MCP: what an agent may do, and what reaches it (review 21) ──
 /mcp-server/src/                         @talstilkol
 /src/agents/mcp/                         @talstilkol
+/src-tauri/mcp-stdio/                    @talstilkol
+/src-tauri/src/mcp_stdio.rs              @talstilkol
 /src/agents/skills/                      @talstilkol
 /src/agents/runtime.ts                   @talstilkol
 /src/agents/untrusted.ts                 @talstilkol
@@ -271,6 +290,8 @@
 /src/ai/screenshotNote.ts                @talstilkol
 /src/book/app.ts                         @talstilkol
 /src/citations/run.ts                    @talstilkol
+/src/citations/openAlexLookup.ts         @talstilkol
+/src/citations/doiOpenAlex.ts            @talstilkol
 /src/commands/domains/exportActions.ts   @talstilkol
 /src/commands/domains/journalistActions.ts @talstilkol
 /src/pdf/zoteroSend.ts                   @talstilkol
@@ -282,3 +303,30 @@
 # P1 round (train 6): sensitive files the merges added (codeowners-coverage)
 /src/agents/defs/piiNames.ts             @talstilkol
 /src/agents/executors/lmstudio.ts        @talstilkol
+
+# ── Review 11 (L11, M4): what runs on npm install, how a clone is set up, and the plan's ratchets ──
+#   npm install runs `prepare` (package.json) → these scripts, in every contributor's clone
+/package.json                            @talstilkol
+/scripts/prepare.mjs                     @talstilkol
+/scripts/install-git-hooks.mjs           @talstilkol
+/scripts/git-setup.mjs                   @talstilkol
+/scripts/lane-state.mjs                  @talstilkol
+/scripts/lib/lane-state.mjs              @talstilkol
+/scripts/lib/ciLocal.mjs                 @talstilkol
+#   Merge drivers and line endings for every clone
+/.gitattributes                          @talstilkol
+#   The audit ledger and the WIP gate's exemptions: append-only and shrink-only (scripts/plan/ledgerRatchet.mjs)
+/plan/audit-verdicts.json                @talstilkol
+/plan/wip-frozen.json                    @talstilkol
+/plan/ledger-snapshot.json               @talstilkol
+/scripts/plan/wipGate.mjs                @talstilkol
+/scripts/plan/auditGuard.mjs             @talstilkol
+/scripts/plan/ledgerRatchet.mjs          @talstilkol
+
+# ── Review 12 (M2, M3): the WIP decisions and the merged-while-frozen ledger ──
+#   plan.json's schedule can't be owned line by line, so the written WIP decisions moved to their own file
+/plan/wip-decisions.json                 @talstilkol
+/scripts/plan/wipDecisions.mjs           @talstilkol
+#   Work merged while its wave was frozen: append-only, mergeSha an ancestor of the train
+/plan/merged-while-frozen.json           @talstilkol
+/scripts/plan/mergedWhileFrozen.mjs      @talstilkol

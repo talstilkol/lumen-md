@@ -10,5 +10,7 @@
   "query.error": "Can't run this query: {error}",
   "query.loading": "Running the query…",
   "query.none": "No notes match.",
-  "query.title": "Query"
+  "query.openAsGraph": "Open as graph",
+  "query.title": "Query",
+  "query.tooLarge": "This query makes too many rows or takes too long, so it was stopped. Add a WHERE or a LIMIT before FLATTEN, or nest fewer map() calls."
 }

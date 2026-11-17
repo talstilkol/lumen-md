@@ -10,7 +10,7 @@
  * pending list as they are withdrawn.
  */
 
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { FileDiff, X } from "lucide-react";
 import { getLocale, t } from "../i18n";
 import { approveStagedChange, listStagedChanges, onStagedChanges, rejectStagedChange } from "../agents/staging";
@@ -20,6 +20,9 @@ import "./agentReviewPanelStrings";
 import { HelpButton } from "./HelpButton";
 import { EmptyState, learnHow } from "./EmptyState";
 import { Modal } from "./Modal";
+import { EntityReviewHost } from "./EntityReviewHost";
+// W13.A5: the proposing agent's model card, with its strings and data, in its own chunk.
+const ModelCardToggle = lazy(() => import("./ModelCardToggle"));
 
 interface Props {
   open: boolean;
@@ -81,7 +84,7 @@ function outcomeText(c: StagedChange): string {
 function InlineDiff({ before, after }: { before: string; after: string }) {
   const parts = useMemo(() => inlineDiff(before, after), [before, after]);
   return (
-    <div dir="auto" data-testid="agent-change-inline" style={{ ...code, whiteSpace: "pre-wrap", wordBreak: "break-word", padding: "6px 8px", borderRadius: 6, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", maxHeight: 260, overflowY: "auto" }}>
+    <div dir="auto" data-testid="agent-change-inline" tabIndex={0} role="group" aria-label={t("agentReview.changeRegion")} style={{ ...code, whiteSpace: "pre-wrap", wordBreak: "break-word", padding: "6px 8px", borderRadius: 6, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", maxHeight: 260, overflowY: "auto" }}>
       {parts.map((p, i) =>
         p.op === "eq" ? (
           <span key={i}>{p.text}</span>
@@ -99,7 +102,7 @@ function LineDiff({ before, after }: { before: string | null; after: string }) {
   const rows = useMemo(() => lineDiffRows(before, after), [before, after]);
   if (!rows) return <div style={muted}>{t("agentReview.tooBig")}</div>;
   return (
-    <div data-testid="agent-change-lines" style={{ ...code, borderRadius: 6, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", maxHeight: 320, overflow: "auto" }}>
+    <div data-testid="agent-change-lines" tabIndex={0} role="group" aria-label={t("agentReview.changeRegion")} style={{ ...code, borderRadius: 6, background: "hsl(var(--bg))", border: "1px solid hsl(var(--border))", maxHeight: 320, overflow: "auto" }}>
       {rows.map((r, i) =>
         r.op === "gap" ? (
           <div key={i} style={{ ...muted, padding: "2px 8px", fontStyle: "italic" }}>
@@ -173,6 +176,11 @@ function GroupHeader({ group }: { group: RunGroup }) {
           {t("agentReview.run", { run: group.runId.slice(-8) })}
         </code>
       )}
+      {group.agentId && !group.agentId.startsWith("mcp:") && (
+        <Suspense fallback={null}>
+          <ModelCardToggle agent={group.agentId} runId={group.runId} />
+        </Suspense>
+      )}
     </div>
   );
 }
@@ -223,7 +231,10 @@ export function AgentReviewPanel({ open, onClose }: Props) {
           </button>
         </header>
 
-        <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 12, fontSize: 13, lineHeight: 1.5, overflowY: "auto" }}>
+        {/* Audit r4 A2.6: a scrollable region must be reachable by keyboard (axe scrollable-region-focusable). */}
+        <div tabIndex={0} role="region" aria-label={t("agentReview.listRegion")} data-testid="agent-review-body" style={{ padding: 18, display: "flex", flexDirection: "column", gap: 12, fontSize: 13, lineHeight: 1.5, overflowY: "auto" }}>
+          {/* W12.E5: the entity graph's proposals sit above the agents' staged changes (nothing when the vault has no graph). */}
+          <EntityReviewHost />
           <p style={{ ...muted, margin: 0 }}>{t("agentReview.intro")}</p>
           {model.pendingCount === 0 && (
             <EmptyState testId="agent-review-empty" style={{ padding: "12px 0" }} message={t("agentReview.empty")} action={learnHow("ai/local-agents#reviewing-proposed-changes")} />

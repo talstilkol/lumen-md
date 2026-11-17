@@ -45,18 +45,9 @@
       ]
     },
     {
-      "key": "block.codeDoctor.bestEffort.one",
-      "en": "Best-effort repair — {n} issue remains.",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "block.codeDoctor.bestEffort.other",
-      "en": "Best-effort repair — {n} issues remain.",
-      "vars": [
-        "n"
-      ]
+      "key": "block.codeDoctor.bestEffort",
+      "en": "{n, plural, one {Best-effort repair — # issue remains.} other {Best-effort repair — # issues remain.}}",
+      "vars": []
     },
     {
       "key": "block.codeDoctor.charRange",
@@ -110,18 +101,9 @@
       ]
     },
     {
-      "key": "block.codeDoctor.fixesReady.one",
-      "en": "· {n} fix ready",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "block.codeDoctor.fixesReady.other",
-      "en": "· {n} fixes ready",
-      "vars": [
-        "n"
-      ]
+      "key": "block.codeDoctor.fixesReady",
+      "en": "{n, plural, one {· # fix ready} other {· # fixes ready}}",
+      "vars": []
     },
     {
       "key": "block.codeDoctor.identical",
@@ -139,32 +121,14 @@
       "vars": []
     },
     {
-      "key": "block.codeDoctor.parsesCleanly.one",
-      "en": "Parses cleanly after {n} fix.",
-      "vars": [
-        "n"
-      ]
+      "key": "block.codeDoctor.parsesCleanly",
+      "en": "{n, plural, one {Parses cleanly after # fix.} other {Parses cleanly after # fixes.}}",
+      "vars": []
     },
     {
-      "key": "block.codeDoctor.parsesCleanly.other",
-      "en": "Parses cleanly after {n} fixes.",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "block.codeDoctor.partial.one",
-      "en": "· {n} issue — partial repair",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "block.codeDoctor.partial.other",
-      "en": "· {n} issues — partial repair",
-      "vars": [
-        "n"
-      ]
+      "key": "block.codeDoctor.partial",
+      "en": "{n, plural, one {· # issue — partial repair} other {· # issues — partial repair}}",
+      "vars": []
     },
     {
       "key": "block.codeDoctor.repairedTable",
@@ -586,18 +550,9 @@
       "vars": []
     },
     {
-      "key": "block.insights.estFiles.one",
-      "en": "≈ {n} file",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "block.insights.estFiles.other",
-      "en": "≈ {n} files",
-      "vars": [
-        "n"
-      ]
+      "key": "block.insights.estFiles",
+      "en": "{n, plural, one {≈ # file} other {≈ # files}}",
+      "vars": []
     },
     {
       "key": "block.insights.field",
@@ -1628,8 +1583,40 @@
       "vars": []
     },
     {
+      "key": "docTabs.menu",
+      "en": "Tab menu: {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "docTabs.moveEarlier",
+      "en": "Move earlier",
+      "vars": []
+    },
+    {
+      "key": "docTabs.moveLater",
+      "en": "Move later",
+      "vars": []
+    },
+    {
       "key": "editor.ariaLabel",
       "en": "Markdown source editor",
+      "vars": []
+    },
+    {
+      "key": "editor.cursorMovement",
+      "en": "Cursor movement in mixed Hebrew and English text",
+      "vars": []
+    },
+    {
+      "key": "editor.cursorMovement.logical",
+      "en": "Logical — arrows follow the order of the text",
+      "vars": []
+    },
+    {
+      "key": "editor.cursorMovement.visual",
+      "en": "Visual — arrows move the way the line looks (like Word)",
       "vars": []
     },
     {
@@ -1995,6 +1982,25 @@
       "vars": []
     },
     {
+      "key": "outline.filter",
+      "en": "Filter headings",
+      "vars": []
+    },
+    {
+      "key": "outline.filterCount",
+      "en": "{total, plural, one {{n} of # heading} other {{n} of # headings}}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "outline.filterNoMatch",
+      "en": "No heading matches “{q}”.",
+      "vars": [
+        "q"
+      ]
+    },
+    {
       "key": "outline.fold",
       "en": "Fold",
       "vars": []
@@ -2032,6 +2038,14 @@
       "vars": []
     },
     {
+      "key": "vaultCite.claimsUnsupported",
+      "en": "{n} of {total} claims have no verified quote — they are marked in the answer.",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
       "key": "vaultCite.noSource",
       "en": "no such source",
       "vars": []
@@ -2040,6 +2054,25 @@
       "key": "vaultCite.notVerified",
       "en": "Quote not found in the note",
       "vars": []
+    },
+    {
+      "key": "vaultCite.pin",
+      "en": "Pin link [{n}]",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "vaultCite.pinGone",
+      "en": "That paragraph has changed since the answer; ask again.",
+      "vars": []
+    },
+    {
+      "key": "vaultCite.pinned",
+      "en": "Link pinned and copied: {link}",
+      "vars": [
+        "link"
+      ]
     },
     {
       "key": "vaultCite.summary",
@@ -2052,6 +2085,11 @@
     {
       "key": "vaultCite.unsupported",
       "en": "No verified citation — check this answer against your notes.",
+      "vars": []
+    },
+    {
+      "key": "vaultCite.unsupportedClaim",
+      "en": "not supported by a verified quote",
       "vars": []
     },
     {

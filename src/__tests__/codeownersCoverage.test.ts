@@ -5,12 +5,12 @@
  * @vitest-environment node
  */
 import { describe, expect, it } from "vitest";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 // @ts-expect-error — plain .mjs module without type declarations
-import { classify, coverage, inScope, MAX_EXCEPTION_DAYS, parseExceptions, suggestedLines } from "../../scripts/lib/sensitivePaths.mjs";
+import { classify, coverage, inScope, MAX_EXCEPTION_DAYS, ownedBy, parseExceptions, suggestedLines } from "../../scripts/lib/sensitivePaths.mjs";
 // @ts-expect-error — plain .mjs module without type declarations
 import { parseCodeowners } from "../../scripts/lib/humanReview.mjs";
 // @ts-expect-error — plain .mjs module without type declarations
@@ -100,6 +100,12 @@ describe("coverage", () => {
     const c = coverage([{ path: "src/storage/exportOdt.ts", text: "" }, { path: "src/storage/exportDocx.ts", text: "" }], entries, null, TODAY);
     expect(c.uncovered.map((u: { file: string }) => u.file)).toEqual(["src/storage/exportOdt.ts"]);
     expect(suggestedLines(c.uncovered)[0]).toMatch(/^\/src\/storage\/exportOdt\.ts\s+@talstilkol$/);
+  });
+
+  it("review 11, L11 / M4: what npm install runs, the clone set-up and the plan's ratchet files have an owner", () => {
+    const entries = parseCodeowners(readFileSync(join(ROOT, ".github/CODEOWNERS"), "utf8"));
+    const files = ["package.json", "scripts/prepare.mjs", "scripts/install-git-hooks.mjs", "scripts/git-setup.mjs", "scripts/lane-state.mjs", "scripts/lib/lane-state.mjs", ".gitattributes", "plan/audit-verdicts.json", "plan/wip-frozen.json", "plan/ledger-snapshot.json", "scripts/plan/wipGate.mjs", "scripts/plan/ledgerRatchet.mjs"];
+    expect(files.filter((f) => !ownedBy(f, entries))).toEqual([]);
   });
 
   it("this repository: 0 sensitive files without an owner", () => {

@@ -1,8 +1,11 @@
 {
-  "graphView.empty": "No workspace files found. Open the workspace panel and add files to see the knowledge graph.",
-  "graphView.openWorkspace": "Open the workspace",
-  "graphView.stats": "{nodes} nodes · {edges} connections",
   "graph.ariaLabel": "Knowledge graph of {nodes} notes",
+  "graph.engine": "Engine",
+  "graph.engine.auto": "Automatic",
+  "graph.engine.gpu": "GPU",
+  "graph.engine.list": "Table only",
+  "graph.engine.noGpu": "{nodes} notes are too many to draw without WebGL 2 here, so the graph shows as a table.",
+  "graph.engine.standard": "Standard",
   "graph.filter.property": "Property (key=value)",
   "graph.filters": "Graph filters",
   "graph.groupBy": "Colour by",
@@ -17,5 +20,14 @@
   "graph.table.more": "and {n} more",
   "graph.table.none": "no links",
   "graph.table.note": "Note",
-  "graph.table.toggle": "Show as a table"
+  "graph.table.toggle": "Show as a table",
+  "graph.time.created": "Created",
+  "graph.time.field": "Time by",
+  "graph.time.modified": "Last saved",
+  "graph.time.pause": "Pause",
+  "graph.time.play": "Play",
+  "graph.time.until": "Up to",
+  "graphView.empty": "No workspace files found. Open the workspace panel and add files to see the knowledge graph.",
+  "graphView.openWorkspace": "Open the workspace",
+  "graphView.stats": "{nodes} nodes · {edges} connections"
 }

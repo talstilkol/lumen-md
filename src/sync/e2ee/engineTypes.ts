@@ -164,6 +164,14 @@ export class BlobMissingError extends Error {}
 /** Files above this size keep no ancestor bytes for merges (attachments; plan W1.8). */
 export const BASE_BYTES_LIMIT = 4 * 1024 * 1024;
 
+/**
+ * Base entries saved together by the bulk loops (`setBase` with `soon`),
+ * blob names recorded in `pending` together before their uploads, and
+ * deleted names forgotten together (FC1). The store saves the whole device
+ * state at once, so one save per file made a 10,000-file sync quadratic.
+ */
+export const SAVE_BATCH = 128;
+
 export interface RekeyRequest {
   revoke?: string[];
   enroll?: Record<string, string>;
@@ -252,6 +260,11 @@ export interface E2eeSyncOptions {
   now?: () => number;
   /** This device's selective-sync rule (plan W1.8): the reason a path is kept out, or null. Read every round. */
   exclude?: ExcludeRule;
+  /**
+   * Plan W13.S2 (shared vaults): where an excluded arrival is kept instead —
+   * settings as `<path>.bak`, never loaded — or null to drop it. Read every round.
+   */
+  quarantine?: (path: string) => string | null;
   /** Each step of a round, as it happens (plan W1.8). A listener that throws is ignored. */
   onEvent?: SyncEventListener;
   /**

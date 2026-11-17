@@ -42,7 +42,7 @@ export const EMBED_ORIGINS: ReadonlySet<string> = new Set([
 
 /**
  * A site whose frames keep `allow-same-origin`: EMBED_ORIGINS, and the frame
- * site this build was made with. That one comes from VITE_CONTENT_FRAME_URL
+ * site this build was made with. That one comes from LUMEN_CONTENT_FRAME_URL
  * (src/lib/contentFrame.ts, a build-time value, with the same checks as
  * cspEndpoints.ts's frame-src entry), so a self-hosted frame site keeps its
  * embeds' players working without an edit here (review t5, L4).

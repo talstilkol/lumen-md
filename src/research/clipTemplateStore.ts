@@ -11,6 +11,7 @@
  * empty by fill().
  */
 import { triggerMatches, type ClipTemplate } from "./clipTemplates";
+import { wordSlug } from "../lib/slug";
 
 export const CLIP_TEMPLATES_PATH = ".lumen/clip-templates.json";
 
@@ -49,7 +50,7 @@ export function parseTemplates(text: string): ClipTemplate[] {
   return list
     .filter((x): x is Record<string, unknown> => !!x && typeof x === "object")
     .map((x) => ({
-      id: str(x.id) || slugId(str(x.name)),
+      id: str(x.id) || templateId(str(x.name)),
       name: str(x.name),
       path: str(x.path) || "{{library}}",
       noteName: str(x.noteName) || "{{title}}",
@@ -63,8 +64,9 @@ export function parseTemplates(text: string): ClipTemplate[] {
 
 export const serializeTemplates = (list: readonly ClipTemplate[]): string => JSON.stringify({ version: 1, templates: list }, null, 2) + "\n";
 
-export function slugId(name: string): string {
-  return name.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "") || "template";
+/** A template's id from its name (lib/slug.ts wordSlug, lowercase), "template" when nothing is left. */
+export function templateId(name: string): string {
+  return wordSlug(name, { lower: true }) || "template";
 }
 
 /** An Obsidian Web Clipper template export (one template, or a list) as ours. */
@@ -76,7 +78,7 @@ export function importObsidianTemplate(text: string): ClipTemplate[] {
     if (typeof x.name !== "string" || typeof x.noteContentFormat !== "string") throw new Error("not an Obsidian Web Clipper template export (name, noteContentFormat)");
     const props = Array.isArray(x.properties) ? (x.properties as Array<{ name?: unknown; value?: unknown }>) : [];
     return {
-      id: slugId(x.name),
+      id: templateId(x.name),
       name: x.name,
       path: typeof x.path === "string" && x.path ? x.path : "{{library}}",
       noteName: typeof x.noteNameFormat === "string" && x.noteNameFormat ? x.noteNameFormat : "{{title}}",

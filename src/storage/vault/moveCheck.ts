@@ -227,3 +227,110 @@ export async function trashLeftovers(target: VaultBackend, leftBehind: Record<st
   }
   return trashed;
 }
+
+/** One folder inside the other (FileSystemDirectoryHandle.resolve): a vault cannot move into itself, or around itself. */
+export async function foldersNested(a: FileSystemDirectoryHandle, b: FileSystemDirectoryHandle): Promise<boolean> {
+  type Resolving = { resolve?: (o: FileSystemHandle) => Promise<string[] | null> };
+  const inside = async (outer: FileSystemDirectoryHandle, inner: FileSystemDirectoryHandle) => {
+    const r = (outer as Resolving).resolve;
+    if (typeof r !== "function") return false;
+    const path = await r.call(outer, inner).catch(() => null);
+    return !!path && path.length > 0;
+  };
+  return (await inside(a, b)) || (await inside(b, a));
+}
+
+/** Is the file system of this desktop case-insensitive by default (macOS APFS/HFS+, Windows NTFS)? */
+export function caseInsensitiveDesktop(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const nav = navigator as Navigator & { userAgentData?: { platform?: string } };
+  return /mac|win/i.test(nav.userAgentData?.platform || nav.platform || nav.userAgent || "");
+}
+
+/**
+ * A desktop vault root in one spelling (R8-L10, R8b-L1): Unicode NFC (macOS
+ * hands out NFD names, and Hebrew points typed in another order are the same
+ * text), `\` as `/`, no repeated or trailing separator, `.` and `..` resolved
+ * (`..` never climbs above the root or a drive: `/../x` is `/x`), and lower
+ * case where the file system ignores case (macOS, Windows). `/Users/x/Vault/`,
+ * `/users/x/./vault` and `/Users/x/A/../Vault` are then the same folder.
+ * Spelling only: a symlink or `/tmp` vs `/private/tmp` needs the disk
+ * (`desktopRootsNestedOnDisk`).
+ */
+export function desktopRootKey(root: string, caseInsensitive = caseInsensitiveDesktop()): string {
+  const s = root.normalize("NFC").replace(/\\/g, "/");
+  const lead = /^\/\/[^/]/.test(s) ? "//" : s.startsWith("/") ? "/" : "";
+  const out: string[] = [];
+  // The part `..` stops at: the root of an absolute path, a drive (`C:`), or a UNC server and share.
+  const floor = lead === "//" ? 2 : /^[A-Za-z]:$/.test(s.split("/")[0]) ? 1 : 0;
+  for (const part of s.split("/")) {
+    if (part === "" || part === ".") continue;
+    if (part !== "..") out.push(part);
+    else if (out.length > floor && out[out.length - 1] !== "..") out.pop();
+    else if (!lead && !floor) out.push(part); // a relative path keeps a leading `..`
+  }
+  const key = lead + out.join("/");
+  return caseInsensitive ? key.toLowerCase() : key;
+}
+
+/** Two desktop roots where one is the other or inside it: copying would write into the source itself. */
+export function desktopRootsNested(a: string, b: string, caseInsensitive = caseInsensitiveDesktop()): boolean {
+  const [x, y] = [desktopRootKey(a, caseInsensitive), desktopRootKey(b, caseInsensitive)];
+  const within = (outer: string, inner: string) => inner === outer || inner.startsWith(outer.endsWith("/") ? outer : `${outer}/`);
+  return within(x, y) || within(y, x);
+}
+
+type NestedInvoke = <T>(cmd: string, args?: Record<string, unknown>) => Promise<T>;
+
+/**
+ * The desktop app could not say whether one folder is inside the other (review 9,
+ * L7): the move is refused rather than risk copying the vault into itself.
+ */
+export class VaultNestingUnknownError extends Error {
+  constructor(readonly reason: string) {
+    super(`Lumen could not check on disk whether one of the two folders is inside the other (${reason}), so the vault was not moved.`);
+    this.name = "VaultNestingUnknownError";
+  }
+}
+
+/**
+ * The same, asking the disk too (R8b-L1): the desktop app's `vault_roots_nested`
+ * resolves both granted folders (realpath, and the inode on Unix), so a symlink,
+ * `/tmp` vs `/private/tmp`, a junction or a case the platform guess missed is
+ * seen. The spelling check runs first. When the disk can't answer (an older
+ * app, the command not yet allowed by the isolation app, an error, an answer
+ * that is not a boolean) the move is refused: it throws VaultNestingUnknownError
+ * (review 9, L7: it used to fall back to the spelling, which can miss a nesting).
+ */
+export async function desktopRootsNestedOnDisk(a: string, b: string, invoke?: NestedInvoke): Promise<boolean> {
+  if (desktopRootsNested(a, b)) return true;
+  let answer: unknown;
+  try {
+    const call: NestedInvoke = invoke ?? (await (await import("./tauri")).loadTauriInvoke());
+    answer = await call<unknown>("vault_roots_nested", { a, b });
+  } catch (e) {
+    throw new VaultNestingUnknownError((e as Error)?.message || String(e));
+  }
+  if (typeof answer !== "boolean") throw new VaultNestingUnknownError(`the app answered ${JSON.stringify(answer) ?? String(answer)}`);
+  return answer;
+}
+
+/**
+ * Before the switch: a file an interrupted run copied (`written`) that has
+ * left the source since (deleted or renamed before Resume, so not in
+ * `copied`) would come back in the new vault. The move's own copy goes if it
+ * still holds exactly what the move wrote; one edited in the folder since is
+ * left alone. The source's trash, if the note went there, was copied with the
+ * rest, so nothing is lost. Returns whether `written` changed.
+ */
+export async function dropStaleCopies(target: VaultBackend, written: Record<string, string>, copied: Record<string, string>): Promise<boolean> {
+  let changed = false;
+  for (const [path, hash] of Object.entries(written)) {
+    if (copied[path]) continue;
+    const there = await targetBytes(target, path).catch(() => null);
+    if (there && (await sha256(there)) === hash) await target.remove(path);
+    delete written[path];
+    changed = true;
+  }
+  return changed;
+}

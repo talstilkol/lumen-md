@@ -1,6 +1,8 @@
 ---
 title: Hebrew niqqud on this device
 description: Add or remove vowel points (niqqud) in Hebrew text with a model that runs in your browser.
+type: how-to
+tasks: ["W10.E42", "W2.5", "6.3"]
 ---
 
 Three commands in `⌘K`, on the selection — or the whole note when nothing

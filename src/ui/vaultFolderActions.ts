@@ -19,9 +19,11 @@ export function reportLateCopies(r: { conflictCopies?: string[] }): void {
 
 /** Toast for a failed move: conflicts, permission, or anything else. */
 export async function reportMoveError(e: unknown, folder: string): Promise<void> {
-  const { VaultMoveConflictError, VaultPermissionError } = await import("../storage/vault/location");
+  const { VaultMoveConflictError, VaultNestingUnknownError, VaultPermissionError } = await import("../storage/vault/location");
   if (e instanceof VaultMoveConflictError) {
     showAiToast(t("vault.folder.conflict", { n: String(e.paths.length), folder, path: e.paths[0] }), "error");
+  } else if (e instanceof VaultNestingUnknownError) {
+    showAiToast(t("vault.folder.nestingUnknown"), "error");
   } else if (e instanceof VaultPermissionError) {
     showAiToast(t("vault.folder.permissionDenied", { folder }), "error");
   } else {

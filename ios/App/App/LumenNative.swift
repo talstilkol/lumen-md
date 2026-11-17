@@ -64,6 +64,18 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "pendingCaptures", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "removeCaptures", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "captureFile", returnType: CAPPluginReturnPromise),
+        // W13.Y4: the system text size (Dynamic Type) as a scale of the default.
+        CAPPluginMethod(name: "getTextScale", returnType: CAPPluginReturnPromise),
+        // W13.M5: a second window on iPad, for a note or empty.
+        CAPPluginMethod(name: "openWindow", returnType: CAPPluginReturnPromise),
+        // W13.M2: the capture Live Activity (Lock Screen, Dynamic Island).
+        CAPPluginMethod(name: "startCaptureActivity", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "updateCaptureActivity", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "endCaptureActivity", returnType: CAPPluginReturnPromise),
+        // W13.M3: the notes Spotlight and Siri may know (the WebView chooses).
+        CAPPluginMethod(name: "updateSpotlight", returnType: CAPPluginReturnPromise),
+        // W13.M4: VisionKit's document camera.
+        CAPPluginMethod(name: "scanDocument", returnType: CAPPluginReturnPromise),
     ]
 
     override public func load() {
@@ -71,6 +83,55 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
         NotificationCenter.default.addObserver(self, selector: #selector(onResume), name: UIApplication.didBecomeActiveNotification, object: nil)
         // The native capture sheet saved while the app is open: drain now, not on the next resume.
         NotificationCenter.default.addObserver(self, selector: #selector(onResume), name: CaptureQueue.changed, object: nil)
+        // W13.M2: the Live Activity's Stop button.
+        NotificationCenter.default.addObserver(self, selector: #selector(onCaptureStop), name: .lumenCaptureStop, object: nil)
+    }
+
+    @objc func onCaptureStop() {
+        notifyListeners("captureStop", data: [:])
+    }
+
+    private static func mode(_ call: CAPPluginCall) -> String {
+        call.getString("mode") == "recording" ? "recording" : "capture"
+    }
+
+    private static func since(_ call: CAPPluginCall) -> Date {
+        let ms = call.getDouble("since") ?? Date().timeIntervalSince1970 * 1000
+        return Date(timeIntervalSince1970: min(ms, Date().timeIntervalSince1970 * 1000) / 1000)
+    }
+
+    @objc func startCaptureActivity(_ call: CAPPluginCall) {
+        let id = LiveCapture.start(mode: Self.mode(call), since: Self.since(call))
+        call.resolve(["id": id as Any])
+    }
+
+    @objc func updateCaptureActivity(_ call: CAPPluginCall) {
+        LiveCapture.update(mode: Self.mode(call), since: Self.since(call))
+        call.resolve()
+    }
+
+    /// W13.M4: scan pages with the document camera → { status, engine, pages: [base64 JPEG], pdf }.
+    @objc func scanDocument(_ call: CAPPluginCall) {
+        DispatchQueue.main.async { DocScanner.start(call, from: self.bridge?.viewController) }
+    }
+
+    /// W13.M3: { upsert: [{path, title, snippet, modified}], remove: [path], reset }.
+    @objc func updateSpotlight(_ call: CAPPluginCall) {
+        let upsert: [NoteStore.Note] = (call.getArray("upsert", JSObject.self) ?? []).compactMap { o in
+            guard let path = o["path"] as? String, let title = o["title"] as? String else { return nil }
+            return NoteStore.Note(path: path, title: String(title.prefix(200)), snippet: String(((o["snippet"] as? String) ?? "").prefix(200)), modified: (o["modified"] as? Double) ?? 0)
+        }
+        let remove = call.getArray("remove", String.self) ?? []
+        let reset = call.getBool("reset") ?? false
+        DispatchQueue.global(qos: .utility).async {
+            NoteStore.apply(upsert: upsert, remove: remove, reset: reset)
+            call.resolve()
+        }
+    }
+
+    @objc func endCaptureActivity(_ call: CAPPluginCall) {
+        LiveCapture.end(saved: call.getString("outcome") == "saved")
+        call.resolve()
     }
 
     @objc func onAction(_ n: Notification) {
@@ -83,10 +144,39 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
         notifyListeners("resume", data: [:])
     }
 
+    /// W13.Y4 (EN 301 549 v4.1.1 user preferences): Dynamic Type as a scale —
+    /// the body style's size at the user's content size category over its
+    /// size at the default (17 pt), e.g. 1.0 at Large, about 3.1 at AX5.
+    @objc func getTextScale(_ call: CAPPluginCall) {
+        DispatchQueue.main.async {
+            let scaled = UIFontMetrics(forTextStyle: .body).scaledValue(for: 17, compatibleWith: UITraitCollection(preferredContentSizeCategory: UIApplication.shared.preferredContentSizeCategory))
+            call.resolve(["scale": Double(scaled / 17), "category": UIApplication.shared.preferredContentSizeCategory.rawValue])
+        }
+    }
+
     @objc func getLaunchUrl(_ call: CAPPluginCall) {
+        // W13.M5: a window opened for one note opens that note, in that window only.
+        if let vc = bridge?.viewController as? MainViewController, let link = vc.launchLink {
+            vc.launchLink = nil
+            call.resolve(["url": link])
+            return
+        }
         let url = LumenLaunch.pending
         LumenLaunch.pending = nil
         call.resolve(["url": url as Any])
+    }
+
+    /// W13.M5: open another window (iPad); `note` is a vault path, or nothing for an empty window.
+    @objc func openWindow(_ call: CAPPluginCall) {
+        let note = call.getString("note").flatMap { $0.isEmpty ? nil : $0 }
+        DispatchQueue.main.async {
+            guard UIApplication.shared.supportsMultipleScenes else {
+                call.resolve(["opened": false])
+                return
+            }
+            LumenWindows.open(note: note)
+            call.resolve(["opened": true])
+        }
     }
 
     @objc func pendingCaptures(_ call: CAPPluginCall) {
@@ -112,6 +202,19 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
 /// a plugin inside the app target is registered here). Main.storyboard
 /// uses this class instead of CAPBridgeViewController.
 class MainViewController: CAPBridgeViewController {
+    /// W13.M5: the lumen://open link of the note this window was opened for.
+    var launchLink: String?
+
+    /// W13.M5: the palette's app-wide shortcuts, listed by iPadOS while ⌘ is held.
+    override var keyCommands: [UIKeyCommand]? {
+        (super.keyCommands ?? []) + LumenKeyCommands.commands(action: #selector(lumenKeyCommand(_:)))
+    }
+
+    @objc func lumenKeyCommand(_ sender: UIKeyCommand) {
+        guard let id = sender.propertyList as? String else { return }
+        LumenKeyCommands.run(id, in: webView)
+    }
+
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(LumenNativePlugin())
         // Plan W2.19 (W10.E45): LAN discovery for pairing without a code (LanDiscovery.swift).

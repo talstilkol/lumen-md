@@ -7,8 +7,16 @@ mod shell;
 mod updates;
 mod update_guard;
 mod manifest_sig;
+// W13.T1: staged rollout and the boot sentinel (std only; the glue is in updates.rs).
+mod rollout;
+mod boot_sentinel;
 
 mod whisper_core;
+mod tectonic;
+// W13.F5: the Pandoc bridge's logic (std only, tested with rustc --test). Its Tauri commands are owed: a new
+// command needs the isolation app's allow-list (src-tauri/isolation/index.js), reviewed by its owner.
+#[allow(dead_code)]
+mod pandoc;
 
 /// Build the native menu bar and emit `lumen-menu` events when an item fires.
 /// The frontend listens for these events in `useTauriMenu` and dispatches the
@@ -207,6 +215,20 @@ mod desktop_vault {
     #[tauri::command]
     pub fn vault_root(state: State<VaultState>) -> Option<String> {
         lock(&state).ok()?.active.clone()
+    }
+
+    /// Is one granted vault folder the other or inside it, on disk (realpath and, on Unix, the
+    /// inode; R8b-L1)? Only folders the dialog granted, so the page learns nothing about other paths.
+    /// Needs its entry in src-tauri/isolation/index.js (owner) before the page can call it; until
+    /// then the page gets no answer and refuses every desktop-to-desktop move it can't rule out by
+    /// spelling (moveCheck.ts desktopRootsNestedOnDisk fails closed; review 9, L7).
+    #[tauri::command]
+    pub fn vault_roots_nested(state: State<VaultState>, a: String, b: String) -> Result<bool, String> {
+        let g = lock(&state)?;
+        let (Some(x), Some(y)) = (g.roots.get(&a), g.roots.get(&b)) else {
+            return Err("ENOVAULT: this folder was not chosen in the dialog".into());
+        };
+        lumen_vault::nesting::roots_nested(x.root(), y.root()).map_err(|e| format!("EIO: {e}"))
     }
 
     /// Ask the user for a folder (native dialog) and grant it. Does not make
@@ -568,7 +590,88 @@ fn close_presenter_window(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+// ── LaTeX → PDF with Tectonic (plan W5.22 step 3, W10.E14) ─────────────────
+// The user installs Tectonic; Lumen bundles no TeX. Logic and tests:
+// tectonic.rs (std only).
+
+#[derive(serde::Serialize)]
+struct LatexStatus {
+    tectonic: Option<String>,
+}
+
+#[derive(serde::Deserialize)]
+struct LatexFile {
+    name: String,
+    data: Vec<u8>,
+}
+
+#[derive(serde::Serialize)]
+struct LatexErrorOut {
+    line: Option<u32>,
+    message: String,
+}
+
+#[derive(serde::Serialize)]
+#[serde(tag = "kind")]
+enum LatexFailure {
+    #[serde(rename = "no-tectonic")]
+    NoTectonic,
+    #[serde(rename = "tex")]
+    Tex { errors: Vec<LatexErrorOut>, log_tail: String },
+    #[serde(rename = "other")]
+    Other { message: String },
+}
+
+fn tectonic_bin() -> Option<std::path::PathBuf> {
+    let env = std::env::var("LUMEN_TECTONIC").ok();
+    let path = std::env::var("PATH").ok();
+    tectonic::find(&tectonic::candidates(env.as_deref(), path.as_deref()))
+}
+
+/// Is Tectonic installed? Its path, or null.
+#[tauri::command]
+fn latex_status() -> LatexStatus {
+    LatexStatus { tectonic: tectonic_bin().map(|p| p.display().to_string()) }
+}
+
+/// Compile main.tex (and the export's other files) to PDF; the errors with their lines when TeX fails.
+/// `offline` (airplane mode or local-only, from the page): Tectonic uses its cache only, no download (R8-M1).
+#[tauri::command]
+async fn latex_pdf(app: tauri::AppHandle, tex: String, files: Vec<LatexFile>, offline: Option<bool>) -> Result<tauri::ipc::Response, LatexFailure> {
+    let bin = tectonic_bin().ok_or(LatexFailure::NoTectonic)?;
+    let stamp = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
+    let work = std::env::temp_dir().join(format!("lumen-latex-{}-{}", std::process::id(), stamp));
+    let files: Vec<(String, Vec<u8>)> = files.into_iter().map(|f| (f.name, f.data)).collect();
+    // A missing flag (an older page) counts as offline: no download without the page's say-so.
+    let offline = offline.unwrap_or(true);
+    // D1 §5: 10 minutes for the first online compile (Tectonic's first download), 120 s once it is warm.
+    let marker = app.path().app_cache_dir().ok().map(|d| d.join(tectonic::WARM_MARKER));
+    tauri::async_runtime::spawn_blocking(move || tectonic::compile_with_marker(&bin, &tex, &files, &work, offline, marker.as_deref()))
+        .await
+        .map_err(|e| LatexFailure::Other { message: e.to_string() })?
+        .map_err(|e| match e {
+            tectonic::CompileError::Tex { errors, log_tail } => LatexFailure::Tex { errors: errors.into_iter().map(|e| LatexErrorOut { line: e.line, message: e.message }).collect(), log_tail },
+            tectonic::CompileError::Spawn(m) | tectonic::CompileError::Io(m) => LatexFailure::Other { message: m },
+            tectonic::CompileError::BadName(n) => LatexFailure::Other { message: format!("invalid file name: {n}") },
+            tectonic::CompileError::Timeout(s) => LatexFailure::Other { message: tectonic::timeout_message(s, offline) },
+        })
+        // The PDF as raw bytes (an ArrayBuffer in the page), not a JSON array of numbers.
+        .map(tauri::ipc::Response::new)
+}
+
 mod zotero_local;
+
+/// The stdio MCP state (desktop); a unit on mobile, where no server process runs.
+#[cfg(desktop)]
+fn mcp_stdio_state() -> mcp_stdio::McpStdio {
+    mcp_stdio::McpStdio::default()
+}
+#[cfg(not(desktop))]
+fn mcp_stdio_state() {}
+
+// MCP servers on stdio (plan W7.18, W10.C1): desktop only.
+#[cfg(desktop)]
+mod mcp_stdio;
 
 /// Zotero's answer for the web view (plan W2.15).
 #[derive(serde::Serialize)]
@@ -610,6 +713,7 @@ pub fn run() {
         .manage(desktop_vault::VaultState::default())
         .manage(shell::Shell::default())
         .manage(lan_discovery::DiscoveryState::default())
+        .manage(mcp_stdio_state())
         .invoke_handler(tauri::generate_handler![
             secret_available,
             secret_get,
@@ -629,8 +733,11 @@ pub fn run() {
             desktop_vault::vault_rename,
             desktop_vault::vault_remove,
             desktop_vault::vault_backup,
+            desktop_vault::vault_roots_nested,
             whisper_status,
             whisper_transcribe,
+            latex_status,
+            latex_pdf,
             shell::shell_ready,
             shell::external_read,
             shell::external_write,
@@ -663,8 +770,25 @@ pub fn run() {
             lan_discovery::lan_discovery_browse,
             lan_discovery::lan_discovery_fetch_offer,
             lan_discovery::lan_discovery_send_answer,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_stdio_approved,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_stdio_approve,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_stdio_revoke,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_stdio_spawn,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_stdio_write,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_stdio_close,
+            #[cfg(desktop)]
+            mcp_stdio::mcp_open_url,
         ])
         .setup(|app| {
+            // W13.T1: count this start; after two failed starts of a new version, the kept previous one comes back.
+            #[cfg(desktop)]
+            updates::imp::boot_launch(app.handle());
             // The folder chosen on an earlier run (plan 4.3).
             let granted = desktop_vault::load(app.handle());
             if let Ok(mut slot) = app.state::<desktop_vault::VaultState>().0.lock() {

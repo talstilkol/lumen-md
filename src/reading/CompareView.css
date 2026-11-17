@@ -1,0 +1,49 @@
+/* W13.R8: the compare view. Marks are more than colour: strike-through, underline, dotted underline. */
+.cmp-dialog {
+  position: fixed;
+  inset: 4vh 4vw;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid hsl(var(--border));
+  border-radius: 10px;
+  background: hsl(var(--bg));
+  color: hsl(var(--fg));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.cmp-dialog::backdrop { background: var(--overlay, rgb(0 0 0 / 0.4)); }
+.cmp-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 10px 16px; border-bottom: 1px solid hsl(var(--border)); }
+.cmp-title { margin: 0; font-size: 15px; font-weight: 700; }
+.cmp-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-inline-start: auto; font-size: 13px; }
+.cmp-tools button { padding: 4px 10px; border: 1px solid hsl(var(--border-strong)); border-radius: 6px; background: hsl(var(--bg)); color: hsl(var(--fg)); cursor: pointer; font: inherit; }
+.cmp-tools button[aria-pressed="true"] { background: hsl(var(--accent)); border-color: hsl(var(--accent)); color: hsl(var(--accent-fg, 0 0% 100%)); }
+.cmp-tools button:focus-visible, .cmp-body:focus-visible, .cmp-fold button:focus-visible { outline: 2px solid hsl(var(--accent)); outline-offset: 2px; }
+.cmp-seg { display: inline-flex; gap: 0; }
+.cmp-seg button:first-child { border-start-end-radius: 0; border-end-end-radius: 0; }
+.cmp-seg button:last-child { border-start-start-radius: 0; border-end-start-radius: 0; margin-inline-start: -1px; }
+.cmp-opt { display: inline-flex; align-items: center; gap: 4px; }
+.cmp-count { color: hsl(var(--fg-muted)); min-width: 8ch; }
+/* Audit r4 A1.6: the note's reading profile (face, size, line height, Hebrew spacing), else the view's own. */
+.cmp-body { flex: 1; min-height: 0; overflow: auto; font-family: var(--reading-font, inherit); font-size: var(--reading-size, 15px); line-height: var(--reading-line-height, 1.7); word-spacing: var(--reading-word-spacing, normal); letter-spacing: var(--reading-letter-spacing, normal); }
+.cmp-grid { display: grid; grid-template-columns: 1fr 1fr; }
+.cmp-row { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; }
+.cmp-cell { padding: 6px 16px; white-space: pre-wrap; overflow-wrap: anywhere; border-bottom: 1px solid hsl(var(--border) / 0.6); min-width: 0; }
+.cmp-old { border-inline-end: 1px solid hsl(var(--border)); background: hsl(var(--bg-subtle)); }
+.cmp-label { position: sticky; top: 0; z-index: 1; font-size: 12px; font-weight: 600; color: hsl(var(--fg-muted)); background: hsl(var(--bg)); padding: 6px 16px; border-bottom: 1px solid hsl(var(--border)); }
+.cmp-fold { grid-column: 1 / -1; padding: 4px 16px; background: hsl(var(--bg-subtle)); border-bottom: 1px solid hsl(var(--border) / 0.6); }
+.cmp-fold button { border: none; background: none; color: hsl(var(--accent)); cursor: pointer; font: inherit; font-size: 12px; padding: 2px 0; }
+.cmp-inline-body { padding: 0 16px 16px; }
+.cmp-para { margin: 0; padding: 6px 0; white-space: pre-wrap; overflow-wrap: anywhere; border-bottom: 1px solid hsl(var(--border) / 0.6); }
+.cmp-del { background: hsl(0 85% 55% / 0.16); color: inherit; text-decoration: line-through; text-decoration-thickness: 1.5px; }
+.cmp-ins { background: hsl(140 60% 40% / 0.18); color: inherit; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.cmp-niqqud { text-decoration: underline dotted; text-decoration-thickness: 2px; text-underline-offset: 4px; background: hsl(45 95% 50% / 0.18); }
+.cmp-current, .cmp-current .cmp-del, .cmp-current .cmp-ins { outline: 2px solid hsl(var(--accent)); outline-offset: 1px; border-radius: 2px; }
+@media (max-width: 700px) {
+  .cmp-dialog { inset: 0; border-radius: 0; }
+  .cmp-tools { margin-inline-start: 0; }
+}

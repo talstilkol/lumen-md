@@ -8,7 +8,7 @@
  */
 import type { Locale } from "./index";
 
-const SUPPORTED: readonly Locale[] = ["en", "he", "ar", "ru", "fr", "de", "ja", "zh-CN"];
+const SUPPORTED: readonly Locale[] = ["en", "he", "ar", "ru", "fr", "de", "ja", "zh-CN", "fa"];
 
 export function detectLocale(saved: unknown, languages: readonly string[] | undefined): Locale {
   if (typeof saved === "string" && (SUPPORTED as readonly string[]).includes(saved)) return saved as Locale;

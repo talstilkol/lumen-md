@@ -148,3 +148,47 @@ export function basicAuth(user: string, password: string): string {
   for (const b of bytes) bin += String.fromCharCode(b);
   return `Basic ${btoa(bin)}`;
 }
+
+export interface DiscoveredCalendar {
+  url: string;
+  name: string;
+  /** The collection holds tasks (VTODO), as the server says; unknown when it does not say. */
+  tasks: boolean | null;
+}
+
+const PROPFIND_CALENDARS = `<?xml version="1.0" encoding="utf-8"?><d:propfind xmlns:d="DAV:" xmlns:c="urn:ietf:params:xml:ns:caldav"><d:prop><d:resourcetype/><d:displayname/><c:supported-calendar-component-set/></d:prop></d:propfind>`;
+
+/** The calendar collections in a multistatus answer (a PROPFIND of a calendar home, Depth 1). */
+export function parseCalendars(xml: string, base: string): DiscoveredCalendar[] {
+  const out: DiscoveredCalendar[] = [];
+  const unesc = (s: string) => s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
+  for (const m of xml.matchAll(/<(?:[\w-]+:)?response\b[^>]*>([\s\S]*?)<\/(?:[\w-]+:)?response>/g)) {
+    const r = m[1]!;
+    const type = /<(?:[\w-]+:)?resourcetype\b[^>]*>([\s\S]*?)<\/(?:[\w-]+:)?resourcetype>/.exec(r)?.[1] ?? "";
+    if (!/<(?:[\w-]+:)?calendar\b/.test(type)) continue;
+    const href = unesc((/<(?:[\w-]+:)?href\b[^>]*>([\s\S]*?)<\/(?:[\w-]+:)?href>/.exec(r)?.[1] ?? "").trim());
+    if (!href) continue;
+    const name = unesc((/<(?:[\w-]+:)?displayname\b[^>]*>([\s\S]*?)<\/(?:[\w-]+:)?displayname>/.exec(r)?.[1] ?? "").trim());
+    const comps = /<(?:[\w-]+:)?supported-calendar-component-set\b[^>]*>([\s\S]*?)<\/(?:[\w-]+:)?supported-calendar-component-set>/.exec(r)?.[1];
+    const url = new URL(href, base).href;
+    out.push({ url: url.endsWith("/") ? url : `${url}/`, name: name || decodeURIComponent(url.replace(/\/$/, "").split("/").pop() ?? url), tasks: comps === undefined ? null : /name=["']VTODO["']/i.test(comps) });
+  }
+  return out;
+}
+
+/** The calendars under `home` (the user's calendar home, or any collection that lists them). */
+export async function discoverCalendars(home: string, o: { fetch: typeof fetch; authorization?: string }): Promise<DiscoveredCalendar[]> {
+  const url = home.endsWith("/") ? home : `${home}/`;
+  let res: Response;
+  try {
+    // privacy-ledger: the caller passes calendarFetch() (config.ts), which records every request.
+    res = await o.fetch(url, { method: "PROPFIND", headers: { "Content-Type": XML, Depth: "1", ...(o.authorization ? { Authorization: o.authorization } : {}) }, body: PROPFIND_CALENDARS });
+  } catch (e) {
+    throw new CalDavError(`CalDAV PROPFIND failed before a response (the server may not allow this app's origin, CORS): ${String(e)}`, 0, "cors");
+  }
+  if (res.status === 401 || res.status === 403) throw new CalDavError(`CalDAV PROPFIND: ${res.status}`, res.status, "auth");
+  if (res.status === 404) throw new CalDavError("CalDAV PROPFIND: not found", 404, "not-found");
+  if (res.status >= 400) throw new CalDavError(`CalDAV PROPFIND: ${res.status}`, res.status, "server");
+  return parseCalendars(await res.text(), url);
+}
+

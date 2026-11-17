@@ -3,7 +3,7 @@ import { useSettledText } from "../hooks/useSettledText";
 import React, { useMemo, useState, useCallback, useSyncExternalStore } from "react";
 import { Sparkles, ShieldCheck, SpellCheck, FileDiff, Activity, BarChart3, CloudCog, CloudOff, AlertCircle } from "lucide-react";
 import type { CollabPeer } from "../collab/yjs";
-import { t, getLocale } from "../i18n";
+import { t } from "../i18n";
 import { useAppStore } from "../store/useStore";
 import { getMonitoringConsent, setMonitoringConsent } from "../lib/telemetry";
 import type { ConfigHealthReport } from "../lib/configHealth";
@@ -12,6 +12,10 @@ import { secretStoreMode, subscribeSecretStoreMode } from "../lib/secretStore";
 import { parseSuggestions, mayContainCriticMarkup } from "../editor/suggesting";
 import { BetaBadge } from "./FeatureFlagsHost";
 import { StatusBarA11yLink } from "./AccessibilityLinks";
+import { IndexProgressStatus } from "./IndexProgressStatus";
+// W13.W14: the note's writing goal, in its own chunk, loaded only for a note whose frontmatter sets one.
+const NoteGoalStatus = React.lazy(() => import("./NoteGoalStatus"));
+const HAS_GOAL = /^\uFEFF?---\r?\n[\s\S]*?^goal[.:\s]/m;
 
 /** Number of CriticMarkup suggestions (cheap no-op for plain docs). */
 function countCriticMarkup(text: string): number {
@@ -89,6 +93,7 @@ export const StatusBar = React.memo(function StatusBar({
       <BetaBadge />
         {dirty ? "●" : "○"} {filename}
       </span>
+      <IndexProgressStatus />
       {syncState !== "idle" && (
         <span className="sb-item" title={t("status.sync.title", { state: t(`status.sync.${syncState}`) })} style={{ gap: 4 }}>
           {syncState === "syncing" && <CloudCog size={10} className="spin" />}
@@ -170,14 +175,19 @@ export const StatusBar = React.memo(function StatusBar({
         </span>
       ) : null}
       <span className="sb-item" title={t("status.words.title")}>
-        {t("status.words", { n: stats.words.toLocaleString(getLocale()) })}
+        {t("status.words", { n: stats.words })}
       </span>
       <span className="sb-item" title={t("status.chars.title")}>
-        {t("status.chars", { n: stats.chars.toLocaleString(getLocale()) })}
+        {t("status.chars", { n: stats.chars })}
       </span>
       <span className="sb-item" title={t("status.reading.title")}>
         {t("status.reading", { n: stats.readingMin })}
       </span>
+      {HAS_GOAL.test(settledText.slice(0, 4000)) && (
+        <React.Suspense fallback={null}>
+          <NoteGoalStatus text={settledText} />
+        </React.Suspense>
+      )}
       {agentReviewPending > 0 && (
         <button type="button" className="sb-item sb-review" onClick={onOpenAgentReview} title={t("agentReview.badge.tooltip")} data-testid="status-agent-review">
           <Sparkles size={10} />

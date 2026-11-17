@@ -1,6 +1,7 @@
 ---
 title: Compiling the native code offline
 description: How Lumen's Rust, Java and Swift code is compiled without crates.io, the Android SDK or Xcode — what the check proves, what it cannot, and what still needs a Mac.
+type: how-to
 ---
 
 Lumen has native code next to the web app: the Tauri desktop shell in
@@ -20,7 +21,7 @@ ten seconds.
 
 | Step | What runs | What a pass proves |
 |---|---|---|
-| 1. Std-only crates | `rustc --test` on `src-tauri/desktop`, `keychain`, `vault`, `src/whisper_core.rs` | The code compiles and its unit tests pass — for real, no stubs. |
+| 1. Std-only crates | `rustc --test` on `src-tauri/desktop`, `keychain`, `vault`, `src-tauri/src/whisper_core.rs` | The code compiles and its unit tests pass — for real, no stubs. |
 | 2. The Tauri glue | `rustc` on `src-tauri/src/lib.rs` + `main.rs` against `tools/native-check/rust-stubs/`, once with `--cfg desktop` and once with `--cfg mobile` | Every module, import, type, borrow and lifetime checks out against the signatures of tauri 2 and its plugins. |
 | 2. Commands | the stub `#[tauri::command]` | Each argument is a command argument (Deserialize, `State`, `AppHandle`, `Window`, `Request`), each return value is an IPC response, every async command's future is `Send`, and an async command that borrows returns a `Result` — the rules the real macro enforces. |
 | 2. Cargo.lock | `lockcheck.mjs` | Every dependency in `Cargo.toml` is in `Cargo.lock`: `cargo check --locked` would not refuse it. |

@@ -4,6 +4,10 @@
  *   lumen search <words…> [--limit n] [--json]
  *   lumen open <note> [--print]        open in the default app, or print it
  *   lumen new <path> [text…]           create a note (fails if it exists)
+ *   lumen new <path|title> --type <t> [--set field=value …]
+ *                                      a note of a type, checked against
+ *                                      its schema (W12.T4)
+ *   lumen types [show <type>] [--json] the vault's types and their fields
  *   lumen append <path> <text…>        add text to the end of a note
  *   lumen daily [text…] [--folder d]   today's note (journal/YYYY-MM-DD.md);
  *                                      with text, adds "- HH:MM text"
@@ -30,9 +34,10 @@ import { spawn } from "node:child_process";
 import { ALL_SCOPES, DEFAULT_SCOPES, disableClient, enableClient, normalizeClientId, parseScopes, readConfig, writeFileAtomic } from "./vault/config.js";
 import { appendLedger, readLedger } from "./vault/ledger.js";
 import { approvePending, lineDiff, listPending, readNote, rejectPending } from "./vault/pending.js";
-import { absPath, notePath } from "./vault/paths.js";
+import { notePath, realVaultPath } from "./vault/paths.js";
 import { VaultIndex } from "./vault/search.js";
 import { planBasesUpdate, proposeBatch, queryVaultBase, relForCli } from "./vault/bases.js";
+import { problemsText, typesDeps, typesEngine } from "./vault/types.js";
 
 export interface CliIO {
   out: (line: string) => void;
@@ -66,12 +71,14 @@ async function confirmChange(io: CliIO, header: string, before: string | null, a
 
 const NO_TTY = "Approving needs a terminal (a TTY): each diff is shown and you type yes. Nothing was written. You can also approve in Lumen's review screen.";
 
-export const VAULT_COMMANDS = ["search", "open", "new", "append", "daily", "bases", "mcp"] as const;
+export const VAULT_COMMANDS = ["search", "open", "new", "append", "daily", "bases", "types", "mcp"] as const;
 
 export const USAGE = [
   "usage: lumen search <words…> [--limit n] [--json]",
   "       lumen open <note> [--print]",
   "       lumen new <path> [text…]",
+  "       lumen new <path|title> --type <type> [--set field=value …]",
+  "       lumen types [show <type>] [--json]",
   "       lumen append <path> <text…>",
   "       lumen daily [text…] [--folder journal]",
   "       lumen bases query <file.base> [--view name] [--offset n] [--limit n] [--json]",
@@ -119,7 +126,7 @@ async function exists(file: string): Promise<boolean> {
 async function resolveNote(vault: string, name: string): Promise<string | null> {
   try {
     const rel = notePath(name);
-    if (await exists(absPath(vault, rel))) return rel;
+    if (await exists(await realVaultPath(vault, rel))) return rel;
   } catch {
     /* not a usable path: look it up by name */
   }
@@ -132,7 +139,7 @@ async function resolveNote(vault: string, name: string): Promise<string | null> 
 }
 
 async function writeDirect(vault: string, tool: string, rel: string, text: string): Promise<void> {
-  await writeFileAtomic(absPath(vault, rel), text);
+  await writeFileAtomic(await realVaultPath(vault, rel), text); // M1
   await appendLedger(vault, { client: "cli", tool, path: rel, decision: "written", bytesOut: 0 });
 }
 
@@ -157,6 +164,12 @@ async function runCommand(argv: string[], io: CliIO): Promise<number> {
   const vault = path.resolve(io.cwd, flags.vault || io.env.LUMEN_VAULT || ".");
   const now = io.now ?? (() => new Date());
 
+  // `--set k=v` may repeat (parseArgs keeps the last of a flag).
+  const sets: string[] = [];
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === "--set" && i + 1 < argv.length) sets.push(argv[i + 1]);
+    else if (argv[i].startsWith("--set=")) sets.push(argv[i].slice(6));
+  }
   switch (cmd) {
     case "search": {
       const query = rest.join(" ").trim();
@@ -180,13 +193,14 @@ async function runCommand(argv: string[], io: CliIO): Promise<number> {
       }
       if (flags.print) io.out((await readNote(vault, rel)) ?? "");
       else {
-        (io.openFile ?? defaultOpen)(absPath(vault, rel));
+        (io.openFile ?? defaultOpen)(await realVaultPath(vault, rel));
         io.out(rel);
       }
       return 0;
     }
     case "new": {
       if (!rest.length) break;
+      if (flags.type) return newTyped(vault, rest, flags, sets, io);
       const rel = notePath(rest[0]);
       if ((await readNote(vault, rel)) !== null) {
         io.err(`${rel} already exists.`);
@@ -218,11 +232,82 @@ async function runCommand(argv: string[], io: CliIO): Promise<number> {
     }
     case "bases":
       return runBases(vault, rest, flags, io);
+    case "types":
+      return runTypes(vault, rest, flags, io);
     case "mcp":
       return runMcp(vault, rest, flags, io);
   }
   io.err(USAGE);
   return 1;
+}
+
+/** A `--set` value: JSON when it parses (numbers, true/false, lists), else the text. */
+function setValue(raw: string): unknown {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return raw;
+  }
+}
+
+/**
+ * `lumen new <path|title> --type <t> --set field=value …` (plan W12.T4):
+ * the same schema check as `create_object`. You are at your terminal, so a
+ * valid object is written directly, like `lumen new`; a value that does
+ * not fit is an error and nothing is written.
+ */
+async function newTyped(vault: string, rest: string[], flags: Record<string, string>, sets: string[], io: CliIO): Promise<number> {
+  const values: Record<string, unknown> = {};
+  for (const kv of sets) {
+    const at = kv.indexOf("=");
+    if (at <= 0) {
+      io.err(`error: --set wants field=value, not '${kv}'`);
+      return 1;
+    }
+    values[kv.slice(0, at).trim()] = setValue(kv.slice(at + 1));
+  }
+  const target = rest[0];
+  const isPath = /\.(md|markdown)$/i.test(target) || target.includes("/");
+  const body = rest.slice(1).join(" ");
+  const plan = await (await typesEngine()).planObject(typesDeps(vault), { type: flags.type, ...(isPath ? { path: target, title: path.posix.basename(target).replace(/\.(md|markdown)$/i, "") } : { title: target }), values, ...(body ? { body: `${body}\n` } : {}) });
+  if (!plan.ok) {
+    io.err(`error: does not fit the type '${flags.type}'; nothing written.\n${problemsText(plan.problems)}`);
+    return 1;
+  }
+  const rel = notePath(plan.path);
+  if ((await readNote(vault, rel)) !== null) {
+    io.err(`${rel} already exists.`);
+    return 1;
+  }
+  await writeDirect(vault, "new", rel, plan.text);
+  io.out(rel);
+  return 0;
+}
+
+/** `lumen types [show <type>] [--json]` (plan W12.T4). */
+async function runTypes(vault: string, rest: string[], flags: Record<string, string>, io: CliIO): Promise<number> {
+  const e = await typesEngine();
+  const deps = typesDeps(vault);
+  const [sub, id] = rest;
+  if (sub === "show" && id) {
+    const t = await e.getType(deps, id);
+    if (!t) {
+      io.err(`no type '${id}'`);
+      return 1;
+    }
+    if (flags.json) io.out(JSON.stringify(t));
+    else for (const f of t.schema) io.out([f.name, f.kind, f.to ? `→ ${f.to}` : "", f.options ? f.options.join("|") : "", f.from !== t.id ? `(from ${f.from})` : ""].filter(Boolean).join("\t"));
+    return 0;
+  }
+  if (sub) {
+    io.err(USAGE);
+    return 1;
+  }
+  const r = await e.listTypes(deps);
+  if (flags.json) io.out(JSON.stringify(r));
+  else for (const t of r.types) io.out([t.id, t.label.he ?? "", t.label.en ?? "", t.tag ? `#${t.tag}` : "", t.extends ? `extends ${t.extends}` : "", `${t.fields} field(s)`].filter(Boolean).join("\t"));
+  for (const er of r.errors) io.err(`warning: ${er}`);
+  return 0;
 }
 
 /**
@@ -231,7 +316,8 @@ async function runCommand(argv: string[], io: CliIO): Promise<number> {
  * same edits as `lumen.bases.update` / the `bases_update` MCP tool and
  * queues them in the approval queue — `--dry-run` only shows what would
  * change, `--approve` shows each note's diff and writes the ones you
- * confirm (a TTY only: an agent's shell cannot approve).
+ * confirm (a TTY only, which stops an agent from approving by accident; an
+ * agent with a shell can open a terminal of its own, review 24 B1r).
  */
 async function runBases(vault: string, rest: string[], flags: Record<string, string>, io: CliIO): Promise<number> {
   const [sub, arg] = rest;

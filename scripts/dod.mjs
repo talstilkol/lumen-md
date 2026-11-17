@@ -9,9 +9,20 @@
  *
  *   node scripts/dod.mjs 0.6 4.12      run the DoD of these tasks
  *   node scripts/dod.mjs --done        every ✅ / ✅* task that has a DoD (CI)
- *   node scripts/dod.mjs --list        which tasks have a DoD, which are grandfathered
+ *   node scripts/dod.mjs --list        which tasks have a DoD, and the rule's problems
  *   node scripts/dod.mjs 0.6 --dry     print the commands, run nothing
  *   node scripts/dod.mjs 0.6 --markdown  the PR checklist for these tasks
+ *   node scripts/dod.mjs --p0 --runner <shim> --report reports/dod-p0-<sha>.md [--jobs N]
+ *       every P0 task's dod (W10.Z3, 13.5; not those two, whose dod is this run),
+ *       `npx vitest run` one file at a time through the runner, and the table
+ *       written to the report (scripts/lib/dodRunner.mjs). Exit 1 when any is red.
+ *   node scripts/dod.mjs --done --runner <shim> [--report <file>]
+ *       the same for every ✅ / ✅* task (plan 0.7: a ✅ whose dod is red shows here).
+ *       Exit 0 only when every row is green: a row that is red, "not here" (a
+ *       command that can't run on this machine, a file whose tests all skipped)
+ *       or "no dod" is not a proof, so the train's dod-done gate is red on it
+ *       (review 9, H1). Without --runner, `npx vitest run <files>` goes through
+ *       vitest's JSON reporter and needs a passed test in every file (M5).
  *
  * ✅* (green against mocks only — no GPU / Ollama here) is set with
  * `"dodMock": true`: such a task can never be plain ✅ until the real-model
@@ -21,6 +32,9 @@ import { readFileSync } from "node:fs";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { spawnSync } from "node:child_process";
+import { vitestFiles, vitestJsonSync } from "./lib/dodRunner.mjs";
+import { rustCounts, rustGreen } from "./lib/rustStd.mjs";
+import { expectedExit, unmetExpect } from "./lib/dodExpect.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -33,65 +47,59 @@ export const isFullDone = (status = "") => status.startsWith("✅") && !status.s
 export const isMockDone = (status = "") => status.startsWith("✅*");
 
 /**
- * The tasks that were ✅ before 0.7 existed, frozen here when 0.7 landed. The plan's
- * `dodGrandfathered` must be a subset: this constant only ever loses ids (a reviewer
- * sees any edit to it), so a new ✅ can't be exempted by adding its id to plan.json.
- */
-export const DOD_GRANDFATHER_BASELINE = Object.freeze(["0.1", "0.2", "0.3", "0.4", "0.5", "0.8", "0.9", "0.10", "0.11", "0.12", "0.13", "0.14", "0.17", "0.18", "0.20", "0.21", "1.1", "1.2", "1.3", "1.4", "1.5", "1.6", "1.7", "1.9", "2.1", "2.2", "2.3", "2.4", "2.5", "2.7", "2.8", "3.1", "3.2", "3.6", "4.1", "4.2", "4.3", "4.4", "4.5", "4.6", "4.7", "4.8", "4.9", "4.10", "4.12", "5.1", "5.2", "5.3", "5.11", "6.0", "6.1", "7.1", "7.10", "8.5", "9.1", "9.2", "9.3", "9.7", "9.8", "14.1"]);
-
-/**
  * The rule plan:check enforces. Returns a list of problems (empty = fine).
- * - every ✅ / ✅* task has a non-empty `dod`, unless it is grandfathered
- *   (marked ✅ before 0.7 existed; the list only shrinks)
+ * - every ✅ / ✅* task has a non-empty `dod`. No task is exempt: the 60 tasks
+ *   that were ✅ before 0.7 got their commands or went back to ⏳ (W10.G1–G4),
+ *   and the grandfather list and its frozen baseline are gone (W10.G5), so a
+ *   `dodGrandfathered` list in the plan is refused rather than read
  * - a task with `dodMock: true` is ✅*, never plain ✅
- * - every grandfathered id is in DOD_GRANDFATHER_BASELINE — the list frozen when 0.7
- *   landed — so the plan's list can only shrink, never grow (Codex P1 on #265)
- * - grandfathered ids exist, are still ✅ / ✅*, and have no `dod` yet. Adding a dod, or
- *   taking a task back to ⏳, means taking its id off the list in the same edit — so a
- *   reopened task can't return to ✅ without a dod (Codex P1 on #265)
- * - the shrink is one-way: an id that leaves `dodGrandfathered` is recorded in
- *   `dodRevoked` in the same edit (every baseline id is in exactly one of the two
- *   lists), and a revoked id can never be grandfathered again — so the ratchet can't
- *   be reversed by deleting a dod and re-adding the id (Codex P1 on #265)
  * - a ✅* task declares `dodMock: true`; without it a later edit could turn ✅* into
  *   plain ✅ and re-run the same mock-only commands as the real check (Codex P1 on #265)
  * - every `dod` entry is a non-empty string
+ * - every P0 task, done or not, has a `dod` and a `dodExpect` with one
+ *   expected result per command (expectProblems, below)
  * @param {any} plan
- * @param {{ baseline?: readonly string[] }} [opts]
  * @returns {string[]}
  */
-export function checkDod(plan, { baseline = DOD_GRANDFATHER_BASELINE } = {}) {
+export function checkDod(plan) {
   const problems = [];
   const tasks = allTasks(plan);
-  const byId = new Map(tasks.map((t) => [t.id, t]));
-  const grand = new Set(plan.dodGrandfathered ?? []);
-  const revoked = new Set(plan.dodRevoked ?? []);
-  const frozen = new Set(baseline);
-  for (const id of revoked) {
-    if (!frozen.has(id)) problems.push(`dodRevoked: ${id} was never grandfathered — only ids that left dodGrandfathered belong here`);
-    if (grand.has(id)) problems.push(`dodGrandfathered: ${id}'s exemption was revoked (dodRevoked) — it cannot be grandfathered again; keep its dod`);
-  }
-  for (const id of frozen) {
-    if (!grand.has(id) && !revoked.has(id)) problems.push(`dodGrandfathered: ${id} left the list without being recorded in dodRevoked — the exemption ends for good`);
-  }
-  for (const id of grand) {
-    const t = byId.get(id);
-    if (!t) problems.push(`dodGrandfathered: ${id} is not a task`);
-    else if (t.dod?.length) problems.push(`dodGrandfathered: ${id} has a dod now — take it off the list`);
-    else if (!(t.status ?? "").startsWith("✅")) problems.push(`dodGrandfathered: ${id} is not done any more — take it off the list (it needs a dod to be ✅ again)`);
-    if (!frozen.has(id)) problems.push(`dodGrandfathered: ${id} was not ✅ before 0.7 — the list only shrinks; give the task a dod instead`);
+  for (const key of ["dodGrandfathered", "dodRevoked"]) {
+    if (plan[key] !== undefined) problems.push(`${key}: no task is exempt from the dod rule any more (W10.G5) — remove the list; a ✅ task needs its dod, or goes back to ⏳`);
   }
   for (const t of tasks) {
     const status = t.status ?? "";
     if (t.dod !== undefined && (!Array.isArray(t.dod) || t.dod.some((c) => typeof c !== "string" || !c.trim()))) {
       problems.push(`${t.id}: dod must be a list of commands`);
     }
+    problems.push(...expectProblems(t));
     if (!status.startsWith("✅")) continue;
-    if (!t.dod?.length && !grand.has(t.id)) problems.push(`${t.id} is marked ${status.slice(0, 2).trim()} without a dod — add the commands that prove it (plan 0.7)`);
+    if (!t.dod?.length) problems.push(`${t.id} is marked ${status.slice(0, 2).trim()} without a dod — add the commands that prove it (plan 0.7)`);
     if (t.dodMock && isFullDone(status)) problems.push(`${t.id} is checked against mocks only (dodMock) — mark it ✅*, not ✅`);
     if (isMockDone(status) && !t.dodMock) problems.push(`${t.id} is ✅* without "dodMock": true — declare it, so the status can't become ✅ before the real-model check replaces the mock`);
   }
   return problems;
+}
+
+/**
+ * W10.Z3 / lane A6 — a P0 task's definition of done is concrete whatever its
+ * status: at least one command, and for each command the result that proves
+ * it (`dodExpect`, the same length as `dod`: "exit 0 — 0 failed", "prints
+ * enabled", …). Any task that has a `dodExpect` keeps it in step with `dod`.
+ * @param {any} t
+ * @returns {string[]}
+ */
+export function expectProblems(t) {
+  const out = [];
+  const cmds = Array.isArray(t.dod) ? t.dod : [];
+  if (t.priority === "P0" && !cmds.length) out.push(`${t.id} is P0 without a dod — add the commands that prove it and their expected results (dodExpect)`);
+  if (t.dodExpect === undefined) {
+    if (t.priority === "P0" && cmds.length) out.push(`${t.id} is P0 without dodExpect — the expected result of each dod command`);
+    return out;
+  }
+  if (!Array.isArray(t.dodExpect) || t.dodExpect.some((e) => typeof e !== "string" || !e.trim())) out.push(`${t.id}: dodExpect must be a list of expected results`);
+  else if (t.dodExpect.length !== cmds.length) out.push(`${t.id}: dodExpect has ${t.dodExpect.length} entries for ${cmds.length} dod command(s) — one expected result per command`);
+  return out;
 }
 
 /**
@@ -115,7 +123,7 @@ export function markdown(tasks) {
   for (const t of tasks) {
     lines.push(`### ${t.id} · ${t.title}`);
     for (const a of t.acceptance ?? []) lines.push(`- [ ] ${a}`);
-    if (t.dod?.length) for (const c of t.dod) lines.push(`- [ ] \`${c}\` green`);
+    if (t.dod?.length) t.dod.forEach((c, i) => lines.push(`- [ ] \`${c}\` ${t.dodExpect?.[i] ? `→ ${t.dodExpect[i]}` : "green"}`));
     else lines.push("- [ ] **no `dod` yet** — add the commands to plan/plan.json");
     if (t.dodMock) lines.push("- [ ] mocks only → ✅*; the real-model check stays with the owner item");
     lines.push("");
@@ -132,9 +140,9 @@ export function runDod(tasks, { root = ROOT, exec = defaultExec, log = console.l
   for (const t of tasks) {
     const t0 = Date.now();
     let failed;
-    for (const cmd of t.dod ?? []) {
+    for (const [k, cmd] of (t.dod ?? []).entries()) {
       log(`dod ${t.id} › ${cmd}`);
-      if (!exec(cmd, root)) {
+      if (!exec(cmd, root, t.dodExpect?.[k])) {
         failed = cmd;
         break;
       }
@@ -144,29 +152,105 @@ export function runDod(tasks, { root = ROOT, exec = defaultExec, log = console.l
   return results;
 }
 
-function defaultExec(cmd, cwd) {
-  const r = spawnSync(cmd, { cwd, shell: true, stdio: "inherit" });
-  return r.status === 0;
+function defaultExec(cmd, cwd, expect) {
+  // A vitest file list: vitest's JSON reporter, and a passed test in every file (review 9, M5).
+  const files = vitestFiles(cmd, cwd);
+  if (files) {
+    const r = vitestJsonSync(files, cwd);
+    if (r.status !== "pass") console.error(`dod: ${cmd} → ${r.status}: ${r.detail}`);
+    return r.status === "pass";
+  }
+  return shellPasses(cmd, cwd, spawnSync, expect);
 }
 
-function main(argv) {
+/**
+ * A shell command of a dod: green on its expected exit code (0 unless
+ * `dodExpect` names another), except a Rust test run that ran no test
+ * (review 10, M5: `cargo test … <filter>` matching nothing exits 0 with
+ * "running 0 tests"; review 11, L8: a Rust test command whose output shows no
+ * test running, such as `cargo test --no-run` or output sent to a file), and except an expected result it does not meet where a
+ * machine can tell (audit r3, ./lib/dodExpect.mjs: "expect unmet").
+ * Its output is shown as it is.
+ * @param {string} cmd
+ * @param {string} cwd
+ * @param {typeof spawnSync} [spawn]
+ * @param {string} [expect] the command's dodExpect entry
+ */
+export function shellPasses(cmd, cwd, spawn = spawnSync, expect) {
+  const r = spawn(cmd, { cwd, shell: true, encoding: "utf8", maxBuffer: 256 * 1024 * 1024 });
+  if (r.stdout) process.stdout.write(r.stdout);
+  if (r.stderr) process.stderr.write(r.stderr);
+  if (r.status !== expectedExit(expect)) return false;
+  const unmet = unmetExpect(expect, { code: r.status, out: `${r.stdout ?? ""}\n${r.stderr ?? ""}` });
+  if (unmet.length) {
+    console.error(`dod: ${cmd} → exit ${r.status}, but expect unmet: ${unmet.join("; ")}`);
+    return false;
+  }
+  const rust = rustCounts(`${r.stdout ?? ""}\n${r.stderr ?? ""}`, cmd);
+  if (rust && !rustGreen(rust)) {
+    console.error(`dod: ${cmd} → exit 0, but ${rust.ran === 0 ? "running 0 tests" : `${rust.passed}/${rust.ran} passed`}: nothing was checked`);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * The exit code of a report run: with --done (and for chosen task ids) 0 only
+ * when there is a row and every row is green (review 9, H1: "not here" and
+ * "no dod" are not green); --p0 is the release review's table, 1 when any row is red.
+ * @param {{ verdict: string }[]} rows
+ * @param {string} mode
+ */
+export function reportExit(rows, mode) {
+  if (mode === "--p0") return rows.some((r) => r.verdict === "red") ? 1 : 0;
+  return rows.length && rows.every((r) => r.verdict === "green") ? 0 : 1;
+}
+
+/** The P0 tasks whose dod the release review runs: all but 13.5 and W10.Z3, whose dod is that run. */
+export const p0Tasks = (plan) => allTasks(plan).filter((t) => t.priority === "P0" && !["13.5", "W10.Z3"].includes(t.id));
+
+async function report(plan, argv) {
+  const { runTasks, reportMarkdown } = await import("./lib/dodRunner.mjs");
+  const val = (name) => (argv.indexOf(name) >= 0 ? argv[argv.indexOf(name) + 1] : null);
+  const runner = val("--runner");
+  const file = val("--report");
+  const jobs = Number(val("--jobs") ?? 1);
+  const ids = argv.filter((a, i) => !a.startsWith("--") && !["--runner", "--report", "--jobs"].includes(argv[i - 1]));
+  const tasks = argv.includes("--p0") ? p0Tasks(plan) : select(plan, { ids, done: argv.includes("--done") });
+  const git = (...a) => spawnSync("git", a, { cwd: ROOT, encoding: "utf8" }).stdout.trim();
+  const rows = await runTasks(tasks, { root: ROOT, runner, jobs, log: (l) => console.log(l) });
+  const mode = argv.includes("--p0") ? "--p0" : argv.includes("--done") ? "--done" : ids.join(" ");
+  const md = reportMarkdown(rows, { sha: git("rev-parse", "HEAD"), branch: git("rev-parse", "--abbrev-ref", "HEAD"), runner, at: new Date().toISOString(), mode });
+  if (file) {
+    const { writeFileSync, mkdirSync } = await import("node:fs");
+    mkdirSync(dirname(resolve(ROOT, file)), { recursive: true });
+    writeFileSync(resolve(ROOT, file), md);
+    console.log(`dod: table written to ${file}`);
+  } else console.log(md);
+  const red = rows.filter((r) => r.verdict === "red").length;
+  console.log(`dod: ${rows.length} tasks — ${rows.filter((r) => r.verdict === "green").length} green, ${red} red, ${rows.filter((r) => r.verdict === "not here").length} not here`);
+  const code = reportExit(rows, mode);
+  if (mode !== "--p0" && code) console.error(`dod ${mode}: not every task is green here — a "not here" or "no dod" row is not a proof`);
+  return code;
+}
+
+async function main(argv) {
   const plan = JSON.parse(readFileSync(join(ROOT, PLAN_FILE), "utf8"));
+  if (argv.includes("--p0") || argv.includes("--report") || argv.includes("--runner")) return report(plan, argv);
   const flags = new Set(argv.filter((a) => a.startsWith("--")));
   const ids = argv.filter((a) => !a.startsWith("--"));
   if (flags.has("--list")) {
     const tasks = allTasks(plan);
-    const grand = new Set(plan.dodGrandfathered ?? []);
     const withDod = tasks.filter((t) => t.dod?.length);
     console.log(`${withDod.length} tasks with a dod: ${withDod.map((t) => t.id).join(", ") || "—"}`);
-    console.log(`${grand.size} grandfathered (done before 0.7, no dod yet): ${[...grand].join(", ") || "—"}`);
     const problems = checkDod(plan);
     for (const p of problems) console.error(`  ✗ ${p}`);
     return problems.length ? 1 : 0;
   }
   const tasks = select(plan, { ids, done: flags.has("--done") });
   if (!tasks.length) {
-    console.error(flags.has("--done") ? "dod: no done task has a dod yet" : "usage: node scripts/dod.mjs <task id…> | --done | --list [--dry | --markdown]");
-    return flags.has("--done") ? 0 : 2;
+    console.error(flags.has("--done") ? "dod: no done task has a dod — nothing proves the ✅ tasks" : "usage: node scripts/dod.mjs <task id…> | --done | --list [--dry | --markdown]");
+    return flags.has("--done") ? 1 : 2;
   }
   if (flags.has("--markdown")) {
     console.log(markdown(tasks));
@@ -186,7 +270,7 @@ function main(argv) {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   try {
-    process.exit(main(process.argv.slice(2)));
+    process.exit(await main(process.argv.slice(2)));
   } catch (e) {
     console.error(String(e?.message ?? e));
     process.exit(1);

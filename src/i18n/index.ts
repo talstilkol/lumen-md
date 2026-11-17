@@ -8,6 +8,9 @@
 import { fillTemplate } from "./fill";
 import { platformKeys } from "../lib/platformKeys";
 import { detectLocale, systemLanguages } from "./detect";
+import { isFullLocale } from "./review";
+import { resolvePlural } from "./plural";
+import { numeralsTag } from "./numerals";
 
 // β.4 — `Locale` includes the 6 deferred locales so the type is stable
 // across the rest of the codebase. Bundles for ar / ru / fr / de / ja /
@@ -22,7 +25,8 @@ export type Locale =
   | "fr"
   | "de"
   | "ja"
-  | "zh-CN";
+  | "zh-CN"
+  | "fa";
 
 export const SUPPORTED_LOCALES: { code: Locale; label: string; dir: "ltr" | "rtl" }[] = [
   { code: "en", label: "English", dir: "ltr" },
@@ -33,6 +37,8 @@ export const SUPPORTED_LOCALES: { code: Locale; label: string; dir: "ltr" | "rtl
   { code: "de", label: "Deutsch", dir: "ltr" },
   { code: "ja", label: "日本語", dir: "ltr" },
   { code: "zh-CN", label: "简体中文", dir: "ltr" },
+  // W13.I7: Persian, the third right-to-left language — beta (./review.ts).
+  { code: "fa", label: "فارسی", dir: "rtl" },
 ];
 
 /**
@@ -46,22 +52,19 @@ export const SUPPORTED_LOCALES: { code: Locale; label: string; dir: "ltr" | "rtl
 const SYNCHRONOUS_LOCALES = new Set<Locale>(["en"]);
 
 /**
- * Locales whose JSON bundle is first-party and complete (key-for-key with
- * `en`, enforced by the i18nDrift + i18nStrings tests). They count as
- * available before their chunk has been fetched.
- */
-const COMPLETE_LOCALES = new Set<Locale>(["en", "he"]);
-
-/**
- * Returns true when the locale's bundle is usable. English and Hebrew are
- * always available. Other lazy locales count as available only when the
+ * Returns true when the locale's bundle is usable. The full languages
+ * (English and Hebrew) are always available. Other lazy locales count as available only when the
  * bundle is loaded AND has at least one key — this keeps empty
  * placeholder stubs (`{}`) from being mistakenly treated as complete
  * locales (a translator's PR-in-flight shouldn't silently flip the
  * locale "on" for users).
  */
 export function isLocaleAvailable(locale: Locale): boolean {
-  if (COMPLETE_LOCALES.has(locale)) return true;
+  // The full languages (./review.ts, the one list of which languages are
+  // full and which are beta) are first-party and complete — key-for-key with
+  // `en`, enforced by the i18nDrift + i18nStrings tests — so they count as
+  // available before their chunk has been fetched.
+  if (isFullLocale(locale)) return true;
   const bundle = BUNDLES[locale];
   if (!bundle) return false;
   // Ignore underscore-prefixed metadata keys (e.g. _placeholder, _note)
@@ -91,6 +94,8 @@ const LAZY_FILES = import.meta.glob<Strings>(["./locales/*/*.json", "!./locales/
 const BUNDLES: Partial<Record<Locale, Strings>> = { en };
 
 let activeLocale: Locale = "en";
+/** The direction of a bundle installed under a code SUPPORTED_LOCALES doesn't list (installBundle). */
+const EXTRA_DIR: Record<string, "ltr" | "rtl"> = {};
 
 export function getLocale(): Locale {
   return activeLocale;
@@ -131,7 +136,7 @@ export function applyLocale(locale: Locale): void {
   if (typeof document !== "undefined") {
     const meta = SUPPORTED_LOCALES.find((l) => l.code === locale);
     document.documentElement.lang = locale;
-    document.documentElement.dir = meta?.dir ?? "ltr";
+    document.documentElement.dir = meta?.dir ?? EXTRA_DIR[locale] ?? "ltr";
   }
   // Kick off an async fetch for non-synchronous locales so subsequent
   // `t()` calls find the bundle. We don't await — `t()` falls back to
@@ -139,6 +144,8 @@ export function applyLocale(locale: Locale): void {
   if (!SYNCHRONOUS_LOCALES.has(locale) && !(locale in BUNDLES)) {
     void loadLocale(locale);
   }
+  // W13.I5 / W13.I7: the Naskh face, no-kashida justification, the welcome note and templates.
+  if (locale === "ar" || locale === "fa") void rtlExtras(locale);
 }
 
 /**
@@ -170,24 +177,68 @@ export function uiStringValues(): Set<string> {
   return out;
 }
 
-/** Translate `id` using the active locale, with optional `{name}` substitutions. */
+/** The English text of `id` (W13.E4: the settings search also matches English words in another UI language); `id` itself when there is none. */
+export function tEnglish(id: string): string {
+  return en[id] ?? id;
+}
+
+/**
+ * The BCP 47 tag numbers are written with: the UI language, plus the digits
+ * the user chose (W13.I5: `-u-nu-arab` for Arabic-Indic digits, ./numerals.ts).
+ */
+const numberTag = (): string => numeralsTag(activeLocale);
+export function numberLocale(): string {
+  return numberTag();
+}
+
+/** `n` written for the UI language and the chosen digits. */
+export function formatNumber(n: number, opts?: Intl.NumberFormatOptions): string {
+  try {
+    return new Intl.NumberFormat(numberTag(), opts).format(n);
+  } catch {
+    return String(n);
+  }
+}
+
+/** A count passed as a var: a number, or a string of digits (callers that pass String(n)). */
+function countOf(v: string | number | undefined): number {
+  if (typeof v === "number") return v;
+  if (typeof v !== "string") return NaN;
+  const n = Number(v.trim());
+  return Number.isFinite(n) ? n : NaN;
+}
+
+/**
+ * Translate `id` using the active locale, with optional `{name}` substitutions.
+ * A value with a plural block (`{count, plural, one {…} other {…}}`, W13.I2)
+ * picks the CLDR form of the active language for `vars[count]`.
+ */
 export function t(id: string, vars?: Record<string, string | number>): string {
   const bundle = BUNDLES[activeLocale] ?? en;
+  const raw = bundle[id] ?? en[id] ?? id;
   // Mac-style shortcuts (⌘K) read as Ctrl+K on Windows / Linux (T45).
-  const template = platformKeys(bundle[id] ?? en[id] ?? id);
+  let template = platformKeys(raw);
+  if (template.includes("plural")) {
+    const arg = /\{\s*(\w+)\s*,\s*plural\s*,/.exec(template)?.[1];
+    const n = arg ? countOf(vars?.[arg]) : NaN;
+    const locale = raw === bundle[id] ? activeLocale : "en";
+    const resolved = resolvePlural(template, Number.isNaN(n) ? Infinity : n, locale, Number.isNaN(n) ? () => String(vars?.[arg ?? ""] ?? "") : formatNumber);
+    if (resolved !== null) template = resolved;
+  }
   if (!vars) return template;
   return fillTemplate(template, vars);
 }
 
 /**
- * Plural-aware translate. Picks `${base}.${category}` where category comes
- * from `Intl.PluralRules` for the active locale ("one", "two", "few", …),
- * falling back to `${base}.other`. `{n}` is substituted with the count.
- * Bundles only need `.one` + `.other`; locales with richer plural systems
- * (ar, ru) can use a count-neutral `.other` phrasing.
+ * Plural-aware translate. `base` holds a plural block (`{n, plural, …}`,
+ * W13.I2): every CLDR form of each language in one value, `#` the count.
+ * Legacy keys (`${base}.one` / `${base}.other`) still resolve by
+ * `Intl.PluralRules` category, falling back to `${base}.other`; the
+ * i18n:plurals gate keeps new ones out.
  */
 export function tPlural(base: string, n: number, vars?: Record<string, string | number>): string {
   const bundle = BUNDLES[activeLocale] ?? en;
+  if (base in bundle || base in en) return t(base, { n, ...vars });
   let category = "other";
   try {
     category = new Intl.PluralRules(activeLocale).select(n);
@@ -199,6 +250,22 @@ export function tPlural(base: string, n: number, vars?: Record<string, string | 
       ? `${base}.${category}`
       : `${base}.other`;
   return t(key, { n, ...vars });
+}
+
+/**
+ * Tests and pseudo-localisation only (plan W13.I1: en-XA, ar-XB, through
+ * src/testing/e2eHooks.ts — a production build drops it with the hooks):
+ * a bundle under a code the language picker never lists, then
+ * `applyLocale(code)`. Keys it lacks fall back to English as usual.
+ */
+export function installBundle(code: string, strings: Strings, dir: "ltr" | "rtl"): void {
+  BUNDLES[code as Locale] = strings;
+  EXTRA_DIR[code] = dir;
+}
+
+/** The Arabic / Persian extras (./rtlExtras.ts), in their own lazy chunk. */
+function rtlExtras(locale: string): Promise<void> {
+  return import("./rtlExtras").then((m) => m.applyRtlExtras(locale)).catch(() => undefined);
 }
 
 /** True when `locale`'s strings are in memory (so `t()` can use them). */
@@ -235,6 +302,8 @@ export async function initLocale(storageKey = "lumen-md"): Promise<Locale> {
     // The chunk couldn't be fetched (offline, missing): don't apply e.g.
     // `lang="he"` + RTL over English strings — fall back to English.
     if (!isLocaleLoaded(locale)) locale = "en";
+    // The welcome note of the first render is in the language too.
+    if (locale === "ar" || locale === "fa") await rtlExtras(locale);
   }
   applyLocale(locale);
   return locale;
@@ -243,5 +312,5 @@ export async function initLocale(storageKey = "lumen-md"): Promise<Locale> {
 export { detectLocale, systemLanguages };
 
 export function isRTL(): boolean {
-  return SUPPORTED_LOCALES.find((l) => l.code === activeLocale)?.dir === "rtl";
+  return (SUPPORTED_LOCALES.find((l) => l.code === activeLocale)?.dir ?? EXTRA_DIR[activeLocale]) === "rtl";
 }

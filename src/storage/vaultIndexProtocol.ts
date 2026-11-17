@@ -54,7 +54,36 @@ export type IndexRequestBody =
 
 export type IndexRequest = IndexRequestBody & { id: number };
 
-export type IndexResponse = { id: number; ok: true; result: unknown } | { id: number; ok: false; error: string };
+/** A request's answer. */
+export type IndexAnswer = { id: number; ok: true; result: unknown } | { id: number; ok: false; error: string };
+
+/**
+ * 2.39, review Z6-H1/M4: the worker says when it starts matching a request's /regex/ (posted right before, from the
+ * parse that runs it), so the time limit starts then: never skipped by how the query is written, and never counting
+ * the time the request waited behind others.
+ */
+export type IndexProgress = { id: number; progress: "regexStart" };
+
+export type IndexResponse = IndexAnswer | IndexProgress;
+
+/** What a caller hears of its own request while it runs (2.39). */
+export interface CallHooks {
+  /** The engine started matching the query's /regex/ (never called for a query without one). */
+  onRegexStart?: () => void;
+  /** The in-thread engine's budget for the regex (ms): past it the search stops with `regexTimedOut`. */
+  regexTimeLimitMs?: number;
+}
+
+/**
+ * The engine was stopped and replaced (a /regex/ ran past its time limit) while this request waited or ran.
+ * It was not answered; withEngine (./workspaceIndex.ts) runs it again once on the new engine.
+ */
+export class IndexRestartedError extends Error {
+  constructor(message = "the search index was restarted (a /regex/ search ran past its time limit) before this request was answered") {
+    super(message);
+    this.name = "IndexRestartedError";
+  }
+}
 
 export interface IndexEngine {
   /** "worker": the index lives in the index worker; "local": in this thread. */
@@ -62,9 +91,9 @@ export interface IndexEngine {
   upsert(files: IndexInput[]): Promise<void>;
   remove(paths: string[]): Promise<void>;
   clear(): Promise<void>;
-  search(query: string, opts: SearchOptions): Promise<SearchHit[]>;
+  search(query: string, opts: SearchOptions, hooks?: CallHooks): Promise<SearchHit[]>;
   /** `search`, with what a /regex/ could not check (2.39). */
-  query(query: string, opts: SearchOptions): Promise<SearchResult>;
+  query(query: string, opts: SearchOptions, hooks?: CallHooks): Promise<SearchResult>;
   backlinks(target: string): Promise<BacklinkHit[]>;
   stats(): Promise<IndexStats>;
   /** Run a ```tasks``` query (plan 4.13); `today` is YYYY-MM-DD in the user's time zone. */
@@ -93,17 +122,18 @@ export interface IndexEngine {
    * restored texts are indexed.
    */
   snapshotBody(): Promise<{ refused: boolean }>;
-  dispose(): void;
+  /** Stop the engine; every request not yet answered rejects ("restarted": with IndexRestartedError, Z6-M4). */
+  dispose(reason?: "restarted"): void;
 }
 
-export function engineOver(kind: IndexEngine["kind"], send: (req: IndexRequestBody) => Promise<unknown>, dispose: () => void): IndexEngine {
+export function engineOver(kind: IndexEngine["kind"], send: (req: IndexRequestBody, hooks?: CallHooks) => Promise<unknown>, dispose: (reason?: "restarted") => void): IndexEngine {
   return {
     kind,
     upsert: async (files) => void (await send({ op: "upsert", files })),
     remove: async (paths) => void (await send({ op: "remove", paths })),
     clear: async () => void (await send({ op: "clear" })),
-    search: (query, opts) => send({ op: "search", query, opts }) as Promise<SearchHit[]>,
-    query: (query, opts) => send({ op: "query", query, opts }) as Promise<SearchResult>,
+    search: (query, opts, hooks) => send({ op: "search", query, opts }, hooks) as Promise<SearchHit[]>,
+    query: (query, opts, hooks) => send({ op: "query", query, opts }, hooks) as Promise<SearchResult>,
     backlinks: (target) => send({ op: "backlinks", target }) as Promise<BacklinkHit[]>,
     stats: () => send({ op: "stats" }) as Promise<IndexStats>,
     tasks: (query, today) => send({ op: "tasks", query, today }) as Promise<QueryResult>,
@@ -130,12 +160,14 @@ export interface WorkerLike {
  * The index in a worker. Requests are answered in order (the worker
  * handles one message at a time), so an upsert sent before a search is
  * always in the search's results. When the worker dies every pending and
- * later request rejects, and the caller falls back to a local engine.
+ * later request rejects, and the caller falls back to a local engine. A
+ * request with a /regex/ hears, through its `CallHooks`, when the worker
+ * starts matching it (an `IndexProgress` message before its answer).
  */
 export function workerEngine(worker: WorkerLike): IndexEngine {
   let nextId = 0;
   let dead: Error | null = null;
-  const pending = new Map<number, { resolve: (v: unknown) => void; reject: (e: Error) => void }>();
+  const pending = new Map<number, { resolve: (v: unknown) => void; reject: (e: Error) => void; hooks?: CallHooks }>();
   const fail = (err: Error) => {
     dead = err;
     for (const p of pending.values()) p.reject(err);
@@ -145,6 +177,10 @@ export function workerEngine(worker: WorkerLike): IndexEngine {
     const res = e.data;
     const p = pending.get(res.id);
     if (!p) return;
+    if ("progress" in res) {
+      p.hooks?.onRegexStart?.();
+      return;
+    }
     pending.delete(res.id);
     if (res.ok) p.resolve(res.result);
     else p.reject(new Error(res.error));
@@ -155,11 +191,11 @@ export function workerEngine(worker: WorkerLike): IndexEngine {
   };
   return engineOver(
     "worker",
-    (body) => {
+    (body, hooks) => {
       if (dead) return Promise.reject(dead);
       const id = ++nextId;
       return new Promise<unknown>((resolve, reject) => {
-        pending.set(id, { resolve, reject });
+        pending.set(id, { resolve, reject, hooks });
         try {
           worker.postMessage({ ...body, id } as IndexRequest);
         } catch (err) {
@@ -168,8 +204,8 @@ export function workerEngine(worker: WorkerLike): IndexEngine {
         }
       });
     },
-    () => {
-      fail(new Error("vault index worker stopped"));
+    (reason) => {
+      fail(reason === "restarted" ? new IndexRestartedError() : new Error("vault index worker stopped"));
       worker.terminate();
     },
   );

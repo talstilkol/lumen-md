@@ -1,7 +1,9 @@
 /**
  * src/layouts/EditorLayout.tsx — which panes each view mode shows, how the
  * split axis follows the preference and the viewport, and the
- * heading-anchored scroll sync between the source editor and the preview.
+ * heading-anchored scroll sync between the source editor and the preview
+ * (the fallback of the line-space sync, plan W13.R7, when a preview has no
+ * `data-sl` lines: src/__tests__/scrollSync.test.ts covers those).
  *
  * CodeMirror and the markdown renderer are replaced by small stand-ins
  * that render the DOM hooks the layout looks for (`.cm-scroller` and
@@ -236,13 +238,21 @@ describe("EditorLayout scroll sync", () => {
       expect(preview.scrollTop).toBe(200);
     });
 
-    // Preview halfway through the last section (400 → end at 800) → editor
-    // halfway from the Details line (40px) to the end of its content (120px).
+    // Plan W13.R7: the panes meet in line space. A quarter into the last
+    // section (Details, line 3, at 400px → the end, after line 4, at 800px)
+    // is line 3.5 → halfway through line 3 in the editor (40 + 10px).
+    await waitFor(() => {
+      fireEvent.mouseEnter(preview);
+      preview.scrollTop = 500;
+      fireEvent.scroll(preview);
+      expect(editor.scrollTop).toBe(50);
+    });
+    // The preview at its end: the editor at its end.
     await waitFor(() => {
       fireEvent.mouseEnter(preview);
       preview.scrollTop = 600;
       fireEvent.scroll(preview);
-      expect(editor.scrollTop).toBe(80);
+      expect(editor.scrollTop).toBe(120);
     });
   });
 

@@ -15,7 +15,8 @@
  *
  * Numbers only; no item, input or output is ever reported.
  *
- *   node scripts/golden/evals/spell-en.mjs --dev   # dev split, exits 1 below target
+ *   node scripts/golden/evals/spell-en.mjs --dev      # dev split, exits 1 below target
+ *   node scripts/golden/evals/spell-en.mjs --common   # the everyday-misspellings set, same targets
  */
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -86,8 +87,21 @@ export function devItems() {
   return set.items;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href && process.argv.includes("--dev")) {
-  const s = await score({ items: devItems() });
-  console.log(JSON.stringify({ split: "dev", items: devItems().length, ...s, targets: TARGETS, pass: meetsTargets(s) }, null, 2));
+/**
+ * The second set (src/__tests__/fixtures/spell-en-common.json): everyday
+ * misspellings in modern sentences, built apart from the moby generator so
+ * the recall target is not met on one error model only (plan 6.10).
+ */
+export function commonItems() {
+  const root = fileURLToPath(new URL("../../../", import.meta.url));
+  return JSON.parse(readFileSync(join(root, "src/__tests__/fixtures/spell-en-common.json"), "utf8")).items;
+}
+
+const cli = import.meta.url === pathToFileURL(process.argv[1] ?? "").href;
+const which = process.argv.includes("--common") ? "common" : process.argv.includes("--dev") ? "dev" : null;
+if (cli && which) {
+  const items = which === "common" ? commonItems() : devItems();
+  const s = await score({ items });
+  console.log(JSON.stringify({ split: which, items: items.length, ...s, targets: TARGETS, pass: meetsTargets(s) }, null, 2));
   process.exit(meetsTargets(s) ? 0 : 1);
 }

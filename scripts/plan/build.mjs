@@ -11,11 +11,21 @@
  *
  *   npm run plan             regenerate both
  *   npm run plan:check       exit 1 when either differs from plan.json (CI),
- *                            or a ✅ task has no `dod` (plan 0.7, scripts/dod.mjs);
- *                            warns when a wave is over its work-in-progress limit
- *                            while the next wave has started (plan W6.39, below)
- *   npm run plan:check -- --wip-strict      the WIP warning fails the check
- *   npm run plan:check -- --wip-limit 8     another limit than plan.schedule.wipLimit / WIP_LIMIT
+ *                            or a ✅ task has no `dod` (plan 0.7, scripts/dod.mjs),
+ *                            a ✅ task has no green `evidence` (plan R12.14, claimGuard.mjs),
+ *                            a ✅ task the latest audit did not call DONE (W10.B12, auditGuard.mjs),
+ *                            a ✅ is verified below `browser` (W10.G8), or a
+ *                            status is longer than STATUS_MAX (W10.G7);
+ *                            or a wave is over its work-in-progress limit while
+ *                            the next wave has started and no written decision in
+ *                            plan/wip-decisions.json freezes it (plan W6.39,
+ *                            strict by default since W10.G6: scripts/plan/wipDecisions.mjs),
+ *                            or a task starts in a frozen wave (scripts/plan/wipGate.mjs)
+ *   npm run plan:check -- --wip-limit 3     a lower limit than plan.schedule.wipLimit / WIP_LIMIT (never a higher one)
+ *   npm run plan:check -- --wip-strict      accepted, and the default: there is no flag that only warns
+ *   npm run plan:check -- --wip-none        also exit 1 when ANY wave pair is over its limit, even one held
+ *                            by a written decision (W6.39's own dod: done means no wave over its limit,
+ *                            read from the exit code, not from how the output is worded; review 12, H3)
  *   npm run plan -- --hours  also print actual hours per task branch (git)
  *
  * The scheduler started as a port of the earlier Python generator (plan5.py
@@ -27,12 +37,23 @@
  * without a zone, computed in UTC so the machine's zone never matters.
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { countPlan, historyFromGit, planVelocity, velocityLine, VELOCITY_END, VELOCITY_START, withoutVelocity } from "./velocity.mjs";
 import { execFileSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { checkDod } from "../dod.mjs";
 import { checkEvalClaims } from "../lib/evalCard.mjs";
+import { claimGuard } from "./claimGuard.mjs";
+import { auditGuard, readLedger } from "./auditGuard.mjs";
+import { RECEIPTS_FILE, checkReceiptClaims } from "./receiptLevels.mjs";
+import { AREAS_FILE, checkAreas } from "./areas.mjs";
+import { formatGate, readFrozen, wipGate } from "./wipGate.mjs";
+import { HELD_LABEL, MERGED_FILE, ancestorOfHead, gitNamedLog, mergedIds, mergedProblems, namedInCode, readMerged, unlistedMergedWork } from "./mergedWhileFrozen.mjs";
+import { WIP_DECISIONS_FILE, readWipDecisions } from "./wipDecisions.mjs";
+import { checkRoot as ratchetCheck } from "./ledgerRatchet.mjs";
+import { checkOriginClaims } from "../golden/origin-claims.mjs";
+import { decidedPairs, lowerOnlyLimit, wipDecisionProblems } from "./wipDecisions.mjs";
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const PLAN_FILE = "plan/plan.json";
@@ -143,6 +164,35 @@ export function checkVerified(plan) {
   return problems;
 }
 
+/**
+ * Plan W10.G8 (the core of W4.24) — ✅ means checked at least in a browser.
+ * `built`, `node` and `owner` (only the owner's real-world check is left, the
+ * ✅* tasks) are ⏳ until that check runs.
+ */
+export const DONE_LEVELS = Object.freeze(["browser", "real"]);
+export function checkDoneLevel(plan) {
+  const problems = [];
+  for (const p of plan.phases) for (const t of p.tasks) {
+    if (!String(t.status ?? "").startsWith("✅")) continue;
+    if (!DONE_LEVELS.includes(t.verified)) problems.push(`${t.id}: marked ${t.status.slice(0, 2).trim()} but verified ${JSON.stringify(t.verified ?? null)} — ✅ needs ${DONE_LEVELS.join(" or ")}; keep it ⏳ until that check runs (W10.G8)`);
+  }
+  return problems;
+}
+
+/**
+ * Plan W10.G7 — a status is one short line on the board. The detail goes in
+ * `notes` (rendered under the task, not in the table).
+ */
+export const STATUS_MAX = 200;
+export function checkStatusLength(plan, { max = STATUS_MAX } = {}) {
+  const problems = [];
+  for (const p of plan.phases) for (const t of p.tasks) {
+    if (t.status !== undefined && [...String(t.status)].length > max) problems.push(`${t.id}: status is ${[...String(t.status)].length} characters, over ${max} — move the detail to "notes" (W10.G7)`);
+    if (t.notes !== undefined && (typeof t.notes !== "string" || !t.notes.trim())) problems.push(`${t.id}: notes must be a non-empty string`);
+  }
+  return problems;
+}
+
 // ───────────────────────────── model ─────────────────────────────
 
 /**
@@ -162,11 +212,11 @@ export function buildModel(plan) {
     tasks: p.tasks.map((x) => {
       const done = (x.status ?? "").startsWith("✅");
       const t = {
-        id: x.id, t: x.title, br: x.branch, lane: x.lane,
+        id: x.id, t: x.title, br: x.branch ?? "—", lane: x.lane,
         m: done ? 0 : x.minutes, m_est: x.minutes, done,
         dep: [...(x.dep ?? [])], depRule: x.depRule, g: [...(x.groups ?? [])], p: x.priority,
-        status: x.status, verified: x.verified, pr: x.pr, new: !!x.new, tal: x.owner ?? "", old: x.was ?? "", w: x.source ?? "",
-        steps: x.steps, ok: x.acceptance, phase: pi,
+        status: x.status, verified: x.verified, pr: x.pr, new: !!x.new, tal: x.owner ?? "", old: x.was ?? "", w: x.source ?? "", held: !!x.heldByFrozenWave,
+        steps: x.steps, ok: x.acceptance, notes: x.notes, phase: pi,
       };
       agent.push(t);
       return t;
@@ -267,8 +317,15 @@ export function buildModel(plan) {
   };
   // Busy intervals per lane and per conflict group.
   const busy = new Map();
+  // Review 10 (plan 0.6): how often each key was reserved, so a task's start is only worked out
+  // again when its lane or a group of it changed (the schedule was O(tasks² · intervals): about
+  // 2 s per build at 950 tasks, past vitest's 5 s per test in planBuild.test.ts). Same result.
+  const version = new Map();
   const intervals = (key) => busy.get(key) ?? [];
-  const reserve = (key, a, b) => busy.set(key, [...intervals(key), [a, b]].sort((x, y) => x[0] - y[0]));
+  const reserve = (key, a, b) => {
+    busy.set(key, [...intervals(key), [a, b]].sort((x, y) => x[0] - y[0]));
+    version.set(key, (version.get(key) ?? 0) + 1);
+  };
   const lastEnd = (keys) => Math.max(START, ...keys.flatMap((k) => intervals(k).map((iv) => iv[1])));
   /** The earliest start ≥ ready where `m` minutes fit between the intervals of `keys`. */
   const firstGap = (keys, ready, m) => {
@@ -290,15 +347,25 @@ export function buildModel(plan) {
    */
   const schedule = (batch, backfill) => {
     const pending = batch.filter((t) => !t.done);
+    // A task's start depends only on its dependencies' ends (fixed once set) and its keys' intervals.
+    const cached = new Map();
+    const keysOf = new Map(pending.map((t) => [t, [`lane:${t.lane}`, ...t.g.map((g) => `group:${g}`)]]));
+    const fresh = (c, keys) => !!c && keys.every((k, i) => (version.get(k) ?? 0) === c.v[i]);
     while (pending.length) {
       let best = null;
       for (const t of pending) {
         if (t.dep.some((d) => BYID.get(d).end === undefined)) continue;
-        const keys = [`lane:${t.lane}`, ...t.g.map((g) => `group:${g}`)];
-        const ready = Math.max(START, ...t.dep.map((d) => BYID.get(d).end));
-        let st;
-        if (t.lane === "T") st = ownerFit(Math.max(ready, lastEnd(keys)), t.m)[0];
-        else st = backfill ? firstGap(keys, ready, t.m) : Math.max(ready, lastEnd(keys));
+        const keys = keysOf.get(t);
+        let c = cached.get(t);
+        if (!fresh(c, keys)) {
+          const ready = Math.max(START, ...t.dep.map((d) => BYID.get(d).end));
+          let st;
+          if (t.lane === "T") st = ownerFit(Math.max(ready, lastEnd(keys)), t.m)[0];
+          else st = backfill ? firstGap(keys, ready, t.m) : Math.max(ready, lastEnd(keys));
+          c = { st, v: keys.map((k) => version.get(k) ?? 0) };
+          cached.set(t, c);
+        }
+        const st = c.st;
         const key = [st, PRIO.get(t.id)];
         if (!best || key[0] < best.key[0] || (key[0] === best.key[0] && key[1] < best.key[1])) best = { key, t, st, keys };
       }
@@ -405,7 +472,7 @@ export function renderBoard(M) {
   o.push("| # | שלב | יעד world class (נמדד) | משימות | מאמץ | התחלה | סיום |\n|---|---|---|---|---|---|---|");
   M.phases.forEach((p, i) => {
     const [a, b] = M.span(p.tasks);
-    o.push(`| ${i} | ${cell(p.title)} | ${cell(p.goal)} | ${p.tasks.length} | ${dur(sum(p.tasks))} | ${fmt(a)} | ${fmt(b)} |`);
+    o.push(`| ${i} | ${cell(p.title)} | ${cell(p.goal ?? "—")} | ${p.tasks.length} | ${dur(sum(p.tasks))} | ${fmt(a)} | ${fmt(b)} |`);
   });
   o.push(`| 15 | מה צריך ממך | — | ${M.owner.length} | ${dur(sum(M.owner))} שלך | ${fmt(Math.min(...M.owner.map((t) => t.start)))} | ${fmt(Math.max(...M.owner.map((t) => t.end)))} |\n`);
   o.push("#### ציר זמן לפי מסלול\n");
@@ -417,11 +484,11 @@ export function renderBoard(M) {
   o.push("");
   M.phases.forEach((p, i) => {
     o.push(`#### ${i}. ${p.title}\n`);
-    o.push(`**יעד:** ${p.goal}` + (p.why ? `  \n**למה:** ${p.why}` : "") + "\n");
+    if (p.goal || p.why) o.push((p.goal ? `**יעד:** ${p.goal}` : "") + (p.goal && p.why ? "  \n" : "") + (p.why ? `**למה:** ${p.why}` : "") + "\n");
     o.push("| # | משימה | עדיפות | מסלול | הערכה | תלוי ב- | התחלה | סיום | מצב | אימות |\n|---|---|---|---|---|---|---|---|---|---|");
     for (const t of p.tasks) {
       const tag = t.new ? " 🆕" : "";
-      o.push(`| ${t.id} | ${cell(t.t)}${tag} | ${priTxt(t)} | ${t.lane} | ${est(t)} | ${cell(depsTxt(M, t) || "—")} | ${t.done ? "—" : fmt(t.start)} | ${t.done ? "—" : fmt(t.end)} | ${cell(t.status ?? "⬜")} | ${cell(verifiedTxt(t))} |`);
+      o.push(`| ${t.id} | ${cell(t.t)}${tag} | ${priTxt(t)} | ${t.lane} | ${est(t)} | ${cell(depsTxt(M, t) || "—")} | ${t.done ? "—" : fmt(t.start)} | ${t.done ? "—" : fmt(t.end)} | ${cell(`${t.status ?? "⬜"}${t.held ? ` · ${HELD_LABEL}` : ""}`)} | ${cell(verifiedTxt(t))} |`);
     }
     o.push("");
     for (const t of p.tasks) {
@@ -430,6 +497,7 @@ export function renderBoard(M) {
       o.push(`**${t.id} · ${t.t}** — ${br} · ${lanes[t.lane]} · ${est(t)} · מקור: ${t.w}${extra}\n`);
       t.steps.forEach((st, k) => o.push(`${t.id}.${k + 1}. ${st}`));
       o.push("\n**קבלה:** " + t.ok.join(" · ") + "\n");
+      if (t.notes) o.push(`**פירוט הסטטוס:** ${t.notes}\n`);
     }
   });
   o.push("#### 15. מה צריך ממך\n");
@@ -490,6 +558,7 @@ ol.steps b{color:var(--muted);font-weight:600}
 .ok ul{margin:4px 0 0;padding-inline-start:18px}
 .pill{font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;margin-inline-start:6px;white-space:nowrap}
 .p-now{background:var(--now-bg);color:var(--now)}
+.p-held{background:var(--now-bg);color:var(--now);font-style:italic}
 .p-new{background:var(--new-bg);color:var(--new)}
 .p-tal{background:var(--tal-bg);color:var(--tal)}
 .p-p0{background:var(--fg);color:var(--bg)}
@@ -524,6 +593,8 @@ export function renderHtml(M) {
 <div class="stat"><b>${M.owner.length} פעולות · ${dur(sum(M.owner))}</b><span>מחכות לך (שלב 15) · ${M.TAL_P0.length} מהן לפני השחרור</span></div>
 <div class="stat"><b>${M.VERIFIED.real} אמיתי · ${M.VERIFIED.browser} דפדפן</b><span>רמת אימות: ${E(verifiedSummary(M))}</span></div>
 </div>`);
+  // R12.21: pace and ETA from the git history of plan.json (scripts/plan/velocity.mjs).
+  H.push(`<p class="sub velocity">${VELOCITY_START}${M.velocity ? E(velocityLine(M.velocity)) : ""}${VELOCITY_END}</p>`);
   H.push(`<section class="card"><header><h2>אבני דרך</h2></header><div class="tbl"><table class="ms"><thead><tr><th>#</th><th>אבן דרך</th><th>בתזמון</th><th>עם מרווח ${B}%</th></tr></thead><tbody>`);
   M.milestones.forEach((m, k) => H.push(`<tr><td>${k + 1}</td><td>${E(m.title)}</td><td>${fmt(m.at)}</td><td>${fmt(M.stretch(m.at))}</td></tr>`));
   H.push("</tbody></table></div></section>");
@@ -548,11 +619,12 @@ export function renderHtml(M) {
   M.phases.forEach((p, i) => {
     const [a, b] = M.span(p.tasks);
     H.push(`<section class="card" id="p${i}"><header><h2><span class="num">${i}</span>${E(p.title)}</h2><span class="when">${p.tasks.length} משימות · ${dur(sum(p.tasks))} · ${fmt(a)} ← ${fmt(b)}</span></header>`);
-    H.push(`<div class="target"><b>יעד world class:</b> ${codeHtml(p.goal)}</div>`);
+    if (p.goal) H.push(`<div class="target"><b>יעד world class:</b> ${codeHtml(p.goal)}</div>`);
     if (p.why) H.push(`<div class="why">${codeHtml(p.why)}</div>`);
     for (const t of p.tasks) {
       let pills = "";
       if (t.status) pills += `<span class="pill p-now">${E(t.status)}</span>`;
+      if (t.held) pills += `<span class="pill p-held">${E(HELD_LABEL)}</span>`;
       if (t.verified) pills += `<span class="pill p-v p-v-${t.verified}">אימות: ${E(VERIFIED_LABEL[t.verified])}${t.pr ? ` · <a href="${PR_URL}${t.pr}">#${t.pr}</a>` : ""}</span>`;
       if (t.new) pills += '<span class="pill p-new">חדש</span>';
       pills += `<span class="pill p-${t.eff.toLowerCase()}">${E(priTxt(t))}</span>`;
@@ -563,7 +635,7 @@ export function renderHtml(M) {
       H.push(`<details class="task"><summary><span class="tid">${t.id}</span><span class="tt">${codeHtml(t.t)}${pills}<span class="meta">${meta}</span></span><span class="est">${est(t)}<span class="dt">${when}</span></span></summary>`);
       H.push('<div class="body"><ol class="steps">');
       t.steps.forEach((st, k) => H.push(`<li><b>${t.id}.${k + 1}</b><span>${codeHtml(st)}</span></li>`));
-      H.push('</ol><div class="ok"><b>קבלה (נמדד):</b><ul>' + t.ok.map((x) => `<li>${codeHtml(x)}</li>`).join("") + `</ul></div><div class="meta">מקור: ${codeHtml(t.w)}${t.old && t.old !== t.id ? " · היה " + E(t.old) : ""}</div></div></details>`);
+      H.push('</ol><div class="ok"><b>קבלה (נמדד):</b><ul>' + t.ok.map((x) => `<li>${codeHtml(x)}</li>`).join("") + `</ul></div>${t.notes ? `<div class="why"><b>פירוט הסטטוס:</b> ${codeHtml(t.notes)}</div>` : ""}<div class="meta">מקור: ${codeHtml(t.w)}${t.old && t.old !== t.id ? " · היה " + E(t.old) : ""}</div></div></details>`);
     }
     H.push("</section>");
   });
@@ -631,17 +703,62 @@ export const roadmapState = (status) => {
 };
 
 /**
+ * A task title for the public page: the internal references taken out — PR
+ * numbers (#123, ranges, "מ-#235"), commit hashes and the empty brackets
+ * they leave. An outside catalogue number stays when it is named
+ * ("Gutenberg #2701"). Audit A4: the roadmap is for readers, not the train.
+ */
+export function publicTitle(title) {
+  const raw = String(title ?? "");
+  let t = raw
+    .replace(/(^|[^\p{L}])(?:[מבלוה]-)?#\d+(?:\s*[–-]\s*#\d+)?/gu, (m, pre, off, str) => (/Gutenberg\s$/.test(str.slice(0, off + pre.length)) ? m : pre))
+    .replace(/\b(?=[0-9a-f]*[a-f])(?=[0-9a-f]*\d)[0-9a-f]{7,40}\b/g, "");
+  const tidy = (x) =>
+    x
+      .replace(/‏(?=\s|$|[,)+])/g, "")
+      .replace(/\(\s*[,،]?\s*\)/g, "")
+      .replace(/\s+([,):])/g, "$1")
+      .replace(/([(])\s+/g, "$1")
+      .replace(/\+\s*,/g, "+")
+      .replace(/(?:\+\s*){2,}/g, "+ ")
+      .replace(/,\s*(?=[,+]|$)/g, "")
+      .replace(/(?:→\s*){2,}/g, "→ ")
+      .replace(/:\s*→\s*/g, ": ")
+      .replace(/\s*→\s*(?=$|[^\p{L}\d\s])/gu, " ")
+      .replace(/PR-ים\s*(?=\(|$)/g, "")
+      .replace(/(^|\s)ש-\s+\(/g, "$1ש-(")
+      .replace(/\s+(?:מעל|על|ו-|ו|קבוצת)$/u, "")
+      .replace(/\s{2,}/g, " ")
+      .replace(/^[\s,:—–-]+|[\s,:—–-]+$/g, "")
+      .trim();
+  t = tidy(tidy(t));
+  return t || raw.replace(/#\d+/g, "").trim();
+}
+
+/**
  * public/roadmap.html: the plan's phases with every task's number, title and
  * state, and nothing else — no steps, acceptance, estimates, dates, branches
  * or the owner's items. The page renders the JSON block with /roadmap.js
  * (an external script: the app's CSP allows no inline script).
  */
+/**
+ * The roadmap's JSON, one task row per line: the page's text is scanned a
+ * sentence (or line) at a time (security/audit-claims, W11.S1), and rows on one
+ * line read two titles as one sentence (INT4a: W13.S5's audit funding next to
+ * W13.S6's encrypted presence). Still one JSON value; `<` is escaped.
+ */
+export function roadmapJson(phases) {
+  const row = (r) => JSON.stringify(r);
+  const body = phases.map(([i, title, rows]) => `[${i},${JSON.stringify(title)},[\n${rows.map(row).join(",\n")}]]`).join(",\n");
+  return `[${body}]`.replace(/</g, "\\u003c");
+}
+
 export function renderRoadmap(M) {
   const states = { done: 0, partial: 0, planned: 0 };
   const phases = M.phases.map((p, i) => [i, p.title, p.tasks.map((t) => {
     const st = roadmapState(t.status);
     states[st]++;
-    return [t.id, st, t.t];
+    return [t.id, st, publicTitle(t.t)];
   })]);
   const total = M.agent.length;
   const pct = Math.round((states.done / total) * 100);
@@ -727,7 +844,7 @@ export function renderRoadmap(M) {
     <footer>
       הדף נוצר על ידי <code>npm run plan</code> מ-<code>plan/plan.json</code>; CI נכשל כשהוא לא תואם. Lumen היא קוד פתוח ברישיון MIT.
     </footer>
-    <script type="application/json" id="roadmap-data">${JSON.stringify(phases).replace(/</g, "\\u003c")}</script>
+    <script type="application/json" id="roadmap-data">${roadmapJson(phases)}</script>
     <script src="/roadmap.js" defer></script>
   </body>
 </html>
@@ -760,24 +877,44 @@ export function belowFloor(task, floor = WIP_FLOOR) {
   return WIP_LEVELS.indexOf(task.verified) < WIP_LEVELS.indexOf(floor);
 }
 
-/** A task is started once it has a status (a PR, work in progress, or done). */
-export const isStarted = (task) => String(task.status ?? "").trim() !== "";
+/** The placeholder a wave's tasks carry before any work ("⏳ גל 10 — לא התחיל"): not started (W10.G6). */
+export const NOT_STARTED = /^⏳\s*גל\s+\d+\s+—\s+לא התחיל/;
+const present = (v) => v !== undefined && v !== null && v !== "" && !(Array.isArray(v) && v.length === 0) && !(typeof v === "object" && !Array.isArray(v) && Object.keys(v).length === 0);
+/**
+ * A task is started once it has a status other than the placeholder (a PR, work
+ * in progress, or done), or once anything records work on it: a `verified`
+ * level, a `pr`, or `evidence` (review 11, M4: a placeholder status alone used
+ * to hide a task whose work had begun), or once it is in `merged`, the ids of
+ * plan/merged-while-frozen.json (review 12, M2; run() also marks them
+ * `heldByFrozenWave` in memory).
+ */
+export const isStarted = (task, merged) => {
+  if (merged?.has(task.id) || task.heldByFrozenWave === true) return true;
+  const s = String(task.status ?? "").trim();
+  if (s !== "" && !NOT_STARTED.test(s)) return true;
+  return present(task.verified) || present(task.pr) || present(task.evidence);
+};
 
 /**
  * Every wave over its limit whose next wave has started:
  * [{ wave, next, limit, open: [ids below the floor], unlabelled, started: [ids of the next wave] }].
- * The limit is `limit`, else plan.schedule.wipLimit, else WIP_LIMIT.
+ * The limit is `limit`, else plan.schedule.wipLimit, else WIP_LIMIT. `merged`: the
+ * ids of plan/merged-while-frozen.json, started whatever their status says.
  */
-export function wipWarnings(plan, { limit } = {}) {
+export function wipWarnings(plan, { limit, merged } = {}) {
   const max = Number.isInteger(limit) && limit >= 0 ? limit : Number.isInteger(plan.schedule?.wipLimit) ? plan.schedule.wipLimit : WIP_LIMIT;
-  const waves = plan.phases
-    .map((p) => ({ n: waveNumber(p.title), tasks: p.tasks }))
-    .filter((w) => w.n !== null)
-    .sort((a, b) => a.n - b.n);
+  // A part of a wave ("גל 12ב") is that wave: its tasks join wave 12's, so wave 12 is never "followed" by itself.
+  const byWave = new Map();
+  for (const p of plan.phases) {
+    const n = waveNumber(p.title);
+    if (n === null) continue;
+    byWave.set(n, [...(byWave.get(n) ?? []), ...p.tasks]);
+  }
+  const waves = [...byWave].map(([n, tasks]) => ({ n, tasks })).sort((a, b) => a.n - b.n);
   const out = [];
   for (let i = 0; i + 1 < waves.length; i++) {
     const open = waves[i].tasks.filter((t) => belowFloor(t));
-    const started = waves[i + 1].tasks.filter(isStarted);
+    const started = waves[i + 1].tasks.filter((t) => isStarted(t, merged));
     if (open.length > max && started.length) {
       out.push({ wave: waves[i].n, next: waves[i + 1].n, limit: max, open: open.map((t) => t.id), unlabelled: open.filter((t) => t.verified === undefined).length, started: started.map((t) => t.id) });
     }
@@ -793,15 +930,60 @@ export function formatWip(w) {
 
 // ───────────────────────────── CLI ─────────────────────────────
 
-export function run({ root = ROOT, check = false, wipLimit } = {}) {
+export function run({ root = ROOT, check = false, wipLimit, strictReceipts = false } = {}) {
   const plan = JSON.parse(readFileSync(join(root, PLAN_FILE), "utf8"));
+  // Review 12, M3: the written WIP decisions live in their own file, owned in CODEOWNERS.
+  const fileDecisions = readWipDecisions(root);
+  if (fileDecisions && plan.schedule?.wipDecisions !== undefined) throw new Error(`plan: plan.schedule.wipDecisions moved to ${WIP_DECISIONS_FILE}; remove it from ${PLAN_FILE}`);
+  if (fileDecisions) plan.schedule = { ...plan.schedule, wipDecisions: fileDecisions };
+  // Review 12, M2: work merged while its wave was frozen is recorded, counted as started, and shown.
+  const mergedFile = readMerged(root);
+  const merged = mergedIds(mergedFile);
+  const planIds = new Set(plan.phases.flatMap((p) => p.tasks.map((t) => t.id)));
+  const mergedErr = mergedProblems(mergedFile, planIds, ancestorOfHead(root));
+  const log = gitNamedLog(root);
+  if (log !== null) mergedErr.push(...unlistedMergedWork(plan, namedInCode(log, planIds), merged, (t) => isStarted(t, merged)));
+  if (mergedErr.length) throw new Error(`plan: ${MERGED_FILE} (review 12, M2) —\n  ${mergedErr.join("\n  ")}`);
+  // heldByFrozenWave is set here, in memory, from the list; plan.json never carries it.
+  const handSet = plan.phases.flatMap((p) => p.tasks).filter((t) => "heldByFrozenWave" in t).map((t) => t.id);
+  if (handSet.length) throw new Error(`plan: ${handSet.join(", ")}: "heldByFrozenWave" comes from ${MERGED_FILE}, never from ${PLAN_FILE}`);
+  for (const p of plan.phases) for (const t of p.tasks) if (merged.has(t.id)) t.heldByFrozenWave = true;
+  const limit = lowerOnlyLimit(wipLimit, Number.isInteger(plan.schedule?.wipLimit) ? plan.schedule.wipLimit : WIP_LIMIT);
   // Plan 0.7: no ✅ without the commands that prove it.
   // W11.I18: a ✅ that rests on an eval cites a complete public or held-out card.
   const dodProblems = [...checkDod(plan), ...checkEvalClaims(plan, (p) => JSON.parse(readFileSync(join(root, p), "utf8")))];
   if (dodProblems.length) throw new Error(`plan: definition of done —\n  ${dodProblems.join("\n  ")}`);
   const verifiedProblems = checkVerified(plan);
   if (verifiedProblems.length) throw new Error(`plan: verified / pr (W4.24) —\n  ${verifiedProblems.join("\n  ")}`);
+  // Plan R12.14: and no ✅ without recorded evidence that a check went green.
+  const claimProblems = claimGuard(plan);
+  if (claimProblems.length) throw new Error(`plan: ✅ without evidence (scripts/plan/claimGuard.mjs) —\n  ${claimProblems.join("\n  ")}`);
+  // W10.B12: and no ✅ on a task the latest audit did not call DONE (plan/audit-verdicts.json).
+  const auditProblems = auditGuard(plan, readLedger(root));
+  if (auditProblems.length) throw new Error(`plan: ✅ the audit did not call DONE (scripts/plan/auditGuard.mjs) —\n  ${auditProblems.join("\n  ")}`);
+  // W10.B13: no status calls a synthetic golden set or fixture real (eval/origins.json).
+  // Review 10, L8: without eval/origins.json the rule cannot run, and plan:check fails (it used to pass).
+  const originsPath = join(root, "eval/origins.json");
+  if (!existsSync(originsPath)) throw new Error("plan: eval/origins.json is missing (W10.B13): the origin of every golden set and fixture is unknown, so no status can be checked against it");
+  const originProblems = checkOriginClaims(plan, JSON.parse(readFileSync(originsPath, "utf8")));
+  if (originProblems.length) throw new Error(`plan: a synthetic set called real (W10.B13, scripts/golden/origin-claims.mjs) —\n  ${originProblems.join("\n  ")}`);
+  const levelProblems = checkDoneLevel(plan);
+  if (levelProblems.length) throw new Error(`plan: ✅ below browser (W10.G8) —\n  ${levelProblems.join("\n  ")}`);
+  const lengthProblems = checkStatusLength(plan);
+  if (lengthProblems.length) throw new Error(`plan: status length (W10.G7) —\n  ${lengthProblems.join("\n  ")}`);
+  // W10.G9: a level comes from a receipt. "real" never stands without one; --strict-receipts holds every level to them.
+  const receiptsPath = join(root, RECEIPTS_FILE);
+  const receipts = existsSync(receiptsPath) ? JSON.parse(readFileSync(receiptsPath, "utf8")) : null;
+  const receiptClaims = checkReceiptClaims(plan, receipts, { strict: strictReceipts });
+  if (receiptClaims.problems.length) throw new Error(`plan: levels without a receipt (W10.G9, npm run plan:receipts) —\n  ${receiptClaims.problems.join("\n  ")}`);
+  // W6.44 (#513, #734): every task maps to its areas, and each area has its bar for 10 as code (npm run plan:areas).
+  const areasPath = join(root, AREAS_FILE);
+  const areaCheck = existsSync(areasPath) ? checkAreas(plan, JSON.parse(readFileSync(areasPath, "utf8"))) : { problems: [], unknown: [] };
+  if (areaCheck.problems.length) throw new Error(`plan: ${AREAS_FILE} (W6.44) —\n  ${areaCheck.problems.join("\n  ")}`);
+  if (areaCheck.unknown.length) console.warn(`plan: ${areaCheck.unknown.length} id(s) in ${AREAS_FILE} are not in the plan (a removed task): ${areaCheck.unknown.slice(0, 12).join(", ")}${areaCheck.unknown.length > 12 ? " …" : ""}`);
   const M = buildModel(plan);
+  M.MANUAL_LEVELS = receiptClaims.manual;
+  M.velocity = planVelocity(historyFromGit(root), countPlan(plan));
   const docPath = join(root, DOC_FILE);
   const htmlPath = join(root, HTML_FILE);
   const doc = readFileSync(docPath, "utf8");
@@ -811,22 +993,27 @@ export function run({ root = ROOT, check = false, wipLimit } = {}) {
   const wantRoadmap = renderRoadmap(M);
   const stale = [];
   if (doc !== wantDoc) stale.push(DOC_FILE);
-  if (!existsSync(htmlPath) || readFileSync(htmlPath, "utf8") !== wantHtml) stale.push(HTML_FILE);
+  const htmlNow = existsSync(htmlPath) ? readFileSync(htmlPath, "utf8") : null;
+  // The velocity line follows git history, not plan.json: --check compares the board without it.
+  if (htmlNow === null || withoutVelocity(htmlNow) !== withoutVelocity(wantHtml)) stale.push(HTML_FILE);
   if (!existsSync(roadmapPath) || readFileSync(roadmapPath, "utf8") !== wantRoadmap) stale.push(ROADMAP_FILE);
   if (!check) {
     if (stale.includes(DOC_FILE)) writeFileSync(docPath, wantDoc);
-    if (stale.includes(HTML_FILE)) writeFileSync(htmlPath, wantHtml);
+    if (htmlNow !== wantHtml) writeFileSync(htmlPath, wantHtml);
     if (stale.includes(ROADMAP_FILE)) writeFileSync(roadmapPath, wantRoadmap);
   }
-  return { M, stale, wip: wipWarnings(plan, { limit: wipLimit }) };
+  // W6.39: the frozen-wave gate holds at the plan's own limit; W10.G6: the written decisions are checked at `limit` (never above the plan's).
+  const wip = wipWarnings(plan, { limit, merged });
+  M.plan = plan;
+  return { M, stale, wip, wipProblems: wipDecisionProblems(plan, wip), gate: wipGate(wipWarnings(plan, { merged }), readFrozen(root), merged), ratchet: check ? ratchetCheck(root) : null };
 }
 
 function main(argv) {
   const check = argv.includes("--check");
   const at = argv.indexOf("--wip-limit");
-  const wipLimit = at >= 0 ? Number(argv[at + 1]) : undefined;
-  if (at >= 0 && !(Number.isInteger(wipLimit) && wipLimit >= 0)) throw new Error(`plan: --wip-limit takes a whole number, not ${JSON.stringify(argv[at + 1])}`);
-  const { M, stale, wip } = run({ check, wipLimit });
+  const wipLimit = at >= 0 ? (/^\d+$/.test(argv[at + 1] ?? "") ? Number(argv[at + 1]) : argv[at + 1] ?? null) : undefined;
+  const { M, stale, wip, wipProblems, gate, ratchet } = run({ check, wipLimit, strictReceipts: argv.includes("--strict-receipts") });
+  if (M.MANUAL_LEVELS.length) console.error(`plan: ${M.MANUAL_LEVELS.length} level(s) above what the signed receipts prove (W10.G9; --strict-receipts fails on them): ${M.MANUAL_LEVELS.slice(0, 8).join(", ")}${M.MANUAL_LEVELS.length > 8 ? " …" : ""}`);
   const P0 = M.agent.filter((t) => t.eff === "P0").length;
   const levels = [...VERIFIED_LEVELS.map((k) => `${k} ${M.VERIFIED[k]}`), ...(M.VERIFIED.none ? [`unset ${M.VERIFIED.none}`] : [])].join(", ");
   const summary = `${M.agent.length} tasks, ${M.owner.length} owner items, ${Math.floor(M.EFFORT / 60)} h left; release (P0, ${P0} tasks) ${fmt(M.P0_END)}, end ${fmt(M.END)}; verified: ${levels}`;
@@ -835,9 +1022,28 @@ function main(argv) {
     for (const h of actualHours(M, { base })) console.log(`${h.id.padEnd(6)} ${h.branch.padEnd(32)} ${String(h.commits).padStart(3)} commits  ${h.hours.toFixed(2).padStart(6)} h actual  ${h.estimate.toFixed(2).padStart(6)} h estimated`);
   }
   if (check) {
-    for (const w of wip) console.error(formatWip(w));
-    if (wip.length && argv.includes("--wip-strict")) {
-      console.error(`plan: ${wip.length} wave${wip.length > 1 ? "s" : ""} over the work-in-progress limit (--wip-strict).`);
+    // W6.39 / W10.G6: a wave pair held by a written decision at its frozen numbers is decided, not a warning;
+    // one line says how many. Any other pair over its limit is printed, and fails just below.
+    const decided = decidedPairs(M.plan ?? null, wip, wipProblems);
+    for (const w of wip) if (!decided.has(`${w.wave}→${w.next}`)) console.error(formatWip(w));
+    if (decided.size) console.log(`plan: work in progress — ${decided.size} wave pair${decided.size > 1 ? "s" : ""} over the limit held by a written decision at frozen numbers (plan/wip-decisions.json, W10.G6); no new start in them.`);
+    // W10.G6: strict by default. A wave over its limit passes only with a written decision that freezes it.
+    if (wipProblems.length) {
+      console.error(`plan: work-in-progress limit (W6.39, strict by default — W10.G6) —\n  ${wipProblems.join("\n  ")}`);
+      return 1;
+    }
+    if (argv.includes("--wip-none") && wip.length) {
+      console.error(`plan: --wip-none: ${wip.length} wave pair${wip.length > 1 ? "s are" : " is"} over the WIP limit (${decided.size} held by a written decision): ${wip.map((w) => `${w.wave}→${w.next}`).join(", ")}`);
+      return 1;
+    }
+    const gateLines = formatGate(gate);
+    if (gateLines.length) {
+      for (const l of gateLines) console.error(l);
+      return 1;
+    }
+    // Review 12, M3: the ratchet files only move one way (scripts/plan/ledgerRatchet.mjs, also npm run plan:ratchet).
+    if (ratchet?.problems.length) {
+      for (const p of ratchet.problems) console.error(`plan: ledger ratchet — ${p}`);
       return 1;
     }
     if (stale.length) {

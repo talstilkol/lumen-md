@@ -39,6 +39,7 @@ describe("privacy ledger: what train 4 added", () => {
   it.each([
     ["https://knesset.gov.il/OdataV4/ParliamentInfo/KNS_Law", "Knesset"],
     ["https://main.knesset.gov.il/Activity/Legislation", "Knesset"],
+    ["https://www.wikidata.org/w/api.php?action=wbsearchentities", "Wikidata"],
     ["https://data.gov.il/api/3/action/package_search?q=x", "Government data"],
     ["https://apis.cbs.gov.il/series/data/list?id=1", "Government data"],
   ])("%s is cloud text with its own reason", (url, reason) => {

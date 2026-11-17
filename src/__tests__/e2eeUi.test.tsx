@@ -166,7 +166,7 @@ describe("e2ee freshness banner", () => {
     expect(screen.queryByText("Freshness verified")).toBeNull();
   });
 
-  it("shows nothing, never 'verified', while freshness is unknown", async () => {
+  it("shows nothing, never 'verified', once freshness is unknown (a re-read past FRESHNESS_STALE_MS, or one that fails)", async () => {
     let listener: () => void = () => {};
     let answer: (f: { source: "paired"; verified: boolean; counter: number }) => void = () => {};
     let calls = 0;
@@ -181,11 +181,12 @@ describe("e2ee freshness banner", () => {
       confirmFreshness: vi.fn(async () => {}),
       onChange: (l: () => void) => ((listener = l), () => {}),
     };
-    const { container } = render(<FreshnessBanner sync={fake as never} />);
+    const { container } = render(<FreshnessBanner sync={fake as never} staleMs={40} />);
     expect((await screen.findByRole("status")).textContent).toBe("Freshness verified");
-    // A round ended: until the re-read answers, nothing is shown.
+    // A round ended (Z6-L4): the last answer stays while the re-read is out, but only for staleMs; then nothing.
     act(() => listener());
-    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.queryByRole("status")).not.toBeNull();
+    await waitFor(() => expect(screen.queryByRole("status")).toBeNull());
     await act(async () => answer({ source: "paired", verified: true, counter: 4 }));
     expect((await screen.findByRole("status")).textContent).toBe("Freshness verified");
     // A re-read that fails leaves it unknown: nothing.

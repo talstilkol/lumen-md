@@ -23,7 +23,7 @@ import {
   setBetaWeekly,
 } from "../beta/programme";
 import { bump, loadUsage, type UsageStore } from "../metrics/usage";
-import { readOverrides } from "../flags/flags";
+import { FLAGS, readOverrides } from "../flags/flags";
 
 function mem(): Storage {
   const m = new Map<string, string>();
@@ -49,8 +49,10 @@ describe("joining and leaving", () => {
     const e = joinBeta({ storage, setChannel: (c) => channels.push(c), today: "2026-11-12" });
     expect(e).toEqual({ v: 1, joined: "2026-11-12", weeklyReport: false, lastReport: null });
     expect(channels).toEqual(["beta"]);
-    // The real flag registry: update.checkOnLaunch is in stage beta.
-    expect(readOverrides(storage)).toEqual({ "update.checkOnLaunch": true });
+    // The real flag registry: every flag in stage beta is on (update.checkOnLaunch, and since W11.P15 the
+    // retention flags), and no other flag.
+    expect(readOverrides(storage)).toEqual(Object.fromEntries(FLAGS.filter((f) => f.stage === "beta").map((f) => [f.id, true])));
+    expect(readOverrides(storage)).toMatchObject({ "update.checkOnLaunch": true, "retention.onThisDay": true, "retention.weeklySummary": true });
     expect(joinBeta({ storage, today: "2026-12-01" }).joined).toBe("2026-11-12");
   });
 

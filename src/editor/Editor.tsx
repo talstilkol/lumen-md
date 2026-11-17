@@ -35,6 +35,7 @@ import {
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import { bidiExtension } from "./bidi";
 import { paragraphDirectionKeymap } from "./paragraphDirection";
+import { noteLangExtension } from "./noteLang";
 import { hebrewTypographyExtension } from "./hebrewTypographyExtension";
 import { bidiMarksExtension } from "./bidiMarks";
 import { sefariaRefTrigger } from "./refTrigger";
@@ -44,6 +45,7 @@ import { languages } from "@codemirror/language-data";
 import { tags as t } from "@lezer/highlight";
 import type { Extension } from "@codemirror/state";
 import { embedHintExtension } from "./embedHintExtension";
+import { openSourcesTrigger } from "./triggers";
 import { insertSlashMenuExtension } from "./insertMenu";
 import { wikiLinkAutocomplete } from "./wikiLinkAutocomplete";
 import { wikiHover } from "./wikiHover";
@@ -131,13 +133,18 @@ const commentsCompartment = new Compartment();
 const grammarCompartment = new Compartment();
 // Outline mode: folding, zoom and block operations (plan W2.13), loaded after mount.
 const outlineCompartment = new Compartment();
+/** W13.E2: smart lists (Enter, Tab, Alt+↑/↓, Mod+Enter, Mod+B, paste in lists), a lazy chunk. */
+const smartListsCompartment = new Compartment();
+/** W13.E5: several cursors, Alt+drag rectangles, Mod+D, Esc to one cursor — a lazy chunk. */
+const multiCursorCompartment = new Compartment();
 // W1.2 — the document's own line ending, so a CRLF file saves as CRLF.
 const lineSeparatorCompartment = new Compartment();
 
 let vimExtensionPromise: Promise<unknown> | null = null;
+/** W13.E1: Vim with RTL-aware motions, :w / :q and the AI-first Esc (editor/vimMode.ts), one lazy chunk. */
 async function loadVimExtension() {
   if (!vimExtensionPromise) {
-    vimExtensionPromise = import("@replit/codemirror-vim").then((m) => m.vim());
+    vimExtensionPromise = import("./vimMode").then((m) => m.loadVimMode());
   }
   return vimExtensionPromise;
 }
@@ -295,6 +302,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       lineSeparatorCompartment.of(EditorState.lineSeparator.of(lineSeparatorFor(initialDoc))),
       vimCompartment.of([]),
       embedHintExtension(),
+      openSourcesTrigger(), // W7.24: typing "@מקור" opens the open-sources dialog
       // W1.3 — ==highlights==, %%comments%% and callout heads, marked.
       obsidianSourceExtension,
       insertSlashMenuExtension(),
@@ -325,6 +333,8 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       bidiExtension(),
       // W11.H4 — Mod+Shift+X switches the selected paragraphs' direction (saved as a mark in the note).
       paragraphDirectionKeymap,
+      // The note's language tag (Yiddish, Ladino…) on the content element (plan W7.9).
+      noteLangExtension(),
       // Hebrew typography as you type: ״ ׳ „” ־ – (plan W2.9).
       hebrewTypographyExtension(),
       bidiMarksExtension(),
@@ -354,8 +364,7 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // extension on demand and reconfigures (starts empty, like collab).
       commentsCompartment.of([]),
       typewriterCompartment.of(typewriterMode ? typewriterModeExtension() : []),
-      // TypeScript checks in ```ts blocks — opt-in; the extension (and the
-      // compiler worker) is loaded only once the setting is on.
+      // TypeScript checks in ```ts blocks — opt-in; the extension (and the compiler worker) is loaded only once the setting is on.
       tsChecksCompartment.of([]),
       // LanguageTool grammar / style — opt-in, debounced 1.5s. Off by
       // default because the public endpoint is rate-limited; users with a
@@ -363,12 +372,13 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       // Loaded dynamically when toggled on to keep the initial bundle small.
       grammarCompartment.of([]),
       outlineCompartment.of([]),
+      smartListsCompartment.of([]),
+      multiCursorCompartment.of([]),
       // Live markdown lint — wavy underlines for trailing whitespace,
       // mixed-indent, heading-skip, broken wiki-links. Runs every 250 ms
       // after the user stops typing.
       markdownLintExtension(),
-      // Workspace search → editor: when SearchDialog opens a hit, this
-      // extension flashes the matches and scrolls the first one into view.
+      // Workspace search → editor: when SearchDialog opens a hit, this extension flashes the matches and scrolls the first one into view.
       searchHighlightExtension(),
       speechHighlightExtension(),
       // Plan 5.9: text the AI wrote is shown lighter until it is edited.
@@ -683,6 +693,24 @@ export const Editor = forwardRef<EditorHandle, EditorProps>(function Editor(
       const view = viewRef.current;
       if (cancelled || !view) return;
       view.dispatch({ effects: outlineCompartment.reconfigure(m.outlineExtension()) });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Smart lists (plan W13.E2) and multiple cursors (W13.E5): their own lazy chunks, like the outline.
+  useEffect(() => {
+    let cancelled = false;
+    void import("./smartListsExtension").then((m) => {
+      const view = viewRef.current;
+      if (cancelled || !view) return;
+      view.dispatch({ effects: smartListsCompartment.reconfigure(m.smartListKeymap()) });
+    });
+    void import("./multiCursor").then((m) => {
+      const view = viewRef.current;
+      if (cancelled || !view) return;
+      view.dispatch({ effects: multiCursorCompartment.reconfigure(m.multiCursorExtension()) });
     });
     return () => {
       cancelled = true;

@@ -111,6 +111,48 @@ const DEFAULT_POLICY_CONFIG: DOMPurifyConfig = {
 let defaultPurifier: ReturnType<typeof DOMPurify> | null = null;
 let sanitizing = 0;
 
+/* ─── What reaches the default policy (plan W11.S17) ─────────────── */
+
+/**
+ * One sink that reached the `default` policy: the sink the browser names
+ * ("Element innerHTML", "HTMLScriptElement src", …), where in the code it
+ * came from (the first stack frame outside this module), and how often.
+ * The default policy is meant to go: every hit is a sink to make explicit
+ * (`lumen` or `dompurify`), and a full e2e run must end with none
+ * (e2e/trusted-types-default.spec.ts reads `window.__lumenTrustedTypesDefaultHits`).
+ */
+export interface DefaultPolicyHit {
+  kind: "html" | "script-url" | "script";
+  sink: string;
+  from: string;
+  count: number;
+}
+
+const hits = new Map<string, DefaultPolicyHit>();
+
+/** The first stack frame that isn't this module (or the browser's own call into it). */
+function callerFrame(): string {
+  const lines = String(new Error().stack ?? "").split("\n").slice(1);
+  const frame = lines.find((l) => /\S/.test(l) && !/trustedTypes|<anonymous>|^\s*at\s+(Object\.)?create(HTML|Script(URL)?)\b/.test(l));
+  return (frame ?? "unknown").trim().replace(/^at\s+/, "").replace(/\?[^:)\s]*/, "").slice(0, 200);
+}
+
+/** Record a default-policy hit (no change to what the policy returns). */
+export function recordDefaultPolicyHit(kind: DefaultPolicyHit["kind"], sink: unknown): void {
+  const name = typeof sink === "string" ? sink : "unknown sink";
+  const from = callerFrame();
+  const key = `${kind}|${name}|${from}`;
+  const h = hits.get(key);
+  if (h) h.count++;
+  else hits.set(key, { kind, sink: name, from, count: 1 });
+  if (typeof window !== "undefined") (window as unknown as { __lumenTrustedTypesDefaultHits?: DefaultPolicyHit[] }).__lumenTrustedTypesDefaultHits = defaultPolicyHits();
+}
+
+/** Every default-policy hit so far, most frequent first. */
+export function defaultPolicyHits(): DefaultPolicyHit[] {
+  return [...hits.values()].sort((a, b) => b.count - a.count || (a.sink < b.sink ? -1 : 1)).map((h) => ({ ...h }));
+}
+
 /**
  * Sanitize a string that hit a sink with no explicit policy. `sink` is the
  * sink name the browser passes (e.g. "Element innerHTML",
@@ -122,6 +164,7 @@ export function sanitizeForDefaultPolicy(input: string, sink?: unknown): string 
   // document which DOMPurify is in the middle of sanitizing, so passing
   // it through is safe — and recursing would never terminate.
   if (sanitizing > 0) return input;
+  recordDefaultPolicyHit("html", sink);
   if (typeof window === "undefined") return input;
   defaultPurifier ??= DOMPurify(window);
   sanitizing++;
@@ -183,15 +226,23 @@ export function installTrustedTypesPolicies(
   if (defaultInstalled) return true;
   if (factory.defaultPolicy) return (defaultInstalled = true);
   try {
+    // A default policy's callbacks get (value, trusted type name, sink name).
+    const sinkOf = (rest: unknown[]) => (typeof rest[0] === "string" && /^Trusted/.test(rest[0]) ? rest[1] : rest[0]);
     factory.createPolicy("default", {
-      createHTML: sanitizeForDefaultPolicy,
-      createScriptURL: allowScriptUrl,
+      createHTML: (input: string, ...rest: unknown[]) => sanitizeForDefaultPolicy(input, sinkOf(rest)),
+      createScriptURL: (input: string, ...rest: unknown[]) => {
+        recordDefaultPolicyHit("script-url", sinkOf(rest));
+        return allowScriptUrl(input);
+      },
       // String → code (eval / new Function). The page CSP no longer allows
       // eval at all (F4: Graphviz moved into a worker with its own policy),
       // so this pass-through is never reached in production; it stays for
       // dev, where no CSP header is served. Trusted Types still guard every
       // HTML and script-URL sink above.
-      createScript: passThroughScript,
+      createScript: (input: string, ...rest: unknown[]) => {
+        recordDefaultPolicyHit("script", sinkOf(rest));
+        return passThroughScript(input);
+      },
     });
     defaultInstalled = true;
   } catch {
@@ -206,6 +257,7 @@ export function __resetTrustedTypesForTests(): void {
   defaultInstalled = false;
   defaultPurifier = null;
   sanitizing = 0;
+  hits.clear();
 }
 
 /* ─── Public helpers ─────────────────────────────────────────────── */
@@ -221,8 +273,19 @@ export function toTrustedHTML(html: string, kind: HtmlKind = "html"): string | T
   return sanitizeForLumen(html, kind);
 }
 
-/** Sanitize and assign `innerHTML` through the `lumen` policy. */
+/**
+ * Sanitize and assign `innerHTML` through the `lumen` policy. Where the
+ * browser has the HTML Sanitizer API (`Element.prototype.setHTML`, plan
+ * W11.S17), HTML goes through it instead, after DOMPurify: setHTML is not a
+ * Trusted Types sink (it sanitizes itself), so nothing reaches a policy, and
+ * DOMPurify's profile still decides what our markup may hold.
+ */
 export function safeSetHtml(el: Element, html: string, kind: HtmlKind = "html"): void {
+  const setHTML = (el as Element & { setHTML?: (markup: string) => void }).setHTML;
+  if (kind === "html" && typeof setHTML === "function") {
+    setHTML.call(el, sanitizeForLumen(html, "html"));
+    return;
+  }
   // lib.dom types innerHTML as `string`; the runtime sink accepts TrustedHTML.
   el.innerHTML = toTrustedHTML(html, kind) as string;
 }

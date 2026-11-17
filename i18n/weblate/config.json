@@ -19,10 +19,10 @@
     "edit_template": false,
     "new_lang": "none",
     "license": "MIT",
-    "check_flags": "placeholders:r\"\\{\\{?\\w+\\}?\\}\"",
+    "check_flags": "placeholders:r\"\\{\\{?\\w+\\}?\\}\",icu-message-format",
     "enable_review": true,
     "addons": ["weblate.cleanup.generic", "weblate.cleanup.blank"]
   },
-  "languages": ["ar", "ru", "fr", "de", "ja", "zh-CN"],
+  "languages": ["ar", "ru", "fr", "de", "ja", "zh-CN", "fa"],
   "first": "ar"
 }

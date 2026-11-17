@@ -1,0 +1,216 @@
+[
+ {
+  "id": "L8-O-6.0",
+  "task": "6.0",
+  "decision": "Publish the converted models (Opus-MT en→he, opus-mt-tc-big-he-en, DictaBERT-NER, bert-base-NER, SigLIP multilingual) as GitHub release assets on talstilkol/lumen-md, after the Mac run L8-6.0-convert passes, and record each file's sha256 in models/registry.json.",
+  "options": [
+   "A. GitHub Releases on talstilkol/lumen-md, one release per model (decided 10.11 in 15.9; the registry and mirror already expect it)",
+   "B. A Hugging Face model repo under the owner's account",
+   "C. Cloudflare R2 behind edge-workers/model-mirror"
+  ],
+  "recommendation": "A",
+  "why": "Already decided in 15.9 and wired: models/registry.json `hosting` reads one GitHub release per model (assets ≤ 2 GiB each; the largest file here is ~630 MB) through the CORS proxy edge-workers/model-mirror, and `npm run owner:models` pins, uploads, verifies and checks. B adds an account and a second source of truth; C adds a paid bucket. The conversion itself is a Mac step (L8-6.0-convert), so the owner only runs the upload, which publishes under the owner's name.",
+  "sources": [
+   "plan/plan.json owner 15.9 (decided 10.11)",
+   "models/registry.json → hosting.about",
+   "https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases (release assets: up to 2 GiB per file)",
+   "scripts/models/convert.mjs, scripts/models/mirror.mjs"
+  ],
+  "changes": [
+   "models/registry.json: sha256, size and hosting.tag per converted file (written by `npm run models:registry -- --dir out/models --smoke out/models/smoke-results.json`)",
+   "GitHub: one release per model (`npm run owner:models`)"
+  ],
+  "ownerCmd": "npm run owner:models",
+  "ownerExpect": "exit 0; `npm run models:mirror -- --check` exit 0",
+  "draftPr": null
+ },
+ {
+  "id": "L8-O-6.2",
+  "task": "6.2",
+  "decision": "Which English neural voice ships for read-aloud: pin Kokoro-82M and choose its English grapheme-to-phoneme step.",
+  "options": [
+   "A. Kokoro-82M + eSpeak NG (GPL-3.0) as a separate worker the user downloads (allowed by 15.10(1))",
+   "B. Kokoro-82M + a TypeScript port of misaki's English dictionaries (Apache-2.0, the G2P Kokoro was trained with); a sentence with a word missing from the dictionary falls back to the system voice",
+   "C. System voices only (today)"
+  ],
+  "recommendation": "B",
+  "why": "B keeps acceptance 6.2 (0 GPL in the bundle, 0 network after the download) without shipping or downloading GPL code at all; misaki's dictionaries are the phoneme set Kokoro-82M was trained on, so quality matches the reference pipeline for in-dictionary words, and misaki uses eSpeak only as an optional fallback. A is permitted but puts GPL code on users' devices and needs a licence notice flow. C ships nothing. The Hebrew side is unaffected (no licensed Hebrew voice yet; Chatterbox waits for W11.H9).",
+  "sources": [
+   "https://huggingface.co/hexgrad/Kokoro-82M (Apache-2.0 weights)",
+   "https://pypi.org/project/misaki/ (Apache-2.0; espeak is an optional out-of-dictionary fallback)",
+   "https://github.com/espeak-ng/espeak-ng (GPL-3.0)",
+   "plan/decisions-2026-11-14.md row 2.1 (15.10)",
+   "src/ai/tts/kokoro.ts (ENGLISH_VOICES empty, ENGLISH_PHONEMIZER null)",
+   "src/__tests__/ttsLicence.test.ts"
+  ],
+  "changes": [
+   "src/ai/tts/kokoro.ts: one KokoroPack in ENGLISH_VOICES (model + voice URL at a revision, size, sha256) and ENGLISH_PHONEMIZER",
+   "new src/ai/tts/englishG2P.ts + its dictionary data file (Apache-2.0 attribution in THIRD_PARTY_NOTICES.md)",
+   "no change to licenses.allow.json (nothing GPL)"
+  ],
+  "draftPr": null
+ },
+ {
+  "id": "L8-O-6.3",
+  "task": "6.3",
+  "decision": "Ship DictaBERT-large-char-menaked as the \"high quality\" niqqud download (stage 2), at a pinned revision, hosted with the other models.",
+  "options": [
+   "A. dicta-il/dictabert-large-char-menaked (CC BY 4.0), exported to ONNX int8 by scripts/models/export-menaked.py (~308 MB), on GitHub Releases",
+   "B. phonikud-onnx (its model card states MIT and CC BY at once)",
+   "C. Nakdimon only (MIT, stage 1, shipped)"
+  ],
+  "recommendation": "A",
+  "why": "A is the plan's stage 2 with one clear licence (CC BY 4.0 + attribution, which the registry already carries per file); B's contradictory licence cannot be relied on; C cannot reach the ≥ 90 % word target on its own. The Mac entry L8-6.3-menaked exports and scores it on the Nakdimon dev part; L8-6.3-golden scores the held-out test part.",
+  "sources": [
+   "https://huggingface.co/dicta-il/dictabert-large-char-menaked (CC BY 4.0)",
+   "plan/plan.json task 6.3 steps",
+   "scripts/models/export-menaked.py",
+   "scripts/golden/evals/nikud.mjs"
+  ],
+  "changes": [
+   "MENAKED_REVISION: the commit sha the Mac run exports (the owner picks the current main commit of the model repo; the Mac run prints it)",
+   "models/registry.json: a dictabert-char-menaked entry (licence CC BY 4.0, attribution, sha256, size)",
+   "release upload with `npm run owner:models`"
+  ],
+  "ownerCmd": "MENAKED_REVISION=<sha> (then the Mac entries L8-6.3-menaked and L8-6.3-golden)",
+  "ownerExpect": "L8-6.3-golden: sets.nikud.scores.nakdimon_word_acc ≥ 0.9",
+  "draftPr": null
+ },
+ {
+  "id": "L8-O-6.6",
+  "task": "6.6",
+  "decision": "Rate the local captioner's descriptions of the 50 images (30 Crossmodal-3600 + 20 Commons) 1–5 against the references (owner item 15.15).",
+  "options": [
+   "A. Rate once the Mac's bench-models run (L8 has no entry: it belongs to `npm run models:day -- --only bench-models`) has produced Florence-2's captions",
+   "B. Replace the human rating with chrF against the references only (scripts/bench/tasks.mjs already computes it)"
+  ],
+  "recommendation": "A",
+  "why": "The acceptance is a human judgement (≥ 80 % rated ≥ 4/5); chrF against one reference undervalues a correct caption that words things differently, so B would change the acceptance. What is missing in code is a rating sheet: a page or CSV listing each image, its caption and the references, and a scorer that turns the 50 ratings into the share ≥ 4. That is ~1 h of cloud work, owed (not done in this lane).",
+  "sources": [
+   "plan/plan.json owner 15.15",
+   "eval/golden/caption/manifest.json",
+   "scripts/owner/steps.mjs (gpu/golden: \"15.15's rating sheet\")"
+  ],
+  "changes": [
+   "new: a rating-sheet generator and scorer (owed)",
+   "plan 6.6 evidence: the share of images rated ≥ 4"
+  ],
+  "ownerExpect": "≥ 40 of 50 images rated ≥ 4",
+  "draftPr": null
+ },
+ {
+  "id": "L8-O-4.18",
+  "task": "4.18",
+  "decision": "Publish a 50-note site to a GitHub Pages repository of the owner's from the app (Publish site → GitHub Pages), then check it in a browser.",
+  "options": [
+   "A. A throwaway public repo (e.g. lumen-publish-test) with Pages on the gh-pages branch, a fine-grained token limited to that repo (contents: write, pages: write)",
+   "B. Netlify (the app's other target)"
+  ],
+  "recommendation": "A",
+  "why": "GitHub Pages is the path the code deploys over REST without force or zip (#354), and a repo-scoped fine-grained token keeps the blast radius to one throwaway repo. The check is machine-readable: the site's index must list ≥ 50 pages and a missing path must return the 404 page.",
+  "sources": [
+   "src/publish/deploy.ts (deploy over the GitHub REST API)",
+   "e2e/publish-site.spec.ts",
+   "https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site"
+  ],
+  "changes": [
+   "none in the repo; plan 4.18 evidence: the site URL and the check's output"
+  ],
+  "ownerCmd": "SITE=https://<user>.github.io/lumen-publish-test/; test \"$(curl -fsS \"$SITE\" | grep -oE 'href=\"[^\"]+\\.html\"' | sort -u | wc -l)\" -ge 50 && test \"$(curl -s -o /dev/null -w '%{http_code}' \"$SITE/no-such-page\")\" = 404",
+  "ownerExpect": "exit 0",
+  "draftPr": null
+ },
+ {
+  "id": "L8-O-W11.P2",
+  "task": "W11.P2",
+  "decision": "Provide the real exports (W10.O9) and run `npm run import:diff` on each: the same export imported by lumen-md and by Obsidian Importer.",
+  "options": [
+   "A. The owner's own Evernote (.enex), Notion (zip) and Google Keep (Takeout) exports, kept outside the repo",
+   "B. Public sample exports only (no personal data, but not the owner's real shapes)"
+  ],
+  "recommendation": "A, with B as the fallback for a format the owner has no account in",
+  "why": "The acceptance is about real exports; import:diff prints counts only (notes, attachments, links, headings, tasks), so personal content never leaves the machine or enters the repo. 1,000 notes ≤ 60 s is timed on the desktop app.",
+  "sources": [
+   "scripts/import-diff.mjs",
+   "src/__tests__/importDiff.test.ts (11 cases)",
+   "docs/owner/checklist.md W10.O9"
+  ],
+  "changes": [
+   "none in the repo; plan W11.P2 evidence: the import:diff report per export"
+  ],
+  "ownerCmd": "npm run import:diff -- --lumen <lumen-md import folder> --oracle <Obsidian Importer folder> --json --out reports/import-diff.md",
+  "ownerExpect": "exit 0 (the gate fails on a shortfall > 1 % without an --explain entry)",
+  "draftPr": null
+ },
+ {
+  "id": "L8-O-W11.P15",
+  "task": "W11.P15",
+  "decision": "Measure D30 in the beta: run the opt-in beta for ≥ 30 days with the retention loops on by default (each can be turned off) and read the funnel.",
+  "options": [
+   "A. The existing opt-in weekly beta report (beta-report issues), read by `npm run beta:funnel -- --github`",
+   "B. Add usage telemetry",
+   "C. Skip D30 until GA"
+  ],
+  "recommendation": "A",
+  "why": "A measures D30 with counts the testers chose to send and nothing else (docs/security/usage-metrics.md); B contradicts the privacy model; C leaves the acceptance unmet. The target from W11.P4 is D30 ≥ 15 %.",
+  "sources": [
+   "scripts/lib/betaFunnel.mjs (activation ≥ 50 %, D7 ≥ 30 %, D30 ≥ 15 %)",
+   "docs/src/content/docs/security/usage-metrics.md"
+  ],
+  "changes": [
+   "none in the repo; plan W11.P15 evidence: the funnel's D30 line"
+  ],
+  "ownerCmd": "npm run beta:funnel -- --github",
+  "ownerExpect": "D30 ≥ 15 % over the testers whose 30-day window has passed",
+  "draftPr": null
+ },
+ {
+  "id": "L8-O-W11.Q12",
+  "task": "W11.Q12",
+  "decision": "Keep or drop the Vercel CI (Beta) trial for lint and unit tests.",
+  "options": [
+   "A. Drop it now: record the decision and delete ci/vercel-ci-trial/ in a follow-up",
+   "B. Run the trial as docs/dev/decisions/vercel-ci-trial.md describes, then decide by its rule"
+  ],
+  "recommendation": "A",
+  "why": "Since the trial was set up, verification moved to the owner's Mac (no Buildkite agent runs either), so there is no CI of record to fall back from. B needs a turbo devDependency, a dashboard toggle and two CI runs on one commit, all for a fallback nobody would use. The numbers the decision record asks for cannot be produced without B; the draft states that plainly instead of inventing them.",
+  "sources": [
+   "docs/dev/decisions/vercel-ci-trial.md",
+   "https://vercel.com/blog/introducing-vercel-ci",
+   "src/__tests__/vercelCiTrial.test.ts"
+  ],
+  "changes": [
+   "docs/dev/decisions/vercel-ci-trial.md: the Status line and the Decision line",
+   "later (after merge): delete ci/vercel-ci-trial/, scripts/ci/ci-compare.mjs and vercelCiTrial.test.ts together"
+  ],
+  "draftPr": {
+   "title": "OWNER-DECISION: W11.Q12 drop the Vercel CI trial",
+   "number": 1107
+  }
+ },
+ {
+  "id": "L8-O-2.8",
+  "task": "2.8",
+  "decision": "Where the PR security scanners (gitleaks, npm audit, cargo audit, semgrep) run on every PR now that GitHub Actions is retired.",
+  "options": [
+   "A. A Buildkite agent on the owner's always-on host runs .buildkite/pipeline.yml's `security` step on every PR (already written and tested by securityScanners.test.ts), plus GitHub's own secret scanning and push protection in the repo settings",
+   "B. A local pre-push hook on the Mac only",
+   "C. GitHub code scanning default setup (runs on GitHub Actions infrastructure)"
+  ],
+  "recommendation": "A",
+  "why": "A is the only option that meets \"3 checks on every PR\" without Actions: the step exists, it fails when a scanner binary is missing in CI (LUMEN_CI/BUILDKITE), and the agent host is owner session 7. Secret scanning and push protection cost nothing on a public repo and need no workflow. B misses PRs from anyone else; C reintroduces Actions. The Mac entry L8-2.8-scanners proves the four scanners pass with every binary present.",
+  "sources": [
+   ".buildkite/pipeline.yml (key: security)",
+   "scripts/security-scan.mjs",
+   "src/__tests__/securityScanners.test.ts",
+   "https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning",
+   "docs/owner/checklist.md session 7 (second host)"
+  ],
+  "changes": [
+   "none in the repo; owner: start the Buildkite agent (accounts/factory step) and turn on secret scanning + push protection"
+  ],
+  "ownerCmd": "npm run owner:session -- check accounts",
+  "ownerExpect": "the accounts/factory checks pass (vm-timer, receipts-repo, first-status) and accounts/github secret-scanning passes",
+  "draftPr": null
+ }
+]

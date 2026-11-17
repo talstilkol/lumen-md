@@ -27,6 +27,8 @@ export function autofillQueue(): AutofillQueue {
     write: async (path, text) => {
       const ws = await import("../storage/workspace");
       await ws.writeWorkspaceFile(path, text);
+      // The open note follows the approved write (it was clean: the proposal's base was its text).
+      (await import("../store/externalChanges")).showOwnWrite(path, text);
       window.dispatchEvent(new CustomEvent("lumen-workspace-changed"));
     },
   }));

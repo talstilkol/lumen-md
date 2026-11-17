@@ -1,6 +1,8 @@
 ---
 title: כניסה יחידה (SSO)
 description: התחברות דרך ספק הזהויות של החברה, באמצעות WorkOS.
+type: how-to
+untracked: "shipped before the plan (the organization release); no plan task covers it"
 ---
 
 Lumen תומכת בכניסה יחידה ב-SAML וב-OIDC דרך [WorkOS](https://workos.com).

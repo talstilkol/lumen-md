@@ -3,7 +3,7 @@
  * plan W4.11): DOCX, ODT, PPTX, XLSX, EPUB and web-archive ZIPs, unzipped by the
  * native DecompressionStream reader in ./zip. fileFormats.ts re-exports them.
  */
-import { unzip, unzipText } from "./zip";
+import { unzip } from "./zip";
 import { parseInertDocument } from "../lib/trustedTypes";
 import { htmlToMarkdown, csvToMarkdown } from "./markupFormats";
 
@@ -66,6 +66,11 @@ export async function docxToMarkdown(file: File): Promise<string> {
       return !!el && v !== "0" && v !== "false";
     });
 
+  // Inline code (W12.F3 round trip): our writer's "Code" character style, or pandoc's VerbatimChar.
+  // A monospace font alone is not enough: a code block's runs carry one too.
+  const isCode = (rPr: Element | undefined): boolean =>
+    /^(Code|VerbatimChar)$/i.test(rPr?.getElementsByTagName("w:rStyle")[0]?.getAttribute("w:val") ?? "");
+
   const imageMd = (drawing: Element): string => {
     const props = drawing.getElementsByTagName("wp:docPr")[0];
     const alt = (props?.getAttribute("descr") || props?.getAttribute("title") || "").replace(/[[\]]/g, "");
@@ -81,9 +86,31 @@ export async function docxToMarkdown(file: File): Promise<string> {
     return `![${alt}](data:${mime};base64,${btoa(bin)})`;
   };
 
+  // Footnotes: word/footnotes.xml, numbered in the order they are referenced.
+  const noteText = new Map<string, string>();
+  const fnXml = part("word/footnotes.xml");
+  if (fnXml) {
+    for (const fn of els(parseInertDocument(fnXml, "application/xml"), "w:footnote")) {
+      const type = fn.getAttribute("w:type");
+      if (type === "separator" || type === "continuationSeparator") continue;
+      const text = els(fn, "w:p")
+        .map((p) => els(p, "w:t").map((t) => t.textContent ?? "").join(""))
+        .join(" ")
+        .trim();
+      noteText.set(fn.getAttribute("w:id") ?? "", text);
+    }
+  }
+  const noteOrder: string[] = [];
+  const noteKey = (id: string): string | null => {
+    if (!noteText.has(id)) return null;
+    let k = noteOrder.indexOf(id);
+    if (k < 0) k = noteOrder.push(id) - 1;
+    return String(k + 1);
+  };
+
   // Runs of a paragraph (hyperlinks included), with neighbouring runs of the same emphasis joined.
   const paraText = (p: Element): string => {
-    const pieces: { text: string; b: boolean; i: boolean; href?: string; raw?: boolean }[] = [];
+    const pieces: { text: string; b: boolean; i: boolean; href?: string; raw?: boolean; code?: boolean }[] = [];
     const runOf = (r: Element, href?: string) => {
       for (const d of els(r, "w:drawing")) pieces.push({ text: imageMd(d), b: false, i: false, raw: true });
       let t = "";
@@ -91,10 +118,19 @@ export async function docxToMarkdown(file: File): Promise<string> {
         if (c.tagName === "w:t") t += c.textContent ?? "";
         else if (c.tagName === "w:tab") t += "\t";
         else if (c.tagName === "w:br") t += " ";
+        else if (c.tagName === "w:footnoteReference") {
+          // A real Word footnote comes back as [^n] with its text at the end (W12.F3).
+          const key = noteKey(c.getAttribute("w:id") ?? "");
+          if (key) {
+            if (t) pieces.push({ text: t, b: on(r.getElementsByTagName("w:rPr")[0], "w:b", "w:bCs"), i: on(r.getElementsByTagName("w:rPr")[0], "w:i", "w:iCs"), href });
+            t = "";
+            pieces.push({ text: `[^${key}]`, b: false, i: false, raw: true });
+          }
+        }
       }
       if (!t) return;
       const rPr = r.getElementsByTagName("w:rPr")[0];
-      pieces.push({ text: t, b: on(rPr, "w:b", "w:bCs"), i: on(rPr, "w:i", "w:iCs"), href });
+      pieces.push({ text: t, b: on(rPr, "w:b", "w:bCs"), i: on(rPr, "w:i", "w:iCs"), href, code: isCode(rPr) });
     };
     for (const c of Array.from(p.children)) {
       if (c.tagName === "w:r") runOf(c);
@@ -104,11 +140,11 @@ export async function docxToMarkdown(file: File): Promise<string> {
       } else if (c.tagName === "w:ins" || c.tagName === "w:smartTag" || c.tagName === "w:sdt") for (const r of els(c, "w:r")) runOf(r);
     }
     // Whitespace takes the emphasis of the text before it, so "**a** **b**" joins into one span.
-    for (let k = 1; k < pieces.length; k++) if (!pieces[k].raw && !pieces[k].text.trim()) Object.assign(pieces[k], { b: pieces[k - 1].b, i: pieces[k - 1].i });
+    for (let k = 1; k < pieces.length; k++) if (!pieces[k].raw && !pieces[k].code && !pieces[k].text.trim()) Object.assign(pieces[k], { b: pieces[k - 1].b, i: pieces[k - 1].i });
     const groups: typeof pieces = [];
     for (const x of pieces) {
       const last = groups[groups.length - 1];
-      if (last && !last.raw && !x.raw && last.b === x.b && last.i === x.i && last.href === x.href) last.text += x.text;
+      if (last && !last.raw && !x.raw && last.b === x.b && last.i === x.i && last.href === x.href && !!last.code === !!x.code) last.text += x.text;
       else groups.push({ ...x });
     }
     return groups
@@ -118,6 +154,7 @@ export async function docxToMarkdown(file: File): Promise<string> {
         const trail = /\s*$/.exec(g.text)![0];
         let core = g.text.trim();
         if (!core) return g.text;
+        if (g.code) core = core.includes("`") ? `\`\` ${core} \`\`` : `\`${core}\``;
         if (g.b) core = `**${core}**`;
         if (g.i) core = `*${core}*`;
         if (g.href) core = `[${core}](${g.href})`;
@@ -155,23 +192,37 @@ export async function docxToMarkdown(file: File): Promise<string> {
       else out.push(md);
       inList = !!list;
     } else if (node.tagName === "w:tbl") {
-      out.push(docxTableToMd(node));
+      out.push(docxTableToMd(node, paraText));
       inList = false;
     }
   }
+  if (noteOrder.length) out.push(noteOrder.map((id, k) => `[^${k + 1}]: ${noteText.get(id)}`).join("\n"));
   const md = out.join("\n\n").replace(/\n{3,}/g, "\n\n").trim();
   return md || "> ⚠️ DOCX contained no extractable text.";
 }
 
-function docxTableToMd(tbl: Element): string {
+/**
+ * A table's cells keep their runs' emphasis and links (paragraph text, as
+ * outside tables; they came back as bare text, so **bold** in a cell was
+ * lost). A header row (w:tblHeader) that is bold as a whole, as Word and our
+ * writer make it, gives plain header text: the bold is the header's style.
+ */
+function docxTableToMd(tbl: Element, paraText: (p: Element) => string): string {
   const rows = els(tbl, "w:tr");
   if (!rows.length) return "";
-  const cellText = (tc: Element) =>
-    els(tc, "w:p")
-      .map((p) => els(p, "w:t").map((t) => t.textContent ?? "").join(""))
+  const cellText = (tc: Element, header: boolean) => {
+    const text = els(tc, "w:p")
+      .map(paraText)
       .join(" ")
-      .trim();
-  const matrix = rows.map((tr) => els(tr, "w:tc").map(cellText));
+      .trim()
+      .replace(/(?<!\\)\|/g, "\\|");
+    const whole = header ? /^\*\*([^*]+)\*\*$/.exec(text) : null;
+    return whole ? whole[1] : text;
+  };
+  const matrix = rows.map((tr) => {
+    const header = tr.getElementsByTagName("w:tblHeader").length > 0;
+    return els(tr, "w:tc").map((tc) => cellText(tc, header));
+  });
   const cols = Math.max(...matrix.map((r) => r.length));
   const pad = (r: string[]) => [...r, ...Array(cols - r.length).fill("")];
   const header = pad(matrix[0]);
@@ -187,41 +238,154 @@ function docxTableToMd(tbl: Element): string {
 /* ─── ODT → Markdown (real: unzip content.xml) ────────────────────── */
 
 /**
- * Real ODT import: unzips `content.xml` and walks the OpenDocument text tree.
- * Handles headings (by outline level) and paragraphs, including list items.
- * Inline bold/italic in ODT lives in indirected automatic-styles, so it is
- * not resolved here — text is preserved, emphasis is not.
+ * Real ODT import: unzips `content.xml` (and `styles.xml`) and walks the
+ * OpenDocument text tree. Headings by outline level; bold and italic through
+ * the automatic text styles (`fo:font-weight`, `fo:font-style`, or their
+ * `-complex` forms that LibreOffice writes for Hebrew); links; bullet and
+ * numbered lists, nested, from the list styles; tables as pipe tables;
+ * footnotes as `[^n]`; code from "Preformatted Text" paragraphs and block
+ * quotes from "Quotations" (plan W12.F3, which added the ODT writer).
  */
 export async function odtToMarkdown(file: File): Promise<string> {
-  let xml: string | null;
+  let parts: Map<string, Uint8Array>;
   try {
-    xml = await unzipText(await file.arrayBuffer(), "content.xml");
+    parts = await unzip(await file.arrayBuffer());
   } catch (err) {
     return `> ⚠️ Could not read ODT archive: ${(err as Error).message}`;
   }
+  const dec = new TextDecoder();
+  const xml = parts.get("content.xml") ? dec.decode(parts.get("content.xml")) : null;
   if (!xml) return "> ⚠️ ODT has no content.xml part.";
-
   const doc = parseInertDocument(xml, "application/xml");
+  const stylesXml = parts.get("styles.xml") ? parseInertDocument(dec.decode(parts.get("styles.xml")), "application/xml") : null;
+
+  // Styles: name → bold / italic / parent, and list style → numbered per level.
+  const textStyle = new Map<string, { b: boolean; i: boolean; code: boolean }>();
+  const paraParent = new Map<string, string>();
+  const listNumbered = new Map<string, boolean[]>();
+  for (const src of [stylesXml, doc]) {
+    if (!src) continue;
+    for (const st of els(src, "style:style")) {
+      const name = st.getAttribute("style:name") ?? "";
+      const tp = st.getElementsByTagName("style:text-properties")[0];
+      const b = !!tp && /bold|[6-9]00/.test(`${tp.getAttribute("fo:font-weight") ?? ""} ${tp.getAttribute("style:font-weight-complex") ?? ""}`);
+      const i = !!tp && /italic|oblique/.test(`${tp.getAttribute("fo:font-style") ?? ""} ${tp.getAttribute("style:font-style-complex") ?? ""}`);
+      const parent = st.getAttribute("style:parent-style-name") ?? "";
+      if (st.getAttribute("style:family") === "text") textStyle.set(name, { b, i, code: /Source_20_Text|Teletype/i.test(parent + name) });
+      if (st.getAttribute("style:family") === "paragraph") paraParent.set(name, parent);
+    }
+    for (const ls of els(src, "text:list-style")) {
+      const levels: boolean[] = [];
+      for (const lv of Array.from(ls.children)) levels[+(lv.getAttribute("text:level") ?? "1") - 1] = lv.tagName === "text:list-level-style-number";
+      listNumbered.set(ls.getAttribute("style:name") ?? "", levels);
+    }
+  }
+  const paraKind = (p: Element): string => {
+    let name = p.getAttribute("text:style-name") ?? "";
+    for (let k = 0; k < 5 && name; k++) {
+      if (/Preformatted|Source/i.test(name)) return "code";
+      if (/Quotation/i.test(name)) return "quote";
+      name = paraParent.get(name) ?? "";
+    }
+    return "";
+  };
+
+  const notes: string[] = [];
+  const inline = (el: Element, b = false, i = false): string => {
+    let out = "";
+    for (const n of Array.from(el.childNodes)) {
+      if (n.nodeType === 3) {
+        const t = (n.textContent ?? "").replace(/\s+/g, " ");
+        out += b || i ? wrap(t, b, i) : t;
+        continue;
+      }
+      if (n.nodeType !== 1) continue;
+      const c = n as Element;
+      if (c.tagName === "text:span") {
+        const st = textStyle.get(c.getAttribute("text:style-name") ?? "");
+        if (st?.code) out += "`" + (c.textContent ?? "") + "`";
+        else out += inline(c, b || !!st?.b, i || !!st?.i);
+      } else if (c.tagName === "text:a") out += `[${inline(c, b, i)}](${c.getAttribute("xlink:href") ?? ""})`;
+      else if (c.tagName === "text:s") out += " ".repeat(+(c.getAttribute("text:c") ?? "1"));
+      else if (c.tagName === "text:tab") out += "\t";
+      else if (c.tagName === "text:line-break") out += "  \n";
+      else if (c.tagName === "text:note") {
+        const body = c.getElementsByTagName("text:note-body")[0];
+        notes.push(body ? els(body, "text:p").map((p) => inline(p).trim()).join(" ") : "");
+        out += `[^${notes.length}]`;
+      } else out += inline(c, b, i);
+    }
+    return out;
+  };
+  function wrap(t: string, b: boolean, i: boolean): string {
+    const core = t.trim();
+    if (!core) return t;
+    const lead = /^\s*/.exec(t)![0];
+    const trail = /\s*$/.exec(t)![0];
+    let m = core;
+    if (b) m = `**${m}**`;
+    if (i) m = `*${m}*`;
+    return lead + m + trail;
+  }
+  const textOf = (p: Element) => inline(p).replace(/\*\*\s*\*\*/g, "").replace(/\*\*\*\*/g, "").trim();
+
   const out: string[] = [];
-  const walk = (parent: Element, inList: boolean) => {
+  const list = (el: Element, depth: number, styleName: string, lines: string[]) => {
+    const style = el.getAttribute("text:style-name") || styleName;
+    const numbered = listNumbered.get(style)?.[depth] ?? false;
+    for (const item of Array.from(el.children).filter((c) => c.tagName === "text:list-item")) {
+      for (const c of Array.from(item.children)) {
+        if (c.tagName === "text:p" || c.tagName === "text:h") {
+          const t = textOf(c);
+          if (t) lines.push(`${"   ".repeat(depth)}${numbered ? "1." : "-"} ${t}`);
+        } else if (c.tagName === "text:list") list(c, depth + 1, style, lines);
+      }
+    }
+  };
+  const table = (t: Element): string => {
+    const rows = els(t, "table:table-row").map((r) =>
+      els(r, "table:table-cell").map((c) => els(c, "text:p").map((p) => textOf(p).replace(/\|/g, "\\|")).join(" ").trim()),
+    );
+    if (!rows.length) return "";
+    const cols = Math.max(...rows.map((r) => r.length));
+    const pad = (r: string[]) => [...r, ...Array(cols - r.length).fill("")];
+    return [pad(rows[0]), Array(cols).fill("---"), ...rows.slice(1).map(pad)].map((r) => `| ${r.join(" | ")} |`).join("\n");
+  };
+  const walk = (parent: Element) => {
     for (const node of Array.from(parent.children)) {
       const tag = node.tagName;
       if (tag === "text:h") {
         const level = Math.min(6, +(node.getAttribute("text:outline-level") || "1"));
-        const text = (node.textContent ?? "").trim();
+        const text = textOf(node);
         if (text) out.push(`${"#".repeat(level)} ${text}`);
       } else if (tag === "text:p") {
-        const text = (node.textContent ?? "").trim();
-        if (text) out.push(inList ? `- ${text}` : text);
+        const kind = paraKind(node);
+        if (kind === "code") {
+          const code = inline(node).replace(/  \n/g, "\n");
+          const prev = out[out.length - 1];
+          if (prev?.startsWith("```\n") && prev.endsWith("\n```")) out[out.length - 1] = `${prev.slice(0, -4)}\n${code}\n\`\`\``;
+          else out.push("```\n" + code + "\n```");
+          continue;
+        }
+        const text = textOf(node);
+        if (text) out.push(kind === "quote" ? `> ${text}` : text);
       } else if (tag === "text:list") {
-        walk(node, true);
+        const lines: string[] = [];
+        list(node, 0, "", lines);
+        if (lines.length) out.push(lines.join("\n"));
+      } else if (tag === "table:table") {
+        const t = table(node);
+        if (t) out.push(t);
+      } else if (tag === "text:sequence-decls" || tag === "office:forms") {
+        continue;
       } else {
-        walk(node, inList);
+        walk(node);
       }
     }
   };
   const bodyText = doc.getElementsByTagName("office:text")[0];
-  if (bodyText) walk(bodyText, false);
+  if (bodyText) walk(bodyText);
+  if (notes.length) out.push(notes.map((n, k) => `[^${k + 1}]: ${n}`).join("\n"));
   const md = out.join("\n\n").trim();
   return md || "> ⚠️ ODT contained no extractable text.";
 }
@@ -275,13 +439,9 @@ function colToIndex(ref: string): number {
  * each worksheet as a Markdown table under a `## SheetName` heading. Formulas
  * render as their cached value; styles/merged cells are not preserved.
  */
-export async function xlsxToMarkdown(file: File): Promise<string> {
-  let files: Map<string, Uint8Array>;
-  try {
-    files = await unzip(await file.arrayBuffer());
-  } catch (err) {
-    return `> ⚠️ Could not read XLSX archive: ${(err as Error).message}`;
-  }
+/** The sheets of an XLSX workbook as rows of cell text (shared and inline strings resolved), in workbook order. */
+export async function xlsxSheets(buffer: ArrayBuffer): Promise<{ name: string; rows: string[][] }[]> {
+  const files = await unzip(buffer);
   const dec = new TextDecoder();
   const parse = (name: string) =>
     files.has(name)
@@ -299,10 +459,7 @@ export async function xlsxToMarkdown(file: File): Promise<string> {
   const sheets = [...files.keys()]
     .filter((n) => /^xl\/worksheets\/sheet\d+\.xml$/.test(n))
     .sort((a, b) => slideNum(a) - slideNum(b));
-  if (!sheets.length) return "> ⚠️ XLSX: no worksheets found.";
-
-  const out: string[] = [];
-  sheets.forEach((name, si) => {
+  return sheets.map((name, si) => {
     const doc = parse(name)!;
     const matrix: string[][] = [];
     for (const row of els(doc, "row")) {
@@ -321,7 +478,22 @@ export async function xlsxToMarkdown(file: File): Promise<string> {
       for (let i = 0; i < arr.length; i++) if (arr[i] === undefined) arr[i] = "";
       matrix.push(arr);
     }
-    if (!matrix.length) return;
+    return { name: names[si] || `Sheet ${si + 1}`, rows: matrix };
+  });
+}
+
+export async function xlsxToMarkdown(file: File): Promise<string> {
+  let sheets: { name: string; rows: string[][] }[];
+  try {
+    sheets = await xlsxSheets(await file.arrayBuffer());
+  } catch (err) {
+    return `> ⚠️ Could not read XLSX archive: ${(err as Error).message}`;
+  }
+  if (!sheets.length) return "> ⚠️ XLSX: no worksheets found.";
+
+  const out: string[] = [];
+  for (const { name, rows: matrix } of sheets) {
+    if (!matrix.length) continue;
     const cols = Math.max(...matrix.map((r) => r.length));
     const pad = (r: string[]) => {
       const c = [...r];
@@ -331,14 +503,14 @@ export async function xlsxToMarkdown(file: File): Promise<string> {
     const header = pad(matrix[0]);
     out.push(
       [
-        `## ${names[si] || `Sheet ${si + 1}`}`,
+        `## ${name}`,
         "",
         "| " + header.join(" | ") + " |",
         "| " + header.map(() => "---").join(" | ") + " |",
         ...matrix.slice(1).map((r) => "| " + pad(r).join(" | ") + " |"),
       ].join("\n"),
     );
-  });
+  }
   return out.join("\n\n") || "> ⚠️ XLSX contained no data.";
 }
 

@@ -1,6 +1,7 @@
 ---
 title: ממשק הבדיקות של e2e
 description: window.__lumen.agentReview קיים רק בפיתוח ובבדיקות.
+type: how-to
 ---
 
 בדיקות הקצה-לקצה מפעילות כמה פונקציות של האפליקציה דרך `window.__lumen`.

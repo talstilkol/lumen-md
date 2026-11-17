@@ -60,8 +60,9 @@ function htmlNodeToMd(node: Node, depth = 0): string {
         .join("\n") + "\n";
     }
     case "ol": {
+      const start = parseInt(el.getAttribute("start") ?? "1", 10) || 1;
       return "\n" + Array.from(el.children)
-        .map((li, i) => `${"  ".repeat(depth)}${i + 1}. ${htmlNodeToMd(li, depth + 1).trim()}`)
+        .map((li, i) => `${"  ".repeat(depth)}${start + i}. ${htmlNodeToMd(li, depth + 1).trim()}`)
         .join("\n") + "\n";
     }
     case "li": return children();
@@ -93,8 +94,9 @@ function tableToMd(table: HTMLTableElement): string {
   const rows = Array.from(table.rows);
   if (rows.length === 0) return "";
 
+  // A cell keeps its inline Markdown (bold, links, code); a | in it is escaped.
   const getRowCells = (row: HTMLTableRowElement) =>
-    Array.from(row.cells).map((c) => c.textContent?.trim() ?? "");
+    Array.from(row.cells).map((c) => htmlNodeToMd(c).replace(/\s+/g, " ").trim().replace(/\|/g, "\\|"));
 
   const headers = getRowCells(rows[0]);
   const sep = headers.map(() => "---");
@@ -285,24 +287,52 @@ export function mhtmlToMarkdown(text: string): string {
 
 /* ─── OPML → Markdown (outlines, RSS reader feeds, mind maps) ──── */
 
+/**
+ * OPML → Markdown. An outline with `_heading` (written by markdownToOpml) or
+ * with a `_note` (pandoc, OmniOutliner, Fargo) is a heading: `_heading` gives
+ * its level, otherwise its depth among heading outlines does; its `_note` is
+ * the section's Markdown. An outline with only a `_note` is body text. Every
+ * other outline is a bullet, nested under the nearest heading.
+ */
 export function opmlToMarkdown(text: string): string {
   try {
     const doc = parseInertDocument(text, "application/xml");
     const title = doc.querySelector("head > title")?.textContent?.trim() ?? "Outline";
-    const lines: string[] = [`# ${title}`, ""];
-    function walk(el: Element, depth: number): void {
-      for (const child of Array.from(el.children).filter((c) => c.tagName.toLowerCase() === "outline")) {
+    const blocks: string[] = [`# ${title}`];
+    let list: string[] = [];
+    const flush = (): void => {
+      if (list.length) blocks.push(list.join("\n"));
+      list = [];
+    };
+    const outlines = (el: Element): Element[] => Array.from(el.children).filter((c) => c.tagName.toLowerCase() === "outline");
+    function walk(el: Element, depth: number, headingLevel: number): void {
+      for (const child of outlines(el)) {
         const text = child.getAttribute("text") ?? child.getAttribute("title") ?? "";
+        const note = child.getAttribute("_note");
+        const level = Number(child.getAttribute("_heading"));
+        if (level >= 1 || (note !== null && text)) {
+          flush();
+          const lv = level >= 1 ? Math.min(6, level) : Math.min(6, headingLevel + 1);
+          blocks.push(`${"#".repeat(lv)} ${text}`.trimEnd());
+          if (note?.trim()) blocks.push(note);
+          walk(child, 0, lv);
+          continue;
+        }
+        if (note !== null) {
+          flush();
+          if (note.trim()) blocks.push(note);
+          walk(child, depth, headingLevel);
+          continue;
+        }
         const url = child.getAttribute("xmlUrl") ?? child.getAttribute("url");
-        const indent = "  ".repeat(depth);
-        const body = url ? `[${text}](${url})` : text;
-        lines.push(`${indent}- ${body}`);
-        walk(child, depth + 1);
+        list.push(`${"  ".repeat(depth)}- ${url ? `[${text}](${url})` : text}`);
+        walk(child, depth + 1, headingLevel);
       }
     }
     const body = doc.querySelector("body");
-    if (body) walk(body, 0);
-    return lines.join("\n");
+    if (body) walk(body, 0, 0);
+    flush();
+    return blocks.join("\n\n");
   } catch {
     return "> ⚠️ Could not parse OPML.";
   }
@@ -310,26 +340,150 @@ export function opmlToMarkdown(text: string): string {
 
 /* ─── LaTeX / .tex → Markdown ──────────────────────────────────────── */
 
-export function latexToMarkdown(text: string): string {
-  let out = text;
-  out = out.replace(/^[\s\S]*?\\begin\{document\}\s*/, "");
-  out = out.replace(/\s*\\end\{document\}[\s\S]*$/, "");
-  out = out.replace(/\\chapter\*?\{([^}]+)\}/g, "# $1");
-  out = out.replace(/\\section\*?\{([^}]+)\}/g, "## $1");
-  out = out.replace(/\\subsection\*?\{([^}]+)\}/g, "### $1");
-  out = out.replace(/\\subsubsection\*?\{([^}]+)\}/g, "#### $1");
-  out = out.replace(/\\textbf\{([^}]+)\}/g, "**$1**");
-  out = out.replace(/\\textit\{([^}]+)\}/g, "*$1*");
-  out = out.replace(/\\emph\{([^}]+)\}/g, "*$1*");
-  out = out.replace(/\\texttt\{([^}]+)\}/g, "`$1`");
-  out = out.replace(/\\begin\{itemize\}|\\begin\{enumerate\}/g, "");
-  out = out.replace(/\\end\{itemize\}|\\end\{enumerate\}/g, "");
-  out = out.replace(/\\item\s+/g, "- ");
+/** The `{…}` argument that starts at `open` (balanced braces, `\{` skipped); [inner, index after `}`]. */
+function latexGroup(s: string, open: number): [string, number] | null {
+  if (s[open] !== "{") return null;
+  let depth = 0;
+  for (let i = open; i < s.length; i++) {
+    if (s[i] === "\\") {
+      i++;
+      continue;
+    }
+    if (s[i] === "{") depth++;
+    else if (s[i] === "}" && --depth === 0) return [s.slice(open + 1, i), i + 1];
+  }
+  return null;
+}
+
+/** Replace `\cmd{arg}` (and `\cmd*{arg}`) everywhere, with nested braces in the argument. */
+function latexCommand(s: string, cmd: string, fn: (arg: string) => string): string {
+  const re = new RegExp(`\\\\${cmd}\\*?(?=\\{)`, "g");
+  let out = "";
+  let last = 0;
+  for (let m = re.exec(s); m; m = re.exec(s)) {
+    const g = latexGroup(s, m.index + m[0].length);
+    if (!g) continue;
+    out += s.slice(last, m.index) + fn(g[0]);
+    last = g[1];
+    re.lastIndex = g[1];
+  }
+  return out + s.slice(last);
+}
+
+const LATEX_ESCAPES: Record<string, string> = { "#": "#", $: "$", "%": "%", "&": "&", _: "_", "{": "{", "}": "}", "~": "~", "^": "^" };
+
+/** Inline LaTeX → Markdown: emphasis, code, links, language wrappers, escapes. */
+function latexInline(s: string): string {
+  let out = s.replace(/\\textbackslash\{\}/g, "\u0000");
+  // Polyglossia wrappers that the exporter (and LaTeX authors) put around a
+  // passage in the other language carry no Markdown meaning.
+  out = latexCommand(out, "text(?:english|hebrew|arabic)", (a) => a);
+  out = latexCommand(out, "texttt", (a) => "`" + a + "`");
+  out = latexCommand(out, "textbf", (a) => `**${a}**`);
+  out = latexCommand(out, "(?:textit|emph)", (a) => `*${a}*`);
+  out = out.replace(/\\href\{([^}]*)\}\{([^}]*)\}/g, "[$2]($1)");
+  out = out.replace(/\\url\{([^}]*)\}/g, "<$1>");
   out = out.replace(/\\\[([\s\S]*?)\\\]/g, "$$\n$1\n$$");
   out = out.replace(/\\\(([^)]+)\\\)/g, "$$$1$");
-  out = out.replace(/\\&/g, "&").replace(/\\%/g, "%").replace(/\\\$/g, "$");
-  out = out.replace(/\\\\/g, "  \n");
-  return out.trim();
+  out = out.replace(/\\\\(?=\s*$)/gm, "  ");
+  return out.replace(/\\([#$%&_{}~^])/g, (_m, c: string) => LATEX_ESCAPES[c]).replace(/\u0000/g, "\\");
+}
+
+/**
+ * LaTeX → Markdown. Heading levels follow the document's class the way pandoc
+ * reads them: in an article (no `\chapter`) `\section` is `#`; when the file
+ * has chapters, `\chapter` is `#` and `\section` is `##`. `\paragraph` and
+ * `\subparagraph` are the levels below `\subsubsection`.
+ */
+export function latexToMarkdown(text: string): string {
+  let body = text.replace(/\r\n?/g, "\n");
+  body = body.replace(/^[\s\S]*?\\begin\{document\}[ \t]*\n?/, "");
+  body = body.replace(/\s*\\end\{document\}[\s\S]*$/, "");
+  const shift = /\\chapter\*?\{/.test(body) ? 1 : 0;
+  const levels: Array<[string, number]> = [
+    ["chapter", 0],
+    ["section", 1],
+    ["subsection", 2],
+    ["subsubsection", 3],
+    ["paragraph", 4],
+    ["subparagraph", 5],
+  ];
+  const out: string[] = [];
+  // Open lists: kind, next number, and the Markdown column of the current item's content.
+  const lists: Array<{ kind: "ul" | "ol"; next: number; content: number; alt: boolean }> = [];
+  let verbatim: string | null = null; // the open code block's indent
+  let lang = "";
+  // The kind and depth of the list that just ended, so a list right after it
+  // gets the other bullet (two adjacent Markdown lists would merge).
+  let ended: { kind: "ul" | "ol"; depth: number; alt: boolean } | null = null;
+  for (const line of body.split("\n")) {
+    if (verbatim !== null) {
+      if (/^\s*\\end\{(?:verbatim|lstlisting)\}\s*$/.test(line)) {
+        out.push(verbatim + "```");
+        verbatim = null;
+      } else out.push(line);
+      continue;
+    }
+    const code = /^(\s*)\\begin\{(?:verbatim|lstlisting)\}(?:\[(?:[^\]]*language=([\w+#-]+))?[^\]]*\])?\s*$/.exec(line);
+    if (code) {
+      verbatim = code[1];
+      out.push(verbatim + "```" + (lang || code[2] || ""));
+      lang = "";
+      continue;
+    }
+    const codeLang = /^\s*% code: (\S+)\s*$/.exec(line);
+    if (codeLang) {
+      lang = codeLang[1];
+      continue;
+    }
+    if (/^\s*%/.test(line)) continue; // a comment line
+    const env = /^\s*\\(begin|end)\{(itemize|enumerate|english|hebrew|arabic)\}\s*$/.exec(line);
+    if (env) {
+      if (env[2] === "itemize" || env[2] === "enumerate") {
+        const outer = lists[lists.length - 1];
+        const kind = env[2] === "itemize" ? "ul" : "ol";
+        if (env[1] === "begin") {
+          const alt = !!ended && ended.kind === kind && ended.depth === lists.length && !ended.alt;
+          lists.push({ kind, next: 1, content: outer ? outer.content : 0, alt });
+        } else {
+          const done = lists.pop();
+          ended = done ? { kind: done.kind, depth: lists.length, alt: done.alt } : null;
+        }
+      }
+      continue;
+    }
+    if (line.trim() && !/^\s*\\setcounter\{/.test(line)) ended = null;
+    const h = /^\s*\\(chapter|section|subsection|subsubsection|paragraph|subparagraph)\*?(?=\{)/.exec(line);
+    const g = h ? latexGroup(line, h[0].length) : null;
+    if (h && g) {
+      const level = Math.min(6, Math.max(1, levels.find(([c]) => c === h[1])![1] + shift));
+      out.push(`${"#".repeat(level)} ${latexInline(g[0]).trim()}`);
+      continue;
+    }
+    const counter = /^\s*\\setcounter\{enum(i{1,4})\}\{(-?\d+)\}\s*$/.exec(line);
+    if (counter && lists.length > 0) {
+      lists[lists.length - 1].next = parseInt(counter[2], 10) + 1;
+      continue;
+    }
+    const item = /^\s*\\item(?:\[[^\]]*\])?( *)(.*)$/.exec(line);
+    if (item && lists.length > 0) {
+      const list = lists[lists.length - 1];
+      const outer = lists[lists.length - 2];
+      const indent = outer ? outer.content : 0;
+      const marker = list.kind === "ol" ? `${list.next++}${list.alt ? ")" : "."}` : list.alt ? "*" : "-";
+      const gap = item[1].length >= 1 && item[1].length <= 4 ? item[1] : " ";
+      list.content = indent + marker.length + gap.length;
+      out.push(`${" ".repeat(indent)}${marker}${gap}${latexInline(item[2])}`);
+      continue;
+    }
+    const wrapped = /^(\s*)\\begin\{(english|hebrew|arabic)\}([\s\S]*)\\end\{\2\}$/.exec(line);
+    out.push(latexInline(wrapped ? wrapped[1] + wrapped[3] : line));
+  }
+  if (verbatim) out.push("```");
+  return out
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
 /* ─── reStructuredText → Markdown ──────────────────────────────────── */
@@ -337,9 +491,35 @@ export function latexToMarkdown(text: string): string {
 export function rstToMarkdown(text: string): string {
   const lines = text.split("\n");
   const out: string[] = [];
+  const code: string[] = [];
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const next = lines[i + 1] ?? "";
+    // `.. code-block:: lang` (or `.. code::`, `.. sourcecode::`): its indented body is a fenced block, kept verbatim.
+    const dir = /^(\s*)\.\.\s+(?:code-block|code|sourcecode)::\s*(\S*)\s*$/.exec(line);
+    if (dir) {
+      const [, indent, lang] = dir;
+      const body: string[] = [];
+      let j = i + 1;
+      while (j < lines.length && !lines[j].trim()) j++;
+      const inner = /^\s*/.exec(lines[j] ?? "")![0].length;
+      if (j < lines.length && inner > indent.length) {
+        for (; j < lines.length; j++) {
+          if (!lines[j].trim()) {
+            const k = lines.slice(j).findIndex((l) => l.trim());
+            if (k < 0 || /^\s*/.exec(lines[j + k])![0].length < inner) break;
+            body.push("");
+          } else if (/^\s*/.exec(lines[j])![0].length < inner) break;
+          else body.push(lines[j].slice(inner));
+        }
+        while (j < lines.length && !lines[j].trim() && lines[j + 1] !== undefined && !lines[j + 1].trim()) j++;
+        const ticks = "`".repeat(Math.max(3, ...body.map((b) => (/^`+/.exec(b.trim())?.[0].length ?? 0) + 1)));
+        code.push([`${indent}${ticks}${lang}`, ...body.map((b) => (b ? indent + b : "")), `${indent}${ticks}`].join("\n"));
+        out.push(`\u0005${code.length - 1}\u0005`);
+        i = lines[j] !== undefined && !lines[j].trim() ? j : j - 1;
+        continue;
+      }
+    }
     if (
       /^[=\-~`'"^*+#<>]{3,}$/.test(next.trim()) &&
       line.trim() &&
@@ -355,30 +535,140 @@ export function rstToMarkdown(text: string): string {
   }
   return out
     .join("\n")
-    .replace(/``([^`]+)``/g, "`$1`");
+    .replace(/``([^`]+)``/g, "`$1`")
+    .replace(/\u0005(\d+)\u0005/g, (_m, k: string) => code[Number(k)]);
 }
 
 /* ─── AsciiDoc → Markdown ──────────────────────────────────────────── */
 
+/** Inline AsciiDoc → Markdown: ``code``, unconstrained **x** / __x__, then constrained *x* / _x_ between non-word characters. */
+function adocInlineToMd(line: string): string {
+  const kept: string[] = [];
+  const keep = (s: string): string => `\u0002${kept.push(s) - 1}\u0002`;
+  const W = "\\p{L}\\p{N}";
+  return line
+    .replace(/`\+(.+?)\+`|``(.+?)``/g, (m, lit: string | undefined, uc: string | undefined, at: number, all: string) => {
+      const c = lit ?? uc ?? "";
+      // Other backticks on the line need a longer fence than theirs.
+      const rest = all.slice(0, at) + all.slice(at + m.length);
+      const beside = Math.max(0, ...Array.from(rest.matchAll(/`+/g), (r) => r[0].length));
+      const run = Math.max(beside, ...Array.from(c.matchAll(/`+/g), (r) => r[0].length)) + 1;
+      const f = "`".repeat(run);
+      const pad = run > 1 || /^`|`$/.test(c) || (/^ [\s\S]* $/.test(c) && c.trim() !== "");
+      return keep(pad ? `${f} ${c} ${f}` : `${f}${c}${f}`);
+    })
+    .replace(/\]\([^)\s]*(?:\s+"[^"]*")?\)|<[a-z][\w+.-]*:[^\s<>]*>/gi, (m) => keep(m))
+    .replace(/(?<!\\)\*\*(?=\S)(.*?\S)\*\*/g, "\u0003$1\u0003")
+    .replace(/(?<!\\)__(?=\S)(.*?\S)__/g, "\u0004$1\u0004")
+    .replace(new RegExp(`(?<![${W}\\\\*])\\*(?=[^\\s*])(.*?[^\\s\\\\])??\\*(?![${W}*])`, "gu"), (m) => `\u0003${m.slice(1, -1)}\u0003`)
+    .replace(new RegExp(`(?<![${W}\\\\_])_(?=[^\\s_])(.*?[^\\s\\\\])??_(?![${W}_])`, "gu"), (m) => `\u0004${m.slice(1, -1)}\u0004`)
+    .replace(/\u0003/g, "**")
+    .replace(/\u0004/g, "*")
+    .replace(/\u0002(\d+)\u0002/g, (_m, i: string) => kept[Number(i)]);
+}
+
+/**
+ * AsciiDoc → Markdown. `=` headings, `*` bullets, constrained and
+ * unconstrained bold and italic, ``code``; fenced (```) and ---- blocks are
+ * copied untouched. A backslash before * or _ stays, as the Markdown escape.
+ */
 export function adocToMarkdown(text: string): string {
-  return text
-    .replace(/^(={1,6})\s+(.+)$/gm, (_m, eq: string, t: string) => `${"#".repeat(eq.length)} ${t}`)
-    .replace(/^\.([^\n]+)$/gm, "**$1**")
-    .replace(/^\*\s/gm, "- ")
-    .replace(/`{2}([^`]+?)`{2}/g, "`$1`")
-    .replace(/_([^_\n]+?)_/g, "*$1*");
+  let fence: string | null = null;
+  const lines = text.split("\n");
+  return lines
+    .map((line, i) => {
+      if (fence === null && /^'{3,}\s*$/.test(line)) return "***"; // AsciiDoc's thematic break
+      const f = /^ {0,3}(`{3,}|~{3,}|-{4,})/.exec(line);
+      // ---- opens a listing block only as a block of its own that closes later
+      // (right under text it is a Markdown setext underline).
+      const dashes = f !== null && f[1][0] === "-";
+      if (fence === null && dashes && ((i > 0 && lines[i - 1].trim() !== "") || !lines.slice(i + 1).some((l) => l.trim() === f[1]))) return line;
+      if (fence !== null) {
+        if (f && f[1][0] === fence[0] && f[1].length >= fence.length && line.trim() === f[1]) {
+          const close = fence;
+          fence = null;
+          return close[0] === "-" ? "```" : line;
+        }
+        return line;
+      }
+      if (f && (f[1][0] !== "-" || line.trim() === f[1])) {
+        fence = f[1];
+        return f[1][0] === "-" ? "```" : line;
+      }
+      const h = /^(={1,6})\s+(.+)$/.exec(line);
+      if (h) return `${"#".repeat(h[1].length)} ${adocInlineToMd(h[2])}`;
+      const title = /^\.([^\s.][^\n]*)$/.exec(line);
+      if (title) return `**${title[1]}**`;
+      const li = /^\*(\s+)(.*)$/.exec(line);
+      if (li && !/^\*(?:[ \t]*\*){2,}[ \t]*$/.test(line)) return `-${li[1]}${adocInlineToMd(li[2])}`;
+      return adocInlineToMd(line);
+    })
+    .join("\n");
 }
 
 /* ─── Org-mode → Markdown ──────────────────────────────────────────── */
 
+/** Inline Org → Markdown; =code= (and link destinations) are parked first so their content stays as written. */
+function orgInlineToMd(line: string): string {
+  const kept: string[] = [];
+  const keep = (s: string): string => `\u0002${kept.push(s) - 1}\u0002`;
+  const tick = (c: string): string => {
+    const run = Math.max(0, ...Array.from(c.matchAll(/`+/g), (m) => m[0].length)) + 1;
+    const fence = "`".repeat(run);
+    const pad = run > 1 || /^`|`$/.test(c) || (/^ [\s\S]* $/.test(c) && c.trim() !== "");
+    return pad ? `${fence} ${c} ${fence}` : `${fence}${c}${fence}`;
+  };
+  // Org's emphasis rules (org-emphasis-regexp-components): a marker opens
+  // after a line start, a space or one of -('"{ and closes before a line end,
+  // a space or one of -.,:!?;'")}[\ ; the text inside starts and ends with a
+  // non-space. Anything else is a literal character.
+  // A zero-width space beside a marker (written where the text runs on) is
+  // part of the markup and is dropped.
+  const PRE = `(?:(?<=^|[\\s\\-('"{*/\u0002])|\u200B)`;
+  const POST = `(?:\u200B|(?=$|[\\s\\-.,:!?;'")}\\[\\\\*/\u0002]))`;
+  const emph = (m: string): RegExp => new RegExp(`${PRE}\\${m}([^\\s\\${m}](?:[^\\n]*?[^\\s\\${m}])??)\\${m}${POST}`, "g");
+  // =code= may keep spaces at its ends (a CommonMark code span can have them).
+  const code = new RegExp(`${PRE}(?:=([^=\\n]+)=|~([^~\\n]+)~)${POST}`, "g");
+  return line
+    .replace(code, (_m, v: string | undefined, c: string | undefined) => keep(tick(v ?? c ?? "")))
+    .replace(/\]\([^)\s]*(?:\s+"[^"]*")?\)|<[a-z][\w+.-]*:[^\s<>]*>/gi, (m) => keep(m))
+    .replace(emph("*"), "**$1**")
+    .replace(emph("/"), "*$1*")
+    .replace(/\\ast\{\}/g, "\\*")
+    .replace(/\\slash\{\}/g, "/")
+    .replace(/\u0002(\d+)\u0002/g, (_m, i: string) => kept[Number(i)]);
+}
+
 export function orgToMarkdown(text: string): string {
-  return text
-    .replace(/^(\*+)\s+(.+)$/gm, (_m: string, stars: string, t: string) => `${"#".repeat(stars.length)} ${t}`)
-    .replace(/\*([^*\n]+)\*/g, "**$1**")
-    .replace(/\/([^/\n]+)\//g, "*$1*")
-    .replace(/=([^=\n]+)=/g, "`$1`")
-    .replace(/^#\+BEGIN_SRC.*$/gm, "```")
-    .replace(/^#\+END_SRC$/gm, "```");
+  let inSrc = false;
+  let fence = "```";
+  const lines = text.split("\n");
+  return lines
+    .map((line, i) => {
+      const begin = /^\s*#\+BEGIN_SRC\b[ \t]*(.*?)\s*$/i.exec(line);
+      if (!inSrc && begin) {
+        inSrc = true;
+        // A block whose text or info string has a ``` line needs a ~~~ fence.
+        const rest = lines.slice(i + 1);
+        const end = rest.findIndex((l) => /^\s*#\+END_SRC\s*$/i.test(l));
+        const body = end < 0 ? rest : rest.slice(0, end);
+        fence = begin[1].includes("`") || body.some((l) => /^\s{0,3}`{3,}/.test(l)) ? "~~~~" : "```";
+        return fence + begin[1];
+      }
+      if (inSrc) {
+        if (/^\s*#\+END_SRC\s*$/i.test(line)) {
+          inSrc = false;
+          return fence;
+        }
+        return line;
+      }
+      // Org's rule, after a blank line; right after text it stays as written (a setext underline).
+      if (/^\s*-{5,}\s*$/.test(line) && (i === 0 || !lines[i - 1].trim())) return "***";
+      const h = /^(\*+)[ \t]+(.+)$/.exec(line); // a space or tab (not U+00A0)
+      if (h) return `${"#".repeat(h[1].length)} ${orgInlineToMd(h[2])}`;
+      return orgInlineToMd(line);
+    })
+    .join("\n");
 }
 
 /* ─── Jupyter notebook (.ipynb) → Markdown ─────────────────────────── */

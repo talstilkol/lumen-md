@@ -33,10 +33,12 @@
  */
 
 import { BLOCK_MARK } from "./remarkBlockIds";
+import { checksum } from "../editor/embedEdit";
 import type { Root as MdastRoot } from "mdast";
 import { headingSlug, headingSlugger, noteKey } from "../lib/slug";
 import { firstStrongDirection, markdownBaseDirection } from "../lib/textDirection";
 import { EMBED_SOURCE, LITERAL_NODES as LITERAL, type EmbedExpander } from "./remarkEmbeds";
+import { compareNames } from "../i18n/collate";
 
 export { hasEmbeds } from "./remarkEmbeds";
 
@@ -109,8 +111,15 @@ export interface ParsedEmbed {
   alias: string | null;
 }
 
-/** Split the inside of `![[…]]`. */
-export function parseEmbed(inner: string): ParsedEmbed {
+/**
+ * Split the inside of `![[…]]`. In the Markdown source an embed inside a
+ * table writes its bars as `\|` (Obsidian; Quartz's ofm.ts escapes them the
+ * same way): `![[Note\|alias]]` is the note "Note" with alias "alias", not a
+ * note called "Note\". The parsed tree has the bar already unescaped; the
+ * source scans (embeddedTexts, missingEmbedded) read it raw.
+ */
+export function parseEmbed(raw: string): ParsedEmbed {
+  const inner = raw.replace(/\\\|/g, "|");
   const bar = inner.indexOf("|");
   const target = (bar < 0 ? inner : inner.slice(0, bar)).trim();
   const alias = bar < 0 ? null : inner.slice(bar + 1).trim() || null;
@@ -177,7 +186,7 @@ export function resolveEmbedTarget(
   if (!tail.length) return null;
   return (
     tail.find((p) => dirOf(p) === fromDir) ??
-    [...tail].sort((a, b) => a.split("/").length - b.split("/").length || a.localeCompare(b))[0]
+    [...tail].sort((a, b) => a.split("/").length - b.split("/").length || compareNames(a, b))[0]
   );
 }
 
@@ -244,6 +253,7 @@ interface Node {
   title?: string | null;
   children?: Node[];
   data?: { hName?: string; hProperties?: Record<string, unknown> };
+  position?: { start?: { offset?: number }; end?: { offset?: number } };
 }
 interface Item {
   node: Node;
@@ -379,7 +389,8 @@ function imageAlias(alias: string | null): { alt: string | null; width?: number;
   return { alt, width, height };
 }
 
-function buildEmbed(inner: string, env: Env, blockAllowed: boolean): Item {
+/** `at`: the embed's offset in the host's source, for drag-to-resize (./imageSize); host images only. */
+function buildEmbed(inner: string, env: Env, blockAllowed: boolean, at?: number): Item {
   const e = parseEmbed(inner);
   const { ctx } = env;
   if (!e.target) return { node: text(`![[${inner}]]`), block: false };
@@ -400,6 +411,11 @@ function buildEmbed(inner: string, env: Env, blockAllowed: boolean): Item {
     if (version !== undefined) props["data-lumen-version"] = String(version);
     if (width) props.width = width;
     if (height) props.height = height;
+    // An embedded note's offsets are in another file: only the host's images can be resized in place.
+    if (at !== undefined && env.depth === 0) {
+      props["data-md-offset"] = at;
+      props["data-md-target"] = e.note;
+    }
     return {
       block: false,
       node: { type: "image", url: path, title: null, alt: alt ?? baseOf(path).replace(/\.[^.]+$/, ""), data: { hProperties: props } },
@@ -435,6 +451,14 @@ function buildEmbed(inner: string, env: Env, blockAllowed: boolean): Item {
   if (source === undefined) return notice(env, "notFound", e.target, { target: e.target }, true);
   if (path !== hostKey) ctx.used.add(path);
 
+  // W13.G6: a whole entity note embeds as its infobox card (loaded on demand by the component).
+  if (!e.fragment && path !== hostKey && isEntityEmbed(path, source)) {
+    return {
+      block: true,
+      node: { type: "lumenEntityInfobox", data: { hName: "lumen-entity-infobox", hProperties: { path, text: source } }, children: [] },
+    };
+  }
+
   const name = path === HOST ? "" : baseOf(path).replace(MD_EXT, "");
   let children = env.parse(source).children as unknown as Node[];
   if (e.fragment) {
@@ -447,6 +471,16 @@ function buildEmbed(inner: string, env: Env, blockAllowed: boolean): Item {
   const dir = e.fragment
     ? firstStrongDirection(plainText(children, NO_DIRECTION)) ?? markdownBaseDirection(source)
     : markdownBaseDirection(source);
+
+  // W12.U1: a block or section of another note, embedded at the top level, can be
+  // edited in place. Its exact range in the source comes from the parse positions,
+  // with a checksum so an edit never lands on text that changed since.
+  let editRange: string | null = null;
+  if (e.fragment && path !== hostKey && env.depth === 0) {
+    const a = children[0]?.position?.start?.offset;
+    const b = children[children.length - 1]?.position?.end?.offset;
+    if (typeof a === "number" && typeof b === "number" && b >= a) editRange = `${a}:${b}:${checksum(source.slice(a, b))}`;
+  }
 
   // Embedded headings get ids of their own, so rehype-slug's numbering of
   // the host's headings (outline, scroll sync, `#heading` links) is the same
@@ -483,20 +517,37 @@ function buildEmbed(inner: string, env: Env, blockAllowed: boolean): Item {
         },
       },
       children: [
-        { type: "lumenEmbedTitle", data: { hName: "div", hProperties: { className: ["lumen-embed-title"] } }, children: [wikiLink(linkTarget, label || e.target)] },
+        {
+          type: "lumenEmbedTitle",
+          data: { hName: "div", hProperties: { className: ["lumen-embed-title"] } },
+          children: [
+            wikiLink(linkTarget, label || e.target),
+            ...(editRange ? [{ type: "lumenEmbedEdit", data: { hName: "lumen-embed-edit", hProperties: { path, range: editRange, note: name } }, children: [] }] : []),
+          ],
+        },
         { type: "lumenEmbedBody", data: { hName: "div", hProperties: { className: ["lumen-embed-body"] } }, children: body.children },
       ],
     },
   };
 }
 
+/**
+ * An entity note (W12.E1): under `ישויות/<type folder>/`, with an
+ * `entity-type:` in its front matter. The folders are entities/model.ts's
+ * TYPE_INFO (kept here as a list so the renderer doesn't load the entity
+ * model; entityInfobox.test.ts checks that the two agree).
+ */
+export const ENTITY_EMBED_FOLDERS = ["אנשים", "מקומות", "ארגונים", "אירועים", "חוקים", "מקורות", "מושגים"];
+const ENTITY_EMBED_PATH = new RegExp(`^ישויות/(?:${ENTITY_EMBED_FOLDERS.join("|")})/[^/]+\\.md$`, "i");
+export const isEntityEmbed = (path: string, source: string) => ENTITY_EMBED_PATH.test(path) && /^---\r?\n(?:(?!---)[^\n]*\n)*?entity-type:[ \t]*\S/.test(source);
+
 /** Text with embeds → text and embed items. */
-function segments(value: string, env: Env, blockAllowed: boolean): Item[] {
+function segments(value: string, env: Env, blockAllowed: boolean, base?: number): Item[] {
   const out: Item[] = [];
   let last = 0;
   for (const m of value.matchAll(embedRe())) {
     if (m.index! > last) out.push({ node: text(value.slice(last, m.index)), block: false });
-    out.push(buildEmbed(m[1], env, blockAllowed));
+    out.push(buildEmbed(m[1], env, blockAllowed, base === undefined ? undefined : base + m.index!));
     last = m.index! + m[0].length;
   }
   if (last < value.length) out.push({ node: text(value.slice(last)), block: false });
@@ -513,7 +564,7 @@ const blank = (n: Node) => n.type === "break" || (n.type === "text" && !n.value?
 function expandParagraph(p: Node, env: Env): Node[] {
   const items: Item[] = [];
   for (const c of p.children ?? []) {
-    if (c.type === "text" && c.value?.includes("![[")) items.push(...segments(c.value, env, true));
+    if (c.type === "text" && c.value?.includes("![[")) items.push(...segments(c.value, env, true, c.position?.start?.offset));
     else {
       if (c.children && !LITERAL.has(c.type)) walk(c, env, false);
       items.push({ node: c, block: false });
@@ -557,7 +608,7 @@ function walk(parent: Node, env: Env, blockAllowed = true): void {
       continue;
     }
     if (child.type === "text" && child.value?.includes("![[")) {
-      const out = segments(child.value, env, false).map((s) => s.node);
+      const out = segments(child.value, env, false, child.position?.start?.offset).map((s) => s.node);
       list.splice(i, 1, ...out);
       i += out.length - 1;
       continue;

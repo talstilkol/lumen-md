@@ -1,0 +1,1032 @@
+{
+ "$comment": "Plan W10.G10: one entry per top-level Codex review comment that mentions P2 on the W1.32 PRs. Edit this file, then run `npm run p2:ledger`; `npm run p2:ledger -- --check --fetch` checks it against GitHub (REST).",
+ "title": "P2 ledger — W1.32 (W10.G10)",
+ "intro": "Every top-level Codex review comment that mentions P2 on the 12 W1.32 PRs (#199, #201, #202, #204, #210, #211, #218, #225, #231, #232, #235, #238), from `gh api repos/talstilkol/lumen-md/pulls/N/comments` on 14.11 (REST; replies matched by `in_reply_to_id`), with its decision.",
+ "method": "How each decision was reached: a \"Fixed in <sha>\" reply in the thread (the sha checked against verify/train-4 fcf760fde8, by ancestry or by the same commit subject when the PR was rebased); otherwise the W1.32 commit on train-4 titled \"Codex P2 on #N\", whose message names the finding; otherwise the decline reason in the thread, docs/known-limits.md, or the lane D owner-checklist decisions. A comment none of these covers is **open**. Re-checked on 16.11 (`npm run p2:ledger -- --check --fetch`, lane B2c): every fixed commit is in verify/train-7 063d3d2c82 (a rebased one through the commit of the same subject, `inHead` in plan/p2-ledger.json), and the three #235 comments open on 14.11 are fixed by 1334460696; one P2 comment posted later on #235 (4575737192, cached image URLs not scoped by vault) is fixed by 687b15a780 (lane FA, audit r3).",
+ "prs": [
+  199,
+  201,
+  202,
+  204,
+  210,
+  211,
+  218,
+  225,
+  231,
+  232,
+  235,
+  238
+ ],
+ "entries": [
+  {
+   "pr": 199,
+   "id": 4305667767,
+   "url": "https://github.com/talstilkol/lumen-md/pull/199#discussion_r4305667767",
+   "finding": "Reject long-form forbidden licence names (`scripts/lib/licenses.mjs`)",
+   "decision": "fixed",
+   "sha": "d6df31de",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 199,
+   "id": 4305667774,
+   "url": "https://github.com/talstilkol/lumen-md/pull/199#discussion_r4305667774",
+   "finding": "Validate `until` before capping a finding (`scripts/lib/licenses.mjs`)",
+   "decision": "fixed",
+   "sha": "d6df31de",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 199,
+   "id": 4305828444,
+   "url": "https://github.com/talstilkol/lumen-md/pull/199#discussion_r4305828444",
+   "finding": "Require exact catalog IDs before marking models covered (`scripts/lib/licenses.mjs`)",
+   "decision": "fixed",
+   "sha": "d1a74cc2",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 199,
+   "id": 4305923064,
+   "url": "https://github.com/talstilkol/lumen-md/pull/199#discussion_r4305923064",
+   "finding": "Recognize spaced CC BY-NC spellings as forbidden (`scripts/lib/licenses.mjs`)",
+   "decision": "fixed",
+   "sha": "22315e9b",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 199,
+   "id": 4305979347,
+   "url": "https://github.com/talstilkol/lumen-md/pull/199#discussion_r4305979347",
+   "finding": "Match linking-exception IDs exactly (`scripts/lib/licenses.mjs`)",
+   "decision": "fixed",
+   "sha": "bb1e26ab",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 199,
+   "id": 4305979351,
+   "url": "https://github.com/talstilkol/lumen-md/pull/199#discussion_r4305979351",
+   "finding": "Cover non-catalog model downloads in discovery (`scripts/lib/licenses.mjs`)",
+   "decision": "fixed",
+   "sha": "bb1e26ab",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 199,
+   "id": 4305979356,
+   "url": "https://github.com/talstilkol/lumen-md/pull/199#discussion_r4305979356",
+   "finding": "Validate the registry verification flag (`scripts/lib/licenses.mjs`)",
+   "decision": "fixed",
+   "sha": "bb1e26ab",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 199,
+   "id": 4305979364,
+   "url": "https://github.com/talstilkol/lumen-md/pull/199#discussion_r4305979364",
+   "finding": "Verify dataset licence files contain documentation (`scripts/lib/licenses.mjs`)",
+   "decision": "superseded",
+   "evidence": "#225 rewrote `checkDatasets` to read SOURCES.md and fail a set without a parts table with a Licence column (`scripts/lib/licenses.mjs:613-619` on train-4)"
+  },
+  {
+   "pr": 199,
+   "id": 4306004729,
+   "url": "https://github.com/talstilkol/lumen-md/pull/199#discussion_r4306004729",
+   "finding": "Bind exceptions to the finding they waive (`scripts/lib/licenses.mjs`)",
+   "decision": "fixed",
+   "sha": "b495d26e",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 199,
+   "id": 4306049267,
+   "url": "https://github.com/talstilkol/lumen-md/pull/199#discussion_r4306049267",
+   "finding": "Fail on unresolved required dependencies (`scripts/lib/licenses.mjs`)",
+   "decision": "fixed",
+   "sha": "7d6441b3",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 199,
+   "id": 4306049271,
+   "url": "https://github.com/talstilkol/lumen-md/pull/199#discussion_r4306049271",
+   "finding": "Keep forbidden IDs fatal after SPDX parse errors (`scripts/lib/licenses.mjs`)",
+   "decision": "fixed",
+   "sha": "7d6441b3",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 199,
+   "id": 4306418701,
+   "url": "https://github.com/talstilkol/lumen-md/pull/199#discussion_r4306418701",
+   "finding": "Validate WITH clauses before accepting permissive licences (`scripts/lib/licenses.mjs`)",
+   "decision": "fixed",
+   "sha": "a934447759",
+   "evidence": "W1.32 commit \"Codex P2 on #199\" in train-4 names this finding"
+  },
+  {
+   "pr": 199,
+   "id": 4306418705,
+   "url": "https://github.com/talstilkol/lumen-md/pull/199#discussion_r4306418705",
+   "finding": "Require an approved long-form linking exception (`scripts/lib/licenses.mjs`)",
+   "decision": "fixed",
+   "sha": "a934447759",
+   "evidence": "W1.32 commit \"Codex P2 on #199\" in train-4 names this finding"
+  },
+  {
+   "pr": 201,
+   "id": 4305668549,
+   "url": "https://github.com/talstilkol/lumen-md/pull/201#discussion_r4305668549",
+   "finding": "Preserve worktree context in recovery commands (`scripts/stack.mjs`)",
+   "decision": "fixed",
+   "sha": "a1581d74",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 201,
+   "id": 4305668552,
+   "url": "https://github.com/talstilkol/lumen-md/pull/201#discussion_r4305668552",
+   "finding": "Exclude fork heads from fallback restacks (`scripts/lib/stack.mjs`)",
+   "decision": "fixed",
+   "sha": "a1581d74",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 201,
+   "id": 4305668554,
+   "url": "https://github.com/talstilkol/lumen-md/pull/201#discussion_r4305668554",
+   "finding": "Preflight every owned worktree before rebasing (`scripts/stack.mjs`)",
+   "decision": "fixed",
+   "sha": "a1581d74",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 201,
+   "id": 4305856068,
+   "url": "https://github.com/talstilkol/lumen-md/pull/201#discussion_r4305856068",
+   "finding": "Include untracked files in the cleanliness preflight (`scripts/stack.mjs`)",
+   "decision": "fixed",
+   "sha": "bd1a43e7",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 201,
+   "id": 4305914726,
+   "url": "https://github.com/talstilkol/lumen-md/pull/201#discussion_r4305914726",
+   "finding": "Push an amended top branch even without descendants (`scripts/stack.mjs`)",
+   "decision": "fixed",
+   "sha": "18c7a2e4",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 201,
+   "id": 4305914728,
+   "url": "https://github.com/talstilkol/lumen-md/pull/201#discussion_r4305914728",
+   "finding": "Resolve duplicate head branches to the chain-carrying PR (`scripts/lib/stack.mjs`)",
+   "decision": "fixed",
+   "sha": "18c7a2e4",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 201,
+   "id": 4305996659,
+   "url": "https://github.com/talstilkol/lumen-md/pull/201#discussion_r4305996659",
+   "finding": "Fall back for descendants outside the tracked stack (`scripts/stack.mjs`)",
+   "decision": "fixed",
+   "sha": "ea9fa999",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 201,
+   "id": 4305996662,
+   "url": "https://github.com/talstilkol/lumen-md/pull/201#discussion_r4305996662",
+   "finding": "Treat null head repositories as foreign (`scripts/lib/stack.mjs`)",
+   "decision": "accepted risk",
+   "evidence": "accepted risk — needs a fork PR; the repo is single-owner and private with no fork PRs (declined in the thread, passed to the owner)"
+  },
+  {
+   "pr": 201,
+   "id": 4305996665,
+   "url": "https://github.com/talstilkol/lumen-md/pull/201#discussion_r4305996665",
+   "finding": "Validate a top branch before reporting success (`scripts/stack.mjs`)",
+   "decision": "fixed",
+   "sha": "ea9fa999",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 201,
+   "id": 4306389040,
+   "url": "https://github.com/talstilkol/lumen-md/pull/201#discussion_r4306389040",
+   "finding": "Queue amended descendants even when no rebase is needed (`scripts/stack.mjs`)",
+   "decision": "fixed",
+   "sha": "6403d968e0",
+   "evidence": "W1.32 commit \"Codex P2 on #201\" in train-4 names this finding"
+  },
+  {
+   "pr": 201,
+   "id": 4306389042,
+   "url": "https://github.com/talstilkol/lumen-md/pull/201#discussion_r4306389042",
+   "finding": "Preserve the selected remote in the printed push command (`scripts/stack.mjs`)",
+   "decision": "fixed",
+   "sha": "6403d968e0",
+   "evidence": "W1.32 commit \"Codex P2 on #201\" in train-4 names this finding"
+  },
+  {
+   "pr": 202,
+   "id": 4305692825,
+   "url": "https://github.com/talstilkol/lumen-md/pull/202#discussion_r4305692825",
+   "finding": "Isolate Vite's writable cache per lane (`scripts/lane.sh`)",
+   "decision": "fixed",
+   "sha": "e8190a68",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 202,
+   "id": 4305860831,
+   "url": "https://github.com/talstilkol/lumen-md/pull/202#discussion_r4305860831",
+   "finding": "Include untracked files in the cleanliness check (`scripts/lane-merge.sh`)",
+   "decision": "fixed",
+   "sha": "3871afb2",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 202,
+   "id": 4305939338,
+   "url": "https://github.com/talstilkol/lumen-md/pull/202#discussion_r4305939338",
+   "finding": "Install merged dependencies before running checks (`scripts/lane-merge.sh`)",
+   "decision": "fixed",
+   "sha": "d2df0d40",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 202,
+   "id": 4305939339,
+   "url": "https://github.com/talstilkol/lumen-md/pull/202#discussion_r4305939339",
+   "finding": "Refresh package locks after clean dependency merges (`scripts/lane-merge.sh`)",
+   "decision": "fixed",
+   "sha": "d2df0d40",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 202,
+   "id": 4306014665,
+   "url": "https://github.com/talstilkol/lumen-md/pull/202#discussion_r4306014665",
+   "finding": "Track dependency changes across resumed merge runs (`scripts/lane-merge.sh`)",
+   "decision": "fixed",
+   "sha": "05973c40",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 202,
+   "id": 4306395688,
+   "url": "https://github.com/talstilkol/lumen-md/pull/202#discussion_r4306395688",
+   "finding": "Route final conflict resolution through the dependency gate (`scripts/lane-merge.sh`)",
+   "decision": "fixed",
+   "sha": "85d14cc9a5",
+   "evidence": "W1.32 commit \"Codex P2 on #202\" in train-4 names this finding"
+  },
+  {
+   "pr": 202,
+   "id": 4306395693,
+   "url": "https://github.com/talstilkol/lumen-md/pull/202#discussion_r4306395693",
+   "finding": "Verify installed dependencies against the target lockfile (`scripts/lane-merge.sh`)",
+   "decision": "fixed",
+   "sha": "85d14cc9a5",
+   "evidence": "W1.32 commit \"Codex P2 on #202\" in train-4 names this finding"
+  },
+  {
+   "pr": 204,
+   "id": 4305691074,
+   "url": "https://github.com/talstilkol/lumen-md/pull/204#discussion_r4305691074",
+   "finding": "Restrict automatic selection to the relevant CI workflow (`scripts/ci-doctor.mjs`)",
+   "decision": "fixed",
+   "sha": "983657a2",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 204,
+   "id": 4305691076,
+   "url": "https://github.com/talstilkol/lumen-md/pull/204#discussion_r4305691076",
+   "finding": "Verify a test existed before counting a green job as a pass (`scripts/lib/ci-doctor.mjs`)",
+   "decision": "fixed",
+   "sha": "983657a2",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 204,
+   "id": 4305691080,
+   "url": "https://github.com/talstilkol/lumen-md/pull/204#discussion_r4305691080",
+   "finding": "Paginate check-run annotations beyond the first 100 (`scripts/ci-doctor.mjs`)",
+   "decision": "fixed",
+   "sha": "983657a2",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 204,
+   "id": 4305883839,
+   "url": "https://github.com/talstilkol/lumen-md/pull/204#discussion_r4305883839",
+   "finding": "Restrict test parsing to Playwright annotations (`scripts/lib/ci-doctor.mjs`)",
+   "decision": "fixed",
+   "sha": "b7d19f8b",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 204,
+   "id": 4305883842,
+   "url": "https://github.com/talstilkol/lumen-md/pull/204#discussion_r4305883842",
+   "finding": "Exclude artifact and cache steps from deterministic checks (`scripts/lib/ci-doctor.mjs`)",
+   "decision": "fixed",
+   "sha": "b7d19f8b",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 204,
+   "id": 4305883844,
+   "url": "https://github.com/talstilkol/lumen-md/pull/204#discussion_r4305883844",
+   "finding": "Propagate failures when loading the target jobs (`scripts/ci-doctor.mjs`)",
+   "decision": "fixed",
+   "sha": "b7d19f8b",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 204,
+   "id": 4305945167,
+   "url": "https://github.com/talstilkol/lumen-md/pull/204#discussion_r4305945167",
+   "finding": "Match PR runs by head repository and SHA (`scripts/ci-doctor.mjs`)",
+   "decision": "accepted risk",
+   "evidence": "accepted risk — needs a fork PR; the repo is single-owner and private with no fork PRs (declined in the thread, passed to the owner)"
+  },
+  {
+   "pr": 204,
+   "id": 4305945170,
+   "url": "https://github.com/talstilkol/lumen-md/pull/204#discussion_r4305945170",
+   "finding": "Do not infer a pass from an annotation-free failed step (`scripts/lib/ci-doctor.mjs`)",
+   "decision": "fixed",
+   "sha": "b1d3377f",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 204,
+   "id": 4306020515,
+   "url": "https://github.com/talstilkol/lumen-md/pull/204#discussion_r4306020515",
+   "finding": "Gate test-file annotations on the failed step (`scripts/lib/ci-doctor.mjs`)",
+   "decision": "fixed",
+   "sha": "89a54a72",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 204,
+   "id": 4306434726,
+   "url": "https://github.com/talstilkol/lumen-md/pull/204#discussion_r4306434726",
+   "finding": "Check runner configuration before inferring a test pass (`scripts/ci-doctor.mjs`)",
+   "decision": "fixed",
+   "sha": "3a53336194",
+   "evidence": "W1.32 commit \"Codex P2 on #204\" in train-4 names this finding"
+  },
+  {
+   "pr": 204,
+   "id": 4306434734,
+   "url": "https://github.com/talstilkol/lumen-md/pull/204#discussion_r4306434734",
+   "finding": "Classify deterministic failures before the no-peer return (`scripts/lib/ci-doctor.mjs`)",
+   "decision": "fixed",
+   "sha": "3a53336194",
+   "evidence": "W1.32 commit \"Codex P2 on #204\" in train-4 names this finding"
+  },
+  {
+   "pr": 210,
+   "id": 4305782255,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4305782255",
+   "finding": "Keep deleted paths in the changed-file set (`scripts/ci-local.mjs`)",
+   "decision": "fixed",
+   "sha": "027df125",
+   "evidence": "reply in the thread; in train-4 as 94825e3a1e (same change, rebased)",
+   "inHead": "94825e3a1e"
+  },
+  {
+   "pr": 210,
+   "id": 4305782257,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4305782257",
+   "finding": "Rebuild the production bundle before an e2e-only run (`scripts/ci-local.mjs`)",
+   "decision": "fixed",
+   "sha": "027df125",
+   "evidence": "reply in the thread; in train-4 as 94825e3a1e (same change, rebased)",
+   "inHead": "94825e3a1e"
+  },
+  {
+   "pr": 210,
+   "id": 4305782258,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4305782258",
+   "finding": "Treat every Vite entry file as app code (`scripts/lib/ciLocal.mjs`)",
+   "decision": "fixed",
+   "sha": "027df125",
+   "evidence": "reply in the thread; in train-4 as 94825e3a1e (same change, rebased)",
+   "inHead": "94825e3a1e"
+  },
+  {
+   "pr": 210,
+   "id": 4305782263,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4305782263",
+   "finding": "Preserve an existing pre-push hook during installation (`scripts/ci-local.mjs`)",
+   "decision": "fixed",
+   "sha": "027df125",
+   "evidence": "reply in the thread; in train-4 as 94825e3a1e (same change, rebased)",
+   "inHead": "94825e3a1e"
+  },
+  {
+   "pr": 210,
+   "id": 4305782264,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4305782264",
+   "finding": "Honor PW_CHROMIUM outside generated lane configs (`scripts/ci-local.mjs`)",
+   "decision": "fixed",
+   "sha": "027df125",
+   "evidence": "reply in the thread; in train-4 as 94825e3a1e (same change, rebased)",
+   "inHead": "94825e3a1e"
+  },
+  {
+   "pr": 210,
+   "id": 4305939935,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4305939935",
+   "finding": "Run tests for non-JavaScript changed inputs (`scripts/lib/ciLocal.mjs`)",
+   "decision": "fixed",
+   "sha": "231accdf",
+   "evidence": "reply in the thread; in train-4 as d27e1e5e63 (same change, rebased)",
+   "inHead": "d27e1e5e63"
+  },
+  {
+   "pr": 210,
+   "id": 4305939938,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4305939938",
+   "finding": "Derive the repository path with fileURLToPath (`scripts/ci-local.mjs`)",
+   "decision": "fixed",
+   "sha": "231accdf",
+   "evidence": "reply in the thread; in train-4 as d27e1e5e63 (same change, rebased)",
+   "inHead": "d27e1e5e63"
+  },
+  {
+   "pr": 210,
+   "id": 4305954293,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4305954293",
+   "finding": "Exclude Playwright specs from Vitest related inputs (`scripts/lib/ciLocal.mjs`)",
+   "decision": "fixed",
+   "sha": "231accdf",
+   "evidence": "reply in the thread; in train-4 as d27e1e5e63 (same change, rebased)",
+   "inHead": "d27e1e5e63"
+  },
+  {
+   "pr": 210,
+   "id": 4305954296,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4305954296",
+   "finding": "Include untracked files in changed-mode planning (`scripts/ci-local.mjs`)",
+   "decision": "fixed",
+   "sha": "231accdf",
+   "evidence": "reply in the thread; in train-4 as d27e1e5e63 (same change, rebased)",
+   "inHead": "d27e1e5e63"
+  },
+  {
+   "pr": 210,
+   "id": 4305954299,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4305954299",
+   "finding": "Build the current bundle before budget-only runs (`scripts/lib/ciLocal.mjs`)",
+   "decision": "fixed",
+   "sha": "231accdf",
+   "evidence": "reply in the thread; in train-4 as d27e1e5e63 (same change, rebased)",
+   "inHead": "d27e1e5e63"
+  },
+  {
+   "pr": 210,
+   "id": 4305954304,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4305954304",
+   "finding": "Reject unknown flags and step selectors (`scripts/ci-local.mjs`)",
+   "decision": "fixed",
+   "sha": "231accdf",
+   "evidence": "reply in the thread; in train-4 as d27e1e5e63 (same change, rebased)",
+   "inHead": "d27e1e5e63"
+  },
+  {
+   "pr": 210,
+   "id": 4306028872,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4306028872",
+   "finding": "Treat the PostCSS configuration as app code (`scripts/lib/ciLocal.mjs`)",
+   "decision": "fixed",
+   "sha": "543c2a9e",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 210,
+   "id": 4306028873,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4306028873",
+   "finding": "Run dependent specs when e2e helpers change (`scripts/lib/ciLocal.mjs`)",
+   "decision": "fixed",
+   "sha": "543c2a9e",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 210,
+   "id": 4306398896,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4306398896",
+   "finding": "Run tests reached through dynamic imports (`scripts/lib/ciLocal.mjs`)",
+   "decision": "fixed",
+   "sha": "d366c6a412",
+   "evidence": "W1.32 commit \"Codex P2 on #210\" in train-4 names this finding"
+  },
+  {
+   "pr": 210,
+   "id": 4306438105,
+   "url": "https://github.com/talstilkol/lumen-md/pull/210#discussion_r4306438105",
+   "finding": "Preserve the source path of recognized renames (`scripts/ci-local.mjs`)",
+   "decision": "fixed",
+   "sha": "d366c6a412",
+   "evidence": "W1.32 commit \"Codex P2 on #210\" in train-4 names this finding"
+  },
+  {
+   "pr": 211,
+   "id": 4305797717,
+   "url": "https://github.com/talstilkol/lumen-md/pull/211#discussion_r4305797717",
+   "finding": "Decode the module URL before changing directories (`scripts/handoff.mjs`)",
+   "decision": "fixed",
+   "sha": "751fe723",
+   "evidence": "reply in the thread; in train-4 as f9082565bf (same change, rebased)",
+   "inHead": "f9082565bf"
+  },
+  {
+   "pr": 211,
+   "id": 4305797720,
+   "url": "https://github.com/talstilkol/lumen-md/pull/211#discussion_r4305797720",
+   "finding": "Don't reject valid fork PR heads (`scripts/handoff.mjs`)",
+   "decision": "fixed",
+   "sha": "751fe723",
+   "evidence": "reply in the thread; in train-4 as f9082565bf (same change, rebased)",
+   "inHead": "f9082565bf"
+  },
+  {
+   "pr": 211,
+   "id": 4305797722,
+   "url": "https://github.com/talstilkol/lumen-md/pull/211#discussion_r4305797722",
+   "finding": "Detect prunable worktrees (`scripts/lib/handoff.mjs`)",
+   "decision": "fixed",
+   "sha": "751fe723",
+   "evidence": "reply in the thread; in train-4 as f9082565bf (same change, rebased)",
+   "inHead": "f9082565bf"
+  },
+  {
+   "pr": 211,
+   "id": 4305938691,
+   "url": "https://github.com/talstilkol/lumen-md/pull/211#discussion_r4305938691",
+   "finding": "Match CI runs to the pull request (`scripts/handoff.mjs`)",
+   "decision": "accepted risk",
+   "evidence": "accepted risk — needs a fork PR; the repo is single-owner and private with no fork PRs (declined in the thread, passed to the owner); CI runs from another head repository are already skipped (751fe723)"
+  },
+  {
+   "pr": 211,
+   "id": 4305961384,
+   "url": "https://github.com/talstilkol/lumen-md/pull/211#discussion_r4305961384",
+   "finding": "Exclude fork heads when choosing stack parents (`scripts/lib/handoff.mjs`)",
+   "decision": "accepted risk",
+   "evidence": "accepted risk — needs a fork PR; the repo is single-owner and private with no fork PRs (declined in the thread, passed to the owner)"
+  },
+  {
+   "pr": 211,
+   "id": 4305961386,
+   "url": "https://github.com/talstilkol/lumen-md/pull/211#discussion_r4305961386",
+   "finding": "Check locked worktree paths for existence (`scripts/lib/handoff.mjs`)",
+   "decision": "fixed",
+   "sha": "bf5bc66a",
+   "evidence": "reply in the thread; in train-4 as cc236a03b4 (same change, rebased)",
+   "inHead": "cc236a03b4"
+  },
+  {
+   "pr": 211,
+   "id": 4306034209,
+   "url": "https://github.com/talstilkol/lumen-md/pull/211#discussion_r4306034209",
+   "finding": "Let stdout flush before exiting (`scripts/handoff.mjs`)",
+   "decision": "fixed",
+   "sha": "dc8b1ad9",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 211,
+   "id": 4306395226,
+   "url": "https://github.com/talstilkol/lumen-md/pull/211#discussion_r4306395226",
+   "finding": "Continue pagination past the thirtieth full page (`scripts/handoff.mjs`)",
+   "decision": "fixed",
+   "sha": "03c4ef8704",
+   "evidence": "W1.32 commit \"Codex P2 on #211\" in train-4 names this finding"
+  },
+  {
+   "pr": 211,
+   "id": 4306395233,
+   "url": "https://github.com/talstilkol/lumen-md/pull/211#discussion_r4306395233",
+   "finding": "Preserve PRs when stack bases form a cycle (`scripts/lib/handoff.mjs`)",
+   "decision": "fixed",
+   "sha": "03c4ef8704",
+   "evidence": "W1.32 commit \"Codex P2 on #211\" in train-4 names this finding"
+  },
+  {
+   "pr": 211,
+   "id": 4306452035,
+   "url": "https://github.com/talstilkol/lumen-md/pull/211#discussion_r4306452035",
+   "finding": "Report deleted fork heads as missing (`scripts/lib/handoff.mjs`)",
+   "decision": "fixed",
+   "sha": "03c4ef8704",
+   "evidence": "W1.32 commit \"Codex P2 on #211\" in train-4 names this finding"
+  },
+  {
+   "pr": 211,
+   "id": 4306452037,
+   "url": "https://github.com/talstilkol/lumen-md/pull/211#discussion_r4306452037",
+   "finding": "Search beyond the first ten workflow runs for CI (`scripts/handoff.mjs`)",
+   "decision": "fixed",
+   "sha": "03c4ef8704",
+   "evidence": "W1.32 commit \"Codex P2 on #211\" in train-4 names this finding"
+  },
+  {
+   "pr": 211,
+   "id": 4306452040,
+   "url": "https://github.com/talstilkol/lumen-md/pull/211#discussion_r4306452040",
+   "finding": "Escape branch names before inserting them into the table (`scripts/lib/handoff.mjs`)",
+   "decision": "fixed",
+   "sha": "03c4ef8704",
+   "evidence": "W1.32 commit \"Codex P2 on #211\" in train-4 names this finding"
+  },
+  {
+   "pr": 218,
+   "id": 4305961653,
+   "url": "https://github.com/talstilkol/lumen-md/pull/218#discussion_r4305961653",
+   "finding": "Refresh the Trash panel after shortcut restores (`src/ui/trashUndoShortcut.ts`)",
+   "decision": "fixed",
+   "sha": "19934d99",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 218,
+   "id": 4306049729,
+   "url": "https://github.com/talstilkol/lumen-md/pull/218#discussion_r4306049729",
+   "finding": "Detach an unsettled note from its deleted workspace path (`src/ui/FileTree.tsx`)",
+   "decision": "fixed",
+   "sha": "da7aa77",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 218,
+   "id": 4306372442,
+   "url": "https://github.com/talstilkol/lumen-md/pull/218#discussion_r4306372442",
+   "finding": "Preserve partially completed bulk deletes in the undo stack (`src/storage/fileOps.ts`)",
+   "decision": "fixed",
+   "sha": "2f51f64",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 218,
+   "id": 4306546517,
+   "url": "https://github.com/talstilkol/lumen-md/pull/218#discussion_r4306546517",
+   "finding": "Detach documents when the post-trash save fails (`src/store/openDocs.ts`)",
+   "decision": "fixed",
+   "sha": "562504bc",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 218,
+   "id": 4306546523,
+   "url": "https://github.com/talstilkol/lumen-md/pull/218#discussion_r4306546523",
+   "finding": "Retain failed toast undos on the shortcut stack (`src/storage/fileOps.ts`)",
+   "decision": "fixed",
+   "sha": "562504bc",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 218,
+   "id": 4306596825,
+   "url": "https://github.com/talstilkol/lumen-md/pull/218#discussion_r4306596825",
+   "finding": "Requeue conservatively when the trash index cannot be read (`src/storage/fileOps.ts`)",
+   "decision": "fixed",
+   "sha": "8f2ede258c",
+   "evidence": "W1.32 commit \"Codex P2 on #218\" in train-4 names this finding"
+  },
+  {
+   "pr": 225,
+   "id": 4306008848,
+   "url": "https://github.com/talstilkol/lumen-md/pull/225#discussion_r4306008848",
+   "finding": "Refresh mutable Tatoeba exports instead of reusing the cache (`scripts/golden/hf_build.py`)",
+   "decision": "fixed",
+   "sha": "a9cdcfe0",
+   "evidence": "reply in the thread; in train-4 as 69fb4e2adb (same change, rebased)",
+   "inHead": "69fb4e2adb"
+  },
+  {
+   "pr": 225,
+   "id": 4306382272,
+   "url": "https://github.com/talstilkol/lumen-md/pull/225#discussion_r4306382272",
+   "finding": "Clear stale hashes before recording partial runs (`scripts/golden.mjs`)",
+   "decision": "fixed",
+   "sha": "c7f95df0",
+   "evidence": "reply in the thread; in train-4 as f2a3174fcb (same change, rebased)",
+   "inHead": "f2a3174fcb"
+  },
+  {
+   "pr": 225,
+   "id": 4306416444,
+   "url": "https://github.com/talstilkol/lumen-md/pull/225#discussion_r4306416444",
+   "finding": "Preserve retrieval metadata in fetched local items (`scripts/golden/hf_build.py`)",
+   "decision": "fixed",
+   "sha": "f117f1cde7",
+   "evidence": "W1.32 commit \"Codex P2 on #225\" in train-4 names this finding"
+  },
+  {
+   "pr": 225,
+   "id": 4306416450,
+   "url": "https://github.com/talstilkol/lumen-md/pull/225#discussion_r4306416450",
+   "finding": "Keep trying images after a content-specific failure (`scripts/golden/sets/caption.mjs`)",
+   "decision": "fixed",
+   "sha": "f117f1cde7",
+   "evidence": "W1.32 commit \"Codex P2 on #225\" in train-4 names this finding"
+  },
+  {
+   "pr": 225,
+   "id": 4307044053,
+   "url": "https://github.com/talstilkol/lumen-md/pull/225#discussion_r4307044053",
+   "finding": "Reject duplicate item IDs before hashing test parts (`scripts/lib/golden.mjs`)",
+   "decision": "fixed",
+   "sha": "f117f1cde7",
+   "evidence": "W1.32 commit \"Codex P2 on #225\" in train-4 names this finding"
+  },
+  {
+   "pr": 225,
+   "id": 4307044056,
+   "url": "https://github.com/talstilkol/lumen-md/pull/225#discussion_r4307044056",
+   "finding": "Enforce the declared injection-vector distribution (`scripts/golden/owner.mjs`)",
+   "decision": "fixed",
+   "sha": "f117f1cde7",
+   "evidence": "W1.32 commit \"Codex P2 on #225\" in train-4 names this finding"
+  },
+  {
+   "pr": 225,
+   "id": 4307044060,
+   "url": "https://github.com/talstilkol/lumen-md/pull/225#discussion_r4307044060",
+   "finding": "Validate the CC0 dedication before accepting owner data (`scripts/golden/owner.mjs`)",
+   "decision": "fixed",
+   "sha": "f117f1cde7",
+   "evidence": "W1.32 commit \"Codex P2 on #225\" in train-4 names this finding"
+  },
+  {
+   "pr": 225,
+   "id": 4310784889,
+   "url": "https://github.com/talstilkol/lumen-md/pull/225#discussion_r4310784889",
+   "finding": "Validate owner audio before accepting the ASR bundle (`scripts/golden/owner.mjs`)",
+   "decision": "fixed",
+   "sha": "f117f1cde7",
+   "evidence": "W1.32 commit \"Codex P2 on #225\" in train-4 names this finding"
+  },
+  {
+   "pr": 225,
+   "id": 4310784894,
+   "url": "https://github.com/talstilkol/lumen-md/pull/225#discussion_r4310784894",
+   "finding": "Apply completeness checks to direct test recording (`scripts/golden.mjs`)",
+   "decision": "fixed",
+   "sha": "f117f1cde7",
+   "evidence": "W1.32 commit \"Codex P2 on #225\" in train-4 names this finding"
+  },
+  {
+   "pr": 231,
+   "id": 4306507523,
+   "url": "https://github.com/talstilkol/lumen-md/pull/231#discussion_r4306507523",
+   "finding": "Keep the missing-group sentinel distinct from `_` (`src/views/DatabaseBlock.tsx`)",
+   "decision": "fixed",
+   "sha": "56d7b46e",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 231,
+   "id": 4306542256,
+   "url": "https://github.com/talstilkol/lumen-md/pull/231#discussion_r4306542256",
+   "finding": "Do not disable filtering when the expression is invalid (`src/views/DatabaseBlock.tsx`)",
+   "decision": "fixed",
+   "sha": "4fbadcaa",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 231,
+   "id": 4306542261,
+   "url": "https://github.com/talstilkol/lumen-md/pull/231#discussion_r4306542261",
+   "finding": "Infer column types from the complete query result (`src/views/DatabaseBlock.tsx`)",
+   "decision": "fixed",
+   "sha": "4fbadcaa",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 231,
+   "id": 4306542263,
+   "url": "https://github.com/talstilkol/lumen-md/pull/231#discussion_r4306542263",
+   "finding": "Roll back tab edits when the workspace write fails (`src/views/databaseEdit.ts`)",
+   "decision": "fixed",
+   "sha": "4fbadcaa",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 231,
+   "id": 4306542266,
+   "url": "https://github.com/talstilkol/lumen-md/pull/231#discussion_r4306542266",
+   "finding": "Keep reserved file metadata from being shadowed (`src/views/databaseFilter.ts`)",
+   "decision": "fixed",
+   "sha": "4fbadcaa",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 231,
+   "id": 4306651500,
+   "url": "https://github.com/talstilkol/lumen-md/pull/231#discussion_r4306651500",
+   "finding": "Preserve booleans for empty Kanban columns (`src/views/database.ts`)",
+   "decision": "fixed",
+   "sha": "40a07da718",
+   "evidence": "W1.32 commit \"Codex P2 on #231\" in train-4 names this finding"
+  },
+  {
+   "pr": 231,
+   "id": 4306651504,
+   "url": "https://github.com/talstilkol/lumen-md/pull/231#discussion_r4306651504",
+   "finding": "Use collision-free keys for list-valued Kanban groups (`src/views/database.ts`)",
+   "decision": "fixed",
+   "sha": "40a07da718",
+   "evidence": "W1.32 commit \"Codex P2 on #231\" in train-4 names this finding"
+  },
+  {
+   "pr": 232,
+   "id": 4306546432,
+   "url": "https://github.com/talstilkol/lumen-md/pull/232#discussion_r4306546432",
+   "finding": "Re-sync after an in-flight index pass (`src/storage/workspaceIndex.ts`)",
+   "decision": "fixed",
+   "sha": "7e554cfa",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 232,
+   "id": 4306546436,
+   "url": "https://github.com/talstilkol/lumen-md/pull/232#discussion_r4306546436",
+   "finding": "Index compatible bare forms for hyphen parts (`src/text/searchTokens.ts`)",
+   "decision": "fixed",
+   "sha": "7e554cfa",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 232,
+   "id": 4306599661,
+   "url": "https://github.com/talstilkol/lumen-md/pull/232#discussion_r4306599661",
+   "finding": "Apply the phrase bonus before pruning candidates (`src/storage/workspaceIndex.ts`)",
+   "decision": "fixed",
+   "sha": "8c6ad4dd",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 232,
+   "id": 4306660752,
+   "url": "https://github.com/talstilkol/lumen-md/pull/232#discussion_r4306660752",
+   "finding": "Do not discard rare prefix completions (`src/search/bm25.ts`)",
+   "decision": "fixed",
+   "sha": "c3bad6e19f",
+   "evidence": "W1.32 commit \"Codex P2 on #232\" in train-4 names this finding"
+  },
+  {
+   "pr": 235,
+   "id": 4306731138,
+   "url": "https://github.com/talstilkol/lumen-md/pull/235#discussion_r4306731138",
+   "finding": "Validate the source before reusing an interrupted move (`src/storage/vault/location.ts`)",
+   "decision": "fixed",
+   "sha": "be6b85f",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 235,
+   "id": 4306731142,
+   "url": "https://github.com/talstilkol/lumen-md/pull/235#discussion_r4306731142",
+   "finding": "Re-scan the source before activating the target (`src/storage/vault/location.ts`)",
+   "decision": "fixed",
+   "sha": "be6b85f",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 235,
+   "id": 4306783259,
+   "url": "https://github.com/talstilkol/lumen-md/pull/235#discussion_r4306783259",
+   "finding": "Freeze source writes through final verification (`src/storage/vault/location.ts`)",
+   "decision": "accepted risk",
+   "evidence": "docs/known-limits.md (7c4fbdcbc7); lane D decision 2.9: no write freeze in the core write path, a post-switch re-hash instead"
+  },
+  {
+   "pr": 235,
+   "id": 4306783265,
+   "url": "https://github.com/talstilkol/lumen-md/pull/235#discussion_r4306783265",
+   "finding": "Avoid duplicating notes already copied into trash (`src/storage/vault/location.ts`)",
+   "decision": "fixed",
+   "sha": "7908d1e768",
+   "evidence": "W1.32 commit; lane D decision 2.10"
+  },
+  {
+   "pr": 235,
+   "id": 4306783268,
+   "url": "https://github.com/talstilkol/lumen-md/pull/235#discussion_r4306783268",
+   "finding": "Skip detachment when reopening the active folder (`src/storage/vault/location.ts`)",
+   "decision": "fixed",
+   "sha": "7908d1e768",
+   "evidence": "W1.32 commit; lane D decision 2.11"
+  },
+  {
+   "pr": 235,
+   "id": 4575404796,
+   "url": "https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575404796",
+   "finding": "Pin vault snapshot reads to the captured backend (`src/sync/autoBackup.ts`)",
+   "decision": "fixed",
+   "evidence": "commit \"Codex P2 on #235\", an ancestor of verify/train-7 063d3d2c82: a snapshot pass stays in its vault (src/sync/autoBackup.ts); test historyVaultIdentity.test.ts (W10.G10 re-check 16.11)",
+   "sha": "1334460696"
+  },
+  {
+   "pr": 235,
+   "id": 4575404797,
+   "url": "https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575404797",
+   "finding": "Reject moving a folder vault into its own descendant (`src/storage/vault/location.ts`)",
+   "decision": "fixed",
+   "evidence": "commit \"Codex P2 on #235\", an ancestor of verify/train-7 063d3d2c82: no move into or around itself (location.ts); test vaultLocation.test.ts (W10.G10 re-check 16.11)",
+   "sha": "1334460696"
+  },
+  {
+   "pr": 235,
+   "id": 4575404801,
+   "url": "https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575404801",
+   "finding": "Reconcile deleted files from an interrupted move (`src/storage/vault/location.ts`)",
+   "decision": "fixed",
+   "evidence": "commit \"Codex P2 on #235\", an ancestor of verify/train-7 063d3d2c82: a resume drops copies of notes deleted since (dropStaleCopies); test vaultLocation.test.ts (W10.G10 re-check 16.11)",
+   "sha": "1334460696"
+  },
+  {
+   "pr": 235,
+   "id": 4575737192,
+   "url": "https://github.com/talstilkol/lumen-md/pull/235#discussion_r4575737192",
+   "finding": "Scope cached image URLs to the activated vault (`src/storage/vault/location.ts`)",
+   "decision": "fixed",
+   "sha": "687b15a780",
+   "evidence": "lane FA (audit r3): blobUrlCache moved to src/renderer/blobUrlCache.ts, scoped by vault identity + backend generation and emptied on a switch; src/__tests__/blobUrlVaultScope.test.tsx (0/3 at f090c20812, 3/3 fixed)"
+  },
+  {
+   "pr": 238,
+   "id": 4306734416,
+   "url": "https://github.com/talstilkol/lumen-md/pull/238#discussion_r4306734416",
+   "finding": "Disambiguate links copied from duplicate headings (`src/editor/blockLink.ts`)",
+   "decision": "fixed",
+   "sha": "1dbdf8bb",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 238,
+   "id": 4306796825,
+   "url": "https://github.com/talstilkol/lumen-md/pull/238#discussion_r4306796825",
+   "finding": "Track fenced-code delimiter lengths (`src/editor/blockLink.ts`)",
+   "decision": "fixed",
+   "sha": "51d6d824",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 238,
+   "id": 4306796829,
+   "url": "https://github.com/talstilkol/lumen-md/pull/238#discussion_r4306796829",
+   "finding": "Recognize setext headings before adding block IDs (`src/editor/blockLink.ts`)",
+   "decision": "fixed",
+   "sha": "51d6d824",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 238,
+   "id": 4306796832,
+   "url": "https://github.com/talstilkol/lumen-md/pull/238#discussion_r4306796832",
+   "finding": "Preserve block-ID case in Vault Doctor (`src/lint/vaultDoctor.ts`)",
+   "decision": "fixed",
+   "sha": "51d6d824",
+   "evidence": "reply in the thread; in train-4"
+  },
+  {
+   "pr": 238,
+   "id": 4306880230,
+   "url": "https://github.com/talstilkol/lumen-md/pull/238#discussion_r4306880230",
+   "finding": "Handle unterminated fences before copying block links (`src/editor/blockLink.ts`)",
+   "decision": "fixed",
+   "sha": "bd7d2e10d0",
+   "evidence": "W1.32 commit \"Codex P2 on #238\" in train-4 names this finding"
+  },
+  {
+   "pr": 238,
+   "id": 4306880234,
+   "url": "https://github.com/talstilkol/lumen-md/pull/238#discussion_r4306880234",
+   "finding": "Preserve escapes typed during WYSIWYG editing (`src/editor/wysiwygWikiLinks.ts`)",
+   "decision": "fixed",
+   "sha": "bd7d2e10d0",
+   "evidence": "W1.32 commit \"Codex P2 on #238\" in train-4 names this finding"
+  },
+  {
+   "pr": 238,
+   "id": 4306880237,
+   "url": "https://github.com/talstilkol/lumen-md/pull/238#discussion_r4306880237",
+   "finding": "Include every line of wrapped setext headings (`src/lint/vaultDoctor.ts`)",
+   "decision": "fixed",
+   "sha": "bd7d2e10d0",
+   "evidence": "W1.32 commit \"Codex P2 on #238\" in train-4 names this finding"
+  }
+ ]
+}

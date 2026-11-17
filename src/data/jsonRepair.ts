@@ -398,15 +398,29 @@ export function repairJson(input: string): RepairResult {
 
 function applyPatches(text: string, patches: RepairPatch[]): string {
   if (patches.length === 0) return text;
-  // Apply right-to-left so earlier offsets stay valid.
+  // One left-to-right pass (FUZZ s1#27, FC1): splicing each patch into the
+  // whole string copied the text once per patch, so 80,000 missing commas
+  // took 20 s and 80,000 unquoted keys 71 s. The result is the one the old
+  // right-to-left splice gave: patches that share a start go in reverse push
+  // order (the later one lands in front). Overlapping spans, which no pass
+  // makes, keep the old splice.
+  const order = patches.map((p, i) => ({ p, i }));
+  order.sort((a, b) => a.p.span.start - b.p.span.start || b.i - a.i);
+  const parts: string[] = [];
+  let at = 0;
+  for (const { p } of order) {
+    if (p.span.start < at) return applyPatchesSplice(text, patches);
+    parts.push(text.slice(at, p.span.start), p.replacement);
+    at = Math.max(at, p.span.end);
+  }
+  parts.push(text.slice(at));
+  return parts.join("");
+}
+
+function applyPatchesSplice(text: string, patches: RepairPatch[]): string {
   const sorted = [...patches].sort((a, b) => b.span.start - a.span.start);
   let out = text;
-  for (const p of sorted) {
-    out =
-      out.slice(0, p.span.start) +
-      p.replacement +
-      out.slice(p.span.end);
-  }
+  for (const p of sorted) out = out.slice(0, p.span.start) + p.replacement + out.slice(p.span.end);
   return out;
 }
 

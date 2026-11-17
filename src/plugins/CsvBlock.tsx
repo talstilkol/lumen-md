@@ -105,7 +105,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
             className={`chart-block-tab ${view === "table" ? "active" : ""}`}
             onClick={() => setView("table")}
           >
-            <Table2 size={12} style={{ display: "inline", marginRight: 4 }} />
+            <Table2 size={12} style={{ display: "inline", marginInlineEnd: 4 }} />
             {t("block.data.table")}
           </button>
           {suggestions.length > 0 && (
@@ -113,7 +113,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
               className={`chart-block-tab ${view === "chart" ? "active" : ""}`}
               onClick={() => setView("chart")}
             >
-              <BarChart3 size={12} style={{ display: "inline", marginRight: 4 }} />
+              <BarChart3 size={12} style={{ display: "inline", marginInlineEnd: 4 }} />
               {t("block.data.chart")}
             </button>
           )}
@@ -145,7 +145,7 @@ export default function CsvBlock({ source, lang, meta }: Props) {
               }
             }}
           >
-            <Sparkles size={12} style={{ display: "inline", marginRight: 4 }} />
+            <Sparkles size={12} style={{ display: "inline", marginInlineEnd: 4 }} />
             {t("block.data.aiChart")}
           </button>
         </div>

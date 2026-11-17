@@ -8,7 +8,9 @@
  * Hebrew dates come from the browser's own ICU Hebrew calendar
  * (`Intl.DateTimeFormat("he-u-ca-hebrew")`) — no calendar library. Holidays
  * and the week's Torah portion ({{holiday}}, {{parasha}}) come from our own
- * Hebrew calendar (hebrewCalendar.ts, plan W2.10).
+ * Hebrew calendar (hebrewCalendar.ts, plan W2.10). {{review}} is the day's
+ * spaced-repetition queue (plan W3.3, W10.E46): each card's
+ * question with its answer folded under it, and the link to where it came from.
  */
 
 import { t } from "../i18n";
@@ -18,6 +20,8 @@ import { DEFAULT_DAILY, isValidDailyPattern, type DailySettings } from "./defaul
 import { gematria } from "./gematria";
 import { defaultIsrael, holidaysOn, weeklyReading } from "./hebrewCalendar";
 import { holidayLabel, nameLang, readingName } from "./hebrewCalendarNames";
+import { learningLines, type CycleId } from "../learning/plans";
+import type { Entry } from "../srs/cards";
 
 export { DEFAULT_DAILY, isValidDailyPattern, type DailySettings };
 
@@ -141,9 +145,29 @@ export const isIsrael = (settings: Pick<DailySettings, "israel">, locale: string
  * Fill a daily-note template. `locale` names the weekday and the title's
  * date, and picks Hebrew or English names for {{holiday}} (the day's holidays,
  * " · " between them, or nothing) and {{parasha}} (this week's portion: the
- * Shabbat on or after the day, or the holiday read instead).
+ * Shabbat on or after the day, or the holiday read instead). {{learning}}
+ * (plan W12.H4) is one line per study cycle in `opts.learning`, with a link
+ * to the day's text on Sefaria.
  */
-export function renderTemplate(template: string, day: Day, locale: string, opts: { israel?: boolean } = {}): string {
+export const DEFAULT_LEARNING: readonly CycleId[] = ["dafYomi", "mishnahYomit", "rambam1"];
+/**
+ * The day's review in the note (plan W3.3): a heading with the count, then
+ * each card's question as a line, its answer in a folded callout (open it
+ * to check yourself) and the link to its place. Rating stays in the review
+ * panel, which keeps the schedule. No cards: one line that says so.
+ */
+export function reviewSection(queue: readonly Entry[]): string {
+  const one = (s: string) => s.replace(/\s*\n\s*/g, " ").trim();
+  const lines = [`## ${t("daily.review.title", { n: String(queue.length) })}`, ""];
+  if (!queue.length) return [...lines, t("daily.review.none"), ""].join("\n");
+  for (const e of queue) {
+    lines.push(`- ${one(e.front)} ([[${e.link}]])`, `  > [!question]- ${t("daily.review.answer")}`, ...e.back.split("\n").map((l) => `  > ${l}`), "");
+  }
+  lines.push(t("daily.review.rate"), "");
+  return lines.join("\n");
+}
+
+export function renderTemplate(template: string, day: Day, locale: string, opts: { israel?: boolean; learning?: readonly CycleId[]; calendar?: string; review?: readonly Entry[]; academic?: string } = {}): string {
   const date = noonUtc(day);
   const israel = opts.israel ?? defaultIsrael(locale);
   const lang = nameLang(locale);
@@ -154,11 +178,39 @@ export function renderTemplate(template: string, day: Day, locale: string, opts:
     title: () => new Intl.DateTimeFormat(locale, { dateStyle: "full", timeZone: "UTC" }).format(date),
     holiday: () => holidaysOn(day, { israel }).map((h) => holidayLabel(h, lang)).join(" · "),
     parasha: () => readingName(weeklyReading(day, { israel }), lang),
+    learning: () => learningLines(day, opts.learning ?? DEFAULT_LEARNING, lang === "he" ? "he" : "en").join("\n"),
+    // W10.C6: the day's events from the calendar subscriptions (read before rendering: calendarBlockFor).
+    calendar: () => opts.calendar ?? "",
+    review: () => reviewSection(opts.review ?? []),
+    // The academic calendar's line (plan W7.8): "שבוע 6 בסמסטר א׳ · 23 יום למועד א׳", or nothing.
+    academic: () => opts.academic ?? "",
   };
-  return template.replace(/\{\{\s*(date|hebrewDate|weekday|title|holiday|parasha)\s*\}\}/g, (_, k: string) => vars[k]());
+  return template.replace(/\{\{\s*(date|hebrewDate|weekday|title|holiday|parasha|learning|calendar|review|academic)\s*\}\}/g, (_, k: string) => vars[k]());
+}
+
+/**
+ * The day's review queue from the vault's review file (.lumen/review.json),
+ * as the review panel builds it (dailyQueue: due first, then new cards).
+ * No file, or one that can't be read: an empty queue.
+ */
+export async function reviewQueueFor(day: Day, read: (path: string) => Promise<string>): Promise<Entry[]> {
+  const { dailyQueue, parseReviewFile, REVIEW_PATH } = await import("../srs/cards");
+  const file = parseReviewFile(await read(REVIEW_PATH).catch(() => null));
+  // The end of the day: a card due later today is due in today's note.
+  return file ? dailyQueue(file, new Date(Date.UTC(day.y, day.m - 1, day.d, 23, 59, 59))) : [];
 }
 
 // ── Open or create ──────────────────────────────────────────────────────
+
+/** The calendar block for a new daily note; empty when it cannot be made (the note is still created). */
+export async function dailyCalendarBlock(day: string, deps: Partial<Pick<import("../calendar/app").CalendarBlockDeps, "feeds" | "fetch" | "timeZone">> = {}): Promise<string> {
+  try {
+    const { calendarBlockFor } = await import("../calendar/app");
+    return await calendarBlockFor(day, { ...deps, labels: { heading: t("daily.calendar.heading"), allDay: t("daily.calendar.allDay"), none: t("daily.calendar.none"), failed: (name) => t("daily.calendar.failed", { name }) } });
+  } catch {
+    return ""; // why: a calendar that cannot be read never stops the day's note from being created
+  }
+}
 
 const inflight = new Map<string, Promise<string>>();
 
@@ -174,7 +226,11 @@ export function ensureDailyNote(day: Day, settings: DailySettings, locale: strin
   const job = (async () => {
     const ws = await import("../storage/workspace");
     if (!(await ws.workspaceHasEntry(path))) {
-      await ws.writeWorkspaceFile(path, renderTemplate(settings.template, day, locale, { israel: isIsrael(settings, locale) }));
+      // {{calendar}}: the subscriptions' events for the day (nothing is fetched when there is none).
+      const calendar = /\{\{\s*calendar\s*\}\}/.test(settings.template) ? await dailyCalendarBlock(isoOf(day)) : undefined;
+      const review = /\{\{\s*review\s*\}\}/.test(settings.template) ? await reviewQueueFor(day, ws.readWorkspaceFile) : undefined;
+      const academic = /\{\{\s*academic\s*\}\}/.test(settings.template) ? await import("../academic/app").then((m) => m.dailyLineFor(day, locale)) : "";
+      await ws.writeWorkspaceFile(path, renderTemplate(settings.template, day, locale, { israel: isIsrael(settings, locale), learning: settings.learning, calendar, review, academic }));
       const { notifyWorkspaceChanged } = await import("../storage/workspaceEvents");
       notifyWorkspaceChanged({ kind: "structure", paths: [path] });
     }
@@ -201,6 +257,10 @@ export async function openDailyNote(day: Day, settings: DailySettings, locale: s
   const open = useAppStore.getState();
   if (settings.morning && isoOf(day) === isoOf(dayOf(new Date())) && open.doc.workspaceName !== path && !open.openTabs.some((x) => x.workspaceName === path)) {
     await import("./morning").then((m) => m.refreshMorningFile(day, settings, locale)).catch(() => undefined);
+  }
+  // Plan W11.P15: "On this day" and, on the week's first day, the week's summary — each behind its own flag.
+  if (isoOf(day) === isoOf(dayOf(new Date())) && open.doc.workspaceName !== path && !open.openTabs.some((x) => x.workspaceName === path)) {
+    await import("../retention/retention").then((m) => m.refreshRetentionFile(day, settings, locale)).catch(() => undefined);
   }
   const store = useAppStore.getState();
   if (store.doc.workspaceName === path) return path;

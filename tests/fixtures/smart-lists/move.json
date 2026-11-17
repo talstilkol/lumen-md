@@ -1,0 +1,8 @@
+[
+  {"id": "move.up", "source": "obsidian-1.15.1", "op": "moveUp", "before": "- a\n- ‸b", "after": "- ‸b\n- a"},
+  {"id": "move.down-with-children", "source": "obsidian-1.15.1", "op": "moveDown", "before": "- ‸a\n  - a1\n- b", "after": "- b\n- ‸a\n  - a1"},
+  {"id": "move.up-past-children", "source": "obsidian-1.15.1", "op": "moveUp", "before": "- a\n  - a1\n- ‸b", "after": "- ‸b\n- a\n  - a1"},
+  {"id": "move.ordered-renumbers", "source": "obsidian-1.15.1", "op": "moveUp", "before": "1. a\n2. ‸b", "after": "1. ‸b\n2. a"},
+  {"id": "move.first-stays", "source": "obsidian-1.15.1", "op": "moveUp", "before": "- ‸a\n- b", "after": "- ‸a\n- b"},
+  {"id": "move.within-parent", "source": "obsidian-1.15.1", "op": "moveUp", "before": "- p\n  - x\n  - ‸y\n- q", "after": "- p\n  - ‸y\n  - x\n- q"}
+]

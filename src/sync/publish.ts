@@ -26,6 +26,7 @@ import { useAuth } from "../auth/useAuth";
 import { recordAudit } from "../lib/audit";
 import { fetchWithRetry } from "../lib/fetchRetry";
 import { exportReadyText } from "../storage/exportReady";
+import { swallowed } from "../lib/logger";
 
 interface MockPublishRecord {
   path: string;
@@ -91,8 +92,9 @@ function mockStore(): Record<string, MockPublishRecord> {
 function saveMockStore(store: Record<string, MockPublishRecord>): void {
   try {
     localStorage.setItem(PUBLISH_MOCK_KEY, JSON.stringify(store));
-  } catch {
+  } catch (err) {
     // why: Mock publish should stay functional even when storage is unavailable.
+    swallowed("sync/publish: Mock publish should stay functional even when storage is unavailable.", err);
   }
 }
 

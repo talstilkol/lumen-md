@@ -1,0 +1,11 @@
+{
+  "ai.acp.consent": "{agent} sends what it reads in your vault to its cloud model. Let it open this vault for this session?",
+  "ai.acp.done": "{agent} finished ({reason}). Its changes are in the review panel.",
+  "ai.acp.failed": "{agent} could not run: {error}",
+  "ai.acp.noVault": "Open a vault folder first: the agent works inside it.",
+  "ai.acp.permission": "Allow the agent's tool \"{tool}\" once?",
+  "ai.acp.pick": "Which agent? It must be installed on this computer; you approve its command in a system dialog.",
+  "ai.acp.prompt": "What should the agent do? Every file it writes waits in the review panel.",
+  "ai.acp.running": "{agent} is working; its changes wait in the review panel",
+  "ai.acp.title": "Ask an external agent (ACP)"
+}

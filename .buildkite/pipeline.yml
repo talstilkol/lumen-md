@@ -652,7 +652,7 @@ steps:
     command: |-
       LUMEN_CI_JOB=percy LUMEN_CI_BROWSERS=chromium bash scripts/buildkite/run.sh <<'LUMEN_JOB'
       gate 'Percy snapshots of the 30 screens' <<'LUMEN_STEP'
-      case ",$${BUILDKITE_PULL_REQUEST_LABELS:-}," in *,percy,*) ;; *) if [ "$${BUILDKITE_BRANCH:-}" != "main" ]; then echo "percy: runs on main and on PRs labelled percy"; exit 0; fi ;; esac
+      case ",$${BUILDKITE_PULL_REQUEST_LABELS:-}," in *,percy,*) ;; *) if [ "$${BUILDKITE_BRANCH:-}" != "main" ]; then echo "percy: runs on main and on PRs labelled percy"; buildkite-agent meta-data set "lumen:skipped:percy" "not run: runs on main and on PRs labelled percy"; exit 0; fi ;; esac
       npm run -s visual:percy
       LUMEN_STEP
       gates_done

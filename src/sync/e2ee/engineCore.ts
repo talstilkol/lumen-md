@@ -45,6 +45,7 @@ import type { SyncEvent } from "./activity";
 import { type HoldReason } from "./status";
 import {
   BASE_BYTES_LIMIT,
+  SAVE_BATCH,
   BlobMissingError,
   DeviceBusyError,
   readmitted,
@@ -55,6 +56,7 @@ import {
   type RekeyRequest,
   type RekeyResult,
 } from "./engineTypes";
+import { swallowed } from "../../lib/logger";
 
 /** @internal One of the engine's parts: use `E2eeSync`, never extend these (review 34). */
 export abstract class E2eeSyncCore {
@@ -104,9 +106,10 @@ export abstract class E2eeSyncCore {
   protected emit(e: SyncEvent): void {
     try {
       this.o.onEvent(e);
-    } catch {
+    } catch (err) {
       // why: a listener that throws must not break the sync round that reports to it
       /* the activity panel must never break a round */
+      swallowed("sync/e2ee/engineCore: a listener that throws must not break the sync round that reports to i", err);
     }
   }
 
@@ -132,6 +135,7 @@ export abstract class E2eeSyncCore {
       maxAttempts: opts.maxAttempts ?? 8,
       now: opts.now ?? (() => Date.now()),
       exclude: opts.exclude ?? (() => null),
+      quarantine: opts.quarantine ?? (() => null),
       onEvent: opts.onEvent ?? (() => undefined),
       access: opts.access ?? (opts.keys.wrap ? { wrap: opts.keys.wrap } : null),
     };
@@ -336,7 +340,7 @@ export abstract class E2eeSyncCore {
     if (!back.length) return;
     const s = await this.loadState();
     let done: RekeyResult | null = null;
-    if (this.o.access && "wrap" in this.o.access && s.freshness !== "unverified") done = await this.rekeyNow({ revoke: back }).catch(() => null);
+    if (this.o.access && "wrap" in this.o.access && s.freshness !== "unverified") done = await this.rekeyNow({ revoke: back }).catch((e: unknown) => (swallowed("sync/e2ee/engineCore: revoking the readmitted devices again failed; the fork error lists them as not revoked", e), null));
     if (done) throw new KeyringForkError("a keyring that lets a device this device revoked back in", back, done.epoch);
     throw new KeyringForkError("a keyring that lets a device this device revoked back in", [], null, back);
   }
@@ -470,7 +474,31 @@ export abstract class E2eeSyncCore {
 
   /** @internal */
   protected async save(): Promise<void> {
+    this.unsaved = 0;
     if (this.state) await this.o.store.save(this.state);
+  }
+
+  /**
+   * Base entries changed since the last save (`setBase` with `soon`). The
+   * store saves the whole device state, so saving it after every one of a
+   * first sync's 10,000 files serialised it 10,000 times: quadratic (FC1,
+   * the 10,000-note re-key test). Only base entries wait — a base that is
+   * not saved yet is rebuilt by the next round (local and vault agree:
+   * `lh === rh`); everything the crash-safety rests on (pending blobs, the
+   * anchor, `committing`) is still saved before the step it protects.
+   * @internal
+   */
+  private unsaved = 0;
+
+  /**
+   * Save if base entries wait: at the end of each bulk loop, inside the
+   * device lock (a save after it could overwrite another tab's). A call that
+   * throws mid-loop leaves them unsaved; the next call reloads the state and
+   * rebuilds them.
+   * @internal
+   */
+  protected async saveDeferred(): Promise<void> {
+    if (this.unsaved > 0) await this.save();
   }
 
   /** Serialise calls: one round (or pairing) at a time per device. Listeners hear when each one ends (2.31). @internal */
@@ -480,8 +508,9 @@ export abstract class E2eeSyncCore {
       for (const l of [...this.changeListeners]) {
         try {
           l();
-        } catch {
+        } catch (err) {
           // why: a listener's failure is its own; the round's result stands
+          swallowed("sync/e2ee/engineCore: a listener's failure is its own; the round's result stands", err);
         }
       }
     };
@@ -506,13 +535,15 @@ export abstract class E2eeSyncCore {
   }
 
   /** @internal */
-  protected async setBase(path: string, entry: ManifestEntry, data: Uint8Array | null): Promise<void> {
+  protected async setBase(path: string, entry: ManifestEntry, data: Uint8Array | null, soon = false): Promise<void> {
     const s = await this.loadState();
     // Ancestor bytes are kept for the three-way merge of a note; a large
     // file (an attachment) keeps only its manifest entry, so a first sync of
     // a big vault does not hold a second copy of it (plan W1.8 benchmark).
     await this.o.store.setBase(path, entry.deleted || !data || data.length > BASE_BYTES_LIMIT ? null : data);
     s.base[path] = entry;
+    // `soon`: one save per SAVE_BATCH entries (see `unsaved`), for the bulk loops only.
+    if (soon && ++this.unsaved < SAVE_BATCH) return;
     await this.save();
   }
 

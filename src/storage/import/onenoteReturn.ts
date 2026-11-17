@@ -14,9 +14,10 @@ export async function oneNoteReturn(ready: Promise<unknown>, deps: { href?: () =
   history.replaceState(null, "", "/");
   let outcome: "tokens" | "error";
   try {
-    const { oneNoteConfig } = await import("./onenoteGraph");
+    const [{ oneNoteConfig }, ids] = await Promise.all([import("./onenoteGraph"), import("./onenoteClientId")]);
+    if (!ids.userClientId()) await ids.loadDeployedClientId();
     const cfg = oneNoteConfig();
-    if (!cfg) throw new Error("OneNote sign-in is not set up on this deployment (VITE_ONENOTE_CLIENT_ID)");
+    if (!cfg) throw new Error("OneNote sign-in is not set up: no Microsoft app client id (enter one in the import wizard, or set onenote.clientId in /lumen-runtime.json)");
     m.giveOneNoteTokens(await m.finishOneNoteSignIn(href, cfg));
     outcome = "tokens";
   } catch (err) {

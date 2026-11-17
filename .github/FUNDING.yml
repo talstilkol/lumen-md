@@ -5,7 +5,10 @@
 custom: ["https://lumen-md.vercel.app/support.html"]
 #
 # Owner steps (docs: project/sustainability, "Owner steps"). Uncomment each
-# line once its account exists, so the button never points at an empty page:
+# line once its account exists, so the button never points at an empty page.
+# The same switch controls public/support.html (plan W10.B21): replace the
+# "coming" label marked `funding:github` / `funding:open_collective` there with
+# the link; supportFunding.test.ts and sustainability.test.ts fail while they disagree.
 #   1. GitHub Sponsors for the personal account (0% fees; Israel is a supported region):
 # github: [talstilkol]
 #   2. Open Source Collective accepted the collective "lumen-md" (10% host fee):

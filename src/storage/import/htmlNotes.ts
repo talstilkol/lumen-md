@@ -10,6 +10,7 @@ import { claimPath, dirOf, mdDest, mdEmbed, relativeTo, resolveRel, safeName, sa
 import { dataUri, decodeEntities, htmlToNote } from "./html";
 import { isoDate, withFrontmatter } from "./frontmatter";
 import { emptyVault, type ConvertedVault, type ImportSourceId } from "./types";
+import { swallowed } from "../../lib/logger";
 
 /* ─── MHTML ──────────────────────────────────────────────────────────── */
 
@@ -178,9 +179,10 @@ export function convertHtmlNotes(files: Map<string, Uint8Array>, source: ImportS
         let rel = src;
         try {
           rel = decodeURIComponent(src);
-        } catch {
+        } catch (err) {
           // why: not percent-encoded: the path is used as written
           /* as written */
+          swallowed("storage/import/htmlNotes: not percent-encoded: the path is used as written", err);
         }
         const file = resolveRel(dirOf(page.src), rel);
         const data = files.get(file);
@@ -197,9 +199,10 @@ export function convertHtmlNotes(files: Map<string, Uint8Array>, source: ImportS
         let rel = href.split("#")[0];
         try {
           rel = decodeURIComponent(rel);
-        } catch {
+        } catch (err) {
           // why: not percent-encoded: the path is used as written
           /* as written */
+          swallowed("storage/import/htmlNotes: not percent-encoded: the path is used as written", err);
         }
         const file = resolveRel(dirOf(page.src), rel);
         const note = noteOf.get(file);

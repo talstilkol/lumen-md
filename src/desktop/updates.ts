@@ -19,7 +19,8 @@ import { buildChannel, isEnabled, type Channel } from "../flags/flags";
 
 export type UpdateStatus =
   | { state: "not-configured" }
-  | { state: "up-to-date"; current: string }
+  // W13.T1: `held` when a newer release exists but its staged rollout has not reached this device (or was halted).
+  | { state: "up-to-date"; current: string; held?: "staged" | "halted"; version?: string }
   | { state: "available"; current: string; version: string; notes: string | null };
 
 export type CheckResult = UpdateStatus | { state: "not-desktop" } | { state: "blocked-local-only" };

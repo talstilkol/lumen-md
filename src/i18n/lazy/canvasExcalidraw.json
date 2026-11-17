@@ -1,5 +1,7 @@
 {
   "canvas.dialogLabel": "Whiteboard",
+  "canvas.hl.deleted": "Source deleted",
+  "canvas.hl.page": "p. {n}",
   "canvas.jsonCanvas.export": "Export .canvas",
   "canvas.jsonCanvas.exported": "Saved {name}.canvas: {nodes} nodes, {edges} edges",
   "canvas.jsonCanvas.failed": "Couldn't import the JSON Canvas: {error}",

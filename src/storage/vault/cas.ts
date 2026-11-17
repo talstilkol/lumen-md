@@ -13,6 +13,7 @@
  */
 
 import { VaultError, type VaultData } from "./types";
+import { swallowed } from "../../lib/logger";
 
 /** SHA-256 of `bytes`, lower-case hex (the hash `writeIf` / `removeIf` compare). */
 export async function sha256Hex(bytes: Uint8Array): Promise<string> {
@@ -82,31 +83,35 @@ export async function handleWriteIf(host: HandleCasHost, parts: string[], path: 
   /** A file this call created and did not fill: take it away again. */
   const dropCreated = async () => {
     if (before || !(await unchanged().catch(() => false))) return;
-    await host.removeAt(parts, path).catch(() => undefined);
+    await host.removeAt(parts, path).catch((e: unknown) => swallowed("storage/vault/cas: a file written by a lost compare-and-swap could not be removed", e));
   };
-  if (typeof (handle as { createWritable?: unknown }).createWritable !== "function") {
-    if (!host.writeFallback) throw new Error("This browser cannot write files here.");
-    if (!(await unchanged())) {
-      await dropCreated();
-      return false;
-    }
-    await host.writeFallback(parts, data);
-    return true;
-  }
-  const writable = await host.openWritable(handle);
+  // Review Z6-M3: from here on, every way out that does not commit (a refused compare, a write that throws, a
+  // writable that cannot be opened, an engine that cannot write) takes away a file this call created, still empty.
+  // These backends have no rename that refuses an existing target (FileSystemHandle.move replaces it, where it
+  // exists at all), so a temporary name and a rename could not keep "only while nothing is there": the created
+  // file is removed instead, and only while it is still empty (another writer's bytes stay).
   let committed = false;
   try {
-    await writable.write(data as FileSystemWriteChunkType);
-    if (!(await unchanged())) return false;
-    await writable.close();
-    committed = true;
-    return true;
-  } finally {
-    if (!committed) {
-      // Drop the swap file: the file keeps what the other writer put there.
-      await (writable as { abort?: () => Promise<void> }).abort?.().catch(() => undefined);
-      await dropCreated();
+    if (typeof (handle as { createWritable?: unknown }).createWritable !== "function") {
+      if (!host.writeFallback) throw new Error("This browser cannot write files here.");
+      if (!(await unchanged())) return false;
+      await host.writeFallback(parts, data);
+      committed = true;
+      return true;
     }
+    const writable = await host.openWritable(handle);
+    try {
+      await writable.write(data as FileSystemWriteChunkType);
+      if (!(await unchanged())) return false;
+      await writable.close();
+      committed = true;
+      return true;
+    } finally {
+      // Drop the swap file: the file keeps what the other writer put there.
+      if (!committed) await (writable as { abort?: () => Promise<void> }).abort?.().catch(() => undefined);
+    }
+  } finally {
+    if (!committed) await dropCreated();
   }
 }
 

@@ -8,14 +8,28 @@ import type { Value } from "./dataview";
 /* ─── Tokens ─────────────────────────────────────────────────────── */
 
 export type Tok =
-  | { t: "num"; v: number }
+  | { t: "num"; v: number; raw?: string }
   | { t: "str"; v: string }
   | { t: "id"; v: string }
   | { t: "tag"; v: string }
   | { t: "link"; v: string }
   | { t: "op"; v: string };
 
-export class DataviewError extends Error {}
+export class DataviewError extends Error {
+  override name = "DataviewError";
+}
+
+/**
+ * A query that would make too many rows or take too long (review 11, M3): a
+ * chained FLATTEN or a nested map grows about 20× per step, on the main
+ * thread. `kind` says which bound it hit; the block shows a friendly message.
+ */
+export class DataviewLimitError extends DataviewError {
+  override name = "DataviewLimitError";
+  constructor(readonly kind: "rows" | "budget" | "string") {
+    super(kind === "rows" ? "the query makes too many rows" : kind === "string" ? "a text in the query is too long" : "the query takes too long");
+  }
+}
 
 export function tokenize(src: string): Tok[] {
   const out: Tok[] = [];
@@ -59,12 +73,12 @@ export function tokenize(src: string): Tok[] {
     }
     const num = /^\d+(?:\.\d+)?/.exec(src.slice(i));
     if (num) {
-      out.push({ t: "num", v: Number(num[0]) });
+      out.push({ t: "num", v: Number(num[0]), raw: num[0] });
       i += num[0].length;
       continue;
     }
     const two = src.slice(i, i + 2);
-    if (["<=", ">=", "!=", "==", "&&", "||"].includes(two)) {
+    if (["<=", ">=", "!=", "==", "&&", "||", "=>"].includes(two)) {
       out.push({ t: "op", v: two === "==" ? "=" : two === "&&" ? "and" : two === "||" ? "or" : two });
       i += 2;
       continue;
@@ -94,7 +108,9 @@ export type Expr =
   | { k: "call"; fn: string; args: Expr[] }
   | { k: "un"; op: "!" | "-"; e: Expr }
   | { k: "bin"; op: string; a: Expr; b: Expr }
-  | { k: "list"; items: Expr[] };
+  | { k: "list"; items: Expr[] }
+  /** `(t) => t.completed`: only as an argument of filter, map, any, all, none, sort. */
+  | { k: "lambda"; params: string[]; body: Expr };
 
 export type Source =
   | { k: "tag"; v: string }
@@ -103,8 +119,16 @@ export type Source =
   | { k: "not"; s: Source }
   | { k: "and" | "or"; a: Source; b: Source };
 
+/** WHERE, SORT, LIMIT, GROUP BY and FLATTEN run in the order they are written, as in Dataview. */
+export type Step =
+  | { k: "where"; e: Expr }
+  | { k: "sort"; keys: Array<{ e: Expr; desc: boolean }> }
+  | { k: "limit"; n: number }
+  | { k: "group"; e: Expr; name: string }
+  | { k: "flatten"; e: Expr; name: string[] };
+
 export interface DvQuery {
-  type: "list" | "table";
+  type: "list" | "table" | "task";
   /** LIST's value, or TABLE's columns. */
   fields: Array<{ e: Expr; name: string }>;
   withoutId: boolean;
@@ -112,6 +136,8 @@ export interface DvQuery {
   where: Expr | null;
   sort: Array<{ e: Expr; desc: boolean }>;
   limit: number | null;
+  /** Every clause after FROM, in order (where / sort / limit above are the same clauses, merged). */
+  steps: Step[];
 }
 
 export const KEYWORDS = new Set(["from", "where", "sort", "limit", "flatten", "group"]);
@@ -205,6 +231,15 @@ export class Parser {
         out = { k: "field", path: [...out.path, p.v] };
         continue;
       }
+      if (this.isOp(".")) {
+        // (date(today) - file.day).days, meta(section).subpath: a member of any value.
+        this.i++;
+        const p = this.peek();
+        if (!p || p.t !== "id") throw new DataviewError("expected a field name after .");
+        this.i++;
+        out = { k: "call", fn: "__get", args: [out, { k: "lit", v: p.v }] };
+        continue;
+      }
       if (this.isOp("[")) {
         this.i++;
         const idx = this.expr();
@@ -230,6 +265,8 @@ export class Parser {
         return { k: "lit", v: "#" + p.v };
       case "op":
         if (p.v === "(") {
+          const params = this.lambdaParams();
+          if (params) return { k: "lambda", params, body: this.expr() };
           const e = this.expr();
           this.eatOp(")");
           return e;
@@ -254,7 +291,8 @@ export class Parser {
           const words: string[] = [];
           while (this.peek() && !this.isOp(")")) {
             const w = this.peek()!;
-            words.push(w.t === "tag" ? "#" + w.v : String(w.v));
+            // The digits as written: date(2021-08-06) keeps its zeros.
+            words.push(w.t === "tag" ? "#" + w.v : w.t === "num" ? (w.raw ?? String(w.v)) : String(w.v));
             this.i++;
           }
           this.eatOp(")");
@@ -278,6 +316,30 @@ export class Parser {
         return { k: "field", path: [p.v] };
       }
     }
+  }
+
+  /** After "(": `a, b) =>` gives ["a", "b"] and moves past the arrow; anything else gives null and moves nowhere. */
+  lambdaParams(): string[] | null {
+    const params: string[] = [];
+    let j = this.i;
+    for (;;) {
+      const tk = this.toks[j];
+      if (tk?.t === "op" && tk.v === ")" && params.length === 0) break;
+      if (tk?.t !== "id") return null;
+      params.push(tk.v);
+      j++;
+      const sep = this.toks[j];
+      if (sep?.t === "op" && sep.v === ",") {
+        j++;
+        continue;
+      }
+      break;
+    }
+    const close = this.toks[j];
+    const arrow = this.toks[j + 1];
+    if (close?.t !== "op" || close.v !== ")" || arrow?.t !== "op" || arrow.v !== "=>") return null;
+    this.i = j + 2;
+    return params;
   }
 
   source(): Source {
@@ -322,26 +384,28 @@ export function parseDataview(src: string): DvQuery {
   const text = src.replace(/\/\/[^\n]*$/gm, "").trim();
   const p = new Parser(tokenize(text));
   const head = p.peek();
-  if (!head || head.t !== "id") throw new DataviewError("a query starts with LIST or TABLE");
+  if (!head || head.t !== "id") throw new DataviewError("a query starts with LIST, TABLE or TASK");
   const kind = head.v.toLowerCase();
-  if (kind !== "list" && kind !== "table") throw new DataviewError(`${head.v} queries are not supported (LIST and TABLE are)`);
+  if (kind !== "list" && kind !== "table" && kind !== "task") throw new DataviewError(`${head.v} queries are not supported (LIST, TABLE and TASK are)`);
   p.i++;
-  const q: DvQuery = { type: kind, fields: [], withoutId: false, from: null, where: null, sort: [], limit: null };
+  const q: DvQuery = { type: kind, fields: [], withoutId: false, from: null, where: null, sort: [], limit: null, steps: [] };
   if (p.isKw("without")) {
     p.i++;
     if (!p.isKw("id")) throw new DataviewError("expected WITHOUT ID");
     p.i++;
     q.withoutId = true;
   }
-  if (!p.atClauseEnd()) {
+  const spelled = (from: number) =>
+    p.toks
+      .slice(from, p.i)
+      .map((tk) => (tk.t === "str" ? JSON.stringify(tk.v) : tk.t === "tag" ? "#" + tk.v : tk.t === "link" ? `[[${tk.v}]]` : String(tk.v)))
+      .join("")
+      .replace(/\s+/g, "");
+  if (kind !== "task" && !p.atClauseEnd()) {
     for (;;) {
       const start = p.i;
       const e = p.expr();
-      let name = p.toks
-        .slice(start, p.i)
-        .map((tk) => (tk.t === "str" ? JSON.stringify(tk.v) : tk.t === "tag" ? "#" + tk.v : tk.t === "link" ? `[[${tk.v}]]` : String(tk.v)))
-        .join("")
-        .replace(/\s+/g, "");
+      let name = spelled(start);
       if (p.isKw("as")) {
         p.i++;
         const n = p.peek();
@@ -359,9 +423,31 @@ export function parseDataview(src: string): DvQuery {
     if (kw.t !== "id") throw new DataviewError(`unexpected "${String(kw.v)}"`);
     const low = kw.v.toLowerCase();
     p.i++;
-    if (low === "from") q.from = p.source();
-    else if (low === "where") q.where = q.where ? { k: "bin", op: "and", a: q.where, b: p.expr() } : p.expr();
-    else if (low === "sort") {
+    if (low === "from") {
+      if (q.steps.length || q.from) throw new DataviewError("FROM comes once, before the other clauses");
+      q.from = p.source();
+    } else if (low === "where") {
+      const e = p.expr();
+      q.steps.push({ k: "where", e });
+      q.where = q.where ? { k: "bin", op: "and", a: q.where, b: e } : e;
+    } else if (low === "group" || low === "flatten") {
+      if (low === "group") {
+        if (!p.isKw("by")) throw new DataviewError("expected GROUP BY");
+        p.i++;
+      }
+      const start = p.i;
+      const e = p.expr();
+      let name = e.k === "field" ? e.path : [spelled(start)];
+      if (p.isKw("as")) {
+        p.i++;
+        const n = p.peek();
+        if (!n || (n.t !== "str" && n.t !== "id")) throw new DataviewError("expected a name after AS");
+        p.i++;
+        name = [String(n.v)];
+      }
+      q.steps.push(low === "group" ? { k: "group", e, name: name.join(".") } : { k: "flatten", e, name });
+    } else if (low === "sort") {
+      const keys: Array<{ e: Expr; desc: boolean }> = [];
       for (;;) {
         const e = p.expr();
         let desc = false;
@@ -369,15 +455,18 @@ export function parseDataview(src: string): DvQuery {
           desc = true;
           p.i++;
         } else if (p.isKw("asc") || p.isKw("ascending")) p.i++;
-        q.sort.push({ e, desc });
+        keys.push({ e, desc });
         if (!p.isOp(",")) break;
         p.i++;
       }
+      q.sort.push(...keys);
+      q.steps.push({ k: "sort", keys });
     } else if (low === "limit") {
       const n = p.peek();
       if (!n || n.t !== "num") throw new DataviewError("LIMIT takes a number");
       p.i++;
       q.limit = n.v;
+      q.steps.push({ k: "limit", n: n.v });
     } else throw new DataviewError(`${kw.v} is not supported`);
   }
   return q;

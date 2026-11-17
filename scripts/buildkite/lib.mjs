@@ -14,6 +14,8 @@
 
 import { E2E_SHARDS, SHARD_MINUTES } from "../lib/e2eShards.mjs";
 import { createHash } from "node:crypto";
+import { POLICY_SKIP_KEY } from "./receiptReport.mjs";
+
 
 export const REPO = "talstilkol/lumen-md";
 /** Agent queues: the Linux host runs every job in Playwright's image; the Mac runs WebKit on macOS itself. */
@@ -212,12 +214,13 @@ export const NATIVE_JOBS = [
     keepGoing: false,
     browsers: ["chromium"],
     // No step-level `if`: the receipt waits for percy, and it would count a skipped step as failed
-    // (see gateKeys). The step itself passes with a message when Percy was not asked for.
+    // (see gateKeys). When Percy was not asked for, the step exits 0 and leaves a policy-skip marker
+    // (POLICY_SKIP_KEY), so the receipt records "skipped-by-policy", not a pass (review Z6-L2).
     steps: [
       {
         name: "Percy snapshots of the 30 screens",
         run: [
-          'case ",${BUILDKITE_PULL_REQUEST_LABELS:-}," in *,percy,*) ;; *) if [ "${BUILDKITE_BRANCH:-}" != "main" ]; then echo "percy: runs on main and on PRs labelled percy"; exit 0; fi ;; esac',
+          `case ",\${BUILDKITE_PULL_REQUEST_LABELS:-}," in *,percy,*) ;; *) if [ "\${BUILDKITE_BRANCH:-}" != "main" ]; then echo "percy: runs on main and on PRs labelled percy"; buildkite-agent meta-data set "${POLICY_SKIP_KEY("percy")}" "not run: runs on main and on PRs labelled percy"; exit 0; fi ;; esac`,
           "npm run -s visual:percy",
         ].join("\n"),
       },
@@ -935,40 +938,5 @@ export function buildRequest(pr) {
 
 // ── the receipt ──────────────────────────────────────────────────────────
 
-/** `buildkite-agent step get outcome` values that count as a pass. */
-export const PASSED = new Set(["passed"]);
-
-/**
- * The receipt body (sealed by scripts/nightly/receipt.mjs). kind "full" with
- * the factory's suite names (build, vitest, "e2e <browser>"), so W6.7's
- * plan:receipts (#511) credits a Buildkite run like a factory night; every
- * other gate is a suite of its own.
- */
-export function receiptReport({ commit, build, outcomes, vitest = null, machine, startedAt, finishedAt }) {
-  const suites = {};
-  const g = (k) => outcomes[k] ?? "missing";
-  const ok = (k) => PASSED.has(g(k));
-  if ("build" in outcomes) suites.build = { ok: ok("build"), detail: `build + secrets + budget: ${g("build")}` };
-  if ("vitest" in outcomes || "vitest-merge" in outcomes)
-    suites.vitest = {
-      ok: ok("vitest") && ok("vitest-merge") && (vitest ? vitest.ok : false),
-      detail: vitest ? `${vitest.tests - vitest.failed}/${vitest.tests} tests in ${vitest.files} files; shard spread ${Math.round(vitest.spread * 100)}%${vitest.problems?.length ? `; ${vitest.problems.join("; ")}` : ""}` : `shards ${g("vitest")}, merge ${g("vitest-merge")}, no summary`,
-    };
-  for (const b of ["chromium", "firefox", "webkit"]) if (`e2e-${b}` in outcomes) suites[`e2e ${b}`] = { ok: ok(`e2e-${b}`), detail: g(`e2e-${b}`) };
-  for (const [k, v] of Object.entries(outcomes)) if (!["build", "vitest", "vitest-merge"].includes(k) && !/^e2e-(chromium|firefox|webkit)$/.test(k)) suites[k] = { ok: PASSED.has(v), detail: v };
-  return {
-    version: 1,
-    kind: "full",
-    trigger: "buildkite",
-    startedAt,
-    finishedAt,
-    minutes: startedAt && finishedAt ? Math.round((Date.parse(finishedAt) - Date.parse(startedAt)) / 6000) / 10 : null,
-    commit,
-    build,
-    machine,
-    outcomes,
-    suites,
-    mustRun: vitest?.mustRun ?? [],
-    shards: vitest ? { ms: vitest.shardMs, spread: vitest.spread } : null,
-  };
-}
+// The receipt body and the policy-skip marker live in ./receiptReport.mjs (re-exported here).
+export { PASSED, POLICY_SKIP_KEY, POLICY_SKIPPABLE, SKIPPED_BY_POLICY, collectOutcomes, receiptReport } from "./receiptReport.mjs";

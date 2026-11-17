@@ -182,6 +182,7 @@ describe("the app does not trust the manifest (W11.S2)", () => {
 
 describe("the Rust rules, compiled and run (rustc --test, no dependencies)", () => {
   const rustc = spawnSync("rustc", ["--version"], { encoding: "utf8" });
+  // skip-reason: the Rust rules compile with rustc, an outside toolchain (the Mac run has it); the TypeScript checks in this file always run | task: W11.S2 | until: 2027-05-16
   it.skipIf(rustc.status !== 0)("manifest_sig.rs and update_guard.rs pass their own tests", () => {
     const dir = mkdtempSync(join(tmpdir(), "manifest-sig-"));
     try {

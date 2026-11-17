@@ -1,6 +1,7 @@
 ---
 title: Monitoring and web vitals
 description: Error reports are off by default and sent only with your consent; web vitals never leave your device.
+type: how-to
 ---
 
 Lumen measures how fast it is on your device, and can send crash reports
@@ -21,8 +22,14 @@ Lumen measures five page-speed metrics with the browser's
 | CLS | Cumulative Layout Shift: how much the layout jumps without your input | ≤ 0.1 |
 
 The values stay in memory on your device. Open them with **Runtime
-metrics** in the status bar, or from the command palette. They are never
-sent, even when error reports are on. A sample stores no page address.
+metrics** in the status bar, or from the command palette. The values are
+never sent, even when error reports are on. A sample stores no page address.
+
+**Performance reports (plan W11.S19)** are a separate switch, off by default
+(Settings → Security → **Send performance reports**). With it on and an
+error tracker set, Lumen sends one report per session, when the page is
+hidden. The report holds only counts: for each metric, how many page loads
+were good, needs improvement or poor. No timing, no page address.
 
 ## Error reports: off by default
 
@@ -37,7 +44,30 @@ Lumen sends error reports only when **both** of these are true:
 
 If either one is missing, the Sentry SDK is never downloaded and no
 request is made. The default build has no DSN, so it makes no monitoring
-requests at all. An e2e test (`e2e/monitoring.spec.ts`) checks this.
+requests at all. An e2e test (`e2e/monitoring.spec.ts`) checks this, with
+either switch on and with both.
+
+**Settings → Security (plan W11.S19)** has both switches:
+
+- **Send error reports** is the same consent as the Telemetry pill.
+- **Send performance reports** is separate.
+
+**Your own error tracker:** Settings → Security also takes a DSN of your own,
+for example your GlitchTip. Reports then go there instead of to the build's
+tracker. The site's security policy (`connect-src`) must allow that host. In
+the hosted app it allows only the build's own tracker, so a DSN of your own
+works in a self-hosted or desktop build.
+
+**What survives:** after the allowlist below, every string in the report
+goes through a redactor that removes the following:
+
+- secret shapes: API keys, GitHub, AWS, Slack and Google tokens, JWTs, long
+  hex or base64;
+- personal details: email, phone, Israeli ID, card, IBAN, and any run of 9
+  or more digits.
+
+Class names must be plain CamelCase. A fuzz test plants secrets in every
+field of 1,000 events, and none survive.
 
 ### What a report contains
 

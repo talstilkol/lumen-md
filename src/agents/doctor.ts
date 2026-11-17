@@ -385,6 +385,14 @@ export async function runDoctor(opts: DoctorOptions = {}): Promise<DoctorReport>
     push({ id: "executor", title: "ai.doctor.check.executor", status: "skip", detail: (e as Error).message });
   }
 
+  // 9b. The engine ladder (W11.I16): what this device can run, in order, and why each rung was skipped.
+  try {
+    const { ladderFinding, appLadderDeps } = await import("./doctorLadder");
+    push(await bounded(async () => ladderFinding(await appLadderDeps()), localMs));
+  } catch (e) {
+    push({ id: "ladder", title: "ai.doctor.check.ladder", status: "skip", detail: (e as Error).message });
+  }
+
   // 10. Golden cases: one fixture per agent through the real runtime.
   if (opts.golden) {
     const { EVAL_CASES } = await import("./eval/fixtures");

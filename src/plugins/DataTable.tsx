@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import type { DataSet, DataColumn } from "../data/csv";
-import { t } from "../i18n";
+import { formatNumber, t } from "../i18n";
+import { compareNames } from "../i18n/collate";
 
 interface Props {
   data: DataSet;
@@ -26,7 +27,7 @@ export function DataTable({ data, maxRows = 200 }: Props) {
       if (bv === null) return -1;
       if (typeof av === "number" && typeof bv === "number")
         return (av - bv) * dir;
-      return String(av).localeCompare(String(bv)) * dir;
+      return compareNames(String(av), String(bv)) * dir;
     });
     return copy;
   }, [data, sortKey, sortDir]);
@@ -57,7 +58,7 @@ export function DataTable({ data, maxRows = 200 }: Props) {
                 {c.name}
                 <span className="col-type">{c.type}</span>
                 {sortKey === c.key && (
-                  <span style={{ marginLeft: 6 }}>
+                  <span style={{ marginInlineStart: 6 }}>
                     {sortDir === "asc" ? "▲" : "▼"}
                   </span>
                 )}
@@ -102,7 +103,7 @@ function formatCell(value: unknown, col: DataColumn): string {
   }
   if (col.type === "number" && typeof value === "number") {
     if (Number.isInteger(value)) return String(value);
-    if (Math.abs(value) >= 1000) return value.toLocaleString();
+    if (Math.abs(value) >= 1000) return formatNumber(value);
     return value.toPrecision(4);
   }
   return String(value);

@@ -13,7 +13,9 @@ import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent a
 import { stepFrom } from "../../graph/graphModel";
 import { PointGrid } from "../../graph/layout";
 import { createRenderer, fitView, toScreen, toWorld, type GraphRenderer, type GraphView } from "../../graph/renderer";
+import { prepareLabel, type LabelDir, type PreparedLabel } from "../../graph/labels";
 import { t } from "../../i18n";
+import { normalizeForFilter } from "../../text/filterMatch";
 
 export interface GraphCanvasProps {
   labels: readonly string[];
@@ -33,11 +35,12 @@ export interface GraphCanvasProps {
   compact?: boolean;
   /** Re-fit the view when this changes (a new graph, not a layout frame). */
   fitKey: string | number;
+  /** W13.G8: drawn under the labels in screen space (cluster hulls); `at` maps world to screen. */
+  underlay?: (ctx: CanvasRenderingContext2D, at: (x: number, y: number) => { x: number; y: number }) => void;
 }
 
 /** While zooming or panning a graph with more links than this, frames draw a sample of them. */
 const MOTION_EDGES = 8000;
-const RTL = /[֐-׿؀-ۿݐ-ݿ]/;
 const MAX_LABELS = 400;
 
 export function GraphCanvas(props: GraphCanvasProps) {
@@ -58,6 +61,16 @@ export function GraphCanvas(props: GraphCanvasProps) {
   const n = labels.length;
   const grid = useMemo(() => (positions ? new PointGrid(positions, 24) : null), [positions]);
   const fitted = useRef<string | number | null>(null);
+  // W13.G2: each label's direction, isolates and grapheme-safe shortening, worked out once per label.
+  const prepared = useMemo(() => {
+    const cache = new Map<number, PreparedLabel>();
+    const uiDir: LabelDir = typeof document !== "undefined" && document.documentElement.dir === "rtl" ? "rtl" : "ltr";
+    return (i: number) => {
+      let p = cache.get(i);
+      if (!p) cache.set(i, (p = prepareLabel(labels[i] ?? "", { maxGraphemes: 40, fallback: uiDir })));
+      return p;
+    };
+  }, [labels]);
 
   // One renderer per canvas.
   useEffect(() => {
@@ -78,6 +91,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
     const v = view.current;
+    props.underlay?.(ctx, (x, y) => toScreen(v, w, h, x, y));
     const tl = toWorld(v, w, h, 0, 0);
     const br = toWorld(v, w, h, w, h);
     // Visible nodes, biggest first; plus the focused / hovered note and its neighbours.
@@ -101,14 +115,14 @@ export function GraphCanvas(props: GraphCanvasProps) {
     ctx.fillStyle = labelColor;
     for (const i of list) {
       const p = toScreen(v, w, h, positions[2 * i], positions[2 * i + 1]);
-      const label = labels[i];
+      const label = prepared(i);
       const strong = i === focus || i === hover;
       ctx.font = `${strong ? 600 : 400} ${strong ? 13 : 11}px system-ui, -apple-system, "Segoe UI", "Noto Sans Hebrew", sans-serif`;
-      // Hebrew (and Arabic) labels run right to left: the canvas shapes and orders them itself.
-      ctx.direction = RTL.test(label) ? "rtl" : "ltr";
-      ctx.fillText(label.length > 40 ? `${label.slice(0, 38)}…` : label, p.x, p.y - Math.max(3, sizes[i] * v.scale) - 2);
+      // The label's own direction (first strong letter); its other-direction runs are isolated (W13.G2).
+      ctx.direction = label.dir;
+      ctx.fillText(label.text, p.x, p.y - Math.max(3, sizes[i] * v.scale) - 2);
     }
-  }, [positions, labels, sizes, neighbors, focus, hover, n, compact, labelColor]);
+  }, [positions, prepared, sizes, neighbors, focus, hover, n, compact, labelColor, props.underlay]);
 
   const schedule = useCallback(() => {
     if (frame.current) return;
@@ -202,11 +216,13 @@ export function GraphCanvas(props: GraphCanvasProps) {
     const r = wrap.current!.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
   };
-  const pick = (sx: number, sy: number) => {
+  // The node under a screen point: the dot itself, or within 10 px of the
+  // cursor — a finger or a pen is wider, 22 px (plan 10.2.1).
+  const pick = (sx: number, sy: number, coarse = false) => {
     if (!grid) return -1;
     const { w, h } = size.current;
     const p = toWorld(view.current, w, h, sx, sy);
-    return grid.nearest(p.x, p.y, Math.max(6, 10 / view.current.scale));
+    return grid.nearest(p.x, p.y, Math.max(6, (coarse ? 22 : 10) / view.current.scale));
   };
 
   const onKeyDown = (e: ReactKeyboardEvent) => {
@@ -248,10 +264,10 @@ export function GraphCanvas(props: GraphCanvasProps) {
   };
 
   const matches = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = normalizeForFilter(query.trim());
     if (!q) return [];
     const out: number[] = [];
-    for (let i = 0; i < n && out.length < 8; i++) if (labels[i].toLowerCase().includes(q)) out.push(i);
+    for (let i = 0; i < n && out.length < 8; i++) if (normalizeForFilter(labels[i]).includes(q)) out.push(i);
     return out;
   }, [query, labels, n]);
 
@@ -342,7 +358,7 @@ export function GraphCanvas(props: GraphCanvasProps) {
           drag.current = null;
           if (d && !d.moved) {
             const p = local(e);
-            const i = pick(p.x, p.y);
+            const i = pick(p.x, p.y, e.pointerType !== "mouse");
             if (i >= 0) {
               setFocus(i);
               onOpen(i);

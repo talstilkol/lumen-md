@@ -9,7 +9,19 @@ import { performance } from "node:perf_hooks";
 import { pathToFileURL } from "node:url";
 import { join } from "node:path";
 
-const { root, name, seed, from, to, slowMs, progress } = workerData;
+const { root, name, seed, from, to, slowMs, clock = "wall", confirm = false, progress } = workerData;
+// Tests only (fuzzDecoders.test.ts): LUMEN_FUZZ_STALL="<index>:<ms>[:always]" blocks this thread at that
+// input for <ms> of wall time and no CPU — a machine stall; with ":always" the re-run blocks too — a hang.
+const [stallAt, stallMs, stallAlways] = String(process.env.LUMEN_FUZZ_STALL ?? "").split(":");
+const stall = (i) => {
+  if (stallAt !== "" && Number(stallAt) === i && (!confirm || stallAlways === "always")) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, Number(stallMs));
+};
+// W10.D21: --clock cpu times an input by this thread's CPU time, which load on the machine does not change.
+const cpuMs = () => {
+  const u = process.threadCpuUsage();
+  return (u.user + u.system) / 1000;
+};
+const now = clock === "cpu" ? cpuMs : () => performance.now();
 const cur = new Int32Array(progress);
 const { TARGETS } = await import(pathToFileURL(join(root, "scripts/fuzz/targets.mjs")).href);
 const { generate } = await import(pathToFileURL(join(root, "scripts/fuzz/generators.ts")).href);
@@ -30,8 +42,9 @@ let ran = 0;
 for (let i = from; i < to; i++) {
   Atomics.store(cur, 0, i);
   const input = generate(target.gen, seed, i);
-  const t0 = performance.now();
+  const t0 = now();
   try {
+    stall(i);
     fn(input);
   } catch (e) {
     if (!target.expected?.(e)) {
@@ -39,7 +52,7 @@ for (let i = from; i < to; i++) {
       else crashes.push({ index: i });
     }
   }
-  const ms = performance.now() - t0;
+  const ms = now() - t0;
   if (ms > maxMs) maxMs = ms;
   if (ms >= slowMs && slow.length < 20) slow.push({ index: i, ms: Math.round(ms) });
   ran++;

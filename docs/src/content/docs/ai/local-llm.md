@@ -1,6 +1,8 @@
 ---
 title: Local LLM (web-llm + WebGPU)
 description: Run AI prompts entirely on your device — private, offline-capable, no per-token cost.
+type: how-to
+tasks: ["5.7"]
 ---
 
 Lumen routes every AI command through `chat()`. With `useLocalAi`

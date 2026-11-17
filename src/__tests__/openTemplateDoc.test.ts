@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import "./helpers/commandSections";
 import { useAppStore } from "../store/useStore";
 import { openNewDoc, openTemplateDoc } from "../commands/useCommands";
 

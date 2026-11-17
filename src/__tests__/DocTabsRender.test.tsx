@@ -118,7 +118,8 @@ describe("DocTabs", () => {
       />,
     );
     // b.md is dirty → leading bullet. getByText throws if not found.
-    const dirtyLabel = screen.getByText(/●\s+b\.md/);
+    // W13.H4 (#1235): the name is isolated in its own <bdi>, so the bullet and the name are two text nodes of one label.
+    const dirtyLabel = screen.getByText((_, el) => el?.tagName === "SPAN" && /^●\s+b\.md$/.test(el.textContent ?? ""));
     expect(dirtyLabel.textContent).toMatch(/b\.md/);
   });
 

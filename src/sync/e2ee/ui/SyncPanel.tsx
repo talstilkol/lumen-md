@@ -8,6 +8,7 @@
 
 import { useEffect, useState, useSyncExternalStore, type FormEvent } from "react";
 import { t } from "../../../i18n";
+import { formatTime } from "../../../i18n/format";
 import "../strings";
 import { PassphraseForm } from "./PassphraseForm";
 import { FreshnessBanner } from "./FreshnessBanner";
@@ -29,6 +30,7 @@ import { HelpButton } from "../../../ui/HelpButton";
 import { UnauditedNotice } from "./unaudited";
 import { explainError } from "../../../lib/userError";
 import { Modal } from "../../../ui/Modal";
+import { swallowed } from "../../../lib/logger";
 
 const NAMES: Record<ProviderKind, string> = { webdav: "WebDAV", s3: "S3", dropbox: "Dropbox", gdrive: "Google Drive", lan: "LAN", folder: "📁", relay: "Lumen relay" };
 const PENDING_OAUTH = "lumen-sync-pending-oauth";
@@ -83,8 +85,9 @@ function ProviderForm({ session, initial, onDone }: { session: SyncSession; init
       // The sign-in leaves the page; the panel reopens and connects on return.
       try {
         sessionStorage.setItem(PENDING_OAUTH, JSON.stringify(settings));
-      } catch {
+      } catch (err) {
         /* why: private mode: the user connects again after signing in */
+        swallowed("sync/e2ee/ui/SyncPanel: private mode: the user connects again after signing in", err);
       }
       await legacyStore(kind)!.connect();
       return;
@@ -344,7 +347,7 @@ function Unlocked({ session }: { session: SyncSession }) {
       </div>
       {last && s.lastAt && (
         <div role="status" data-testid="sync-result" style={muted}>
-          {t("e2ee.sync.result", { time: new Date(s.lastAt).toLocaleTimeString(), up: last.uploaded, down: last.downloaded, deleted: last.deleted })}
+          {t("e2ee.sync.result", { time: formatTime(s.lastAt), up: last.uploaded, down: last.downloaded, deleted: last.deleted })}
           {last.held.length > 0 && <> · {t("e2ee.sync.held", { n: last.held.length })}</>}
         </div>
       )}
@@ -532,8 +535,9 @@ export function SyncPanel({ onClose, session = syncSession() }: { onClose: () =>
 export function savePendingOAuth(settings: ProviderSettings): void {
   try {
     sessionStorage.setItem(PENDING_OAUTH, JSON.stringify(settings));
-  } catch {
+  } catch (err) {
     /* why: private mode: the user connects again after signing in */
+    swallowed("sync/e2ee/ui/SyncPanel: private mode: the user connects again after signing in", err);
   }
 }
 

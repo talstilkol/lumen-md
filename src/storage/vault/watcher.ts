@@ -22,7 +22,9 @@
  * folder is polled about once a second.
  */
 
+import { setVisibleInterval } from "../../lib/visibleInterval";
 import { log } from "../../lib/logger";
+import { isIgnoredDir, isUnderIgnoredDir } from "./ignore";
 import type { VaultBackend, VaultEvent } from "./types";
 
 export interface SnapEntry {
@@ -60,7 +62,7 @@ export const SKIP_AFTER = 3;
 
 /**
  * Every file of `backend` with size and mtime (by listing; dot folders
- * included). A sub-folder that vanished while walking is skipped. The vault
+ * included, the skipped ones of ./ignore — .git, node_modules — not). A sub-folder that vanished while walking is skipped. The vault
  * root failing to list rejects, so the watcher keeps its previous baseline
  * instead of reporting the whole vault as deleted (2.83, Codex P2 on #258).
  * Any other failure of a sub-folder — a revoked permission, an I/O error —
@@ -91,8 +93,10 @@ export async function listSnapshot(backend: VaultBackend, opts: SnapshotOptions 
     seen.add(dir);
     opts.failures?.delete(dir);
     for (const e of entries) {
-      if (e.kind === "directory") await walk(e.path);
-      else out.set(e.path, { size: e.size ?? 0, mtime: e.mtime ?? 0 });
+      // W13.V6: a skipped folder (.git, node_modules…) is not listed at all.
+      if (e.kind === "directory") {
+        if (!isIgnoredDir(e.path)) await walk(e.path);
+      } else if (!isUnderIgnoredDir(e.path)) out.set(e.path, { size: e.size ?? 0, mtime: e.mtime ?? 0 });
     }
   };
   await walk("");
@@ -166,9 +170,15 @@ export function watchExternalChanges(backend: VaultBackend, opts: WatchOptions =
   let baseline: Snapshot | null = null;
   const failures = new Map<string, number>();
   const warned = new Set<string>();
-  const take =
-    opts.snapshot ??
-    (() =>
+  // W13.V6: a given snapshot (the desktop's, from Rust) loses whatever lies in a skipped folder too.
+  const given = opts.snapshot;
+  const take = given
+    ? async () => {
+        const snap = await given();
+        for (const p of [...snap.keys()]) if (isUnderIgnoredDir(p)) snap.delete(p);
+        return snap;
+      }
+    : (() =>
       listSnapshot(backend, {
         prev: baseline,
         failures,
@@ -257,10 +267,11 @@ export function watchExternalChanges(backend: VaultBackend, opts: WatchOptions =
 
   void compare(); // the first snapshot is the baseline
   const stopObserve = opts.observe?.(() => void compare()) ?? null;
-  const timer = setInterval(() => void compare(), opts.intervalMs ?? 1000);
+  // W13.V4: the poll sleeps while the app is in the background (a phone's battery), and runs on return.
+  const stopTimer = setVisibleInterval(() => void compare(), opts.intervalMs ?? 1000);
   return () => {
     stopped = true;
-    clearInterval(timer);
+    stopTimer();
     stopObserve?.();
     offOwn();
   };
@@ -274,7 +285,10 @@ export function observeDirectoryHandle(handle: FileSystemDirectoryHandle, poke: 
   const Ctor = (globalThis as unknown as { FileSystemObserver?: new (cb: () => void) => { observe(h: FileSystemHandle, o: { recursive: boolean }): Promise<void>; disconnect(): void } }).FileSystemObserver;
   if (typeof Ctor !== "function") return null;
   try {
-    const observer = new Ctor(() => poke());
+    // W13.V6: a change inside a skipped folder (git's own writes, an npm install) does not wake the watcher.
+    const observer = new Ctor((records?: Array<{ relativePathComponents?: string[] }>) => {
+      if (!records?.length || records.some((r) => !r.relativePathComponents || !isUnderIgnoredDir(r.relativePathComponents.join("/")))) poke();
+    });
     void observer.observe(handle, { recursive: true }).catch((err: unknown) => log.warn("FileSystemObserver failed", err));
     return () => observer.disconnect();
   } catch (err) {

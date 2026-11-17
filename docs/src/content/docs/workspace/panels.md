@@ -1,6 +1,8 @@
 ---
 title: Side panels
 description: The file tree, outline, backlinks, tags, comments, trash and version history — what each side panel shows and how to use it.
+type: how-to
+tasks: ["W12.S2"]
 ---
 
 Each panel has a **?** button that opens this help at its own section.
@@ -49,3 +51,18 @@ Every kept version of the open note, newest first. A version is kept every
 couple of minutes while you type, on every save and when you close the
 tab. Pick a version to preview it, with how much it differs from the
 current text, and **Restore this version** if you want it back.
+
+## What I knew then
+
+**What I knew then** (command palette) shows the whole vault as it was on
+a past date, from the same kept versions. Drag the date slider (in Hebrew
+it runs right to left) and search: results come from a separate, temporary
+index, so your normal search is not touched. A result opens read-only under
+a "This is how it was on …" bar. **Then vs now** shows each paragraph that
+changed since, word by word; with that note open in the editor,
+**Restore paragraph** puts one paragraph back, and Ctrl+Z undoes it.
+
+The dialog says from which date history exists. What was never saved into
+history (before history began, or a note deleted for good) cannot be shown.
+A vault that is a git repository also fills in dates before history began
+from its commits.

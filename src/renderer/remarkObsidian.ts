@@ -3,8 +3,10 @@
  * tree after parsing. It is shared by the preview pipeline and the WYSIWYG
  * editor (which turns highlights into a mark).
  *
- * - Callouts: `> [!type] Title`. A `+` or `-` after the type makes the callout
- *   foldable (`+` open, `-` closed). The type aliases are Obsidian's.
+ * - Callouts: `> [!type] Title`, or `> [!type|metadata] Title` (the metadata
+ *   goes to `data-callout-metadata`, as in Obsidian). A `+` or `-` after the
+ *   type makes the callout foldable (`+` open, `-` closed). The type aliases
+ *   are Obsidian's.
  * - Comments: `%%hidden%%`, inline or across blocks. Hidden in the preview.
  *   An unclosed `%%` hides the rest of the note, as in Obsidian.
  * - Highlights: `==text==`. A colour emoji at the start (🔴 🟠 🟡 🟢 🔵 🟣)
@@ -17,6 +19,8 @@
  *
  * Code, inline code, math and raw HTML are never touched.
  */
+import { MEDIA_EXT } from "../media/mediaExt";
+import { EMBEDS_DATA_KEY } from "./remarkEmbeds";
 import type { Root } from "mdast";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- mdast nodes are rebuilt structurally here */
@@ -88,7 +92,13 @@ export const HIGHLIGHT_COLORS: Record<string, string> = {
   "🟣": "purple",
 };
 
-export const CALLOUT_HEAD = /^\[!([\w-]+)\]([+-]?)[ \t]*/;
+/**
+ * `[!type]`, `[!type|metadata]` (Obsidian's callout metadata, read by CSS
+ * snippets: `data-callout-metadata`), then `+`/`-` to fold. Groups: 1 type,
+ * 2 metadata, 3 fold. Quartz's ofm.ts calloutRegex reads the same
+ * (src/__tests__/ofmConformance.test.ts).
+ */
+export const CALLOUT_HEAD = /^\[!([\w-]+)(?:\|([^\]\n]*))?\]([+-]?)[ \t]*/;
 
 const SKIP = new Set(["code", "inlineCode", "math", "inlineMath", "html", "yaml"]);
 const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg|bmp|avif|ico|tiff?)$/i;
@@ -101,6 +111,11 @@ export interface ObsidianOptions {
   keepComments?: boolean;
   /** Turn callouts into elements (the preview). The editor keeps them as quotes. */
   callouts?: boolean;
+  /**
+   * `false`: leave `![[image.png]]` text to remarkEmbeds (the embedded-note
+   * parser). The preview's own render decides from its embed context.
+   */
+  textImageEmbeds?: boolean;
 }
 
 export const defaultCalloutTitle = (_kind: string, type: string) => type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
@@ -257,7 +272,13 @@ function sizeProps(width?: number, height?: number): Record<string, number> {
   return p;
 }
 
-export function embedImages(tree: Root): void {
+/**
+ * `textImages: false` leaves `![[image.png]]` text alone: with an embed
+ * context, remarkEmbeds resolves it in the workspace (plan 4.7: the file's
+ * path and version, a notice when it is missing). Sized `![alt|300](x)`
+ * images and audio/video embeds are handled either way.
+ */
+export function embedImages(tree: Root, textImages = true): void {
   const walk = (parent: Node) => {
     if (!Array.isArray(parent.children)) return;
     for (let i = 0; i < parent.children.length; i++) {
@@ -283,7 +304,14 @@ export function embedImages(tree: Root): void {
         const base = c.position?.start.offset;
         for (const m of c.value.matchAll(EMBED)) {
           const target = m[1].trim();
-          if (!IMAGE_EXT.test(target)) continue;
+          // Audio and video (W12.F8): a player with its transcript track (src/media/MediaEmbed.tsx).
+          if (MEDIA_EXT.test(target)) {
+            if (m.index > last) parts.push({ type: "text", value: c.value.slice(last, m.index) });
+            parts.push({ type: "mediaEmbed", data: { hName: "lumen-mediaembed", hProperties: { target }, hChildren: [] } });
+            last = m.index + m[0].length;
+            continue;
+          }
+          if (!textImages || !IMAGE_EXT.test(target)) continue;
           const { alt, width, height } = parseEmbedParams(m[2].split("|").slice(1));
           if (m.index > last) parts.push({ type: "text", value: c.value.slice(last, m.index) });
           const props: Record<string, unknown> = { className: ["obsidian-embed"], ...sizeProps(width, height) };
@@ -346,7 +374,8 @@ export function transformCallouts(tree: Root, title: ObsidianOptions["calloutTit
       if (!m) continue;
       const type = m[1];
       const kind = calloutKind(type);
-      const fold = m[2];
+      const meta = m[2]?.trim();
+      const fold = m[3];
       t.value = t.value.slice(m[0].length);
       const [head, rest] = splitFirstLine(p.children);
       const titleKids = head.filter((n) => !(n.type === "text" && n.value === ""));
@@ -356,6 +385,7 @@ export function transformCallouts(tree: Root, title: ObsidianOptions["calloutTit
         hProperties: {
           className: ["callout", `callout-${kind}`],
           "data-callout": type.toLowerCase(),
+          ...(meta ? { "data-callout-metadata": meta } : {}),
           ...(fold ? { "data-callout-fold": fold, open: fold === "+" } : {}),
         },
       };
@@ -376,9 +406,11 @@ export function transformCallouts(tree: Root, title: ObsidianOptions["calloutTit
 
 /** The preview's remark plugin. */
 export function remarkObsidian(options: ObsidianOptions = {}) {
-  return (tree: Root) => {
+  return (tree: Root, file?: { data?: unknown }) => {
     if (!options.keepComments) stripComments(tree);
-    embedImages(tree);
+    // A render with an embed context (file.data.lumenEmbeds, ./remarkEmbeds) leaves image embeds to it.
+    const withEmbeds = options.textImageEmbeds === false || !!(file?.data as Record<string, unknown> | undefined)?.[EMBEDS_DATA_KEY];
+    embedImages(tree, !withEmbeds);
     if (options.callouts !== false) transformCallouts(tree, options.calloutTitle);
     wrapHighlights(tree);
   };

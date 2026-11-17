@@ -15,7 +15,9 @@
  * and the search says how many were skipped), and the main thread stops
  * the index worker when a regex search runs past its time limit
  * (REGEX_TIME_LIMIT_MS in ../storage/workspaceIndex.ts), so a runaway pattern cannot freeze
- * search for the session.
+ * search for the session. The limit runs from when the index starts matching
+ * the regex this parser found (QueryHooks in ../storage/vaultIndexCore.ts,
+ * review Z6-H1), never from a second reading of the query text.
  *
  * Words outside operators go to the ranked search as before (BM25 in
  * ../storage/vaultIndexCore.ts). A query that is only operators lists the

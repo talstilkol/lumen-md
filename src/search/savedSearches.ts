@@ -1,56 +1,63 @@
 /**
  * Saved searches (plan W2.12): named queries in the 11.3 syntax, listed in
- * the sidebar; a click opens the search dialog on that query. Kept per
- * browser in localStorage (like the recent searches), never in the vault.
+ * the sidebar; a click opens the search dialog on that query.
+ *
+ * W12.A4: kept in the vault (`.lumen/searches.json`, ./savedSearchStore.ts),
+ * so they sync between devices; the old per-browser localStorage list is
+ * moved there once. The API stays synchronous: a change shows at once and
+ * the file follows.
  */
+import { createSavedSearchStore, SEARCHES_PATH, type SavedSearch } from "./savedSearchStore";
+import { isOPFSAvailable, readWorkspaceFile, workspaceHasFile, writeWorkspaceFile } from "../storage/workspace";
 
-export interface SavedSearch {
-  name: string;
-  query: string;
-}
+export type { SavedSearch };
 
-const KEY = "lumen-saved-searches";
 export const SAVED_SEARCHES_CHANGED = "lumen-saved-searches-changed";
 /** Opens the search dialog; `detail.query` fills its box. */
 export const OPEN_SEARCH = "lumen-open-search";
 const MAX = 100;
 
-export function savedSearches(): SavedSearch[] {
+const local = (() => {
   try {
-    const v = JSON.parse(localStorage.getItem(KEY) ?? "[]") as unknown;
-    if (!Array.isArray(v)) return [];
-    return v.filter((x): x is SavedSearch => !!x && typeof x === "object" && typeof (x as SavedSearch).name === "string" && typeof (x as SavedSearch).query === "string");
+    return typeof localStorage !== "undefined" ? localStorage : null;
   } catch {
-    return [];
+    return null; // why: storage blocked (private mode): nothing to migrate
   }
+})();
+
+const store = createSavedSearchStore(
+  {
+    available: isOPFSAvailable,
+    read: async () => ((await workspaceHasFile(SEARCHES_PATH).catch(() => false)) ? readWorkspaceFile(SEARCHES_PATH) : null),
+    write: (text) => writeWorkspaceFile(SEARCHES_PATH, text).then(() => undefined),
+  },
+  local,
+  { onChange: () => typeof window !== "undefined" && window.dispatchEvent(new Event(SAVED_SEARCHES_CHANGED)) },
+);
+
+export function savedSearches(): SavedSearch[] {
+  return store.list().slice(0, MAX);
 }
 
-function write(list: SavedSearch[]): void {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(list.slice(0, MAX)));
-  } catch {
-    // why: storage is blocked or full (private mode, quota): the setting holds for this session only
-    /* private mode / quota: the list stays as it was */
-  }
-  window.dispatchEvent(new Event(SAVED_SEARCHES_CHANGED));
+/** Read the vault's list again (on open, and after the vault changed or synced). The first time, the old localStorage list moves in. */
+export function refreshSavedSearches(): Promise<SavedSearch[]> {
+  return store.refresh();
 }
+
+/** Every change written to the vault (tests, and before the app closes). */
+export const flushSavedSearches = () => store.flush();
 
 /** Save (or rename) a search; the same query is kept once, newest first. */
 export function saveSearch(query: string, name?: string): SavedSearch | null {
-  const q = query.trim();
-  if (!q) return null;
-  const entry = { name: (name ?? "").trim() || q, query: q };
-  write([entry, ...savedSearches().filter((s) => s.query !== q)]);
-  return entry;
+  return store.save(query, name);
 }
 
 export function removeSavedSearch(query: string): void {
-  write(savedSearches().filter((s) => s.query !== query));
+  store.remove(query);
 }
 
 export function isSaved(query: string): boolean {
-  const q = query.trim();
-  return savedSearches().some((s) => s.query === q);
+  return store.isSaved(query);
 }
 
 export function openSearch(query: string): void {

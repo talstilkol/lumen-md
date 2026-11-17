@@ -21,5 +21,11 @@
   "hl.exportFailed": "Couldn't export the highlights: {error}",
   "hl.loadFailed": "Couldn't read the highlights: {error}",
   "hl.tagFailed": "Couldn't save the tag: {error}",
-  "hl.kind.import": "Imported"
+  "hl.kind.import": "Imported",
+  "hl.exportApa": "Export with APA citations",
+  "hl.apaTitle": "Highlights with citations — {date} ({n})",
+  "hl.apaReferences": "References",
+  "hl.apaWhich": "Which source is {source}?",
+  "hl.apaNoLibrary": "No sources in the citation library: sync Zotero or add a .bib or .csl.json file first.",
+  "hl.scan": "Scan a page"
 }

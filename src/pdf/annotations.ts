@@ -20,6 +20,7 @@
  */
 
 import { encodeWikiPath } from "../lib/wikiPath";
+import { compareNames } from "../i18n/collate";
 
 export { encodeWikiPath };
 
@@ -664,7 +665,7 @@ export function renderAnnotationsBlock(pdfPath: string, annotations: readonly Pd
   const sorted = [...annotations].sort((a, b) => {
     const da = describeAnnotation(a);
     const db = describeAnnotation(b);
-    return da.page - db.page || (da.position?.start ?? 0) - (db.position?.start ?? 0) || a.created.localeCompare(b.created);
+    return da.page - db.page || (da.position?.start ?? 0) - (db.position?.start ?? 0) || compareNames(a.created, b.created);
   });
   const lines = sorted.map((a) => {
     const d = describeAnnotation(a);

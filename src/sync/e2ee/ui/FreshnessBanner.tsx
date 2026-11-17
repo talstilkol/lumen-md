@@ -22,13 +22,22 @@ import { explainError } from "../../../lib/userError";
 
 type Freshness = Awaited<ReturnType<E2eeSync["freshness"]>>;
 
+/**
+ * Review Z6-L4: how long the last answer stays on screen while a re-read after a round is out (ms). A re-read
+ * answers well within it, so the line does not blink off and on with every auto-sync; one that does not answer
+ * in time leaves freshness unknown, and "verified" goes.
+ */
+export const FRESHNESS_STALE_MS = 1_000;
+
 interface Props {
   sync: Pick<E2eeSync, "freshness" | "pair" | "confirmFreshness" | "pairingRequest" | "pairingSas" | "confirmPairing" | "rejectPairing" | "onChange">;
   /** How often the comparison asks for the other device's key or confirmation (ms; tests). */
   pollMs?: number;
+  /** FRESHNESS_STALE_MS (tests). */
+  staleMs?: number;
 }
 
-export function FreshnessBanner({ sync, pollMs }: Props) {
+export function FreshnessBanner({ sync, pollMs, staleMs = FRESHNESS_STALE_MS }: Props) {
   const [state, setState] = useState<Freshness | null>(null);
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -39,24 +48,30 @@ export function FreshnessBanner({ sync, pollMs }: Props) {
   useEffect(() => {
     let live = true;
     let reads = 0;
+    let stale: ReturnType<typeof setTimeout> | undefined;
     // Re-read after every round, pairing or confirmation (2.31, #275): a round
-    // can revoke a verification. While a re-read is pending, or when it fails,
-    // freshness is unknown, and "verified" is never shown for an unknown state.
+    // can revoke a verification. A re-read that fails leaves freshness unknown,
+    // and "verified" is never shown for an unknown state. Z6-L4: while the
+    // re-read is out, the last answer stays for at most `staleMs`, then goes.
     const read = () => {
       const n = ++reads;
-      setState((prev: Freshness | null) => (prev?.verified ? null : prev));
-      sync.freshness().then(
-        (f) => live && n === reads && setState(f),
-        () => live && n === reads && setState(null),
-      );
+      clearTimeout(stale);
+      stale = setTimeout(() => live && n === reads && setState((prev: Freshness | null) => (prev?.verified ? null : prev)), staleMs);
+      const settle = (f: Freshness | null) => {
+        if (!live || n !== reads) return;
+        clearTimeout(stale);
+        setState(f);
+      };
+      sync.freshness().then(settle, () => settle(null));
     };
     read();
     const off = sync.onChange(read);
     return () => {
       live = false;
+      clearTimeout(stale);
       off();
     };
-  }, [sync]);
+  }, [sync, staleMs]);
 
   async function act(fn: () => Promise<void>) {
     setError(null);

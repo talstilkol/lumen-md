@@ -342,11 +342,11 @@
       "attribution": "Aya Expanse © Cohere For AI, CC-BY-NC-4.0 (non-commercial), with the C4AI Acceptable Use Policy.",
       "size": "~5.1 GB (q4)",
       "runs": "ollama",
-      "delivery": "ollama-pull",
-      "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts)",
+      "delivery": "none",
+      "catalog": "not in a catalog: removed from OLLAMA_CATALOG by task 1.7 (3f1ca54612); hebrewSupportOf() and the licence check still recognise it when a person installed it themselves",
       "match": ["aya-expanse"],
       "verified": true,
-      "notes": "Non-commercial. Currently in OLLAMA_CATALOG, and recommendOllamaModel() picks it for Hebrew notes on 8-11 GB machines (the AI doctor offers a one-click pull). Removal is task 1.7."
+      "notes": "Non-commercial. The app neither offers nor pulls it (task 1.7); a copy a person pulled is labelled with its licence class. So no bench (W10.E35)."
     },
     {
       "id": "gemma3:12b",
@@ -647,6 +647,22 @@
       "match": ["wooorm/dictionaries"],
       "verified": true,
       "notes": "Must never be bundled. The app downloads it from upstream only after an explicit user action and shows its licence first (HEBREW_DICT_LICENSE); that exception is recorded in licenses.allow.json."
+    },
+    {
+      "id": "hunspell-yi-dictionary",
+      "kind": "other",
+      "source": "https://raw.githubusercontent.com/alephreish/hunspell-yi/9f537e5a46caf571c91d86e8a3cf5d0f4ac77192/yi.dic",
+      "license": "GPL-3.0-only",
+      "class": "forbidden",
+      "commercial": "no",
+      "attribution": "Yiddish word list hunspell-yi by Raphael A. Finkel, Simche Taub and Andrey Rozenberg (github.com/alephreish/hunspell-yi), GPL-3.0.",
+      "size": "2.4 MB",
+      "runs": "browser",
+      "delivery": "user-download",
+      "catalog": "YIDDISH_DICT (src/ai/yiddishSpell.ts)",
+      "match": ["alephreish/hunspell-yi"],
+      "verified": true,
+      "notes": "Must never be bundled. Download OFF pending the owner (R8-M5): the licences.allow.json exception #981 added was removed (no lane may loosen an allow-list), and the app holds no upstream address. To re-enable: approve the exception (check GPL-3.0-only vs -or-later upstream), restore the address in src/ai/yiddishSpell.ts, set YIDDISH_DOWNLOAD_ENABLED, and confirm both pins on the Mac. The download then checks each file's size and SHA-256 on the raw bytes (plan W7.9)."
     },
     {
       "id": "frequencywords-he-50k",
@@ -1139,7 +1155,7 @@
       },
       "catalog": "CONVERTED_MODELS (src/ai/convertedModels.ts)",
       "verified": false,
-      "notes": "English names for the PII redactor (plan 2.6, audit W10.C23), next to DictaBERT-NER for Hebrew. Converted by .github/workflows/model-convert.yml (plan 6.0); its sha256 is recorded from the first conversion run on the Mac (10.M). Downloaded only with consent; not downloadable until the host is chosen (15.9)."
+      "notes": "English names for the PII redactor (plan 2.6, audit W10.C23), next to DictaBERT-NER for Hebrew. Converted by scripts/models/convert.mjs (plan 6.0; the archived Actions workflow model-convert.yml is mapped in docs/archive/workflows/equivalents.json); its sha256 is recorded from the first conversion run on the Mac (10.M). Downloaded only with consent; not downloadable until the host is chosen (15.9)."
     },
     {
       "id": "siglip-base-patch16-256-multilingual",
@@ -1570,6 +1586,71 @@
       "catalog": "OLLAMA_CATALOG (src/ai/modelCatalog.ts), desktop only",
       "verified": true,
       "notes": "W11.I10: licence verified on 15.11.2026 from the Hugging Face model API of dicta-il/DictaLM-3.0-24B-Thinking-GGUF (apache-2.0) and the model card (32K context; from Mistral-Small-3.1, arXiv 2602.02104). Revisions are not pinned yet (models/dictalm3.json), so `npm run dictalm3 -- eval` still waits on that owner check. Not auto-picked."
+    },
+    {
+      "id": "gkour/israeli_law",
+      "kind": "other",
+      "source": "https://huggingface.co/datasets/gkour/israeli_law",
+      "license": "CC-BY-SA-4.0",
+      "class": "conditional",
+      "commercial": "conditional",
+      "attribution": "ספר החוקים הפתוח — ויקיטקסט העברי (he.wikisource.org), CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/); dataset gkour/israeli_law on Hugging Face. Not an official source.",
+      "size": "5,942 pages, ~25M tokens (dataset card, research R2 §1.10); the download size is set at the pin",
+      "runs": "browser",
+      "delivery": "download",
+      "hosting": {
+        "hf": "datasets/gkour/israeli_law",
+        "revision": null
+      },
+      "unmodified": true,
+      "catalog": "OPEN_LAW_DATASET (src/sources/openlaw/book.ts)",
+      "verified": false,
+      "notes": "Plan W11.H16: an offline source for W7.5. Each law or section the user keeps is saved unmodified as a note tagged rights: cc-by-sa with Wikisource's credit and a link. Licence from the dataset card (verified: false until the card is re-read at the pinned revision); OPEN_LAW_REVISION stays null, so nothing downloads, until it is pinned."
+    },
+    {
+      "id": "LevMuchnik/SupremeCourtOfIsrael",
+      "kind": "other",
+      "source": "https://huggingface.co/datasets/LevMuchnik/SupremeCourtOfIsrael",
+      "license": "not stated (the card names OpenRAIL without its terms)",
+      "class": "unknown",
+      "commercial": "unknown",
+      "attribution": "",
+      "size": "751k documents (2022 snapshot)",
+      "runs": "browser",
+      "delivery": "none",
+      "verified": false,
+      "catalog": "VERDICTS_DATASET (src/sources/openlaw/book.ts)",
+      "notes": "Plan W11.H16: Supreme Court rulings are link only (verdictLink: a title and a link to the court's site, never the text) until the dataset's licence is clear. Nothing is downloaded."
+    },
+    {
+      "id": "harper",
+      "kind": "other",
+      "source": "https://github.com/Automattic/harper",
+      "license": "Apache-2.0",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "Harper © Automattic and contributors, licensed under the Apache License 2.0.",
+      "size": "~1–3 MB WebAssembly (harper.js), rule engine, no weights",
+      "runs": "browser",
+      "delivery": "none",
+      "catalog": "models/writing-defaults.json (engine of the grammarEn writing agent, W13.W10)",
+      "verified": true,
+      "notes": "W13.W16. English grammar rule engine (Rust/WASM, milliseconds per check, < 1/50 of LanguageTool's memory). Not bundled by this entry; W13.W10 adds the package."
+    },
+    {
+      "id": "nspell",
+      "kind": "other",
+      "source": "https://github.com/wooorm/nspell",
+      "license": "MIT",
+      "class": "allowed",
+      "commercial": "yes",
+      "attribution": "nspell © Titus Wormer, licensed under the MIT License.",
+      "size": "~30 KB (npm package already in the production dependencies)",
+      "runs": "browser",
+      "delivery": "none",
+      "catalog": "models/writing-defaults.json (engine of the spelling writing agent)",
+      "verified": true,
+      "notes": "W13.W16. Hunspell-compatible spelling engine; the code ships as an npm production dependency (checked by the npm part of this gate), so this entry delivers nothing itself. Its Hebrew dictionary is Hspell (AGPL, entry hspell-he-dictionary): a user download only, never bundled and never a default."
     }
   ]
 }

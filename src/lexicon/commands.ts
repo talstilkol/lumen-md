@@ -5,7 +5,7 @@
  */
 import type { EditorView } from "@codemirror/view";
 import "./strings";
-import { t } from "../i18n";
+import { formatNumber, t } from "../i18n";
 import { uiConfirm } from "../ui/PromptDialog";
 import { showAiToast } from "../ui/AiToast";
 import { lexiconInstalled } from "./installed";
@@ -25,10 +25,10 @@ export async function runLexiconPackCommand(): Promise<void> {
     return;
   }
   const mb = (manifest.bytes / 1e6).toFixed(1);
-  if (!(await uiConfirm({ message: t("lexicon.downloadConfirm", { mb, count: manifest.count.toLocaleString() }) }))) return;
+  if (!(await uiConfirm({ message: t("lexicon.downloadConfirm", { mb, count: formatNumber(manifest.count) }) }))) return;
   try {
     const n = await downloadLexicon();
-    showAiToast(t("lexicon.installed", { count: n.toLocaleString() }), "info");
+    showAiToast(t("lexicon.installed", { count: formatNumber(n) }), "info");
   } catch (e) {
     showAiToast(t("lexicon.failed", { error: explainError(e) }), "error");
   }

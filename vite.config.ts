@@ -1,12 +1,13 @@
 /// <reference types="vitest" />
 import { defineConfig as defineViteConfig, searchForWorkspaceRoot } from "vite";
 import type { Plugin, UserConfig as ViteUserConfig } from "vite";
-import { cspEndpointsPlugin } from "./src/build/cspEndpoints";
+import { contentFramePage, cspEndpointsPlugin } from "./src/build/cspEndpoints";
 import { laneCacheDir } from "./src/build/laneCache";
 import { webrManifestPlugin } from "./src/build/webrManifest";
 import { LOCALES, whatsNew } from "./scripts/lib/whats-new.mjs";
 import { viteEnvGatePlugin } from "./src/build/viteEnvGate";
 import { bootPreloadPlugin } from "./src/build/bootPreload";
+import { deterministicMapsPlugin } from "./src/build/deterministicMaps";
 
 interface VitestConfig {
   test?: {
@@ -343,6 +344,14 @@ export default defineConfig({
     // window.__lumenTest for Playwright (src/testing/e2eHooks.ts): a literal,
     // so a build without VITE_E2E=1 drops the hook and its chunk entirely.
     __LUMEN_E2E__: JSON.stringify(process.env.VITE_E2E === "1"),
+    // The content frame's own site (plan W6.40, D1 §7): a build-only variable, never VITE_*, and only
+    // an https origin with "/" or "/content-frame.html" reaches the bundle (contentFramePage).
+    __LUMEN_CONTENT_FRAME_URL__: JSON.stringify(contentFramePage(process.env.LUMEN_CONTENT_FRAME_URL)),
+    // window.__lumen.agentReview (src/agents/reviewBridge.ts, plan W1.31): a
+    // literal too. Vite leaves an unset VITE_* as `({}).VITE_…`, which the
+    // minifier does not fold, so the surface stayed in a normal production
+    // build; with the literal false it is dropped (check:test-surface).
+    __LUMEN_TEST_SURFACE__: JSON.stringify(process.env.VITE_LUMEN_TEST_SURFACE === "1"),
   },
   // Worker bundles get only these plugins (plus Vite's own).
   worker: { plugins: () => [dictionaryEn, htmlIsomorphicInWorkers] },
@@ -361,6 +370,8 @@ export default defineConfig({
     cspEndpointsPlugin(),
     // W10.E20: the start's lazy chunks listed for public/boot.js, which preloads them in parallel.
     bootPreloadPlugin(),
+    // W10.D21: with LUMEN_SOURCEMAP=1, every .map is rewritten deterministically once the bundle is written.
+    deterministicMapsPlugin(process.env.LUMEN_SOURCEMAP === "1", __dirname),
     VitePWA({
       registerType: "prompt",
       includeAssets: ["favicon.svg", "icons/*.png"],
@@ -368,6 +379,8 @@ export default defineConfig({
       // linked from index.html, pointing at icons that did not exist and
       // disagreeing on the colours; its share/file handlers live here now.)
       manifest: {
+        // Plan W11.P13: navigator.install() needs an id. "/" is what browsers compute from start_url anyway, so installed apps keep theirs.
+        id: "/",
         name: "Lumen — Markdown, illuminated",
         short_name: "Lumen",
         description:

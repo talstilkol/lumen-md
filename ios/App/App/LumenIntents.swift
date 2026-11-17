@@ -69,6 +69,20 @@ struct VoiceNoteIntent: AppIntent {
     }
 }
 
+/// Plan W10.C31: "Record to inbox" — the Lock Screen, Action button and Siri start a voice note that lands in the inbox.
+@available(iOS 16.0, *)
+struct RecordToInboxIntent: AppIntent {
+    static var title: LocalizedStringResource = "Record to Lumen inbox"
+    static var description = IntentDescription("Opens Lumen recording a voice note into the inbox.")
+    static var openAppWhenRun = true
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        LumenLaunch.deliver(URL(string: "lumen://capture?mode=voice")!)
+        return .result()
+    }
+}
+
 @available(iOS 16.0, *)
 struct SearchNotesIntent: AppIntent {
     static var title: LocalizedStringResource = "Search Lumen"
@@ -106,6 +120,7 @@ struct LumenShortcuts: AppShortcutsProvider {
         AppShortcut(intent: CaptureSheetIntent(), phrases: ["Capture to \(.applicationName)", "Capture to my \(.applicationName) inbox"], shortTitle: "Capture", systemImageName: "tray.and.arrow.down.fill")
         AppShortcut(intent: QuickNoteIntent(), phrases: ["Quick note in \(.applicationName)", "New \(.applicationName) note"], shortTitle: "Quick note", systemImageName: "square.and.pencil")
         AppShortcut(intent: VoiceNoteIntent(), phrases: ["Voice note in \(.applicationName)"], shortTitle: "Voice note", systemImageName: "mic")
+        AppShortcut(intent: RecordToInboxIntent(), phrases: ["Record to \(.applicationName) inbox", "Record a \(.applicationName) voice note"], shortTitle: "Record to inbox", systemImageName: "mic.badge.plus")
         AppShortcut(intent: SearchNotesIntent(), phrases: ["Search \(.applicationName)"], shortTitle: "Search", systemImageName: "magnifyingglass")
         AppShortcut(intent: DailyNoteIntent(), phrases: ["Today's \(.applicationName) note", "Open today in \(.applicationName)"], shortTitle: "Today's note", systemImageName: "calendar")
     }

@@ -14,6 +14,7 @@
 import { createStore, del, get, type UseStore } from "idb-keyval";
 import type { OrganizerSuggestion } from "./analyze";
 import { __resetOutcomes, featureTallies, recordFeatureOutcome } from "../outcomes";
+import { compareNames } from "../../i18n/collate";
 
 export interface Tally {
   ok: number;
@@ -75,7 +76,7 @@ export function applyLearning(list: readonly OrganizerSuggestion[], b: Book, min
   return list
     .map((s) => adjust(s, b))
     .filter((s): s is OrganizerSuggestion => !!s && s.confidence >= minConfidence)
-    .sort((x, y) => y.confidence - x.confidence || x.id.localeCompare(y.id));
+    .sort((x, y) => y.confidence - x.confidence || compareNames(x.id, y.id));
 }
 
 /** Record a decision on a suggestion (all of its features), in the learning critic's book. */

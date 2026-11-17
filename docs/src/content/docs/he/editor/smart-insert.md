@@ -1,6 +1,8 @@
 ---
 title: הוספה חכמה (⌘⇧V)
 description: מדביקים כל דבר לחלון אחד — Lumen מזהה את הסוג ועוטפת אותו בבלוק הנכון.
+type: how-to
+untracked: "shipped before the plan (release 9.4); no plan task covers it"
 ---
 
 `⌘⇧V` פותח חלון אחד עם אזור טקסט גדול. מדביקים **כל דבר** ו-Lumen מבינה מה

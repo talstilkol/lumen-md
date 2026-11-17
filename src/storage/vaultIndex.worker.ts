@@ -5,11 +5,23 @@
  * notes through the VaultBackend and sends their text here; queries come
  * back as plain results. See ./vaultIndexProtocol.ts.
  */
+import "../ai/workerLedgerInstall"; // first: what this worker fetches reaches the privacy ledger (plan 2.4, W10.D22)
 import { VaultIndex } from "./vaultIndexCore";
 import { handleIndexRequest } from "./vaultIndexLocal";
-import type { IndexRequest } from "./vaultIndexProtocol";
+import type { IndexProgress, IndexRequest } from "./vaultIndexProtocol";
+import { swallowed } from "../lib/logger";
 
 const index = new VaultIndex();
+
+// W11.H12: search lemmas from a lemmatizer model, only once one passed the W11.M3 rule
+// (eval/public/_verdicts.json) and its runtime exists — today neither, so this ends at null.
+void import("../search/lemma/lemmaIndex")
+  .then((m) => m.chosenLemmatizer())
+  .then((lz) => (lz ? index.useLemmatizer(lz) : undefined))
+  .catch((err: unknown) => {
+    // why: without a lemmatizer search is BM25 over words with the rule-based morphology, as before
+    swallowed("storage/vaultIndex.worker: without a lemmatizer search is BM25 over words with the rule-based mor", err);
+  });
 
 // Requests run one after another: a snapshot restore finishes before the
 // upserts sent after it (W2.22: some requests are asynchronous now).
@@ -21,12 +33,16 @@ self.onmessage = (e: MessageEvent<IndexRequest>) => {
     .then(async () => {
       // W6.36: work a request hands back runs after its answer, before the next request.
       const later: Array<() => Promise<void>> = [];
-      (self as unknown as Worker).postMessage(await handleIndexRequest(index, req, (w) => later.push(w)));
-      for (const w of later) await w().catch(() => {
+      // 2.39 (Z6-H1/M4): said right before the regex runs, from the parse that runs it; the main thread's time limit starts here.
+      const onRegexStart = () => (self as unknown as Worker).postMessage({ id: req.id, progress: "regexStart" } satisfies IndexProgress);
+      (self as unknown as Worker).postMessage(await handleIndexRequest(index, req, (w) => later.push(w), { onRegexStart }));
+      for (const w of later) await w().catch((err: unknown) => {
         // why: follow-up work of an answered request (the snapshot save) is best effort; the answer was sent
+        swallowed("storage/vaultIndex.worker: follow-up work of an answered request (the snapshot save) is best effo", err);
       });
     })
-    .catch(() => {
+    .catch((err: unknown) => {
       // why: a request that throws is answered by handleIndexRequest itself; the queue goes on
+      swallowed("storage/vaultIndex.worker: a request that throws is answered by handleIndexRequest itself; the qu", err);
     });
 };

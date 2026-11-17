@@ -13,6 +13,7 @@ import { validateManifest, isPinned, idsDigest, type PublicManifest } from "../e
 import { checkPublicEval, resultPath, registryRevision, latestResults, type PublicResult } from "../eval/public/gate";
 import { editDistance, wer, cer, median, microRate } from "../eval/public/metrics";
 import { ivritLeaderboard, whisperBasic, normalizer } from "../eval/public/normalize";
+import hand from "./fixtures/ivritNormalizerHand.json";
 import { parseFleursTsv, parseAudioJsonl, scoreAsr, type AsrEngine } from "../eval/public/adapters/asr";
 import { freezePrompts, selectFrozen, scoreRoundTrip, voicePasses } from "../eval/public/adapters/ttsRoundTrip";
 import { parseNakdimonTest, scoreNikud, compareNikud, undot } from "../eval/public/adapters/nikud";
@@ -149,20 +150,44 @@ describe("metrics", () => {
   });
 });
 
-describe("W11.H6 ivrit.ai leaderboard normaliser (port; parity with the Python original is owed)", () => {
-  it("Whisper's BasicTextNormalizer: brackets dropped, punctuation and symbols become spaces, lower case", () => {
-    expect(whisperBasic("Hello, World! [music] (laughs) <noise>")).toBe("hello world");
+describe("W11.H6 ivrit.ai leaderboard normaliser (port of HebrewTextNormalizer @ e333b4a0fb; the run against the Python original is owed)", () => {
+  it("Whisper's BasicTextNormalizer: brackets dropped, punctuation and symbols become spaces, lower case, no strip", () => {
+    expect(whisperBasic("Hello, World! [music] (laughs) <noise>")).toBe("hello world ");
     expect(whisperBasic("a—b")).toBe("a b");
+    // Python's \s: U+001C–U+001F and U+0085 are spaces there, not in JavaScript
+    expect(whisperBasic("a\u001fb\u0085c")).toBe("a b c");
   });
-  it("niqqud and cantillation go, maqaf splits, invisible controls are deleted, not spaced", () => {
+  it("niqqud goes, cantillation, meteg and rafe become spaces (TaamimChar, not NIQQUD_CHARS), maqaf splits, controls are deleted", () => {
     expect(ivritLeaderboard("שָׁלוֹם")).toBe("שלום");
-    expect(ivritLeaderboard("בְּרֵאשִׁ֖ית")).toBe("בראשית");
+    expect(ivritLeaderboard("בְּרֵאשִׁ֖ית")).toBe("בראש ית");
+    expect(ivritLeaderboard("הַֽמֶּלֶךְ")).toBe("ה מלך");
     expect(ivritLeaderboard("בית־ספר")).toBe("בית ספר");
-    expect(ivritLeaderboard("של‏ום")).toBe("שלום");
-    expect(ivritLeaderboard("  שלום,   עולם. ")).toBe("שלום עולם");
+    expect(ivritLeaderboard("של\u200fום")).toBe("שלום");
+    expect(ivritLeaderboard("  שלום,   עולם. ")).toBe(" שלום עולם ");
+  });
+  it("gershayim and every double-quote variant join an acronym; the apostrophe goes, the geresh is a space", () => {
+    expect(ivritLeaderboard("צה״ל")).toBe("צהל");
+    expect(ivritLeaderboard('צה"ל')).toBe("צהל");
+    expect(ivritLeaderboard("מנכ“ל")).toBe("מנכל");
+    expect(ivritLeaderboard("צ'יפס")).toBe("ציפס");
+    expect(ivritLeaderboard("ג׳ירפה")).toBe("ג ירפה");
+  });
+  it("no normalisation before the niqqud step: a precomposed presentation form keeps its point until NFKC makes it a space", () => {
+    expect(ivritLeaderboard("\uFB2A")).toBe("ש ");
+    expect(ivritLeaderboard("\u05E9\u05C1")).toBe("ש");
+  });
+  it("gives the worked-out result on 50 inputs covering every step (fixtures/ivritNormalizerHand.json)", () => {
+    const rows = (hand as { rows: { input: string; expected: string }[] }).rows;
+    expect(rows).toHaveLength(50);
+    const bad = rows.filter((r) => ivritLeaderboard(r.input) !== r.expected).map((r) => r.input);
+    expect(bad).toEqual([]);
+  });
+  it("WER and CER ignore the leading and trailing space, as jiwer's Strip does", () => {
+    expect(wer([{ ref: ivritLeaderboard("שלום, עולם."), hyp: ivritLeaderboard("שלום עולם") }])).toBe(0);
+    expect(cer([{ ref: ivritLeaderboard("שלום, עולם."), hyp: ivritLeaderboard("שלום עולם") }])).toBe(0);
   });
   it("is found by id, and an unknown id fails", () => {
-    expect(normalizer("ivrit-leaderboard")("א.")).toBe("א");
+    expect(normalizer("ivrit-leaderboard")("א.")).toBe("א ");
     expect(() => normalizer("nope")).toThrow(/unknown normaliser/);
   });
 });

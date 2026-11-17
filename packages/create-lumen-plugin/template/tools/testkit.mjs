@@ -18,6 +18,12 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import vm from "node:vm";
 
+/** The plugin API version this kit speaks (the app's PLUGIN_API_VERSION; a test keeps them equal). */
+export const API_VERSION = "1.1.0";
+
+/** Deprecated methods → since, removeIn, use (the app's DEPRECATIONS; a test keeps them equal). The first call warns in `logs`. */
+export const DEPRECATED = { "document.setText": { since: "1.1.0", removeIn: "2.0.0", use: "document.applyEdits" } };
+
 /** `<namespace>.<method>` → the capability it needs (the app's METHOD_CAPABILITY; a test keeps them equal). */
 export const METHODS = {
   "document.getText": "document:read",
@@ -26,6 +32,7 @@ export const METHODS = {
   "document.setText": "document:write",
   "document.insertText": "document:write",
   "document.replaceSelection": "document:write",
+  "document.applyEdits": "document:write",
   "vault.list": "vault:read",
   "vault.read": "vault:read",
   "vault.write": "vault:write",
@@ -108,6 +115,19 @@ export async function loadPlugin(opts = {}) {
       doc.text = doc.text.slice(0, a) + String(t) + doc.text.slice(b);
       doc.selection = [a, a + String(t).length];
     },
+    // API 1.1.0: edits in the coordinates of the text before the batch, applied together.
+    "document.applyEdits": (edits) => {
+      if (!Array.isArray(edits)) throw new TypeError("edits must be an array of { from, to, insert }");
+      const list = edits.map((e) => ({ from: e?.from, to: e?.to, insert: e?.insert }));
+      for (const e of list) if (!Number.isInteger(e.from) || !Number.isInteger(e.to) || typeof e.insert !== "string" || e.from < 0 || e.to < e.from || e.to > doc.text.length) throw new RangeError("each edit is { from, to, insert } inside the note");
+      list.sort((a, b) => a.from - b.from || a.to - b.to);
+      for (let i = 1; i < list.length; i++) if (list[i].from < list[i - 1].to) throw new RangeError(`edits overlap at ${list[i].from}`);
+      let out = "";
+      let at = 0;
+      for (const e of list) (out += doc.text.slice(at, e.from) + e.insert), (at = e.to);
+      doc.text = out + doc.text.slice(at);
+      return list.length;
+    },
     // Like the app: the entries directly inside `dir` ("" = the vault root), dot files hidden.
     "vault.list": (dir) => {
       const base = dir ? `${String(dir).replace(/^\/+|\/+$/g, "")}/` : "";
@@ -189,10 +209,18 @@ export async function loadPlugin(opts = {}) {
   };
 
   const lumen = Object.create(null);
+  const warned = new Set();
   for (const m of Object.keys(METHODS)) {
     const [ns, fn] = m.split(".");
     lumen[ns] ??= Object.create(null);
-    lumen[ns][fn] = (...args) => call(m, args);
+    const d = DEPRECATED[m];
+    lumen[ns][fn] = (...args) => {
+      if (d && !warned.has(m)) {
+        warned.add(m);
+        state.logs.push({ level: "warn", text: `plugin ${manifest.id}: lumen.${m} is deprecated since plugin API ${d.since} and will be removed in ${d.removeIn}; use lumen.${d.use}` });
+      }
+      return call(m, args);
+    };
   }
   lumen.on = (name, handler) => {
     if (typeof handler !== "function") throw new TypeError("handler must be a function");
@@ -204,6 +232,7 @@ export async function loadPlugin(opts = {}) {
     return call("commands.register", [cmd]);
   };
   lumen.manifest = Object.freeze(JSON.parse(JSON.stringify(manifest)));
+  lumen.apiVersion = API_VERSION;
   for (const ns of Object.keys(lumen)) if (typeof lumen[ns] === "object") Object.freeze(lumen[ns]);
   Object.freeze(lumen);
 

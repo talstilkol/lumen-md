@@ -17,7 +17,7 @@
 | Fact | Source |
 |---|---|
 | Open source, MIT licence | `LICENSE` |
-| Interface in 8 languages, Hebrew and Arabic mirrored | `docs/editor/hebrew` |
+| Interface in 8 languages (English and Hebrew in full, six in beta: machine-translated), Hebrew and Arabic mirrored | `docs/editor/hebrew` |
 | Works offline as an installed web app | `docs/getting-started/install` |
 | Notes are plain Markdown; full export as .zip or a folder | `docs/workspace/export-import` |
 | Imports Obsidian vaults and Notion exports | `docs/workspace/export-import` |

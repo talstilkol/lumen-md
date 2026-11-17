@@ -1,6 +1,8 @@
 ---
 title: Choosing the Hebrew search model
 description: How Lumen picks the model behind semantic search and suggested links. It runs a competition on a hard Hebrew question set, and the default changes only for a clear, measured gain.
+type: how-to
+tasks: ["W7.13", "W10.E53"]
 ---
 
 Semantic search and suggested links depend on an *embedding model*. In 2026
@@ -53,7 +55,11 @@ npm run eval:embed-ingest       # judges it, then writes src/ai/embeddingDefault
 
 The ingest takes a run only when every row is measured on both the dev and
 held-out parts, and the decision names a default with its reason. The
-winner becomes the search model only when all three hold:
+winner becomes the search model only when all four hold:
+- the run's eval card is tagged `heldout` or `public`, on a set that is not
+  synthetic (a run on `eval/synthetic/retrieval-hard` alone never changes
+  the model: its numbers, the held-out part's too, are recorded as
+  development numbers, and `src/ai/embeddingDefault.json` is left as it is);
 - the set separated the models;
 - the model's licence is verified;
 - its files have a sha256.

@@ -1,6 +1,8 @@
 ---
 title: Plugin registry and the built-in ten
 description: The ten plugins in Lumen's plugin gallery, what each one may do, and how the static registry is built and scanned.
+type: how-to
+tasks: ["W12.S6", "W10.B3", "W6.35"]
 ---
 
 The **Sandboxed plugins** section of the Plugin Gallery lists plugins from a
@@ -65,6 +67,12 @@ A new version goes in a folder of its own, for example `kanban@1.1.0`.
 
 When you install a plugin, the app scans the downloaded code again. It refuses
 the code if its SHA-256 differs from the hash in the registry scan.
+
+Check that the registry is current (this example runs in the docs check):
+
+```sh run
+node scripts/build-plugin-registry.mjs --check
+```
 
 ## The signed registry
 

@@ -10,7 +10,8 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const ROOT = join(__dirname, "..");
-const CALLEES = new Set(["chat", "chatStream", "runAgent", "runAgentOrThrow", "streamAgent", "summarizeMemo"]);
+// chatLocal / chatLocalStream (the in-browser model) and runLocalRequest (the runtime's local-only door, 5.5.3) too.
+const CALLEES = new Set(["chat", "chatStream", "runAgent", "runAgentOrThrow", "streamAgent", "summarizeMemo", "chatLocal", "chatLocalStream", "runLocalRequest"]);
 /** Pass-throughs: the options object already carries the caller's signal. */
 const ALLOWED = new Set([
   "agents/executors/chatExecutor.ts:chatStream(messages,opts)", // opts.signal = req.signal

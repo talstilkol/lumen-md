@@ -31,7 +31,7 @@ import { WORKSPACE_CHANGED, changeOf } from "./workspaceEvents";
 import { isOPFSAvailable, type WorkspaceEntry } from "./workspace";
 import { getVaultBackend, refreshVaultEncryption, unwrapVaultBackend, vaultEncryptionReady, watchVault, type VaultEvent } from "./vault";
 import type { IndexEngine } from "./vaultIndexProtocol";
-import { log } from "../lib/logger";
+import { log, swallowed } from "../lib/logger";
 import { scheduleIdle } from "../lib/idle";
 import { dropSnapshot } from "./indexSnapshot";
 import type { SnapshotKeys } from "./snapshotSeal";
@@ -188,25 +188,26 @@ export function getEngine(): Promise<IndexEngine> {
 }
 
 /**
- * Run `fn` on the engine. If the worker died, switch to an in-thread
- * engine, give it every indexed note again, and retry once.
+ * Run `fn` on the engine (`current`: its promise). If the worker died, switch to an in-thread engine, give it every
+ * indexed note again, and retry once. Z6-M4: a request a restart left unanswered runs again once on the new engine.
  */
-export async function withEngine<T>(fn: (e: IndexEngine) => Promise<T>): Promise<T> {
+export async function withEngine<T>(fn: (e: IndexEngine, current: Promise<IndexEngine>) => Promise<T>, retried = false): Promise<T> {
   const current = getEngine();
   // Review 29 Z5: the vault and the epoch this request belongs to, for the refill below.
   const at = epoch;
   const vault = snapshotVault();
   const e = await current;
   try {
-    return await fn(e);
+    return await fn(e, current);
   } catch (err) {
+    if ((err as Error | null)?.name === "IndexRestartedError" && engine !== current && !retried && at === epoch) return withEngine(fn, true);
     // W6.36: a request to an engine that was replaced meanwhile (a reset) is
     // not a dead worker: it must not swap the new engine for a local one.
     if (e.kind !== "worker" || engine !== current) throw err;
     log.warn("vault index worker failed; indexing on the main thread", err);
     e.dispose();
     const local = await localIndexEngine();
-    engine = Promise.resolve(local);
+    const localP = (engine = Promise.resolve(local));
     // The text died with the worker (W2.22: this thread keeps summaries only):
     // fill the new index from the snapshot, reading only what it lacks.
     // Z5: the refill reads from the vault active now; once the vault or the epoch moved (a switch, a lock, a drop),
@@ -220,20 +221,20 @@ export async function withEngine<T>(fn: (e: IndexEngine) => Promise<T>): Promise
       throw err;
     }
     for (const [path, f] of filled) cache.byPath.set(path, f);
-    return fn(local);
+    return fn(local, localP);
   }
 }
 
 /**
  * 2.39: stop `stuck`, a worker busy with a runaway /regex/ (a regex runs synchronously: terminating is the only way),
  * and start a fresh engine, filled as withEngine's fallback fills one (from the snapshot, reading only what it lacks,
- * Z5/Z7 guards). Requests wait for the filled engine. `current` is the engine promise the caller used.
+ * Z5/Z7 guards). Requests wait for the filled engine. `current` is the engine promise the caller used. Z6-M4: what
+ * the stuck worker had not answered rejects (IndexRestartedError) once `engine` is the new one, so withEngine reruns it.
  */
 export function restartEngine(current: Promise<IndexEngine>, stuck: IndexEngine): Promise<void> {
   if (engine !== current) return Promise.resolve();
   const at = epoch;
   const vault = snapshotVault();
-  stuck.dispose();
   const next = createEngine().then(async (fresh) => {
     const stale = () => moved(at, vault);
     const filled = await fillEngine(fresh, [...cache.byPath.values()], stale);
@@ -243,6 +244,7 @@ export function restartEngine(current: Promise<IndexEngine>, stuck: IndexEngine)
     return fresh;
   });
   engine = next;
+  stuck.dispose("restarted");
   return next.then(undefined, (err) => {
     log.warn("vault index: the restarted engine could not be filled; the index is rebuilt on next use", err);
     if (engine === next) {
@@ -251,8 +253,6 @@ export function restartEngine(current: Promise<IndexEngine>, stuck: IndexEngine)
     }
   });
 }
-
-// ── Keeping the index in step ───────────────────────────────────────────
 
 // ── W2.22: the index survives a restart (./indexSnapshot.ts) ─────────────
 
@@ -329,8 +329,8 @@ async function snapshotMode(): Promise<{ keys?: SnapshotKeys } | null> {
     const { restSnapshotKeys } = await import("./vault/restStore");
     const keys = restSnapshotKeys();
     return keys ? { keys } : null;
-  } catch {
-    return null;
+  } catch (e) {
+    return (swallowed("storage/workspaceIndex: the snapshot keys could not be read; no snapshot is kept", e), null);
   }
 }
 
@@ -367,8 +367,9 @@ function scheduleSnapshot(): void {
     snapshotTimer = null;
     scheduleIdle(() => {
       if (gen !== snapshotGen) return;
-      void saveSnapshotNow().catch(() => {
+      void saveSnapshotNow().catch((err: unknown) => {
         // why: a snapshot save is best effort; the next idle save or the next open tries again
+        swallowed("storage/workspaceIndex: a snapshot save is best effort; the next idle save or the next open tr", err);
       });
     });
   }, SNAPSHOT_DELAY_MS);

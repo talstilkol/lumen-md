@@ -1,6 +1,7 @@
 ---
 title: Install Lumen
 description: Lumen in the browser, as an installed web app, on the desktop (macOS, Windows, Linux) and on iOS / Android — and what each one stores where.
+type: how-to
 ---
 
 Lumen is the same app on every platform. The only differences are where
@@ -30,6 +31,22 @@ Chrome / Edge 111+ and Firefox 128+.
 Use the browser's install button (Chrome, Edge) or *Share → Add to Home
 Screen* (Safari). The installed app opens without a network: the editor,
 highlighting, fonts and your files are all cached.
+
+Or open the command palette and choose **Install Lumen as an app…**. In
+Chrome and Edge 148 and later this shows the browser's own install button
+(the `<install>` element). Where the browser has `navigator.install()` or
+the older install prompt, it is one click. Everywhere else it shows the
+steps for that browser:
+
+- **iPhone and iPad:** Safari → Share → *Add to Home Screen*. On iOS 26,
+  leave *Open as Web App* on.
+- **Safari on the Mac:** File → *Add to Dock*.
+- **Firefox on Android:** the menu → *Install*.
+- **Firefox on a computer:** it can't install web apps. Use the desktop app,
+  or install from Chrome or Edge.
+
+Lumen counts how many times it was installed from this browser and shows the
+count there. The count is never sent.
 
 ## Desktop
 

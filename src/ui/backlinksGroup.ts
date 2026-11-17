@@ -3,6 +3,7 @@
  * Heptabase 8.2026). Pure, so the tests run it without a DOM.
  */
 import type { BacklinkHit } from "../storage/vaultIndexCore";
+import { normalizeForFilter } from "../text/filterMatch";
 
 export type BacklinkSort = "name" | "modified";
 
@@ -13,10 +14,8 @@ export interface BacklinkGroup {
   hits: BacklinkHit[];
 }
 
-/** Case and niqqud do not matter to the search (what a person types rarely has niqqud). */
-function fold(s: string): string {
-  return s.normalize("NFD").replace(/[\u0591-\u05C7\u0300-\u036F]/g, "").toLowerCase();
-}
+/** Case, niqqud, accents and geresh do not matter to the search (W13.E3: what a person types rarely has niqqud). */
+const fold = normalizeForFilter;
 
 /**
  * Hits grouped by the note they come from. `query` keeps a group when its

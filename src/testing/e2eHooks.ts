@@ -19,8 +19,26 @@ const MODULES = {
   "store/gitPullDocs": () => import("../store/gitPullDocs"),
   "store/useStore": () => import("../store/useStore"),
   "ai/ocr": () => import("../ai/ocr"),
+  // e2e/content-frame-origin.spec.ts: a content frame made by the app's own module (W6.40).
+  "lib/contentFrame": () => import("../lib/contentFrame"),
   // e2e/rtl-parity/animations.spec.ts: a toast on demand, to read its entrance (plan 9.9).
   "ui/AiToast": () => import("../ui/AiToast"),
+  // e2e/bulk-properties-1k.spec.ts: 1,000 notes in one bulk edit, timed in every engine (plan W7.4).
+  "views/bulkEditRun": () => import("../views/bulkEditRun"),
+  // e2e/voice-capture.spec.ts (W10.C8 test): a scripted live engine on the capture box's seam (plan W10.C8, 6.1).
+  "capture/voiceCapture": () => import("../capture/voiceCapture"),
+  // e2e/as-of.spec.ts: the open note's past versions, filed as autosave files them (W12.S2).
+  "storage/history": () => import("../storage/history"),
+  // e2e/conflict-3way.spec.ts: the conflict dialog as sync opens it (W12.S3).
+  "sync/cloud/ConflictDialog": () => import("../sync/cloud/ConflictDialog"),
+  // e2e/immersive-reader.spec.ts: the Reading mode menu, as the toolbar opens it (W13.R1, W13.R5).
+  "ui/ReadingModeMenu": () => import("../ui/ReadingModeMenu"),
+  // e2e/paged-preview.spec.ts: the PDF export's document, printed to count its pages (W13.R10).
+  "ui/PrintExport": () => import("../ui/PrintExport"),
+  // e2e/reading-modes.spec.ts: the compare view of two texts (W13.R8), as version history opens it.
+  "reading/openCompare": () => import("../reading/openCompare"),
+  // e2e/i18n-pseudo.spec.ts: the pseudo-locales en-XA / ar-XB, installed under codes the picker never lists (W13.I1).
+  "i18n/index": () => import("../i18n/index"),
 };
 
 export type E2eModuleName = keyof typeof MODULES;

@@ -1,3 +1,4 @@
+import { swallowed } from "../lib/logger";
 /**
  * What deleting a note does with the attachments only it links to (plan
  * W7.3): ask (the default), always move them to the trash too, or never.
@@ -21,7 +22,8 @@ export function setAttachmentPolicy(next: AttachmentPolicy): void {
   try {
     if (next === "ask") localStorage.removeItem(KEY);
     else localStorage.setItem(KEY, next);
-  } catch {
+  } catch (err) {
     /* why: private mode: asks again next time */
+    swallowed("storage/attachmentPolicy: private mode: asks again next time", err);
   }
 }

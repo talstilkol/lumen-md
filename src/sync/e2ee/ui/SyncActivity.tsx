@@ -13,6 +13,7 @@ import type { SyncEvent } from "../activity";
 import { describeSecondsLeft, type Progress } from "../estimate";
 import { countStates, type FileStatus } from "../status";
 import type { SyncSession } from "./session";
+import { compareNames } from "../../../i18n/collate";
 
 const muted: React.CSSProperties = { fontSize: 12, color: "hsl(var(--fg-muted))" };
 const list: React.CSSProperties = { listStyle: "none", margin: 0, padding: 0, display: "grid", gap: 2, fontSize: 12, maxHeight: 180, overflow: "auto" };
@@ -83,7 +84,7 @@ function ProgressLine({ p }: { p: Progress }) {
 const ATTENTION: Record<string, number> = { error: 0, conflict: 1, pending: 2 };
 
 function Attention({ files }: { files: ReadonlyMap<string, FileStatus> }) {
-  const rows = [...files].filter(([, st]) => st.state in ATTENTION).sort((a, b) => ATTENTION[a[1].state] - ATTENTION[b[1].state] || a[0].localeCompare(b[0]));
+  const rows = [...files].filter(([, st]) => st.state in ATTENTION).sort((a, b) => ATTENTION[a[1].state] - ATTENTION[b[1].state] || compareNames(a[0], b[0]));
   if (!rows.length) return null;
   return (
     <section aria-labelledby="sync-attention" style={{ display: "grid", gap: 4 }}>

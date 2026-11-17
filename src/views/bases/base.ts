@@ -25,17 +25,20 @@
  * keys this reader does not know (plugin views, column sizes) survive.
  */
 
-import YAML, { isMap, isScalar, isSeq, parseDocument, YAMLMap, YAMLSeq, type Document } from "yaml";
+import YAML, { isMap, isSeq, parseDocument, type Document } from "yaml";
 import { FormulaError } from "../formula/ast";
 import { evaluateBases, parseBases, type BasesEvalOptions, type BasesScope, type BasesVault } from "./evaluate";
 import type { BasesNode } from "./expr";
+import { typedSortKey } from "../../properties/valueTypes";
 import { equalValues, fromYaml, isEmptyValue, isTagged, parseWikiLink, sortCompare, toText, truthy, type BasesFile, type BValue } from "./values";
 import { builtinSummary, compileFilter, sortDate } from "./fastFilters";
+import { workdaysUntil } from "../workdays";
+import { MAX_YAML_FLOW_DEPTH, parseFrontmatterYaml, yamlFlowDepth } from "../../lib/yamlBounds";
 export { builtinSummary, compileFilter } from "./fastFilters";
 
 export type BasesFilter = string | { and: BasesFilter[] } | { or: BasesFilter[] } | { not: BasesFilter[] };
 
-export type BasesViewType = "table" | "cards" | "list" | "kanban" | "map" | "calendar" | "timeline";
+export type BasesViewType = "table" | "cards" | "list" | "kanban" | "map" | "calendar" | "timeline" | "chart" | "hebrew-calendar";
 
 export interface BasesSort {
   property: string;
@@ -59,14 +62,28 @@ export interface BasesView {
   groupOrder?: Array<string | null>;
   /** Property → summary name (`Sum`, `Average`, or one of the file's own `summaries:`). */
   summaries: Record<string, string>;
-  /** Cards: the property with the cover image. */
+  /** Cards and kanban: the property with the cover image. */
   image?: string;
+  /** W12.T5, Obsidian's "Image fit": `cover` (fill and crop) or `contain` (no crop). */
+  imageFit?: "cover" | "contain";
+  /** W12.T5, Obsidian's "Image aspect ratio": the cover's height ÷ width. */
+  imageAspectRatio?: number;
+  /** W12.T5: cards' (and kanban columns') width in pixels, Obsidian's `cardSize`. */
+  cardSize?: number;
   /** Map: the property with the coordinates. */
   coordinates?: string;
-  /** Calendar and timeline (W1.12): the date property (default `note.date`). */
+  /** Calendar, timeline (W1.12) and hebrew-calendar (W12.V5, a Lumen view type): the date property (default `note.date`). */
   date?: string;
   /** Timeline: the end-date property; without it an item is one day long. */
   end?: string;
+  /**
+   * Chart (plan W12.V1, a Lumen view type: Obsidian shows it as its own
+   * table): `chart:` bar | line | pie | scatter | heatmap | calendar, the
+   * category / date / number property `x:`, the measure `y:` (absent: the
+   * count of notes), `series:` (heatmap: the row category) and `aggregate:`
+   * count | sum | avg | min | max.
+   */
+  chart?: { kind: string; x?: string; y?: string; series?: string; aggregate?: string };
 }
 
 /**
@@ -77,9 +94,15 @@ export interface BasesView {
 export interface BasesRelation {
   property: string;
   incoming: boolean;
+  /**
+   * W12.T6: only related notes that pass this filter (a typed relation: the
+   * notes of one type). The same filter syntax as `filters:`.
+   */
+  filter?: BasesFilter;
 }
 
-export const ROLLUP_FUNCTIONS = ["count", "sum", "avg", "min", "max", "earliest", "latest"] as const;
+/** "workdays": working days from today until the earliest date of `property` among the related notes (W10.C26). */
+export const ROLLUP_FUNCTIONS = ["count", "sum", "avg", "min", "max", "earliest", "latest", "workdays"] as const;
 export type RollupFunction = (typeof ROLLUP_FUNCTIONS)[number];
 
 /** A rollup: `function` over `property` of the notes of `relation`. */
@@ -134,30 +157,16 @@ function readSort(v: unknown): BasesSort | null {
 }
 
 /**
- * The deepest a `.base` file's flow collections (`[…]`, `{…}`) may nest. Real
- * files nest two or three levels; the YAML parser's cost grows steeply with
- * depth (a 3 KB file of nested `[` took 0.6–2 s in the fuzz run, W4.16), so a
- * deeper file is refused before it is parsed, like any other invalid file.
+ * The deepest a `.base` file's flow collections (`[…]`, `{…}`) may nest: the
+ * shared YAML bound (src/lib/yamlBounds.ts). A 3 KB file of nested `[` took
+ * 0.6–2 s in the fuzz run (W4.16), so a deeper file is refused before it is parsed.
  */
-export const MAX_BASE_NESTING = 64;
-
-/** The deepest run of unclosed `[` / `{` in `text` (quotes not considered: an over-count only). */
-function flowDepth(text: string): number {
-  let depth = 0;
-  let max = 0;
-  for (let i = 0; i < text.length; i++) {
-    const c = text.charCodeAt(i);
-    if (c === 91 || c === 123) {
-      if (++depth > max) max = depth;
-    } else if ((c === 93 || c === 125) && depth > 0) depth--;
-  }
-  return max;
-}
+export const MAX_BASE_NESTING = MAX_YAML_FLOW_DEPTH;
 
 /** Parse a `.base` file. Never throws. */
 export function parseBase(text: string): BaseParse {
   let doc: Document;
-  if (flowDepth(text) > MAX_BASE_NESTING) return { ok: false, error: `nested deeper than ${MAX_BASE_NESTING} levels` };
+  if (yamlFlowDepth(text) > MAX_BASE_NESTING) return { ok: false, error: `nested deeper than ${MAX_BASE_NESTING} levels` };
   try {
     doc = parseDocument(text, { prettyErrors: false });
   } catch (e) {
@@ -202,10 +211,14 @@ export function parseBase(text: string): BaseParse {
         // A groupOrder that is not a list is ignored (Obsidian 1.14.4 fixed a base that failed to load over it).
         groupOrder: Array.isArray(rv.groupOrder) ? rv.groupOrder.map((x) => (x === null || x === undefined || x === "" ? null : x instanceof Date ? x.toISOString().slice(0, 10) : String(x))) : undefined,
         summaries: viewSummaries,
-        image: typeof rv.image === "string" ? propertyId(rv.image) : undefined,
+        image: typeof rv.image === "string" && rv.image.trim() ? propertyId(rv.image) : undefined,
+        imageFit: rv.imageFit === "contain" || rv.imageFit === "cover" ? rv.imageFit : undefined,
+        imageAspectRatio: typeof rv.imageAspectRatio === "number" && rv.imageAspectRatio > 0 ? rv.imageAspectRatio : undefined,
+        cardSize: typeof rv.cardSize === "number" && rv.cardSize > 0 ? rv.cardSize : undefined,
         coordinates: typeof rv.coordinates === "string" ? propertyId(rv.coordinates) : undefined,
         date: typeof rv.date === "string" ? propertyId(rv.date) : undefined,
         end: typeof rv.end === "string" ? propertyId(rv.end) : undefined,
+        chart: readChart(rv),
       });
     });
     if (!views.length) views.push({ type: "table", name: "Table", order: [], sort: [], summaries: {} });
@@ -214,7 +227,8 @@ export function parseBase(text: string): BaseParse {
       for (const [name, r] of Object.entries(raw.relations)) {
         const rel = typeof r === "string" ? { property: r } : r;
         if (!isRecord(rel) || typeof rel.property !== "string" || !rel.property.trim()) throw new Error(`relations.${name}: needs a property (the link property)`);
-        relations[name] = { property: rel.property.trim().replace(/^note\./, ""), incoming: rel.incoming === true || rel.direction === "incoming" };
+        const relFilter = readFilter(rel.filter, `relations.${name}.filter`);
+        relations[name] = { property: rel.property.trim().replace(/^note\./, ""), incoming: rel.incoming === true || rel.direction === "incoming", ...(relFilter !== undefined ? { filter: relFilter } : {}) };
       }
     const rollups: Record<string, BasesRollup> = {};
     if (isRecord(raw.rollups))
@@ -288,6 +302,14 @@ export function propertyId(id: string): string {
   return `note.${s}`;
 }
 
+/** A chart view's settings (W12.V1); the kind is checked where it is drawn (src/viz). */
+function readChart(rv: Record<string, unknown>): BasesView["chart"] {
+  if (String(rv.type).toLowerCase() !== "chart") return undefined;
+  const str = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : undefined);
+  const prop = (v: unknown) => (str(v) ? propertyId(str(v)!) : undefined);
+  return { kind: (str(rv.chart) ?? "bar").toLowerCase(), x: prop(rv.x) ?? "file.folder", y: prop(rv.y), series: prop(rv.series), aggregate: str(rv.aggregate)?.toLowerCase() };
+}
+
 /** The column header: `properties:` displayName, else the name without its namespace. */
 export function propertyLabel(base: BaseModel, id: string): string {
   return base.displayNames[id] ?? (/^(note|formula|relation|rollup)\./.test(id) ? id.slice(id.indexOf(".") + 1) : id);
@@ -310,7 +332,7 @@ export function basesFileFromText(path: string, text: string | null, meta: { siz
     const m = FM.exec(text);
     if (m) {
       try {
-        const parsed: unknown = YAML.parse(m[1]);
+        const parsed: unknown = parseFrontmatterYaml(m[1]);
         if (isRecord(parsed)) fm = parsed;
       } catch {
         // why: unreadable frontmatter: the note has no properties, as Obsidian shows it
@@ -424,6 +446,11 @@ export interface RunOptions extends BasesEvalOptions {
   view?: number | string;
   /** `this`: the base file, or the note that embeds it. */
   thisFile?: BasesFile | null;
+  /**
+   * W12.T3: rows only from these paths (a type's notes, chosen by the type
+   * registry); every file still resolves links, relations and rollups.
+   */
+  only?: ReadonlySet<string>;
 }
 
 const err = (where: string, e: FormulaError) => `${where}: ${e.message}${e.at >= 0 ? ` (character ${e.at + 1})` : ""}`;
@@ -558,7 +585,21 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
     }
     return out;
   };
+  // W12.T6: a typed relation keeps only the related notes that pass its filter (decided once per file).
+  const relPass = new Map<BasesFilter, Map<string, boolean>>();
   const related = (file: BasesFile, rel: BasesRelation): BasesFile[] => {
+    const all = relatedAll(file, rel);
+    const f = rel.filter;
+    if (f === undefined) return all;
+    let memo = relPass.get(f);
+    if (!memo) relPass.set(f, (memo = new Map()));
+    return all.filter((x) => {
+      let ok = memo!.get(x.path);
+      if (ok === undefined) memo!.set(x.path, (ok = test(f, scopeFor(x), "relation filter")));
+      return ok;
+    });
+  };
+  const relatedAll = (file: BasesFile, rel: BasesRelation): BasesFile[] => {
     if (!rel.incoming) {
       const seen = new Set<string>();
       const out: BasesFile[] = [];
@@ -600,6 +641,10 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
     try {
       const values = targets.map((f) => value(r.property!, scopeFor(f)));
       const flat = values.flatMap((v) => (Array.isArray(v) ? v : [v]));
+      if (r.function === "workdays") {
+        const first = builtinSummary("Earliest", flat);
+        return first === undefined || first === null ? null : workdaysUntil(first, evalOpts.now ?? new Date());
+      }
       const summary = { sum: "Sum", avg: "Average", min: "Min", max: "Max", earliest: "Earliest", latest: "Latest" }[r.function];
       const out = builtinSummary(summary, flat);
       return out === undefined ? null : out;
@@ -614,11 +659,13 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
   if (view.image) needed.add(view.image);
   if (view.coordinates) needed.add(view.coordinates);
   const kind = viewKind(view);
-  if (kind === "calendar" || kind === "timeline") needed.add(view.date ?? "note.date");
+  if (kind === "calendar" || kind === "timeline" || kind === "hebrew-calendar") needed.add(view.date ?? "note.date");
   if (kind === "timeline" && view.end) needed.add(view.end);
+  if (kind === "chart" && view.chart) for (const id of [view.chart.x, view.chart.y, view.chart.series]) if (id) needed.add(id);
 
   const matched: BaseRow[] = [];
   for (const file of files) {
+    if (opts.only && !opts.only.has(file.path)) continue;
     const scope = scopeFor(file);
     if (!test(base.filters, scope, "filters")) continue;
     if (!test(view.filters, scope, `view ${view.name} filters`)) continue;
@@ -630,7 +677,14 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
   const keys = [...(view.groupBy ? [view.groupBy] : []), ...view.sort];
   // Dates parsed once per row, not once per comparison (10,000 rows: ~5× faster).
   // …and emptiness once per row too (W6.46).
-  const decorated = matched.map((r) => ({ r, d: keys.map((k) => sortDate(r.cells[k.property])), e: keys.map((k) => isEmptyValue(r.cells[k.property])) }));
+  // …and amounts / addresses read once per row: two amounts sort by number, two
+  // addresses by city, street and house number (plan R12.17).
+  const decorated = matched.map((r) => ({
+    r,
+    d: keys.map((k) => sortDate(r.cells[k.property])),
+    e: keys.map((k) => isEmptyValue(r.cells[k.property])),
+    t: keys.map((k) => typedSortKey(r.cells[k.property])),
+  }));
   decorated.sort((x, y) => {
     const a = x.r;
     const b = y.r;
@@ -638,7 +692,14 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
       const k = keys[i];
       const da = x.d[i];
       const db = y.d[i];
-      const d = da !== null && db !== null ? Math.sign(da - db) : sortCompare(a.cells[k.property], b.cells[k.property]);
+      const ta = x.t[i];
+      const tb = y.t[i];
+      const d =
+        da !== null && db !== null
+          ? Math.sign(da - db)
+          : ta !== null && tb !== null && typeof ta === typeof tb
+            ? ta < tb ? -1 : ta > tb ? 1 : 0
+            : sortCompare(a.cells[k.property], b.cells[k.property]);
       // Empty values stay last in both directions.
       if (d) return x.e[i] || y.e[i] ? d : k.direction === "DESC" ? -d : d;
     }
@@ -696,62 +757,13 @@ export function orderGroups(groups: BaseGroup[], order: ReadonlyArray<string | n
   return out;
 }
 
-/* ─── Writers for the filter editor (Obsidian 1.15) ───────────────────── */
-
-/**
- * A text literal for a filter: double quotes, with `\` and `"` escaped.
- * Obsidian 1.15 fixed filters whose value holds a quote or a backslash
- * (they were saved broken); this writes them the way the parser reads them.
- */
-export function basesTextLiteral(s: string): string {
-  return `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\t/g, "\\t")}"`;
-}
-
-/** Where a filter lives: the base's own (`All views`) or one view's (`This view`). */
-export type FilterScope = { view: null } | { view: number };
-
-function filterPath(scope: FilterScope): (string | number)[] {
-  return scope.view === null ? ["filters"] : ["views", scope.view, "filters"];
-}
-
-/**
- * Move one filter statement (Obsidian 1.15: drag to reorder, and a filter
- * row's menu that moves it between All views and This view). Both ends are
- * top-level `and:` lists; a single statement or a missing `filters:` becomes
- * one. Everything else in the file stays as written.
- */
-export function moveFilter(text: string, from: FilterScope & { index: number }, to: FilterScope & { index: number }): { ok: true; text: string } | { ok: false; error: string } {
-  return updateBase(text, (doc) => {
-    /** The `and:` list at a scope, made into one when it is a single statement or a group of another kind. */
-    const andList = (scope: FilterScope, create: boolean): YAMLSeq => {
-      if (scope.view !== null && !isMap(doc.getIn(["views", scope.view]))) throw new Error(`no view ${scope.view + 1}`);
-      const path = filterPath(scope);
-      const cur = doc.getIn(path, true);
-      if (isMap(cur) && cur.items.length === 1) {
-        const and = cur.get("and", true);
-        if (isSeq(and)) return and;
-      }
-      const empty = cur === undefined || cur === null || (isScalar(cur) && (cur.value === null || cur.value === ""));
-      if (empty && !create) throw new Error("no filters there");
-      const seq = new YAMLSeq();
-      if (!empty) seq.items.push(cur);
-      const map = new YAMLMap();
-      map.set("and", seq);
-      doc.setIn(path, map);
-      return seq;
-    };
-    const src = andList(from, false);
-    if (from.index < 0 || from.index >= src.items.length) throw new Error(`no filter ${from.index + 1}`);
-    const [item] = src.items.splice(from.index, 1);
-    const dst = andList(to, true);
-    dst.items.splice(Math.max(0, Math.min(to.index, dst.items.length)), 0, item);
-  });
-}
+/* ─── Writers for the filter editor (Obsidian 1.15): ./filterWriters ─── */
+export { basesTextLiteral, moveFilter, type FilterScope } from "./filterWriters";
 
 /** The kind of view to draw: a plugin's view type (unknown here) is drawn as a table. */
 export function viewKind(view: BasesView): BasesViewType {
   const t = view.type.toLowerCase();
-  return t === "cards" || t === "list" || t === "kanban" || t === "map" || t === "calendar" || t === "timeline" ? t : "table";
+  return t === "cards" || t === "list" || t === "kanban" || t === "map" || t === "calendar" || t === "timeline" || t === "chart" || t === "hebrew-calendar" ? t : "table";
 }
 
 /** A cell value as a point, for the map view: `[lat, lng]`, `"lat, lng"` or `{lat, lng}`. */

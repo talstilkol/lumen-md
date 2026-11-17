@@ -66,7 +66,7 @@ export class PrivacyBlockedError extends Error {
 }
 
 interface Rule {
-  test: (host: string, path: string) => boolean;
+  test: (host: string, path: string, query: URLSearchParams) => boolean;
   category: LedgerCategory;
   reason: string;
 }
@@ -97,8 +97,15 @@ const RULES: Rule[] = [
   // a local-only policy blocks it like the research service. W6.47: it also
   // writes — only the PDF highlights the user sends and confirms.
   { test: (h) => h === "api.zotero.org", category: "research", reason: "Zotero Web API (your library; writes only the PDF highlights you send)" },
+  // D1 §6 / review 12 L4: cite-from-DOI (doiOpenAlex.ts) first; then W12.X3, the citation graph's optional reference lookup (select=referenced_works), off by default; only DOIs go out.
+  { test: (h, p, q) => h === "api.openalex.org" && p.startsWith("/works/doi:") && q.get("select") !== "referenced_works", category: "research", reason: "OpenAlex: cite from a DOI (the DOI you approved only, when you turn it on)" },
+  { test: (h) => h === "api.openalex.org", category: "research", reason: "OpenAlex: the references of a DOI (citation graph, only when you turn it on)" },
+  // W10.E38 (plan 6.13): a DOI the user looked up and approved, and nothing else.
+  { test: (h) => h === "api.crossref.org", category: "research", reason: "CrossRef DOI lookup: the DOI you asked for only" },
   // Knesset records (plan W7.5): the law or bill name the user asked for.
   { test: (h) => h === "knesset.gov.il" || h === "main.knesset.gov.il", category: "cloud-text", reason: "Knesset records (OData): the law or bill name only" },
+  // Wikidata (plan W12.E10): an entity's name, after the user's consent, to link the entity to its item.
+  { test: (h) => h === "www.wikidata.org", category: "cloud-text", reason: "Wikidata search: the entity name only" },
   // Government data (plan W7.6): search words, a dataset id or a series id.
   { test: (h) => h === "data.gov.il" || h === "apis.cbs.gov.il", category: "cloud-text", reason: "Government data (data.gov.il, CBS): the search words or dataset id only" },
   {
@@ -244,7 +251,7 @@ export function classify(url: string): { host: string; category: LedgerCategory;
   // why: the error tracker named by the build's DSN, wherever it is hosted (Sentry, a self-hosted GlitchTip, even this origin)
   const tracker = monitoringEndpoint();
   if (tracker && u.href.startsWith(tracker)) return { host, category: "monitoring", reason: MONITORING_REASON };
-  for (const r of RULES) if (r.test(host, u.pathname)) return { host, category: r.category, reason: r.reason };
+  for (const r of RULES) if (r.test(host, u.pathname, u.searchParams)) return { host, category: r.category, reason: r.reason };
   let ollamaHost = "";
   try {
     ollamaHost = new URL(getBaseUrl()).host.toLowerCase();
@@ -437,14 +444,13 @@ export function addSpeechVoiceBytes(id: number, bytes: number): boolean {
 }
 
 /** A prompt to a model built into the browser (Chrome's, plan W7.14): it runs on this device and sends nothing. */
-export function recordOnDeviceModel(name: string): void {
-  record({ host: `on-device: ${name}`, method: "PROMPT", bytesOut: 0, bytesIn: null, category: "local-ai", reason: "Runs on this device; nothing is sent", policy: getAiPolicy(), decision: "allowed" });
+export function recordOnDeviceModel(name: string, method = "PROMPT", bytesOut = 0, reason = "Runs on this device; nothing is sent"): void {
+  record({ host: `on-device: ${name}`, method, bytesOut, bytesIn: null, category: "local-ai", reason, policy: getAiPolicy(), decision: "allowed" });
 }
+/** A program the user installed, run here by Lumen (W13.F5: Pandoc, sandboxed, no network): the ledger lists every process Lumen starts. */
+export const recordLocalProcess = (name: string, reason: string, bytesOut: number): void => recordOnDeviceModel(name, "PROCESS", bytesOut, reason);
 
-/**
- * Record use of the browser's speech recognition service (Chrome sends the audio
- * to Google). "blocked" when local-only refused it.
- */
+/** Record use of the browser's speech recognition service (Chrome sends the audio to Google). "blocked" when local-only refused it. */
 export function recordSpeechRecognition(decision: "allowed" | "blocked"): LedgerEntry | null {
   const id = record({ host: "browser speech recognition", method: "AUDIO", bytesOut: 0, bytesIn: null, category: "cloud-text", reason: "Dictation through the browser's speech service", policy: getAiPolicy(), decision });
   return entries.find((x) => x.id === id) ?? null;
@@ -502,8 +508,10 @@ let unwrappedFetch: typeof fetch | null = null;
  * records it twice nor blocks a request the user consented to.
  */
 export function ledgerFetch(opts: LedgerOptions): typeof fetch {
+  // The transport is read on each call, not when this fetch is made (review 25, RR25-1): one made before
+  // the ledger or airplane mode's guard was installed must still send through them.
   // privacy-ledger: the ledger's own pass-through to the unwrapped fetch: wrap() records what calls it
-  const base: typeof fetch = unwrappedFetch ?? ((input, init) => globalThis.fetch(input, init));
+  const base: typeof fetch = (input, init) => (unwrappedFetch ? unwrappedFetch(input, init) : globalThis.fetch(input, init));
   return withLedger(base, opts);
 }
 
@@ -681,6 +689,16 @@ export function recordStyleRequest(url: string): LedgerEntry {
   }
   const id = record({ host, method: "GET", bytesOut: 0, bytesIn: null, category: "third-party", reason: "A stylesheet (theme or CSS snippet) loaded it", policy: getAiPolicy(), decision: "allowed" });
   return entries.find((x) => x.id === id)!;
+}
+
+/** A plain (readable) backup archive to the user's WebDAV server (R8-M2); "blocked" under local-only, and then not sent. */
+export function recordPlainBackup(url: string, bytesOut: number): LedgerEntry {
+  const policy = getAiPolicy();
+  const decision = blockedByPolicy("third-party", policy) ? "blocked" : "allowed";
+  const id = record({ host: hostOf(url), method: "PUT", bytesOut, bytesIn: null, category: "third-party", reason: "Plain backup to your WebDAV server (the vault archive, not encrypted)", policy, decision });
+  const entry = entries.find((x) => x.id === id)!;
+  if (decision === "blocked") onBlocked?.(entry);
+  return entry;
 }
 
 /** Response size and status of a recorded request. */

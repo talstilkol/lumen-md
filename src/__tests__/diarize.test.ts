@@ -2,8 +2,10 @@
  * Plan W2.7 — speaker identification: the pyannote-3.1-shaped pieces
  * (powerset decoding, windows, clustering, frames → turns), the pipeline
  * end to end with stand-in networks behind the seam, speakers on transcript
- * sentences, renaming once for the whole note, and the DER used for the
- * acceptance on the golden recordings.
+ * sentences, renaming once for the whole note, and the DER scorer used for
+ * the acceptance on the golden recordings. No test here measures DER: the
+ * pipeline runs on stand-in networks. DER is not measured yet
+ * (scripts/eval/der.mjs, plan W10.B7).
  */
 import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
@@ -172,7 +174,11 @@ describe("the diarization pipeline behind its seam (W2.7)", () => {
     await expect(diarize(new Float32Array(16), { ort: fakeOrt(), load: async () => new Uint8Array(), fbank: () => [] })).rejects.toThrow(/not pinned/);
   });
 
-  it("finds both speakers of a 25 s meeting with DER under 5%", async () => {
+  // Not a DER measurement (plan W10.B7, audit W2.7): the networks are stand-ins
+  // (fakeOrt) and the audio is built to match them, so this only shows the
+  // post-processing recovers the labels it was given. A real DER needs real
+  // speech and pyannote: scripts/eval/der.mjs.
+  it("post-processing recovers the labels encoded in the stand-in audio (2 speakers, 25 s)", async () => {
     const ort = fakeOrt();
     const loaded: string[] = [];
     const progress: number[] = [];

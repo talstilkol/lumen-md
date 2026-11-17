@@ -16,6 +16,7 @@
  * Loaded with the review bridge after startup; nothing here is in the
  * startup bundle.
  */
+import { setVisibleInterval } from "../lib/visibleInterval";
 import { onStagedChanges, stageChange } from "./staging";
 import type { StagedChange } from "./types";
 
@@ -152,13 +153,13 @@ export function createMcpInbox(ws: InboxWorkspace, opts: { intervalMs?: number; 
   const onFocus = () => void sync().catch(() => {
     // why: a failed sync on focus is retried on the next focus or interval
   });
-  const timer = setInterval(onFocus, opts.intervalMs ?? 10_000);
+  const stopTimer = setVisibleInterval(onFocus, opts.intervalMs ?? 10_000);
   if (typeof window !== "undefined") window.addEventListener("focus", onFocus);
   return {
     sync,
     stop() {
       stopped = true;
-      clearInterval(timer);
+      stopTimer();
       if (typeof window !== "undefined") window.removeEventListener("focus", onFocus);
       off();
     },

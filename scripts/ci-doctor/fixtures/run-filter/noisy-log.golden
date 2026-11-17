@@ -1,0 +1,10 @@
+generic
+3 שורות עם שגיאה
+---
+[build] compiling module 0... ok  [×400]
+ERROR: failed to resolve import "@/lib/db" from src/app/page.tsx
+[build] retrying cache warmup ok  [×200]
+Traceback (most recent call last):
+  File "build.py", line 12, in <module>
+    run()
+KeyError: 'DATABASE_URL'

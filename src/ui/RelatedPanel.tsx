@@ -8,6 +8,7 @@
  *
  * Lazy: mounted by "Related notes: show / hide"; never in the startup bundle.
  */
+import { setVisibleInterval } from "../lib/visibleInterval";
 import { useEffect, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { StateEffect } from "@codemirror/state";
@@ -181,10 +182,10 @@ export async function toggleRelatedPanel(getView: () => EditorView | null): Prom
   };
   attach();
   // The editor may be rebuilt (mode switch, another note): re-attach; refresh the index and names now and then.
-  const timer = setInterval(() => {
+  const stopAttach = setVisibleInterval(() => {
     attach();
   }, 1000);
-  const refresh = setInterval(() => {
+  const stopRefresh = setVisibleInterval(() => {
     void ensureIndex(false, { checked: true }).then(() => {
       titles = titleEntries(indexedFiles().map((f) => f.path));
     });
@@ -194,8 +195,8 @@ export async function toggleRelatedPanel(getView: () => EditorView | null): Prom
   document.body.appendChild(el);
   const root = createRoot(el);
   const stop = () => {
-    clearInterval(timer);
-    clearInterval(refresh);
+    stopAttach();
+    stopRefresh();
     // The plugin stays in this editor until it is rebuilt; with no panel it only clears its hints.
     host.pause = () => [];
     mounted = null;

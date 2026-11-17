@@ -6,13 +6,18 @@
  *   GET    /v1/vault/o/            → {"names": [...]}
  *   GET    /v1/vault/o/<name>      → bytes + ETag
  *   PUT    /v1/vault/o/<name>      If-Match / If-None-Match: *
- *   DELETE /v1/vault/o/<name>
+ *   DELETE /v1/vault/o/<name>      If-Match (412 lost race)
  *   GET    /healthz                {"ok":true,"service":"lumen-vault-relay"} (also / and /health;
  *                                   exact paths, so never an object's name)
  *
  * It is the same relay as the Node server: every request goes to
  * createVaultRelay() from sync-server/vault-relay.js, unchanged in what it
- * checks (tokens, sizes, the limits, the proof of work). Only the parts a
+ * checks (tokens, sizes, the limits, the proof of work, and in role spaces,
+ * plan W12.S4, the admin-signed ACL and each write's Ed25519 writer
+ * signature: sync-server/vault-relay-roles.js, verified with the Worker's
+ * WebCrypto; the per-signer counters that stop replays are an object of the
+ * space in this Durable Object's storage). Every request header reaches it
+ * as sent (X-Lumen-Role carries a signed delete). Only the parts a
  * Node process keeps on its disk or in its memory live here in the Durable
  * Object's storage:
  *   - the objects (`m|` metadata, `d|` chunks of CHUNK bytes; a SQLite
@@ -371,7 +376,7 @@ export class VaultRelay {
       maxSpaceBytes: num(e.VAULT_RELAY_MAX_SPACE, 128 * 1024 * 1024),
       maxTotalBytes: num(e.VAULT_RELAY_MAX_TOTAL, 768 * 1024 * 1024),
       ratePerMinute: num(e.VAULT_RELAY_RATE, 600),
-      retentionDays: num(e.VAULT_RELAY_RETENTION_DAYS, 180),
+      retentionDays: num(e.VAULT_RELAY_RETENTION_DAYS, 90),
       newSpacesPerDay: num(e.VAULT_RELAY_NEW_SPACES_PER_DAY, 5),
       newSpacesPer48: e.VAULT_RELAY_NEW_SPACES_PER_48 ? num(e.VAULT_RELAY_NEW_SPACES_PER_48, 80) : undefined,
       addressBytesPerDay: num(e.VAULT_RELAY_ADDRESS_BYTES_PER_DAY, 128 * 1024 * 1024),

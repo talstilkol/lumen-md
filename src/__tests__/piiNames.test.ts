@@ -69,6 +69,52 @@ describe("the name finder's fallback (W10.C23)", () => {
     expect(t("pii.preview.noNames")).toMatch(/^Names are not hidden/);
   });
 
+  it("every state: the preview and the log say names are hidden exactly when every name in the text is hidden", async () => {
+    // "0 states where the user thinks names are hidden and they are not" (W10.C23):
+    // no finder, a finder that finds them, one that throws (Ollama stopped
+    // mid-request: patterns only), one that fails on the second message only,
+    // and one cut off by the user's Esc. (A finder that runs and misses a name
+    // is a recall question, measured by piiGolden, not a state.)
+    const { redactionLog } = await import("../ai/piiRedactor");
+    setPreviewEnabled(true);
+    const finds = async (text: string) => spansOf(text, ["Dana Levi", "Yossi Cohen"]);
+    let calls = 0;
+    const states: Array<[string, Parameters<typeof __setNer>[0], number]> = [
+      ["no finder", null, 1],
+      ["finds the names", finds, 2],
+      ["throws: Ollama stopped", async () => Promise.reject(new Error("connection refused")), 2],
+      ["fails on the second message only", async (text: string) => (++calls === 2 ? Promise.reject(new Error("timeout")) : finds(text)), 2],
+    ];
+    for (const [label, ner, n] of states) {
+      calls = 0;
+      const seen: boolean[] = [];
+      __setPreview(async (msgs, _c, names) => {
+        seen.push(names);
+        // What the user is told must match what is about to leave the device.
+        const sent = msgs.map((m) => m.content).join("\n");
+        const leaked = sent.includes("Dana Levi") || sent.includes("Yossi Cohen");
+        expect(names && leaked, `${label}: the preview claims names are hidden, but the text still has them`).toBe(false);
+        return true;
+      });
+      __setNer(ner);
+      const before = redactionLog().length;
+      const messages = Array.from({ length: n }, () => ({ role: "user", content: TEXT }));
+      const { messages: sent } = await redactForCloud(messages, "anthropic");
+      const leaked = sent.some((m) => m.content.includes("Dana Levi"));
+      expect(seen, label).toEqual([!leaked && ner !== null && ner !== undefined]);
+      const rec = redactionLog().slice(before);
+      expect(rec.length, label).toBe(1);
+      expect(rec[0].names, label).toBe(seen[0]);
+    }
+    // Esc during the name search: nothing is sent and nothing is claimed.
+    const ac = new AbortController();
+    __setNer(async (_t, sig) => {
+      ac.abort();
+      throw sig?.reason ?? new DOMException("aborted", "AbortError");
+    });
+    await expect(redactForCloud([{ role: "user", content: TEXT }], "anthropic", ac.signal)).rejects.toThrow();
+  });
+
   it("bert-base-NER (English, MIT) is registered for conversion, with its sha256 owed to the first run", () => {
     const reg = JSON.parse(readFileSync(join(process.cwd(), "models/registry.json"), "utf8"));
     const all = (reg.models ?? reg) as Array<{ id: string; license: string; hosting?: { via?: string; tag?: string }; notes?: string }>;
