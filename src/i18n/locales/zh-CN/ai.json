@@ -1,6 +1,5 @@
 {
-  "agent.grammar.found.one": "发现 {n} 个问题：\n\n{list}",
-  "agent.grammar.found.other": "发现 {n} 个问题：\n\n{list}",
+  "agent.grammar.found": "{n, plural, other {发现 # 个问题：\n\n{list}}}",
   "agent.links.needWorkspace": "请先从工作区打开该文件——链接代理会读取相邻的笔记。",
   "agent.links.no": "否",
   "agent.links.prompt": "找到 {n} 条链接建议：\n\n{summary}\n\n全部应用？（输入“{no}”跳过）",

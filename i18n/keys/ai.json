@@ -4,18 +4,9 @@
   "source": "src/i18n/locales/en/ai.json",
   "entries": [
     {
-      "key": "agent.grammar.found.one",
-      "en": "Found {n} issue:\n\n{list}",
+      "key": "agent.grammar.found",
+      "en": "{n, plural, one {Found # issue:\n\n{list}} other {Found # issues:\n\n{list}}}",
       "vars": [
-        "n",
-        "list"
-      ]
-    },
-    {
-      "key": "agent.grammar.found.other",
-      "en": "Found {n} issues:\n\n{list}",
-      "vars": [
-        "n",
         "list"
       ]
     },

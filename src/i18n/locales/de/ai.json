@@ -1,6 +1,5 @@
 {
-  "agent.grammar.found.one": "{n} Problem gefunden:\n\n{list}",
-  "agent.grammar.found.other": "{n} Probleme gefunden:\n\n{list}",
+  "agent.grammar.found": "{n, plural, one {# Problem gefunden:\n\n{list}} other {# Probleme gefunden:\n\n{list}}}",
   "agent.links.needWorkspace": "Öffnen Sie die Datei zuerst aus Ihrem Arbeitsbereich — der Link-Agent liest benachbarte Notizen.",
   "agent.links.no": "nein",
   "agent.links.prompt": "{n} Link-Vorschläge gefunden:\n\n{summary}\n\nAlle übernehmen? ('{no}' eingeben zum Überspringen)",

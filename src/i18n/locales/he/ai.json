@@ -1,6 +1,5 @@
 {
-  "agent.grammar.found.one": "נמצאה {n} בעיה:\n\n{list}",
-  "agent.grammar.found.other": "נמצאו {n} בעיות:\n\n{list}",
+  "agent.grammar.found": "{n, plural, one {נמצאה בעיה אחת:\n\n{list}} two {נמצאו # בעיות:\n\n{list}} other {נמצאו # בעיות:\n\n{list}}}",
   "agent.links.needWorkspace": "קודם פתחו את הקובץ מסביבת העבודה — סוכן הקישורים קורא את הפתקים השכנים.",
   "agent.links.no": "לא",
   "agent.links.prompt": "נמצאו {n} הצעות קישור:\n\n{summary}\n\nלהחיל את כולן? (הקלידו '{no}' כדי לדלג)",

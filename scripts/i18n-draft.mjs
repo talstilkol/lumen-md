@@ -16,7 +16,8 @@
  */
 import { argv, env, exit } from "node:process";
 import { resolve } from "node:path";
-import { LOCALES_DIR, readLocale, writeLocale } from "./lib/i18n-files.mjs";
+import { LOCALES_DIR, ROOT, readLocale, writeLocale } from "./lib/i18n-files.mjs";
+import { readGlossary } from "./lib/i18n-glossary.mjs";
 import { DRAFT_LOCALES, REVIEW_DIR, approve, draftMissing, fakeEngine, ollamaEngine, readNeedsReview, unreviewed, writeNeedsReview } from "./lib/i18n-draft.mjs";
 
 const args = {};
@@ -53,7 +54,7 @@ if (typeof args.approve === "string") {
 const engine =
   args.engine === "fake"
     ? fakeEngine()
-    : ollamaEngine({ host: env.OLLAMA_HOST ?? "http://127.0.0.1:11434", model: typeof args.model === "string" ? args.model : "qwen2.5:7b" });
+    : ollamaEngine({ host: env.OLLAMA_HOST ?? "http://127.0.0.1:11434", model: typeof args.model === "string" ? args.model : "qwen2.5:7b", glossary: readGlossary(ROOT) });
 
 const locales = Object.fromEntries(langs.map((l) => [l, readLocale(l, localesDir)]));
 const { drafts, rejected } = await draftMissing({ en, locales, engine, keys, review });

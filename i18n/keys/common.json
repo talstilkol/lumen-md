@@ -636,18 +636,10 @@
       "vars": []
     },
     {
-      "key": "agentReview.toast.one",
-      "en": "{agent} proposed a change. Nothing is written until you approve it.",
+      "key": "agentReview.toast",
+      "en": "{n, plural, one {{agent} proposed a change. Nothing is written until you approve it.} other {{agent} proposed # changes. Nothing is written until you approve them.}}",
       "vars": [
         "agent"
-      ]
-    },
-    {
-      "key": "agentReview.toast.other",
-      "en": "{agent} proposed {n} changes. Nothing is written until you approve them.",
-      "vars": [
-        "agent",
-        "n"
       ]
     },
     {
@@ -4559,10 +4551,8 @@
     },
     {
       "key": "db.count",
-      "en": "{count} notes",
-      "vars": [
-        "count"
-      ]
+      "en": "{count, plural, one {# note} other {# notes}}",
+      "vars": []
     },
     {
       "key": "db.empty",
@@ -10148,88 +10138,39 @@
       "vars": []
     },
     {
-      "key": "graphAlt.kind.concept.one",
-      "en": "1 concept",
+      "key": "graphAlt.kind.concept",
+      "en": "{n, plural, one {1 concept} other {# concepts}}",
       "vars": []
     },
     {
-      "key": "graphAlt.kind.concept.other",
-      "en": "{n} concepts",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.kind.event.one",
-      "en": "1 event",
+      "key": "graphAlt.kind.event",
+      "en": "{n, plural, one {1 event} other {# events}}",
       "vars": []
     },
     {
-      "key": "graphAlt.kind.event.other",
-      "en": "{n} events",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.kind.law.one",
-      "en": "1 law",
+      "key": "graphAlt.kind.law",
+      "en": "{n, plural, one {1 law} other {# laws}}",
       "vars": []
     },
     {
-      "key": "graphAlt.kind.law.other",
-      "en": "{n} laws",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.kind.organization.one",
-      "en": "1 organization",
+      "key": "graphAlt.kind.organization",
+      "en": "{n, plural, one {1 organization} other {# organizations}}",
       "vars": []
     },
     {
-      "key": "graphAlt.kind.organization.other",
-      "en": "{n} organizations",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.kind.person.one",
-      "en": "1 person",
+      "key": "graphAlt.kind.person",
+      "en": "{n, plural, one {1 person} other {# people}}",
       "vars": []
     },
     {
-      "key": "graphAlt.kind.person.other",
-      "en": "{n} people",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.kind.place.one",
-      "en": "1 place",
+      "key": "graphAlt.kind.place",
+      "en": "{n, plural, one {1 place} other {# places}}",
       "vars": []
     },
     {
-      "key": "graphAlt.kind.place.other",
-      "en": "{n} places",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.kind.source.one",
-      "en": "1 source",
+      "key": "graphAlt.kind.source",
+      "en": "{n, plural, one {1 source} other {# sources}}",
       "vars": []
-    },
-    {
-      "key": "graphAlt.kind.source.other",
-      "en": "{n} sources",
-      "vars": [
-        "n"
-      ]
     },
     {
       "key": "graphAlt.list.back",
@@ -10302,40 +10243,19 @@
       "vars": []
     },
     {
-      "key": "graphAlt.summary.clusters.one",
-      "en": "1 cluster",
+      "key": "graphAlt.summary.clusters",
+      "en": "{n, plural, one {1 cluster} other {# clusters}}",
       "vars": []
     },
     {
-      "key": "graphAlt.summary.clusters.other",
-      "en": "{n} clusters",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.summary.components.one",
-      "en": "1 connected group",
+      "key": "graphAlt.summary.components",
+      "en": "{n, plural, one {1 connected group} other {# connected groups}}",
       "vars": []
     },
     {
-      "key": "graphAlt.summary.components.other",
-      "en": "{n} connected groups",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.summary.edges.one",
-      "en": "1 link",
+      "key": "graphAlt.summary.edges",
+      "en": "{n, plural, one {1 link} other {# links}}",
       "vars": []
-    },
-    {
-      "key": "graphAlt.summary.edges.other",
-      "en": "{n} links",
-      "vars": [
-        "n"
-      ]
     },
     {
       "key": "graphAlt.summary.empty",
@@ -10350,28 +10270,14 @@
       ]
     },
     {
-      "key": "graphAlt.summary.nodes.one",
-      "en": "1 node",
+      "key": "graphAlt.summary.nodes",
+      "en": "{n, plural, one {1 node} other {# nodes}}",
       "vars": []
     },
     {
-      "key": "graphAlt.summary.nodes.other",
-      "en": "{n} nodes",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.summary.unconnected.one",
-      "en": "1 with no link",
+      "key": "graphAlt.summary.unconnected",
+      "en": "{n, plural, one {1 with no link} other {# with no link}}",
       "vars": []
-    },
-    {
-      "key": "graphAlt.summary.unconnected.other",
-      "en": "{n} with no link",
-      "vars": [
-        "n"
-      ]
     },
     {
       "key": "graphClusters.again",
@@ -12341,18 +12247,9 @@
       "vars": []
     },
     {
-      "key": "israeliTime.left.one",
-      "en": "{n} working day left",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "israeliTime.left.other",
-      "en": "{n} working days left",
-      "vars": [
-        "n"
-      ]
+      "key": "israeliTime.left",
+      "en": "{n, plural, one {# working day left} other {# working days left}}",
+      "vars": []
     },
     {
       "key": "israeliTime.moved",
@@ -12363,18 +12260,9 @@
       ]
     },
     {
-      "key": "israeliTime.overdue.one",
-      "en": "{n} working day overdue",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "israeliTime.overdue.other",
-      "en": "{n} working days overdue",
-      "vars": [
-        "n"
-      ]
+      "key": "israeliTime.overdue",
+      "en": "{n, plural, one {# working day overdue} other {# working days overdue}}",
+      "vars": []
     },
     {
       "key": "jewishLang.dict.downloadConfirm",
@@ -19620,10 +19508,8 @@
     },
     {
       "key": "status.chars",
-      "en": "{n} chars",
-      "vars": [
-        "n"
-      ]
+      "en": "{n, plural, one {# char} other {# chars}}",
+      "vars": []
     },
     {
       "key": "status.chars.title",
@@ -19796,10 +19682,8 @@
     },
     {
       "key": "status.words",
-      "en": "{n} words",
-      "vars": [
-        "n"
-      ]
+      "en": "{n, plural, one {# word} other {# words}}",
+      "vars": []
     },
     {
       "key": "status.words.title",

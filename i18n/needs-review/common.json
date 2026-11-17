@@ -3513,118 +3513,6 @@
     "ru": "1c23ah5",
     "zh-CN": "1c23ah5"
   },
-  "graphAlt.kind.concept.one": {
-    "ar": "2hiwvc",
-    "de": "2hiwvc",
-    "fr": "2hiwvc",
-    "ja": "2hiwvc",
-    "ru": "2hiwvc",
-    "zh-CN": "2hiwvc"
-  },
-  "graphAlt.kind.concept.other": {
-    "ar": "symjok",
-    "de": "symjok",
-    "fr": "symjok",
-    "ja": "symjok",
-    "ru": "symjok",
-    "zh-CN": "symjok"
-  },
-  "graphAlt.kind.event.one": {
-    "ar": "apu3m4",
-    "de": "apu3m4",
-    "fr": "apu3m4",
-    "ja": "apu3m4",
-    "ru": "apu3m4",
-    "zh-CN": "apu3m4"
-  },
-  "graphAlt.kind.event.other": {
-    "ar": "1yvbggg",
-    "de": "1yvbggg",
-    "fr": "1yvbggg",
-    "ja": "1yvbggg",
-    "ru": "1yvbggg",
-    "zh-CN": "1yvbggg"
-  },
-  "graphAlt.kind.law.one": {
-    "ar": "l463hw",
-    "de": "l463hw",
-    "fr": "l463hw",
-    "ja": "l463hw",
-    "ru": "l463hw",
-    "zh-CN": "l463hw"
-  },
-  "graphAlt.kind.law.other": {
-    "ar": "1n6bkoc",
-    "de": "1n6bkoc",
-    "fr": "1n6bkoc",
-    "ja": "1n6bkoc",
-    "ru": "1n6bkoc",
-    "zh-CN": "1n6bkoc"
-  },
-  "graphAlt.kind.organization.one": {
-    "ar": "19cp237",
-    "de": "19cp237",
-    "fr": "19cp237",
-    "ja": "19cp237",
-    "ru": "19cp237",
-    "zh-CN": "19cp237"
-  },
-  "graphAlt.kind.organization.other": {
-    "ar": "14d9ccn",
-    "de": "14d9ccn",
-    "fr": "14d9ccn",
-    "ja": "14d9ccn",
-    "ru": "14d9ccn",
-    "zh-CN": "14d9ccn"
-  },
-  "graphAlt.kind.person.one": {
-    "ar": "uv63fl",
-    "de": "uv63fl",
-    "fr": "uv63fl",
-    "ja": "uv63fl",
-    "ru": "uv63fl",
-    "zh-CN": "uv63fl"
-  },
-  "graphAlt.kind.person.other": {
-    "ar": "eclv1e",
-    "de": "eclv1e",
-    "fr": "eclv1e",
-    "ja": "eclv1e",
-    "ru": "eclv1e",
-    "zh-CN": "eclv1e"
-  },
-  "graphAlt.kind.place.one": {
-    "ar": "6ojvfz",
-    "de": "6ojvfz",
-    "fr": "6ojvfz",
-    "ja": "6ojvfz",
-    "ru": "6ojvfz",
-    "zh-CN": "6ojvfz"
-  },
-  "graphAlt.kind.place.other": {
-    "ar": "1ixtxip",
-    "de": "1ixtxip",
-    "fr": "1ixtxip",
-    "ja": "1ixtxip",
-    "ru": "1ixtxip",
-    "zh-CN": "1ixtxip"
-  },
-  "graphAlt.kind.source.one": {
-    "ar": "1cx2h8x",
-    "de": "1cx2h8x",
-    "fr": "1cx2h8x",
-    "ja": "1cx2h8x",
-    "ru": "1cx2h8x",
-    "zh-CN": "1cx2h8x"
-  },
-  "graphAlt.kind.source.other": {
-    "ar": "17scjz9",
-    "de": "17scjz9",
-    "fr": "17scjz9",
-    "ja": "17scjz9",
-    "ru": "17scjz9",
-    "zh-CN": "17scjz9"
-  },
   "graphAlt.list.back": {
     "ar": "1hzmxtu",
     "de": "1hzmxtu",
@@ -3729,54 +3617,6 @@
     "ru": "10b6rop",
     "zh-CN": "10b6rop"
   },
-  "graphAlt.summary.clusters.one": {
-    "ar": "1i21wcu",
-    "de": "1i21wcu",
-    "fr": "1i21wcu",
-    "ja": "1i21wcu",
-    "ru": "1i21wcu",
-    "zh-CN": "1i21wcu"
-  },
-  "graphAlt.summary.clusters.other": {
-    "ar": "14yhaem",
-    "de": "14yhaem",
-    "fr": "14yhaem",
-    "ja": "14yhaem",
-    "ru": "14yhaem",
-    "zh-CN": "14yhaem"
-  },
-  "graphAlt.summary.components.one": {
-    "ar": "1bkcl3s",
-    "de": "1bkcl3s",
-    "fr": "1bkcl3s",
-    "ja": "1bkcl3s",
-    "ru": "1bkcl3s",
-    "zh-CN": "1bkcl3s"
-  },
-  "graphAlt.summary.components.other": {
-    "ar": "1vr0gx0",
-    "de": "1vr0gx0",
-    "fr": "1vr0gx0",
-    "ja": "1vr0gx0",
-    "ru": "1vr0gx0",
-    "zh-CN": "1vr0gx0"
-  },
-  "graphAlt.summary.edges.one": {
-    "ar": "19az604",
-    "de": "19az604",
-    "fr": "19az604",
-    "ja": "19az604",
-    "ru": "19az604",
-    "zh-CN": "19az604"
-  },
-  "graphAlt.summary.edges.other": {
-    "ar": "1moxiru",
-    "de": "1moxiru",
-    "fr": "1moxiru",
-    "ja": "1moxiru",
-    "ru": "1moxiru",
-    "zh-CN": "1moxiru"
-  },
   "graphAlt.summary.empty": {
     "ar": "4l7swe",
     "de": "4l7swe",
@@ -3792,38 +3632,6 @@
     "ja": "kx9whf",
     "ru": "kx9whf",
     "zh-CN": "kx9whf"
-  },
-  "graphAlt.summary.nodes.one": {
-    "ar": "rub5hs",
-    "de": "rub5hs",
-    "fr": "rub5hs",
-    "ja": "rub5hs",
-    "ru": "rub5hs",
-    "zh-CN": "rub5hs"
-  },
-  "graphAlt.summary.nodes.other": {
-    "ar": "1q5viw6",
-    "de": "1q5viw6",
-    "fr": "1q5viw6",
-    "ja": "1q5viw6",
-    "ru": "1q5viw6",
-    "zh-CN": "1q5viw6"
-  },
-  "graphAlt.summary.unconnected.one": {
-    "ar": "1g9tbcd",
-    "de": "1g9tbcd",
-    "fr": "1g9tbcd",
-    "ja": "1g9tbcd",
-    "ru": "1g9tbcd",
-    "zh-CN": "1g9tbcd"
-  },
-  "graphAlt.summary.unconnected.other": {
-    "ar": "obstqs",
-    "de": "obstqs",
-    "fr": "obstqs",
-    "ja": "obstqs",
-    "ru": "obstqs",
-    "zh-CN": "obstqs"
   },
   "graphClusters.again": {
     "ar": "112qn3u",
@@ -7200,5 +7008,314 @@
     "ja": "1ccwmzq",
     "ru": "1ccwmzq",
     "zh-CN": "1ccwmzq"
+  },
+  "graphAlt.kind.concept": {
+    "ar": "fo5mtu",
+    "ru": "fo5mtu",
+    "fr": "fo5mtu",
+    "de": "fo5mtu",
+    "ja": "fo5mtu",
+    "zh-CN": "fo5mtu"
+  },
+  "graphAlt.kind.event": {
+    "ar": "1bh2vfm",
+    "ru": "1bh2vfm",
+    "fr": "1bh2vfm",
+    "de": "1bh2vfm",
+    "ja": "1bh2vfm",
+    "zh-CN": "1bh2vfm"
+  },
+  "graphAlt.kind.law": {
+    "ar": "1kk9rga",
+    "ru": "1kk9rga",
+    "fr": "1kk9rga",
+    "de": "1kk9rga",
+    "ja": "1kk9rga",
+    "zh-CN": "1kk9rga"
+  },
+  "graphAlt.kind.organization": {
+    "ar": "1pcqnhu",
+    "ru": "1pcqnhu",
+    "fr": "1pcqnhu",
+    "de": "1pcqnhu",
+    "ja": "1pcqnhu",
+    "zh-CN": "1pcqnhu"
+  },
+  "graphAlt.kind.person": {
+    "ar": "1iqo9af",
+    "ru": "1iqo9af",
+    "fr": "1iqo9af",
+    "de": "1iqo9af",
+    "ja": "1iqo9af",
+    "zh-CN": "1iqo9af"
+  },
+  "graphAlt.kind.place": {
+    "ar": "b699ha",
+    "ru": "b699ha",
+    "fr": "b699ha",
+    "de": "b699ha",
+    "ja": "b699ha",
+    "zh-CN": "b699ha"
+  },
+  "graphAlt.kind.source": {
+    "ar": "byjrri",
+    "ru": "byjrri",
+    "fr": "byjrri",
+    "de": "byjrri",
+    "ja": "byjrri",
+    "zh-CN": "byjrri"
+  },
+  "graphAlt.summary.clusters": {
+    "ar": "1bpqprm",
+    "ru": "1bpqprm",
+    "fr": "1bpqprm",
+    "de": "1bpqprm",
+    "ja": "1bpqprm",
+    "zh-CN": "1bpqprm"
+  },
+  "graphAlt.summary.components": {
+    "ar": "j9obje",
+    "ru": "j9obje",
+    "fr": "j9obje",
+    "de": "j9obje",
+    "ja": "j9obje",
+    "zh-CN": "j9obje"
+  },
+  "graphAlt.summary.edges": {
+    "ar": "14l99qg",
+    "ru": "14l99qg",
+    "fr": "14l99qg",
+    "de": "14l99qg",
+    "ja": "14l99qg",
+    "zh-CN": "14l99qg"
+  },
+  "graphAlt.summary.nodes": {
+    "ar": "9qit6g",
+    "ru": "9qit6g",
+    "fr": "9qit6g",
+    "de": "9qit6g",
+    "ja": "9qit6g",
+    "zh-CN": "9qit6g"
+  },
+  "graphAlt.summary.unconnected": {
+    "ar": "p80r4l",
+    "ru": "p80r4l",
+    "fr": "p80r4l",
+    "de": "p80r4l",
+    "ja": "p80r4l",
+    "zh-CN": "p80r4l"
+  },
+  "agentReview.toast": {
+    "ar": "crri3d",
+    "ru": "crri3d",
+    "fr": "crri3d",
+    "de": "crri3d",
+    "ja": "crri3d",
+    "zh-CN": "crri3d"
+  },
+  "israeliTime.left": {
+    "ar": "1iw9p2m",
+    "ru": "1iw9p2m",
+    "fr": "1iw9p2m",
+    "de": "1iw9p2m",
+    "ja": "1iw9p2m",
+    "zh-CN": "1iw9p2m"
+  },
+  "israeliTime.overdue": {
+    "ar": "6kbbg4",
+    "ru": "6kbbg4",
+    "fr": "6kbbg4",
+    "de": "6kbbg4",
+    "ja": "6kbbg4",
+    "zh-CN": "6kbbg4"
+  },
+  "db.count": {
+    "ar": "cl67bp",
+    "ru": "cl67bp",
+    "fr": "cl67bp",
+    "de": "cl67bp",
+    "ja": "cl67bp",
+    "zh-CN": "cl67bp"
+  },
+  "status.words": {
+    "ar": "18vvf6q",
+    "ru": "18vvf6q",
+    "fr": "18vvf6q",
+    "de": "18vvf6q",
+    "ja": "18vvf6q",
+    "zh-CN": "18vvf6q"
+  },
+  "status.chars": {
+    "ar": "tzxp96",
+    "ru": "tzxp96",
+    "fr": "tzxp96",
+    "de": "tzxp96",
+    "ja": "tzxp96",
+    "zh-CN": "tzxp96"
+  },
+  "asOf.date": {
+    "ja": "it3kw2"
+  },
+  "asOf.query": {
+    "ja": "1blpjwy"
+  },
+  "asOf.none": {
+    "ja": "dzy0gj"
+  },
+  "e2ee.sync.provider": {
+    "ja": "1bjo1up"
+  },
+  "e2ee.sync.newVault": {
+    "ja": "1hmz610"
+  },
+  "e2ee.sync.existingVault": {
+    "ja": "1mzaja2"
+  },
+  "e2ee.sync.migrate.found": {
+    "ja": "1m2v0bh"
+  },
+  "library.noVault": {
+    "ja": "1dut9ia"
+  },
+  "organizer.none": {
+    "ja": "1j3k29z"
+  },
+  "organizer.title": {
+    "ja": "1sv422n"
+  },
+  "pluginTrust.cap.vault-read": {
+    "ja": "1bmayvj",
+    "de": "1bmayvj"
+  },
+  "pluginTrust.cap.vault-write": {
+    "ja": "17dohwv",
+    "de": "17dohwv"
+  },
+  "vaultCheck.title": {
+    "ja": "1w4rppg",
+    "de": "1w4rppg"
+  },
+  "vaultCheck.checking": {
+    "ja": "1qufwge",
+    "de": "1qufwge"
+  },
+  "vaultCheck.failed": {
+    "ja": "1iacjuh",
+    "de": "1iacjuh"
+  },
+  "storage.eviction.body": {
+    "ja": "16yk32f"
+  },
+  "storage.eviction.export": {
+    "ja": "1g7hwjb"
+  },
+  "error.notFound": {
+    "ja": "1skn1vd"
+  },
+  "attachCleanup.ask.message": {
+    "ja": "mc7a4w"
+  },
+  "attachCleanup.ask.trash": {
+    "ja": "10vwdqx"
+  },
+  "attachCleanup.setting.always": {
+    "ja": "ibxz28"
+  },
+  "importWizard.reason.trashed": {
+    "ja": "rs0gnm",
+    "ar": "rs0gnm"
+  },
+  "voiceCmd.confirmDelete": {
+    "ja": "1p45sk1",
+    "zh-CN": "1p45sk1"
+  },
+  "voiceCmd.confirmOk": {
+    "ja": "jenovv",
+    "zh-CN": "jenovv"
+  },
+  "snippets.intro": {
+    "de": "1hw18fw"
+  },
+  "error.quota": {
+    "de": "sl5egq"
+  },
+  "cite.noLibrary": {
+    "de": "yndjjl"
+  },
+  "cite.synced": {
+    "de": "1o3pggm"
+  },
+  "desktop.unknownVault": {
+    "de": "12c66z5"
+  },
+  "importWizard.how.obsidian": {
+    "de": "1kytgdd"
+  },
+  "importWizard.undone": {
+    "de": "1uvy7x6"
+  },
+  "importWizard.error.failed": {
+    "de": "1v4r13l"
+  },
+  "desktop.capture.failed": {
+    "de": "6ok9mt"
+  },
+  "askScope.tag": {
+    "fr": "14c0x23"
+  },
+  "bulkEdit.op.addTag": {
+    "fr": "fjy52r"
+  },
+  "bulkEdit.op.removeTag": {
+    "fr": "1or5bye"
+  },
+  "viz.structure.title.tags": {
+    "fr": "1avrq0s"
+  },
+  "hl.tag.all": {
+    "fr": "1ooyk8l"
+  },
+  "viz.structure.tags": {
+    "fr": "wy2g8w"
+  },
+  "mobileBar.tag": {
+    "fr": "1wybrxv"
+  },
+  "entityGraph.view.tag": {
+    "fr": "d4z2wo"
+  },
+  "hl.tag": {
+    "fr": "1wybrxv"
+  },
+  "types.studio.tag": {
+    "fr": "1irodmg"
+  },
+  "hl.tag.add": {
+    "fr": "51zm3i"
+  },
+  "hl.tag.remove": {
+    "fr": "17xlm77"
+  },
+  "e2ee.roles.title": {
+    "ar": "httdro"
+  },
+  "latex.missingKeys": {
+    "ar": "5hlphc",
+    "de": "5hlphc"
+  },
+  "contacts.imported": {
+    "ru": "1yu2kyy",
+    "de": "1yu2kyy",
+    "ja": "1yu2kyy"
+  },
+  "status.sync.syncing": {
+    "fr": "sgz23q",
+    "de": "sgz23q"
+  },
+  "backlinksList.noMatch": {
+    "de": "nmfkh0"
+  },
+  "backlinksList.search": {
+    "de": "8mzu85"
   }
 }

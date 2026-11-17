@@ -1,6 +1,5 @@
 {
-  "agent.grammar.found.one": "{n} 件の問題が見つかりました:\n\n{list}",
-  "agent.grammar.found.other": "{n} 件の問題が見つかりました:\n\n{list}",
+  "agent.grammar.found": "{n, plural, other {# 件の問題が見つかりました:\n\n{list}}}",
   "agent.links.needWorkspace": "まずワークスペースからファイルを開いてください。リンクエージェントは近くのノートを読み取ります。",
   "agent.links.no": "いいえ",
   "agent.links.prompt": "{n} 件のリンク候補が見つかりました:\n\n{summary}\n\nすべて適用しますか？（スキップするには '{no}' と入力）",

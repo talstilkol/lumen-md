@@ -534,5 +534,73 @@
     "ja": "12myrs1",
     "ru": "12myrs1",
     "zh-CN": "12myrs1"
+  },
+  "cmd.ai.organize": {
+    "ja": "1fssnyf"
+  },
+  "cmd.vault.check": {
+    "ja": "4ge0kk",
+    "de": "4ge0kk"
+  },
+  "cmd.view.asOf.hint": {
+    "ja": "rzvoys"
+  },
+  "cmd.cite.syncZotero": {
+    "de": "1f9pvbk"
+  },
+  "cmd.file.sampleVault.researcher": {
+    "de": "1mzdogp"
+  },
+  "cmd.file.sampleVault.student": {
+    "de": "6rb1fi"
+  },
+  "cmd.file.sampleVault.writer": {
+    "de": "1r9ay0"
+  },
+  "cmd.help.diagnostics.hint": {
+    "de": "q3xfgc"
+  },
+  "cmd.research.litReview": {
+    "de": "4nsx2y"
+  },
+  "cmd.tools.autoTag.hint": {
+    "fr": "ec3uub"
+  },
+  "cmd.view.tags.hint": {
+    "fr": "9ohb5c"
+  },
+  "cmd.export.latexProject.hint": {
+    "ar": "12rykyr",
+    "de": "12rykyr"
+  },
+  "cmd.file.importVcard.hint": {
+    "ar": "1x99suq",
+    "ru": "1x99suq",
+    "fr": "1x99suq",
+    "de": "1x99suq",
+    "ja": "1x99suq",
+    "zh-CN": "1x99suq"
+  },
+  "cmd.sources.datagovInsert.hint": {
+    "ar": "w1iesk",
+    "ru": "w1iesk",
+    "fr": "w1iesk",
+    "de": "w1iesk",
+    "ja": "w1iesk",
+    "zh-CN": "w1iesk"
+  },
+  "cmd.view.tags": {
+    "ar": "1pftjsh",
+    "ru": "1pftjsh",
+    "ja": "1pftjsh",
+    "zh-CN": "1pftjsh"
+  },
+  "cmd.view.backlinks": {
+    "ar": "pa2eo1",
+    "ru": "pa2eo1",
+    "fr": "pa2eo1",
+    "de": "pa2eo1",
+    "ja": "pa2eo1",
+    "zh-CN": "pa2eo1"
   }
 }

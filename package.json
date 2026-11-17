@@ -83,7 +83,7 @@
     "perf:gate": "node scripts/perf-gate.mjs",
     "lighthouse:a11y": "node scripts/lighthouse-a11y.mjs",
     "i18n:extract": "node scripts/extract-i18n-keys.mjs",
-    "i18n:check": "node scripts/i18n-split.mjs --check && node scripts/extract-i18n-keys.mjs --check && node scripts/check-i18n-hardcoded.mjs",
+    "i18n:check": "node scripts/i18n-split.mjs --check && node scripts/extract-i18n-keys.mjs --check && node scripts/check-i18n-hardcoded.mjs && node scripts/i18n-plurals.mjs --check && node scripts/i18n-glossary.mjs --check",
     "i18n:hardcoded": "node scripts/check-i18n-hardcoded.mjs",
     "messages:check": "node scripts/check-raw-errors.mjs && node scripts/check-empty-states.mjs && node scripts/check-destructive.mjs",
     "i18n:drift": "node scripts/i18n-drift.mjs",

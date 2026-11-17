@@ -9,6 +9,7 @@ import { fillTemplate } from "./fill";
 import { platformKeys } from "../lib/platformKeys";
 import { detectLocale, systemLanguages } from "./detect";
 import { isFullLocale } from "./review";
+import { resolvePlural } from "./plural";
 
 // β.4 — `Locale` includes the 6 deferred locales so the type is stable
 // across the rest of the codebase. Bundles for ar / ru / fr / de / ja /
@@ -168,24 +169,67 @@ export function uiStringValues(): Set<string> {
   return out;
 }
 
-/** Translate `id` using the active locale, with optional `{name}` substitutions. */
+/**
+ * The BCP 47 tag numbers are written with: the UI language, plus the digits
+ * the user chose (W13.I5: `-u-nu-arab` for Arabic-Indic digits). The
+ * numerals module sets it; plain locale until then.
+ */
+let numberTag: () => string = () => activeLocale;
+export function setNumberLocale(tag: () => string): void {
+  numberTag = tag;
+}
+export function numberLocale(): string {
+  return numberTag();
+}
+
+/** `n` written for the UI language and the chosen digits. */
+export function formatNumber(n: number, opts?: Intl.NumberFormatOptions): string {
+  try {
+    return new Intl.NumberFormat(numberTag(), opts).format(n);
+  } catch {
+    return String(n);
+  }
+}
+
+/** A count passed as a var: a number, or a string of digits (callers that pass String(n)). */
+function countOf(v: string | number | undefined): number {
+  if (typeof v === "number") return v;
+  if (typeof v !== "string") return NaN;
+  const n = Number(v.trim());
+  return Number.isFinite(n) ? n : NaN;
+}
+
+/**
+ * Translate `id` using the active locale, with optional `{name}` substitutions.
+ * A value with a plural block (`{count, plural, one {…} other {…}}`, W13.I2)
+ * picks the CLDR form of the active language for `vars[count]`.
+ */
 export function t(id: string, vars?: Record<string, string | number>): string {
   const bundle = BUNDLES[activeLocale] ?? en;
+  const raw = bundle[id] ?? en[id] ?? id;
   // Mac-style shortcuts (⌘K) read as Ctrl+K on Windows / Linux (T45).
-  const template = platformKeys(bundle[id] ?? en[id] ?? id);
+  let template = platformKeys(raw);
+  if (template.includes("plural")) {
+    const arg = /\{\s*(\w+)\s*,\s*plural\s*,/.exec(template)?.[1];
+    const n = arg ? countOf(vars?.[arg]) : NaN;
+    const locale = raw === bundle[id] ? activeLocale : "en";
+    const resolved = resolvePlural(template, Number.isNaN(n) ? Infinity : n, locale, Number.isNaN(n) ? () => String(vars?.[arg ?? ""] ?? "") : formatNumber);
+    if (resolved !== null) template = resolved;
+  }
   if (!vars) return template;
   return fillTemplate(template, vars);
 }
 
 /**
- * Plural-aware translate. Picks `${base}.${category}` where category comes
- * from `Intl.PluralRules` for the active locale ("one", "two", "few", …),
- * falling back to `${base}.other`. `{n}` is substituted with the count.
- * Bundles only need `.one` + `.other`; locales with richer plural systems
- * (ar, ru) can use a count-neutral `.other` phrasing.
+ * Plural-aware translate. `base` holds a plural block (`{n, plural, …}`,
+ * W13.I2): every CLDR form of each language in one value, `#` the count.
+ * Legacy keys (`${base}.one` / `${base}.other`) still resolve by
+ * `Intl.PluralRules` category, falling back to `${base}.other`; the
+ * i18n:plurals gate keeps new ones out.
  */
 export function tPlural(base: string, n: number, vars?: Record<string, string | number>): string {
   const bundle = BUNDLES[activeLocale] ?? en;
+  if (base in bundle || base in en) return t(base, { n, ...vars });
   let category = "other";
   try {
     category = new Intl.PluralRules(activeLocale).select(n);
