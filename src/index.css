@@ -2361,6 +2361,44 @@ dialog.lumen-modal:is([data-reading-mode="side-by-side"], [data-reading-mode="da
   outline: 2px solid hsl(var(--accent));
   outline-offset: 2px;
 }
+/*
+ * g5 L1: `className="btn"` / `"btn btn-primary"` (43 buttons) had no rule anywhere, and a class opts a
+ * button out of the dialog default above, so they read as plain text (found on the backup panel's
+ * "Use this server, encrypted"). The same look as the dialog default; primary in the accent colour.
+ * One class of specificity, the least that beats the unlayered preflight's `button { background-color:
+ * transparent; font: inherit }`; an inline style still wins.
+ */
+.btn {
+  border: 1px solid hsl(var(--border-strong));
+  border-radius: 6px;
+  padding-block: 4px;
+  padding-inline: 10px;
+  background: hsl(var(--bg));
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.btn:hover:not(:disabled) {
+  background: hsl(var(--bg-muted));
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.btn:focus-visible {
+  outline: 2px solid hsl(var(--accent));
+  outline-offset: 2px;
+}
+.btn.btn-primary {
+  background: hsl(var(--accent));
+  border-color: hsl(var(--accent));
+  color: hsl(var(--accent-fg));
+}
+.btn.btn-primary:hover:not(:disabled) {
+  background: hsl(var(--accent) / 0.88);
+}
 @keyframes cmdFadeIn {
   from {
     opacity: 0;
