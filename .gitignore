@@ -67,6 +67,7 @@ coverage/
 .claude/
 .vercel
 public/pyodide/
+public/vendor/typst/
 public/webr/
 public/ort/
 public/vad/

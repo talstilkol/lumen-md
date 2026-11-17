@@ -420,6 +420,8 @@
   "toolbar.viewMode": "View Mode",
   "toolbar.workspace": "Toggle workspace",
   "tour.action.openRuntimeMetrics": "Open runtime metrics now",
+  "typstPdf.failed": "Typst could not make the PDF: {error}",
+  "typstPdf.unavailable": "Typst PDF is not installed in this build. Export the .typ file and compile it with typst instead.",
   "update.available": "A new version of Lumen is available.",
   "update.dismiss": "Dismiss",
   "update.launch.available": "Lumen {version} is available. Run “Check for updates…” to install it.",

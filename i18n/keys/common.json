@@ -18371,6 +18371,18 @@
       "vars": []
     },
     {
+      "key": "typstPdf.failed",
+      "en": "Typst could not make the PDF: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "typstPdf.unavailable",
+      "en": "Typst PDF is not installed in this build. Export the .typ file and compile it with typst instead.",
+      "vars": []
+    },
+    {
       "key": "update.available",
       "en": "A new version of Lumen is available.",
       "vars": []

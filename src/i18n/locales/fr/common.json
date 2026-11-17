@@ -3326,6 +3326,8 @@
   "typo.rule.numbers": "Nombres: 50 % → 50%, %50 → 50%, 10–20 → 10-20",
   "typo.rule.quotes": "Guillemets hébreux: \"שלום\" → „שלום”",
   "typo.title": "Typographie hébraïque",
+  "typstPdf.failed": "Typst could not make the PDF: {error}",
+  "typstPdf.unavailable": "Typst PDF is not installed in this build. Export the .typ file and compile it with typst instead.",
   "update.available": "Une nouvelle version de Lumen est disponible.",
   "update.available.body": "Vous avez {current}. Télécharger, vérifier et installer {version} ? Lumen redémarrera.",
   "update.available.title": "Lumen {version} est disponible",

@@ -1837,5 +1837,23 @@
     "ja": "1gjpbva",
     "ru": "1gjpbva",
     "zh-CN": "1gjpbva"
+  },
+  "typstPdf.unavailable": {
+    "he": "b03qw6",
+    "ar": "b03qw6",
+    "de": "b03qw6",
+    "fr": "b03qw6",
+    "ja": "b03qw6",
+    "ru": "b03qw6",
+    "zh-CN": "b03qw6"
+  },
+  "typstPdf.failed": {
+    "he": "zx7omu",
+    "ar": "zx7omu",
+    "de": "zx7omu",
+    "fr": "zx7omu",
+    "ja": "zx7omu",
+    "ru": "zx7omu",
+    "zh-CN": "zx7omu"
   }
 }

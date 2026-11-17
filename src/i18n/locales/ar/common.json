@@ -3326,6 +3326,8 @@
   "typo.rule.numbers": "الأرقام: 50 % → 50%, %50 → 50%, 10–20 → 10-20",
   "typo.rule.quotes": "علامات الاقتباس العبرية: \"שלום\" → „שלום”",
   "typo.title": "الطباعة العبرية",
+  "typstPdf.failed": "Typst could not make the PDF: {error}",
+  "typstPdf.unavailable": "Typst PDF is not installed in this build. Export the .typ file and compile it with typst instead.",
   "update.available": "تتوفر نسخة جديدة من Lumen.",
   "update.available.body": "لديك {current}. هل تريد تنزيل {version} والتحقق منه وتثبيته؟ سيُعاد تشغيل Lumen.",
   "update.available.title": "Lumen {version} متاح",

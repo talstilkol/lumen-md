@@ -224,6 +224,8 @@
   "cmd.file.exportSite.hint": "带侧边栏导航和 RSS 的多页 HTML 网站(按 H1 拆分页面)",
   "cmd.file.exportTypst": "导出 to Typst (.typ)",
   "cmd.file.exportTypst.hint": "希伯来语从右到左的 Typst 源文件,用 typst 编译",
+  "cmd.file.exportTypstPdf": "Export to PDF with Typst",
+  "cmd.file.exportTypstPdf.hint": "Compiled on this device by typst.ts, with a Hebrew font; nothing is sent",
   "cmd.file.exportVcard": "将人物导出为 vCard",
   "cmd.file.exportVcard.hint": "所有人物笔记导出为一个 vCard 4.0 文件,下载到此设备",
   "cmd.file.importVcard": "导入联系人(vCard)…",

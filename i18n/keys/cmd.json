@@ -1137,6 +1137,16 @@
       "vars": []
     },
     {
+      "key": "cmd.file.exportTypstPdf",
+      "en": "Export to PDF with Typst",
+      "vars": []
+    },
+    {
+      "key": "cmd.file.exportTypstPdf.hint",
+      "en": "Compiled on this device by typst.ts, with a Hebrew font; nothing is sent",
+      "vars": []
+    },
+    {
       "key": "cmd.file.exportVcard",
       "en": "Export people as vCard",
       "vars": []

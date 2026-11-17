@@ -234,5 +234,6 @@
   "cmd.voice.command.hint": "Say one: new note, search…, add task…, daily note, read aloud — recognised on this device",
   "cmd.voice.corpusRecorder.hint": "Record, check and export a CC0 speech corpus on this device (no upload)",
   "cmd.voice.meeting.hint": "Record a meeting, transcribe it on this device, and insert its decisions, tasks with owner and date, and open questions",
-  "cmd.window.new.hint": "Another editor window; drag tabs between windows"
+  "cmd.window.new.hint": "Another editor window; drag tabs between windows",
+  "cmd.file.exportTypstPdf.hint": "Compiled on this device by typst.ts, with a Hebrew font; nothing is sent"
 }

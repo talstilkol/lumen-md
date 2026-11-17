@@ -3326,6 +3326,8 @@
   "typo.rule.numbers": "数字: 50 % → 50%, %50 → 50%, 10–20 → 10-20",
   "typo.rule.quotes": "ヘブライ語の引用符: \"שלום\" → „שלום”",
   "typo.title": "ヘブライ語の組版",
+  "typstPdf.failed": "Typst could not make the PDF: {error}",
+  "typstPdf.unavailable": "Typst PDF is not installed in this build. Export the .typ file and compile it with typst instead.",
   "update.available": "Lumenの新しいバージョンが利用可能です。",
   "update.available.body": "現在のバージョンは {current} です。{version} をダウンロード・検証・インストールしますか？Lumen は再起動します。",
   "update.available.title": "Lumen {version} が利用可能です",

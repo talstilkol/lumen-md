@@ -3326,6 +3326,8 @@
   "typo.rule.numbers": "数字: 50 % → 50%, %50 → 50%, 10–20 → 10-20",
   "typo.rule.quotes": "希伯来语引号: \"שלום\" → „שלום”",
   "typo.title": "希伯来语排版",
+  "typstPdf.failed": "Typst could not make the PDF: {error}",
+  "typstPdf.unavailable": "Typst PDF is not installed in this build. Export the .typ file and compile it with typst instead.",
   "update.available": "Lumen 有新版本可用。",
   "update.available.body": "您当前是 {current}。要下载、验证并安装 {version} 吗？Lumen 随后会重启。",
   "update.available.title": "Lumen {version} 可用",

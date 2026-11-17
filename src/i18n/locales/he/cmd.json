@@ -224,6 +224,8 @@
   "cmd.file.exportSite.hint": "אתר HTML רב-עמודים עם ניווט צד + RSS (עמודים מפוצלים לפי H1)",
   "cmd.file.exportTypst": "ייצוא ל-Typst ‏(‎.typ)",
   "cmd.file.exportTypst.hint": "מקור Typst עם עברית מימין לשמאל; מקמפלים אותו עם typst",
+  "cmd.file.exportTypstPdf": "ייצוא ל-PDF עם Typst",
+  "cmd.file.exportTypstPdf.hint": "מהודר במכשיר הזה על ידי typst.ts, עם גופן עברי; שום דבר לא נשלח",
   "cmd.file.exportVcard": "ייצוא אנשים ל-vCard",
   "cmd.file.exportVcard.hint": "כל פתקי האנשים כקובץ vCard 4.0 אחד, שיורד במכשיר הזה",
   "cmd.file.importVcard": "ייבוא אנשי קשר (vCard)…",
