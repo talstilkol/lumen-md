@@ -1,9 +1,9 @@
 {
  "about": "W10.F7: a decision for every open PR whose head is not in the train (npm run train:missing). in = a task or train brings it; rejected = it will not go in, and why; replaced = what carries it instead. A decision is about one head: a PR that moves needs a new one.",
  "train": "verify/train-7",
- "trainHead": "8f634e7dbd9fcf6992bcade3ef3dede478179f54",
- "decided": "2026-11-16",
- "note": "Integrator INT6a (16.11): wave g6 (#1077-#1108, #1112-#1115 except the drafts below) and lane D1 (#1109) are merged into verify/train-7 from f090c20812, so their heads are in the train and need no decision. trainHead is the integration head this file was checked against (merges plus the mac:pack aggregator); later commits on it are the integrator's own fixes. Six OWNER-DECISION drafts stay out and are decided 'in' via their task, to be merged once the owner acts (#1080 lint on the Mac first; #1084, #1091 accounts that do not exist yet; #1090 the owner's signature; #1092 the coordinator's contact; #1101 private vulnerability reporting off). #1107 (W11.Q12 drop the Vercel CI trial) is a decision record only and was merged under the delegation; #1099 (main into train 7, tree-identical) was merged under the delegation. Lane FA (#1110, #1111, #1116, #1117, #1118) was still running: decided by its current heads; a head that moves is stale again. Before: Lane D1 (16.11): #985 is replaced by #1109 (its strict-WIP commit ported, with the WIP decisions written under the owner's delegation). Before: Lane INT5 (wave g2 and lane F10 into verify/train-7 from af2d0d7ce5): the 40 g2 PRs (#1030-#1069) and the 7 F10 PRs (#1070-#1076) are merged into the train, so they are in it and need no decision (train:missing ignores PRs in the train). #985 stays 'pending': #1038 had marked it 'in' via W10.G6, saying its strict-WIP commit 2a016e18b1 goes in together with per-wave wipDecisions. That decides the WIP rules, which are the owner's (an earlier lane was refused permission to write them), so INT5 kept only what is a fact: its first commit 643c440e0f is in the train via #999; its second commit 2a016e18b1 is not in the train and waits for the owner. 'pending' is not a decision the checker accepts, so train:missing stays red on this one entry, as it was at af2d0d7ce5 (the check is not loosened). Before: Lane g2-L2 (W10.F7): re-run against verify/train-7 @ af2d0d7ce5 — 724 open PR heads in the train, 64 outside it, every one decided, 0 stale, 0 undecided; #985 moved from 'pending' (not a valid decision) to 'in' via W10.G6. Before: Lane INT2: #999 (#985's first commit 643c440e0f, the plan sync + P0 DoDs) merged into verify/train-7 @ 6516a3586b, so #999 is in the train and needs no decision. #985 is marked 'pending' with its reason: its strict-WIP commit waits for the owner's WIP decisions. 'pending' is not a value the checker accepts, so train:missing and the repo-file test in trainMissing.test.ts fail on it until the owner decides (the check was not loosened). Before: Lane F8 (review 8): re-run against the F8 integration head 2cb1792f1d (13 F8 PRs #986-#998 merged into verify/train-7 @ eba3a0eaee). The five dependabot bumps (#160 #161 #162 #264 #325) were re-keyed to their rebased heads and are now decided by number, author and title; #985 (opened after the T8 push) is decided 'in' via W10.B12. Before: T8 integration (lane INT): re-run against the integration head a878a844f1 after merging the 39 T8 PRs (#946-#984); decisions about PRs now in the train were dropped (train:missing ignores them), and #513/#734 are replaced by their re-applied port. Before: lane A1 (T8) decided every open PR outside verify/train-7 @ 3100c18c43 (ports #957-#983; evidence in the lane's decisions.tsv).",
+ "trainHead": "d2a32e5025b9e862c4ab8c6386bd5a8d346e6893",
+ "decided": "2026-11-17",
+ "note": "Integrator INT6b (17.11): lane FA (#1110 #1111 #1116-#1119 #1127-#1130) and lane F11 (#1120-#1126) are merged into verify/train-7 from 78da492534; their heads are in the train. No other open PR was undecided against this head. trainHead is the integration head this file was checked against (before this commit): review 11 L13 asks the file to name the train head itself, which a commit of this file cannot do, so train:missing reports that line as stale after the push until the rule reads trainHead as an ancestor.",
  "decisions": [
   {
    "pr": 109,
@@ -482,36 +482,120 @@
    "pr": 1110,
    "head": "cbe80ecee97aa78977bc19e29856ff1427d50557",
    "decision": "in",
-   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; lane FA was still running, so its PRs were left for the next integration; this head is the one seen at INT6a.",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
    "via": "W11.I2"
   },
   {
    "pr": 1111,
    "head": "6be55fc6e48f170662bbbd611af156833ff208c2",
    "decision": "in",
-   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; lane FA was still running, so its PRs were left for the next integration; this head is the one seen at INT6a.",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
    "via": "W10.C23"
   },
   {
    "pr": 1116,
    "head": "7182bf6d11d27f7444cbf1a0bb8b850e20113248",
    "decision": "in",
-   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; lane FA was still running, so its PRs were left for the next integration; this head is the one seen at INT6a.",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
    "via": "W10.G10"
   },
   {
    "pr": 1117,
    "head": "c2f0b82e4e1c6da02ba97e18dc5eae065ab075eb",
    "decision": "in",
-   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; lane FA was still running, so its PRs were left for the next integration; this head is the one seen at INT6a.",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
    "via": "W10.D20"
   },
   {
    "pr": 1118,
    "head": "8cee5892e21ff841ed267250ad1049498c82b93d",
    "decision": "in",
-   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; lane FA was still running, so its PRs were left for the next integration; this head is the one seen at INT6a.",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
    "via": "W6.39"
+  },
+  {
+   "pr": 1119,
+   "head": "db968e91bea84716179bbaba0d150a8a1581a5dc",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.C11"
+  },
+  {
+   "pr": 1120,
+   "head": "2f5a271d350bfcca7c7696978761bc16fef9fecc",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W13.X1"
+  },
+  {
+   "pr": 1121,
+   "head": "60d1fdb63f20187004cc90678d5efaaa3ff3e157",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.E57"
+  },
+  {
+   "pr": 1122,
+   "head": "264dd06fc6f74bf4ccbbda89bf169b151e7169b9",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W2.12"
+  },
+  {
+   "pr": 1123,
+   "head": "06f959d5841020b7fb72ef42e829e19a524f4dcd",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W6.39"
+  },
+  {
+   "pr": 1124,
+   "head": "31b0c7a5d43129f788aeca90d00fe806e81dc5be",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W11.S13"
+  },
+  {
+   "pr": 1125,
+   "head": "63251c3c0617d19c5d32cc3ab9488f500e7c3363",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W6.39"
+  },
+  {
+   "pr": 1126,
+   "head": "d6a80e249b7e699f66031b07de69a8e2310a54b3",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.F17"
+  },
+  {
+   "pr": 1127,
+   "head": "a02f230187becb828fb3d00584d62d953bb92ab7",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.B19"
+  },
+  {
+   "pr": 1128,
+   "head": "bb95c43ed1d8c672dd84f7b2f0851e646d44101e",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "R12.6"
+  },
+  {
+   "pr": 1129,
+   "head": "2693853277488725227295ce5878c2373b14fd8c",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.A8"
+  },
+  {
+   "pr": 1130,
+   "head": "4a1709cceb5697ebcef10433ecef76d30aaf65e6",
+   "decision": "in",
+   "reason": "Integrator INT6b (17.11): merged into verify/train-7 with --no-ff on int6b (lane FA and lane F11, review 11), so this head is in the train.",
+   "via": "W10.C30"
   }
  ]
 }
