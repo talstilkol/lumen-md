@@ -5,6 +5,8 @@
  */
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
 import { immersiveParagraphs, lexiconTranslation } from "../reading/immersive";
 import { ImmersiveReader } from "../ui/ImmersiveReader";
@@ -81,5 +83,35 @@ describe("the reader", () => {
     expect(immersiveParagraphs("one\n\n```\ncode\n```\n\ntwo").length).toBe(2);
     expect(await lexiconTranslation("ובספר")).toContain("book");
     expect(calls).toEqual([]);
+  });
+
+  it("review 13 M1: speaking a word loads the speech route on demand and uses an on-device voice", async () => {
+    const said: string[] = [];
+    const realSS = (globalThis as { speechSynthesis?: unknown }).speechSynthesis;
+    const realU = (globalThis as { SpeechSynthesisUtterance?: unknown }).SpeechSynthesisUtterance;
+    const voices = [{ lang: "he-IL", localService: true, name: "Carmit", voiceURI: "carmit" }, { lang: "he-IL", localService: false, name: "Cloud", voiceURI: "cloud" }];
+    Object.assign(globalThis, {
+      speechSynthesis: { getVoices: () => voices, cancel: () => undefined, speak: (u: { text: string; voice: { name: string } }) => said.push(`${u.text}@${u.voice.name}`) },
+      SpeechSynthesisUtterance: class {
+        voice: unknown = null;
+        lang = "";
+        constructor(public text: string) {}
+      },
+    });
+    try {
+      render(<ImmersiveReader content={MD} profile={{ pos: true, syllables: false, lineFocus: 0 }} close={() => undefined} />);
+      fireEvent.click(screen.getByTestId("immersive-page").querySelector<HTMLElement>('[data-w="הלך"]')!);
+      fireEvent.click(screen.getByTestId("immersive-speak"));
+      await waitFor(() => expect(said).toEqual(["הלך@Carmit"]));
+      expect(calls).toEqual([]);
+    } finally {
+      Object.assign(globalThis, { speechSynthesis: realSS, SpeechSynthesisUtterance: realU });
+    }
+  });
+
+  it("review 13 M1: the dialog does not import the speech route statically (i18nLazyEnglish)", () => {
+    const src = readFileSync(join(__dirname, "../ui/ImmersiveReader.tsx"), "utf8");
+    expect(src).not.toMatch(/^import[^;]*from "\.\.\/ai\/tts";/m);
+    expect(src).toMatch(/import\("\.\.\/ai\/tts"\)/);
   });
 });

@@ -23734,6 +23734,14 @@
       "vars": []
     },
     {
+      "key": "writing.suggestModel",
+      "en": "For this agent on this device: {{model}} ({{licence}}), e.g. `ollama pull {{model}}`.",
+      "vars": [
+        "model",
+        "licence"
+      ]
+    },
+    {
       "key": "writing.title",
       "en": "Writing suggestions",
       "vars": []

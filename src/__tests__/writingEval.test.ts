@@ -14,7 +14,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 // @ts-expect-error — a plain .mjs module without types
 import { makeCard, validateCard } from "../../scripts/lib/evalCard.mjs";
-import { mean, scoreCoach, scoreConcision, scoreToneGuard, type CoachItem, type ConcisionItem, type ToneItem } from "../eval/writing/score";
+import { mean, scoreCoach, scoreConcision, scoreToneGuard, type CoachItem, type ConcisionItem, type ToneItem } from "../eval/writing/score.eval";
 
 const ROOT = join(__dirname, "../..");
 const read = <T,>(agent: string, lang: string): T[] => readFileSync(join(ROOT, "eval/writing", agent, `${lang}.jsonl`), "utf8").trim().split("\n").map((l) => JSON.parse(l) as T);

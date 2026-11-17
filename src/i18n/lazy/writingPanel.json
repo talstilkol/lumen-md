@@ -54,6 +54,7 @@
   "writing.statusAccepted": "Applied {{n}}. One undo (Ctrl+Z) puts it all back.",
   "writing.statusAcceptedSkipped": "Applied {{n}}; {{skipped}} skipped (the text changed or they overlap).",
   "writing.statusRejected": "Rejected.",
+  "writing.suggestModel": "For this agent on this device: {{model}} ({{licence}}), e.g. `ollama pull {{model}}`.",
   "writing.title": "Writing suggestions",
   "writing.version": "Version {{n}}",
   "writing.versions": "Versions",

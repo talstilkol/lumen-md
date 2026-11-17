@@ -16,6 +16,7 @@
 import { anchorMap, boxAtLine, headingLines, lineToY, yToLine, type LineBox, type LinePoint } from "./scrollSync";
 import { lineBasesOf } from "../renderer/sourceLineRegistry";
 import { headingSlugger } from "../lib/slug";
+import { clampLineNumber } from "../editor/lineClamp";
 
 export interface LinkedPane {
   /** The scroll container. */
@@ -48,7 +49,6 @@ function docOffset(view: EditorLike, scroller: HTMLElement): number {
   return view.documentTop - scroller.getBoundingClientRect().top + scroller.scrollTop;
 }
 
-const clampLine = (n: number, lines: number) => Math.min(Math.max(1, Math.floor(n)), Math.max(1, lines));
 
 export function editorPane(scroller: HTMLElement, getView: () => EditorLike | null): LinkedPane {
   const blockOf = (view: EditorLike, n: number) => {
@@ -87,7 +87,7 @@ export function editorPane(scroller: HTMLElement, getView: () => EditorLike | nu
         scroller.scrollTop = scroller.scrollHeight;
         return true;
       }
-      const n = clampLine(line, lines);
+      const n = Math.max(1, clampLineNumber(line, lines));
       const b = blockOf(view, n);
       scroller.scrollTop = Math.max(0, b.top + (line - n) * b.height + docOffset(view, scroller));
       return true;

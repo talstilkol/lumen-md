@@ -10,7 +10,7 @@
   "seed": 9,
   "temperature": 0,
   "dataset": {
-   "name": "src/agents/writing/readability/corpusHe.ts (held-out split)",
+   "name": "src/agents/writing/readability/corpusHe.eval.ts (held-out split)",
    "version": "1",
    "license": "MIT (written for lumen-md; graded by intended reader)",
    "origin": "synthetic"
