@@ -12,6 +12,7 @@ import { createHash } from "node:crypto";
 import { alignPieces, bioToSpans, decodeGliner, fileDigest, glinerInputs, joinTokens, spansToBio, words } from "../../scripts/eval-public/engines/ner-core.mjs";
 import { makeDictaBertNer, nerEngine } from "../../scripts/eval-public/engines/dictabert-ner.mjs";
 import { glinerEngine, makeGliner, NEMO_LABELS, ortFeeds } from "../../scripts/eval-public/engines/gliner.mjs";
+// @ts-expect-error — a plain .mjs harness without types (as in piiGolden.test.ts)
 import { namesFrom, scoreWith } from "../../scripts/golden/evals/ner-pii.mjs";
 import { findPii } from "../ai/pii";
 

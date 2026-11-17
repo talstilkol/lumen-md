@@ -11,8 +11,9 @@
  * Nothing is registered by default. The app works the same with no classifier,
  * and a classifier that fails or times out is skipped (the rules have run).
  * The one planned classifier is ProtectAI's deberta-v3-base-prompt-injection-v2
- * (Apache-2.0, English only), on the desktop, once the model is converted and
- * hosted (6.0, 15.9): `protectAiClassifier` turns its logits into scores.
+ * (Apache-2.0, English only): `protectAiClassifier` turns its logits into
+ * scores, and ./protectAi.ts registers it once the model is on this device
+ * (converted and hosted: 6.0, 15.9).
  */
 
 /** A model that scores passages: the probability each one is an injection attempt. */

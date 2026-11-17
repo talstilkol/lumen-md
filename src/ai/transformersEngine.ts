@@ -224,6 +224,13 @@ export async function nerLocal(texts: string[], model: string, opts: { signal?: 
   return call({ type: "ner", model, device, texts }, [], opts.signal);
 }
 
+/** Sequence-classification logits (plan 2.7): row-major [texts, labels], labels in index order. The model must already be cached. */
+export async function sequenceLogitsLocal(texts: string[], model: string, opts: { host?: string; signal?: AbortSignal } = {}): Promise<{ logits: number[]; labels: string[] }> {
+  if (!texts.length) return { logits: [], labels: [] };
+  const device = await transformersDevice();
+  return call({ type: "seqLogits", model, device, texts, host: opts.host }, [], opts.signal);
+}
+
 /** Download / compile a model ahead of time. */
 export async function preloadTransformersModel(task: "automatic-speech-recognition" | "feature-extraction", model?: string): Promise<string> {
   const hw = await detectHardware();

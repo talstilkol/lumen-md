@@ -340,6 +340,8 @@ const RULE_FLAG = "⟦flagged as an injected instruction";
  * as it was.
  */
 export async function classifyCleaned(cleaned: string, findings: Finding[], signal?: AbortSignal): Promise<string> {
+  // Plan 2.7: ProtectAI joins once its model is on this device (never a download from here).
+  await import("./protectAi").then((m) => m.ensureInjectionClassifier()).catch(() => null);
   const r = await classifyText(cleaned, { skip: (p) => p.includes(RULE_FLAG), signal });
   if (!r?.hits.length) return cleaned;
   let out = "";
