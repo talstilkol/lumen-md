@@ -228,7 +228,7 @@
   "trash.renamesUndone": "{n, plural, one {# moved back to its old name} many {# moved back to their old names} other {# moved back to their old names}}",
   "trash.restore": "Restaurer",
   "trash.restoreFailed": "Impossible de restaurer depuis la corbeille : {error}",
-  "trash.restoreFailedMany": "{n, plural, one {# could not be restored and stays in the trash} many {# could not be restored and stay in the trash} other {# could not be restored and stay in the trash}}",
+  "trash.restoreFailedMany": "{n, plural, one {# élément n’a pas pu être restauré et reste dans la corbeille} many {# d’éléments n’ont pas pu être restaurés et restent dans la corbeille} other {# éléments n’ont pas pu être restaurés et restent dans la corbeille}}",
   "trash.restoreSelected": "Restore selected ({n})",
   "trash.restored": "Restauré dans {path}",
   "trash.restoredMany": "{count, plural, one {# élément restauré depuis la corbeille} many {# d’éléments restaurés depuis la corbeille} other {# éléments restaurés depuis la corbeille}}",

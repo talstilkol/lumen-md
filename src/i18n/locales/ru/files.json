@@ -228,7 +228,7 @@
   "trash.renamesUndone": "{n, plural, one {# moved back to its old name} few {# moved back to their old names} many {# moved back to their old names} other {# moved back to their old names}}",
   "trash.restore": "Восстановить",
   "trash.restoreFailed": "Не удалось восстановить из корзины: {error}",
-  "trash.restoreFailedMany": "{n, plural, one {# could not be restored and stays in the trash} few {# could not be restored and stay in the trash} many {# could not be restored and stay in the trash} other {# could not be restored and stay in the trash}}",
+  "trash.restoreFailedMany": "{n, plural, one {# не удалось восстановить, он остаётся в корзине} few {# не удалось восстановить, они остаются в корзине} many {# не удалось восстановить, они остаются в корзине} other {# не удалось восстановить, они остаются в корзине}}",
   "trash.restoreSelected": "Restore selected ({n})",
   "trash.restored": "Восстановлено в {path}",
   "trash.restoredMany": "{count, plural, one {Восстановлен # объект из корзины} few {Восстановлено # объекта из корзины} many {Восстановлено # объектов из корзины} other {Восстановлено # объекта из корзины}}",

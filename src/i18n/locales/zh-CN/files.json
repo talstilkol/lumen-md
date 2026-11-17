@@ -228,7 +228,7 @@
   "trash.renamesUndone": "{n, plural, other {# moved back to their old names}}",
   "trash.restore": "恢复",
   "trash.restoreFailed": "无法从回收站恢复：{error}",
-  "trash.restoreFailedMany": "{n, plural, other {# could not be restored and stay in the trash}}",
+  "trash.restoreFailedMany": "{n, plural, other {# 个无法恢复，仍在回收站中}}",
   "trash.restoreSelected": "Restore selected ({n})",
   "trash.restored": "已恢复到 {path}",
   "trash.restoredMany": "{count, plural, other {已从回收站恢复 # 项}}",

@@ -228,7 +228,7 @@
   "trash.renamesUndone": "{n, plural, zero {# moved back to their old names} one {# moved back to its old name} two {# moved back to their old names} few {# moved back to their old names} many {# moved back to their old names} other {# moved back to their old names}}",
   "trash.restore": "استعادة",
   "trash.restoreFailed": "تعذّرت الاستعادة من سلة المهملات: {error}",
-  "trash.restoreFailedMany": "{n, plural, zero {# could not be restored and stay in the trash} one {# could not be restored and stays in the trash} two {# could not be restored and stay in the trash} few {# could not be restored and stay in the trash} many {# could not be restored and stay in the trash} other {# could not be restored and stay in the trash}}",
+  "trash.restoreFailedMany": "{n, plural, zero {لم يتعذّر استعادة أي عنصر} one {تعذّرت استعادة عنصر واحد ويبقى في سلة المهملات} two {تعذّرت استعادة عنصرين ويبقيان في سلة المهملات} few {تعذّرت استعادة # عناصر وتبقى في سلة المهملات} many {تعذّرت استعادة # عنصرًا وتبقى في سلة المهملات} other {تعذّرت استعادة # عنصر وتبقى في سلة المهملات}}",
   "trash.restoreSelected": "Restore selected ({n})",
   "trash.restored": "تمت الاستعادة إلى {path}",
   "trash.restoredMany": "{count, plural, zero {لم تُستعد أي عناصر من سلة المهملات} one {تمت استعادة عنصر واحد من سلة المهملات} two {تمت استعادة عنصرين من سلة المهملات} few {تمت استعادة # عناصر من سلة المهملات} many {تمت استعادة # عنصرًا من سلة المهملات} other {تمت استعادة # عنصر من سلة المهملات}}",

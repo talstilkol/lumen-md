@@ -228,7 +228,7 @@
   "trash.renamesUndone": "{n, plural, other {# moved back to their old names}}",
   "trash.restore": "復元",
   "trash.restoreFailed": "ごみ箱から復元できませんでした: {error}",
-  "trash.restoreFailedMany": "{n, plural, other {# could not be restored and stay in the trash}}",
+  "trash.restoreFailedMany": "{n, plural, other {# 件を復元できず、ごみ箱に残っています}}",
   "trash.restoreSelected": "Restore selected ({n})",
   "trash.restored": "{path} に復元しました",
   "trash.restoredMany": "{count, plural, other {# 件をごみ箱から復元しました}}",
