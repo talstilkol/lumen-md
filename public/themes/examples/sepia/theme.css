@@ -11,6 +11,8 @@
 }
 .dark {
   --bg: 30 18% 10%;
+  /* Set here too: the light --bg-subtle above would otherwise apply in dark (pale quotes, light text). */
+  --bg-subtle: 30 16% 12%;
   --bg-muted: 30 14% 15%;
   --fg: 38 30% 88%;
   --fg-subtle: 38 18% 72%;

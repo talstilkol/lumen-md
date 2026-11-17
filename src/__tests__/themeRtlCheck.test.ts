@@ -51,7 +51,7 @@ describe("contrast (WCAG 2.2 1.4.3)", () => {
 
   it("the app's own tokens pass in light and dark", () => {
     const r = themeContrast("", app);
-    expect(r.length).toBe(14);
+    expect(r.length).toBe(18) // 9 pairs (quotes: --fg-subtle and --fg on --bg-subtle, wave g5) × light and dark;
     expect(r.filter((c) => !c.pass)).toEqual([]);
   });
 

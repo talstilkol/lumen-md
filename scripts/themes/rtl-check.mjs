@@ -12,6 +12,7 @@
  *   node scripts/themes/rtl-check.mjs --check    # exit 1 when one is missing or stale, or a theme fails
  *   node scripts/themes/rtl-check.mjs --css <file> [--repository <https url>] [--json]   # one stylesheet (a submission)
  *   node scripts/themes/rtl-check.mjs --screens <results.json> # merge a browser run's screenshots (Mac)
+ *   node scripts/themes/rtl-check.mjs --measures <measures.json> # judge e2e/themes-rtl-screens.spec.ts's run and merge it
  *
  * The "tested in RTL" badge needs the 8 screens in RTL and LTR as well,
  * which only a browser run gives; without one, `screens` is "owed".
@@ -59,7 +60,20 @@ if (opt("--css")) {
 const DIR = join(ROOT, "public/themes/examples");
 const OUT = join(DIR, "scorecards");
 const index = JSON.parse(readFileSync(join(DIR, "index.json"), "utf8"));
-const screensRun = opt("--screens") ? JSON.parse(readFileSync(resolve(opt("--screens")), "utf8")) : {};
+let screensRun = opt("--screens") ? JSON.parse(readFileSync(resolve(opt("--screens")), "utf8")) : {};
+if (opt("--measures")) {
+  // e2e/themes-rtl-screens.spec.ts: { themeId | "(no theme)": { he: { screen: probe }, en: { … } } } → verdicts (src/plugins/runtime/rtlScreens.ts).
+  const { screensForCard } = await import(pathToFileURL(join(ROOT, "src/plugins/runtime/rtlScreens.ts")).href);
+  const raw = JSON.parse(readFileSync(resolve(opt("--measures")), "utf8"));
+  const toMeasures = (run) =>
+    Object.fromEntries(
+      Object.keys(run?.he ?? {})
+        .filter((s) => run.en?.[s])
+        .map((s) => [s, { viewport: run.he[s].viewport, overflowX: { rtl: run.he[s].overflowX, ltr: run.en[s].overflowX }, rtl: run.he[s].boxes, ltr: run.en[s].boxes, axe: { rtl: run.he[s].axe ?? [], ltr: run.en[s].axe ?? [] } }]),
+    );
+  const base = toMeasures(raw["(no theme)"]);
+  screensRun = Object.fromEntries(Object.entries(raw).filter(([id]) => id !== "(no theme)").map(([id, run]) => [id, screensForCard(toMeasures(run), base)]));
+}
 const cards = [];
 for (const t of index.themes) {
   const c = await card(t, readFileSync(join(DIR, t.path, "theme.css"), "utf8"), { screens: screensRun[t.id], inRepo: true });
@@ -69,7 +83,7 @@ for (const t of index.themes) {
 const file = (c) => join(OUT, `${c.id}@${c.version}.json`);
 const failing = cards.filter((c) => !c.passed || c.rtl.checks.physical === "fail" || c.rtl.checks.contrast === "fail");
 if (args.includes("--check")) {
-  const stale = opt("--screens") ? [] : cards.filter((c) => !existsSync(file(c)) || stable(JSON.parse(readFileSync(file(c), "utf8"))) !== stable(c));
+  const stale = opt("--screens") || opt("--measures") ? [] : cards.filter((c) => !existsSync(file(c)) || stable(JSON.parse(readFileSync(file(c), "utf8"))) !== stable(c));
   for (const c of stale) console.log(`stale or missing: ${file(c)} (run node scripts/themes/rtl-check.mjs)`);
   process.exit(stale.length || failing.length ? 1 : 0);
 }

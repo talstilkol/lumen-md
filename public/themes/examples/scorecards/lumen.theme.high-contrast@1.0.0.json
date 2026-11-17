@@ -4,7 +4,7 @@
   "reviewer": "lumen-review/1",
   "id": "lumen.theme.high-contrast",
   "version": "1.0.0",
-  "reviewedAt": "2026-11-15T05:16:52.347Z",
+  "reviewedAt": "2026-11-17T11:03:10.313Z",
   "passed": true,
   "score": 90,
   "grade": "A",
@@ -26,7 +26,7 @@
       "detail": "no signature"
     }
   ],
-  "durationMs": 1,
+  "durationMs": 8,
   "rtl": {
     "rtl": 1,
     "id": "lumen.theme.high-contrast",
@@ -56,9 +56,25 @@
       },
       {
         "mode": "light",
+        "fg": "--fg",
+        "bg": "--bg-subtle",
+        "ratio": 20.06,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
         "fg": "--fg-subtle",
         "bg": "--bg",
         "ratio": 15.08,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "light",
+        "fg": "--fg-subtle",
+        "bg": "--bg-subtle",
+        "ratio": 14.41,
         "min": 4.5,
         "pass": true
       },
@@ -112,9 +128,25 @@
       },
       {
         "mode": "dark",
+        "fg": "--fg",
+        "bg": "--bg-subtle",
+        "ratio": 18.32,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
         "fg": "--fg-subtle",
         "bg": "--bg",
         "ratio": 15.97,
+        "min": 4.5,
+        "pass": true
+      },
+      {
+        "mode": "dark",
+        "fg": "--fg-subtle",
+        "bg": "--bg-subtle",
+        "ratio": 13.93,
         "min": 4.5,
         "pass": true
       },
