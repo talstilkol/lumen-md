@@ -1396,7 +1396,7 @@
   "entityGraph.paths.find": "מציאת מסלולים",
   "entityGraph.paths.found": "נמצאו {n} מסלולים ב־{ms} אלפיות שנייה",
   "entityGraph.paths.from": "מ־",
-  "entityGraph.paths.inverse": "(בכיוון ההפוך) {relation}",
+  "entityGraph.paths.inverse": "{relation} (בכיוון ההפוך)",
   "entityGraph.paths.maxHops": "שרשרת ארוכה ביותר (קשרים)",
   "entityGraph.paths.mode": "מוצא מסלול",
   "entityGraph.paths.more": "(ועוד {n})",

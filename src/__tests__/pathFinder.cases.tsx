@@ -229,9 +229,13 @@ describe("the panel, in Hebrew", () => {
       const [note, anchor] = o.split("#^");
       expect(TEXTS.get(note)).toContain(`^${anchor}`);
     }
-    // In RTL a relation read backwards points right (חברת אלפא נוסדה על ידי משה: the step runs משה → חברה).
-    expect(first.querySelector("[data-step='0']")!.textContent).toContain("→");
-    expect(first.querySelector("[data-step='1']")!.textContent).toContain("←");
+    // In RTL every arrow of a path points left, the way it is read, also on a link read backwards
+    // (חברת אלפא נוסדה על ידי משה: the step runs משה ← חברה and says "(בכיוון ההפוך)"). INT7: no mixed arrows.
+    for (const p of paths) for (const step of p.querySelectorAll("[data-step]")) {
+      expect(step.textContent).toContain("←");
+      expect(step.textContent).not.toContain("→");
+    }
+    expect(first.querySelector("[data-step='0']")!.textContent).toMatch(/entityGraph\.paths\.inverse|בכיוון ההפוך|reversed/);
     fireEvent.click(within(first).getAllByRole("button", { name: "משה ישראלי" })[0]);
     expect(entities).toEqual([moshe]);
     const r = await axe.run(container, { rules: { "color-contrast": { enabled: false } } });

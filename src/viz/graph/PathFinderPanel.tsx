@@ -6,9 +6,11 @@
  * longest chain, how many chains. A loaded chunk of the entity graph view.
  *
  * Keyboard: a form (Enter searches), then ordinary lists and buttons; the
- * result count is announced in a live region. Direction: the arrows follow
- * the reading direction (→ in English, ← in Hebrew), and each name is its
- * own `dir="auto"` isolate.
+ * result count is announced in a live region. Direction: every arrow of a
+ * path points the way the path is read (→ in English, ← in Hebrew), also on
+ * a link read backwards — that one says so in words ("(reversed)") — so
+ * one path never mixes → and ← (INT7, audit r4 design check); each name is
+ * its own `dir="auto"` isolate.
  */
 import { useId, useMemo, useRef, useState, type FormEvent } from "react";
 import { t } from "../../i18n";
@@ -74,7 +76,8 @@ export default function PathFinderPanel({ entities, edges, texts, from = "", to 
   };
 
   const toggle = (id: string) => setPreds((s) => (s.has(id) ? new Set([...s].filter((x) => x !== id)) : new Set([...s, id])));
-  const arrow = (forward: boolean) => (forward !== rtl ? "→" : "←");
+  // The walking direction, the same for every step; a backward link is told by its label, not by the arrow.
+  const arrow = (_forward: boolean) => (rtl ? "←" : "→");
 
   return (
     <section aria-labelledby={`${ids}-title`} data-testid="path-finder" style={{ display: "grid", gap: 12, padding: 12, fontSize: 13 }}>
