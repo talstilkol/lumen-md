@@ -51,6 +51,9 @@ export async function runApaExport(items: readonly HighlightItem[], whereLabel: 
     }
     metas.set(source, { key, record: byKey.get(key)!.record });
   }
+  // Scanned books: the page printed on the page ("עמ׳ 14"), from the PDF's /PageLabels, not its index.
+  const { withPageLabels } = await import("./pageLabels");
+  await withPageLabels(metas, items, async (source) => new Uint8Array(await (await ws.readWorkspaceBlob(source)).arrayBuffer()));
   const date = new Date().toISOString().slice(0, 10);
   const r = exportNoteApa(items, (s) => metas.get(s) ?? null, { title: t("hl.apaTitle", { date, n: items.length }), references: t("hl.apaReferences"), where: whereLabel });
   if (!r.ok) return null;
