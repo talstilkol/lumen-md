@@ -1,4 +1,148 @@
 {
+  "ai.acp.panel.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fa": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "ai.acp.panel.done": {
+    "ar": "1014s5k",
+    "de": "1014s5k",
+    "fa": "1014s5k",
+    "fr": "1014s5k",
+    "ja": "1014s5k",
+    "ru": "1014s5k",
+    "zh-CN": "1014s5k"
+  },
+  "ai.acp.panel.empty": {
+    "ar": "1yiam4x",
+    "de": "1yiam4x",
+    "fa": "1yiam4x",
+    "fr": "1yiam4x",
+    "ja": "1yiam4x",
+    "ru": "1yiam4x",
+    "zh-CN": "1yiam4x"
+  },
+  "ai.acp.panel.failed": {
+    "ar": "fzt5jw",
+    "de": "fzt5jw",
+    "fa": "fzt5jw",
+    "fr": "fzt5jw",
+    "ja": "fzt5jw",
+    "ru": "fzt5jw",
+    "zh-CN": "fzt5jw"
+  },
+  "ai.acp.panel.log": {
+    "ar": "reguw4",
+    "de": "reguw4",
+    "fa": "reguw4",
+    "fr": "reguw4",
+    "ja": "reguw4",
+    "ru": "reguw4",
+    "zh-CN": "reguw4"
+  },
+  "ai.acp.panel.plan": {
+    "ar": "8icj76",
+    "de": "8icj76",
+    "fa": "8icj76",
+    "fr": "8icj76",
+    "ja": "8icj76",
+    "ru": "8icj76",
+    "zh-CN": "8icj76"
+  },
+  "ai.acp.panel.review": {
+    "ar": "hq25o",
+    "de": "hq25o",
+    "fa": "hq25o",
+    "fr": "hq25o",
+    "ja": "hq25o",
+    "ru": "hq25o",
+    "zh-CN": "hq25o"
+  },
+  "ai.acp.panel.running": {
+    "ar": "8r39fb",
+    "de": "8r39fb",
+    "fa": "8r39fb",
+    "fr": "8r39fb",
+    "ja": "8r39fb",
+    "ru": "8r39fb",
+    "zh-CN": "8r39fb"
+  },
+  "ai.acp.panel.status.completed": {
+    "ar": "at2lwx",
+    "de": "at2lwx",
+    "fa": "at2lwx",
+    "fr": "at2lwx",
+    "ja": "at2lwx",
+    "ru": "at2lwx",
+    "zh-CN": "at2lwx"
+  },
+  "ai.acp.panel.status.failed": {
+    "ar": "1qc7sfo",
+    "de": "1qc7sfo",
+    "fa": "1qc7sfo",
+    "fr": "1qc7sfo",
+    "ja": "1qc7sfo",
+    "ru": "1qc7sfo",
+    "zh-CN": "1qc7sfo"
+  },
+  "ai.acp.panel.status.in_progress": {
+    "ar": "5opvf0",
+    "de": "5opvf0",
+    "fa": "5opvf0",
+    "fr": "5opvf0",
+    "ja": "5opvf0",
+    "ru": "5opvf0",
+    "zh-CN": "5opvf0"
+  },
+  "ai.acp.panel.status.pending": {
+    "ar": "1u9tm7c",
+    "de": "1u9tm7c",
+    "fa": "1u9tm7c",
+    "fr": "1u9tm7c",
+    "ja": "1u9tm7c",
+    "ru": "1u9tm7c",
+    "zh-CN": "1u9tm7c"
+  },
+  "ai.acp.panel.stop": {
+    "ar": "ky4lc5",
+    "de": "ky4lc5",
+    "fa": "ky4lc5",
+    "fr": "ky4lc5",
+    "ja": "ky4lc5",
+    "ru": "ky4lc5",
+    "zh-CN": "ky4lc5"
+  },
+  "ai.acp.panel.stopping": {
+    "ar": "1h3h506",
+    "de": "1h3h506",
+    "fa": "1h3h506",
+    "fr": "1h3h506",
+    "ja": "1h3h506",
+    "ru": "1h3h506",
+    "zh-CN": "1h3h506"
+  },
+  "ai.acp.panel.thinking": {
+    "ar": "1ru04o5",
+    "de": "1ru04o5",
+    "fa": "1ru04o5",
+    "fr": "1ru04o5",
+    "ja": "1ru04o5",
+    "ru": "1ru04o5",
+    "zh-CN": "1ru04o5"
+  },
+  "ai.acp.panel.title": {
+    "ar": "2lcszp",
+    "de": "2lcszp",
+    "fa": "2lcszp",
+    "fr": "2lcszp",
+    "ja": "2lcszp",
+    "ru": "2lcszp",
+    "zh-CN": "2lcszp"
+  },
   "tts.kokoro.body": {
     "ar": "15pi4g7",
     "de": "15pi4g7",

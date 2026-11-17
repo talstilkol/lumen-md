@@ -272,6 +272,94 @@
       "vars": []
     },
     {
+      "key": "ai.acp.panel.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.panel.done",
+      "en": "Finished ({reason}).",
+      "vars": [
+        "reason"
+      ]
+    },
+    {
+      "key": "ai.acp.panel.empty",
+      "en": "Waiting for the agent…",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.panel.failed",
+      "en": "Stopped: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "ai.acp.panel.log",
+      "en": "What the agent says and runs",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.panel.plan",
+      "en": "Plan",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.panel.review",
+      "en": "Review changes",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.panel.running",
+      "en": "{agent} is working. Every file it writes waits in the review panel.",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
+      "key": "ai.acp.panel.status.completed",
+      "en": "done",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.panel.status.failed",
+      "en": "failed",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.panel.status.in_progress",
+      "en": "running",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.panel.status.pending",
+      "en": "waiting",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.panel.stop",
+      "en": "Stop",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.panel.stopping",
+      "en": "Stopping; its pending changes are withdrawn…",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.panel.thinking",
+      "en": "Thinking:",
+      "vars": []
+    },
+    {
+      "key": "ai.acp.panel.title",
+      "en": "{agent} (ACP)",
+      "vars": [
+        "agent"
+      ]
+    },
+    {
       "key": "ai.acp.permission",
       "en": "Allow the agent's tool \"{tool}\" once?",
       "vars": [
