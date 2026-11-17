@@ -17,6 +17,11 @@
  *                                           eval/cards/writing/<id>.json, or any report whose card.agent or
  *                                           top-level agent is <id> (W13.W6–W12); exit 2 without an id
  *
+ *   npm run eval:card -- --suite writing --check --measured
+ *                                           W13.W17 (the Mac measurement day): also every agent of the
+ *                                           suite has at least one heldout or public report on a real,
+ *                                           digest-pinned model; none at all fails ("0 reports" is red)
+ *
  * Exit 1 when any report has no card or its card is missing a field
  * (scripts/lib/evalCard.mjs lists them), or when a writing card's
  * dataset.name is not a path in the repository (a trailing "(…)" note
@@ -99,6 +104,18 @@ export function writingAgentsWithSets(root = ROOT) {
   return existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name).sort() : [];
 }
 
+/** W13.W17: the agent's measured reports — a complete heldout or public card on a model pinned by sha256 digest. */
+export function measuredReports(agent, { root = ROOT } = {}) {
+  return agentReports(agent, { root }).filter((f) => {
+    try {
+      const card = cardOf(JSON.parse(readFileSync(join(root, f), "utf8")));
+      return !validateCard(card).length && (card.tag === "heldout" || card.tag === "public") && /^sha256:[0-9a-f]{64}$/.test(card.model?.digest ?? "");
+    } catch {
+      return false;
+    }
+  });
+}
+
 /**
  * The reports that carry one agent's card: its file under eval/cards/writing,
  * and every report in the default folders whose card names the agent.
@@ -140,7 +157,13 @@ export function main(argv, { root = ROOT, log = console.log, err = console.error
   // An agent with an eval set (W13.W2) is held to its set; one without (W13.W6–W10) to its card alone.
   if (suite === "writing" || (agent !== undefined && existsSync(join(root, "eval/writing", agent, "manifest.json")))) {
     const agents = agent !== undefined ? [agent] : writingAgentsWithSets(root);
-    const results = agents.map((a) => checkWritingAgent(a, { root }));
+    const measured = argv.includes("--measured");
+    const results = agents.map((a) => {
+      const r = checkWritingAgent(a, { root });
+      // Audit r4 A2.12: W13.W17's gate is red until the Mac's real-model reports exist — never vacuously green.
+      if (measured && !measuredReports(a, { root }).length) return { ...r, problems: [...r.problems, `no measured report: a heldout or public card on a digest-pinned model (W13.W17, the Mac measurement day)`] };
+      return r;
+    });
     for (const r of results) {
       if (json) log(JSON.stringify(r));
       else if (r.problems.length) err(`✗ ${r.file}\n    ${r.problems.join("\n    ")}`);
@@ -149,6 +172,7 @@ export function main(argv, { root = ROOT, log = console.log, err = console.error
     const bad = results.filter((r) => r.problems.length).length;
     if (!json) log(`eval:card: ${results.length - bad}/${results.length} writing agents carry a complete, current card${suite === "writing" && !check ? " (report only: add --check to gate)" : ""}`);
     if (suite === "writing" && !check) return 0;
+    if (measured && !results.length) err("eval:card: --measured with no writing agents to measure: 0 reports is not a pass");
     return bad || !results.length ? 1 : 0;
   }
   if (agent !== undefined) {

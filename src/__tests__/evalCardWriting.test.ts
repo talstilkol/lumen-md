@@ -97,6 +97,23 @@ describe("eval:card for the writing agents (W13.W2)", () => {
     expect(run(["eval/cards/writing"], ROOT).code).toBe(0);
   });
 
+  it("audit r4 A2.12: W13.W17's gate (--measured) is red with 0 measured reports, green once each agent has a heldout card on a pinned model", () => {
+    const r = run(["--suite", "writing", "--check", "--measured"], ROOT);
+    expect(r.code).toBe(1);
+    expect(r.out).toMatch(/no measured report/);
+    const dir = sandbox();
+    mkdirSync(join(dir, "eval/results/writing"), { recursive: true });
+    for (const agent of ["concision", "styleCoach", "toneShifter"]) {
+      const card = JSON.parse(readFileSync(join(ROOT, "eval/cards/writing", `${agent}.json`), "utf8")).card;
+      const measured = { ...card, agent, tag: "heldout", model: { name: "qwen3:4b", digest: `sha256:${"a".repeat(64)}` }, dataset: { name: "eval/heldout/writing-w17", version: "1", license: "owner" } };
+      delete measured.dataset.origin;
+      writeFileSync(join(dir, "eval/results/writing", `${agent}-qwen3.json`), JSON.stringify({ card: measured }));
+    }
+    const ok = run(["--suite", "writing", "--check", "--measured"], dir);
+    expect(ok.out).not.toMatch(/no measured report/);
+    expect(ok.code).toBe(0);
+  });
+
   it("an unknown suite is refused", () => {
     expect(run(["--suite", "nope"], ROOT).code).toBe(1);
   });
