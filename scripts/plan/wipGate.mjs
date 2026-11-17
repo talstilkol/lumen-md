@@ -18,6 +18,11 @@
  *     until it is removed (`node scripts/plan/wipGate.mjs --prune`). Nothing
  *     here ever adds an id; `--prune` only deletes.
  *
+ * Review 12, M2: work that was merged into the train while its wave was
+ * frozen is recorded in plan/merged-while-frozen.json (append-only,
+ * scripts/plan/mergedWhileFrozen.mjs). The gate accepts exactly those ids
+ * too; they are never "stale" here, since that list only grows.
+ *
  * The gate always uses the plan's own limit (plan.schedule.wipLimit, else
  * WIP_LIMIT): `--wip-limit` changes the warnings, never what is blocked.
  * `--wip-strict` still fails on any warning at all (the end state the DoD asks for).
@@ -37,16 +42,17 @@ export function frozenIds(frozen) {
 /**
  * @param {Array<{ wave: number, next: number, started: string[] }>} warnings wipWarnings(plan) at the plan's own limit
  * @param {any} frozen the parsed plan/wip-frozen.json, or null
+ * @param {Set<string>} [merged] the ids in plan/merged-while-frozen.json
  * @returns {{ blocked: Array<{ id: string, wave: number, next: number }>, stale: string[] }}
  */
-export function wipGate(warnings, frozen) {
+export function wipGate(warnings, frozen, merged = new Set()) {
   const allowed = frozenIds(frozen);
   const blocked = [];
   const live = new Set();
   for (const w of warnings) {
     for (const id of w.started) {
       live.add(id);
-      if (!allowed.has(id)) blocked.push({ id, wave: w.wave, next: w.next });
+      if (!allowed.has(id) && !merged.has(id)) blocked.push({ id, wave: w.wave, next: w.next });
     }
   }
   const stale = [...allowed].filter((id) => !live.has(id)).sort();
@@ -80,9 +86,11 @@ export function pruned(frozen, stale) {
 async function main(argv) {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
   const { wipWarnings } = await import("./build.mjs");
+  const { mergedIds, readMerged } = await import("./mergedWhileFrozen.mjs");
   const plan = JSON.parse(readFileSync(join(root, "plan/plan.json"), "utf8"));
   const frozen = readFrozen(root);
-  const res = wipGate(wipWarnings(plan), frozen);
+  const merged = mergedIds(readMerged(root));
+  const res = wipGate(wipWarnings(plan, { merged }), frozen, merged);
   if (argv.includes("--prune")) {
     if (!frozen) throw new Error(`${WIP_FROZEN_FILE} is missing or not JSON; --prune only removes ids`);
     writeFileSync(join(root, WIP_FROZEN_FILE), JSON.stringify(pruned(frozen, res.stale), null, 2) + "\n");

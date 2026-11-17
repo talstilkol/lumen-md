@@ -439,44 +439,50 @@
   {
    "pr": 1080,
    "head": "dea50af7307387a6348d38ce6b33edeb974b77c3",
-   "decision": "in",
-   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the OWNER-DECISION draft makes npm run lint a preview gate, and it is merged only after lint is green on the owner's Mac (owner pack L3-0.4).",
-   "via": "0.4"
+   "decision": "deferred",
+   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the OWNER-DECISION draft makes npm run lint a preview gate, and it is merged only after lint is green on the owner's Mac (owner pack L3-0.4). Review 12, L5 (lane F12, 17.11): recorded as deferred, not in.",
+   "via": "0.4",
+   "until": "lint green on the owner's Mac (owner pack L3-0.4)"
   },
   {
    "pr": 1084,
    "head": "1f543aa8bbf339c021cbccb371db1e8c8720e0cc",
-   "decision": "in",
-   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the OWNER-DECISION draft switches on the GitHub Sponsors and Open Collective links, and those accounts do not exist yet (owner pack L5.O-W5.25).",
-   "via": "W5.25"
+   "decision": "deferred",
+   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the OWNER-DECISION draft switches on the GitHub Sponsors and Open Collective links, and those accounts do not exist yet (owner pack L5.O-W5.25). Review 12, L5 (lane F12, 17.11): recorded as deferred, not in.",
+   "via": "W5.25",
+   "until": "the owner's decision on GitHub Sponsors"
   },
   {
    "pr": 1090,
    "head": "b897044511d1a9c2f276b9fa73a52b0f55ab1b1f",
-   "decision": "in",
-   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the MIT grant for israelconnect reuse is the owner's own signature (owner pack L6-R12.1-licence); the delegation does not sign licences for the owner.",
-   "via": "R12.1"
+   "decision": "deferred",
+   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the MIT grant for israelconnect reuse is the owner's own signature (owner pack L6-R12.1-licence); the delegation does not sign licences for the owner. Review 12, L5 (lane F12, 17.11): recorded as deferred, not in.",
+   "via": "R12.1",
+   "until": "the owner's MIT grant for israelconnect reuse"
   },
   {
    "pr": 1091,
    "head": "17538b4b2117d4902a7cdf1bdb1dc84d671e0baa",
-   "decision": "in",
-   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the OWNER-DECISION draft adds the GitHub Sponsors link, and the account does not exist yet (owner pack L1/W11.O8).",
-   "via": "W11.O8"
+   "decision": "deferred",
+   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the OWNER-DECISION draft adds the GitHub Sponsors link, and the account does not exist yet (owner pack L1/W11.O8). Review 12, L5 (lane F12, 17.11): recorded as deferred, not in.",
+   "via": "W11.O8",
+   "until": "the owner's decision on GitHub Sponsors"
   },
   {
    "pr": 1092,
    "head": "75797920dc0b78fd3c47a3003211c1a2ff4b6a62",
-   "decision": "in",
-   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the draft holds placeholders for the accessibility coordinator's contact, which only the owner can supply (owner pack L1/W11.O3).",
-   "via": "W11.O3"
+   "decision": "deferred",
+   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: the draft holds placeholders for the accessibility coordinator's contact, which only the owner can supply (owner pack L1/W11.O3). Review 12, L5 (lane F12, 17.11): recorded as deferred, not in.",
+   "via": "W11.O3",
+   "until": "the accessibility coordinator's real details from the owner"
   },
   {
    "pr": 1101,
    "head": "a89d7d4c43a9d21f9762a54351a138795704dfd8",
-   "decision": "in",
-   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: SECURITY.md may name private vulnerability reporting as the first channel only after the owner turns it on (the PUT was refused from here; owner pack L7-W10.D15).",
-   "via": "W10.D15"
+   "decision": "deferred",
+   "reason": "Integrator INT6a (16.11): wave g6 and lane D1 were merged into verify/train-7 from f090c20812; left out on purpose: SECURITY.md may name private vulnerability reporting as the first channel only after the owner turns it on (the PUT was refused from here; owner pack L7-W10.D15). Review 12, L5 (lane F12, 17.11): recorded as deferred, not in.",
+   "via": "W10.D15",
+   "until": "the owner turns on private vulnerability reporting (owner pack L7-W10.D15)"
   },
   {
    "pr": 1110,

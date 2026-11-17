@@ -76,7 +76,8 @@ describe("the two ratchet files only move one way (review 11, M4)", () => {
     const git = (...a: string[]) => spawnSync("git", ["-c", "user.name=t", "-c", "user.email=t@t", ...a], { cwd: dir, encoding: "utf8" });
     git("init", "-q", "-b", "main");
     mkdirSync(join(dir, "plan"));
-    for (const f of [FROZEN_FILE, LEDGER_FILE, SNAPSHOT_FILE]) cpSync(join(ROOT, f), join(dir, f));
+    // Review 12: the merged-while-frozen list and the WIP decisions are ratchet files too, in the snapshot.
+    for (const f of [FROZEN_FILE, LEDGER_FILE, SNAPSHOT_FILE, "plan/merged-while-frozen.json", "plan/wip-decisions.json"]) cpSync(join(ROOT, f), join(dir, f));
     git("add", "-A");
     git("commit", "-q", "-m", "base");
     git("branch", "base");

@@ -1,0 +1,10 @@
+{
+ "about": "Review 12, M2: work merged into the train while its wave was frozen by the WIP limit (W6.39, W10.G6), recorded instead of hidden. Append-only (scripts/plan/ledgerRatchet.mjs) and owned in CODEOWNERS; every mergeSha must be an ancestor of the train. plan:check counts these ids as started, the frozen-wave gate (scripts/plan/wipGate.mjs) accepts exactly them, and the board shows them as \"merged, held by frozen wave\". See scripts/plan/mergedWhileFrozen.mjs.",
+ "merged": [
+  { "id": "W13.X1", "prs": [1016, 1072], "mergeSha": "50e64805c4263e8df05d9d8a680b5389a3b741b9", "at": "2026-11-16" },
+  { "id": "W13.X2", "prs": [1019], "mergeSha": "b53b34e7e19c4d28997d20da3341ea9d5ec34003", "at": "2026-11-16" },
+  { "id": "W9.8", "prs": [1069], "mergeSha": "e1005049bc8965c5aa8314af04139681d2b485f0", "at": "2026-11-16" },
+  { "id": "W9.4", "prs": [649], "mergeSha": "b96853d37b58624ba07e85337fd8b39cabff7705", "at": "2026-11-15" },
+  { "id": "W6.12", "prs": [630], "mergeSha": "b9f68c111a5410e2148c8af97ed29f6421dbb842", "at": "2026-11-15" }
+ ]
+}
