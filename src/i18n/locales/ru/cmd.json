@@ -560,6 +560,8 @@
   "cmd.view.columnNext.hint": "Ctrl+Alt+Shift+→ (зеркально в раскладке справа налево)",
   "cmd.view.columnPrev": "Вид: предыдущая колонка",
   "cmd.view.columnPrev.hint": "Ctrl+Alt+Shift+← (зеркально в раскладке справа налево)",
+  "cmd.view.daf": "📜 Page of the Talmud (daf)",
+  "cmd.view.daf.hint": "The note's main text with its commentaries around it, as on a printed daf",
   "cmd.view.findReplace": "Найти и заменить",
   "cmd.view.grammarCheck.hint": "Подчёркивает грамматические, стилистические ошибки и опечатки. Задайте VITE_LANGUAGETOOL_URL для собственного хостинга.",
   "cmd.view.grammarCheck.off": "Отключить grammar check",

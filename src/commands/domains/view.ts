@@ -37,6 +37,15 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => void import("../../ai/mt/openSideBySide").then((m) => m.openSideBySide()),
     },
     {
+      id: "view.daf",
+      label: t("cmd.view.daf"),
+      hint: t("cmd.view.daf.hint"),
+      icon: cmdIcons.Columns2,
+      group: t("group.view"),
+      // W13.R11: the main text with its commentaries around it (lazy; reads the vault only).
+      action: () => void import("../../reading/daf/openDaf").then((m) => m.openDaf()),
+    },
+    {
       id: "view.preview",
       label: t("cmd.view.preview"),
       shortcut: "⌘3",

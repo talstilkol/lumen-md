@@ -560,6 +560,8 @@
   "cmd.view.columnNext.hint": "Ctrl+Alt+Shift+→（在从右到左的布局中镜像）",
   "cmd.view.columnPrev": "视图：转到上一栏",
   "cmd.view.columnPrev.hint": "Ctrl+Alt+Shift+←（在从右到左的布局中镜像）",
+  "cmd.view.daf": "📜 Page of the Talmud (daf)",
+  "cmd.view.daf.hint": "The note's main text with its commentaries around it, as on a printed daf",
   "cmd.view.findReplace": "查找和替换",
   "cmd.view.grammarCheck.hint": "为语法、风格和拼写问题添加下划线。设置 VITE_LANGUAGETOOL_URL 可自行托管。",
   "cmd.view.grammarCheck.off": "禁用 grammar check",

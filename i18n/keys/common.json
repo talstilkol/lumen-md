@@ -3994,6 +3994,101 @@
       "vars": []
     },
     {
+      "key": "daf.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "daf.empty",
+      "en": "This note has no text for the page. Write the main text, and add ```commentary inner``` and ```commentary outer``` blocks for the commentaries.",
+      "vars": []
+    },
+    {
+      "key": "daf.fromNote",
+      "en": "From this note",
+      "vars": []
+    },
+    {
+      "key": "daf.inner",
+      "en": "Inner commentary",
+      "vars": []
+    },
+    {
+      "key": "daf.main",
+      "en": "Main text",
+      "vars": []
+    },
+    {
+      "key": "daf.mode.linear",
+      "en": "Linear",
+      "vars": []
+    },
+    {
+      "key": "daf.mode.page",
+      "en": "Page",
+      "vars": []
+    },
+    {
+      "key": "daf.myNotes",
+      "en": "My notes on this passage",
+      "vars": []
+    },
+    {
+      "key": "daf.narrow",
+      "en": "The window is too narrow for the page: the texts are shown one after another.",
+      "vars": []
+    },
+    {
+      "key": "daf.outer",
+      "en": "Outer commentary",
+      "vars": []
+    },
+    {
+      "key": "daf.print",
+      "en": "Print / Save as PDF",
+      "vars": []
+    },
+    {
+      "key": "daf.rashi",
+      "en": "Rashi",
+      "vars": []
+    },
+    {
+      "key": "daf.side",
+      "en": "Amud",
+      "vars": []
+    },
+    {
+      "key": "daf.side.a",
+      "en": "a (Rashi on the right)",
+      "vars": []
+    },
+    {
+      "key": "daf.side.b",
+      "en": "b (Rashi on the left)",
+      "vars": []
+    },
+    {
+      "key": "daf.title",
+      "en": "Page of the Talmud",
+      "vars": []
+    },
+    {
+      "key": "daf.toolbar",
+      "en": "Page of the Talmud controls",
+      "vars": []
+    },
+    {
+      "key": "daf.tosafot",
+      "en": "Tosafot",
+      "vars": []
+    },
+    {
+      "key": "daf.view",
+      "en": "View",
+      "vars": []
+    },
+    {
       "key": "daily.calendar.allDay",
       "en": "All day",
       "vars": []

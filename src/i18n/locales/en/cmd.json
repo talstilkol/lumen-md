@@ -345,6 +345,8 @@
   "cmd.view.columnNext.hint": "Ctrl+Alt+Shift+→ (mirrored in a right-to-left layout)",
   "cmd.view.columnPrev": "View: focus the previous column",
   "cmd.view.columnPrev.hint": "Ctrl+Alt+Shift+← (mirrored in a right-to-left layout)",
+  "cmd.view.daf": "📜 Page of the Talmud (daf)",
+  "cmd.view.daf.hint": "The note's main text with its commentaries around it, as on a printed daf",
   "cmd.view.findReplace": "Find & Replace",
   "cmd.view.grammarCheck.hint": "Underlines grammar / style / typo issues. Set VITE_LANGUAGETOOL_URL to self-host.",
   "cmd.view.grammarCheck.off": "Disable grammar check",

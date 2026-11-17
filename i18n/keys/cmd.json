@@ -3560,6 +3560,16 @@
       "key": "cmd.reading.sidenotes.hint",
       "en": "Each note next to its line: on the right in English, on the left in Hebrew; under its paragraph on a narrow screen",
       "vars": []
+    },
+    {
+      "key": "cmd.view.daf",
+      "en": "📜 Page of the Talmud (daf)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.daf.hint",
+      "en": "The note's main text with its commentaries around it, as on a printed daf",
+      "vars": []
     }
   ]
 }

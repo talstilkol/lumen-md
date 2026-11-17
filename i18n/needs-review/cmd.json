@@ -119,6 +119,22 @@
     "ru": "3tcta1",
     "zh-CN": "3tcta1"
   },
+  "cmd.view.daf": {
+    "ar": "vw5inu",
+    "de": "vw5inu",
+    "fr": "vw5inu",
+    "ja": "vw5inu",
+    "ru": "vw5inu",
+    "zh-CN": "vw5inu"
+  },
+  "cmd.view.daf.hint": {
+    "ar": "1yqmwx6",
+    "de": "1yqmwx6",
+    "fr": "1yqmwx6",
+    "ja": "1yqmwx6",
+    "ru": "1yqmwx6",
+    "zh-CN": "1yqmwx6"
+  },
   "cmd.view.tripleLinked": {
     "ar": "12bs96p",
     "de": "12bs96p",

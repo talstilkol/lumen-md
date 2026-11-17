@@ -560,6 +560,8 @@
   "cmd.view.columnNext.hint": "Ctrl+Alt+Shift+← (בפריסה מימין לשמאל הכיוון מתהפך)",
   "cmd.view.columnPrev": "תצוגה: מעבר לעמודה הקודמת",
   "cmd.view.columnPrev.hint": "Ctrl+Alt+Shift+→ (בפריסה מימין לשמאל הכיוון מתהפך)",
+  "cmd.view.daf": "📜 צורת הדף",
+  "cmd.view.daf.hint": "הטקסט המרכזי של הפתק והפירושים סביבו, כמו בדף גמרא מודפס",
   "cmd.view.findReplace": "חיפוש והחלפה",
   "cmd.view.grammarCheck.hint": "מסמן בעיות דקדוק / סגנון / שגיאות הקלדה. הגדר VITE_LANGUAGETOOL_URL לאחסון עצמאי.",
   "cmd.view.grammarCheck.off": "כבה בדיקת דקדוק",
