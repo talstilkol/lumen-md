@@ -26,7 +26,8 @@ use tauri::{AppHandle, Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder
 #[serde(tag = "kind", rename_all = "kebab-case")]
 pub enum OpenRequest {
     /// A note of a known vault: switch to that vault if needed, open `rel`.
-    Vault { root: String, rel: String, line: Option<u32> },
+    /// `link`: it came from a `lumen://` link, which the app confirms first (W13.X5); the OS and the tray are not links.
+    Vault { root: String, rel: String, line: Option<u32>, link: bool },
     /// A file in no known vault, by token (`external_read` / `external_write`).
     File { token: String, name: String },
     /// A vault named in a link that isn't one the user opened.
@@ -85,7 +86,7 @@ pub fn open_file(app: &AppHandle, path: &Path) {
     let path = std::fs::canonicalize(path).unwrap_or_else(|_| fileopen::normalize(path));
     let roots = crate::desktop_vault::known_roots(&app.state::<VaultState>());
     let req = match fileopen::place(&path, &roots, CASE_INSENSITIVE) {
-        fileopen::Placement::InVault { root, rel } => OpenRequest::Vault { root, rel, line: None },
+        fileopen::Placement::InVault { root, rel } => OpenRequest::Vault { root, rel, line: None, link: false },
         fileopen::Placement::Standalone { path } => {
             let shell = app.state::<Shell>();
             let Ok(mut s) = shell.0.lock() else { return };
@@ -121,9 +122,9 @@ pub fn open_link(app: &AppHandle, link: &str) {
                 }
             };
             match root {
-                Some(root) => OpenRequest::Vault { root, rel: path, line },
+                Some(root) => OpenRequest::Vault { root, rel: path, line, link: true },
                 // No folder vault: the main window opens `path` from app storage.
-                None => OpenRequest::Vault { root: String::new(), rel: path, line },
+                None => OpenRequest::Vault { root: String::new(), rel: path, line, link: true },
             }
         }
         deeplink::DeepLink::New { title, text, folder } => OpenRequest::New { title, text, folder },
@@ -383,7 +384,7 @@ pub fn build_tray(app: &AppHandle) -> tauri::Result<()> {
                         let rel = app.state::<Shell>().0.lock().ok().and_then(|s| s.recent.get(i).map(|(_, p)| p.clone()));
                         if let Some(rel) = rel {
                             let root = crate::desktop_vault::active_root(&app.state::<VaultState>()).unwrap_or_default();
-                            deliver(app, OpenRequest::Vault { root, rel, line: None });
+                            deliver(app, OpenRequest::Vault { root, rel, line: None, link: false });
                         }
                     }
                 }

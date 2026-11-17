@@ -13085,6 +13085,132 @@
       ]
     },
     {
+      "key": "link.allow",
+      "en": "Allow",
+      "vars": []
+    },
+    {
+      "key": "link.always",
+      "en": "Always allow this from {source} on this device",
+      "vars": [
+        "source"
+      ]
+    },
+    {
+      "key": "link.always.hint",
+      "en": "Only on this device; it is never synced or exported.",
+      "vars": []
+    },
+    {
+      "key": "link.blocked",
+      "en": "The link was not followed.",
+      "vars": []
+    },
+    {
+      "key": "link.cancel",
+      "en": "Don't allow",
+      "vars": []
+    },
+    {
+      "key": "link.confirm.capture",
+      "en": "Add this to your inbox note: {text}",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "link.confirm.clip",
+      "en": "Save a web clip “{title}” from {page} into your vault",
+      "vars": [
+        "title",
+        "page"
+      ]
+    },
+    {
+      "key": "link.confirm.new",
+      "en": "Create a new note “{title}” in {folder}, with this text: {text}",
+      "vars": [
+        "title",
+        "folder",
+        "text"
+      ]
+    },
+    {
+      "key": "link.confirm.open",
+      "en": "Open {path}",
+      "vars": [
+        "path"
+      ]
+    },
+    {
+      "key": "link.confirm.openUnknown",
+      "en": "Open {path}, a .{ext} file",
+      "vars": [
+        "path",
+        "ext"
+      ]
+    },
+    {
+      "key": "link.confirm.source",
+      "en": "Asked by a lumen:// link. Any web page or app can open one: allow it only if you expected it.",
+      "vars": []
+    },
+    {
+      "key": "link.confirm.title",
+      "en": "A link wants Lumen to do something",
+      "vars": []
+    },
+    {
+      "key": "link.source.capture",
+      "en": "capture links",
+      "vars": []
+    },
+    {
+      "key": "link.source.new",
+      "en": "new-note links",
+      "vars": []
+    },
+    {
+      "key": "link.source.open",
+      "en": "open-note links",
+      "vars": []
+    },
+    {
+      "key": "link.warn.executable",
+      "en": "This is a program (.{ext}). Opening programs from a link is how many attacks start.",
+      "vars": [
+        "ext"
+      ]
+    },
+    {
+      "key": "link.warn.html",
+      "en": "This is a local web page (.{ext}). It can run code when it is opened.",
+      "vars": [
+        "ext"
+      ]
+    },
+    {
+      "key": "link.warn.htmlNetwork",
+      "en": "This local web page (.{ext}) loads content from the internet when it is opened.",
+      "vars": [
+        "ext"
+      ]
+    },
+    {
+      "key": "link.warn.script",
+      "en": "This is a script (.{ext}). Running a script from a link can do anything you can do.",
+      "vars": [
+        "ext"
+      ]
+    },
+    {
+      "key": "link.warn.unknown",
+      "en": "Lumen does not know this kind of file (.{ext}).",
+      "vars": [
+        "ext"
+      ]
+    },
+    {
       "key": "litReview.done",
       "en": "Literature review: {papers} papers, {values} verified values, in “{folder}”.",
       "vars": [

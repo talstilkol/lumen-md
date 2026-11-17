@@ -13,12 +13,17 @@ import type { ClipPayload } from "./clipV2";
 
 export const CLIP_MESSAGE = "lumen-clip-v2";
 
-export function startClipBridge(onClip: (p: ClipPayload) => void): () => void {
+/**
+ * `kind`: where the clip came from. "payload" is the extension's bridge on this page (the user clicked the
+ * extension); "deep" (a lumen:// link) and "hash" (`#clip=` in an address) can come from any page, so the app
+ * confirms them first (W13.X5).
+ */
+export function startClipBridge(onClip: (p: ClipPayload, kind: "payload" | "deep" | "hash") => void): () => void {
   const deliver = async (raw: unknown, kind: "payload" | "deep" | "hash") => {
     const m = await import("./clipV2");
     const p = kind === "payload" ? m.parsePayload(raw) : kind === "deep" ? m.parseDeepLink(String(raw ?? "")) : m.takeHashPayload();
     if (!p) return;
-    onClip(p);
+    onClip(p, kind);
     if (kind === "payload") window.postMessage({ type: `${CLIP_MESSAGE}:ack`, url: p.url }, location.origin);
   };
   const onMessage = (e: MessageEvent) => {

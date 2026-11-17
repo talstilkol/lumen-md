@@ -157,8 +157,13 @@ export function useAppBootEffects(): void {
   useEffect(() => {
     let stop: (() => void) | undefined;
     let cancelled = false;
-    const save = (p: import("../research/clipV2").ClipPayload) =>
-      void import("../commands/useCommands").then(({ saveClipV2 }) => saveClipV2(p)).catch((e) => showAiToast(t("clip.failed", { message: explainError(e) }), "error"));
+    const save = (p: import("../research/clipV2").ClipPayload, kind: "payload" | "deep" | "hash") =>
+      void (async () => {
+        // W13.X5: a clip from a link or an address (any page can make one) is confirmed first; the extension's own is not.
+        if (kind !== "payload" && !(await (await import("../security/LinkConfirmDialog")).confirmLinkInApp({ kind: "clip", pageUrl: p.url, title: p.title ?? "" }))) return;
+        const { saveClipV2 } = await import("../commands/useCommands");
+        await saveClipV2(p);
+      })().catch((e) => showAiToast(t("clip.failed", { message: explainError(e) }), "error"));
     void import("../research/clipBridge").then(({ startClipBridge }) => {
       if (!cancelled) stop = startClipBridge(save);
     });

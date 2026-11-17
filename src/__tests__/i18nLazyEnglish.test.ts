@@ -277,6 +277,7 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "offlineMap.json": { module: "map/offlineMapStrings.ts", users: ["map/OfflineMapPanel.tsx", "plugins/MapBlock.tsx"], prefixes: ["map."] },
   "paged.json": { module: "ui/PagedPreview.tsx", users: [], prefixes: ["paged."] },
   "readingMode.json": { module: "reading/readingModeStrings.ts", users: ["ui/ImmersiveReader.tsx", "ui/ReadingModeMenu.tsx"], prefixes: ["readingMode."] },
+  "linkConfirm.json": { module: "security/linkConfirmStrings.ts", users: ["security/LinkConfirmDialog.tsx"], prefixes: ["link."] },
   "rsvp.json": { module: "reading/rsvpStrings.ts", users: ["ui/RsvpReader.tsx"], prefixes: ["rsvp."] },
   "writingChecksDialog.json": { module: "ui/writingChecksDialogStrings.ts", users: ["ui/WritingChecksDialog.tsx"], prefixes: ["wchk."] },
   "writingGoals.json": { module: "ui/goalsDialogStrings.ts", users: ["ui/GoalsDialog.tsx", "ui/NoteGoalStatus.tsx"], prefixes: ["goal."] },
