@@ -7,8 +7,8 @@
  *
  * Two sources:
  *  - the clarity and style coach of plan W13.W3, when it is there: its
- *    suggestions (the W13.W1 contract: `{ range: {from, to}, kind }`) are
- *    mapped onto these five kinds (`fromSuggestions`);
+ *    suggestions (W13.W1's WritingSuggestion, a type-only import) are
+ *    mapped onto these five kinds (`fromSuggestions`, HEMINGWAY_OF_KIND);
  *  - otherwise, these local rules — deterministic, no model, ≤ 150 ms for a
  *    long note (src/__tests__/hemingwayOverlay.test.ts).
  *
@@ -20,6 +20,7 @@
  * complex-word list holds bureaucratic phrases with a plain alternative.
  */
 import { langOf, paragraphAt, sentencesIn, type Span } from "./focusUnits";
+import type { SuggestionKind, WritingSuggestion } from "../agents/writing/suggestion";
 
 export const HEMINGWAY_KINDS = ["veryLong", "long", "passive", "adverb", "complex"] as const;
 export type HemingwayKind = (typeof HEMINGWAY_KINDS)[number];
@@ -179,14 +180,11 @@ function dedupe(list: HemingwayFinding[]): HemingwayFinding[] {
   return out;
 }
 
-/** A W13.W1 suggestion, structurally (no import from the writing agents' module). */
-export interface SuggestionLike {
-  range: Span;
-  kind: string;
-  replacement?: string | null;
-}
+/** What the overlay reads of a W13.W1 suggestion (the type is W1's; nothing of the writing agents loads with it). */
+export type SuggestionLike = Pick<WritingSuggestion, "range" | "kind"> & Partial<Pick<WritingSuggestion, "replacement">>;
 
-const KIND_MAP: Record<string, HemingwayKind | undefined> = {
+/** W1 kinds that have a Hemingway colour (INT7: keyed by W1's own SuggestionKind, so a renamed kind fails to compile). */
+export const HEMINGWAY_OF_KIND: Partial<Record<SuggestionKind, HemingwayKind>> = {
   passive: "passive",
   nominalization: "complex",
   wordChoice: "complex",
@@ -199,7 +197,7 @@ const KIND_MAP: Record<string, HemingwayKind | undefined> = {
 export function fromSuggestions(list: readonly SuggestionLike[], text?: string): HemingwayFinding[] {
   const out: HemingwayFinding[] = [];
   for (const s of list) {
-    let kind = KIND_MAP[s.kind];
+    let kind = HEMINGWAY_OF_KIND[s.kind];
     if (!kind) continue;
     if (kind === "long" && text) {
       const n = wordsOf(text.slice(s.range.from, s.range.to)).length;

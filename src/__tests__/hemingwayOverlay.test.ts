@@ -143,3 +143,22 @@ describe("the layer in the editor", () => {
     expect(ms).toBeLessThan(5000);
   });
 });
+
+describe("wired to the real W13.W1 type and the W13.W3 coach (INT7)", () => {
+  it("every kind the overlay colours is a W1 suggestion kind", async () => {
+    const { SUGGESTION_KINDS } = await import("../agents/writing/suggestion");
+    const { HEMINGWAY_OF_KIND } = await import("../reading/hemingway");
+    for (const k of Object.keys(HEMINGWAY_OF_KIND)) expect(SUGGESTION_KINDS, k).toContain(k);
+  });
+
+  it("the style coach's own suggestions on a passive, hedged sentence come out as highlights", async () => {
+    await import("../agents/writing/agents");
+    const { getWritingAgent } = await import("../agents/writing/agent");
+    const coach = getWritingAgent("styleCoach")!;
+    const text = "The report was written by the team in order to make a decision about the utilization of the budget. It is basically very good.";
+    const sugs = await coach.run({ text, lang: "en", level: "professional", signal: new AbortController().signal, model: null });
+    const got = fromSuggestions(sugs, text);
+    expect(got.length).toBeGreaterThan(0);
+    for (const f of got) expect(HEMINGWAY_KINDS).toContain(f.kind);
+  });
+});
