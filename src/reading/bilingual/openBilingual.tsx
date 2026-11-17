@@ -12,6 +12,7 @@ import { BilingualView } from "../../ui/BilingualView";
 // The machine translation layers' names (mt.layer.name.*), which the view shows: the mt strings load with this opener.
 import "../../ai/mt/strings";
 import { fromSidecar, fromSourceNote, type Bilingual } from "./bilingual";
+import { HelpButton } from "../../ui/HelpButton";
 
 // The English of this view comes with ../../ui/BilingualView (its strings, registered when it loads).
 
@@ -53,6 +54,7 @@ export async function openBilingual(): Promise<void> {
         <BilingualView data={data} />
       ) : (
         <div data-testid="bilingual-empty" style={{ display: "grid", gap: 10 }}>
+          <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="editor/reading-views" /></span>
           <h2 style={{ margin: 0, fontSize: 18 }}>{t("bilingual.title")}</h2>
           {/* empty-action: the "make a translation" button below */}
           <p style={{ margin: 0 }}>{t("bilingual.none")}</p>

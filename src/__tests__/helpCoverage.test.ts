@@ -1,6 +1,7 @@
 /**
  * W3.7 — 100% of panels have a "?": every component that renders a dialog
- * (role="dialog" / aria-modal) or a side panel (<aside>) has a HelpButton,
+ * (role="dialog" / aria-modal, or the <Modal> primitive — audit r2: the
+ * dialogs built on <Modal> were not counted) or a side panel (<aside>) has a HelpButton,
  * and every button's page and section exist in the packed docs, in English
  * and in Hebrew.
  */
@@ -11,8 +12,8 @@ import type { HelpBundle } from "../help/helpSearch";
 
 const ROOT = join(__dirname, "..", "..");
 const SRC = join(ROOT, "src");
-/** The help panel is the help. */
-const NOT_PANELS = new Set(["src/ui/HelpPanel.tsx"]);
+/** The help panel is the help; Modal.tsx is the primitive every dialog is built on (its users are checked). */
+const NOT_PANELS = new Set(["src/ui/HelpPanel.tsx", "src/ui/Modal.tsx"]);
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const n of readdirSync(dir)) {
@@ -26,7 +27,7 @@ function walk(dir: string, out: string[] = []): string[] {
 
 const panels = walk(SRC)
   .map((p) => ({ rel: relative(ROOT, p).split("\\").join("/"), text: readFileSync(p, "utf8") }))
-  .filter((f) => !NOT_PANELS.has(f.rel) && (/role="dialog"|aria-modal/.test(f.text) || /<aside\b/.test(f.text)));
+  .filter((f) => !NOT_PANELS.has(f.rel) && (/role="dialog"|aria-modal/.test(f.text) || /<aside\b/.test(f.text) || /<Modal\b/.test(f.text)));
 /** The packed docs of a language: every shard (scripts/help-bundle.mjs), joined. */
 function packed(lang: "en" | "he"): HelpBundle {
   const dir = join(SRC, "help/generated");
@@ -41,7 +42,9 @@ const bundles = { en: packed("en"), he: packed("he") };
 
 describe('every panel has a "?"', () => {
   it("finds the panels", () => {
-    expect(panels.length).toBeGreaterThanOrEqual(28);
+    // 28 when the gate was written (role="dialog" and <aside> only); 123 with the <Modal> dialogs (audit r2).
+    expect(panels.length).toBeGreaterThanOrEqual(120);
+    expect(panels.some((p) => p.rel === "src/sources/sefaria/VersePanel.tsx")).toBe(true);
   });
 
   for (const f of panels) {

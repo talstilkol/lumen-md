@@ -15,6 +15,7 @@ import { Modal } from "../ui/Modal";
 import type { GDay } from "../daily/hebrewCalendar";
 import { CYCLES, follow, iso, markDone, markForReview, progress, readingOf, unfollow, type CycleId, type LearningFile } from "./plans";
 import { explainError } from "../lib/userError";
+import { HelpButton } from "../ui/HelpButton";
 
 export interface LearningPlansProps {
   file: LearningFile;
@@ -41,6 +42,7 @@ export function LearningPlansDialog({ file: initial, today, lang, onChange, onCl
 
   return (
     <Modal aria-label={t("learning.title")} onClose={onClose} className="learning-plans" data-testid="learning-plans" style={{ maxInlineSize: 560, inlineSize: "100%" }}>
+      <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="workspace/student-mode" /></span>
       <h2 style={{ marginBlock: "0 8px", fontSize: 18 }}>{t("learning.title")}</h2>
       {error && <div role="alert">{error}</div>}
       <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 12 }}>

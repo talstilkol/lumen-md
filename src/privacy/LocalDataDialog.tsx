@@ -12,6 +12,8 @@ const formatNumber = (n: number) => new Intl.NumberFormat(getLocale()).format(n)
 import { uiConfirm } from "../ui/PromptDialog";
 import "./localDataStrings";
 import { browserStorage, CATEGORIES, inventory, reportJson, wipe, type DataCategory, type InventoryReport, type StorageDeps } from "./localData";
+import { HelpButton } from "../ui/HelpButton";
+import { Modal } from "../ui/Modal";
 
 const size = (n: number | null) => (n === null ? t("localData.unknown") : n < 1024 * 1024 ? t("localData.kb", { n: formatNumber(Math.ceil(n / 1024)) }) : t("localData.mb", { n: formatNumber(Math.round((n / 1048576) * 10) / 10) }));
 
@@ -34,47 +36,46 @@ export function LocalDataDialog({ deps, onClose, save }: { deps: StorageDeps; on
     refresh();
   };
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 1000, display: "grid", placeItems: "center", background: "rgb(0 0 0 / 0.4)" }} onKeyDown={(e) => e.key === "Escape" && onClose()}>
-      <div role="dialog" aria-modal="true" aria-labelledby="local-data-title" data-testid="local-data" style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", borderRadius: 10, padding: 20, width: "min(560px, 94vw)", maxHeight: "86vh", overflow: "auto", display: "grid", gap: 12 }} tabIndex={-1}>
-        <h2 id="local-data-title" ref={title} tabIndex={-1} style={{ margin: 0, fontSize: 18 }}>
-          {t("localData.title")}
-        </h2>
-        <p style={{ margin: 0, fontSize: 13, color: "hsl(var(--fg-muted))" }}>{report ? t("localData.total", { used: size(report.usage), quota: size(report.quota) }) : t("localData.loading")}</p>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
-          <tbody>
-            {(report?.categories ?? []).map((c) => (
-              <tr key={c.category} data-testid={`local-data-${c.category}`} style={{ borderTop: "1px solid hsl(var(--border))" }}>
-                <th scope="row" style={{ textAlign: "start", padding: "8px 4px", fontWeight: 500 }}>
-                  {t(`localData.cat.${c.category}`)}
-                  <div style={{ fontSize: 12, fontWeight: 400, color: "hsl(var(--fg-muted))" }}>{t(`localData.about.${c.category}`)}</div>
-                </th>
-                {/* empty-allow: a size cell ("nothing stored"); the row's Delete is beside it */}
-                <td style={{ padding: "8px 4px", whiteSpace: "nowrap" }}>{c.items.length ? size(c.bytes) : t("localData.empty")}</td>
-                <td style={{ padding: "8px 4px", textAlign: "end" }}>
-                  <button type="button" className="btn" disabled={busy || !c.items.length} onClick={() => void remove(c.category)} aria-label={t("localData.deleteWhat", { what: t(`localData.cat.${c.category}`) })} style={{ padding: "4px 10px", border: "1px solid hsl(var(--border))", borderRadius: 6 }}>
-                    {t("localData.delete")}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div role="status" style={{ minHeight: 18, fontSize: 13 }}>
-          {note}
-        </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
-          <button type="button" className="btn" disabled={!report} onClick={() => report && save(`lumen-local-data-${report.created.slice(0, 10)}.json`, reportJson(report))} style={{ padding: "6px 12px", border: "1px solid hsl(var(--border))", borderRadius: 6 }}>
-            {t("localData.export")}
-          </button>
-          <button type="button" className="btn" disabled={busy} onClick={() => void remove("all")} style={{ padding: "6px 12px", border: "1px solid hsl(var(--danger))", color: "hsl(var(--danger))", borderRadius: 6 }}>
-            {t("localData.deleteAll")}
-          </button>
-          <button type="button" className="btn btn-primary" onClick={onClose} style={{ padding: "6px 12px", border: "none", borderRadius: 6, background: "hsl(var(--accent))", color: "hsl(var(--accent-fg))" }}>
-            {t("localData.close")}
-          </button>
-        </div>
+    <Modal aria-labelledby="local-data-title" onClose={onClose} data-testid="local-data" style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", borderRadius: 10, padding: 20, width: "min(560px, 94vw)", maxHeight: "86vh", overflow: "auto", display: "grid", gap: 12 }}>
+      <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="security/privacy-report" /></span>
+      <h2 id="local-data-title" ref={title} tabIndex={-1} style={{ margin: 0, fontSize: 18 }}>
+        {t("localData.title")}
+      </h2>
+      <p style={{ margin: 0, fontSize: 13, color: "hsl(var(--fg-muted))" }}>{report ? t("localData.total", { used: size(report.usage), quota: size(report.quota) }) : t("localData.loading")}</p>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
+        <tbody>
+          {(report?.categories ?? []).map((c) => (
+            <tr key={c.category} data-testid={`local-data-${c.category}`} style={{ borderTop: "1px solid hsl(var(--border))" }}>
+              <th scope="row" style={{ textAlign: "start", padding: "8px 4px", fontWeight: 500 }}>
+                {t(`localData.cat.${c.category}`)}
+                <div style={{ fontSize: 12, fontWeight: 400, color: "hsl(var(--fg-muted))" }}>{t(`localData.about.${c.category}`)}</div>
+              </th>
+              {/* empty-allow: a size cell ("nothing stored"); the row's Delete is beside it */}
+              <td style={{ padding: "8px 4px", whiteSpace: "nowrap" }}>{c.items.length ? size(c.bytes) : t("localData.empty")}</td>
+              <td style={{ padding: "8px 4px", textAlign: "end" }}>
+                <button type="button" className="btn" disabled={busy || !c.items.length} onClick={() => void remove(c.category)} aria-label={t("localData.deleteWhat", { what: t(`localData.cat.${c.category}`) })} style={{ padding: "4px 10px", border: "1px solid hsl(var(--border))", borderRadius: 6 }}>
+                  {t("localData.delete")}
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div role="status" style={{ minHeight: 18, fontSize: 13 }}>
+        {note}
       </div>
-    </div>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "flex-end" }}>
+        <button type="button" className="btn" disabled={!report} onClick={() => report && save(`lumen-local-data-${report.created.slice(0, 10)}.json`, reportJson(report))} style={{ padding: "6px 12px", border: "1px solid hsl(var(--border))", borderRadius: 6 }}>
+          {t("localData.export")}
+        </button>
+        <button type="button" className="btn" disabled={busy} onClick={() => void remove("all")} style={{ padding: "6px 12px", border: "1px solid hsl(var(--danger))", color: "hsl(var(--danger))", borderRadius: 6 }}>
+          {t("localData.deleteAll")}
+        </button>
+        <button type="button" className="btn btn-primary" onClick={onClose} style={{ padding: "6px 12px", border: "none", borderRadius: 6, background: "hsl(var(--accent))", color: "hsl(var(--accent-fg))" }}>
+          {t("localData.close")}
+        </button>
+      </div>
+    </Modal>
   );
 }
 

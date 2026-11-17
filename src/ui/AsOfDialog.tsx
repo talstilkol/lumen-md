@@ -19,6 +19,7 @@ import { wordDiff } from "../collab/wordDiff";
 import { toast } from "../store/useToastStore";
 import { Modal } from "./Modal";
 import "./asOfStrings";
+import { HelpButton } from "./HelpButton";
 
 const DAY = 86_400_000;
 const field = { padding: "6px 8px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "inherit" } as const;
@@ -95,6 +96,7 @@ export function AsOfDialog({ onClose, activeName = null, applyRestore, now: nowP
           <h2 id="as-of-title" style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
             {t("asOf.title")}
           </h2>
+          <HelpButton topic="workspace/history" />
           <button type="button" onClick={onClose} aria-label={t("asOf.close")} style={{ marginInlineStart: "auto", border: "none", background: "transparent", color: "inherit", cursor: "pointer" }}>
             <X size={14} aria-hidden="true" />
           </button>

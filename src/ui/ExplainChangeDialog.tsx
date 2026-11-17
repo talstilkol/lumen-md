@@ -9,6 +9,7 @@ import { t } from "../i18n";
 import { Modal } from "./Modal";
 import type { ChangeExplanation, MeaningKind } from "../agents/writing/explainChange";
 import "./explainChangeDialogStrings";
+import { HelpButton } from "./HelpButton";
 
 const KIND_COLOR: Record<MeaningKind, string> = { number: "217 91% 45%", negation: "0 72% 45%", entity: "262 60% 50%" };
 
@@ -104,6 +105,7 @@ export function openExplainChangeDialog(r: ChangeExplanation, versionLabel: stri
       }}
     >
       <div style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, width: "min(680px, calc(100vw - 32px))", maxHeight: "84vh", overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 10 }} dir={lang === "he" ? "rtl" : "ltr"}>
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="workspace/history" /></span>
         <h2 id="xchg-title" style={{ margin: 0, fontSize: 16 }}>
           {t("xchg.title")}
         </h2>

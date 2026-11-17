@@ -17,6 +17,7 @@ import { Modal } from "./Modal";
 // The palette's dialog look (.cmd-palette): loaded with this dialog too, which can open before the palette ever has (INT7).
 import "./CommandPalette.css";
 import { EmptyState, learnHow } from "./EmptyState";
+import { HelpButton } from "./HelpButton";
 
 const btn: CSSProperties = { border: "1px solid hsl(var(--border-strong))", borderRadius: 8, padding: "6px 12px", background: "hsl(var(--bg))", color: "hsl(var(--fg))", font: "inherit", fontSize: 13, cursor: "pointer" };
 
@@ -99,6 +100,7 @@ export function RsvpReader({ content, initialWpm, close }: { content: string; in
           <h2 id="rsvp-title" style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>
             {t("rsvp.title")}
           </h2>
+          <HelpButton topic="editor/reading-modes" />
           <span style={{ fontSize: 11, border: "1px solid hsl(var(--border-strong))", borderRadius: 4, padding: "0 5px" }}>{t("readingMode.experimental")}</span>
           <a href={RSVP_RESEARCH} target="_blank" rel="noreferrer noopener" style={{ fontSize: 12 }}>
             {t("rsvp.research")}

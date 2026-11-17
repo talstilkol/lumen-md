@@ -19,6 +19,7 @@ import { analyzeClustersOffThread, type WorkerAnalyzeOptions } from "../../graph
 import { stageGapLinks } from "../../graph/clusterGapsStage";
 import "./clusterGapsStrings";
 import { explainError } from "../../lib/userError";
+import { HelpButton } from "../HelpButton";
 
 export interface ClusterGapsPanelProps {
   /** The graph on screen: note paths, labels and links. */
@@ -110,6 +111,7 @@ export function ClusterGapsPanel({ nodes, edges, texts = indexTexts, read = read
     <aside aria-label={t("graphClusters.title")} data-testid="cluster-gaps" style={{ position: "absolute", insetBlock: 0, insetInlineEnd: 0, inlineSize: "min(380px, 90%)", overflow: "auto", background: "hsl(var(--bg))", borderInlineStart: "1px solid hsl(var(--border))", padding: 12, fontSize: 12, zIndex: 3, color: "hsl(var(--fg))" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <h3 style={{ margin: 0, fontSize: 14 }}>{t("graphClusters.title")}</h3>
+        <HelpButton topic="workspace/graph" />
         <button
           type="button"
           onClick={() => {

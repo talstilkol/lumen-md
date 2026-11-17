@@ -15,6 +15,7 @@ import { setFrontmatterField } from "../ai/batchWrites";
 import "./goalsDialogStrings";
 // Hebrew readability from W13.W9's index, not the provisional stand-in (INT7).
 import "../agents/writing/goals/hebrewIndex";
+import { HelpButton } from "./HelpButton";
 
 export function goalValue(g: NoteGoal): string | null {
   const parts = [g.words ? `words: ${g.words}` : "", g.minutes ? `minutes: ${g.minutes}` : "", g.readability ? `readability: ${g.readability}` : "", g.tone ? `tone: ${g.tone}` : ""].filter(Boolean);
@@ -57,6 +58,7 @@ export function GoalsDialogImpl({ onClose, now = new Date() }: { onClose: () => 
       }}
     >
       <div style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, width: "min(620px, calc(100vw - 32px))", maxHeight: "84vh", overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 12 }}>
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="editor/writing-agents" /></span>
         <h2 id="goals-title" style={{ margin: 0, fontSize: 16 }}>
           {t("goal.dialog.title")}
         </h2>

@@ -20,6 +20,7 @@ import type { BasesFile } from "../views/bases/values";
 import "./typedObjectsStrings";
 import { Modal } from "../ui/Modal";
 import { EmptyState, learnHow } from "../ui/EmptyState";
+import { HelpButton } from "../ui/HelpButton";
 
 const BasesBlock = lazy(() => import("../views/bases/BasesBlock"));
 
@@ -53,6 +54,7 @@ export function TypePage({ type, onClose }: { type?: string; onClose: () => void
     <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("types.page.title")} data-testid="type-page">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 1100, inlineSize: "95vw", padding: 0, display: "flex", maxHeight: "85vh" }}>
         <nav aria-label={t("types.page.list")} style={{ inlineSize: 180, borderInlineEnd: "1px solid hsl(var(--border))", overflow: "auto", padding: 8 }}>
+          <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="workspace/obsidian-bases" /></span>
           <h2 style={{ fontSize: 13, margin: "4px 4px 8px" }}>{t("types.page.list")}</h2>
           {!types.length && <EmptyState style={{ padding: 4 }} message={t("types.page.none")} action={learnHow("workspace/obsidian-bases")} />}
           <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>

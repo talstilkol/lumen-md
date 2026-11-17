@@ -11,6 +11,7 @@ import { currentEnv, installCount, installMode, recordInstall, runInstall, type 
 import { onPromptChange } from "./installPrompt";
 import "./installStrings";
 import { Modal } from "../ui/Modal";
+import { HelpButton } from "../ui/HelpButton";
 
 const btn: React.CSSProperties = { padding: "6px 12px", fontSize: 13, borderRadius: 6, border: "1px solid hsl(var(--border))", background: "transparent", color: "inherit", cursor: "pointer" };
 const primary: React.CSSProperties = { ...btn, background: "hsl(var(--accent))", color: "hsl(var(--accent-fg))", borderColor: "transparent" };
@@ -103,6 +104,7 @@ export function InstallDialog({ open, onClose, env = currentEnv }: Props) {
         <header style={{ padding: "12px 16px", borderBottom: "1px solid hsl(var(--border))", display: "flex", gap: 10, alignItems: "center" }}>
           <Download size={16} />
           <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, flex: 1 }}>{t("install.title")}</h2>
+          <HelpButton topic="getting-started/install" />
           <button type="button" style={btn} onClick={onClose} aria-label={t("install.close")}>
             <X size={14} />
           </button>

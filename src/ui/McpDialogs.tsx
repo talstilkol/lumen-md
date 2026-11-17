@@ -24,6 +24,7 @@ import type { ApprovalScope } from "../agents/mcp/approvals";
 import type { CallAnswer, CallInfo } from "../agents/mcp/tools";
 import type { McpServerConfig } from "../agents/mcp/servers";
 import { Modal } from "./Modal";
+import { HelpButton } from "./HelpButton";
 
 const box: React.CSSProperties = { maxWidth: 560, width: "min(560px, 94vw)" };
 const mono: React.CSSProperties = { fontFamily: "var(--font-mono, monospace)", fontSize: 12, wordBreak: "break-all", whiteSpace: "pre-wrap", direction: "ltr", textAlign: "start", unicodeBidi: "isolate" };
@@ -136,6 +137,7 @@ export function ElicitationDialog({ ask, onResolve, openUrl = openElicitationUrl
   return (
     <Modal onClose={cancel} className="prompt-backdrop" aria-labelledby="mcp-el-title" data-testid="mcp-elicitation" onMouseDown={(e) => e.target === e.currentTarget && cancel()}>
       <div className="prompt-dialog" ref={ref} style={box}>
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="ai/mcp" /></span>
         <div id="mcp-el-title" className="prompt-title">
           {t("mcpServers.elicit.title", { server: ask.server })}
         </div>

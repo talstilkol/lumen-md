@@ -52,6 +52,28 @@ const tab = (shiftKey = false) => fireEvent.keyDown(document.activeElement ?? do
 const active = () => (document.activeElement as HTMLElement | null)?.textContent || (document.activeElement as HTMLElement | null)?.getAttribute("aria-label");
 
 describe("useFocusTrap", () => {
+  it("W3.7: a panel's \"?\" is never where a dialog starts; the first real control is", async () => {
+    render(
+      <Dialog>
+        <button className="lumen-help-btn" aria-label="Help">?</button>
+        <h2>Title</h2>
+        <input aria-label="name" />
+      </Dialog>,
+    );
+    await tick();
+    expect(active()).toBe("name");
+  });
+
+  it("W3.7: a dialog whose only control is its \"?\" still focuses it", async () => {
+    render(
+      <Dialog>
+        <button className="lumen-help-btn" aria-label="Help">?</button>
+      </Dialog>,
+    );
+    await tick();
+    expect(active()).toBe("?");
+  });
+
   it("focuses the first focusable element; skips disabled and hidden ones", async () => {
     const { getByTestId } = render(<Dialog />);
     await tick();

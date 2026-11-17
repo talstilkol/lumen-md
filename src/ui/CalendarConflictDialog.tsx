@@ -15,6 +15,7 @@ import type { Choice, Conflict } from "../calendar/taskSync";
 import type { Todo } from "../calendar/ical";
 import "./calendarConflictStrings";
 import { Modal } from "./Modal";
+import { HelpButton } from "./HelpButton";
 
 function describe(todo: Omit<Todo, "uid"> | null): string[] {
   if (!todo) return [t("calendar.conflict.deleted")];
@@ -30,6 +31,7 @@ export function CalendarConflictDialog({ conflict, onResolve }: { conflict: Conf
   return (
     <Modal onClose={() => onResolve(null)} className="prompt-backdrop" aria-labelledby="cal-conflict-title" aria-describedby="cal-conflict-why" data-testid="calendar-conflict">
       <div className="prompt-dialog" ref={ref} style={{ maxWidth: 600, width: "min(600px, 94vw)" }}>
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="workspace/caldav" /></span>
         <div id="cal-conflict-title" className="prompt-title">
           {t("calendar.conflict.title")}
         </div>

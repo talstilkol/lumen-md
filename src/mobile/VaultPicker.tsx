@@ -19,6 +19,7 @@ import { daysLeft, formatBytes, purgeExpired, readRegistry, rename, restore, tra
 import { kv, openVault } from "./vaultPickerActions";
 import { explainError } from "../lib/userError";
 import { EmptyState, learnHow } from "../ui/EmptyState";
+import { HelpButton } from "../ui/HelpButton";
 
 type Busy = null | { id: string; what: "rename" | "trash" | "restore" | "open" | "move" };
 
@@ -105,6 +106,7 @@ export function VaultPicker({ onClose, now = Date.now, openId: openIdProp, store
   return (
     <Modal onClose={onClose} aria-labelledby={titleId} className="prompt-backdrop" data-testid="vault-picker">
       <div ref={root} className="prompt-dialog" style={{ color: "hsl(var(--fg))", inlineSize: "min(560px, calc(100vw - 24px))", maxBlockSize: "calc(100dvh - 24px)", overflow: "auto" }}>
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="workspace/mobile-vault-folder" /></span>
         <h2 id={titleId} tabIndex={-1} data-autofocus style={{ fontSize: 18, fontWeight: 600, margin: "0 0 4px" }}>
           {t("vaults.title")}
         </h2>

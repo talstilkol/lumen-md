@@ -20,6 +20,7 @@ import { loadWritingChecks, saveWritingChecks, type WritingCheckSettings } from 
 import { stageFinding } from "../agents/writingReview";
 import "./writingChecksDialogStrings";
 import { explainError } from "../lib/userError";
+import { HelpButton } from "./HelpButton";
 
 export type WritingCheckId = "repetition" | "loanwords";
 
@@ -125,6 +126,7 @@ export function WritingChecksDialogImpl({ target, onClose }: { target: WritingCh
         dir={target.lang === "he" ? "rtl" : "ltr"}
         style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, width: "min(680px, calc(100vw - 32px))", maxHeight: "84vh", overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 10 }}
       >
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="editor/writing-agents" /></span>
         <h2 id="wchk-title" style={{ margin: 0, fontSize: 16 }}>
           {title}
         </h2>

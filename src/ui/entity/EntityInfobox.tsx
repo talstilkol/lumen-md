@@ -9,6 +9,7 @@ import { useEffect, useId, useState } from "react";
 import { getLocale, t } from "../../i18n";
 import { formatInfoValue, type InfoboxModel, type InfoValue } from "../../entities/infobox";
 import "./entityInfobox.css";
+import { HelpButton } from "../HelpButton";
 
 export interface EntityInfoboxProps {
   model: InfoboxModel;
@@ -70,6 +71,7 @@ export function EntityInfobox({ model, resolveImage, linkOf, hover, dir }: Entit
         <tbody>
           <tr>
             <td colSpan={2} className="lumen-infobox-type" style={{ borderBlockStart: 0 }}>
+              <span style={{ float: "inline-end", marginInlineStart: 6 }}><HelpButton topic="workspace/entity-graph" size={18} /></span>
               {t(`entityGraph.type.${e.type}`)}
               {e.aliases.length > 0 && (
                 <>

@@ -10,6 +10,8 @@ import { t } from "../i18n";
 import "./appLockStrings";
 import { AppLock, readSettings, webAuthnSeam, type LockState, type NativePrivacy } from "./appLock";
 import { BOOT_CLASS } from "./appLockBoot";
+import { HelpButton } from "../ui/HelpButton";
+import { Modal } from "../ui/Modal";
 
 let lock: AppLock | null = null;
 
@@ -74,7 +76,8 @@ export function LockOverlay({ lock: l, doc = document }: { lock: AppLock; doc?: 
   };
   return (
     <div style={cover}>
-      <div role="dialog" aria-modal="true" aria-labelledby="app-lock-title" aria-describedby="app-lock-body" data-testid="app-lock" style={{ display: "grid", gap: 12, justifyItems: "center", padding: 24, maxWidth: 360, textAlign: "center" }}>
+      {/* A native modal <dialog> (W3.7, modal gate): the app behind is inert, not only covered. Nothing dismisses it but Unlock. */}
+      <Modal aria-labelledby="app-lock-title" aria-describedby="app-lock-body" closedBy="none" data-testid="app-lock" style={{ display: "grid", gap: 12, justifyItems: "center", padding: 24, maxWidth: 360, textAlign: "center", border: 0, background: "hsl(var(--bg))", color: "hsl(var(--fg))" }}>
         <div aria-hidden="true" style={{ fontSize: 40 }}>🔒</div>
         <h2 id="app-lock-title" style={{ margin: 0, fontSize: 20, fontWeight: 600 }}>
           {t("appLock.title")}
@@ -88,7 +91,8 @@ export function LockOverlay({ lock: l, doc = document }: { lock: AppLock; doc?: 
         <div role="alert" style={{ minHeight: 20, fontSize: 13, color: "hsl(var(--danger))" }}>
           {error}
         </div>
-      </div>
+        <HelpButton topic="security/vault-encryption" />
+      </Modal>
     </div>
   );
 }

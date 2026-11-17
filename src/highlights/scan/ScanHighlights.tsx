@@ -17,6 +17,7 @@ import { showAiToast } from "../../ui/AiToast";
 import { explainError } from "../../lib/userError";
 import { color } from "../../ui/tokens";
 import { Modal } from "../../ui/Modal";
+import { HelpButton } from "../../ui/HelpButton";
 
 /** Detection runs on a copy this wide; OCR reads the full-size photo. */
 const DETECT_WIDTH = 1400;
@@ -151,6 +152,7 @@ export default function ScanHighlights({ onClose }: Props) {
   return (
     <Modal onClose={onClose} className="cmd-palette-backdrop" onClick={onClose} aria-label={t("hlscan.title")} data-testid="scan-highlights">
       <div className="cmd-palette" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560, padding: 16, display: "grid", gap: 10, maxHeight: "85vh", overflowY: "auto" }}>
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="workspace/highlights" /></span>
         <h2 style={{ margin: 0, fontSize: 15 }}>{t("hlscan.title")}</h2>
         <p style={{ margin: 0, fontSize: 12, color: "hsl(var(--fg-muted))" }}>{t("hlscan.intro")}</p>
         <label

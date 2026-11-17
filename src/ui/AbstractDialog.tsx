@@ -18,6 +18,7 @@ import { stageSuggestion } from "../agents/writingReview";
 import "./abstractDialogStrings";
 import { explainError } from "../lib/userError";
 import { EmptyState, learnHow } from "./EmptyState";
+import { HelpButton } from "./HelpButton";
 
 export interface AbstractTarget {
   getView: () => EditorView | null;
@@ -142,6 +143,7 @@ export function openAbstractDialog(r: AbstractResult, target: AbstractTarget): v
   root.render(
     <Modal onClose={close} aria-labelledby="abs-title" data-testid="abstract-dialog" style={{ position: "fixed", inset: 0, background: "var(--overlay)", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: "6vh", zIndex: 9999 }} onClick={(e) => { if (e.target === e.currentTarget) close(); }}>
       <div dir={target.lang === "he" ? "rtl" : "ltr"} style={{ background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border-strong))", borderRadius: 12, width: "min(700px, calc(100vw - 32px))", maxHeight: "84vh", overflow: "auto", padding: 18, display: "flex", flexDirection: "column", gap: 10 }}>
+        <span style={{ float: "inline-end", marginInlineStart: 8 }}><HelpButton topic="editor/writing-agents" /></span>
         <h2 id="abs-title" style={{ margin: 0, fontSize: 16 }}>{t("abs.title")}</h2>
         <AbstractView r={r} target={target} onClose={close} />
       </div>
