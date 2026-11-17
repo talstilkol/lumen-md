@@ -7317,5 +7317,493 @@
     "ja": "1ccwmzq",
     "ru": "1ccwmzq",
     "zh-CN": "1ccwmzq"
+  },
+  "nativeMenu.app": {
+    "ar": "1o4q8ca",
+    "de": "1o4q8ca",
+    "fr": "1o4q8ca",
+    "ja": "1o4q8ca",
+    "ru": "1o4q8ca",
+    "zh-CN": "1o4q8ca"
+  },
+  "nativeMenu.file": {
+    "ar": "bygjtv",
+    "de": "bygjtv",
+    "fr": "bygjtv",
+    "ja": "bygjtv",
+    "ru": "bygjtv",
+    "zh-CN": "bygjtv"
+  },
+  "nativeMenu.edit": {
+    "ar": "1i1lcq9",
+    "de": "1i1lcq9",
+    "fr": "1i1lcq9",
+    "ja": "1i1lcq9",
+    "ru": "1i1lcq9",
+    "zh-CN": "1i1lcq9"
+  },
+  "nativeMenu.view": {
+    "ar": "q5w460",
+    "de": "q5w460",
+    "fr": "q5w460",
+    "ja": "q5w460",
+    "ru": "q5w460",
+    "zh-CN": "q5w460"
+  },
+  "nativeMenu.window": {
+    "ar": "1s8mpdp",
+    "de": "1s8mpdp",
+    "fr": "1s8mpdp",
+    "ja": "1s8mpdp",
+    "ru": "1s8mpdp",
+    "zh-CN": "1s8mpdp"
+  },
+  "nativeMenu.help": {
+    "ar": "1f8350a",
+    "de": "1f8350a",
+    "fr": "1f8350a",
+    "ja": "1f8350a",
+    "ru": "1f8350a",
+    "zh-CN": "1f8350a"
+  },
+  "nativeMenu.role.about": {
+    "ar": "bervp7",
+    "de": "bervp7",
+    "fr": "bervp7",
+    "ja": "bervp7",
+    "ru": "bervp7",
+    "zh-CN": "bervp7"
+  },
+  "nativeMenu.role.services": {
+    "ar": "rnv8lx",
+    "de": "rnv8lx",
+    "fr": "rnv8lx",
+    "ja": "rnv8lx",
+    "ru": "rnv8lx",
+    "zh-CN": "rnv8lx"
+  },
+  "nativeMenu.role.hide": {
+    "ar": "1q79kyc",
+    "de": "1q79kyc",
+    "fr": "1q79kyc",
+    "ja": "1q79kyc",
+    "ru": "1q79kyc",
+    "zh-CN": "1q79kyc"
+  },
+  "nativeMenu.role.hideOthers": {
+    "ar": "1dd51w0",
+    "de": "1dd51w0",
+    "fr": "1dd51w0",
+    "ja": "1dd51w0",
+    "ru": "1dd51w0",
+    "zh-CN": "1dd51w0"
+  },
+  "nativeMenu.role.showAll": {
+    "ar": "190ilu7",
+    "de": "190ilu7",
+    "fr": "190ilu7",
+    "ja": "190ilu7",
+    "ru": "190ilu7",
+    "zh-CN": "190ilu7"
+  },
+  "nativeMenu.role.quit": {
+    "ar": "dciiir",
+    "de": "dciiir",
+    "fr": "dciiir",
+    "ja": "dciiir",
+    "ru": "dciiir",
+    "zh-CN": "dciiir"
+  },
+  "nativeMenu.role.undo": {
+    "ar": "vmlwpb",
+    "de": "vmlwpb",
+    "fr": "vmlwpb",
+    "ja": "vmlwpb",
+    "ru": "vmlwpb",
+    "zh-CN": "vmlwpb"
+  },
+  "nativeMenu.role.redo": {
+    "ar": "w7fg15",
+    "de": "w7fg15",
+    "fr": "w7fg15",
+    "ja": "w7fg15",
+    "ru": "w7fg15",
+    "zh-CN": "w7fg15"
+  },
+  "nativeMenu.role.cut": {
+    "ar": "onu7hf",
+    "de": "onu7hf",
+    "fr": "onu7hf",
+    "ja": "onu7hf",
+    "ru": "onu7hf",
+    "zh-CN": "onu7hf"
+  },
+  "nativeMenu.role.copy": {
+    "ar": "s6g5lw",
+    "de": "s6g5lw",
+    "fr": "s6g5lw",
+    "ja": "s6g5lw",
+    "ru": "s6g5lw",
+    "zh-CN": "s6g5lw"
+  },
+  "nativeMenu.role.paste": {
+    "ar": "1dqva14",
+    "de": "1dqva14",
+    "fr": "1dqva14",
+    "ja": "1dqva14",
+    "ru": "1dqva14",
+    "zh-CN": "1dqva14"
+  },
+  "nativeMenu.role.selectAll": {
+    "ar": "1l0m2oi",
+    "de": "1l0m2oi",
+    "fr": "1l0m2oi",
+    "ja": "1l0m2oi",
+    "ru": "1l0m2oi",
+    "zh-CN": "1l0m2oi"
+  },
+  "nativeMenu.role.minimize": {
+    "ar": "1uva1ct",
+    "de": "1uva1ct",
+    "fr": "1uva1ct",
+    "ja": "1uva1ct",
+    "ru": "1uva1ct",
+    "zh-CN": "1uva1ct"
+  },
+  "nativeMenu.role.zoom": {
+    "ar": "r953rm",
+    "de": "r953rm",
+    "fr": "r953rm",
+    "ja": "r953rm",
+    "ru": "r953rm",
+    "zh-CN": "r953rm"
+  },
+  "nativeMenu.role.fullscreen": {
+    "ar": "cxbrdm",
+    "de": "cxbrdm",
+    "fr": "cxbrdm",
+    "ja": "cxbrdm",
+    "ru": "cxbrdm",
+    "zh-CN": "cxbrdm"
+  },
+  "nativeMenu.role.closeWindow": {
+    "ar": "1jos4bt",
+    "de": "1jos4bt",
+    "fr": "1jos4bt",
+    "ja": "1jos4bt",
+    "ru": "1jos4bt",
+    "zh-CN": "1jos4bt"
+  },
+  "nativeMenu.cmd.app.checkUpdates": {
+    "ar": "12h7gqo",
+    "de": "12h7gqo",
+    "fr": "12h7gqo",
+    "ja": "12h7gqo",
+    "ru": "12h7gqo",
+    "zh-CN": "12h7gqo"
+  },
+  "nativeMenu.cmd.file.new": {
+    "ar": "1x0essj",
+    "de": "1x0essj",
+    "fr": "1x0essj",
+    "ja": "1x0essj",
+    "ru": "1x0essj",
+    "zh-CN": "1x0essj"
+  },
+  "nativeMenu.cmd.note.today": {
+    "ar": "1gqfglg",
+    "de": "1gqfglg",
+    "fr": "1gqfglg",
+    "ja": "1gqfglg",
+    "ru": "1gqfglg",
+    "zh-CN": "1gqfglg"
+  },
+  "nativeMenu.cmd.file.open": {
+    "ar": "n287h9",
+    "de": "n287h9",
+    "fr": "n287h9",
+    "ja": "n287h9",
+    "ru": "n287h9",
+    "zh-CN": "n287h9"
+  },
+  "nativeMenu.cmd.file.save": {
+    "ar": "lewgh4",
+    "de": "lewgh4",
+    "fr": "lewgh4",
+    "ja": "lewgh4",
+    "ru": "lewgh4",
+    "zh-CN": "lewgh4"
+  },
+  "nativeMenu.cmd.file.saveAs": {
+    "ar": "1beuu7u",
+    "de": "1beuu7u",
+    "fr": "1beuu7u",
+    "ja": "1beuu7u",
+    "ru": "1beuu7u",
+    "zh-CN": "1beuu7u"
+  },
+  "nativeMenu.cmd.file.exportPdf": {
+    "ar": "nskpwf",
+    "de": "nskpwf",
+    "fr": "nskpwf",
+    "ja": "nskpwf",
+    "ru": "nskpwf",
+    "zh-CN": "nskpwf"
+  },
+  "nativeMenu.cmd.file.exportHtml": {
+    "ar": "3jf5x4",
+    "de": "3jf5x4",
+    "fr": "3jf5x4",
+    "ja": "3jf5x4",
+    "ru": "3jf5x4",
+    "zh-CN": "3jf5x4"
+  },
+  "nativeMenu.cmd.file.exportDocx": {
+    "ar": "m8aj3v",
+    "de": "m8aj3v",
+    "fr": "m8aj3v",
+    "ja": "m8aj3v",
+    "ru": "m8aj3v",
+    "zh-CN": "m8aj3v"
+  },
+  "nativeMenu.cmd.file.print": {
+    "ar": "15c76kq",
+    "de": "15c76kq",
+    "fr": "15c76kq",
+    "ja": "15c76kq",
+    "ru": "15c76kq",
+    "zh-CN": "15c76kq"
+  },
+  "nativeMenu.cmd.edit.toggleDirection": {
+    "ar": "akkdci",
+    "de": "akkdci",
+    "fr": "akkdci",
+    "ja": "akkdci",
+    "ru": "akkdci",
+    "zh-CN": "akkdci"
+  },
+  "nativeMenu.cmd.edit.hebrewTypography": {
+    "ar": "3aklaj",
+    "de": "3aklaj",
+    "fr": "3aklaj",
+    "ja": "3aklaj",
+    "ru": "3aklaj",
+    "zh-CN": "3aklaj"
+  },
+  "nativeMenu.cmd.view.source": {
+    "ar": "r5qyuw",
+    "de": "r5qyuw",
+    "fr": "r5qyuw",
+    "ja": "r5qyuw",
+    "ru": "r5qyuw",
+    "zh-CN": "r5qyuw"
+  },
+  "nativeMenu.cmd.view.preview": {
+    "ar": "1yfnwtz",
+    "de": "1yfnwtz",
+    "fr": "1yfnwtz",
+    "ja": "1yfnwtz",
+    "ru": "1yfnwtz",
+    "zh-CN": "1yfnwtz"
+  },
+  "nativeMenu.cmd.view.wysiwyg": {
+    "ar": "1f6ny",
+    "de": "1f6ny",
+    "fr": "1f6ny",
+    "ja": "1f6ny",
+    "ru": "1f6ny",
+    "zh-CN": "1f6ny"
+  },
+  "nativeMenu.cmd.view.split": {
+    "ar": "6a1ocj",
+    "de": "6a1ocj",
+    "fr": "6a1ocj",
+    "ja": "6a1ocj",
+    "ru": "6a1ocj",
+    "zh-CN": "6a1ocj"
+  },
+  "nativeMenu.cmd.view.sideBySide": {
+    "ar": "1udh7qq",
+    "de": "1udh7qq",
+    "fr": "1udh7qq",
+    "ja": "1udh7qq",
+    "ru": "1udh7qq",
+    "zh-CN": "1udh7qq"
+  },
+  "nativeMenu.cmd.view.reading": {
+    "ar": "1havj1a",
+    "de": "1havj1a",
+    "fr": "1havj1a",
+    "ja": "1havj1a",
+    "ru": "1havj1a",
+    "zh-CN": "1havj1a"
+  },
+  "nativeMenu.cmd.view.readingOptions": {
+    "ar": "1hskq5p",
+    "de": "1hskq5p",
+    "fr": "1hskq5p",
+    "ja": "1hskq5p",
+    "ru": "1hskq5p",
+    "zh-CN": "1hskq5p"
+  },
+  "nativeMenu.cmd.view.backlinks": {
+    "ar": "1mppi0b",
+    "de": "1mppi0b",
+    "fr": "1mppi0b",
+    "ja": "1mppi0b",
+    "ru": "1mppi0b",
+    "zh-CN": "1mppi0b"
+  },
+  "nativeMenu.cmd.view.graphView": {
+    "ar": "qexq07",
+    "de": "qexq07",
+    "fr": "qexq07",
+    "ja": "qexq07",
+    "ru": "qexq07",
+    "zh-CN": "qexq07"
+  },
+  "nativeMenu.cmd.view.typewriter": {
+    "ar": "1h9kvsx",
+    "de": "1h9kvsx",
+    "fr": "1h9kvsx",
+    "ja": "1h9kvsx",
+    "ru": "1h9kvsx",
+    "zh-CN": "1h9kvsx"
+  },
+  "nativeMenu.cmd.help.open": {
+    "ar": "7sbuc1",
+    "de": "7sbuc1",
+    "fr": "7sbuc1",
+    "ja": "7sbuc1",
+    "ru": "7sbuc1",
+    "zh-CN": "7sbuc1"
+  },
+  "nativeMenu.cmd.help.whatsNew": {
+    "ar": "1a7uheb",
+    "de": "1a7uheb",
+    "fr": "1a7uheb",
+    "ja": "1a7uheb",
+    "ru": "1a7uheb",
+    "zh-CN": "1a7uheb"
+  },
+  "nativeMenu.cmd.help.feedback": {
+    "ar": "zr1fic",
+    "de": "zr1fic",
+    "fr": "zr1fic",
+    "ja": "zr1fic",
+    "ru": "zr1fic",
+    "zh-CN": "zr1fic"
+  },
+  "nativeMenu.cmd.help.diagnostics": {
+    "ar": "10ud9k3",
+    "de": "10ud9k3",
+    "fr": "10ud9k3",
+    "ja": "10ud9k3",
+    "ru": "10ud9k3",
+    "zh-CN": "10ud9k3"
+  },
+  "nativeMenu.cmd.window.new": {
+    "ar": "1uhnl5n",
+    "de": "1uhnl5n",
+    "fr": "1uhnl5n",
+    "ja": "1uhnl5n",
+    "ru": "1uhnl5n",
+    "zh-CN": "1uhnl5n"
+  },
+  "nativeMenu.cmd.file.insertText": {
+    "ar": "1ro7u6z",
+    "de": "1ro7u6z",
+    "fr": "1ro7u6z",
+    "ja": "1ro7u6z",
+    "ru": "1ro7u6z",
+    "zh-CN": "1ro7u6z"
+  },
+  "nativeMenu.cmd.file.quickCapture": {
+    "ar": "zapknk",
+    "de": "zapknk",
+    "fr": "zapknk",
+    "ja": "zapknk",
+    "ru": "zapknk",
+    "zh-CN": "zapknk"
+  },
+  "nativeMenu.cmd.file.toggleWorkspace": {
+    "ar": "hsrhvh",
+    "de": "hsrhvh",
+    "fr": "hsrhvh",
+    "ja": "hsrhvh",
+    "ru": "hsrhvh",
+    "zh-CN": "hsrhvh"
+  },
+  "nativeMenu.cmd.edit.find": {
+    "ar": "paoevn",
+    "de": "paoevn",
+    "fr": "paoevn",
+    "ja": "paoevn",
+    "ru": "paoevn",
+    "zh-CN": "paoevn"
+  },
+  "nativeMenu.cmd.edit.workspaceSearch": {
+    "ar": "836lyu",
+    "de": "836lyu",
+    "fr": "836lyu",
+    "ja": "836lyu",
+    "ru": "836lyu",
+    "zh-CN": "836lyu"
+  },
+  "nativeMenu.cmd.view.toggleOutline": {
+    "ar": "4l1jz1",
+    "de": "4l1jz1",
+    "fr": "4l1jz1",
+    "ja": "4l1jz1",
+    "ru": "4l1jz1",
+    "zh-CN": "4l1jz1"
+  },
+  "nativeMenu.cmd.view.focusMode": {
+    "ar": "lvmzmu",
+    "de": "lvmzmu",
+    "fr": "lvmzmu",
+    "ja": "lvmzmu",
+    "ru": "lvmzmu",
+    "zh-CN": "lvmzmu"
+  },
+  "nativeMenu.cmd.view.toggleTheme": {
+    "ar": "d6cq19",
+    "de": "d6cq19",
+    "fr": "d6cq19",
+    "ja": "d6cq19",
+    "ru": "d6cq19",
+    "zh-CN": "d6cq19"
+  },
+  "nativeMenu.cmd.help.commandPalette": {
+    "ar": "pn013p",
+    "de": "pn013p",
+    "fr": "pn013p",
+    "ja": "pn013p",
+    "ru": "pn013p",
+    "zh-CN": "pn013p"
+  },
+  "nativeMenu.cmd.help.shortcuts": {
+    "ar": "1fp3al3",
+    "de": "1fp3al3",
+    "fr": "1fp3al3",
+    "ja": "1fp3al3",
+    "ru": "1fp3al3",
+    "zh-CN": "1fp3al3"
+  },
+  "nativeMenu.cmd.help.tour": {
+    "ar": "1bmspzp",
+    "de": "1bmspzp",
+    "fr": "1bmspzp",
+    "ja": "1bmspzp",
+    "ru": "1bmspzp",
+    "zh-CN": "1bmspzp"
+  },
+  "nativeMenu.cmd.help.github": {
+    "ar": "o696fm",
+    "de": "o696fm",
+    "fr": "o696fm",
+    "ja": "o696fm",
+    "ru": "o696fm",
+    "zh-CN": "o696fm"
   }
 }

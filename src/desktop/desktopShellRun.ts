@@ -7,9 +7,9 @@
  */
 
 import type { EditorHandle } from "../editor/Editor";
-import { t } from "../i18n";
+import { getLocale, t } from "../i18n";
 import { tabIdOf, useAppStore } from "../store/useStore";
-import { dragTabOut, formatCapture, INBOX_PATH, initDesktopShell, setTrayMenu, standaloneHandle, syncTabs, type TabState } from "./shell";
+import { dragTabOut, formatCapture, INBOX_PATH, initDesktopShell, setNativeMenu, setTrayMenu, standaloneHandle, syncTabs, type TabState } from "./shell";
 import "./desktopShellRunStrings";
 
 /** Run `fn` on the editor once the note `content` is loaded in it (the editor mounts lazily). */
@@ -115,8 +115,15 @@ export function syncOpenTabs(ids: string[]): void {
   void syncTabs(ids).catch(() => undefined);
 }
 
-/** The tray, in the UI language, with this window's recent tabs. */
+let menuLang: string | null = null;
+
+/** The tray, in the UI language, with this window's recent tabs — and the menu bar, when the language changed (W13.K5). */
 export function updateTray(openTabs: ReadonlyArray<{ name: string; workspaceName?: string | null }>): void {
+  const lang = getLocale();
+  if (lang !== menuLang) {
+    menuLang = lang;
+    void setNativeMenu(lang).catch(() => undefined);
+  }
   void setTrayMenu(
     { capture: t("desktop.tray.capture"), new_note: t("desktop.tray.new"), recent: t("desktop.tray.recent"), show: t("desktop.tray.show"), quit: t("desktop.tray.quit") },
     openTabs.filter((x) => x.workspaceName).slice(-5).reverse().map((x) => [x.name, x.workspaceName as string]),
