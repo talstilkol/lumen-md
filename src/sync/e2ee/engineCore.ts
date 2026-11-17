@@ -45,6 +45,7 @@ import type { SyncEvent } from "./activity";
 import { type HoldReason } from "./status";
 import {
   BASE_BYTES_LIMIT,
+  SAVE_BATCH,
   BlobMissingError,
   DeviceBusyError,
   readmitted,
@@ -472,7 +473,31 @@ export abstract class E2eeSyncCore {
 
   /** @internal */
   protected async save(): Promise<void> {
+    this.unsaved = 0;
     if (this.state) await this.o.store.save(this.state);
+  }
+
+  /**
+   * Base entries changed since the last save (`setBase` with `soon`). The
+   * store saves the whole device state, so saving it after every one of a
+   * first sync's 10,000 files serialised it 10,000 times: quadratic (FC1,
+   * the 10,000-note re-key test). Only base entries wait — a base that is
+   * not saved yet is rebuilt by the next round (local and vault agree:
+   * `lh === rh`); everything the crash-safety rests on (pending blobs, the
+   * anchor, `committing`) is still saved before the step it protects.
+   * @internal
+   */
+  private unsaved = 0;
+
+  /**
+   * Save if base entries wait: at the end of each bulk loop, inside the
+   * device lock (a save after it could overwrite another tab's). A call that
+   * throws mid-loop leaves them unsaved; the next call reloads the state and
+   * rebuilds them.
+   * @internal
+   */
+  protected async saveDeferred(): Promise<void> {
+    if (this.unsaved > 0) await this.save();
   }
 
   /** Serialise calls: one round (or pairing) at a time per device. Listeners hear when each one ends (2.31). @internal */
@@ -509,13 +534,15 @@ export abstract class E2eeSyncCore {
   }
 
   /** @internal */
-  protected async setBase(path: string, entry: ManifestEntry, data: Uint8Array | null): Promise<void> {
+  protected async setBase(path: string, entry: ManifestEntry, data: Uint8Array | null, soon = false): Promise<void> {
     const s = await this.loadState();
     // Ancestor bytes are kept for the three-way merge of a note; a large
     // file (an attachment) keeps only its manifest entry, so a first sync of
     // a big vault does not hold a second copy of it (plan W1.8 benchmark).
     await this.o.store.setBase(path, entry.deleted || !data || data.length > BASE_BYTES_LIMIT ? null : data);
     s.base[path] = entry;
+    // `soon`: one save per SAVE_BATCH entries (see `unsaved`), for the bulk loops only.
+    if (soon && ++this.unsaved < SAVE_BATCH) return;
     await this.save();
   }
 

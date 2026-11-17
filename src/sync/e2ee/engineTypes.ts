@@ -164,6 +164,14 @@ export class BlobMissingError extends Error {}
 /** Files above this size keep no ancestor bytes for merges (attachments; plan W1.8). */
 export const BASE_BYTES_LIMIT = 4 * 1024 * 1024;
 
+/**
+ * Base entries saved together by the bulk loops (`setBase` with `soon`),
+ * blob names recorded in `pending` together before their uploads, and
+ * deleted names forgotten together (FC1). The store saves the whole device
+ * state at once, so one save per file made a 10,000-file sync quadratic.
+ */
+export const SAVE_BATCH = 128;
+
 export interface RekeyRequest {
   revoke?: string[];
   enroll?: Record<string, string>;
