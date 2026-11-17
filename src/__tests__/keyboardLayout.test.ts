@@ -121,7 +121,7 @@ function events(combo: string): Array<{ layout: string; e: Parameters<typeof mat
   // A function key (F1) is the same key in every layout.
   if (/^F\d{1,2}$/.test(last)) return ["US", "Hebrew", "macOS ⌘"].map((layout) => ({ layout, e: { key: last, code: last, ctrlKey: false, shiftKey: false, altKey: false } }));
   const key = last === "Space" ? " " : last.toLowerCase();
-  const code = key === " " ? "Space" : /[a-z]/.test(key) ? `Key${key.toUpperCase()}` : /[0-9]/.test(key) ? `Digit${key}` : key === "/" ? "Slash" : "";
+  const code = key === " " ? "Space" : /[a-z]/.test(key) ? `Key${key.toUpperCase()}` : /[0-9]/.test(key) ? `Digit${key}` : key === "/" ? "Slash" : key === "," ? "Comma" : key === "." ? "Period" : "";
   const mods = { ctrlKey: parts.includes("Mod") || parts.includes("Ctrl"), shiftKey: parts.includes("Shift"), altKey: parts.includes("Alt") };
   const heKey = toHebrewLayout(key);
   return [

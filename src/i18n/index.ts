@@ -177,6 +177,11 @@ export function uiStringValues(): Set<string> {
   return out;
 }
 
+/** The English text of `id` (W13.E4: the settings search also matches English words in another UI language); `id` itself when there is none. */
+export function tEnglish(id: string): string {
+  return en[id] ?? id;
+}
+
 /**
  * The BCP 47 tag numbers are written with: the UI language, plus the digits
  * the user chose (W13.I5: `-u-nu-arab` for Arabic-Indic digits, ./numerals.ts).

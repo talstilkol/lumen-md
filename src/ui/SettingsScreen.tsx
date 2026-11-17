@@ -9,6 +9,12 @@
  *   rendered in place with `embedded`.
  * - Search matches the labels and keys of every setting, including the
  *   ones inside a tab's dialog, and narrows the tabs to the matching ones.
+ *   W13.E4: it ranks them too (settings/settingsSearch.ts: labels and
+ *   keywords in the active language and English, niqqud- and accent-blind,
+ *   plugins' settings included) in a list driven from the field: ↑/↓, Enter
+ *   opens the setting (its tab, the control focused), Esc clears, ⌘F comes
+ *   back to the field. ⌘, opens the screen with the field focused;
+ *   lumen://settings/<id> opens it on a setting.
  *
  * The whole file is a lazy chunk: App only holds which tab is open.
  */
@@ -16,11 +22,14 @@
 import { lazy, Suspense, useEffect, useId, useMemo, useRef, useState } from "react";
 import { Settings as SettingsIcon, X, Download, Upload, Search } from "lucide-react";
 import { useAppStore, type AppState } from "../store/useStore";
-import { SETTINGS_TABS, searchSettings, type SettingEntry, type SettingsTab } from "../settings/schema";
+import { SETTINGS, SETTINGS_TABS, type SettingEntry, type SettingsTab } from "../settings/schema";
+import { buildSettingsIndex, rankSettings, type SettingsHit } from "../settings/settingsSearch";
+import { onPluginSettingsChange } from "../settings/pluginSettings";
+import { SettingsResults, optionId } from "./settings/SettingsResults";
 import { exportSettings, importSettings, parseSettingsFile, type SettingsTarget } from "../settings/io";
 import { downloadText } from "../storage/exportFormats";
 import { showAiToast } from "./AiToast";
-import { SUPPORTED_LOCALES, t, type Locale } from "../i18n";
+import { SUPPORTED_LOCALES, getLocale, t, tEnglish, type Locale } from "../i18n";
 import { isBetaLocale } from "../i18n/review";
 import { localeOptionLabel, openTranslationHelp } from "../i18n/localeLabel";
 import "./settingsScreenStrings";
@@ -45,11 +54,16 @@ const ImageHostsSection = lazy(() => import("./ImageHostsPanel").then((m) => ({ 
 const MonitoringSettings = lazy(() => import("./MonitoringSettings").then((m) => ({ default: m.MonitoringSettings })));
 const OpenAlexSwitch = lazy(() => import("../citations/OpenAlexSwitch").then((m) => ({ default: m.OpenAlexSwitch })));
 
+/** Every setting with a label: what an empty search shows. */
+const SETTINGS_ENTRIES = SETTINGS.filter((e) => e.kind === "setting" && !!e.label);
+
 /** A settings file is a few KB; anything far larger isn't one. */
 const IMPORT_MAX_BYTES = 256 * 1024;
 
 interface Props {
   tab?: SettingsTab;
+  /** A setting to focus on open (a deep link, W13.E4): its id, or `plugin:<plugin>/<id>`. */
+  focus?: string;
   onClose: () => void;
   onOpenAuditLog?: () => void;
 }
@@ -128,7 +142,7 @@ function writeLocal(key: string, value: string): void {
   }
 }
 
-export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAuditLog }: Props) {
+export function SettingsScreen({ tab: initialTab = "general", focus, onClose, onOpenAuditLog }: Props) {
   const ids = useId();
   const [tab, setTab] = useState<SettingsTab>(initialTab);
   const [query, setQuery] = useState("");
@@ -138,12 +152,105 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
   // Re-render after a localStorage-backed control changes.
   const [, setLocalVersion] = useState(0);
 
-  const { entries, tabs } = useMemo(() => searchSettings(query, t), [query]);
+  // The search index (W13.E4): rebuilt when a plugin adds or removes a setting.
+  const [pluginsVersion, setPluginsVersion] = useState(0);
+  useEffect(() => onPluginSettingsChange(() => setPluginsVersion((v) => v + 1)), []);
+  const index = useMemo(() => buildSettingsIndex([t, tEnglish], { locale: getLocale() }), [pluginsVersion]);
+  const hits = useMemo(() => (query.trim() ? rankSettings(index, query) : []), [index, query]);
+  const [active, setActive] = useState(0);
+  useEffect(() => setActive(0), [query]);
+  // The tabs and the General list narrow to what the ranked search found.
+  const { entries, tabs } = useMemo(() => {
+    if (!query.trim()) return { entries: SETTINGS_ENTRIES, tabs: new Set<SettingsTab>(SETTINGS_TABS.map((x) => x.id)) };
+    const tabs = new Set<SettingsTab>();
+    const entries: SettingEntry[] = [];
+    for (const h of hits) {
+      if (h.item.tab) tabs.add(h.item.tab);
+      if (h.item.entry) entries.push(h.item.entry);
+    }
+    return { entries, tabs };
+  }, [hits, query]);
   const visibleTabs = SETTINGS_TABS.filter((x) => tabs.has(x.id));
+  const resultsId = `${ids}-results`;
+  const panelRef = useRef<HTMLElement>(null);
+  /** A setting to focus once its tab has rendered (a picked result or a deep link). */
+  const [pendingFocus, setPendingFocus] = useState<string | null>(focus ?? null);
 
   useEffect(() => {
-    searchRef.current?.focus();
-  }, []);
+    if (!focus) searchRef.current?.focus();
+  }, [focus]);
+
+  // Focus the picked setting's control when its tab is on screen; the panel itself when the
+  // setting lives inside a tab's own dialog (never <body>). A plugin's setting opens its own view.
+  useEffect(() => {
+    if (!pendingFocus) return;
+    if (pendingFocus.startsWith("plugin:")) {
+      const p = index.find((x) => x.id === pendingFocus)?.plugin;
+      setPendingFocus(null);
+      if (p) {
+        onClose();
+        p.open();
+      }
+      return;
+    }
+    let tries = 0;
+    const timer = window.setInterval(() => {
+      const el = panelRef.current?.querySelector<HTMLElement>(`[data-setting="${CSS.escape(pendingFocus)}"]`);
+      if (el || ++tries > 10) {
+        window.clearInterval(timer);
+        const target = el ?? panelRef.current;
+        target?.focus();
+        target?.scrollIntoView?.({ block: "center" });
+        if (el) {
+          el.closest<HTMLElement>("label,div")?.setAttribute("data-flash", "1");
+          window.setTimeout(() => el.closest<HTMLElement>("label,div")?.removeAttribute("data-flash"), 1600);
+        }
+        setPendingFocus(null);
+      }
+    }, 50);
+    return () => window.clearInterval(timer);
+  }, [pendingFocus, tab, index, onClose]);
+
+  const openHit = (h: SettingsHit) => {
+    if (h.item.kind === "plugin") {
+      setPendingFocus(h.item.id);
+      return;
+    }
+    if (h.item.tab) setTab(h.item.tab);
+    setQuery("");
+    setPendingFocus(h.item.kind === "tab" ? "" : h.item.id);
+    if (h.item.kind === "tab") window.setTimeout(() => panelRef.current?.focus(), 0);
+  };
+
+  /** The combobox keys, on the field and on the list. */
+  const onResultsKey = (e: React.KeyboardEvent) => {
+    if (!hits.length) return;
+    const last = hits.length - 1;
+    const move = (i: number) => {
+      e.preventDefault();
+      setActive(Math.max(0, Math.min(last, i)));
+    };
+    if (e.key === "ArrowDown") move(active + 1);
+    else if (e.key === "ArrowUp") move(active - 1);
+    else if (e.key === "PageDown") move(active + 8);
+    else if (e.key === "PageUp") move(active - 8);
+    else if ((e.key === "Home" || e.key === "End") && e.currentTarget !== searchRef.current) move(e.key === "Home" ? 0 : last);
+    else if (e.key === "Enter") {
+      e.preventDefault();
+      const h = hits[active];
+      if (h) openHit(h);
+    }
+  };
+
+  // ⌘F / Ctrl+F anywhere in the screen: back to the search field (Obsidian 1.13).
+  const onScreenKey = (e: React.KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && (e.code === "KeyF" || e.key.toLowerCase() === "f")) {
+      e.preventDefault();
+      e.stopPropagation();
+      searchRef.current?.focus();
+      searchRef.current?.select();
+    }
+  };
 
   // A search that leaves the open tab out moves to the first tab it found.
   useEffect(() => {
@@ -306,6 +413,7 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
         className="cmd-palette"
         data-testid="settings-screen"
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={onScreenKey}
         style={{ width: "min(920px, 96vw)", maxWidth: 920, maxHeight: "90vh", height: "90vh", padding: 0, display: "flex", flexDirection: "column" }}
       >
         <header style={header}>
@@ -321,8 +429,23 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape" && query) {
+                  // Clear first; a second Escape closes the screen.
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setQuery("");
+                  return;
+                }
+                onResultsKey(e);
+              }}
               placeholder={t("settings.search")}
               aria-label={t("settings.search")}
+              role="combobox"
+              aria-expanded={!!query.trim() && hits.length > 0}
+              aria-controls={resultsId}
+              aria-autocomplete="list"
+              aria-activedescendant={query.trim() && hits.length ? optionId(resultsId, active) : undefined}
               data-testid="settings-search"
               style={{ ...input, flex: 1 }}
             />
@@ -348,6 +471,7 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
             <X size={14} />
           </button>
         </header>
+        {query.trim() && <SettingsResults id={resultsId} hits={hits} query={query} active={active} onActive={setActive} onOpen={openHit} onKeyDown={onResultsKey} />}
         <div style={{ display: "flex", flex: 1, minHeight: 0, flexWrap: "wrap" }}>
           <nav role="tablist" aria-orientation="vertical" aria-label={t("settings.title")} style={nav}>
             {visibleTabs.map((x) => (
@@ -369,6 +493,8 @@ export function SettingsScreen({ tab: initialTab = "general", onClose, onOpenAud
             {!visibleTabs.length && <p style={{ ...muted, padding: 8 }}>{t("settings.empty")}</p>}
           </nav>
           <section
+            ref={panelRef}
+            tabIndex={0}
             role="tabpanel"
             id={`${ids}-panel`}
             aria-labelledby={`${ids}-tab-${tab}`}

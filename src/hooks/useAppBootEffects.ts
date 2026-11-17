@@ -177,6 +177,19 @@ export function useAppBootEffects(): void {
     };
   }, []);
 
+  // W13.E4: lumen://settings/<id> (desktop) and #settings/<id> (web) open the settings on a setting.
+  useEffect(() => {
+    let stop: (() => void) | undefined;
+    let cancelled = false;
+    void import("../settings/settingsLink").then(({ startSettingsLinks }) => {
+      if (!cancelled) stop = startSettingsLinks();
+    });
+    return () => {
+      cancelled = true;
+      stop?.();
+    };
+  }, []);
+
   // Check for a shared note from the iOS Share Extension.
   useEffect(() => {
     const pending = (window as unknown as Record<string, unknown>).__pendingSharedNote;

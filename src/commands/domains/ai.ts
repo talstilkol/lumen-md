@@ -99,6 +99,7 @@ export function buildAiModelCommands(): Command[] {
       id: "settings.open",
       label: t("settings.title"),
       hint: t("settings.search"),
+      shortcut: "⌘,",
       icon: cmdIcons.Sparkles,
       group: t("group.view"),
       action: () => {

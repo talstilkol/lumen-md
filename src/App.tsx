@@ -297,7 +297,13 @@ export default function App() {
 
   useCommandEvents(commands);
   useWindowEvent("lumen-open-ai-settings", () => setSettingsTab("ai"));
-  useWindowEvent("lumen-open-settings", (e) => setSettingsTab((e as CustomEvent<{ tab?: SettingsTab }>).detail?.tab ?? "general"));
+  // W13.E4: `focus` names a setting to open on (lumen://settings/<id>, settings/settingsLink.ts).
+  const [settingsFocus, setSettingsFocus] = useState<string | undefined>(undefined);
+  useWindowEvent("lumen-open-settings", (e) => {
+    const d = (e as CustomEvent<{ tab?: SettingsTab; focus?: string }>).detail;
+    setSettingsFocus(d?.focus);
+    setSettingsTab(d?.tab ?? "general");
+  });
   useWindowEvent("lumen-open-privacy-ledger", () => setPrivacyOpen(true));
   // A saved search in the sidebar (plan W2.12) opens the dialog on its query.
   useWindowEvent("lumen-open-search", (e) => {
@@ -662,7 +668,7 @@ export default function App() {
             // pro users have no org, so their own id is the scope.
             orgId={auditScope({ id: authUserId ?? "", orgId: authOrgId }) || "personal"}
           />}
-          {settingsTab && <SettingsScreen key={settingsTab} tab={settingsTab} onClose={() => setSettingsTab(null)} onOpenAuditLog={() => { setSettingsTab(null); setAuditLogOpen(true); }} />}
+          {settingsTab && <SettingsScreen key={`${settingsTab}:${settingsFocus ?? ""}`} tab={settingsTab} focus={settingsFocus} onClose={() => setSettingsTab(null)} onOpenAuditLog={() => { setSettingsTab(null); setAuditLogOpen(true); }} />}
           {aiDoctorOpen && <AiDoctorPanel open={aiDoctorOpen} onClose={() => setAiDoctorOpen(false)} />}
           {agentReviewOpen && <AgentReviewPanel open={agentReviewOpen} onClose={() => setAgentReviewOpen(false)} />}
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}

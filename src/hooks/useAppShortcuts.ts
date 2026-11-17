@@ -104,6 +104,9 @@ export function useAppShortcuts(a: AppShortcutActions): void {
         case "help.shortcuts":
           setShortcutsOpen((v) => !v);
           return;
+        case "settings.open":
+          window.dispatchEvent(new CustomEvent("lumen-open-settings"));
+          return;
         case "insert.smart":
           // ⌘⇧V — Smart Insert (paste anything → auto-detect → wrap).
           (async () => {
