@@ -39,9 +39,10 @@ describe("W10.B12 audit guard", () => {
 
   it("a ✅ on a task the audit called PARTIAL fails, even with evidence that claims DONE", () => {
     const id = partialId();
+    const name = realLedger().audits.at(-1).name;
     const problems = auditGuard(promote(id), realLedger());
-    expect(problems).toContain(`${id}: ✅ but the audit "r2 16.11 (audit/r2-all.json)" called it PARTIAL — back to ⏳`);
-    expect(problems).toContain(`${id}: its evidence says "DONE", the audit "r2 16.11 (audit/r2-all.json)" says "PARTIAL"`);
+    expect(problems).toContain(`${id}: ✅ but the audit "${name}" called it PARTIAL — back to ⏳`);
+    expect(problems).toContain(`${id}: its evidence says "DONE", the audit "${name}" says "PARTIAL"`);
   });
 
   it("a ✅ no audit has judged fails; a later audit that calls it DONE lets it pass", () => {
@@ -67,7 +68,9 @@ describe("W10.B12 audit guard", () => {
   });
 
   it("deleting or breaking the ledger does not switch the rule off", () => {
-    expect(auditGuard(realPlan(), null)[0]).toMatch(/^plan\/audit-verdicts\.json is missing, and 16 task\(s\) are ✅/);
+    const done = tasks(realPlan()).filter((x) => String(x.status ?? "").startsWith("✅")).length;
+    expect(done).toBeGreaterThan(0);
+    expect(auditGuard(realPlan(), null)[0]).toBe(`plan/audit-verdicts.json is missing, and ${done} task(s) are ✅ — a ✅ needs the audit's DONE (W10.B12)`);
     expect(ledgerProblems({ audits: [] })).toEqual([`${AUDIT_FILE}: needs a non-empty "audits" list`]);
     expect(ledgerProblems({ audits: [{ name: "x", at: "2026-11-16", verdicts: { "0.1": "DONE-ish" } }] })[0]).toMatch(/0\.1 has verdict "DONE-ish"/);
     expect(() => appendAudit(realLedger(), [{ id: "0.1", verdict: "DONE" }], { name: "old", at: "2026-01-01" })).toThrow(/date order/);

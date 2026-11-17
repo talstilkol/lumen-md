@@ -593,10 +593,10 @@
       "0.6"
      ],
      "priority": "P0",
-     "status": "⏳ #265 · ביקורת 14.11: חלקי — 52 ✅ היו פטורים בלי dod; נסגר ב-W10.G1–G5 · (הבודק, צעד ה-CI ותבנית ה-PR; 2 ממצאי Codex P1 תוקנו ב-21fb05d8 — רשימת ה-grandfather קפואה בקוד (DOD_GRANDFATHER_BASELINE))…",
+     "status": "⏳ #265 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
      "verified": "browser",
      "pr": 265,
-     "notes": "⏳ #265 (הבודק, צעד ה-CI ותבנית ה-PR; 2 ממצאי Codex P1 תוקנו ב-21fb05d8 — רשימת ה-grandfather קפואה בקוד (DOD_GRANDFATHER_BASELINE, 60) ומשימה שנפתחה מחדש יוצאת ממנה; CI ירוק על bead92e6; ה-dod של 60 המשימות אחרי המיזוג 15.1) · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): met: plan:check refuses ✅ without dod; dod --done --runner shim: 16/16 ✅ tasks green (reports/dod-done-1a184547ae.md in #1013); 1.4 is no longer ✅; every P0 has dod+dodExpect (dod --list exit 0); dod.test 17/17; fix #1013, merged into verify/train-7 (063d3d2c82); owed: follow-up once #1000+#1013 land: add `dod --done --runner` as a train:offline --all gate so a red ✅ blocks the receipt",
+     "notes": "⏳ #265 (הבודק, צעד ה-CI ותבנית ה-PR; 2 ממצאי Codex P1 תוקנו ב-21fb05d8 — רשימת ה-grandfather קפואה בקוד (DOD_GRANDFATHER_BASELINE, 60) ומשימה שנפתחה מחדש יוצאת ממנה; CI ירוק על bead92e6; ה-dod של 60 המשימות אחרי המיזוג 15.1) · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): met: plan:check refuses ✅ without dod; dod --done --runner shim: 16/16 ✅ tasks green (reports/dod-done-1a184547ae.md in #1013); 1.4 is no longer ✅; every P0 has dod+dodExpect (dod --list exit 0); dod.test 17/17; fix #1013, merged into verify/train-7 (063d3d2c82); owed: follow-up once #1000+#1013 land: add `dod --done --runner` as a train:offline --all gate so a red ✅ blocks the receipt · INT6b 17.11: status before → ⏳ #265 · ביקורת 14.11: חלקי — 52 ✅ היו פטורים בלי dod; נסגר ב-W10.G1–G5 · (הבודק, צעד ה-CI ותבנית ה-PR; 2 ממצאי Codex P1 תוקנו ב-21fb05d8 — רשימת ה-grandfather קפואה בקוד (DOD_GRANDFATHER_BASELINE))…",
      "new": true,
      "was": "0.6",
      "source": "נספח 16",
@@ -695,10 +695,10 @@
       "0.1"
      ],
      "priority": "P0",
-     "status": "⏳ #204 · ביקורת 14.11: חלקי — תיקון --around רק ב-#204, לא ברכבת · (הכלי + 35 בדיקות ✓; --around/--window נוסף ב-42c8474: על #189 עכשיו 100 ריצות מאותו חלון זמן)…",
+     "status": "⏳ #204 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the local equivalent of #189's Actions-only acceptance (ciDoctorReceipts, ciDoctorLocal now in the dod)",
      "verified": "node",
      "pr": 204,
-     "notes": "⏳ #204 (הכלי + 35 בדיקות ✓; --around/--window נוסף ב-42c8474: על #189 עכשיו 100 ריצות מאותו חלון זמן, 50 בקומיטים דומים → FLAKY (עבר רק ב-retry ב-#191 ועוד 9) במקום UNKNOWN; הקבלה כפי שנוסחה (״עבר ב-#191 על אותו קוד״) לא מתקיימת מילולית — ב-#191 עבר רק ב-retry) · ביקורת 1.8 · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): fixed: Actions retired, so ci-doctor --source local (lib/ci-doctor-receipts.mjs) classifies the red gates of train:offline/ci:local run records (.ci-local/runs) and receipts, with no network; ciDoctorReceipts 7/7, ciDoctor 50/50, ciDoctorCli 7/7, ciDoctorLocal 27/27; fix #1000, merged into verify/train-7 (063d3d2c82) · INT6b 17.11 (lane FA, audit r3 A1): the acceptance's #189 run was GitHub Actions only (retired); its local equivalent: ci-doctor on ci:local / train-offline receipts says a gate red in one clean run and green on the same commit in another clean run is flaky (\"passed on the same code\"); proven by src/__tests__/ciDoctorReceipts.test.ts \"a code-only gate that passed on this same commit in another clean run is flaky\" (no GitHub Actions)",
+     "notes": "⏳ #204 (הכלי + 35 בדיקות ✓; --around/--window נוסף ב-42c8474: על #189 עכשיו 100 ריצות מאותו חלון זמן, 50 בקומיטים דומים → FLAKY (עבר רק ב-retry ב-#191 ועוד 9) במקום UNKNOWN; הקבלה כפי שנוסחה (״עבר ב-#191 על אותו קוד״) לא מתקיימת מילולית — ב-#191 עבר רק ב-retry) · ביקורת 1.8 · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): fixed: Actions retired, so ci-doctor --source local (lib/ci-doctor-receipts.mjs) classifies the red gates of train:offline/ci:local run records (.ci-local/runs) and receipts, with no network; ciDoctorReceipts 7/7, ciDoctor 50/50, ciDoctorCli 7/7, ciDoctorLocal 27/27; fix #1000, merged into verify/train-7 (063d3d2c82) · INT6b 17.11 (lane FA, audit r3 A1): the acceptance's #189 run was GitHub Actions only (retired); its local equivalent: ci-doctor on ci:local / train-offline receipts says a gate red in one clean run and green on the same commit in another clean run is flaky (\"passed on the same code\"); proven by src/__tests__/ciDoctorReceipts.test.ts \"a code-only gate that passed on this same commit in another clean run is flaky\" (no GitHub Actions) · INT6b 17.11: status before → ⏳ #204 · ביקורת 14.11: חלקי — תיקון --around רק ב-#204, לא ברכבת · (הכלי + 35 בדיקות ✓; --around/--window נוסף ב-42c8474: על #189 עכשיו 100 ריצות מאותו חלון זמן)…",
      "new": true,
      "was": "0.8",
      "source": "תהליך",
@@ -1246,10 +1246,10 @@
       "0.2"
      ],
      "priority": "P1",
-     "status": "⏳ #209 · ביקורת 14.11: הושלם; ה-dod לא ירוק לא מקוון: commandIds 1/2",
+     "status": "⏳ #209 · cloud-complete (audit r3 PARTIAL); owed: Mac vitest commandIds",
      "verified": "browser",
      "pr": 209,
-     "notes": "✅ #209",
+     "notes": "✅ #209 · INT6b 17.11: status before → ⏳ #209 · ביקורת 14.11: הושלם; ה-dod לא ירוק לא מקוון: commandIds 1/2",
      "new": true,
      "source": "נמצא בפיצול 0.2",
      "steps": [
@@ -1710,9 +1710,9 @@
      "acceptance": [
       "0 פערים בין סטטוס ל-DoD"
      ],
-     "status": "⏳ ביקורת 14.11: חלקי — 52 ✅ היו בלי dod; ‏0.5 (waitForTimeout) ו-0.16 (CI) לא כפי שדווח · ביקורת עצמאית 10.11 (scratchpad audit-1.8.md): 25 ✅ בשלבים 0–1 — 17 עקביים, 8 פערים שתוקנו כאן (0.5, 0.9)…",
+     "status": "⏳ cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
      "verified": "browser",
-     "notes": "✅ ביקורת עצמאית 10.11 (scratchpad audit-1.8.md): 25 ✅ בשלבים 0–1 — 17 עקביים, 8 פערים שתוקנו כאן (0.5, 0.9, 0.11, 0.14, 0.20, 1.1, 1.7 → ⏳; 1.3 → ✅* עם dod); 0 הפרות של כללי התוכנית · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): met: dod --list exit 0, plan:check exit 0; all 16 ✅ tasks' dods green under the shim (reports/dod-done-1a184547ae.md); audit's '1.4 ✅ fails' gone (1.4 is ⏳); fix #1013, merged into verify/train-7 (063d3d2c82); owed: g6/data.json comparison was not re-run (audit scratch file, not in the repo)",
+     "notes": "✅ ביקורת עצמאית 10.11 (scratchpad audit-1.8.md): 25 ✅ בשלבים 0–1 — 17 עקביים, 8 פערים שתוקנו כאן (0.5, 0.9, 0.11, 0.14, 0.20, 1.1, 1.7 → ⏳; 1.3 → ✅* עם dod); 0 הפרות של כללי התוכנית · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): met: dod --list exit 0, plan:check exit 0; all 16 ✅ tasks' dods green under the shim (reports/dod-done-1a184547ae.md); audit's '1.4 ✅ fails' gone (1.4 is ⏳); fix #1013, merged into verify/train-7 (063d3d2c82); owed: g6/data.json comparison was not re-run (audit scratch file, not in the repo) · INT6b 17.11: status before → ⏳ ביקורת 14.11: חלקי — 52 ✅ היו בלי dod; ‏0.5 (waitForTimeout) ו-0.16 (CI) לא כפי שדווח · ביקורת עצמאית 10.11 (scratchpad audit-1.8.md): 25 ✅ בשלבים 0–1 — 17 עקביים, 8 פערים שתוקנו כאן (0.5, 0.9)…",
      "dod": [
       "node scripts/dod.mjs --list",
       "npm run plan:check"
@@ -2228,7 +2228,7 @@
       "1.1"
      ],
      "priority": "P0",
-     "status": "⏳ #229 · ביקורת r2 16.11: PARTIAL 80 — החסר ב-notes",
+     "status": "⏳ #229 · cloud-complete (audit r3 PARTIAL); owed: the fake-indexeddb run on the Mac; re-audit (historyComplete.test.ts now in the dod)",
      "verified": "node",
      "pr": 229,
      "was": "3.2",
@@ -2275,7 +2275,7 @@
       "who": "cloud-code",
       "missing": "historyComplete (the real acceptance test) cannot run offline (fake-indexeddb not installed: 0/16 load as stubs), so ≤10% over 1,000 versions is unverified by me; the ✅ rests on a dod that tests unrelated helpers."
      },
-     "notes": "עד 16.11: ✅ #229 (verified browser); מ-16.11 ⏳ ו-verified built — מה שהטקסט מתעד שרץ, לפי migrate-verified · ביקורת r2 16.11 (audit/r2-all.json): PARTIAL (80/100); נשאר: historyComplete (the real acceptance test) cannot run offline (fake-indexeddb not installed: 0/16 load as stubs), so ≤10% over 1,000 versions is unverified by me; the ✅ rests on a dod that tests unrelated helpers. · stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): met: historyComplete 16/16 in a headless browser in the lane harness with REAL IndexedDB (outside the repo, no receipt; not the plan’s browser check) (lane shim: fake-indexeddb -> real IDB under a fresh name prefix per test; toFake respected): 1000 versions stored 446,846 B for 7,647,248 B of text = 5.8% (<=10%), all read back; collab snapshots, pruning, MAX_PER_DOC, migration green. versionHistory 10/10; owed: historyComplete with the real fake-indexeddb on the Mac (package not installed here)",
+     "notes": "עד 16.11: ✅ #229 (verified browser); מ-16.11 ⏳ ו-verified built — מה שהטקסט מתעד שרץ, לפי migrate-verified · ביקורת r2 16.11 (audit/r2-all.json): PARTIAL (80/100); נשאר: historyComplete (the real acceptance test) cannot run offline (fake-indexeddb not installed: 0/16 load as stubs), so ≤10% over 1,000 versions is unverified by me; the ✅ rests on a dod that tests unrelated helpers. · stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): met: historyComplete 16/16 in a headless browser in the lane harness with REAL IndexedDB (outside the repo, no receipt; not the plan’s browser check) (lane shim: fake-indexeddb -> real IDB under a fresh name prefix per test; toFake respected): 1000 versions stored 446,846 B for 7,647,248 B of text = 5.8% (<=10%), all read back; collab snapshots, pruning, MAX_PER_DOC, migration green. versionHistory 10/10; owed: historyComplete with the real fake-indexeddb on the Mac (package not installed here) · INT6b 17.11: status before → ⏳ #229 · ביקורת r2 16.11: PARTIAL 80 — החסר ב-notes",
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
@@ -2849,10 +2849,10 @@
       "1.1"
      ],
      "priority": "P0",
-     "status": "⏳ #224 · ביקורת 14.11: הושלם; ה-dod לא ירוק לא מקוון: embeds 5/56",
+     "status": "⏳ #224 · cloud-complete (audit r3 PARTIAL); owed: e2e embeds; KaTeX offline; Quartz ofm.ts port step not done",
      "verified": "browser",
      "pr": 224,
-     "notes": "✅ #224 · stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): fixed: regression: W1.3 remarkObsidian turned ![[img]] into a bare <img src> before remarkEmbeds, so image embeds skipped workspace resolution / notFound / version / live tracking. After: embeds 48/56 -> 55/57 (2 left = shim's temml stand-in; 57/57 with temml absent as vite aliases it), embedsLive 3/4 -> 4/4, safeFiles 27/30 -> 28/30, all other Markdown-rendering tests unchanged vs base; startup 226,531 B gz; fix #1011, merged into verify/train-7 (063d3d2c82); owed: e2e/embeds.spec.ts in a browser; Quartz ofm.ts port not done (own implementation kept)",
+     "notes": "✅ #224 · stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): fixed: regression: W1.3 remarkObsidian turned ![[img]] into a bare <img src> before remarkEmbeds, so image embeds skipped workspace resolution / notFound / version / live tracking. After: embeds 48/56 -> 55/57 (2 left = shim's temml stand-in; 57/57 with temml absent as vite aliases it), embedsLive 3/4 -> 4/4, safeFiles 27/30 -> 28/30, all other Markdown-rendering tests unchanged vs base; startup 226,531 B gz; fix #1011, merged into verify/train-7 (063d3d2c82); owed: e2e/embeds.spec.ts in a browser; Quartz ofm.ts port not done (own implementation kept) · INT6b 17.11: status before → ⏳ #224 · ביקורת 14.11: הושלם; ה-dod לא ירוק לא מקוון: embeds 5/56",
      "new": true,
      "source": "מחקר פערים #3",
      "steps": [
@@ -3620,7 +3620,7 @@
       "5.4"
      ],
      "priority": "P0",
-     "status": "⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 124/124; חסר: מודל אמיתי לאיכות",
+     "status": "⏳ cloud-complete (audit r3 PARTIAL); owed: real-model quality; human-reviewed label (runtime.ts CODEOWNERS)",
      "verified": "node",
      "was": "4.5",
      "source": "§4, T17",
@@ -3652,7 +3652,7 @@
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
      ],
-     "notes": "stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): met: allThroughRuntime 17/17 (shim v4) on 1a184547ae: the 3 callers the audit named go through runLocalRequest (eff41dfcb0); 0 bypasses. runLocalRequest now forwards the signal explicitly (#1009); fix #1009, merged into verify/train-7 (063d3d2c82); owed: quality with a real local model (Mac)"
+     "notes": "stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): met: allThroughRuntime 17/17 (shim v4) on 1a184547ae: the 3 callers the audit named go through runLocalRequest (eff41dfcb0); 0 bypasses. runLocalRequest now forwards the signal explicitly (#1009); fix #1009, merged into verify/train-7 (063d3d2c82); owed: quality with a real local model (Mac) · INT6b 17.11: status before → ⏳ קוד גמור — ממוזג בשלוש הרכבות; בדיקות היחידה על train-2 (shim עם vi.mock): 124/124; חסר: מודל אמיתי לאיכות"
     },
     {
      "id": "5.6",
@@ -3701,10 +3701,10 @@
       "1.7"
      ],
      "priority": "P1",
-     "status": "⏳ #277 · ביקורת 14.11: חלקי · (pull של Ollama עם התקדמות, מצבי economy/balanced/quality, ניקוי מטמון ומכסה, הודעה בלי WebGPU; CI ירוק על f0e78b51, startup 460.0/460; חסר: web-llm 0.2.86 ב-lockfile)…",
+     "status": "⏳ #277 · cloud-complete (audit r3 PARTIAL); owed: web-llm 0.2.86 + Gemma 4; dodMock; panel test load-flaky",
      "verified": "browser",
      "pr": 277,
-     "notes": "⏳ #277 (pull של Ollama עם התקדמות, מצבי economy/balanced/quality, ניקוי מטמון ומכסה, הודעה בלי WebGPU; CI ירוק על f0e78b51, startup 460.0/460; חסר: web-llm 0.2.86 ב-lockfile; ✅* אחרי המיזוג — Ollama ו-WebGPU אמיתיים 15.3)",
+     "notes": "⏳ #277 (pull של Ollama עם התקדמות, מצבי economy/balanced/quality, ניקוי מטמון ומכסה, הודעה בלי WebGPU; CI ירוק על f0e78b51, startup 460.0/460; חסר: web-llm 0.2.86 ב-lockfile; ✅* אחרי המיזוג — Ollama ו-WebGPU אמיתיים 15.3) · INT6b 17.11: status before → ⏳ #277 · ביקורת 14.11: חלקי · (pull של Ollama עם התקדמות, מצבי economy/balanced/quality, ניקוי מטמון ומכסה, הודעה בלי WebGPU; CI ירוק על f0e78b51, startup 460.0/460; חסר: web-llm 0.2.86 ב-lockfile)…",
      "was": "4.7",
      "source": "T4, T6, T11",
      "steps": [
@@ -4310,7 +4310,7 @@
       "7.10"
      ],
      "priority": "P0",
-     "status": "⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: englishSpell 8/11 (חבילות חסרות); חסר: vitest אמיתי",
+     "status": "⏳ cloud-complete (audit r3 PARTIAL); owed: held-out split; in-app e2e",
      "verified": "node",
      "new": true,
      "was": "5.10",
@@ -4338,7 +4338,7 @@
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
      ],
-     "notes": "stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): met: spell-en dev split with real nspell 2.1.5 + dictionary-en 4.0.0: node harness recall 1.00, fp_word 2.64%, correction@5 0.84 (spellEnGolden 1/1); bundled englishSpell.worker in a headless browser in the lane harness (outside the repo, no receipt; not the plan’s browser check; dict fetched same-origin, built in 234 ms): recall 32/32 = 1.00, fp ~2.6%, 0 off-site requests; owed: held-out split (only dev committed); in-app e2e on the Mac"
+     "notes": "stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): met: spell-en dev split with real nspell 2.1.5 + dictionary-en 4.0.0: node harness recall 1.00, fp_word 2.64%, correction@5 0.84 (spellEnGolden 1/1); bundled englishSpell.worker in a headless browser in the lane harness (outside the repo, no receipt; not the plan’s browser check; dict fetched same-origin, built in 234 ms): recall 32/32 = 1.00, fp ~2.6%, 0 off-site requests; owed: held-out split (only dev committed); in-app e2e on the Mac · INT6b 17.11: status before → ⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: englishSpell 8/11 (חבילות חסרות); חסר: vitest אמיתי"
     },
     {
      "id": "6.11",
@@ -4853,10 +4853,10 @@
       "7.1"
      ],
      "priority": "P1",
-     "status": "⏳ #345 + W10.B18 #706 (על feat/embed-compete): ברירת המחדל היא BM25 לבד — על הסט הקשה (eval/golden/retrieval-hard) ה-reranker המילולי מוריד nDCG@10: פיתוח 0.948→0.918, מוחזק 0.952→0.907…",
+     "status": "⏳ #345 · cloud-complete (audit r3 PARTIAL); owed: bge-reranker-v2-m3 not measured; real embedding model",
      "verified": "built",
      "pr": 345,
-     "notes": "⏳ #345 + W10.B18 #706 (על feat/embed-compete): ברירת המחדל היא BM25 לבד — על הסט הקשה (eval/golden/retrieval-hard) ה-reranker המילולי מוריד nDCG@10: פיתוח 0.948→0.918, מוחזק 0.952→0.907; המילולי נשאר הגדרה להפעלה; rerankHard.test.ts מצמיד את ברירת המחדל למנצח; bge-reranker לא נמדד — יהפוך לברירת מחדל רק עם קבלת מדידה מ-Mac שעוברת את BM25 ב-3 נקודות לפחות בפיתוח ובמוחזק",
+     "notes": "⏳ #345 + W10.B18 #706 (על feat/embed-compete): ברירת המחדל היא BM25 לבד — על הסט הקשה (eval/golden/retrieval-hard) ה-reranker המילולי מוריד nDCG@10: פיתוח 0.948→0.918, מוחזק 0.952→0.907; המילולי נשאר הגדרה להפעלה; rerankHard.test.ts מצמיד את ברירת המחדל למנצח; bge-reranker לא נמדד — יהפוך לברירת מחדל רק עם קבלת מדידה מ-Mac שעוברת את BM25 ב-3 נקודות לפחות בפיתוח ובמוחזק · INT6b 17.11: status before → ⏳ #345 + W10.B18 #706 (על feat/embed-compete): ברירת המחדל היא BM25 לבד — על הסט הקשה (eval/golden/retrieval-hard) ה-reranker המילולי מוריד nDCG@10: פיתוח 0.948→0.918, מוחזק 0.952→0.907…",
      "was": "6.4",
      "source": "T29, T34, נספח 19",
      "steps": [
@@ -5108,10 +5108,10 @@
       "8.1"
      ],
      "priority": "P1",
-     "status": "⏳ #248 · ביקורת 14.11: חלקי — היעד ≤250 KB והשער מתיר 460; נמדד 385.7 KB · (parse5 ו-react-dom/server מחוץ להפעלה: 456.5 → 385.7 KB gz; היעד 250 KB — שאר הצעדים פתוחים)",
+     "status": "⏳ #248 · cloud-complete (audit r3 PARTIAL); owed: real vite build + npm run budget; prerendered shell",
      "verified": "built",
      "pr": 248,
-     "notes": "⏳ #248 (parse5 ו-react-dom/server מחוץ להפעלה: 456.5 → 385.7 KB gz; היעד 250 KB — שאר הצעדים פתוחים)",
+     "notes": "⏳ #248 (parse5 ו-react-dom/server מחוץ להפעלה: 456.5 → 385.7 KB gz; היעד 250 KB — שאר הצעדים פתוחים) · INT6b 17.11: status before → ⏳ #248 · ביקורת 14.11: חלקי — היעד ≤250 KB והשער מתיר 460; נמדד 385.7 KB · (parse5 ו-react-dom/server מחוץ להפעלה: 456.5 → 385.7 KB gz; היעד 250 KB — שאר הצעדים פתוחים)",
      "was": "7.2",
      "source": "C2, T38",
      "steps": [
@@ -5269,10 +5269,10 @@
       "0.3"
      ],
      "priority": "P0",
-     "status": "⏳ #253 · ביקורת 14.11: הושלם; ה-dod לא ירוק לא מקוון: i18nHardcoded 4/5 · (294 מחרוזות, לא 18; תרגומי ar/ru/fr/de/ja/zh בלי דובר שפת אם — 15.16)",
+     "status": "⏳ #253 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
      "verified": "browser",
      "pr": 253,
-     "notes": "✅ #253 (294 מחרוזות, לא 18; תרגומי ar/ru/fr/de/ja/zh בלי דובר שפת אם — 15.16)",
+     "notes": "✅ #253 (294 מחרוזות, לא 18; תרגומי ar/ru/fr/de/ja/zh בלי דובר שפת אם — 15.16) · INT6b 17.11: status before → ⏳ #253 · ביקורת 14.11: הושלם; ה-dod לא ירוק לא מקוון: i18nHardcoded 4/5 · (294 מחרוזות, לא 18; תרגומי ar/ru/fr/de/ja/zh בלי דובר שפת אם — 15.16)",
      "was": "8.1",
      "source": "H4, P6, T45",
      "steps": [
@@ -5456,7 +5456,7 @@
       "0.3"
      ],
      "priority": "P1",
-     "status": "⏳ #337 feat/i18n-draft-agent (npm run i18n:draft עם Ollama, רשימת needs-review) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)",
+     "status": "⏳ #337 · cloud-complete (audit r3 PARTIAL); owed: 10 keys→70 drafts on real Ollama",
      "verified": "node",
      "pr": 337,
      "new": true,
@@ -5482,7 +5482,8 @@
       "score": 82,
       "who": "cloud-code",
       "missing": "'10 keys -> 70 drafts' only against a mocked Ollama."
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ #337 feat/i18n-draft-agent (npm run i18n:draft עם Ollama, רשימת needs-review) — נבדק רק ב-Node נקי; typecheck/vitest/build/Playwright ממתינים ל-Vercel Sandbox; Codex לא סקר (מכסה)"
     },
     {
      "id": "9.7",
@@ -5885,7 +5886,7 @@
       "8.4"
      ],
      "priority": "P1",
-     "status": "⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: searchOps 39/40 (30 שאילתות הקבלה עוברות), bm25 12/12",
+     "status": "⏳ cloud-complete (audit r3 PARTIAL); owed: Mac vitest searchOps",
      "verified": "built",
      "was": "10.3",
      "source": "J5",
@@ -5906,7 +5907,8 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "The one searchOps failure is a shim limitation (read-only ES module property, 'Cannot redefine property: documentTerms'), not a product failure."
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: searchOps 39/40 (30 שאילתות הקבלה עוברות), bm25 12/12"
     },
     {
      "id": "11.4",
@@ -6073,7 +6075,7 @@
       "1.1"
      ],
      "priority": "P1",
-     "status": "⏳ #271 (A1–A3, A6, A8, A9 תוקנו; A4, A5, A7 החלטה מתועדת עם בדיקה; 9/9 עם בדיקה; CI ירוק על aeab395b; פתוח לטל: VITE_RESEARCH_TOKEN מול טוקן בהגדרות בלבד)",
+     "status": "⏳ #271 · cloud-complete (audit r3 PARTIAL); owed: VITE_RESEARCH_TOKEN decision",
      "verified": "browser",
      "pr": 271,
      "was": "11.3",
@@ -6097,7 +6099,8 @@
       "score": 80,
       "who": "cloud-code",
       "missing": "Owner decision on VITE_RESEARCH_TOKEN still open; playgroundFiles' one failure is a shim stub (remark-frontmatter not installed offline)."
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ #271 (A1–A3, A6, A8, A9 תוקנו; A4, A5, A7 החלטה מתועדת עם בדיקה; 9/9 עם בדיקה; CI ירוק על aeab395b; פתוח לטל: VITE_RESEARCH_TOKEN מול טוקן בהגדרות בלבד)"
     },
     {
      "id": "12.4",
@@ -6151,7 +6154,7 @@
       "3.6"
      ],
      "priority": "P0",
-     "status": "⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: docsComplete 9/9; כשל docs-complete ב-train-2 תוקן ברכבת 3",
+     "status": "⏳ cloud-complete (audit r3 PARTIAL); owed: re-audit: docsCodeRefs.test.ts is now in the dod",
      "verified": "built",
      "was": "12.1",
      "source": "N1",
@@ -6177,7 +6180,8 @@
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד גמור — ממוזג ב-train-2 וברכבת 3; בדיקות יחידה לא מקוון: docsComplete 9/9; כשל docs-complete ב-train-2 תוקן ברכבת 3"
     },
     {
      "id": "13.2",
@@ -6441,10 +6445,10 @@
       "7.4"
      ],
      "priority": "P1",
-     "status": "⏳ #347 · feat/feedback (Help: Send feedback + Report a problem מהרופא; תצוגה מקדימה של מה שיוצא, ניקוי סודות, כלום לא יוצא בלי לחיצה; Vercel build ירוק (tsc -b מחמיר כולל בדיקות + vite build))…",
+     "status": "⏳ #347 · cloud-complete (audit r3 PARTIAL); owed: e2e feedback.spec on real build",
      "verified": "node",
      "pr": 347,
-     "notes": "⏳ #347 feat/feedback (Help: Send feedback + Report a problem מהרופא; תצוגה מקדימה של מה שיוצא, ניקוי סודות, כלום לא יוצא בלי לחיצה; Vercel build ירוק (tsc -b מחמיר כולל בדיקות + vite build); feedback.test 10/10 ב-shim; dod: npx vitest run src/__tests__/feedback.test.ts src/__tests__/FeedbackDialogRender.test.tsx; npx playwright test e2e/feedback.spec.ts)",
+     "notes": "⏳ #347 feat/feedback (Help: Send feedback + Report a problem מהרופא; תצוגה מקדימה של מה שיוצא, ניקוי סודות, כלום לא יוצא בלי לחיצה; Vercel build ירוק (tsc -b מחמיר כולל בדיקות + vite build); feedback.test 10/10 ב-shim; dod: npx vitest run src/__tests__/feedback.test.ts src/__tests__/FeedbackDialogRender.test.tsx; npx playwright test e2e/feedback.spec.ts) · INT6b 17.11: status before → ⏳ #347 · feat/feedback (Help: Send feedback + Report a problem מהרופא; תצוגה מקדימה של מה שיוצא, ניקוי סודות, כלום לא יוצא בלי לחיצה; Vercel build ירוק (tsc -b מחמיר כולל בדיקות + vite build))…",
      "new": true,
      "source": "השקה",
      "steps": [
@@ -7727,10 +7731,10 @@
      ],
      "why": "החלטה 10.11 על פריט בעלים",
      "branch": "feat/agent-review-dev-only",
-     "status": "⏳ #368 · **מוכן למיזוג** — (על #223; agentReview רק ב-DEV או VITE_LUMEN_TEST_SURFACE=1 + check:test-surface)…",
+     "status": "⏳ #368 · cloud-complete (audit r3 PARTIAL); owed: grep of real production build",
      "verified": "browser",
      "pr": 368,
-     "notes": "⏳ #368 **מוכן למיזוג** — (על #223; agentReview רק ב-DEV או VITE_LUMEN_TEST_SURFACE=1 + check:test-surface; Vercel Sandbox (Node 24): typecheck 0, vitest 316/3033, budget 441.8/460, 0 מופעים ב-dist, e2e 5/5 בשלושה דפדפנים; dod: npx vitest run src/__tests__/testSurfaceGate.test.ts src/__tests__/agentReviewPanel.test.tsx · npm run build && npm run check:test-surface · npx playwright test e2e/agent-review.spec.ts e2e/paste-html.spec.ts)",
+     "notes": "⏳ #368 **מוכן למיזוג** — (על #223; agentReview רק ב-DEV או VITE_LUMEN_TEST_SURFACE=1 + check:test-surface; Vercel Sandbox (Node 24): typecheck 0, vitest 316/3033, budget 441.8/460, 0 מופעים ב-dist, e2e 5/5 בשלושה דפדפנים; dod: npx vitest run src/__tests__/testSurfaceGate.test.ts src/__tests__/agentReviewPanel.test.tsx · npm run build && npm run check:test-surface · npx playwright test e2e/agent-review.spec.ts e2e/paste-html.spec.ts) · INT6b 17.11: status before → ⏳ #368 · **מוכן למיזוג** — (על #223; agentReview רק ב-DEV או VITE_LUMEN_TEST_SURFACE=1 + check:test-surface)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -7759,10 +7763,10 @@
      ],
      "why": "החלטה 10.11 על פריט בעלים",
      "branch": "verify/train",
-     "status": "⏳ ביקורת 14.11: חלקי — אין יומן שממפה את 110 תגובות ה-P2 להחלטות · על verify/train (לא נדחף) — 32 שרשורי P2 קיבלו החלטה, כל אחד ב-commit נפרד עם בדיקה (#199, #201, #202, #204, #210, #211, #225)…",
+     "status": "⏳ #199 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1116 (blobUrlVaultScope, #235)",
      "verified": "built",
      "pr": 199,
-     "notes": "⏳ על verify/train (לא נדחף) — 32 שרשורי P2 קיבלו החלטה, כל אחד ב-commit נפרד עם בדיקה (#199, #201, #202, #204, #210, #211, #225, #218, #231, #232, #238, #235); 3 מקרים נרשמו כהחלטה ב-docs/known-limits.md; vitest לא רץ",
+     "notes": "⏳ על verify/train (לא נדחף) — 32 שרשורי P2 קיבלו החלטה, כל אחד ב-commit נפרד עם בדיקה (#199, #201, #202, #204, #210, #211, #225, #218, #231, #232, #238, #235); 3 מקרים נרשמו כהחלטה ב-docs/known-limits.md; vitest לא רץ · INT6b 17.11: status before → ⏳ ביקורת 14.11: חלקי — אין יומן שממפה את 110 תגובות ה-P2 להחלטות · על verify/train (לא נדחף) — 32 שרשורי P2 קיבלו החלטה, כל אחד ב-commit נפרד עם בדיקה (#199, #201, #202, #204, #210, #211, #225)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -7794,7 +7798,7 @@
      "status": "✅ #373 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
      "verified": "browser",
      "pr": 373,
-     "notes": "⏳ #373 (על #242; מתג ״לסמוך על הריפו הזה״ לכל ריפו, כבוי כברירת מחדל, קשור לרשומת המקור של git ונופל בשיבוט מחדש או העברה; כתיבות עדיין עוברות סקירה; plain-Node 21/21, i18n:check; לא נבדק ב-Sandbox (חסום עד 1.12); dod: npx vitest run src/__tests__/trustedRepos.test.tsx src/__tests__/injectionGuard.test.ts) · INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ #373 · (על #242; מתג ״לסמוך על הריפו הזה״ לכל ריפו, כבוי כברירת מחדל, קשור לרשומת המקור של git ונופל בשיבוט מחדש או העברה; כתיבות עדיין עוברות סקירה; plain-Node 21/21, i18n:check)…",
+     "notes": "⏳ #373 (על #242; מתג ״לסמוך על הריפו הזה״ לכל ריפו, כבוי כברירת מחדל, קשור לרשומת המקור של git ונופל בשיבוט מחדש או העברה; כתיבות עדיין עוברות סקירה; plain-Node 21/21, i18n:check; לא נבדק ב-Sandbox (חסום עד 1.12); dod: npx vitest run src/__tests__/trustedRepos.test.tsx src/__tests__/injectionGuard.test.ts) · INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ #373 · (על #242; מתג ״לסמוך על הריפו הזה״ לכל ריפו, כבוי כברירת מחדל, קשור לרשומת המקור של git ונופל בשיבוט מחדש או העברה; כתיבות עדיין עוברות סקירה; plain-Node 21/21, i18n:check)… · dod green in the shim v4, in Node and in Chromium",
      "auditVerdict": {
       "at": "2026-11-17",
       "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
@@ -8257,10 +8261,10 @@
      ],
      "why": "Word עושה את זה עשרות שנים; עורכי Markdown לא — וזה מה שגורם לטקסט עברי להיראות מקצועי.",
      "branch": "feat/hebrew-typography",
-     "status": "⏳ #365 · feat/hebrew-typography **מוכן למיזוג** — (על #252; Vercel Sandbox (Node 24) @125e482: typecheck 0, vitest 317/3137, build + budget 458.8/460, e2e 9/9 בשלושה דפדפנים)…",
+     "status": "⏳ #365 · cloud-complete (audit r3 PARTIAL); owed: e2e Ctrl+Z restores original",
      "verified": "browser",
      "pr": 365,
-     "notes": "⏳ #365 feat/hebrew-typography **מוכן למיזוג** — (על #252; Vercel Sandbox (Node 24) @125e482: typecheck 0, vitest 317/3137, build + budget 458.8/460, e2e 9/9 בשלושה דפדפנים; dod: npx vitest run src/__tests__/hebrewTypography.test.ts · npx playwright test e2e/hebrew-typography.spec.ts)",
+     "notes": "⏳ #365 feat/hebrew-typography **מוכן למיזוג** — (על #252; Vercel Sandbox (Node 24) @125e482: typecheck 0, vitest 317/3137, build + budget 458.8/460, e2e 9/9 בשלושה דפדפנים; dod: npx vitest run src/__tests__/hebrewTypography.test.ts · npx playwright test e2e/hebrew-typography.spec.ts) · INT6b 17.11: status before → ⏳ #365 · feat/hebrew-typography **מוכן למיזוג** — (על #252; Vercel Sandbox (Node 24) @125e482: typecheck 0, vitest 317/3137, build + budget 458.8/460, e2e 9/9 בשלושה דפדפנים)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -8371,7 +8375,7 @@
      "status": "✅ #371 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
      "verified": "browser",
      "pr": 371,
-     "notes": "⏳ #371 (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview), התיקון @e96b2e9 לא נבדק — ה-Sandbox חסום (מגבלת שימוש של Vercel עד 1.12)) · INT6b 17.11: ✅ on audit r3 DONE (score 82); status before → ⏳ #371 · (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview))…",
+     "notes": "⏳ #371 (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview), התיקון @e96b2e9 לא נבדק — ה-Sandbox חסום (מגבלת שימוש של Vercel עד 1.12)) · INT6b 17.11: ✅ on audit r3 DONE (score 82); status before → ⏳ #371 · (על #306; בלוקי query ו-dataview + חיפושים שמורים; Vercel Sandbox (Node 24) @e15ff94: 98/99 (30 שאילתות זהב, 20 בלוקי Dataview))… · dod green in the shim v4, in Node and in Chromium",
      "auditVerdict": {
       "at": "2026-11-17",
       "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
@@ -8910,7 +8914,7 @@
      ],
      "why": "Linear מגיע לתחושה של ״מהיר״ גם בזכות תנועה מרוסנת ואחידה.",
      "branch": "feat/design-tokens",
-     "status": "⏳ #389 (על #343; טוקנים לעיצוב ותנועה, ביקורת 40/40 משטחים, designSystem 11/11; לא נבדק ב-Sandbox (חסום עד 1.12))",
+     "status": "⏳ #389 · cloud-complete (audit r3 PARTIAL); owed: design-audit of 40 surfaces; component library docs thin",
      "verified": "built",
      "pr": 389,
      "auditVerdict": {
@@ -8920,7 +8924,8 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "I could not re-run design-audit offline; 'documented component library' thin."
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ #389 (על #343; טוקנים לעיצוב ותנועה, ביקורת 40/40 משטחים, designSystem 11/11; לא נבדק ב-Sandbox (חסום עד 1.12))"
     },
     {
      "id": "W3.2",
@@ -9402,7 +9407,7 @@
       "שער הדומיין נכשל על קובץ שתול עם הדומיין הישן"
      ],
      "why": "ה-production של היום (main 17.10) שולח תצוגות שיתוף, SEO ו-canonical לדומיין שתפוס ע״י אחר — נזק למותג וסיכון שמשתמשים יגיעו לאתר זר.",
-     "status": "⏳ #432 fix/live-domain-meta → main (index.html, robots, sitemap מצביעים על lumen-md.vercel.app) — המיזוג שמור לטל",
+     "status": "⏳ #432 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
      "verified": "node",
      "pr": 432,
      "auditVerdict": {
@@ -9419,7 +9424,7 @@
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
      ],
-     "notes": "stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): met: production fetched via the Vercel connector (the proxy returns 403 to curl): canonical, og:url, og:image, twitter:image, JSON-LD url, robots Sitemap and sitemap <loc> all lumen-md.vercel.app; `live-meta.mjs --dir` on those files: passed; takenDomain 5/5, liveMeta 7/7, liveMetaDeploy 6/6"
+     "notes": "stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): met: production fetched via the Vercel connector (the proxy returns 403 to curl): canonical, og:url, og:image, twitter:image, JSON-LD url, robots Sitemap and sitemap <loc> all lumen-md.vercel.app; `live-meta.mjs --dir` on those files: passed; takenDomain 5/5, liveMeta 7/7, liveMetaDeploy 6/6 · INT6b 17.11: status before → ⏳ #432 fix/live-domain-meta → main (index.html, robots, sitemap מצביעים על lumen-md.vercel.app) — המיזוג שמור לטל"
     },
     {
      "id": "W4.4",
@@ -9750,8 +9755,8 @@
      ],
      "why": "50 בדיקות e2e מדולגות ב-29 קבצים הן כיסוי שנראה קיים אבל לא בודק כלום.",
      "branch": "test/skip-audit",
-     "status": "⏳ #546 ‏5576cb001d (על train-2) — דילוגים ב-e2e ‏39→15, ‏0 בלי סיבה; 19 דילוגי seed דרך vaultOrSkip (רק WebKit); skipAudit 7/7. חסר: Playwright ב-3 דפדפנים",
-     "verified": "built",
+     "status": "⏳ #546 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 546,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -9764,7 +9769,8 @@
      "dod": [
       "npx vitest run src/__tests__/skipAudit.test.ts",
       "node scripts/skip-report.mjs"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ #546 ‏5576cb001d (על train-2) — דילוגים ב-e2e ‏39→15, ‏0 בלי סיבה; 19 דילוגי seed דרך vaultOrSkip (רק WebKit); skipAudit 7/7. חסר: Playwright ב-3 דפדפנים; INT6b 17.11: dod green in the shim v4 (Node)"
     },
     {
      "id": "W4.13",
@@ -10176,10 +10182,10 @@
      ],
      "why": "שורות סטטוס של 300 תווים מערבבות ״נבנה״, ״עבר ב-shim״ ו״נבדק ב-Sandbox״. הביקורת 1.8 מצאה 8 פערים ב-25 ✅ — האמון בלוח תלוי בזה.",
      "branch": "chore/plan-verified",
-     "status": "⏳ #489 · ביקורת 14.11: חלקי — כלל ✅ מול verified נוסף ב-W10.G8; ציון אמינות לכל תחום חסר · → chore/dod (שדות verified (built/node/browser/real/owner) ו-pr לכל משימה)…",
-     "verified": "built",
+     "status": "⏳ #489 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 489,
-     "notes": "⏳ #489 → chore/dod (שדות verified (built/node/browser/real/owner) ו-pr לכל משימה, עמודת ״אימות״ ב-MASTER_PLAN וב-board, ספירה לכל רמה; סקריפט migrate-verified שניתן להריץ שוב: built 137, node 31, browser 85, real 0, owner 17; תוקן התקיעה של build.mjs על updated עם אזור זמן; planBuild 18/19 (הכישלון הנותר קיים גם בבסיס: ל-13.5 חסרה תלות ב-4.14); המיזוג ל-chore/dod נחסם במערכת ההרשאות — שמור לטל)",
+     "notes": "⏳ #489 → chore/dod (שדות verified (built/node/browser/real/owner) ו-pr לכל משימה, עמודת ״אימות״ ב-MASTER_PLAN וב-board, ספירה לכל רמה; סקריפט migrate-verified שניתן להריץ שוב: built 137, node 31, browser 85, real 0, owner 17; תוקן התקיעה של build.mjs על updated עם אזור זמן; planBuild 18/19 (הכישלון הנותר קיים גם בבסיס: ל-13.5 חסרה תלות ב-4.14); המיזוג ל-chore/dod נחסם במערכת ההרשאות — שמור לטל) · INT6b 17.11: status before → ⏳ #489 · ביקורת 14.11: חלקי — כלל ✅ מול verified נוסף ב-W10.G8; ציון אמינות לכל תחום חסר · → chore/dod (שדות verified (built/node/browser/real/owner) ו-pr לכל משימה)… · dod green in the shim v4 (Node)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -10249,10 +10255,10 @@
      ],
      "why": "אין שום דרך לדעת אם מישהו משתמש ומה נשבר. ניטור 12.4 תלוי ב-DSN שלא הוגדר.",
      "branch": "feat/local-usage-metrics",
-     "status": "⏳ #461 · (על verify/train; מונים מקומיים בלבד לפי מזהה פקודה, לוח ״שימוש במכשיר הזה״ (הפעלה, שימור 7/30 יום, פקודות מובילות/לא בשימוש), שליחה רק בלחיצה (issue מוכן או העתקה), נרשם ביומן הפרטיות)…",
-     "verified": "built",
+     "status": "⏳ #461 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 461,
-     "notes": "⏳ #461 (על verify/train; מונים מקומיים בלבד לפי מזהה פקודה, לוח ״שימוש במכשיר הזה״ (הפעלה, שימור 7/30 יום, פקודות מובילות/לא בשימוש), שליחה רק בלחיצה (issue מוכן או העתקה), נרשם ביומן הפרטיות; usageMetrics 13/13 — 0 בקשות בלי לחיצה, סודות שתולים לא מופיעים; חסר: snapshot של commandIds, בנייה ותקציב (459–460 KB)) · ביקורת 12.11: תוקן ב-ceee062e5 — מזהי פקודות מנורמלים (template.apply, recent.open, plugin.command), רשימה מותרת קפדנית; usageMetrics 16/16",
+     "notes": "⏳ #461 (על verify/train; מונים מקומיים בלבד לפי מזהה פקודה, לוח ״שימוש במכשיר הזה״ (הפעלה, שימור 7/30 יום, פקודות מובילות/לא בשימוש), שליחה רק בלחיצה (issue מוכן או העתקה), נרשם ביומן הפרטיות; usageMetrics 13/13 — 0 בקשות בלי לחיצה, סודות שתולים לא מופיעים; חסר: snapshot של commandIds, בנייה ותקציב (459–460 KB)) · ביקורת 12.11: תוקן ב-ceee062e5 — מזהי פקודות מנורמלים (template.apply, recent.open, plugin.command), רשימה מותרת קפדנית; usageMetrics 16/16 · INT6b 17.11: status before → ⏳ #461 · (על verify/train; מונים מקומיים בלבד לפי מזהה פקודה, לוח ״שימוש במכשיר הזה״ (הפעלה, שימור 7/30 יום, פקודות מובילות/לא בשימוש), שליחה רק בלחיצה (issue מוכן או העתקה), נרשם ביומן הפרטיות)… · dod green in the shim v4 (Node)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -10651,10 +10657,10 @@
      ],
      "why": "לומדי תורה, סטודנטים למדעי היהדות ומרצים כותבים על מקורות כל יום. אף כלי PKM לא מחבר אותם לספריא.",
      "branch": "feat/sefaria-sources",
-     "status": "⏳ #452 · (על verify/train; ציטוט לפי הפניה, רישיון לכל גרסה: PD/CC0/CC-BY/CC-BY-SA נשמרים עם קרדיט, השאר קישור בלבד; בקשה רק אחרי אישור, ביומן הפרטיות וב-CSP)…",
+     "status": "⏳ #452 · cloud-complete (audit r3 PARTIAL); owed: real Sefaria API checks; panel UX in app",
      "verified": "built",
      "pr": 452,
-     "notes": "⏳ #452 (על verify/train; ציטוט לפי הפניה, רישיון לכל גרסה: PD/CC0/CC-BY/CC-BY-SA נשמרים עם קרדיט, השאר קישור בלבד; בקשה רק אחרי אישור, ביומן הפרטיות וב-CSP; sefariaSources 12/12, 50/50 פורמטים, 0 בקשות בביקור שני; תנאי השימוש, מגבלת קצב ו-CORS לא אומתו (הפרוקסי חוסם את sefaria.org); חסר: פאנל צד ונקודות פסוק בגרף)",
+     "notes": "⏳ #452 (על verify/train; ציטוט לפי הפניה, רישיון לכל גרסה: PD/CC0/CC-BY/CC-BY-SA נשמרים עם קרדיט, השאר קישור בלבד; בקשה רק אחרי אישור, ביומן הפרטיות וב-CSP; sefariaSources 12/12, 50/50 פורמטים, 0 בקשות בביקור שני; תנאי השימוש, מגבלת קצב ו-CORS לא אומתו (הפרוקסי חוסם את sefaria.org); חסר: פאנל צד ונקודות פסוק בגרף) · INT6b 17.11: status before → ⏳ #452 · (על verify/train; ציטוט לפי הפניה, רישיון לכל גרסה: PD/CC0/CC-BY/CC-BY-SA נשמרים עם קרדיט, השאר קישור בלבד; בקשה רק אחרי אישור, ביומן הפרטיות וב-CSP)…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -12249,10 +12255,10 @@
      ],
      "why": "בדיקה שכותב מי שכתב את הקוד בודקת את מה שהוא חשב, לא את מה שתוקף יעשה.",
      "branch": "test/blind-tests",
-     "status": "⏳ #507 · (על verify/train-2; 157 מבחנים עיוורים ב-9 קבצים — נכתבו מתיאור ה-PR, התיעוד וה-API הציבורי בלי לקרוא את המימוש: 138 עוברים, 19 it.fails לבאגים מאומתים)…",
-     "verified": "built",
+     "status": "⏳ #507 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 507,
-     "notes": "⏳ #507 (על verify/train-2; 157 מבחנים עיוורים ב-9 קבצים — נכתבו מתיאור ה-PR, התיעוד וה-API הציבורי בלי לקרוא את המימוש: 138 עוברים, 19 it.fails לבאגים מאומתים; 11 ממצאים: 3 בינוניים (שם זמני של 266 בייט שובר שמירה בטלפון ו-Safari, תגיות redact עם מאפיינים לא מושחרות אבל התצוגה מראה שכן, השחרת בחירה שחוצה סימון קיים), 7 נמוכים, 1 מידע; תיקונים בעבודה (lane R3)) · 12.11: כל 7 הבאגים תוקנו (lane R3) — F-1 שמות זמניים קצרים + יומן (#356 ecb426ad9; 100 SIGKILL עם שם של 255 בייט: 0 פגומים), F-8/F-9 מנתח לפי כללי ה-tokenizer של HTML ומיזוג סימונים (#473), F-3, F-6, F-7; F-11: בדיקה ראשונה של 10k פתקים בדפדפן ~9 ש׳ (לא 5) — התיעוד תוקן, בדיקה שנייה 1–2 ש׳; החלטות: S10 — סירוב סגור הוא המפרט הנכון, המבחן העיוור יעודכן; #562 ‏8dbdceead3: חבילות עיוורות ל-header/manifest של e2ee ‏20/20 ול-worker ledger ‏10/10 (0 באגים, עמימות אחת F-12), כלל pr:check לשינוי snapshot. חסר: keyring, engine, airplane",
+     "notes": "⏳ #507 (על verify/train-2; 157 מבחנים עיוורים ב-9 קבצים — נכתבו מתיאור ה-PR, התיעוד וה-API הציבורי בלי לקרוא את המימוש: 138 עוברים, 19 it.fails לבאגים מאומתים; 11 ממצאים: 3 בינוניים (שם זמני של 266 בייט שובר שמירה בטלפון ו-Safari, תגיות redact עם מאפיינים לא מושחרות אבל התצוגה מראה שכן, השחרת בחירה שחוצה סימון קיים), 7 נמוכים, 1 מידע; תיקונים בעבודה (lane R3)) · 12.11: כל 7 הבאגים תוקנו (lane R3) — F-1 שמות זמניים קצרים + יומן (#356 ecb426ad9; 100 SIGKILL עם שם של 255 בייט: 0 פגומים), F-8/F-9 מנתח לפי כללי ה-tokenizer של HTML ומיזוג סימונים (#473), F-3, F-6, F-7; F-11: בדיקה ראשונה של 10k פתקים בדפדפן ~9 ש׳ (לא 5) — התיעוד תוקן, בדיקה שנייה 1–2 ש׳; החלטות: S10 — סירוב סגור הוא המפרט הנכון, המבחן העיוור יעודכן; #562 ‏8dbdceead3: חבילות עיוורות ל-header/manifest של e2ee ‏20/20 ול-worker ledger ‏10/10 (0 באגים, עמימות אחת F-12), כלל pr:check לשינוי snapshot. חסר: keyring, engine, airplane · INT6b 17.11: status before → ⏳ #507 · (על verify/train-2; 157 מבחנים עיוורים ב-9 קבצים — נכתבו מתיאור ה-PR, התיעוד וה-API הציבורי בלי לקרוא את המימוש: 138 עוברים, 19 it.fails לבאגים מאומתים)…; INT6b 17.11: dod green in the shim v4 (Node)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -12639,10 +12645,10 @@
      ],
      "why": "הסטטוס טען 789 שורות, והקובץ ממשיך לגדול בכל רכבת. שער שרק יורד עוצר את זה ביום אחד.",
      "branch": "chore/max-lines-gate",
-     "status": "⏳ #500 · ביקורת 14.11: חלקי · ‏dc4b14ffe7 — הקוד הושלם; רכבת 3 נכשלת בשער: Editor.tsx, engine.ts מעל ה-baseline; App.tsx, airplane.ts, exportDocx.ts, keyring.ts מעל 800…",
-     "verified": "built",
+     "status": "⏳ #500 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 500,
-     "notes": "⏳ #500 ‏dc4b14ffe7 — הקוד הושלם; רכבת 3 נכשלת בשער: Editor.tsx, engine.ts מעל ה-baseline; App.tsx, airplane.ts, exportDocx.ts, keyring.ts מעל 800; #574 ‏9d425f6337: Editor.tsx 1030→906, airplane.ts 806→749, exportDocx.ts 962→749 (העברה מילולית; 33 חבילות docx זהות בייט לבייט); #569 מפצל App.tsx ועוד 12; engine.ts פוצל ל-5 קבצים (כולם <800) ו-keyring.ts ל-731 ב-a26f9af574, בלי שינוי התנהגות; mutation keyring 83.8% (נוספו מבחנים, הסף לא הורד)",
+     "notes": "⏳ #500 ‏dc4b14ffe7 — הקוד הושלם; רכבת 3 נכשלת בשער: Editor.tsx, engine.ts מעל ה-baseline; App.tsx, airplane.ts, exportDocx.ts, keyring.ts מעל 800; #574 ‏9d425f6337: Editor.tsx 1030→906, airplane.ts 806→749, exportDocx.ts 962→749 (העברה מילולית; 33 חבילות docx זהות בייט לבייט); #569 מפצל App.tsx ועוד 12; engine.ts פוצל ל-5 קבצים (כולם <800) ו-keyring.ts ל-731 ב-a26f9af574, בלי שינוי התנהגות; mutation keyring 83.8% (נוספו מבחנים, הסף לא הורד) · INT6b 17.11: status before → ⏳ #500 · ביקורת 14.11: חלקי · ‏dc4b14ffe7 — הקוד הושלם; רכבת 3 נכשלת בשער: Editor.tsx, engine.ts מעל ה-baseline; App.tsx, airplane.ts, exportDocx.ts, keyring.ts מעל 800… · dod green in the shim v4 (Node)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -13143,10 +13149,10 @@
      ],
      "why": "הקצב של הבנייה עבר את קצב האימות פי כמה. בלי מגבלה, החוב רק גדל.",
      "branch": "chore/plan-wip-limit",
-     "status": "⏳ #502 · ביקורת 14.11: חלקי — רק אזהרה, לא ב-chore/dod; שום גל לא נעצר · → chore/dod (אזהרה ב-plan:check כשגל מתחיל לפני שהקודם אומת, --wip-strict מכשיל; היום 5 אזהרות — כל הגלים)",
+     "status": "⏳ #502 · cloud-complete (audit r3 NOT DONE); owed: re-audit: plan:check now exits 0 with no WIP warning, so the dodExpect is met (INT6b)",
      "verified": "node",
      "pr": 502,
-     "notes": "⏳ #502 → chore/dod (אזהרה ב-plan:check כשגל מתחיל לפני שהקודם אומת, --wip-strict מכשיל; היום 5 אזהרות — כל הגלים) · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): blocked: plan:check exit 0 with 5 WIP warnings (waves 7,8,10,11,12); the strict-WIP commit is #985, pending the owner's WIP decisions; owed: owner: plan.schedule.wipDecisions, then integrate #985 · INT6b 17.11 (lane FA): PR #1118 makes dod.mjs enforce dodExpect; W6.39 now red (expect unmet: 10 waves over WIP)",
+     "notes": "⏳ #502 → chore/dod (אזהרה ב-plan:check כשגל מתחיל לפני שהקודם אומת, --wip-strict מכשיל; היום 5 אזהרות — כל הגלים) · stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): blocked: plan:check exit 0 with 5 WIP warnings (waves 7,8,10,11,12); the strict-WIP commit is #985, pending the owner's WIP decisions; owed: owner: plan.schedule.wipDecisions, then integrate #985 · INT6b 17.11 (lane FA): PR #1118 makes dod.mjs enforce dodExpect; W6.39 now red (expect unmet: 10 waves over WIP) · INT6b 17.11: status before → ⏳ #502 · ביקורת 14.11: חלקי — רק אזהרה, לא ב-chore/dod; שום גל לא נעצר · → chore/dod (אזהרה ב-plan:check כשגל מתחיל לפני שהקודם אומת, --wip-strict מכשיל; היום 5 אזהרות — כל הגלים)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -14173,10 +14179,10 @@
      ],
      "why": "השרת של W2.3 נותן לסוכנים חיצוניים גישה לכספת. ההפך חסר: הסוכנים המקומיים שלנו לא יכולים להשתמש בכלים שכבר קיימים כשרתי MCP, למשל הכנסת או data.gov.il.",
      "branch": "feat/mcp-client",
-     "status": "⏳ #601 · ‏7f5522ea89 (על #552) — Lumen כלקוח MCP בהרשאה לכל שרת, מצב טיסה 0 שליחות, 20 תשובות זדוניות — 0 שינויים בלי אישור, בדיקות OAuth…",
+     "status": "⏳ #601 · cloud-complete (audit r3 PARTIAL); owed: e2e real server; isolation allow-list (owner)",
      "verified": "built",
      "pr": 601,
-     "notes": "⏳ #601 ‏7f5522ea89 (על #552) — Lumen כלקוח MCP בהרשאה לכל שרת, מצב טיסה 0 שליחות, 20 תשובות זדוניות — 0 שינויים בלי אישור, בדיקות OAuth; mcpClient 13/13. חסר: מסכי OAuth ו-stdio בשולחן העבודה, eval:mcp-client; ביקורת אבטחה; ביקורת 21: changes-requested — תיאורי כלים לא מוגנים, מצב טיסה לא חוסם שרתי stdio שפונים לרשת, טוקן OAuth נמסר לשרתים שחולקים issuer; תוקן ב-5355def6ba (C1–C5; rr21 5/6, b6 הותאם); אושר בביקורת 24 (C3r תוקן ב-da6c7d0e8a; רישום ביומן לקריאות stdio — בעבודה)",
+     "notes": "⏳ #601 ‏7f5522ea89 (על #552) — Lumen כלקוח MCP בהרשאה לכל שרת, מצב טיסה 0 שליחות, 20 תשובות זדוניות — 0 שינויים בלי אישור, בדיקות OAuth; mcpClient 13/13. חסר: מסכי OAuth ו-stdio בשולחן העבודה, eval:mcp-client; ביקורת אבטחה; ביקורת 21: changes-requested — תיאורי כלים לא מוגנים, מצב טיסה לא חוסם שרתי stdio שפונים לרשת, טוקן OAuth נמסר לשרתים שחולקים issuer; תוקן ב-5355def6ba (C1–C5; rr21 5/6, b6 הותאם); אושר בביקורת 24 (C3r תוקן ב-da6c7d0e8a; רישום ביומן לקריאות stdio — בעבודה) · INT6b 17.11: status before → ⏳ #601 · ‏7f5522ea89 (על #552) — Lumen כלקוח MCP בהרשאה לכל שרת, מצב טיסה 0 שליחות, 20 תשובות זדוניות — 0 שינויים בלי אישור, בדיקות OAuth…",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -14639,7 +14645,7 @@
      ],
      "why": "הקובץ שלא ברשימה הוא בדיוק זה שהדליפה עוברת דרכו.",
      "branch": "chore/codeowners-coverage",
-     "status": "⏳ #537 ‏993d5427b3 (על #481) — sensitivePaths (9 כללים), codeowners:check ו-pr:check; train-2: ‏186 קבצים רגישים, 0 בלי בעלים; codeownersCoverage 9/9",
+     "status": "⏳ #537 · cloud-complete (audit r3 PARTIAL); owed: owner review receipt",
      "verified": "built",
      "pr": 537,
      "auditVerdict": {
@@ -14649,7 +14655,8 @@
       "score": 80,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ #537 ‏993d5427b3 (על #481) — sensitivePaths (9 כללים), codeowners:check ו-pr:check; train-2: ‏186 קבצים רגישים, 0 בלי בעלים; codeownersCoverage 9/9"
     },
     {
      "id": "W8.7",
@@ -14669,10 +14676,10 @@
       "headers --check מכשיל פער"
      ],
      "why": "שתי רשימות שצריכות להיות זהות לא נשארות זהות.",
-     "status": "⏳ #553 · ‏d5518751ab (על #451) — embedProviders ב-security/policy.json, frame-src ו-EmbedBlock ומצב טיסה קוראים מאותו מקור; כותרות זהות בייט לבייט…",
-     "verified": "built",
+     "status": "⏳ #553 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 553,
-     "notes": "⏳ #553 ‏d5518751ab (על #451) — embedProviders ב-security/policy.json, frame-src ו-EmbedBlock ומצב טיסה קוראים מאותו מקור; כותרות זהות בייט לבייט; embedProviders 5/5. חסר: vitest/build (לוודא שרק המפתח הזה נכנס לחבילה)",
+     "notes": "⏳ #553 ‏d5518751ab (על #451) — embedProviders ב-security/policy.json, frame-src ו-EmbedBlock ומצב טיסה קוראים מאותו מקור; כותרות זהות בייט לבייט; embedProviders 5/5. חסר: vitest/build (לוודא שרק המפתח הזה נכנס לחבילה) · INT6b 17.11: status before → ⏳ #553 · ‏d5518751ab (על #451) — embedProviders ב-security/policy.json, frame-src ו-EmbedBlock ומצב טיסה קוראים מאותו מקור; כותרות זהות בייט לבייט… · dod green in the shim v4 (Node)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -14932,10 +14939,10 @@
       "הרצה חוזרת מעדכנת סטטוס"
      ],
      "why": "מאה הוראות מפוזרות לא מבוצעות; רשימה אחת כן.",
-     "status": "⏳ ביקורת 14.11: חלקי · קוד גמור — #617: scripts/owner-checklist.mjs, ‏510 צעדים מ-187 PR-ים, בדיקות 15/15 לא מקוון; חסר: vitest אמיתי (Mac)",
-     "verified": "built",
+     "status": "⏳ #617 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 617,
-     "notes": "⏳ קוד גמור — #617: scripts/owner-checklist.mjs, ‏510 צעדים מ-187 PR-ים, בדיקות 15/15 לא מקוון; חסר: vitest אמיתי (Mac)",
+     "notes": "⏳ קוד גמור — #617: scripts/owner-checklist.mjs, ‏510 צעדים מ-187 PR-ים, בדיקות 15/15 לא מקוון; חסר: vitest אמיתי (Mac) · INT6b 17.11: status before → ⏳ ביקורת 14.11: חלקי · קוד גמור — #617: scripts/owner-checklist.mjs, ‏510 צעדים מ-187 PR-ים, בדיקות 15/15 לא מקוון; חסר: vitest אמיתי (Mac); INT6b 17.11: dod green in the shim v4 (Node)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -15361,7 +15368,7 @@
       "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — no waitForTimeout without hygiene-allow"
      ],
-     "notes": "stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): met: playwright.gifs.config.ts:19 retries: 0 (all 3 configs 0); playwrightRetries 5/5; `! git grep waitForTimeout -- e2e | grep -v hygiene-allow` exit 0 · INT6b 17.11: ✅ on audit r3 DONE (score 86); status before → ⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
+     "notes": "stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): met: playwright.gifs.config.ts:19 retries: 0 (all 3 configs 0); playwrightRetries 5/5; `! git grep waitForTimeout -- e2e | grep -v hygiene-allow` exit 0 · INT6b 17.11: ✅ on audit r3 DONE (score 86); status before → ⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5 · dod green in the shim v4, in Node and in Chromium",
      "evidence": {
       "verdict": "DONE",
       "pr": 640,
@@ -15408,7 +15415,7 @@
       "W6.15"
      ],
      "files": "src/__tests__/blind/*.test.ts, scripts/lib/skipAudit.mjs",
-     "status": "⏳ קוד ב-PR #654 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #654 · cloud-complete (audit r3 DONE); owed: bulkEditOpfsBench in a real browser (real OPFS, Mac); then W10.G8's browser level",
      "verified": "node",
      "pr": 654,
      "auditVerdict": {
@@ -15425,7 +15432,7 @@
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
      ],
-     "notes": "stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): met: skipAudit 8/8 (0 skips without skip-reason), bootShellCls 1/1, cm6VisibleRanges 7/7; bulkEditOpfsBench 0/0 = describe.skipIf(!hasOpfs) with skip-reason (needs real OPFS); caps unchanged; owed: bulkEditOpfsBench runs only in a real browser (Mac)"
+     "notes": "stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): met: skipAudit 8/8 (0 skips without skip-reason), bootShellCls 1/1, cm6VisibleRanges 7/7; bulkEditOpfsBench 0/0 = describe.skipIf(!hasOpfs) with skip-reason (needs real OPFS); caps unchanged; owed: bulkEditOpfsBench runs only in a real browser (Mac) · INT6b 17.11: status before → ⏳ קוד ב-PR #654 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.A7",
@@ -15450,8 +15457,8 @@
       "W4.11"
      ],
      "files": "src/App.tsx, src/ui/**, src/a11y/**",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
-     "verified": "built",
+     "status": "⏳ #640 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 640,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -15466,7 +15473,8 @@
      ],
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5 · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.A8",
@@ -15492,7 +15500,7 @@
       "W4.11"
      ],
      "files": "src/lib/**, src/ai/**, src/storage/**, src/sync/**",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
+     "status": "⏳ #640 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1129 (loggerSwallowed; codeHealth's W10.A8 check)",
      "verified": "built",
      "pr": 640,
      "auditVerdict": {
@@ -15510,7 +15518,8 @@
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5"
     },
     {
      "id": "W10.A9",
@@ -15535,7 +15544,7 @@
       "11.1"
      ],
      "files": "src/settings/schema.ts, src/settings/io.ts, src/__tests__/settingsSchema.test.ts",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
+     "status": "⏳ #640 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
      "verified": "node",
      "pr": 640,
      "auditVerdict": {
@@ -15552,7 +15561,7 @@
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
      ],
-     "notes": "stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): fixed: settingsSchema 5/6 -> 6/6: the 22 audit keys already present; one new key missing, lumen.latex.tectonicDownloads (consent, data); lumen-saved-searches is a live migration key, kept. settingsIo 11/11, settingsScreen 13/13 unchanged; fix #1010, merged into verify/train-7 (063d3d2c82); owed: owner receipts/label if the privacy-settings policy applies"
+     "notes": "stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): fixed: settingsSchema 5/6 -> 6/6: the 22 audit keys already present; one new key missing, lumen.latex.tectonicDownloads (consent, data); lumen-saved-searches is a live migration key, kept. settingsIo 11/11, settingsScreen 13/13 unchanged; fix #1010, merged into verify/train-7 (063d3d2c82); owed: owner receipts/label if the privacy-settings policy applies · INT6b 17.11: status before → ⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5"
     },
     {
      "id": "W10.A10",
@@ -15617,8 +15626,8 @@
       "14.4"
      ],
      "files": "scripts/check-flags.mjs, src/i18n/lazy/featureFlagsPanel.json",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
-     "verified": "built",
+     "status": "⏳ #640 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 640,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -15633,7 +15642,8 @@
      ],
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5 · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.A12",
@@ -15927,8 +15937,8 @@
       "12.2"
      ],
      "files": "src/plugins/sandbox.ts, scripts/unused-files.baseline.json",
-     "status": "⏳ קוד ב-PR #638 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #638 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 638,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -15940,7 +15950,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/noWeakPluginCsp.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #638 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.B5",
@@ -16003,8 +16014,8 @@
       "W2.11"
      ],
      "files": "src/text/hebrewMorph.ts:104-120, eval/golden/crosslingual/, src/__tests__/hebrewMorph.test.ts",
-     "status": "⏳ קוד ב-PR #700 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #700 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 700,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -16017,7 +16028,8 @@
      "dod": [
       "npx vitest run src/__tests__/hebrewMorph.test.ts",
       "npx vitest run src/__tests__/crossLingualStatus.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #700 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.B7",
@@ -16076,8 +16088,8 @@
       "W5.3"
      ],
      "files": "scripts/grammar/make-probe.mjs, scripts/grammar/eval.mjs",
-     "status": "⏳ קוד ב-PR #677, #683 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #677 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 677,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -16090,7 +16102,8 @@
      "dod": [
       "npx vitest run src/__tests__/grammarEval.test.ts",
       "npx vitest run src/__tests__/hebrewGrammar.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #677, #683 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.B9",
@@ -16165,7 +16178,7 @@
      "dod": [
       "npx vitest run src/__tests__/knessetAnswer.test.ts"
      ],
-     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 86); status before → ⏳ קוד ב-PR #693 — נבדק לא מקוון; ממתין לרכבת",
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 86); status before → ⏳ קוד ב-PR #693 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "evidence": {
       "verdict": "DONE",
       "pr": 693,
@@ -16258,10 +16271,10 @@
       "W4.21"
      ],
      "files": "plan.json (chore/dod), MASTER_PLAN.md, scripts/build.mjs",
-     "status": "⏳ קוד ב-PR #715 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #715 · cloud-complete (audit r3 PARTIAL); owed: re-audit: auditGuard.test.ts is now in the dod",
      "verified": "node",
      "pr": 715,
-     "notes": "⏳ #618 — 16 ✅ ירדו ל-⏳ עם ״ביקורת 14.11״, והערת פסק דין לסטטוסים שהביקורת סותרת; plan:check ו-planBuild/dod ב-shim; מחכה למיזוג",
+     "notes": "⏳ #618 — 16 ✅ ירדו ל-⏳ עם ״ביקורת 14.11״, והערת פסק דין לסטטוסים שהביקורת סותרת; plan:check ו-planBuild/dod ב-shim; מחכה למיזוג · INT6b 17.11: status before → ⏳ קוד ב-PR #715 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -16313,8 +16326,8 @@
       "W2.10"
      ],
      "files": "eval/golden/**, src/__tests__/fixtures/**, scripts/plan-check.mjs",
-     "status": "⏳ קוד ב-PR #715, #816 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #715 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 715,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -16326,7 +16339,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/origins.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #715, #816 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.B14",
@@ -16353,7 +16367,7 @@
       "W6.16"
      ],
      "files": "scripts/mutation/*.mjs, reports/mutation/receipt.json, scripts/vercel-build.mjs",
-     "status": "⏳ קוד ב-PR #674 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #674 · cloud-complete (audit r3 PARTIAL); owed: fresh Stryker receipt",
      "verified": "built",
      "pr": 674,
      "auditVerdict": {
@@ -16363,7 +16377,8 @@
       "score": 85,
       "who": "cloud-code",
       "missing": "—"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #674 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.B15",
@@ -16386,8 +16401,8 @@
       "W4.23"
      ],
      "files": "tools/native-check/real-cargo.sh, src/__tests__/realCargo.test.ts",
-     "status": "⏳ קוד ב-PR #641 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #641 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 641,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -16399,7 +16414,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/realCargo.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #641 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.B16",
@@ -16541,7 +16557,7 @@
       "W2.2"
      ],
      "files": "eval/golden/related-real/, scripts/golden/evals/related.mjs",
-     "status": "⏳ קוד ב-PR #704 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #704 · cloud-complete (audit r3 PARTIAL); owed: the typing→paint test on the Mac; record Recall@5 on a real set; re-audit of the #1127 ratchet",
      "verified": "built",
      "pr": 704,
      "auditVerdict": {
@@ -16552,7 +16568,7 @@
       "who": "cloud-code",
       "missing": "eval/golden/related-real/ named in the task missing; Recall@5 number on real links not recorded in plan"
      },
-     "notes": "INT6b 17.11 (lane FA): PR #1127: ratchet at 69/489 (14.1%), dev 18/122; Mac half (typing→paint) still owed"
+     "notes": "INT6b 17.11 (lane FA): PR #1127: ratchet at 69/489 (14.1%), dev 18/122; Mac half (typing→paint) still owed · INT6b 17.11: status before → ⏳ קוד ב-PR #704 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.B20",
@@ -16577,8 +16593,8 @@
       "1.7"
      ],
      "files": "models/dictalm3.json, src/commands/domains/help.ts",
-     "status": "⏳ קוד ב-PR #656 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #656 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 656,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -16590,7 +16606,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/creditsCommand.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #656 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.B21",
@@ -16716,7 +16733,7 @@
       "W7.18"
      ],
      "files": "src/agents/mcp/transports/stdio.ts, src-tauri/src/mcp_stdio.rs, src/agents/mcp/client.ts",
-     "status": "⏳ קוד ב-PR #728, #753 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #728 · cloud-complete (audit r3 PARTIAL); owed: isolation mcp_stdio_*; cargo build; human-reviewed label",
      "verified": "built",
      "pr": 728,
      "auditVerdict": {
@@ -16726,7 +16743,8 @@
       "score": 5,
       "who": "cloud-code",
       "missing": "stdio transport + Rust side, allow-list, stderr to ledger, airplane-mode block, tests"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #728, #753 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.C2",
@@ -16755,7 +16773,7 @@
       "W7.18"
      ],
      "files": "src/ui/settings/McpServers.tsx, src/agents/mcp/registry.ts, src/agents/runtime.ts",
-     "status": "⏳ קוד ב-PR #632, #699, #728 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #632 · cloud-complete (audit r3 PARTIAL); owed: e2e real outside server; human-reviewed label",
      "verified": "built",
      "pr": 632,
      "auditVerdict": {
@@ -16765,7 +16783,8 @@
       "score": 5,
       "who": "cloud-code",
       "missing": "server settings screen, per-server permission, tools to agents via the review queue, injection test on the shipped path"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #632, #699, #728 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.C3",
@@ -17074,7 +17093,7 @@
       "W5.9"
      ],
      "files": "src/privacy/NetworkMonitor.tsx, src/privacy/report.ts:130",
-     "status": "⏳ קוד ב-PR #652 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #652 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1119 (airplaneCertificateSigned)",
      "verified": "built",
      "pr": 652,
      "auditVerdict": {
@@ -17087,7 +17106,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/airplaneCertificateSigned.test.tsx"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #652 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.C12",
@@ -17115,7 +17135,7 @@
       "5.3"
      ],
      "files": "src/ai/productAgent.ts, src/agents/tools/writeFile.ts",
-     "status": "⏳ קוד ב-PR #627, #844 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #627 · cloud-complete (audit r3 PARTIAL); owed: 5.3 eval with real model",
      "verified": "node",
      "pr": 627,
      "auditVerdict": {
@@ -17132,7 +17152,7 @@
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
      ],
-     "notes": "stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): fixed: productAgent stages every file via write_file (agents/tools/workspace.ts), agentsUseTools 105/105. New builderReviewPanel.test.tsx 2/2: 5 files -> 5 pending all-add proposals in AgentReviewPanel, 0 writes, Approve all writes exactly them. Found+fixed: root index.html redirect wrapper overwrote a generated index.html (test red without fix); fix #1012, merged into verify/train-7 (063d3d2c82); owed: 5.3 eval with a real local model (Mac)"
+     "notes": "stage B1b 16.11 (verify/train-7 1a184547ae, shim v4): fixed: productAgent stages every file via write_file (agents/tools/workspace.ts), agentsUseTools 105/105. New builderReviewPanel.test.tsx 2/2: 5 files -> 5 pending all-add proposals in AgentReviewPanel, 0 writes, Approve all writes exactly them. Found+fixed: root index.html redirect wrapper overwrote a generated index.html (test red without fix); fix #1012, merged into verify/train-7 (063d3d2c82); owed: 5.3 eval with a real local model (Mac) · INT6b 17.11: status before → ⏳ קוד ב-PR #627, #844 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.C13",
@@ -17309,7 +17329,7 @@
      "dod": [
       "npx vitest run src/__tests__/trashUndo.test.ts"
      ],
-     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 88); status before → ⏳ קוד ב-PR #644 — נבדק לא מקוון; ממתין לרכבת",
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 88); status before → ⏳ קוד ב-PR #644 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "evidence": {
       "verdict": "DONE",
       "pr": 644,
@@ -17361,7 +17381,7 @@
      "dod": [
       "npx vitest run src/__tests__/imageHosts.test.tsx"
      ],
-     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #645 — נבדק לא מקוון; ממתין לרכבת",
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #645 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "evidence": {
       "verdict": "DONE",
       "pr": 645,
@@ -17449,7 +17469,7 @@
       "npx vitest run src/__tests__/qr.test.ts",
       "npx vitest run src/__tests__/syncSetupWizard.test.tsx"
      ],
-     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #663, #835, #880 — נבדק לא מקוון; ממתין לרכבת",
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #663, #835, #880 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "evidence": {
       "verdict": "DONE",
       "pr": 663,
@@ -17496,9 +17516,9 @@
       "W7.14"
      ],
      "files": "src/ai/structured/index.ts, src/tags/suggest.ts, src/capture/triage.ts",
-     "status": "⏳ בעבודה",
-     "verified": "built",
-     "notes": "החלטות הרכז 15.11: ממתין: W10.C21 אחרי ש-F16 ‏(#722) ברכבת",
+     "status": "⏳ cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
+     "notes": "החלטות הרכז 15.11: ממתין: W10.C21 אחרי ש-F16 ‏(#722) ברכבת · INT6b 17.11: status before → ⏳ בעבודה · dod green in the shim v4 (Node)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -17571,7 +17591,7 @@
       "2.6"
      ],
      "files": "src/privacy/piiNer.ts:16, models/registry.json, src/ui/CloudSendDialog.tsx",
-     "status": "⏳ קוד ב-PR #678 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #678 · cloud-complete (audit r3 PARTIAL); owed: bert-base-NER sha256 on the Mac; CloudSendDialog.tsx (audit r3); re-audit of the #1111 fix (piiNamesLanguage)",
      "verified": "built",
      "pr": 678,
      "auditVerdict": {
@@ -17584,7 +17604,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/piiNamesLanguage.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #678 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.C24",
@@ -17609,7 +17630,7 @@
       "W5.1"
      ],
      "files": "src/sources/sefaria/*, src/editor/refTrigger.ts, src/graph/nodes.ts",
-     "status": "⏳ קוד ב-PR #736, #835, #845, #880, #881 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #736 · cloud-complete (audit r3 PARTIAL); owed: live Sefaria behind consent (network); ref trigger only in source editor, not WYSIWYG",
      "verified": "built",
      "pr": 736,
      "auditVerdict": {
@@ -17619,7 +17640,8 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "live Sefaria request behind consent not run"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #736, #835, #845, #880, #881 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.C25",
@@ -17819,8 +17841,8 @@
       "W4.3"
      ],
      "files": "scripts/check-code-hygiene.mjs, scripts/pr-check.mjs:180",
-     "status": "⏳ קוד ב-PR #628, #844 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #628 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 628,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -17837,7 +17859,8 @@
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason",
       "exit 0 — 0 failed, 0 skipped without a reason"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #628, #844 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.C31",
@@ -18527,8 +18550,8 @@
       "W6.29"
      ],
      "files": "src/**, scripts/privacy-baseline.json",
-     "status": "⏳ קוד ב-PR #733 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #733 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 733,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -18542,7 +18565,8 @@
       "npx vitest run src/__tests__/privacyLedgerRules.test.ts",
       "npx vitest run src/__tests__/ledgerGaps.test.ts",
       "node scripts/privacy-ledger-check.mjs"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #733 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.D17",
@@ -18568,7 +18592,7 @@
       "W6.29"
      ],
      "files": "src/**, scripts/vercel-build.mjs",
-     "status": "⏳ קוד ב-PR #733 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #733 · cloud-complete (audit r3 PARTIAL); owed: real Vercel/Mac build running privacy:ledger gate",
      "verified": "built",
      "pr": 733,
      "auditVerdict": {
@@ -18578,7 +18602,8 @@
       "score": 80,
       "who": "cloud-code",
       "missing": "real Vercel run"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #733 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.D18",
@@ -18601,8 +18626,8 @@
       "W6.15"
      ],
      "files": "src/__tests__/blind/*.test.ts",
-     "status": "⏳ קוד ב-PR #756, #776 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #756 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 756,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -18617,7 +18642,8 @@
       "npx vitest run src/__tests__/blind/blindE2eeEngine.test.ts",
       "npx vitest run src/__tests__/blind/blindE2eeManifest.test.ts",
       "npx vitest run src/__tests__/blind/blindE2eeHeader.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #756, #776 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.D19",
@@ -18658,7 +18684,7 @@
       "npx vitest run src/__tests__/blind/blindAirplane.test.ts",
       "npx vitest run src/__tests__/blind/blindWorkerLedger.test.ts"
      ],
-     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #756, #776 — נבדק לא מקוון; ממתין לרכבת",
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #756, #776 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "evidence": {
       "verdict": "DONE",
       "pr": 756,
@@ -18714,7 +18740,7 @@
       "W6.15"
      ],
      "files": "scripts/pr-check.mjs, scripts/lib/prGate.mjs",
-     "status": "⏳ קוד ב-PR #709 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #709 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1117 (prGate 18/18, visual baselines mapped)",
      "verified": "built",
      "pr": 709,
      "auditVerdict": {
@@ -18725,7 +18751,7 @@
       "who": "cloud-code",
       "missing": "—"
      },
-     "notes": "INT6b 17.11 (lane FA): PR #1117: prGate.test 18/18 (base 14/18), prCheck 12/12"
+     "notes": "INT6b 17.11 (lane FA): PR #1117: prGate.test 18/18 (base 14/18), prCheck 12/12 · INT6b 17.11: status before → ⏳ קוד ב-PR #709 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.D21",
@@ -19315,8 +19341,8 @@
       "13.6"
      ],
      "files": "plan/targets.json, scripts/plan-targets.mjs",
-     "status": "⏳ קוד ב-PR #749, #764 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #749 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 749,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -19328,7 +19354,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/planTargets.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #749, #764 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.E14",
@@ -19816,7 +19843,7 @@
       "12.2"
      ],
      "files": "scripts/unused-files.baseline.json, src/lib/slug.ts, src/lib/utils.ts:26",
-     "status": "⏳ קוד ב-PR #786 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #786 · cloud-complete (audit r3 PARTIAL); owed: re-audit of #1130 (wordSlug; slugUnifiedWords; orphans 24→22, the rest with reasons)",
      "verified": "built",
      "pr": 786,
      "auditVerdict": {
@@ -19829,7 +19856,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/slugUnifiedWords.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #786 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.E28",
@@ -19858,9 +19886,9 @@
       "W9.1"
      ],
      "files": "src/App.tsx, src/app/*.tsx",
-     "status": "⏳ קוד — נבדק לא מקוון; ממתין לרכבת; App.tsx כבר 785 שורות — אין צורך בשינוי",
+     "status": "⏳ cloud-complete (audit r3 PARTIAL); owed: tsc acceptance needs @types/react (Mac)",
      "verified": "built",
-     "notes": "בעבודה",
+     "notes": "בעבודה · INT6b 17.11: status before → ⏳ קוד — נבדק לא מקוון; ממתין לרכבת; App.tsx כבר 785 שורות — אין צורך בשינוי",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -19894,10 +19922,10 @@
       "W6.25"
      ],
      "files": "src/canvas/tldrawToExcalidraw.ts, src/editor/WysiwygEditor.tsx, src/editor/Editor.tsx",
-     "status": "⏳ קוד ב-PR #832 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #832 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 832,
-     "notes": "בעבודה",
+     "notes": "בעבודה · INT6b 17.11: status before → ⏳ קוד ב-PR #832 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -19933,10 +19961,10 @@
       "W6.25"
      ],
      "files": "src/agents/runtime.ts, src/ui/SearchDialog.tsx, src/views/dataview.ts",
-     "status": "⏳ קוד ב-PR #832 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #832 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 832,
-     "notes": "בעבודה",
+     "notes": "בעבודה · INT6b 17.11: status before → ⏳ קוד ב-PR #832 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -19976,10 +20004,10 @@
       "W6.25"
      ],
      "files": "src/__tests__/codeHealth.test.ts, max-lines-baseline.json",
-     "status": "⏳ קוד ב-PR #832 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #832 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 832,
-     "notes": "בעבודה",
+     "notes": "בעבודה · INT6b 17.11: status before → ⏳ קוד ב-PR #832 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -20090,10 +20118,10 @@
       "7.8"
      ],
      "files": "src/bench/engines/*",
-     "status": "⏳ קוד ב-PR #818 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #818 · cloud-complete (audit r3 PARTIAL); owed: benches never run against real models",
      "verified": "built",
      "pr": 818,
-     "notes": "בעבודה",
+     "notes": "בעבודה · INT6b 17.11: status before → ⏳ קוד ב-PR #818 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -20197,10 +20225,10 @@
       "5.9"
      ],
      "files": "src/editor/aiAuthorship.ts, src/editor/WysiwygEditor.tsx",
-     "status": "⏳ קוד ב-PR #846 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #846 · cloud-complete (audit r3 PARTIAL); owed: wysiwygAiAuthorship.test cannot load offline; 100% insertion marking unproven; export with marks unproven",
      "verified": "built",
      "pr": 846,
-     "notes": "בעבודה",
+     "notes": "בעבודה · INT6b 17.11: status before → ⏳ קוד ב-PR #846 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -20427,7 +20455,7 @@
      "dod": [
       "npx vitest run src/__tests__/menaked.test.ts"
      ],
-     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 90); status before → ⏳ קוד ב-PR #762 — נבדק לא מקוון; ממתין לרכבת",
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 90); status before → ⏳ קוד ב-PR #762 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "evidence": {
       "verdict": "DONE",
       "pr": 762,
@@ -20888,7 +20916,7 @@
       "W8.9"
      ],
      "files": "scripts/lockfile-drift.mjs",
-     "status": "⏳ קוד ב-PR #741 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #741 · cloud-complete (audit r3 PARTIAL); owed: pre-push hook opt-in per clone",
      "verified": "built",
      "pr": 741,
      "auditVerdict": {
@@ -20898,7 +20926,8 @@
       "score": 65,
       "who": "cloud-code",
       "missing": "hook must be installed per clone"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #741 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.E57",
@@ -20922,7 +20951,7 @@
       "W8.10"
      ],
      "files": "scripts/lane-state.mjs",
-     "status": "⏳ קוד ב-PR #741 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #741 · cloud-complete (audit r3 PARTIAL); owed: watch/post-push opt-in; no hour-long run shown",
      "verified": "built",
      "pr": 741,
      "auditVerdict": {
@@ -20932,7 +20961,8 @@
       "score": 60,
       "who": "cloud-code",
       "missing": "hourly update not shown; opt-in"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #741 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.E58",
@@ -20989,8 +21019,8 @@
       "W6.22"
      ],
      "files": "scripts/lib/trainBase.mjs",
-     "status": "⏳ קוד ב-PR #737 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #737 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 737,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -21003,7 +21033,8 @@
      "dod": [
       "npx vitest run src/__tests__/trainBase.test.ts",
       "npx vitest run src/__tests__/prCheck.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #737 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.E60",
@@ -21129,7 +21160,7 @@
       "W4.28"
      ],
      "files": "CONTRIBUTING.md, docs/dev/good-first-issues.md",
-     "status": "⏳ קוד ב-PR #760 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #760 · cloud-complete (audit r3 PARTIAL); owed: re-audit of #1130 (goodFirstIssuesFresh); the 15 labels (owner)",
      "verified": "built",
      "pr": 760,
      "auditVerdict": {
@@ -21142,7 +21173,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/goodFirstIssuesFresh.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #760 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.E64",
@@ -21351,10 +21383,10 @@
       "W9.8"
      ],
      "files": "לפי השורות ב-#618",
-     "status": "⏳ קוד ב-PR #790, #844 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #790 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 790,
-     "notes": "החלטות הרכז 15.11: ‏#790 (ברכבת 5) הוא ה-PR למיזוג להחלטה 2.41 / E70; ‏#623 הוחלף — נשאר פתוח ומסומן superseded",
+     "notes": "החלטות הרכז 15.11: ‏#790 (ברכבת 5) הוא ה-PR למיזוג להחלטה 2.41 / E70; ‏#623 הוחלף — נשאר פתוח ומסומן superseded · INT6b 17.11: status before → ⏳ קוד ב-PR #790, #844 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -21391,10 +21423,10 @@
       "W9.8"
      ],
      "files": "לפי השורות ב-#618",
-     "status": "⏳ קוד ב-PR #456 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #456 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 456,
-     "notes": "החלטות הרכז 15.11: E71–E74 מכוסות על ידי PR-י המקור שלהן (#456, ‏#316, ‏#469, ‏#602), שנכנסים לרכבת 6",
+     "notes": "החלטות הרכז 15.11: E71–E74 מכוסות על ידי PR-י המקור שלהן (#456, ‏#316, ‏#469, ‏#602), שנכנסים לרכבת 6 · INT6b 17.11: status before → ⏳ קוד ב-PR #456 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -21431,10 +21463,10 @@
       "W9.8"
      ],
      "files": "לפי השורות ב-#618",
-     "status": "⏳ קוד ב-PR #316 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #316 · cloud-complete (audit r3 PARTIAL); owed: clipperV2 needs readability+turndown install",
      "verified": "built",
      "pr": 316,
-     "notes": "החלטות הרכז 15.11: E71–E74 מכוסות על ידי PR-י המקור שלהן (#456, ‏#316, ‏#469, ‏#602), שנכנסים לרכבת 6",
+     "notes": "החלטות הרכז 15.11: E71–E74 מכוסות על ידי PR-י המקור שלהן (#456, ‏#316, ‏#469, ‏#602), שנכנסים לרכבת 6 · INT6b 17.11: status before → ⏳ קוד ב-PR #316 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -21679,7 +21711,7 @@
       "W6.42"
      ],
      "files": "scripts/test-tiers.mjs, scripts/check-vercel-ignore.mjs, e2e/**",
-     "status": "⏳ קוד ב-PR #626, #654, #660, #738, #844 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #626 · cloud-complete (audit r3 PARTIAL); owed: #985 pending in train-missing",
      "verified": "built",
      "pr": 626,
      "auditVerdict": {
@@ -21695,7 +21727,8 @@
      ],
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #626, #654, #660, #738, #844 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.F2",
@@ -21882,7 +21915,7 @@
       "0.7"
      ],
      "files": "scripts/dod.mjs",
-     "status": "⏳ קוד ב-PR #637, #673, #734, #844 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #637 · cloud-complete (audit r3 PARTIAL); owed: committed dod --done receipt needs green train:offline",
      "verified": "built",
      "pr": 637,
      "auditVerdict": {
@@ -21898,7 +21931,8 @@
      ],
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #637, #673, #734, #844 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.F7",
@@ -21924,7 +21958,7 @@
       "W6.42"
      ],
      "files": "scripts/train-missing.mjs, plan/train-missing.json",
-     "status": "⏳ קוד ב-PR #648, #844 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #648 · cloud-complete (audit r3 PARTIAL); owed: #985 pending",
      "verified": "node",
      "pr": 648,
      "auditVerdict": {
@@ -21941,7 +21975,7 @@
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
      ],
-     "notes": "stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): blocked: trainMissing 9/10; the only failure is #985's 'pending' entry (left as is, per brief); owed: owner: WIP decisions -> a real decision for #985"
+     "notes": "stage B1a 16.11 (verify/train-7 1a184547ae, shim v4): blocked: trainMissing 9/10; the only failure is #985's 'pending' entry (left as is, per brief); owed: owner: WIP decisions -> a real decision for #985 · INT6b 17.11: status before → ⏳ קוד ב-PR #648, #844 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.F8",
@@ -21964,7 +21998,7 @@
       "4.14"
      ],
      "files": "src/pdf/**",
-     "status": "⏳ קוד ב-PR #665, #854 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #665 · cloud-complete (audit r3 PARTIAL); owed: PDF reader e2e",
      "verified": "built",
      "pr": 665,
      "auditVerdict": {
@@ -21974,7 +22008,8 @@
       "score": 70,
       "who": "cloud-code",
       "missing": "pdfReaderModal.test.tsx flaky on HEAD (5/1 then 4/2 under load; 6/0 in t7red); PDF reader e2e not run"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #665, #854 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.F9",
@@ -21996,8 +22031,8 @@
       "0.9"
      ],
      "files": "scripts/ci-doctor.mjs",
-     "status": "⏳ קוד ב-PR #646, #795 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #646 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 646,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -22009,7 +22044,8 @@
      },
      "dod": [
       "git merge-base --is-ancestor 42c847468c HEAD"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #646, #795 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.F10",
@@ -22069,7 +22105,7 @@
       "W4.12"
      ],
      "files": "e2e/**",
-     "status": "⏳ קוד ב-PR #654 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #654 · cloud-complete (audit r3 PARTIAL); owed: e2e not run; true skip points ~21 (engine helpers counted separately)",
      "verified": "built",
      "pr": 654,
      "auditVerdict": {
@@ -22079,7 +22115,8 @@
       "score": 55,
       "who": "cloud-code",
       "missing": "acceptance <=15 .skip not met as counted (20, some conditional helpers); e2e not run"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #654 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.F12",
@@ -22101,7 +22138,7 @@
       "W4.9"
      ],
      "files": "src/commands/**",
-     "status": "⏳ קוד ב-PR #686 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #686 · cloud-complete (audit r3 PARTIAL); owed: real vite build + npm run budget",
      "verified": "built",
      "pr": 686,
      "auditVerdict": {
@@ -22111,7 +22148,8 @@
       "score": 80,
       "who": "cloud-code",
       "missing": "startup numbers measured with shim build only; real vite build on Mac"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #686 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.F13",
@@ -22133,7 +22171,7 @@
       "W6.16"
      ],
      "files": "scripts/nightly/*.mjs",
-     "status": "⏳ קוד ב-PR #651 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #651 · cloud-complete (audit r3 PARTIAL); owed: nightly never ran unattended (W10.M12)",
      "verified": "built",
      "pr": 651,
      "auditVerdict": {
@@ -22143,7 +22181,8 @@
       "score": 82,
       "who": "cloud-code",
       "missing": "nightly never ran unattended (W10.M12)"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #651 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.F14",
@@ -22170,7 +22209,7 @@
       "W6.23"
      ],
      "files": "verify/train-5, verify/train-6",
-     "status": "⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5",
+     "status": "⏳ #640 · cloud-complete (audit r3 PARTIAL); owed: train:offline receipt",
      "verified": "built",
      "pr": 640,
      "auditVerdict": {
@@ -22188,7 +22227,8 @@
      "dodExpect": [
       "exit 0 — train 6 is built on train 5",
       "exit 0 — the offline receipt on that base"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #640 — נבדק לא מקוון; ממתין לרכבת; ברכבת 5"
     },
     {
      "id": "W10.F15",
@@ -22230,7 +22270,7 @@
       "git merge-base --is-ancestor d5518751ab HEAD",
       "npx vitest run src/__tests__/e2eePairingSas.test.ts"
      ],
-     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 88); status before → ⏳ קוד ב-PR #717 — נבדק לא מקוון; ממתין לרכבת",
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 88); status before → ⏳ קוד ב-PR #717 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "evidence": {
       "verdict": "DONE",
       "pr": 717,
@@ -22288,7 +22328,7 @@
       "W9.7"
      ],
      "files": "src/ai/structured/*, scripts/golden/evals/*",
-     "status": "⏳ קוד ב-PR #706, #722, #802, #893 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #706 · cloud-complete (audit r3 PARTIAL); owed: unusedFiles real vitest; eval scripts on Mac",
      "verified": "built",
      "pr": 706,
      "auditVerdict": {
@@ -22298,7 +22338,8 @@
       "score": 70,
       "who": "cloud-code",
       "missing": "rerankHard.test.ts red (8/1: dev.json nDCG 0.95 vs expected 0.9479, also red in t7red) and unusedFiles.test.ts red (12/3, findOrphans glob cases); eval scripts runnable only on Mac"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #706, #722, #802, #893 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.F17",
@@ -22321,8 +22362,8 @@
       "W8.10"
      ],
      "files": "scripts/lockfile-drift.mjs, scripts/lane-state.mjs",
-     "status": "⏳ קוד ב-PR #660, #741, #867 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #660 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 660,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -22336,7 +22377,8 @@
       "npx vitest run src/__tests__/e2eHooks.test.ts",
       "npx vitest run src/__tests__/lockfileDrift.test.ts",
       "npx vitest run src/__tests__/laneState.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #660, #741, #867 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.F18",
@@ -22359,7 +22401,7 @@
       "W8.12"
      ],
      "files": "src/research/usability/*",
-     "status": "⏳ קוד ב-PR #731 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #731 · cloud-complete (audit r3 PARTIAL); owed: commandIds snapshot + i18nLazyEnglish need real vitest",
      "verified": "built",
      "pr": 731,
      "auditVerdict": {
@@ -22369,7 +22411,8 @@
       "score": 80,
       "who": "cloud-code",
       "missing": "-"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #731 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.F19",
@@ -22391,8 +22434,8 @@
       "W7.22"
      ],
      "files": "scripts/supply-chain/*",
-     "status": "⏳ קוד ב-PR #658, #783 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #658 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 658,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -22406,7 +22449,8 @@
       "git merge-base --is-ancestor 7e3ad362a5 HEAD",
       "npx vitest run src/__tests__/supplyChain.test.ts",
       "npx vitest run src/__tests__/supplyChainProvenance.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #658, #783 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.F20",
@@ -22428,8 +22472,8 @@
       "W9.3"
      ],
      "files": "scripts/owner-checklist.mjs",
-     "status": "⏳ קוד ב-PR #673 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #673 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 673,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -22442,7 +22486,8 @@
      "dod": [
       "git merge-base --is-ancestor 330817b7ed HEAD",
       "npx vitest run src/__tests__/ownerChecklist.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #673 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.F21",
@@ -22630,8 +22675,8 @@
       "W3.9"
      ],
      "files": "src/ai/tts/*, docs/accessibility/*, src-tauri/Cargo.lock",
-     "status": "⏳ קוד ב-PR #796 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #796 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 796,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -22646,7 +22691,8 @@
       "git merge-base --is-ancestor a43a7141c2 HEAD",
       "git merge-base --is-ancestor 9dad38fda3 HEAD",
       "git merge-base --is-ancestor c507977bee HEAD"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #796 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W10.F27",
@@ -22672,7 +22718,7 @@
       "W6.39"
      ],
      "files": "scripts/plan-check.mjs, scripts/build.mjs, plan/areas.json",
-     "status": "⏳ קוד ב-PR #637, #734 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #637 · cloud-complete (audit r3 DONE); owed: train:missing green on the train head (review 11 L13's head check, see INT6b on #938)",
      "verified": "built",
      "pr": 637,
      "auditVerdict": {
@@ -22687,7 +22733,8 @@
       "git merge-base --is-ancestor 90422ade2a HEAD",
       "git merge-base --is-ancestor 4aca2ac6fd HEAD",
       "node scripts/train-missing.mjs"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #637, #734 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.F28",
@@ -22710,7 +22757,7 @@
       "W9.8"
      ],
      "files": "/home/claude/w-NC-*",
-     "status": "⏳ קוד — נבדק לא מקוון; ממתין לרכבת; הוחלט, אין צורך ב-PR",
+     "status": "⏳ cloud-complete (audit r3 PARTIAL); owed: re-audit of PR 1130 (plan/w10-f28-worktrees.md)",
      "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
@@ -22720,7 +22767,7 @@
       "who": "cloud-code",
       "missing": "w-NC-316 note not found"
      },
-     "notes": "INT6b 17.11 (lane FA): PR #1130: plan/w10-f28-worktrees.md (w-NC-316 never existed; 0 local-only work)"
+     "notes": "INT6b 17.11 (lane FA): PR #1130: plan/w10-f28-worktrees.md (w-NC-316 never existed; 0 local-only work) · INT6b 17.11: status before → ⏳ קוד — נבדק לא מקוון; ממתין לרכבת; הוחלט, אין צורך ב-PR"
     },
     {
      "id": "W10.F29",
@@ -22742,7 +22789,7 @@
       "10.3"
      ],
      "files": "visual/*",
-     "status": "⏳ קוד — נבדק לא מקוון; ממתין לרכבת; הוחלט, אין צורך ב-PR",
+     "status": "⏳ cloud-complete (audit r3 NOT DONE); owed: re-audit of PR 1130 (decision recorded, visualCoverage); ai-doctor visual baselines on the Mac",
      "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
@@ -22754,7 +22801,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/visualCoverage.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד — נבדק לא מקוון; ממתין לרכבת; הוחלט, אין צורך ב-PR"
     },
     {
      "id": "W10.G1",
@@ -22793,10 +22841,10 @@
       "1.4"
      ],
      "files": "plan.json, scripts/dod.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #618 · cloud-complete (audit r3 PARTIAL); owed: real vitest run",
      "verified": "node",
      "pr": 618,
-     "notes": "⏳ #618 — dod לכל משימה שבדיקת היחידה שלה ירוקה ב-shim על train-4, השאר ל-⏳; מחכה ל-vitest אמיתי ולמיזוג",
+     "notes": "⏳ #618 — dod לכל משימה שבדיקת היחידה שלה ירוקה ב-shim על train-4, השאר ל-⏳; מחכה ל-vitest אמיתי ולמיזוג · INT6b 17.11: status before → ⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -22851,10 +22899,10 @@
       "3.6"
      ],
      "files": "plan.json, scripts/dod.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #618 · cloud-complete (audit r3 PARTIAL); owed: real vitest run",
      "verified": "node",
      "pr": 618,
-     "notes": "⏳ #618 — dod לכל משימה שבדיקת היחידה שלה ירוקה ב-shim על train-4, השאר ל-⏳; מחכה ל-vitest אמיתי ולמיזוג",
+     "notes": "⏳ #618 — dod לכל משימה שבדיקת היחידה שלה ירוקה ב-shim על train-4, השאר ל-⏳; מחכה ל-vitest אמיתי ולמיזוג · INT6b 17.11: status before → ⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -22909,10 +22957,10 @@
       "5.2"
      ],
      "files": "plan.json, scripts/dod.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #618 · cloud-complete (audit r3 PARTIAL); owed: real vitest run",
      "verified": "node",
      "pr": 618,
-     "notes": "⏳ #618 — dod לכל משימה שבדיקת היחידה שלה ירוקה ב-shim על train-4, השאר ל-⏳; מחכה ל-vitest אמיתי ולמיזוג",
+     "notes": "⏳ #618 — dod לכל משימה שבדיקת היחידה שלה ירוקה ב-shim על train-4, השאר ל-⏳; מחכה ל-vitest אמיתי ולמיזוג · INT6b 17.11: status before → ⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -22967,10 +23015,10 @@
       "14.1"
      ],
      "files": "plan.json, scripts/dod.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #618 · cloud-complete (audit r3 PARTIAL); owed: real vitest run",
      "verified": "node",
      "pr": 618,
-     "notes": "⏳ #618 — dod לכל משימה שבדיקת היחידה שלה ירוקה ב-shim על train-4, השאר ל-⏳; מחכה ל-vitest אמיתי ולמיזוג",
+     "notes": "⏳ #618 — dod לכל משימה שבדיקת היחידה שלה ירוקה ב-shim על train-4, השאר ל-⏳; מחכה ל-vitest אמיתי ולמיזוג · INT6b 17.11: status before → ⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23012,10 +23060,10 @@
       "1.8"
      ],
      "files": "scripts/dod.mjs, plan.json",
-     "status": "⏳ קוד ב-PR #868 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #868 · cloud-complete (audit r3 PARTIAL); owed: re-audit: the dod is now dod.test.ts (the rule's own test)",
      "verified": "node",
      "pr": 868,
-     "notes": "⏳ #618 — DOD_GRANDFATHER_BASELINE, ‏dodGrandfathered ו-dodRevoked נמחקו; plan:check מסרב לרשימה; dod 19/19 ב-shim; מחכה למיזוג",
+     "notes": "⏳ #618 — DOD_GRANDFATHER_BASELINE, ‏dodGrandfathered ו-dodRevoked נמחקו; plan:check מסרב לרשימה; dod 19/19 ב-shim; מחכה למיזוג · INT6b 17.11: status before → ⏳ קוד ב-PR #868 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23098,10 +23146,10 @@
       "W6.7"
      ],
      "files": "plan.json, scripts/plan-check.mjs, scripts/migrate-status.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #618 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
      "verified": "node",
      "pr": 618,
-     "notes": "⏳ #618 — 0 סטטוסים מעל 200 תווים, הפירוט ב-notes ומוצג בלוח; כלל STATUS_MAX ב-plan:check; planBuild ב-shim; מחכה למיזוג",
+     "notes": "⏳ #618 — 0 סטטוסים מעל 200 תווים, הפירוט ב-notes ומוצג בלוח; כלל STATUS_MAX ב-plan:check; planBuild ב-shim; מחכה למיזוג · INT6b 17.11: status before → ⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23137,10 +23185,10 @@
       "W4.24"
      ],
      "files": "scripts/build.mjs, scripts/plan-check.mjs",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #618 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
      "verified": "node",
      "pr": 618,
-     "notes": "⏳ #618 — plan:check מסרב ל-✅ עם built/node/owner; ‏9 ה-✅* ירדו ל-⏳; planBuild ב-shim; מחכה למיזוג",
+     "notes": "⏳ #618 — plan:check מסרב ל-✅ עם built/node/owner; ‏9 ה-✅* ירדו ל-⏳; planBuild ב-shim; מחכה למיזוג · INT6b 17.11: status before → ⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23211,10 +23259,10 @@
       "W1.32"
      ],
      "files": "scripts/p2-ledger.mjs, plan/p2-ledger.json",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #618 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1116 (blobUrlVaultScope, #235 P2)",
      "verified": "built",
      "pr": 618,
-     "notes": "⏳ #618 — plan/p2-ledger.md: ‏110 תגובות P2 ב-12 ה-PR-ים: 101 תוקנו, 5 סיכון מקובל, 1 הוחלף, 3 פתוחות (נכתבו 14.11 אחרי W1.32)",
+     "notes": "⏳ #618 — plan/p2-ledger.md: ‏110 תגובות P2 ב-12 ה-PR-ים: 101 תוקנו, 5 סיכון מקובל, 1 הוחלף, 3 פתוחות (נכתבו 14.11 אחרי W1.32) · INT6b 17.11: status before → ⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23256,10 +23304,10 @@
       "W1.17"
      ],
      "files": ".github/workflows/*, src/__tests__/noActions.test.ts",
-     "status": "⏳ קוד ב-PR #643 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #643 · cloud-complete (audit r3 PARTIAL); owed: re-audit of #1130 (archivedWorkflows: 48 jobs mapped)",
      "verified": "node",
      "pr": 643,
-     "notes": "⏳ #643 (על verify/train-4) — workflows ל-docs/archive/workflows, ‏check-no-workflows ב-hygiene; noActions 4/4 ו-5 בדיקות workflow ירוקות ב-shim",
+     "notes": "⏳ #643 (על verify/train-4) — workflows ל-docs/archive/workflows, ‏check-no-workflows ב-hygiene; noActions 4/4 ו-5 בדיקות workflow ירוקות ב-shim · INT6b 17.11: status before → ⏳ קוד ב-PR #643 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23297,10 +23345,10 @@
       "W8.10"
      ],
      "files": "plan.json, MASTER_PLAN.md, plan/board.html",
-     "status": "⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #618 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 618,
-     "notes": "⏳ #618 — גל 10 (241 משימות) בתוכנית, סטטוס ל-W8.9 ול-W8.10, הלוח נבנה מחדש; plan:check ירוק; מחכה למיזוג",
+     "notes": "⏳ #618 — גל 10 (241 משימות) בתוכנית, סטטוס ל-W8.9 ול-W8.10, הלוח נבנה מחדש; plan:check ירוק; מחכה למיזוג · INT6b 17.11: status before → ⏳ קוד ב-PR #618 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -23780,7 +23828,7 @@
       "13.5"
      ],
      "files": "$S/audit-w10/*",
-     "status": "⏳ שלב רכבת — אחרי סבב P1",
+     "status": "⏳ cloud-complete (audit r3 DONE); owed: a dod in the repo: the report's inputs (merged.json, r2-all.json) are outside it",
      "verified": "built",
      "auditVerdict": {
       "at": "2026-11-16",
@@ -23789,7 +23837,8 @@
       "score": 65,
       "who": "cloud-code",
       "missing": "acceptance 'report with per-id transitions vs merged.json' : review-z6 is a findings review, not a per-id DONE transition report"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ שלב רכבת — אחרי סבב P1"
     },
     {
      "id": "W10.Z7",
@@ -23850,7 +23899,7 @@
       "W4.7"
      ],
      "files": "docs/owner/checklist.md",
-     "status": "⏳ קוד ב-PR #673 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #673 · cloud-complete (audit r3 PARTIAL); owed: owner must run Mac/owner sessions",
      "verified": "built",
      "pr": 673,
      "auditVerdict": {
@@ -23860,7 +23909,8 @@
       "score": 65,
       "who": "cloud-code",
       "missing": "acceptance 'one list with times' plausibly met, but owner sessions untested by owner"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #673 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W10.M1",
@@ -25002,7 +25052,7 @@
      ],
      "why": "באג Home/End וקפיצות החצים של Obsidian 1.14.2 קיים אצלנו באותה גרסת CodeMirror. מתקנים לפני המתחרה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #672 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #672 · cloud-complete (audit r3 PARTIAL); owed: real vite startup budget (W10.M2)",
      "verified": "built",
      "pr": 672,
      "stage": "11.H",
@@ -25016,7 +25066,8 @@
       "score": 78,
       "who": "cloud-code",
       "missing": "startup budget only measured with the shim build; CodeMirror upgrade is W10.M2"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #672 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W11.H3",
@@ -25079,7 +25130,7 @@
      ],
      "why": "בקשה פתוחה בפורום של Obsidian שאין לה מענה; אצלנו היא סוגרת את הפער האחרון בעריכה דו-כיוונית.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #679 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #679 · cloud-complete (audit r3 PARTIAL); owed: real-browser close/reopen e2e",
      "verified": "built",
      "pr": 679,
      "stage": "11.H",
@@ -25093,7 +25144,8 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "menu/shortcut not separately verified; real-browser reopen e2e not run"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #679 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W11.H5",
@@ -25157,7 +25209,7 @@
      ],
      "why": "היעד ״FLEURS ≤ 15%״ משתנה ב-±12 נקודות לפי נרמול. לוח ivrit.ai משתמש ב-eval-d1 וב-eval-whatsapp.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #661 · cloud-complete (audit r3 PARTIAL); owed: parity on 50 examples vs Python normaliser; eval sets not downloaded",
      "verified": "built",
      "pr": 661,
      "stage": "11.H",
@@ -25172,7 +25224,8 @@
       "score": 50,
       "who": "cloud-code / Mac",
       "missing": "acceptance 'same text as the original on 50 examples' not done (test title says parity owed); sets not downloaded"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #661 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W11.H7",
@@ -25392,7 +25445,7 @@
      ],
      "why": "Shoshan: ‏92.4% מחוץ לתחום ו-0% שגיאות במילים לא מוכרות, מול 12.3% של DictaBERT-lex.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #708, #838 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #708 · cloud-complete (audit r3 PARTIAL); owed: ONNX export, HeQ/MMTEB A/B result, W11.M3 winner; shoshan/dictaLex not reachable from index",
      "verified": "built",
      "pr": 708,
      "stage": "11.H",
@@ -25406,7 +25459,8 @@
       "score": 45,
       "who": "cloud-code / Mac",
       "missing": "shoshan.ts/dictaLex.ts reachable only from lemmatizer/abTest, not from the search index; no ONNX export, no A/B result"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #708, #838 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W11.H13",
@@ -25656,8 +25710,8 @@
      ],
      "why": "הביקורת מצאה חמישה seams מתים (דקדוק, הרצאות, תמלול חי, פלט מובנה, לקוח MCP). בלי שער הדפוס יחזור.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #655, #844 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #655 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 655,
      "stage": "11.I",
      "research": [
@@ -25676,7 +25730,8 @@
      ],
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #655, #844 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W11.I2",
@@ -25701,7 +25756,7 @@
      ],
      "why": "הכספת תמיד [B]. רק מגבלה ארכיטקטונית מחזיקה מול הזרקה; 12 הגנות סינון נשברו ביותר מ-90%.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #692, #703, #844 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #692 · cloud-complete (audit r3 PARTIAL); owed: re-audit of the fix in #1110 (ruleOfTwoVaultRead); review receipts and the human-reviewed label (owner, security)",
      "verified": "built",
      "pr": 692,
      "stage": "11.I",
@@ -25716,7 +25771,7 @@
       "who": "cloud-code",
       "missing": "real-model behaviour unmeasured (AgentDojo on Mac)"
      },
-     "notes": "INT6b 17.11 (lane FA): ⏳ fix in PR #1110 (vault read = private whatever its trust class); dod+ npx vitest run src/__tests__/ruleOfTwoVaultRead.test.ts",
+     "notes": "INT6b 17.11 (lane FA): ⏳ fix in PR #1110 (vault read = private whatever its trust class); dod+ npx vitest run src/__tests__/ruleOfTwoVaultRead.test.ts · INT6b 17.11: status before → ⏳ קוד ב-PR #692, #703, #844 — נבדק לא מקוון; ממתין לרכבת",
      "dod": [
       "npx vitest run src/__tests__/ruleOfTwoVaultRead.test.ts"
      ]
@@ -25761,7 +25816,7 @@
       "npx vitest run src/__tests__/spotlighting.test.ts",
       "npx vitest run src/__tests__/injectionGuard.test.ts"
      ],
-     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #692, #703 — נבדק לא מקוון; ממתין לרכבת",
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 85); status before → ⏳ קוד ב-PR #692, #703 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "evidence": {
       "verdict": "DONE",
       "pr": 692,
@@ -25845,7 +25900,7 @@
      ],
      "why": "VS Code, ‏LM Studio ו-Notion כבר נותנים MCP עם אישור לכל כלי. נעיצה מונעת rug-pull של תיאור כלי.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #728 — נבדק לא מקוון; ממתין לרכבת; בתוך לקוח ה-MCP",
+     "status": "⏳ #728 · cloud-complete (audit r3 PARTIAL); owed: e2e against real servers (W11.M6)",
      "verified": "built",
      "pr": 728,
      "stage": "11.I",
@@ -25862,7 +25917,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/mcpClientStdio.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #728 — נבדק לא מקוון; ממתין לרכבת; בתוך לקוח ה-MCP"
     },
     {
      "id": "W11.I6",
@@ -25993,8 +26049,8 @@
      ],
      "why": "ההבטחה ״הכול ביומן הפרטיות״ נכונה היום רק בחצי.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #780, #833 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #780 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 780,
      "stage": "11.I",
      "research": [
@@ -26010,7 +26066,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/privacyMcpLedger.test.tsx"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #780, #833 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W11.I10",
@@ -26301,7 +26358,7 @@
      ],
      "why": "LM Studio הוא ה-runtime המקומי השני בגודלו, עם הרשאות.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #724 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #724 · cloud-complete (audit r3 PARTIAL); owed: real LM Studio run",
      "verified": "built",
      "pr": 724,
      "stage": "11.I",
@@ -26315,7 +26372,8 @@
       "score": 75,
       "who": "cloud-code",
       "missing": "real LM Studio not tried"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #724 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W11.I18",
@@ -26693,8 +26751,8 @@
      ],
      "why": "בלי Actions, רק השרת יכול לאכוף; ‏main קיבל את #432 בלי קבלה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #694, #844 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #694 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 694,
      "stage": "11.S",
      "research": [
@@ -26713,7 +26771,8 @@
      ],
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #694, #844 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W11.S5",
@@ -26851,7 +26910,7 @@
      ],
      "why": "בלי שחזור, סיסמה שנשכחה מאבדת את הכספת — התלונה הראשונה ב-E2EE.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #768, #769, #778 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #768 · cloud-complete (audit r3 PARTIAL); owed: external crypto audit; receipts",
      "verified": "built",
      "pr": 768,
      "stage": "11.S",
@@ -26865,7 +26924,8 @@
       "score": 70,
       "who": "cloud-code",
       "missing": "Python reader on vectors not run here; external crypto audit owed"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #768, #769, #778 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W11.S9",
@@ -26962,7 +27022,7 @@
      ],
      "why": "תיקון 13 בתוקף עם קנסות; GDPR חל על המטא-דאטה של הממסר גם כשהתוכן מוצפן.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #765 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #765 · cloud-complete (audit r3 PARTIAL); owed: legal review (W11.O3)",
      "verified": "built",
      "pr": 765,
      "stage": "11.S",
@@ -26976,7 +27036,8 @@
       "score": 75,
       "who": "cloud-code / owner",
       "missing": "legal review by clinic (W11.O3)"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #765 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W11.S12",
@@ -27000,7 +27061,7 @@
      ],
      "why": "סימני אמון הם התנאי לאימוץ במוצר פרטיות.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #701, #775, #785, #804 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #701 · cloud-complete (audit r3 PARTIAL); owed: SLSA provenance on the release build (Mac); re-audit of #1130's published fuzz results",
      "verified": "built",
      "pr": 701,
      "stage": "11.S",
@@ -27017,7 +27078,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/securityFuzzResults.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #701, #775, #785, #804 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W11.S13",
@@ -27042,8 +27104,8 @@
      ],
      "why": "Obsidian ו-Proton מפרסמים; תווית שלא תואמת ליומן היא סיכון בחנות.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #785 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #785 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 785,
      "stage": "11.S",
      "research": [
@@ -27059,7 +27121,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/storeLabelsLedger.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #785 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W11.S14",
@@ -27084,7 +27147,7 @@
      ],
      "why": "זה הסטנדרט מאז מאי 2026; עם ארגז החול של QuickJS אנחנו מעל Obsidian.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #701, #714, #910 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #701 · cloud-complete (audit r3 PARTIAL); owed: npm audit on lockfile needs network",
      "verified": "built",
      "pr": 701,
      "stage": "11.S",
@@ -27098,7 +27161,8 @@
       "score": 65,
       "who": "cloud-code",
       "missing": "Z7 M1 var() bypass fixed in #939; 'version fails -> removed within 24 h' policy not implemented as code; <=10 min/version unmeasured"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #701, #714, #910 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W11.S15",
@@ -27373,14 +27437,14 @@
      ],
      "why": "קישוט של כל המסמך הוא מה שגורם להקלדה איטית בפתקים ארוכים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #817 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #817 · cloud-complete (audit r3 PARTIAL); owed: syntax-tree cases need @codemirror/language",
      "verified": "built",
      "pr": 817,
      "stage": "11.Q",
      "research": [
       "R5.6"
      ],
-     "notes": "בעבודה (X-Q)",
+     "notes": "בעבודה (X-Q) · INT6b 17.11: status before → ⏳ קוד ב-PR #817 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -27565,14 +27629,14 @@
      ],
      "why": "spec.json הוא סט זהב ציבורי ואמיתי.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #847, #877 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #847 · cloud-complete (audit r3 PARTIAL); owed: fast-check runs; GFM 98.79% < 99% target",
      "verified": "built",
      "pr": 847,
      "stage": "11.Q",
      "research": [
       "R5.9"
      ],
-     "notes": "בעבודה (X-Q)",
+     "notes": "בעבודה (X-Q) · INT6b 17.11: status before → ⏳ קוד ב-PR #847, #877 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -27867,8 +27931,8 @@
      ],
      "why": "בלי מדד הפעלה אי אפשר לדעת אם ההשקה עובדת.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #659, #725, #732, #811 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #659 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 659,
      "stage": "11.P",
      "research": [
@@ -27885,7 +27949,8 @@
      "dod": [
       "npx vitest run src/__tests__/activationTtfv.test.ts",
       "npx vitest run src/__tests__/launchGateGa.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #659, #725, #732, #811 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W11.P5",
@@ -27981,7 +28046,7 @@
      ],
      "why": "ערוץ רכישה בזמן חלון ההגירה מ-Evernote.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #681 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #681 · cloud-complete (audit r3 PARTIAL); owed: screenshots (W10.M9)",
      "verified": "built",
      "pr": 681,
      "stage": "11.P",
@@ -27995,7 +28060,8 @@
       "score": 72,
       "who": "cloud-code",
       "missing": "screenshots owed (W10.M9)"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #681 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W11.P8",
@@ -28169,8 +28235,8 @@
      ],
      "why": "18% מהנטישה על תמחור; Evernote ו-Anytype ספגו ביקורת על צמצום החינם.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #705 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #705 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 705,
      "stage": "11.P",
      "research": [
@@ -28187,7 +28253,8 @@
      "dod": [
       "npx vitest run src/__tests__/pricingPage.test.ts",
       "npx vitest run src/__tests__/sustainability.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #705 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W11.P13",
@@ -28321,8 +28388,8 @@
      ],
      "why": "השקה גלובלית לפני שהמוצר נבדק שורפת את ההזדמנות היחידה ב-HN וב-PH.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #650, #732, #844 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #650 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 650,
      "stage": "11.L",
      "research": [
@@ -28341,7 +28408,8 @@
      ],
      "dodExpect": [
       "exit 0 — 0 failed, 0 skipped without a reason"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #650, #732, #844 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W11.L2",
@@ -28365,8 +28433,8 @@
      ],
      "why": "רשימת יציאה שאי אפשר לסמן ביד.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #650, #732 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #650 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 650,
      "stage": "11.L",
      "research": [
@@ -28382,7 +28450,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/launchGateGa.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #650, #732 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W11.L3",
@@ -29588,8 +29657,8 @@
      ],
      "why": "מגמה 4 ב-R1: Tana, ‏Capacities, ‏Logseq DB ו-Anytype בנויים על סוגים. אצלנו הסוג חייב להישאר Markdown רגיל, אחרת מאבדים את היתרון מול Logseq DB שעבר ל-SQLite.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #820, #831, #833, #837, #887, #894, #901 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #820 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 820,
      "stage": "12.T",
      "decision": "N1",
@@ -29609,7 +29678,8 @@
      "dod": [
       "npx vitest run src/__tests__/typedObjectsReal.test.ts",
       "npx vitest run src/__tests__/typedObjects.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #820, #831, #833, #837, #887, #894, #901 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W12.T2",
@@ -29716,7 +29786,7 @@
      ],
      "why": "Bear 2.9 ו-Heptabase MCP 0.11 הם הרף ב-2026; סוכן שיודע מה זה ״ספר״ אצל המשתמש כותב נתונים נקיים.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #820, #833 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #820 · cloud-complete (audit r3 PARTIAL); owed: MCP Inspector run (W11.M6)",
      "verified": "built",
      "pr": 820,
      "stage": "12.T",
@@ -29732,7 +29802,8 @@
       "score": 60,
       "who": "cloud-code",
       "missing": "REGRESSION: mcpVault.test.ts 'every tool has a scope' is red on HEAD because create_object is not in its write-tool list (14/1); MCP Inspector run (W11.M6)"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #820, #833 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W12.T5",
@@ -29821,7 +29892,7 @@
       "npx vitest run src/__tests__/basesRelations.test.ts",
       "npx vitest run src/__tests__/typeBaseTable.test.tsx"
      ],
-     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 88); status before → ⏳ קוד ב-PR #820, #831, #892, #898 — נבדק לא מקוון; ממתין לרכבת",
+     "notes": "INT6b 17.11: ✅ on audit r3 DONE (score 88); status before → ⏳ קוד ב-PR #820, #831, #892, #898 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "evidence": {
       "verdict": "DONE",
       "pr": 820,
@@ -29920,7 +29991,7 @@
      ],
      "why": "הבקשה המרכזית של הבעלים. מקור לכל קשת הוא מה שמבדיל גרף ידע מגרף ״AI אמר״, ומאפשר לבדוק כל טענה מול הפסקה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #820, #837, #838, #839, #892, #895, #901 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #820 · cloud-complete (audit r3 PARTIAL); owed: owner review with R12.1",
      "verified": "built",
      "pr": 820,
      "stage": "12.E",
@@ -29931,7 +30002,7 @@
       "src/ai/vaultCitations.ts",
       "R12.2: israelconnect:data/schemas/kgx_v10.schema.json · israelconnect:data/schemas/kgx_v10.validation_rules.json · israelconnect:tools/analysis/predicates.json · israelconnect:tools/story/person_predicates.json"
      ],
-     "notes": "שימוש חוזר (מ-R12.2, מוזג לכאן 15.11): מודל הישויות והטענות: Entity · Claim · Evidence · Source עם directness, הכחשות ותיקונים (KGX-lite) — מקור: israelconnect:data/schemas/kgx_v10.schema.json · israelconnect:data/schemas/kgx_v10.validation_rules.json · israelconnect:tools/analysis/predicates.json · israelconnect:tools/story/person_predicates.json; קבצים: src/entities/model.ts, src/entities/schema.json, src/entities/validate.ts; לגזור מ-kgx_v10 תת-סכמה לכספת: ישות = פתק עם type ב-frontmatter; טענה = (subject, predicate, object) עם directness (direct/mediated/context) ו-directionality; שרשרת מקור: Source (פתק/URL) → Evidence (ציטוט מילולי, offset, sha256 של הטקסט) → Claim; תאריך לא ידוע נשאר null; הכחשה ותיקון כרשומות נפרדות, לא מחיקה; לתרגם 10–15 מ-35 הכללים הסמנטיים שרלוונטיים לכספת (למשל: אין טענה בלי evidence; ציטוט שלא נמצא בטקסט = שגיאה) ל-validate.ts; אוצר פרדיקטים בעברית ובאנגלית מ-predicates.json, בלי נתוני אנשים · רישיון: israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
+     "notes": "שימוש חוזר (מ-R12.2, מוזג לכאן 15.11): מודל הישויות והטענות: Entity · Claim · Evidence · Source עם directness, הכחשות ותיקונים (KGX-lite) — מקור: israelconnect:data/schemas/kgx_v10.schema.json · israelconnect:data/schemas/kgx_v10.validation_rules.json · israelconnect:tools/analysis/predicates.json · israelconnect:tools/story/person_predicates.json; קבצים: src/entities/model.ts, src/entities/schema.json, src/entities/validate.ts; לגזור מ-kgx_v10 תת-סכמה לכספת: ישות = פתק עם type ב-frontmatter; טענה = (subject, predicate, object) עם directness (direct/mediated/context) ו-directionality; שרשרת מקור: Source (פתק/URL) → Evidence (ציטוט מילולי, offset, sha256 של הטקסט) → Claim; תאריך לא ידוע נשאר null; הכחשה ותיקון כרשומות נפרדות, לא מחיקה; לתרגם 10–15 מ-35 הכללים הסמנטיים שרלוונטיים לכספת (למשל: אין טענה בלי evidence; ציטוט שלא נמצא בטקסט = שגיאה) ל-validate.ts; אוצר פרדיקטים בעברית ובאנגלית מ-predicates.json, בלי נתוני אנשים · רישיון: israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1 · INT6b 17.11: status before → ⏳ קוד ב-PR #820, #837, #838, #839, #892, #895, #901 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -30223,7 +30294,7 @@
      ],
      "why": "ייצוא פתוח הוא חלק מהבטחת ״הנתונים שלך״ — אפשר לקחת את הגרף ל-Neo4j, ל-Gephi או ל-SPARQL.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #837 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #837 · cloud-complete (audit r3 PARTIAL); owed: n3 round trip",
      "verified": "built",
      "pr": 837,
      "stage": "12.E",
@@ -30231,7 +30302,7 @@
      "reuse": [
       "R12.5: israelconnect:app/js/graph_formats.js · israelconnect:tools/build/kgx_assemble_graph.py#to_jsonld,to_cypher · israelconnect:app/js/interop.js · israelconnect:tools/export/graphml.py · israelconnect:tools/tests/test_graph_formats_js.py"
      ],
-     "notes": "שימוש חוזר (מ-R12.5, מוזג לכאן 15.11): ייצוא הגרף: GraphML, GEXF, Turtle/RDF, JSON-LD, Cypher ל-Neo4j ו-CSV ל-Maltego/i2 — מקור: israelconnect:app/js/graph_formats.js · israelconnect:tools/build/kgx_assemble_graph.py#to_jsonld,to_cypher · israelconnect:app/js/interop.js · israelconnect:tools/export/graphml.py · israelconnect:tools/tests/test_graph_formats_js.py; קבצים: src/graph/export/{graphml,gexf,turtle,jsonld,cypher,interop}.ts; להעביר את graph_formats.js (בלי תלויות, ממוין, דטרמיניסטי) למודול TS שמקבל את מודל R12.2; להעביר to_jsonld/from_jsonld ו-to_cypher מ-kgx_assemble_graph.py; טענות כצמתים, שכבות כמאפיינים; להחליף את IC_BASE בבסיס IRI של הכספת (urn:lumen-vault:<id>), לא דומיין; interop.js: ייצוא ל-Maltego JSON/CSV ול-i2 CSV עם המזהים שלנו בכל שורה, כדי שסבב חזרה ישמור עליהם; פקודה בלוח הפקודות ובדיאלוג הייצוא · רישיון: israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
+     "notes": "שימוש חוזר (מ-R12.5, מוזג לכאן 15.11): ייצוא הגרף: GraphML, GEXF, Turtle/RDF, JSON-LD, Cypher ל-Neo4j ו-CSV ל-Maltego/i2 — מקור: israelconnect:app/js/graph_formats.js · israelconnect:tools/build/kgx_assemble_graph.py#to_jsonld,to_cypher · israelconnect:app/js/interop.js · israelconnect:tools/export/graphml.py · israelconnect:tools/tests/test_graph_formats_js.py; קבצים: src/graph/export/{graphml,gexf,turtle,jsonld,cypher,interop}.ts; להעביר את graph_formats.js (בלי תלויות, ממוין, דטרמיניסטי) למודול TS שמקבל את מודל R12.2; להעביר to_jsonld/from_jsonld ו-to_cypher מ-kgx_assemble_graph.py; טענות כצמתים, שכבות כמאפיינים; להחליף את IC_BASE בבסיס IRI של הכספת (urn:lumen-vault:<id>), לא דומיין; interop.js: ייצוא ל-Maltego JSON/CSV ול-i2 CSV עם המזהים שלנו בכל שורה, כדי שסבב חזרה ישמור עליהם; פקודה בלוח הפקודות ובדיאלוג הייצוא · רישיון: israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1 · INT6b 17.11: status before → ⏳ קוד ב-PR #837 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -30388,8 +30459,8 @@
      ],
      "why": "Bear 2.9 הציב רף של היקף לפי תגית. היקף אחד לשני המסלולים מונע מצב שבו הסוכן החיצוני מוגבל והפנימי לא.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #825, #826, #879, #884 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #825 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 825,
      "stage": "12.A",
      "decision": "U3",
@@ -30407,7 +30478,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/askVaultScope.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #825, #826, #879, #884 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "W12.A3",
@@ -30513,7 +30585,7 @@
      ],
      "why": "לימוד בחברותא הוא דרך הלימוד המרכזית בעולם התורני, ואף אפליקציית פתקים לא תומכת בו. ספריא נותנת טקסטים עם רישיון לכל גרסה, וקישורים ב-CC-BY 4.0.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #835, #845, #880, #881 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #835 · cloud-complete (audit r3 PARTIAL); owed: no acceptance item seen passing here (L8 ran it 6/6 with $S/g2w/L8-runner.sh)",
      "verified": "built",
      "pr": 835,
      "stage": "12.H",
@@ -30532,7 +30604,8 @@
       "score": 45,
       "who": "cloud-code",
       "missing": "havrutaRoom.test.ts load error offline (createHmac/timingSafeEqual from sync-server in shim): 'no payload contains source text' and '< 1 s sync' not seen passing"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #835, #845, #880, #881 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W12.H2",
@@ -30596,7 +30669,7 @@
      ],
      "why": "ישיבות ובתי מדרש עובדים הרבה בלי רשת או עם NetFree (W11.P14). חדר שנשאר על הממסר לתמיד הוא סיכון פרטיות.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ קוד ב-PR #835, #880 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #835 · cloud-complete (audit r3 PARTIAL); owed: offline merge and 404-after-end not seen here (L8 ran 7/7 with L8-runner)",
      "verified": "built",
      "pr": 835,
      "stage": "12.H",
@@ -30611,7 +30684,8 @@
       "score": 45,
       "who": "cloud-code",
       "missing": "havrutaOffline.test.ts load error offline; '404 after end' not seen passing"
-     }
+     },
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #835, #880 — נבדק לא מקוון; ממתין לרכבת"
     },
     {
      "id": "W12.H4",
@@ -32399,10 +32473,10 @@
      "hoursSaved": 8,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ קוד ב-PR #866, #870 — נבדק לא מקוון; ממתין לרכבת",
+     "status": "⏳ #866 · cloud-complete (audit r3 PARTIAL); owed: real-browser axe; case-level timeline",
      "verified": "built",
      "pr": 866,
-     "notes": "חופף ל-W12.E7 (מחוון זמן), W12.S1 (״מה ידעתי אז״): לבנות מעל המשימות האלה, לא מודול שני",
+     "notes": "חופף ל-W12.E7 (מחוון זמן), W12.S1 (״מה ידעתי אז״): לבנות מעל המשימות האלה, לא מודול שני · INT6b 17.11: status before → ⏳ קוד ב-PR #866, #870 — נבדק לא מקוון; ממתין לרכבת",
      "auditVerdict": {
       "at": "2026-11-16",
       "by": "ביקורת r2 16.11 (audit/r2-all.json)",
@@ -32529,7 +32603,7 @@
      "status": "✅ #870 · audit r3 DONE; dod green in Node and Chromium (INT6b 17.11)",
      "verified": "browser",
      "pr": 870,
-     "notes": "חופף ל-W12.V4 (מפת טיעונים), W12.E4: לבנות מעל המשימות האלה, לא מודול שני · INT6b 17.11: ✅ on audit r3 DONE (score 82); status before → ⏳ קוד ב-PR #870 — נבדק לא מקוון; ממתין לרכבת",
+     "notes": "חופף ל-W12.V4 (מפת טיעונים), W12.E4: לבנות מעל המשימות האלה, לא מודול שני · INT6b 17.11: ✅ on audit r3 DONE (score 82); status before → ⏳ קוד ב-PR #870 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4, in Node and in Chromium",
      "auditVerdict": {
       "at": "2026-11-17",
       "by": "r3 17.11 (audit3/A1-A3-verdicts.tsv)",
@@ -32636,8 +32710,8 @@
      "hoursSaved": 8,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1 · tasker: אין קובץ LICENSE — של טל, מותר; מומלץ להוסיף MIT ב-R12.1",
      "stage": "12.R",
-     "status": "⏳ קוד ב-PR #891 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #891 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 891,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -32651,7 +32725,8 @@
       "npx vitest run src/__tests__/ciDoctorLocal.test.ts",
       "npx vitest run src/__tests__/ciDoctor.test.ts",
       "npx vitest run src/__tests__/ciDoctorCli.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #891 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "R12.13",
@@ -32681,8 +32756,8 @@
      "hoursSaved": 6,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ קוד ב-PR #867 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #867 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 867,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -32694,7 +32769,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/laneLeases.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #867 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "R12.14",
@@ -32726,8 +32802,8 @@
      "hoursSaved": 4,
      "licence": "israelconnect: AGPL-3.0-or-later (קוד) / CC BY 4.0 (נתונים וסכמות) — מותר ל-lumen-md (MIT) רק אחרי R12.1",
      "stage": "12.R",
-     "status": "⏳ קוד ב-PR #868 — נבדק לא מקוון; ממתין לרכבת",
-     "verified": "built",
+     "status": "⏳ #868 · cloud-complete (audit r3 DONE); owed: a browser-level run or receipt (W10.G8): dod green here in Node or shell, no Chromium proof",
+     "verified": "node",
      "pr": 868,
      "auditVerdict": {
       "at": "2026-11-16",
@@ -32739,7 +32815,8 @@
      },
      "dod": [
       "npx vitest run src/__tests__/honestStatus.test.ts"
-     ]
+     ],
+     "notes": "INT6b 17.11: status before → ⏳ קוד ב-PR #868 — נבדק לא מקוון; ממתין לרכבת · dod green in the shim v4 (Node)"
     },
     {
      "id": "R12.15",
