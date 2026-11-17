@@ -154,7 +154,8 @@ const LINES: [string, Dir][] = [
   ["2026 שנה טובה לכולם", "rtl"],
   ["ראה `npm run dev`", "rtl"],
   ["`git status` לפני הכול", "rtl"],
-  ["https://lumen-md.vercel.app היא הכתובת", "rtl"],
+  // A bare URL is Latin: the line's first strong character makes it LTR (the golden set's rule, lib/bidiDirection; F14).
+  ["https://lumen-md.vercel.app היא הכתובת", "ltr"],
   ["ראו [[מתכון עוגה]] היום", "rtl"],
   ["הערה[^1] בסוף השורה", "rtl"],
   ["Hello עולם יפה", "ltr"],
