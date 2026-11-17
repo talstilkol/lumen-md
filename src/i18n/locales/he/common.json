@@ -609,7 +609,7 @@
   "calendar.settings.password": "סיסמת אפליקציה",
   "calendar.settings.passwordKept": "שמורה באחסון הסודות",
   "calendar.settings.remove": "הסרה",
-  "calendar.settings.removeNamed": "הסרת {name}",
+  "calendar.settings.removeNamed": "הסרה: {name}",
   "calendar.settings.removed": "המנוי הוסר.",
   "calendar.settings.save": "שמירה",
   "calendar.settings.saved": "נשמר. הסיסמה באחסון הסודות, לא בהגדרות.",
