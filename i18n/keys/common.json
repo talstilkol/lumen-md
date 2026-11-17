@@ -20675,6 +20675,33 @@
       "vars": []
     },
     {
+      "key": "supportNotice.body",
+      "en": "Lumen may work, but some features can fail. Your notes stay on this device and you can export them any time. Update the browser to be supported again.",
+      "vars": []
+    },
+    {
+      "key": "supportNotice.missing",
+      "en": "Missing: {list}",
+      "vars": [
+        "list"
+      ]
+    },
+    {
+      "key": "supportNotice.ok",
+      "en": "Got it",
+      "vars": []
+    },
+    {
+      "key": "supportNotice.policy",
+      "en": "Support policy",
+      "vars": []
+    },
+    {
+      "key": "supportNotice.title",
+      "en": "This browser is older than Lumen supports.",
+      "vars": []
+    },
+    {
       "key": "syllabus.created",
       "en": "Syllabus created: {weeks} teaching weeks, {from} to {to}",
       "vars": [

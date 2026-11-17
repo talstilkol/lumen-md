@@ -8,7 +8,7 @@
 
 **Support period:** Lumen gets security updates for at least five years from its first public release, and never ending before 31 December 2031 (CRA Art. 13(8)). They ship in the newest release line, which every user can move to free of charge (Art. 13(10)); each security update stays downloadable for at least ten years (Art. 13(9)).
 
-The same table is on the public security page (written from `security/disclosure.json`).
+The same table is on the public security page (written from `security/disclosure.json`). Which browsers and systems are supported, and how the code keeps to them: [docs/support-policy.md](docs/support-policy.md) ([עברית](docs/support-policy.he.md)).
 
 ## Reporting a vulnerability
 

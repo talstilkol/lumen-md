@@ -30,6 +30,7 @@ import { applyBootEdit, takeBootEdit } from "./boot/bootNote";
 import "./index.css";
 import { windowLabel } from "./desktop/window";
 import { keepInstallPrompt } from "./pwa/installPrompt";
+import { missingFeatures, shouldNotify } from "./boot/supportCheck";
 import { loadCommandHints } from "./commands/hints";
 import { armBootOk, beginBoot, noteBootCrash } from "./boot/bootSentinel";
 
@@ -49,6 +50,16 @@ const PresenterView = React.lazy(() => import("./slides/PresenterView"));
 
 // Plan W11.P13: Chromium offers its install prompt once, early; keep it for the install dialog.
 if (typeof window !== "undefined") keepInstallPrompt();
+// W13.T2: a browser older than the support policy is told so, once per version (nothing is blocked).
+const UNSUPPORTED = missingFeatures();
+const SupportNotice = React.lazy(() => import("./boot/SupportNotice").then((m) => ({ default: m.SupportNotice })));
+const showSupportNotice = (() => {
+  try {
+    return shouldNotify(UNSUPPORTED, __LUMEN_VERSION__, localStorage);
+  } catch {
+    return shouldNotify(UNSUPPORTED, __LUMEN_VERSION__, null);
+  }
+})();
 
 // Every AI network request is recorded; local-only blocks cloud ones (T37).
 const lastBlockToast = new Map<string, number>();
@@ -279,6 +290,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       </Suspense>
     )}
     <ToastContainer />
+    {showSupportNotice && (
+      <Suspense fallback={null}>
+        <SupportNotice missing={UNSUPPORTED} version={__LUMEN_VERSION__} />
+      </Suspense>
+    )}
   </React.StrictMode>,
 );
 // The start counts as good once the app has stayed up for a moment without the error screen.

@@ -8955,5 +8955,50 @@
     "ja": "1bslmi7",
     "ru": "1bslmi7",
     "zh-CN": "1bslmi7"
+  },
+  "supportNotice.title": {
+    "ar": "wzzlt3",
+    "de": "wzzlt3",
+    "fr": "wzzlt3",
+    "he": "wzzlt3",
+    "ja": "wzzlt3",
+    "ru": "wzzlt3",
+    "zh-CN": "wzzlt3"
+  },
+  "supportNotice.body": {
+    "ar": "1we15xx",
+    "de": "1we15xx",
+    "fr": "1we15xx",
+    "he": "1we15xx",
+    "ja": "1we15xx",
+    "ru": "1we15xx",
+    "zh-CN": "1we15xx"
+  },
+  "supportNotice.policy": {
+    "ar": "85wb4y",
+    "de": "85wb4y",
+    "fr": "85wb4y",
+    "he": "85wb4y",
+    "ja": "85wb4y",
+    "ru": "85wb4y",
+    "zh-CN": "85wb4y"
+  },
+  "supportNotice.missing": {
+    "ar": "1k4qagh",
+    "de": "1k4qagh",
+    "fr": "1k4qagh",
+    "he": "1k4qagh",
+    "ja": "1k4qagh",
+    "ru": "1k4qagh",
+    "zh-CN": "1k4qagh"
+  },
+  "supportNotice.ok": {
+    "ar": "l8hqi2",
+    "de": "l8hqi2",
+    "fr": "l8hqi2",
+    "he": "l8hqi2",
+    "ja": "l8hqi2",
+    "ru": "l8hqi2",
+    "zh-CN": "l8hqi2"
   }
 }

@@ -160,6 +160,7 @@
     "release:sign": "node scripts/supply-chain/release.mjs",
     "release:verify": "node scripts/supply-chain/verify-release.mjs",
     "release:rollout": "node scripts/release-rollout.mjs",
+    "support:check": "node scripts/support-policy.mjs",
     "release:attest": "node scripts/supply-chain/attest.mjs",
     "provenance:verify": "node scripts/supply-chain/verify.mjs",
     "supply:selftest": "bash scripts/supply-chain/selftest.sh",
@@ -418,7 +419,12 @@
     "lodash-es": "^4.18.1"
   },
   "browserslist": [
-    "defaults"
+    "chrome >= 140",
+    "edge >= 140",
+    "firefox >= 140",
+    "safari >= 18",
+    "ios_saf >= 18",
+    "and_chr >= 140"
   ],
   "engines": {
     "node": "^22.13.0 || ^24.0.0"
