@@ -2257,6 +2257,20 @@
       "icon": "Download"
     },
     {
+      "id": "writing.proofreadHe",
+      "label": "Writing: Hebrew Proofreading",
+      "group": "Tools",
+      "hint": "Number gender, את/עם, the article in a construct — local rules, as suggestions",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.panel",
+      "label": "Writing: Show Suggestions",
+      "group": "Tools",
+      "hint": "The open writing suggestions of this note",
+      "icon": "Sparkles"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -4674,6 +4688,20 @@
       "icon": "Download"
     },
     {
+      "id": "writing.proofreadHe",
+      "label": "Writing: Hebrew Proofreading",
+      "group": "Tools",
+      "hint": "Number gender, את/עם, the article in a construct — local rules, as suggestions",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.panel",
+      "label": "Writing: Show Suggestions",
+      "group": "Tools",
+      "hint": "The open writing suggestions of this note",
+      "icon": "Sparkles"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -5020,6 +5048,8 @@
     "spell.yiddishDictionary",
     "academic.choose",
     "academic.ics",
+    "writing.proofreadHe",
+    "writing.panel",
     "types.page",
     "types.studio"
   ]

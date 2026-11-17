@@ -46,5 +46,165 @@
     "ja": "l899cf",
     "ru": "l899cf",
     "zh-CN": "l899cf"
+  },
+  "cmd.writing.coach": {
+    "ar": "d95pdy",
+    "de": "d95pdy",
+    "fr": "d95pdy",
+    "ja": "d95pdy",
+    "ru": "d95pdy",
+    "zh-CN": "d95pdy"
+  },
+  "cmd.writing.coach.hint": {
+    "ar": "gkzm3t",
+    "de": "gkzm3t",
+    "fr": "gkzm3t",
+    "ja": "gkzm3t",
+    "ru": "gkzm3t",
+    "zh-CN": "gkzm3t"
+  },
+  "cmd.writing.expand": {
+    "ar": "1g4lfse",
+    "de": "1g4lfse",
+    "fr": "1g4lfse",
+    "ja": "1g4lfse",
+    "ru": "1g4lfse",
+    "zh-CN": "1g4lfse"
+  },
+  "cmd.writing.expand.hint": {
+    "ar": "1g99fgq",
+    "de": "1g99fgq",
+    "fr": "1g99fgq",
+    "ja": "1g99fgq",
+    "ru": "1g99fgq",
+    "zh-CN": "1g99fgq"
+  },
+  "cmd.writing.panel": {
+    "ar": "38e2pt",
+    "de": "38e2pt",
+    "fr": "38e2pt",
+    "ja": "38e2pt",
+    "ru": "38e2pt",
+    "zh-CN": "38e2pt"
+  },
+  "cmd.writing.panel.hint": {
+    "ar": "fa5enu",
+    "de": "fa5enu",
+    "fr": "fa5enu",
+    "ja": "fa5enu",
+    "ru": "fa5enu",
+    "zh-CN": "fa5enu"
+  },
+  "cmd.writing.proofreadHe": {
+    "ar": "1un8708",
+    "de": "1un8708",
+    "fr": "1un8708",
+    "ja": "1un8708",
+    "ru": "1un8708",
+    "zh-CN": "1un8708"
+  },
+  "cmd.writing.proofreadHe.hint": {
+    "ar": "1d2dd7e",
+    "de": "1d2dd7e",
+    "fr": "1d2dd7e",
+    "ja": "1d2dd7e",
+    "ru": "1d2dd7e",
+    "zh-CN": "1d2dd7e"
+  },
+  "cmd.writing.registerHigh": {
+    "ar": "tn58fp",
+    "de": "tn58fp",
+    "fr": "tn58fp",
+    "ja": "tn58fp",
+    "ru": "tn58fp",
+    "zh-CN": "tn58fp"
+  },
+  "cmd.writing.registerHigh.hint": {
+    "ar": "1p8obwq",
+    "de": "1p8obwq",
+    "fr": "1p8obwq",
+    "ja": "1p8obwq",
+    "ru": "1p8obwq",
+    "zh-CN": "1p8obwq"
+  },
+  "cmd.writing.registerSpoken": {
+    "ar": "159s51r",
+    "de": "159s51r",
+    "fr": "159s51r",
+    "ja": "159s51r",
+    "ru": "159s51r",
+    "zh-CN": "159s51r"
+  },
+  "cmd.writing.registerSpoken.hint": {
+    "ar": "1xecjc9",
+    "de": "1xecjc9",
+    "fr": "1xecjc9",
+    "ja": "1xecjc9",
+    "ru": "1xecjc9",
+    "zh-CN": "1xecjc9"
+  },
+  "cmd.writing.shorten": {
+    "ar": "1dz4xa9",
+    "de": "1dz4xa9",
+    "fr": "1dz4xa9",
+    "ja": "1dz4xa9",
+    "ru": "1dz4xa9",
+    "zh-CN": "1dz4xa9"
+  },
+  "cmd.writing.shorten.hint": {
+    "ar": "4i87j1",
+    "de": "4i87j1",
+    "fr": "4i87j1",
+    "ja": "4i87j1",
+    "ru": "4i87j1",
+    "zh-CN": "4i87j1"
+  },
+  "cmd.writing.toneFormal": {
+    "ar": "1esfcd3",
+    "de": "1esfcd3",
+    "fr": "1esfcd3",
+    "ja": "1esfcd3",
+    "ru": "1esfcd3",
+    "zh-CN": "1esfcd3"
+  },
+  "cmd.writing.toneFormal.hint": {
+    "ar": "178hpvx",
+    "de": "178hpvx",
+    "fr": "178hpvx",
+    "ja": "178hpvx",
+    "ru": "178hpvx",
+    "zh-CN": "178hpvx"
+  },
+  "cmd.writing.toneFriendly": {
+    "ar": "117p9e3",
+    "de": "117p9e3",
+    "fr": "117p9e3",
+    "ja": "117p9e3",
+    "ru": "117p9e3",
+    "zh-CN": "117p9e3"
+  },
+  "cmd.writing.toneFriendly.hint": {
+    "ar": "1u31y5r",
+    "de": "1u31y5r",
+    "fr": "1u31y5r",
+    "ja": "1u31y5r",
+    "ru": "1u31y5r",
+    "zh-CN": "1u31y5r"
+  },
+  "cmd.writing.toneNeutral": {
+    "ar": "fq6ik9",
+    "de": "fq6ik9",
+    "fr": "fq6ik9",
+    "ja": "fq6ik9",
+    "ru": "fq6ik9",
+    "zh-CN": "fq6ik9"
+  },
+  "cmd.writing.toneNeutral.hint": {
+    "ar": "h89fnm",
+    "de": "h89fnm",
+    "fr": "h89fnm",
+    "ja": "h89fnm",
+    "ru": "h89fnm",
+    "zh-CN": "h89fnm"
   }
 }
