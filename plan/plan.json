@@ -30584,7 +30584,7 @@
      ],
      "why": "החלק הגלוי של חברותא. הכול מורכב מרכיבים שכבר בקוד: ספריא, חדרים מוצפנים, ניקוד לתצוגה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ #845 · spec written (lane FC2 #1197) but not on the train (INT8 17.11: its one-engine skip would make e2e/ 20 skip points, ratchet 19); owed: a freed skip point or a relay on every engine, then Mac FC2-e2e-wave12",
+     "status": "⏳ #845 · spec written (lane FC2 #1197), not on the train (INT8 17.11: skip-point ratchet 19); owed: a freed skip point or a relay on every engine, then Mac FC2-e2e-wave12",
      "verified": "built",
      "pr": 845,
      "stage": "12.H",
