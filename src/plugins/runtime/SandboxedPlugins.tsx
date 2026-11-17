@@ -30,6 +30,8 @@ interface Listed {
   manifest: PluginManifest;
   scan: ScanResult;
   path: string;
+  /** W13.L5: set by the registry build when the version's Sigstore author signature verified against publisher.github. */
+  author?: { github: string };
 }
 
 async function getJson<T>(url: string, signal: AbortSignal): Promise<T> {
@@ -39,10 +41,23 @@ async function getJson<T>(url: string, signal: AbortSignal): Promise<T> {
   return (await res.json()) as T;
 }
 
+/** W13.L4: what the plugin policies in force (this device's, the vault's) say about installing `item` from this gallery. */
+async function policyFor(item: Listed): Promise<import("../policy").PolicyDecision> {
+  const [{ decide, loadPolicies }, { readWorkspaceFile }] = await Promise.all([import("../policy"), import("../../storage/workspace")]);
+  const policies = await loadPolicies(async (path) => {
+    try {
+      return await readWorkspaceFile(path);
+    } catch {
+      return null;
+    }
+  });
+  return decide(policies, { id: item.manifest.id, version: item.manifest.version, registry: BASE });
+}
+
 /** The registry's versions that passed their scan, newest last per plugin. */
 async function loadListed(signal: AbortSignal): Promise<Listed[]> {
   const [index, scans] = await Promise.all([
-    getJson<{ plugins: Array<{ id: string; versions: Array<{ version: string; path: string; delisted?: unknown }> }> }>(`${BASE}/index.json`, signal),
+    getJson<{ plugins: Array<{ id: string; versions: Array<{ version: string; path: string; delisted?: unknown; author?: { github?: unknown } }> }> }>(`${BASE}/index.json`, signal),
     getJson<{ results: Array<ScanResult & { path: string }> }>(`${BASE}/scan.json`, signal),
   ]);
   const { parseManifest } = await import("./manifest");
@@ -53,7 +68,9 @@ async function loadListed(signal: AbortSignal): Promise<Listed[]> {
     const latest = ok[ok.length - 1];
     if (!latest?.scan) continue;
     const manifest = parseManifest(await getJson<unknown>(`${BASE}/${latest.v.path}/lumen-plugin.json`, signal));
-    out.push({ manifest, scan: latest.scan, path: latest.v.path });
+    // The mark comes from the signed index only, and only when it names the manifest's own publisher.
+    const gh = latest.v.author?.github;
+    out.push({ manifest, scan: latest.scan, path: latest.v.path, ...(typeof gh === "string" && gh === manifest.publisher?.github ? { author: { github: gh } } : {}) });
   }
   return out;
 }
@@ -65,6 +82,21 @@ export function SandboxedPlugins() {
   const [busy, setBusy] = useState(false);
   const [devOpen, setDevOpen] = useState(false);
   const [installed, setInstalled] = useState<ReadonlySet<string>>(new Set());
+  const [policy, setPolicy] = useState<import("../policy").PolicyDecision | null>(null);
+
+  // W13.L4: the managed plugin policy (this device's and the vault's), decided when the install screen opens.
+  useEffect(() => {
+    setPolicy(null);
+    if (!asking) return;
+    let live = true;
+    policyFor(asking).then(
+      (d) => live && setPolicy(d),
+      () => undefined, // why: no policy can be read here (no vault): nothing is blocked by one; install() checks again
+    );
+    return () => {
+      live = false;
+    };
+  }, [asking]);
 
   useEffect(() => {
     const ac = new AbortController();
@@ -103,6 +135,9 @@ export function SandboxedPlugins() {
         // (same origin as the app's code): the bytes must still equal the scanned ones.
         if (!(e instanceof InstallRefused) || e.reason !== "registry-unsigned") throw e;
       }
+      // The unsigned fallback honours the policy too (the signed path checked it in install.ts).
+      const decision = await policyFor(item);
+      if (!decision.allowed) throw new Error(decision.reason ?? "not allowed by the plugin policy");
       // privacy-ledger: not tracked — the app's own files (/plugins/examples, this origin).
       const code = await (await fetch(`${BASE}/${item.path}/${item.manifest.main}`)).text();
       const [{ scanPluginVersion }, { startPlugin }] = await Promise.all([import("./scan"), import("./manager")]);
@@ -159,6 +194,11 @@ export function SandboxedPlugins() {
           {items.map((it) => (
             <div key={it.manifest.id} data-testid="sandboxed-plugin-card" data-plugin={it.manifest.id} style={{ border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 12, display: "grid", gap: 6 }}>
               <strong style={{ fontSize: 14 }}>{it.manifest.name}</strong>
+              {it.author && (
+                <span data-testid="verified-author" style={{ fontSize: 11, color: "hsl(var(--success))" }}>
+                  ✓ {t("pluginTrust.verifiedAuthor", { github: it.author.github })}
+                </span>
+              )}
               <span style={{ fontSize: 12, color: "hsl(var(--fg-muted))" }}>{it.manifest.description}</span>
               <span data-testid="safety-card" style={{ fontSize: 12 }}>
                 {t("pluginTrust.card.grade", { grade: it.scan.grade, score: it.scan.score })} · {t("pluginTrust.card.perms", { n: it.manifest.capabilities.length })}
@@ -200,7 +240,7 @@ export function SandboxedPlugins() {
           </Suspense>
         )}
       </details>
-      {asking && <InstallDialog manifest={asking.manifest} scan={asking.scan} busy={busy} onCancel={() => setAsking(null)} onInstall={() => void install(asking)} />}
+      {asking && <InstallDialog manifest={asking.manifest} scan={asking.scan} busy={busy} onCancel={() => setAsking(null)} onInstall={() => void install(asking)} policy={policy} />}
     </section>
   );
 }

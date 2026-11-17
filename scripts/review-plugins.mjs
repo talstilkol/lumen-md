@@ -10,6 +10,9 @@
  *                                                   # `delisted` in index.json (not shown, not installable);
  *                                                   # then the owner re-signs: build-plugin-registry.mjs --sign
  *   … --dir <registry dir> --out <scorecards dir>   # another registry (the tests use this)
+ *   node scripts/review-plugins.mjs --ref <folder | git-url#sha[:subdir]> [--json <file>] [--md <file>]
+ *                                                   # W13.L6: a developer's preview of any branch, tag or commit:
+ *                                                   # failures, warnings and suggestions (exit 1 on a failure)
  *
  * Runs offline: `npm audit` is not run (a version with a lockfile is marked
  * "audit owed"). A version's package-lock.json is checked against
@@ -32,6 +35,25 @@ if (!process.execArgv.includes("--import")) {
 const args = process.argv.slice(2);
 const opt = (f) => (args.indexOf(f) >= 0 ? args[args.indexOf(f) + 1] : undefined);
 const { reviewPluginVersion, overdueTakedowns, takedowns } = await import(pathToFileURL(join(ROOT, "src/plugins/runtime/review.ts")).href);
+
+if (args.includes("--ref")) {
+  // W13.L6: the registry's own review, on a ref the developer names, before submitting it.
+  const { resolveRef, reviewInput, suggestions, preview, previewMarkdown } = await import(pathToFileURL(join(ROOT, "scripts/lib/plugin-preview.mjs")).href);
+  let ref;
+  try {
+    ref = resolveRef(opt("--ref"));
+  } catch (e) {
+    console.error(`plugins:review: ${e.message}`);
+    process.exit(2);
+  }
+  const card = await reviewPluginVersion(reviewInput(ref.dir));
+  const p = preview(card, suggestions(ref.dir, card), ref);
+  const md = previewMarkdown(p);
+  if (opt("--json")) writeFileSync(opt("--json"), JSON.stringify(p, null, 2) + "\n");
+  if (opt("--md")) writeFileSync(opt("--md"), md + "\n");
+  console.log(md);
+  process.exit(p.failures.length ? 1 : 0);
+}
 const { inRange } = await import(pathToFileURL(join(ROOT, "scripts/audit-lock.mjs")).href);
 const knownBad = JSON.parse(readFileSync(join(ROOT, "security/known-bad.json"), "utf8")).entries.filter((e) => String(e.file).endsWith("package-lock.json"));
 const DIR = resolve(opt("--dir") ?? join(ROOT, "public/plugins/examples"));

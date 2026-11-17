@@ -37,7 +37,10 @@ if (argv.includes("--verify")) {
     const res = await fetch(new URL(p, target.endsWith("/") ? target : target + "/"), { redirect: "follow" });
     return res.ok ? Buffer.from(await res.arrayBuffer()) : null;
   };
-  const r = await verifySite({ get, scanVersion: scanPluginVersion });
+  // W13.L5: author signatures too (Sigstore's trust root from TUF, or LUMEN_SIGSTORE_TRUSTED_ROOT offline).
+  const { verifyAuthor, authorStatement } = await import(pathToFileURL(join(ROOT, "scripts/lib/plugin-author.mjs")).href);
+  const trustedRoot = process.env.LUMEN_SIGSTORE_TRUSTED_ROOT ? JSON.parse(readFileSync(process.env.LUMEN_SIGSTORE_TRUSTED_ROOT, "utf8")) : null;
+  const r = await verifySite({ get, scanVersion: scanPluginVersion, verifyAuthor: (o) => verifyAuthor({ ...o, trustedRoot }), authorStatement });
   for (const p of r.problems) console.log(`FAIL ${p}`);
   console.log(`${r.ok ? "ok" : "FAILED"}: ${r.versions} versions checked in ${target}`);
   process.exit(r.ok ? 0 : 1);

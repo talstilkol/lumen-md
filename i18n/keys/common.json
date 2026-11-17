@@ -17046,6 +17046,40 @@
       "vars": []
     },
     {
+      "key": "pluginTrust.policy.denied",
+      "en": "The plugin policy “{name}” blocks {id}.",
+      "vars": [
+        "name",
+        "id"
+      ]
+    },
+    {
+      "key": "pluginTrust.policy.invalid",
+      "en": "Plugins cannot be installed until whoever manages this vault fixes its plugin policy:",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.policy.notAllowed",
+      "en": "{id} {version} is not on the allow list of the plugin policy “{name}”.",
+      "vars": [
+        "id",
+        "version",
+        "name"
+      ]
+    },
+    {
+      "key": "pluginTrust.policy.registry",
+      "en": "The plugin policy “{name}” allows plugins only from its own registries.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "pluginTrust.policy.unnamed",
+      "en": "this vault",
+      "vars": []
+    },
+    {
       "key": "pluginTrust.remove",
       "en": "Remove",
       "vars": []
@@ -17148,6 +17182,13 @@
       "key": "pluginTrust.section.title",
       "en": "Sandboxed plugins",
       "vars": []
+    },
+    {
+      "key": "pluginTrust.verifiedAuthor",
+      "en": "Verified author: @{github} (signed with Sigstore)",
+      "vars": [
+        "github"
+      ]
     },
     {
       "key": "plugins.block.failed",

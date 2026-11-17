@@ -60,5 +60,11 @@
   "pluginTrust.api.belowMin": "This plugin needs plugin API {need} or newer; this Lumen has {have}. Update Lumen to install it.",
   "pluginTrust.api.newerMajor": "This plugin was built for plugin API {need}, a newer major version than this Lumen's {have}. Update Lumen to install it.",
   "pluginTrust.api.unsupported": "This plugin was built for plugin API {need}, which this Lumen ({have}) no longer runs. Ask its author for an update.",
-  "pluginTrust.api.invalid": "This plugin's API versions are not valid version numbers."
+  "pluginTrust.api.invalid": "This plugin's API versions are not valid version numbers.",
+  "pluginTrust.policy.unnamed": "this vault",
+  "pluginTrust.policy.denied": "The plugin policy “{name}” blocks {id}.",
+  "pluginTrust.policy.notAllowed": "{id} {version} is not on the allow list of the plugin policy “{name}”.",
+  "pluginTrust.policy.registry": "The plugin policy “{name}” allows plugins only from its own registries.",
+  "pluginTrust.policy.invalid": "Plugins cannot be installed until whoever manages this vault fixes its plugin policy:",
+  "pluginTrust.verifiedAuthor": "Verified author: @{github} (signed with Sigstore)"
 }
