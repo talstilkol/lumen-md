@@ -27,6 +27,8 @@ const RESPONSIVENESS = /@responsiveness/;
 const TTFV = /@ttfv/;
 /** W11.Q4: the WYSIWYG ceiling's calibration (e2e/wysiwyg-ceiling-calibrate.spec.ts), only in the "calibrate" project. */
 const CALIBRATE = /@calibrate/;
+/** Plan W13.V1: INP in three engines with LoAF attribution (e2e/inp-engines.spec.ts), only in the inp-<engine> projects. */
+const INPX = /@inpx/;
 const NOT_IN_PR_RUNS = /@nightly|@inp|@coldstart|@responsiveness|@ttfv|@calibrate/;
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;
 /** A Chromium executable to use when Playwright's own is not installed (docs/dev/ci-local.md). */
@@ -78,7 +80,11 @@ export default defineConfig({
     // `npx playwright test --project=perf` (.github/workflows/nightly-perf.yml).
     { name: "perf", grep: NIGHTLY, use: { ...devices["Desktop Chrome"] } },
     // `npm run perf:inp`: 20 interactions and keypress → paint with the CPU 4× slower (plan W1.22).
-    { name: "inp", grep: INP, use: { ...devices["Desktop Chrome"] } },
+    { name: "inp", grep: INP, grepInvert: INPX, use: { ...devices["Desktop Chrome"] } },
+    // `npm run perf:inp` (plan W13.V1): the same 20 interactions in each engine, p75 ≤ 200 ms, LoAF in Chromium.
+    { name: "inp-chromium", grep: INPX, use: { ...devices["Desktop Chrome"], ...(CHROMIUM ? { launchOptions: { executablePath: CHROMIUM } } : {}) } },
+    { name: "inp-firefox", grep: INPX, use: { ...devices["Desktop Firefox"] } },
+    { name: "inp-webkit", grep: INPX, use: { ...devices["Desktop Safari"] } },
     // `npm run perf:wysiwyg-ceiling`: WYSIWYG open time and typing at 50 KB–900 KB, CPU 4× slower (plan W11.Q4).
     { name: "calibrate", grep: CALIBRATE, use: { ...devices["Desktop Chrome"] } },
     // `npm run perf:coldstart` against a production build (PLAYWRIGHT_BASE_URL): the desktop and a phone profile.

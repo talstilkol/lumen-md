@@ -1,0 +1,151 @@
+{
+ "engine": "chromium",
+ "loafSupported": true,
+ "interactions": [
+  {
+   "name": "fast click",
+   "start": 49.1,
+   "ms": 16
+  },
+  {
+   "name": "fast click",
+   "start": 192.2,
+   "ms": 16
+  },
+  {
+   "name": "fast click",
+   "start": 258.2,
+   "ms": 16
+  },
+  {
+   "name": "slow click",
+   "start": 324.8,
+   "ms": 272
+  },
+  {
+   "name": "fast click",
+   "start": 722.5,
+   "ms": 16
+  },
+  {
+   "name": "fast click",
+   "start": 791.3,
+   "ms": 16
+  },
+  {
+   "name": "fast click",
+   "start": 828.5,
+   "ms": 16
+  },
+  {
+   "name": "fast click",
+   "start": 973,
+   "ms": 16
+  },
+  {
+   "name": "fast click",
+   "start": 1134.2,
+   "ms": 16
+  },
+  {
+   "name": "fast click",
+   "start": 1218.4,
+   "ms": 16
+  },
+  {
+   "name": "slow click",
+   "start": 1296.9,
+   "ms": 272
+  },
+  {
+   "name": "fast click",
+   "start": 1624.4,
+   "ms": 16
+  },
+  {
+   "name": "fast click",
+   "start": 1691.4,
+   "ms": 16
+  },
+  {
+   "name": "fast click",
+   "start": 1758.3,
+   "ms": 16
+  },
+  {
+   "name": "fast click",
+   "start": 1824.5,
+   "ms": 16
+  },
+  {
+   "name": "fast click",
+   "start": 1890.8,
+   "ms": 32
+  },
+  {
+   "name": "fast click",
+   "start": 1958.6,
+   "ms": 16
+  },
+  {
+   "name": "slow click",
+   "start": 2024.9,
+   "ms": 264
+  },
+  {
+   "name": "fast click",
+   "start": 2357.8,
+   "ms": 16
+  },
+  {
+   "name": "fast click",
+   "start": 2425.4,
+   "ms": 16
+  }
+ ],
+ "loafs": [
+  {
+   "startTime": 324.7,
+   "duration": 270.3,
+   "blockingDuration": 219.938,
+   "scripts": [
+    {
+     "sourceURL": "http://localhost/slow.js",
+     "sourceFunctionName": "renderHugeList",
+     "invoker": "BUTTON#slow.onclick",
+     "invokerType": "event-listener",
+     "duration": 260
+    }
+   ]
+  },
+  {
+   "startTime": 1296.9,
+   "duration": 271.5,
+   "blockingDuration": 221.39,
+   "scripts": [
+    {
+     "sourceURL": "http://localhost/slow.js",
+     "sourceFunctionName": "renderHugeList",
+     "invoker": "BUTTON#slow.onclick",
+     "invokerType": "event-listener",
+     "duration": 267
+    }
+   ]
+  },
+  {
+   "startTime": 2024.9,
+   "duration": 263.2,
+   "blockingDuration": 212.769,
+   "scripts": [
+    {
+     "sourceURL": "http://localhost/slow.js",
+     "sourceFunctionName": "renderHugeList",
+     "invoker": "BUTTON#slow.onclick",
+     "invokerType": "event-listener",
+     "duration": 260
+    }
+   ]
+  }
+ ],
+ "$comment": "W13.V1: a real Chromium run (headless, 2026-11-17) of the Event Timing + long-animation-frame observers of e2e/inp-engines.spec.ts on a page with a 260 ms click handler (renderHugeList in slow.js)."
+}

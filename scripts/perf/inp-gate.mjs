@@ -13,7 +13,15 @@
  * source editor and Moby-Dick in WYSIWYG. Lower is better for all three. The absolute budgets
  * (p75 < 100 ms, p95 < 16 / 33 ms) are asserted by e2e/inp-budget.spec.ts
  * itself.
+ *
+ *     --engines   (plan W13.V1, `npm run perf:inp`) also gate INP in Chromium,
+ *                 Firefox and WebKit from reports/perf/inp-<engine>.json
+ *                 (e2e/inp-engines.spec.ts): p75 ≤ 200 ms in each, all three
+ *                 present, and every interaction over 200 ms in Chromium named
+ *                 by its long-animation-frame script (file and function).
+ *                 The table goes to reports/perf/inp-engines.md.
  */
+import { engineGate, ENGINES, renderEngines } from "./inpAttribution.mjs";
 import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -50,9 +58,25 @@ export function compare(baseline, latest, threshold = REGRESSION) {
     });
 }
 
+/** W13.V1: the three engines' reports, gated; returns the exit code. */
+export function gateEngines(dir) {
+  const runs = {};
+  for (const e of ENGINES) {
+    const p = join(dir, `inp-${e}.json`);
+    runs[e] = existsSync(p) ? JSON.parse(readFileSync(p, "utf8")) : null;
+  }
+  const gate = engineGate(runs);
+  const md = renderEngines(gate);
+  writeFileSync(join(dir, "inp-engines.md"), `# INP in three engines (W13.V1)\n\n${md}\n`);
+  console.log(md);
+  if (!gate.ok) console.error(`inp-gate: ${gate.problems.length} engine problem(s)`);
+  return gate.ok ? 0 : 1;
+}
+
 function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
   const dir = join(root, "reports", "perf");
+  if (process.argv.includes("--engines") && gateEngines(dir) !== 0) process.exit(1);
   const latestPath = join(dir, "inp-latest.json");
   const basePath = join(dir, "inp-baseline.json");
   const args = process.argv.slice(2);
