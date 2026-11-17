@@ -7573,6 +7573,122 @@
       "vars": []
     },
     {
+      "key": "entityGraph.paths.anyLength",
+      "en": "Any",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.count",
+      "en": "Paths",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.find",
+      "en": "Find paths",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.found",
+      "en": "{n} paths found in {ms} ms",
+      "vars": [
+        "n",
+        "ms"
+      ]
+    },
+    {
+      "key": "entityGraph.paths.from",
+      "en": "From",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.inverse",
+      "en": "(reversed) {relation}",
+      "vars": [
+        "relation"
+      ]
+    },
+    {
+      "key": "entityGraph.paths.maxHops",
+      "en": "Longest chain (links)",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.mode",
+      "en": "Path finder",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.more",
+      "en": "(+{n} more)",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "entityGraph.paths.moved",
+      "en": "The paragraph is no longer in the note",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.none",
+      "en": "No path connects them with these filters. Allow more relation types or a longer chain.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.openSource",
+      "en": "Open the paragraph",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.relations",
+      "en": "Relations ({n} of {total})",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
+      "key": "entityGraph.paths.results",
+      "en": "Paths",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.same",
+      "en": "Choose two different entities.",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.summary",
+      "en": "Path {n} · {hops} links · {confidence} together",
+      "vars": [
+        "n",
+        "hops",
+        "confidence"
+      ]
+    },
+    {
+      "key": "entityGraph.paths.swap",
+      "en": "Swap the two entities",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.title",
+      "en": "How do they connect?",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.to",
+      "en": "To",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.paths.unknown",
+      "en": "No entity is called “{name}”.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
       "key": "entityGraph.predicate.amends",
       "en": "amends",
       "vars": []
