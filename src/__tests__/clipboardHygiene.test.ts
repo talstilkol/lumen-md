@@ -23,6 +23,7 @@ function fakes(o: { canRead?: boolean } = {}) {
     setTimeout: (fn, ms) => timers.push({ fn, ms }),
     clearTimeout: () => undefined,
     doc: { addEventListener: (k: string, f: () => void) => void (listeners[k] ??= []).push(f), removeEventListener: () => undefined } as unknown as SecretClipboardDeps["doc"],
+    win: { addEventListener: (k: string, f: () => void) => void (listeners[`win:${k}`] ??= []).push(f), removeEventListener: () => undefined } as unknown as SecretClipboardDeps["win"],
   };
   return { deps, timers, board: () => board, setBoard: (t: string) => void (board = t), fire: (k: string) => listeners[k]?.forEach((f) => f()) };
 }
@@ -65,6 +66,27 @@ describe("the clipboard is cleared after 60 seconds (acceptance)", () => {
     b.timers[0].fn();
     await flush();
     expect(b.board()).toBe("copied in the app");
+  });
+
+  it("review 14 Low 3: without permission to read, leaving the window (another app may have copied) keeps the clipboard", async () => {
+    for (const away of ["win:blur", "visibilitychange"]) {
+      __resetSecretClipboard();
+      const f = fakes({ canRead: false });
+      await copySecret("secret", f.deps);
+      f.setBoard("copied in another app");
+      f.fire(away);
+      f.timers[0].fn();
+      await flush();
+      expect([away, f.board()]).toEqual([away, "copied in another app"]);
+    }
+    // With permission to read, it compares, so leaving the window does not stop a clear of the secret itself.
+    __resetSecretClipboard();
+    const r = fakes({ canRead: true });
+    await copySecret("secret", r.deps);
+    r.fire("win:blur");
+    r.timers[0].fn();
+    await flush();
+    expect(r.board()).toBe("");
   });
 
   it("a refused clipboard says so and schedules nothing", async () => {
