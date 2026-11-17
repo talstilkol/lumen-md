@@ -53,6 +53,14 @@ export function isAbort(e: unknown): boolean {
   return !!err && (err.name === "AbortError" || err.run?.status === "aborted");
 }
 
+/** Esc presses that cancelled AI work (W13.E1: Vim's Esc then stays in insert mode). */
+const consumedEscapes = new WeakSet<Event>();
+
+/** Did this Esc key press cancel running AI work? (The editor then leaves the press alone.) */
+export function escapeCancelledAi(e: Event): boolean {
+  return consumedEscapes.has(e);
+}
+
 let installed = false;
 /** Esc cancels running AI work (dialogs keep their own Esc handling too). */
 export function installAiEscape(onCancelled: (n: number) => void): void {
@@ -65,7 +73,10 @@ export function installAiEscape(onCancelled: (n: number) => void): void {
     (e) => {
       if (e.key !== "Escape" || !live.size) return;
       const n = cancelAllAi();
-      if (n) onCancelled(n);
+      if (n) {
+        consumedEscapes.add(e);
+        onCancelled(n);
+      }
     },
     { capture: true },
   );

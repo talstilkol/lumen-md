@@ -81,6 +81,7 @@ export default defineConfig({
             { label: "Hebrew keyboard layout", slug: "editor/hebrew-keyboard", translations: { he: "פריסת מקלדת עברית" } },
             { label: "Hebrew typography", slug: "editor/hebrew-typography", translations: { he: "טיפוגרפיה עברית" } },
             { label: "Outline mode", slug: "editor/outline-mode", translations: { he: "מצב מתאר" } },
+            { label: "Lists, cursors and Vim", slug: "editor/editing-keys", translations: { he: "רשימות, סמנים ו-Vim" } },
             { label: "Messages, empty states and undo", slug: "editor/messages", translations: { he: "הודעות, מצבים ריקים וביטול" } },
             { label: "Reading options and Hebrew fonts", slug: "editor/reading", translations: { he: "אפשרויות קריאה וגופנים עבריים" } },
             { label: "Themes and CSS snippets", slug: "editor/themes", translations: { he: "ערכות נושא וקטעי CSS" } },
