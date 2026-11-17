@@ -13,6 +13,7 @@
  * rebuilds them from the C source).
  */
 import { ARGON2_FILL_WASM_B64 } from "./argon2fillWasm";
+import { swallowed } from "../../../../lib/logger";
 
 export interface Argon2FillWasm {
   /** The blocks, lane after lane, as 32-bit words (in the instance's memory). */
@@ -45,8 +46,9 @@ function compiled(): WebAssembly.Module | null {
   try {
     if (typeof WebAssembly !== "object") return null;
     module = new WebAssembly.Module(decode(ARGON2_FILL_WASM_B64) as BufferSource);
-  } catch {
+  } catch (e) {
     // why: no WebAssembly here (a CSP without 'wasm-unsafe-eval', an old engine): the TypeScript fill gives the same bytes
+    swallowed("sync/e2ee/primitives/argon2: no WebAssembly; Argon2id runs the TypeScript fill (about 12 times slower)", e);
     module = null;
   }
   return module;
@@ -60,8 +62,9 @@ export function argon2FillWasm(bytes: number): Argon2FillWasm | null {
   let inst: WebAssembly.Instance;
   try {
     inst = new WebAssembly.Instance(m, {});
-  } catch {
+  } catch (e) {
     // why: instantiation refused (memory pressure): the TypeScript fill gives the same bytes
+    swallowed("sync/e2ee/primitives/argon2: the WebAssembly instance was refused; the TypeScript fill runs", e);
     return null;
   }
   const memory = inst.exports.memory as WebAssembly.Memory;
@@ -72,8 +75,9 @@ export function argon2FillWasm(bytes: number): Argon2FillWasm | null {
   if (need > have) {
     try {
       memory.grow(Math.ceil((need - have) / PAGE));
-    } catch {
+    } catch (e) {
       // why: the engine refused the memory (RangeError): the TypeScript fill tries with a plain array
+      swallowed("sync/e2ee/primitives/argon2: the WebAssembly memory could not grow; the TypeScript fill runs", e);
       return null;
     }
   }
