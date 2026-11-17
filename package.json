@@ -132,7 +132,7 @@
     "ci:real-model-pins": "node scripts/real-model-pins.mjs",
     "docs:complete": "node scripts/docs-complete.mjs && node scripts/docs-parity.mjs --strict",
     "docs:parity": "node scripts/docs-parity.mjs --strict",
-    "docs:audit": "node scripts/docs-audit.mjs",
+    "docs:audit": "node scripts/docs-audit.mjs && node scripts/rtl-benchmark-audit.mjs",
     "bench:fim": "node --experimental-strip-types scripts/bench-fim.mjs",
     "models:day": "node scripts/models-day.mjs",
     "mac:pack": "node scripts/mac-pack/run-all.mjs",

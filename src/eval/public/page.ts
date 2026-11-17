@@ -7,6 +7,7 @@
  * `npm run eval:public -- page --write`; `check` fails when the page is out
  * of date or a claim lacks its source or date.
  */
+import { renderRtlSection, type RtlLedger } from "./rtlBenchmark";
 import type { PublicResult } from "./gate";
 import { latestResults } from "./gate";
 
@@ -93,7 +94,7 @@ const T = {
 
 const fmt = (v: number, row: Row) => (row.format === "percent" ? `${(v * 100).toFixed(row.metric === "characterTest" ? 2 : 1)}%` : String(v));
 
-export function renderBenchmarkPage(results: readonly PublicResult[], comp: CompetitorData, lang: "en" | "he"): string {
+export function renderBenchmarkPage(results: readonly PublicResult[], comp: CompetitorData, lang: "en" | "he", rtl?: RtlLedger | null): string {
   const t = T[lang];
   const latest = latestResults(results.filter((r) => r.synthetic === false));
   const L = ["---", `title: ${t.title}`, `description: ${t.description}`, "---", "", t.intro, ""];
@@ -119,6 +120,8 @@ export function renderBenchmarkPage(results: readonly PublicResult[], comp: Comp
     notes.forEach((c, i) => L.push(`${i + 1}. \`${c}\``));
     L.push("");
   }
+  // W13.H6: the recorded RTL test, only what was recorded (launch/rtl-benchmark.json).
+  if (rtl !== undefined) L.push(...renderRtlSection(rtl, lang));
   L.push(t.compare, "", t.how, "");
   return L.join("\n");
 }

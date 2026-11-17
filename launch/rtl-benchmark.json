@@ -1,0 +1,4 @@
+{
+  "$comment": "W13.H6: the recorded public RTL test. One cell per scenario × app, added after its screen recording is in docs/public/rtl-benchmark/ (the script: docs/rtl-benchmark.md). Never add a cell without its video. `npm run docs:audit` fails until all 60 are here; `npm run eval:public -- page --write` puts them on the W11.H13 page.",
+  "cells": []
+}
