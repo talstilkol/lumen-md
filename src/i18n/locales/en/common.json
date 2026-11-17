@@ -157,6 +157,8 @@
   "graph.search": "Find a note",
   "help.button": "Help for this panel",
   "hover.notFound": "No note named “{target}” yet",
+  "ipad.key.closeTab": "Close tab",
+  "ipad.key.smartPaste": "Smart paste",
   "loading.generic": "Loading…",
   "locale.beta": "Beta (machine translation, awaiting native review)",
   "locale.betaHelp": "How to report a translation issue",

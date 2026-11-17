@@ -21,7 +21,7 @@ import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdir
 import { homedir, tmpdir } from "node:os";
 import path from "node:path";
 import { isBeta, sha256sums } from "./lib/release.mjs";
-import { androidCommands, androidOutputs, androidPreflight, buildNumber, compileSdkOf, exportOptionsPlist, iosCommands, iosPreflight, javaMajor, newestBuildTools, parseApksigner, parseJarsigner, shellLine, xcodeMajor } from "./lib/mobileBuild.mjs";
+import { androidAdaptiveItems, androidCommands, androidOutputs, androidPreflight, buildNumber, compileSdkOf, exportOptionsPlist, iosCommands, iosPreflight, javaMajor, newestBuildTools, parseApksigner, parseJarsigner, shellLine, xcodeMajor } from "./lib/mobileBuild.mjs";
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, "release", "mobile");
@@ -194,7 +194,21 @@ function writeSums() {
   writeFileSync(path.join(OUT, "SHA256SUMS"), sha256sums(names.map((name) => ({ name, data: readFileSync(path.join(OUT, name)) }))));
 }
 
+function adaptiveFacts() {
+  const r = (p) => (exists(p) ? readFileSync(path.join(ROOT, p), "utf8") : "");
+  let config = null;
+  try {
+    config = JSON.parse(r("capacitor.config.json"));
+  } catch {
+    config = null;
+  }
+  return { manifest: r("android/app/src/main/AndroidManifest.xml"), config, mainActivity: r("android/app/src/main/java/com/lumen/editor/MainActivity.java"), css: r("src/index.css") };
+}
+
 function check() {
+  // W13.M1: checked from the files, so it runs (and blocks) on any machine.
+  const m = report("Android 16 (API 36): any size, edge to edge, predictive back", androidAdaptiveItems(adaptiveFacts()));
+  if (m.length) process.exitCode = 1;
   const a = report("Android", androidPreflight(androidFacts(false)));
   const key = iosKey();
   try {

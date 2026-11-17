@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D13B74759D3A391D2F205CB5 /* DocScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13A74759D3A391D2F205CB5 /* DocScanner.swift */; };
+		D13BD3E4F6A3F9BBF4184790 /* NoteEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13AD3E4F6A3F9BBF4184790 /* NoteEntity.swift */; };
+		D13CB88DFB13BE7E449ACBAF /* CaptureActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13AB88DFB13BE7E449ACBAF /* CaptureActivity.swift */; };
+		D13BB1991D9F532FDF6CF788 /* LiveCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13AB1991D9F532FDF6CF788 /* LiveCapture.swift */; };
+		D13B495B4C7A42D21329E44E /* CaptureLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13A495B4C7A42D21329E44E /* CaptureLiveActivity.swift */; };
+		D13BB88DFB13BE7E449ACBAF /* CaptureActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13AB88DFB13BE7E449ACBAF /* CaptureActivity.swift */; };
+		D13B4A773E63CD4BFAB80476 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13A4A773E63CD4BFAB80476 /* SceneDelegate.swift */; };
+		D13B8F4D51A1FDCD39502C1B /* KeyCommandsData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13A8F4D51A1FDCD39502C1B /* KeyCommandsData.swift */; };
+		D13BD061CCDB01861F65F47C /* KeyCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13AD061CCDB01861F65F47C /* KeyCommands.swift */; };
 		2FAD9763203C412B000D30F8 /* config.xml in Resources */ = {isa = PBXBuildFile; fileRef = 2FAD9762203C412B000D30F8 /* config.xml */; };
 		4D22ABE92AF431CB00220026 /* CapApp-SPM in Frameworks */ = {isa = PBXBuildFile; productRef = 4D22ABE82AF431CB00220026 /* CapApp-SPM */; };
 		50379B232058CBB4000EE86E /* capacitor.config.json in Resources */ = {isa = PBXBuildFile; fileRef = 50379B222058CBB4000EE86E /* capacitor.config.json */; };
@@ -68,6 +77,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		D13A74759D3A391D2F205CB5 /* DocScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocScanner.swift; sourceTree = "<group>"; };
+		D13AD3E4F6A3F9BBF4184790 /* NoteEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteEntity.swift; sourceTree = "<group>"; };
+		D13AB1991D9F532FDF6CF788 /* LiveCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveCapture.swift; sourceTree = "<group>"; };
+		D13A495B4C7A42D21329E44E /* CaptureLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureLiveActivity.swift; sourceTree = "<group>"; };
+		D13AB88DFB13BE7E449ACBAF /* CaptureActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureActivity.swift; sourceTree = "<group>"; };
+		D13A4A773E63CD4BFAB80476 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		D13A8F4D51A1FDCD39502C1B /* KeyCommandsData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyCommandsData.swift; sourceTree = "<group>"; };
+		D13AD061CCDB01861F65F47C /* KeyCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyCommands.swift; sourceTree = "<group>"; };
 		2FAD9762203C412B000D30F8 /* config.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = config.xml; sourceTree = "<group>"; };
 		50379B222058CBB4000EE86E /* capacitor.config.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = capacitor.config.json; sourceTree = "<group>"; };
 		504EC3041FED79650016851F /* App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = App.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -162,6 +179,12 @@
 				C7A000000000000000000001 /* LumenNative.swift */,
 				E45A00000000000000000001 /* LanDiscovery.swift */,
 				C7A000000000000000000003 /* LumenIntents.swift */,
+				D13A74759D3A391D2F205CB5 /* DocScanner.swift */,
+				D13AD3E4F6A3F9BBF4184790 /* NoteEntity.swift */,
+				D13AB1991D9F532FDF6CF788 /* LiveCapture.swift */,
+				D13A4A773E63CD4BFAB80476 /* SceneDelegate.swift */,
+				D13A8F4D51A1FDCD39502C1B /* KeyCommandsData.swift */,
+				D13AD061CCDB01861F65F47C /* KeyCommands.swift */,
 				C7A000000000000000000005 /* iCloudSync.swift */,
 				C8A000000000000000000002 /* NativeCapture.swift */,
 				C7A000000000000000000007 /* Localizable.strings */,
@@ -183,6 +206,7 @@
 			children = (
 				C7A000000000000000000010 /* LumenWidgets.swift */,
 				C8A000000000000000000003 /* LumenControls.swift */,
+				D13A495B4C7A42D21329E44E /* CaptureLiveActivity.swift */,
 				C7A000000000000000000014 /* Localizable.strings */,
 				C7A000000000000000000012 /* Info.plist */,
 				C7A000000000000000000013 /* LumenWidgets.entitlements */,
@@ -194,6 +218,7 @@
 			isa = PBXGroup;
 			children = (
 				C8A000000000000000000001 /* CaptureQueue.swift */,
+				D13AB88DFB13BE7E449ACBAF /* CaptureActivity.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -363,9 +388,16 @@
 				C7A000000000000000000002 /* LumenNative.swift in Sources */,
 				E45A00000000000000000002 /* LanDiscovery.swift in Sources */,
 				C7A000000000000000000004 /* LumenIntents.swift in Sources */,
+				D13B74759D3A391D2F205CB5 /* DocScanner.swift in Sources */,
+				D13BD3E4F6A3F9BBF4184790 /* NoteEntity.swift in Sources */,
+				D13BB1991D9F532FDF6CF788 /* LiveCapture.swift in Sources */,
+				D13B4A773E63CD4BFAB80476 /* SceneDelegate.swift in Sources */,
+				D13B8F4D51A1FDCD39502C1B /* KeyCommandsData.swift in Sources */,
+				D13BD061CCDB01861F65F47C /* KeyCommands.swift in Sources */,
 				C7A000000000000000000006 /* iCloudSync.swift in Sources */,
 				C8A000000000000000000013 /* NativeCapture.swift in Sources */,
 				C8A000000000000000000011 /* CaptureQueue.swift in Sources */,
+				D13BB88DFB13BE7E449ACBAF /* CaptureActivity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -375,6 +407,8 @@
 			files = (
 				C7A000000000000000000011 /* LumenWidgets.swift in Sources */,
 				C8A000000000000000000014 /* LumenControls.swift in Sources */,
+				D13CB88DFB13BE7E449ACBAF /* CaptureActivity.swift in Sources */,
+				D13B495B4C7A42D21329E44E /* CaptureLiveActivity.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

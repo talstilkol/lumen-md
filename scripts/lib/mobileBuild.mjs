@@ -73,6 +73,25 @@ export function androidPreflight(f, { unsigned = false } = {}) {
   return items;
 }
 
+/**
+ * W13.M1: Android 16 (API 36) readiness, from the files alone (no SDK): the
+ * manifest locks no orientation or aspect ratio and opts in to predictive back,
+ * Capacitor 8's SystemBars hands the insets to CSS, and the app's CSS uses
+ * env(safe-area-inset-*) rather than a fixed bar height.
+ */
+export function androidAdaptiveItems({ manifest, config, mainActivity, css }) {
+  const items = [];
+  const a = add(items);
+  a(!/android:screenOrientation\s*=/.test(manifest), "no android:screenOrientation lock (ignored at >= 600 dp on API 36)", "remove android:screenOrientation from AndroidManifest.xml; lay out by width (src/mobile/windowClass.ts)");
+  a(!/android:(?:max|min)AspectRatio\s*=|android:resizeableActivity\s*=\s*"false"/.test(manifest), "no aspect-ratio lock and no resizeableActivity=\"false\"", "remove android:maxAspectRatio / minAspectRatio / resizeableActivity=\"false\"");
+  a(/<application\b[^>]*android:enableOnBackInvokedCallback\s*=\s*"true"/.test(manifest), "predictive back is on (android:enableOnBackInvokedCallback=\"true\" on <application>)", "add android:enableOnBackInvokedCallback=\"true\" to <application>");
+  a(/OnBackPressedCallback/.test(mainActivity ?? "") && /canGoBack\(\)/.test(mainActivity ?? "") && /getOnBackPressedDispatcher\(\)\.addCallback/.test(mainActivity ?? ""), "MainActivity registers an OnBackPressedCallback that hands back to the WebView's history", "see android/app/src/main/java/com/lumen/editor/MainActivity.java (plan W13.M1)");
+  a(config?.plugins?.SystemBars?.insetsHandling === "css", "Capacitor 8 SystemBars passes the insets to CSS (plugins.SystemBars.insetsHandling = \"css\")", "set plugins.SystemBars.insetsHandling to \"css\" in capacitor.config.json");
+  a(!config?.plugins?.StatusBar?.backgroundColor, "no StatusBar backgroundColor (edge to edge: the app draws behind the bars)", "remove plugins.StatusBar.backgroundColor from capacitor.config.json");
+  a(/env\(safe-area-inset-top/.test(css ?? "") && /env\(safe-area-inset-bottom/.test(css ?? "") && !/constant\(safe-area-inset/.test(css ?? ""), "the CSS pads by env(safe-area-inset-*) (no legacy constant())", "use env(safe-area-inset-top/bottom/left/right) for the bars");
+  return items;
+}
+
 /** What the iOS build and upload need. */
 export function iosPreflight(f, { upload = true, altool = false } = {}) {
   const items = [];

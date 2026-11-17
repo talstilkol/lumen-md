@@ -38,6 +38,11 @@ interface Props {
 type VoiceState = { kind: "idle" } | { kind: "starting" } | { kind: "recording"; since: number } | { kind: "transcribing" };
 type VoiceModule = typeof import("../capture/voiceCapture");
 type Recording = import("../capture/voiceCapture").Recording;
+/** The iOS app (Capacitor), where the capture Live Activity exists. */
+const isIosApp = () => {
+  const c = (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean; getPlatform?: () => string } }).Capacitor;
+  return !!c?.isNativePlatform?.() && c.getPlatform?.() === "ios";
+};
 type LiveTranscript = import("../capture/voiceCapture").LiveTranscript;
 
 export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
@@ -55,6 +60,8 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
   /** The last recording (kept until the capture is added), and whether its transcript failed. */
   const take = useRef<{ audio: Blob; durationMs: number; untranscribed: boolean } | null>(null);
   const mod = useRef<Promise<VoiceModule> | null>(null);
+  /** W13.M2: the Lock Screen / Dynamic Island activity (the iOS app only). */
+  const act = useRef<import("../mobile/liveActivity").CaptureActivity | null>(null);
   const voiceMod = () => (mod.current ??= import("../capture/voiceCapture"));
 
   const startVoice = async () => {
@@ -63,7 +70,9 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
     try {
       const m = await voiceMod();
       rec.current = await m.startRecording(pressed);
-      setVoice({ kind: "recording", since: Date.now() });
+      const since = Date.now();
+      setVoice({ kind: "recording", since });
+      act.current?.recording(true, since);
       // The live engine listens alongside the recording; without one, Whisper transcribes after it (and the box says so).
       setPartial("");
       setAfterStop(!m.hasLiveTranscriber());
@@ -82,6 +91,7 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
     const r = rec.current;
     if (!r) return;
     rec.current = null;
+    act.current?.recording(false);
     const pendingLive = live.current;
     live.current = null;
     setVoice({ kind: "transcribing" });
@@ -129,6 +139,30 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per opening
   }, [open, voiceOnOpen]);
 
+  // W13.M2: while the box is open in the iOS app, a Live Activity keeps it in reach; its Stop button stops the recording.
+  useEffect(() => {
+    if (!open || !isIosApp()) return;
+    let off: (() => void) | undefined;
+    let alive = true;
+    void import("../mobile/liveActivity").then(async (m) => {
+      const a = await m.captureActivity();
+      if (!alive) return;
+      act.current = a;
+      if (rec.current) a.recording(true);
+      else a.opened();
+      off = a.onStop(() => {
+        if (rec.current) void stopVoice();
+      });
+    });
+    return () => {
+      alive = false;
+      off?.();
+      act.current?.closed();
+      act.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per opening
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
@@ -166,6 +200,7 @@ export function QuickCapture({ open, onClose, voice: voiceOnOpen }: Props) {
       }
       take.current = null;
       setText("");
+      act.current?.saved();
       toast.success(t("capture.saved", { path: (await captureMod()).INBOX_PATH }));
       onClose();
     } catch (e) {

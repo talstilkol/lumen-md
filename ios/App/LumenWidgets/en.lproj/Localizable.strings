@@ -8,3 +8,7 @@
 "lock.capture" = "Capture";
 "lock.capture.hint" = "To your Lumen inbox";
 "lock.capture.description" = "Type a line for your inbox from the Lock Screen.";
+"live.capturing" = "Capture in progress";
+"live.recording" = "Recording";
+"live.stop" = "Stop";
+"live.open" = "Open";

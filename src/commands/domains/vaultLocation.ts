@@ -11,6 +11,7 @@ import type { Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
 
 const actions = () => import("../../ui/vaultFolderActions");
+const inApp = () => typeof window !== "undefined" && !!(window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
 
 export function buildVaultLocationCommands(): Command[] {
   return [
@@ -38,6 +39,28 @@ export function buildVaultLocationCommands(): Command[] {
       group: t("group.file"),
       action: async () => (await actions()).moveVaultToBrowser(),
     },
+    // W13.M3: which notes Spotlight / Siri (iOS) and App Shortcuts (Android) may know — the app only.
+    ...(inApp()
+      ? [
+          {
+            id: "mobile.spotlight",
+            label: t("cmd.mobile.spotlight"),
+            hint: t("cmd.mobile.spotlight.hint"),
+            icon: cmdIcons.Eye,
+            group: t("group.file"),
+            action: async () => (await import("../../mobile/spotlightActions")).chooseSpotlightMode(),
+          },
+          {
+            // W13.M4: VisionKit / ML Kit document scanner, OCR on this device, a new note.
+            id: "mobile.scan",
+            label: t("cmd.mobile.scan"),
+            hint: t("cmd.mobile.scan.hint"),
+            icon: cmdIcons.FileText,
+            group: t("group.file"),
+            action: async () => void (await import("../../mobile/docScanActions")).scanDocumentCommand(),
+          },
+        ]
+      : []),
   ];
 }
 

@@ -87,6 +87,8 @@ export function useLaunchActions({ setCaptureOpen, setCaptureVoice, setPaletteOp
         daily: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
         // W13.X5: lumen://capture?text=… writes to the inbox: asked first.
         confirm: async (a) => (await import("../security/LinkConfirmDialog")).confirmLinkInApp(a),
+        // W13.M3/M5: Spotlight, Siri and a second iPad window open a note by its vault path.
+        openNote: (path) => window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path } })),
       });
     });
     return () => stop?.();

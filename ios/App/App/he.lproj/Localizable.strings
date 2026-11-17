@@ -24,3 +24,7 @@
 "Record to Lumen inbox" = "הקלטה לתיבה של Lumen";
 "Record to inbox" = "הקלטה לתיבה";
 "Opens Lumen recording a voice note into the inbox." = "פותח את Lumen ומקליט פתק קולי לתיבה.";
+"live.stop" = "עצירה";
+"spotlight.note" = "פתק";
+"spotlight.open" = "פתיחה ב-Lumen";
+"spotlight.preview" = "תצוגה מקדימה של פתק";

@@ -45,6 +45,9 @@ export const SHORTCUTS: readonly Shortcut[] = [
   // The open-sources dialog (plan W7.24). Not Mod+Shift+S: that is Save as.
   { id: "sources.open", combo: "Mod+Alt+S", scope: "global" },
   { id: "help.open", combo: "F1", scope: "global" },
+  // Another window (plan W3.9, W13.M5): bound by the desktop menu bar (src-tauri/src/lib.rs) and the
+  // iPad's UIKeyCommand; in a browser the key stays the browser's.
+  { id: "window.new", combo: "Mod+Shift+N", scope: "global" },
   // The outline mode's keys (plan W2.x), bound by the editor's outline keymap (editor/outlineExtension.ts).
   { id: "outline.moveUp", combo: "Alt+Shift+↑", scope: "editor" },
   { id: "outline.moveDown", combo: "Alt+Shift+↓", scope: "editor" },

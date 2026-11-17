@@ -46,6 +46,33 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<!-- W13.M5: windows are UIScenes, several at once on iPad (Stage Manager, Split View). -->
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<true/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneConfigurationName</key>
+					<string>Default Configuration</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Main</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
+	<!-- W13.M2: the capture Live Activity (no note text in it; see CaptureActivity.swift). -->
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>com.lumen.editor.window</string>
+	</array>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>
@@ -73,7 +100,7 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Lumen can save images you create or edit back to your photos.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Lumen can capture a photo and embed it in the current note.</string>
+	<string>Lumen uses the camera to take a photo for a note, or to scan a document into a note (the pages stay on this device).</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Lumen uses the microphone for voice-to-markdown dictation.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
