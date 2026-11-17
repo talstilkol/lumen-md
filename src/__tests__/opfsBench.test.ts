@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 // @ts-expect-error — plain .mjs script without type declarations
-import { makeFiles, median, sizes, TARGETS } from "../../scripts/perf/opfs-bench.mjs";
+import { fileAt, makeFiles, median, sizes, spans, TARGETS } from "../../scripts/perf/opfs-bench.mjs";
 
 describe("opfs-bench (W11.Q11)", () => {
   it("10,000 file sizes around a 2 KB median, the same every run", () => {
@@ -37,10 +37,36 @@ describe("opfs-bench (W11.Q11)", () => {
 
   it("reports both OPFS read paths: the main thread one by one, and the worker in the app's batches", () => {
     const page = readFileSync("scripts/perf/opfs-bench.page.ts", "utf8");
-    expect(page).toMatch(/return \{ opfsWrite, opfsRead, opfsReadWorker, idbWrite, idbRead, idbReadAll, readBatch: READ_BATCH \}/);
+    expect(page).toMatch(/return \{ opfsWrite, opfsRead, opfsReadWorker, idbWrite, idbRead, idbReadAll, readBatch: READ_BATCH, heapMB: heap \}/);
     expect(page).toContain('import { READ_BATCH } from "../../src/storage/vault/opfsSyncWrite"');
     expect(page).toContain('op: "read", paths');
     // The app's backend reads through the worker first (src/storage/vault/opfs.ts).
     expect(readFileSync("src/storage/vault/opfs.ts", "utf8")).toContain("readPrimary: readInWorker");
+  });
+
+  it("streams the files to the page: the pool once and 2 numbers per file, cut there as in Node (10k crash, L8)", () => {
+    const pool = readFileSync("docs/src/content/docs/editor/acr.md", "utf8").repeat(50);
+    const sp = spans(10_000, pool.length) as number[];
+    expect(sp).toHaveLength(20_000);
+    const files = makeFiles(10_000, pool) as Array<{ path: string; text: string }>;
+    for (const i of [0, 1, 99, 4321, 9999]) expect(fileAt(pool, sp, i)).toEqual(files[i]);
+    // What crosses page.evaluate: the pool and the spans, not 10,000 texts.
+    const sent = JSON.stringify({ pool, spans: sp }).length;
+    const before = JSON.stringify(files).length;
+    expect(sent).toBeLessThan(before / 4);
+    const driver = readFileSync("scripts/perf/opfs-bench.mjs", "utf8");
+    expect(driver).toContain("window.opfsBench(a), { pool, spans: sp, concurrency: 8 }");
+    expect(driver).not.toMatch(/makeFiles\(n\)/);
+    const page = readFileSync("scripts/perf/opfs-bench.page.ts", "utf8");
+    expect(page).toContain('import { fileAt as fileAtJs } from "./opfs-bench-files.mjs"');
+    expect(page).not.toMatch(/files\.(slice|length|map)/);
+  });
+
+  it("reports the peak resident size and the phase a crash happened in", () => {
+    const driver = readFileSync("scripts/perf/opfs-bench.mjs", "utf8");
+    expect(driver).toContain("results[engine].peakRssMB");
+    expect(driver).toContain('page.on("crash"');
+    expect(driver).toContain("the page crashed during ${crashed}");
+    expect(readFileSync("scripts/perf/opfs-bench.page.ts", "utf8")).toContain("opfs-bench phase: ");
   });
 });

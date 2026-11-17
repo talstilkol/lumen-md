@@ -7,10 +7,14 @@
 import { errorFromAnswer, splitRead, type ReadAnswer, type ReadRequest, type WriteAnswer, type WriteRequest } from "../../src/storage/vault/vaultIoFs";
 // The app's batch size for worker reads (src/storage/vault/opfsSyncWrite.ts).
 import { READ_BATCH } from "../../src/storage/vault/opfsSyncWrite";
+// @ts-expect-error — plain .mjs module without type declarations
+import { fileAt as fileAtJs } from "./opfs-bench-files.mjs";
+
+const fileAt = fileAtJs as (pool: string, spans: number[], i: number) => { path: string; text: string };
 
 declare global {
   interface Window {
-    opfsBench(opts: { files: Array<{ path: string; text: string }>; concurrency: number }): Promise<unknown>;
+    opfsBench(opts: { pool: string; spans: number[]; concurrency: number }): Promise<unknown>;
     opfsSelftest(): Promise<unknown>;
   }
 }
@@ -51,12 +55,22 @@ async function clearOpfs(): Promise<void> {
   for await (const [name] of (root as unknown as { entries(): AsyncIterable<[string, FileSystemHandle]> }).entries()) await root.removeEntry(name, { recursive: true });
 }
 
-async function pool<T>(items: T[], n: number, fn: (x: T) => Promise<void>): Promise<void> {
+/** Run `fn(0 … count-1)` with `n` in flight. */
+async function pool(count: number, n: number, fn: (i: number) => Promise<void>): Promise<void> {
   let i = 0;
   await Promise.all(Array.from({ length: n }, async () => {
-    while (i < items.length) await fn(items[i++]);
+    while (i < count) await fn(i++);
   }));
 }
+
+/** The phase, for the driver: a crash report names the phase it happened in (W11.Q11). */
+const phase = (name: string) => console.log(`opfs-bench phase: ${name}`);
+
+/** Chromium's JS heap in MB (null elsewhere): the page's peak is reported per phase. */
+const heapMB = (): number | null => {
+  const m = (performance as unknown as { memory?: { usedJSHeapSize: number } }).memory;
+  return m ? Math.round(m.usedJSHeapSize / 1024 / 1024) : null;
+};
 
 function idb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -95,15 +109,28 @@ async function withLongTasks<T>(fn: () => Promise<T>): Promise<{ value: T; ms: n
   return { value, ms: Math.round(ms), longTasks: po ? seen.filter((d) => d > 50).length : -1, longestMs: po ? Math.round(Math.max(0, ...seen)) : -1 };
 }
 
-window.opfsBench = async ({ files, concurrency }) => {
+window.opfsBench = async ({ pool: text, spans, concurrency }) => {
+  // The files are cut from one copy of the pool on demand (W11.Q11: 28 MB of
+  // file texts in one page.evaluate message crashed the 10k page in L8), and
+  // every read below keeps a running count, never the texts.
+  const count = spans.length / 2;
+  const file = (i: number) => fileAt(text, spans, i);
+  const heap: Record<string, number | null> = {};
+  const step = async <T,>(name: string, fn: () => Promise<T>) => {
+    phase(name);
+    const r = await withLongTasks(fn);
+    heap[name] = heapMB();
+    return r;
+  };
+  phase("clear");
   await clearOpfs();
   const root = await navigator.storage.getDirectory();
-  const opfsWrite = await withLongTasks(() => pool(files, concurrency, (f) => workerWrite(f.path.split("/"), f.text)));
-  const opfsRead = await withLongTasks(async () => {
+  const opfsWrite = await step("opfsWrite", () => pool(count, concurrency, (i) => { const f = file(i); return workerWrite(f.path.split("/"), f.text); }));
+  const opfsRead = await step("opfsRead", async () => {
     let bytes = 0;
-    for (const f of files) {
+    for (let i = 0; i < count; i++) {
       let dir: FileSystemDirectoryHandle = root;
-      const parts = f.path.split("/");
+      const parts = file(i).path.split("/");
       for (const p of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(p);
       bytes += (await (await (await dir.getFileHandle(parts[parts.length - 1])).getFile()).text()).length;
     }
@@ -111,12 +138,13 @@ window.opfsBench = async ({ files, concurrency }) => {
   });
   // The #856 follow-up: the same files through the worker, READ_BATCH per message, as readAllNotes does.
   const dec = new TextDecoder();
-  const opfsReadWorker = await withLongTasks(async () => {
+  const opfsReadWorker = await step("opfsReadWorker", async () => {
     let bytes = 0;
     let missing = 0;
-    for (let i = 0; i < files.length; i += READ_BATCH) {
-      const out = await workerRead(files.slice(i, i + READ_BATCH).map((f) => f.path.split("/")));
-      for (const b of out) {
+    for (let i = 0; i < count; i += READ_BATCH) {
+      const batch: string[][] = [];
+      for (let k = i; k < Math.min(count, i + READ_BATCH); k++) batch.push(file(k).path.split("/"));
+      for (const b of await workerRead(batch)) {
         if (b) bytes += dec.decode(b).length;
         else missing++;
       }
@@ -124,18 +152,35 @@ window.opfsBench = async ({ files, concurrency }) => {
     if (missing) throw new Error(`${missing} files not read through the worker`);
     return bytes;
   });
+  phase("idbOpen");
   const db = await idb();
-  const idbWrite = await withLongTasks(() => pool(files, concurrency, (f) => tx(db, "readwrite", (s) => s.put(f.text, f.path)).then(() => undefined)));
-  const idbRead = await withLongTasks(async () => {
+  const idbWrite = await step("idbWrite", () => pool(count, concurrency, (i) => { const f = file(i); return tx(db, "readwrite", (s) => s.put(f.text, f.path)).then(() => undefined); }));
+  const idbRead = await step("idbRead", async () => {
     let bytes = 0;
-    for (const f of files) bytes += String(await tx(db, "readonly", (s) => s.get(f.path))).length;
+    for (let i = 0; i < count; i++) bytes += String(await tx(db, "readonly", (s) => s.get(file(i).path))).length;
     return bytes;
   });
-  const idbReadAll = await withLongTasks(async () => ((await tx(db, "readonly", (s) => s.getAll())) as string[]).reduce((n, x) => n + x.length, 0));
+  // getAll in pages of READ_BATCH × 4 keys: the whole store in one array was the run's largest allocation.
+  const idbReadAll = await step("idbReadAll", async () => {
+    let bytes = 0;
+    let after: IDBValidKey | null = null;
+    for (;;) {
+      const range: IDBKeyRange | undefined = after === null ? undefined : IDBKeyRange.lowerBound(after, true);
+      const keys = (await tx(db, "readonly", (s) => s.getAllKeys(range, READ_BATCH * 4))) as IDBValidKey[];
+      if (!keys.length) break;
+      const last = keys[keys.length - 1];
+      const vals = (await tx(db, "readonly", (s) => s.getAll(IDBKeyRange.bound(keys[0], last)))) as string[];
+      for (const v of vals) bytes += v.length;
+      after = last;
+    }
+    return bytes;
+  });
   db.close();
+  phase("clear");
   await clearOpfs();
+  phase("done");
   // opfsRead: the main thread, one file at a time (the path before the follow-up); opfsReadWorker: the worker, batched.
-  return { opfsWrite, opfsRead, opfsReadWorker, idbWrite, idbRead, idbReadAll, readBatch: READ_BATCH };
+  return { opfsWrite, opfsRead, opfsReadWorker, idbWrite, idbRead, idbReadAll, readBatch: READ_BATCH, heapMB: heap };
 };
 
 window.opfsSelftest = async () => {
