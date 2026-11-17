@@ -1,7 +1,10 @@
 /**
  * Harness for the PII golden set (plan 2.6, 7.1): the redactor in
- * src/ai/pii.ts on patterns alone (the names model, DictaBERT-NER, is not
- * downloadable until 15.9; its numbers come from the browser run).
+ * src/ai/pii.ts — its patterns, and for the names target the same
+ * DictaBERT-NER the app loads (src/ai/piiNer.ts), run in Node by
+ * scripts/eval-public/engines/dictabert-ner.mjs when LUMEN_PII_NER_ENGINE
+ * names an engine module (its extract(text) spans, PER kept, become the
+ * redactor's `ner`). Without it, patterns only, and "names.model" is 0.
  *
  *   score({ items }) → {
  *     "recall.patterns"            share of pattern entities (e-mail, phone, ID, card, IBAN, plate, birth date) fully covered
@@ -79,9 +82,23 @@ async function loadFind() {
   const out = await build({ configFile: false, logLevel: "silent", build: { write: false, minify: false, lib: { entry, formats: ["es"], fileName: "pii" } } });
   const chunk = (Array.isArray(out) ? out[0] : out).output.find((o) => o.type === "chunk");
   const mod = await import(`data:text/javascript;base64,${Buffer.from(chunk.code).toString("base64")}`);
-  return (text) => mod.findPii(text);
+  return (text, ner) => mod.findPii(text, { ner });
+}
+
+/** An engine's spans (dictabert-ner.mjs `extract`) as the redactor's names finder: PER → PERSON, other types dropped. */
+export function namesFrom(engine) {
+  return async (text) => (await engine.extract(text)).filter((s) => /^PER(S|SON)?$/.test(s.type)).map((s) => ({ start: s.start, end: s.end, type: "PERSON" }));
+}
+
+async function loadNames(env = process.env) {
+  if (!env.LUMEN_PII_NER_ENGINE) return null;
+  const { resolve } = await import("node:path");
+  const { pathToFileURL } = await import("node:url");
+  const mod = await import(pathToFileURL(resolve(env.LUMEN_PII_NER_ENGINE)).href);
+  return namesFrom(await mod.default());
 }
 
 export async function score({ items }) {
-  return scoreWith(await loadFind(), items);
+  const [find, ner] = await Promise.all([loadFind(), loadNames()]);
+  return { ...(await scoreWith((text) => find(text, ner), items)), "names.model": ner ? 1 : 0 };
 }
