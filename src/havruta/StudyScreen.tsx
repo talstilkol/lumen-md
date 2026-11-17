@@ -19,6 +19,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type * as Y from "yjs";
 import { t } from "../i18n";
+import { scrollBehavior } from "../lib/motion";
 import "./havrutaStrings";
 import { removeNikud } from "../text/nikud";
 import { addHighlight, addNote, listHighlights, notesBySegment, roomRef, SourceTextInNoteError, type HavrutaHighlight, type HavrutaPresence } from "./room";
@@ -130,7 +131,7 @@ export function StudyScreen({ session, text, me, onSave, onEnd, pointNikud }: St
   useEffect(() => {
     if (!follow || partnerSegment === null) return;
     setActive(partnerSegment);
-    segRefs.current[partnerSegment]?.scrollIntoView?.({ block: "center", behavior: "smooth" });
+    segRefs.current[partnerSegment]?.scrollIntoView?.({ block: "center", behavior: scrollBehavior() });
   }, [follow, partnerSegment]);
 
   // Display-only niqqud for unpointed segments, through the on-device model when given.

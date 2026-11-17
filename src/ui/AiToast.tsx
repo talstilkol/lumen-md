@@ -63,6 +63,26 @@ const COLORS: Record<ToastType, string> = {
   error: "hsl(var(--danger))",
 };
 
+interface Rect {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+/** Whether two rectangles share any area. */
+export function overlaps(a: Rect, b: Rect): boolean {
+  return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom && b.right > b.left && b.bottom > b.top;
+}
+/** Whether `a` stays clear of `zone` (so the toasts can go back to the bottom without covering it). */
+const clearOf = (a: Rect, zone: Rect) => !overlaps(a, zone);
+/** The band the toasts use at the top or at the bottom of the window, on the inline-end side. */
+const TOAST_ZONE = (band: "top" | "bottom"): Rect => {
+  const rtl = getComputedStyle(document.documentElement).direction === "rtl";
+  const [left, right] = rtl ? [0, Math.min(420, window.innerWidth)] : [Math.max(0, window.innerWidth - 420), window.innerWidth];
+  return band === "top" ? { left, right, top: 0, bottom: 56 + 5 * 64 } : { left, right, top: window.innerHeight - 40 - 5 * 64, bottom: window.innerHeight };
+};
+
 export function AiToastContainer() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const timers = useRef(new Map<number, ReturnType<typeof setTimeout>>());
@@ -91,6 +111,24 @@ export function AiToastContainer() {
     schedule(t);
   };
 
+  // W13.Y5 (WCAG 2.4.11, Focus Not Obscured): when the focused control sits under the toasts' corner,
+  // the toasts move to the top of the window until focus leaves that spot.
+  const [atTop, setAtTop] = useState(false);
+  const regions = useRef<HTMLDivElement[]>([]);
+  useEffect(() => {
+    const check = () => {
+      const el = document.activeElement;
+      if (!el || el === document.body || regions.current.some((r) => r?.contains(el))) return;
+      const f = el.getBoundingClientRect();
+      const boxes = regions.current.filter(Boolean).map((r) => r.getBoundingClientRect());
+      // At the bottom: move up when the toasts cover the focus. At the top: come back down only when the
+      // focus is under the top band and clear of the bottom one; anywhere else, stay where they are.
+      setAtTop((was) => (was ? clearOf(f, TOAST_ZONE("top")) || !clearOf(f, TOAST_ZONE("bottom")) : boxes.some((b) => overlaps(f, b))));
+    };
+    document.addEventListener("focusin", check);
+    return () => document.removeEventListener("focusin", check);
+  }, [toasts.length]);
+
   useEffect(() => {
     const add = (t: Toast) => {
       setToasts((prev) => [...prev.slice(-4), t]);
@@ -106,7 +144,7 @@ export function AiToastContainer() {
 
   const box = {
     position: "fixed",
-    bottom: 40,
+    ...(atTop ? { top: 56 } : { bottom: 40 }),
     insetInlineEnd: 16,
     zIndex: 99999,
     display: "flex",
@@ -119,10 +157,10 @@ export function AiToastContainer() {
     // data-modal-exempt: both regions stay live under a modal overlay that makes
     // the app inert (the PDF reader): a save error must still be shown and announced.
     <>
-      <div data-modal-exempt="" role="alert" aria-live="assertive" aria-atomic="false" data-testid="toasts-alert" style={{ ...box, bottom: 40 + 64 * toasts.filter((x) => x.type !== "error").length }}>
+      <div ref={(r) => void (regions.current[0] = r!)} data-modal-exempt="" role="alert" aria-live="assertive" aria-atomic="false" data-testid="toasts-alert" data-placement={atTop ? "top" : "bottom"} style={{ ...box, ...(atTop ? { top: 56 + 64 * toasts.filter((x) => x.type !== "error").length } : { bottom: 40 + 64 * toasts.filter((x) => x.type !== "error").length }) }}>
         {renderToasts(toasts.filter((x) => x.type === "error"))}
       </div>
-      <div data-modal-exempt="" role="status" aria-live="polite" aria-atomic="false" data-testid="toasts-status" style={box}>
+      <div ref={(r) => void (regions.current[1] = r!)} data-modal-exempt="" role="status" aria-live="polite" aria-atomic="false" data-testid="toasts-status" data-placement={atTop ? "top" : "bottom"} style={box}>
         {renderToasts(toasts.filter((x) => x.type !== "error"))}
       </div>
     </>
@@ -191,12 +229,20 @@ export function AiToastContainer() {
             <button
               onClick={() => remove(t.id)}
               aria-label={i18n("toast.dismiss")}
+              data-testid="toast-dismiss"
               style={{
                 background: "transparent",
                 border: "none",
                 color: "hsl(var(--fg-muted))",
                 cursor: "pointer",
+                // 24 px: the WCAG 2.2 minimum target (2.5.8, W13.Y5).
+                minWidth: 24,
+                minHeight: 24,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
                 padding: 2,
+                borderRadius: 4,
                 flexShrink: 0,
               }}
             >

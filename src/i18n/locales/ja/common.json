@@ -1,5 +1,6 @@
 {
   "a11y.sidebarResizer": "サイドバーの幅を変更",
+  "a11y.sidebarResizerHint": "Drag to resize, or click for the next width (160, 240, 320, 400 px)",
   "a11y.skipToContent": "コンテンツへスキップ",
   "about.a11yStatement": "アクセシビリティ方針",
   "about.a11yStatement.hint": "Lumen のアクセシビリティ方針：準拠規格、対応状況、既知の課題、障壁の報告方法",

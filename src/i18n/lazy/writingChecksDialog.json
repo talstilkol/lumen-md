@@ -5,7 +5,7 @@
   "wchk.cut": "(cut)",
   "wchk.goto": "Go to",
   "wchk.ignore": "Ignore from now on",
-  "wchk.ignoreLabel": "Ignore “{what}” from now on",
+  "wchk.ignoreLabel": "Ignore from now on: “{what}”",
   "wchk.kind.all": "Everything ({count})",
   "wchk.kind.cliche": "Clichés ({count})",
   "wchk.kind.doubled": "Doubled words ({count})",

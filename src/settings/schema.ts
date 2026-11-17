@@ -331,6 +331,8 @@ export const SETTINGS: readonly SettingEntry[] = [
   data("lumen.writingGoals.log.v1"),
   // Wave g4 (W13.S1): how long this vault keeps old versions of notes and attachments (per vault).
   local("lumen.history.retention.v1.*", { kind: "setting", tab: "general", type: "json" }),
+  // Wave g4 (W13.Y4): this device's text size over the system's (1–3.1; none: follow the system).
+  local("lumen.textScale.override", { kind: "setting", tab: "appearance", type: "number", min: 1, max: 3.1 }),
   local("lumen.map.offline", { kind: "setting", tab: "privacy", type: "boolean", values: ["", "1"] }),
   local("lumen-paged", { kind: "setting", tab: "general", type: "json" }),
   local("lumen.compare", { kind: "setting", tab: "general", type: "json" }),

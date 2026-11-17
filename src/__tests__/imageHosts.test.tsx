@@ -51,7 +51,7 @@ describe("the screen", () => {
     render(<ImageHostsList />);
     expect(screen.getByTestId("image-hosts").textContent).toContain("a.example.com");
     expect(screen.getAllByRole("listitem").map((li) => li.textContent?.replace(/Revoke$/, ""))).toEqual(["a.example.com", "b.example.com"]);
-    fireEvent.click(screen.getByRole("button", { name: "Stop always allowing a.example.com" }));
+    fireEvent.click(screen.getByRole("button", { name: "Revoke always allowing a.example.com" }));
     expect(screen.getAllByRole("listitem")).toHaveLength(1);
     fireEvent.click(screen.getByRole("button", { name: "Revoke all" }));
     expect(screen.getByTestId("image-hosts-empty")).toBeTruthy();

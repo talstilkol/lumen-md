@@ -309,19 +309,17 @@
       "id": "2.5.3",
       "level": "A",
       "name": "Label in Name",
-      "status": "partially-supports",
+      "status": "supports",
       "remarks": {
-        "en": "Buttons with visible text use that text as their name. Not every icon-and-text control has been checked by hand.",
-        "he": "כפתורים עם טקסט גלוי משתמשים בו כשם. לא כל פקד של אייקון וטקסט נבדק ביד."
+        "en": "Every control in the source that sets an accessible name and shows text is checked in English and Hebrew: the name contains the visible text (W13.Y3; 8 controls fixed). The browser run checks the rendered names on ten surfaces. Speech-input protocol: docs/a11y/voice-control-protocol.md.",
+        "he": "כל פקד בקוד שמגדיר שם נגיש ומציג טקסט נבדק באנגלית ובעברית: השם מכיל את הטקסט הגלוי (W13.Y3; 8 פקדים תוקנו). הרצת הדפדפן בודקת את השמות בפועל בעשרה משטחים. פרוטוקול קלט קולי: docs/a11y/voice-control-protocol.md."
       },
       "evidence": [
-        "e2e/a11y.spec.ts"
-      ],
-      "plan": {
-        "en": "A manual pass over every toolbar and dialog, recorded in the screen reader protocol.",
-        "he": "מעבר ידני על כל סרגל כלים ודיאלוג, מתועד בפרוטוקול קוראי המסך.",
-        "target": "0.2.0"
-      }
+        "src/__tests__/labelInName.test.ts",
+        "src/a11y/wcag22.ts",
+        "e2e/a11y.spec.ts",
+        "docs/a11y/voice-control-protocol.md"
+      ]
     },
     {
       "id": "2.5.4",
@@ -633,19 +631,16 @@
       "id": "2.4.11",
       "level": "AA",
       "name": "Focus Not Obscured (Minimum)",
-      "status": "partially-supports",
+      "status": "supports",
       "remarks": {
-        "en": "Dialogs are modal and centred. Notifications in the corner can sit over a focused control near the bottom edge until they go away.",
-        "he": "דיאלוגים הם מודאליים וממורכזים. הודעות בפינה יכולות לכסות פקד במיקוד ליד הקצה התחתון עד שהן נעלמות."
+        "en": "Dialogs are modal and centred. Notifications move to the top of the window when the focused control is under them, and back when it is under the top band (W13.Y5). The browser gate tabs through ten surfaces and fails on a focused control hidden by fixed or sticky content.",
+        "he": "דיאלוגים הם מודאליים וממורכזים. הודעות עוברות לראש החלון כשהפקד שבמיקוד נמצא מתחתן, וחוזרות כשהוא מתחת לפס העליון (W13.Y5). שער הדפדפן עובר ב-Tab על עשרה משטחים ונכשל על פקד במיקוד שמוסתר בתוכן קבוע או דביק."
       },
       "evidence": [
-        "src/ui/AiToast.tsx"
-      ],
-      "plan": {
-        "en": "Move notifications away from the focused element, and an e2e that tabs through the main screen with notifications showing.",
-        "he": "להזיז הודעות מהרכיב שבמיקוד, ובדיקת e2e שעוברת ב-Tab על המסך הראשי כשמוצגות הודעות.",
-        "target": "0.2.0"
-      }
+        "src/ui/AiToast.tsx",
+        "src/__tests__/wcag22New.test.ts",
+        "e2e/a11y.spec.ts"
+      ]
     },
     {
       "id": "2.5.7",
@@ -653,15 +648,17 @@
       "name": "Dragging Movements",
       "status": "partially-supports",
       "remarks": {
-        "en": "Reordering document tabs is by dragging only; there is no single-pointer or command alternative yet. Resizing the sidebar by its edge has a keyboard alternative, but not a single-pointer one.",
-        "he": "סידור לשוניות המסמכים מחדש נעשה רק בגרירה; עדיין אין חלופה של לחיצה או פקודה. לגרירות אחרות (קצה הסרגל) יש חלופה במקלדת, אבל לא בלחיצה בודדת."
+        "en": "Document tabs move with a single click from their menu (right-click: Move earlier / Move later) or Alt+Shift+arrow; the sidebar edge steps through widths on a click (W13.Y5). Canvas nodes, kanban cards, chapter order and image resizing are not yet checked for a single-pointer alternative.",
+        "he": "לשוניות המסמכים זזות בלחיצה אחת מהתפריט שלהן (לחיצה ימנית: הזזה למקום הקודם / הבא) או ב-Alt+Shift+חץ; קצה הסרגל עובר בין רוחבים בלחיצה (W13.Y5). צמתי הקנבס, כרטיסי הקנבן, סדר הפרקים ושינוי גודל תמונה עוד לא נבדקו לחלופה של לחיצה בודדת."
       },
       "evidence": [
-        "src/ui/DocTabs.tsx"
+        "src/ui/DocTabs.tsx",
+        "src/ui/SidebarResizer.tsx",
+        "src/__tests__/wcag22New.test.ts"
       ],
       "plan": {
-        "en": "\"Move tab left / right\" in the tab's menu and the palette, and a width menu on the sidebar edge.",
-        "he": "„הזזת לשונית ימינה / שמאלה” בתפריט הלשונית ובפלטה, ותפריט רוחב על קצה הסרגל.",
+        "en": "A menu or button alternative for canvas, kanban, chapter order and image resize, each with a test.",
+        "he": "חלופה של תפריט או כפתור לקנבס, לקנבן, לסדר הפרקים ולשינוי גודל תמונה, כל אחת עם בדיקה.",
         "target": "0.2.0"
       }
     },
@@ -671,13 +668,17 @@
       "name": "Target Size (Minimum)",
       "status": "partially-supports",
       "remarks": {
-        "en": "Most controls are 24×24 CSS px or larger, or spaced so a 24 px circle fits. A few icon buttons in dense panels (the calendar's arrows, a toast's close button) are smaller. axe (W3.8 run) confirms: 13 results on DocTabs' close buttons, the vault-encryption dialog's close, the calendar header and the usability panel.",
-        "he": "רוב הפקדים בגודל 24×24 פיקסלים לפחות, או מרווחים כך שעיגול של 24 פיקסלים נכנס. כמה כפתורי אייקון בפאנלים צפופים (החיצים של לוח השנה, כפתור הסגירה של הודעה) קטנים יותר. axe (הרצת W3.8) מאשר: 13 תוצאות בכפתורי הסגירה של הלשוניות, בסגירה של חלון הצפנת הכספת, בכותרת לוח השנה ובחלונית השימושיות."
+        "en": "Tab close buttons, the tab menu and a notification's dismiss button are 24 px or larger (W6.30, W13.Y5). A target-size scan with WCAG's spacing exception (src/a11y/wcag22.ts) runs on ten surfaces in the browser gate; it found and fixed the notification's dismiss button.",
+        "he": "כפתורי הסגירה של הלשוניות, תפריט הלשונית וכפתור הסגירה של הודעה הם 24 פיקסלים לפחות (W6.30, W13.Y5). סריקת גודל מטרה עם חריגת הריווח של WCAG (src/a11y/wcag22.ts) רצה על עשרה משטחים בשער הדפדפן; היא מצאה ותיקנה את כפתור הסגירה של ההודעה."
       },
-      "evidence": [],
+      "evidence": [
+        "src/a11y/wcag22.ts",
+        "src/__tests__/wcag22New.test.ts",
+        "e2e/a11y.spec.ts"
+      ],
       "plan": {
-        "en": "Enlarge those buttons to 24 px — done in #522 (W6.30) — and keep the axe target-size rule in the run.",
-        "he": "להגדיל את הכפתורים האלה ל-24 פיקסלים — נעשה ב-#522 (W6.30) — ולהשאיר את כלל target-size של axe בהרצה.",
+        "en": "Keep the browser scan at zero on the ten surfaces; the calendar header and the usability panel are checked when the gate runs on the Mac.",
+        "he": "להשאיר את סריקת הדפדפן על אפס בעשרת המשטחים; כותרת לוח השנה וחלונית השימושיות נבדקות כשהשער רץ ב-Mac.",
         "target": "0.2.0"
       }
     },
@@ -744,11 +745,13 @@
       "name": "Accessible Authentication (Minimum)",
       "status": "supports",
       "remarks": {
-        "en": "Sign-in needs no cognitive test: email and password fields allow paste and password managers (autocomplete), or a single sign-on provider.",
-        "he": "הכניסה לא דורשת מבחן קוגניטיבי: שדות הדוא״ל והסיסמה מאפשרים הדבקה ומנהלי סיסמאות (autocomplete), או כניסה דרך ספק SSO."
+        "en": "Sign-in needs no cognitive test: email and password fields allow paste and password managers (autocomplete), or a single sign-on provider. Unlocking an encrypted vault the same: every passphrase field allows paste and names itself to password managers (current- or new-password), and a passkey or the recovery key opens it without remembering anything (W13.Y5).",
+        "he": "הכניסה לא דורשת מבחן קוגניטיבי: שדות הדוא״ל והסיסמה מאפשרים הדבקה ומנהלי סיסמאות (autocomplete), או כניסה דרך ספק SSO. כך גם פתיחת כספת מוצפנת: כל שדה ביטוי סיסמה מאפשר הדבקה ומזדהה למנהלי סיסמאות (current- או new-password), ומפתח גישה או מפתח השחזור פותחים אותה בלי לזכור דבר (W13.Y5)."
       },
       "evidence": [
-        "src/components/AuthDialog.tsx"
+        "src/components/AuthDialog.tsx",
+        "src/__tests__/wcag22New.test.ts",
+        "src/sync/e2ee/ui/PasskeyUnlock.tsx"
       ]
     },
     {

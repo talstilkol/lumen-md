@@ -1,5 +1,6 @@
 {
   "a11y.sidebarResizer": "Redimensionner la barre latérale",
+  "a11y.sidebarResizerHint": "Drag to resize, or click for the next width (160, 240, 320, 400 px)",
   "a11y.skipToContent": "Aller au contenu",
   "about.a11yStatement": "Déclaration d’accessibilité",
   "about.a11yStatement.hint": "La déclaration d’accessibilité de Lumen : la norme, ce qui fonctionne, les lacunes connues et comment signaler un obstacle",

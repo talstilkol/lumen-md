@@ -1,5 +1,6 @@
 {
   "a11y.sidebarResizer": "تغيير عرض الشريط الجانبي",
+  "a11y.sidebarResizerHint": "Drag to resize, or click for the next width (160, 240, 320, 400 px)",
   "a11y.skipToContent": "تخطَّ إلى المحتوى",
   "about.a11yStatement": "بيان إمكانية الوصول",
   "about.a11yStatement.hint": "بيان إمكانية الوصول في Lumen: المعيار، وما يعمل، والفجوات المعروفة، وكيفية الإبلاغ عن عائق",

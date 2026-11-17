@@ -49,7 +49,7 @@ function errorText(e: unknown): string {
   return t("e2ee.roles.error", { error: e2eeErrorText(e) });
 }
 
-function PassphraseRow({ go, label, testid, onSubmit }: { go: string; label: string; testid: string; onSubmit: (p: string) => void }) {
+function PassphraseRow({ go, label, testid, onSubmit, existing = false }: { go: string; label: string; testid: string; onSubmit: (p: string) => void; /** Unlocking with a passphrase that exists: password managers fill it (WCAG 3.3.8). */ existing?: boolean }) {
   const [p, setP] = useState("");
   return (
     <form
@@ -59,7 +59,7 @@ function PassphraseRow({ go, label, testid, onSubmit }: { go: string; label: str
         if (p) onSubmit(p);
       }}
     >
-      <input type="password" autoComplete="new-password" style={{ ...field, flex: 1, minWidth: 160 }} value={p} onChange={(e) => setP(e.target.value)} aria-label={label} data-testid={`${testid}-passphrase`} />
+      <input type="password" autoComplete={existing ? "current-password" : "new-password"} style={{ ...field, flex: 1, minWidth: 160 }} value={p} onChange={(e) => setP(e.target.value)} aria-label={label} data-testid={`${testid}-passphrase`} />
       <button type="submit" style={primary} disabled={!p} data-testid={`${testid}-go`}>
         {go}
       </button>
@@ -204,7 +204,7 @@ export function RoleVaultPanel({ onClose, deps, relay, origin, joining = null }:
                 <SharedConsent vault={view.record.id} />
               </>
             ) : (
-              <PassphraseRow go={t("e2ee.roles.unlock.go")} label={t("e2ee.roles.passphrase")} testid="role-unlock" onSubmit={(p) => void unlock(view.record, p)} />
+              <PassphraseRow go={t("e2ee.roles.unlock.go")} label={t("e2ee.roles.passphrase")} testid="role-unlock" existing onSubmit={(p) => void unlock(view.record, p)} />
             )}
           </section>
         )}

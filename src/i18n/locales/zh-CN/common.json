@@ -1,5 +1,6 @@
 {
   "a11y.sidebarResizer": "调整侧边栏宽度",
+  "a11y.sidebarResizerHint": "Drag to resize, or click for the next width (160, 240, 320, 400 px)",
   "a11y.skipToContent": "跳到内容",
   "about.a11yStatement": "无障碍声明",
   "about.a11yStatement.hint": "Lumen 的无障碍声明：标准、已支持的内容、已知差距以及如何报告障碍",

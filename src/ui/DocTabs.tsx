@@ -42,6 +42,16 @@ export const DocTabs = React.memo(function DocTabs({
   onDragOut,
 }: Props) {
   const [dragSrc, setDragSrc] = useState<number | null>(null);
+  /** WCAG 2.5.7: the tab's menu (right-click, or the Menu key) — moving a tab without dragging it. */
+  const [menu, setMenu] = useState<{ idx: number; x: number; y: number } | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const stripRef = useRef<HTMLDivElement | null>(null);
+  const focusTab = (i: number) => requestAnimationFrame(() => stripRef.current?.querySelectorAll<HTMLButtonElement>("button[data-doc-tab]")[i]?.focus());
+  const move = (from: number, to: number) => {
+    if (!onReorder || to < 0 || to >= tabs.length || to === from) return;
+    onReorder(from, to);
+    focusTab(to);
+  };
   const [dragHover, setDragHover] = useState<number | null>(null);
   const hoverRef = useRef<number | null>(null);
 
@@ -104,7 +114,9 @@ export const DocTabs = React.memo(function DocTabs({
   if (tabs.length <= 1) return null;
 
   return (
+    <>
     <div
+      ref={stripRef}
       className="doc-tabs"
       // Using `role="group"` rather than `tablist` — tablist mandates that
       // every direct child be a `role="tab"` (axe `aria-required-children`).
@@ -141,7 +153,15 @@ export const DocTabs = React.memo(function DocTabs({
             onPointerDown={(e) => startTouchDrag(e, idx)}
             onContextMenu={(e) => {
               // A long press shouldn't open the browser's menu over the tab being dragged.
-              if (dragSrc !== null) e.preventDefault();
+              if (dragSrc !== null) {
+                e.preventDefault();
+                return;
+              }
+              // W13.Y5 (WCAG 2.5.7): right-click (or the Menu key) opens Move earlier / later — reordering without a drag.
+              if (!onReorder) return;
+              e.preventDefault();
+              const r = e.currentTarget.getBoundingClientRect();
+              setMenu({ idx, x: e.clientX || r.left, y: e.clientY || r.bottom });
             }}
             onMouseDown={(e) => {
               // Middle-click anywhere in the tab row = close (browser convention).
@@ -206,8 +226,15 @@ export const DocTabs = React.memo(function DocTabs({
                   onClose(tab.id);
                   return;
                 }
-                // ←/→ move to the tab drawn on that side (reversed in RTL), Home/End to the ends.
+                // W13.Y5: Alt+Shift+←/→ moves the tab itself one place, in the direction drawn (RTL aware).
                 const strip = e.currentTarget.closest(".doc-tabs");
+                if (onReorder && e.altKey && e.shiftKey && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+                  e.preventDefault();
+                  const rtl = inlineDirectionOf(strip) === "rtl";
+                  const later = (e.key === "ArrowRight") !== rtl;
+                  move(idx, idx + (later ? 1 : -1));
+                  return;
+                }
                 const next = rovingIndex(e.key, inlineDirectionOf(strip), idx, tabs.length);
                 if (next === null || e.altKey || e.metaKey || e.ctrlKey || e.shiftKey) return;
                 e.preventDefault();
@@ -286,8 +313,76 @@ export const DocTabs = React.memo(function DocTabs({
         );
       })}
     </div>
+    {menu && (
+      <TabMenu
+        x={menu.x}
+        y={menu.y}
+        label={tabs[menu.idx]?.name ?? ""}
+        menuRef={menuRef}
+        canEarlier={menu.idx > 0}
+        canLater={menu.idx < tabs.length - 1}
+        onEarlier={() => (move(menu.idx, menu.idx - 1), setMenu(null))}
+        onLater={() => (move(menu.idx, menu.idx + 1), setMenu(null))}
+        onClose={() => {
+          const i = menu.idx;
+          setMenu(null);
+          focusTab(i);
+        }}
+      />
+    )}
+    </>
   );
 });
+
+/**
+ * The tab's menu (W13.Y5, WCAG 2.5.7 Dragging Movements): Move earlier /
+ * Move later, one click each — the single-pointer way to do what dragging
+ * a tab does. Earlier/later follow the reading order, so the words are right
+ * in Hebrew as in English. ↑/↓ move between the items, Escape closes and
+ * gives focus back to the tab.
+ */
+function TabMenu(p: { x: number; y: number; label: string; menuRef: React.RefObject<HTMLDivElement | null>; canEarlier: boolean; canLater: boolean; onEarlier: () => void; onLater: () => void; onClose: () => void }) {
+  React.useEffect(() => {
+    p.menuRef.current?.querySelector<HTMLButtonElement>("[role=menuitem]:not([aria-disabled=true])")?.focus();
+    const away = (e: PointerEvent) => {
+      if (!p.menuRef.current?.contains(e.target as Node)) p.onClose();
+    };
+    document.addEventListener("pointerdown", away, true);
+    return () => document.removeEventListener("pointerdown", away, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const item: React.CSSProperties = { display: "block", width: "100%", minHeight: 28, padding: "4px 12px", textAlign: "start", border: "none", background: "transparent", color: "inherit", font: "inherit", fontSize: 13, cursor: "pointer", borderRadius: 4 };
+  const entries: Array<{ label: string; on: () => void; ok: boolean }> = [
+    { label: t("docTabs.moveEarlier"), on: p.onEarlier, ok: p.canEarlier },
+    { label: t("docTabs.moveLater"), on: p.onLater, ok: p.canLater },
+  ];
+  return (
+    <div
+      ref={p.menuRef}
+      role="menu"
+      aria-label={t("docTabs.menu", { name: p.label })}
+      data-testid="doc-tab-menu"
+      style={{ position: "fixed", left: Math.min(p.x, window.innerWidth - 200), top: Math.min(p.y, window.innerHeight - 90), zIndex: 1000, minWidth: 180, padding: 4, background: "hsl(var(--bg))", color: "hsl(var(--fg))", border: "1px solid hsl(var(--border))", borderRadius: 8, boxShadow: "var(--shadow-md, 0 6px 20px rgba(0,0,0,.15))" }}
+      onKeyDown={(e) => {
+        const items = [...(p.menuRef.current?.querySelectorAll<HTMLButtonElement>("[role=menuitem]") ?? [])];
+        const at = items.indexOf(document.activeElement as HTMLButtonElement);
+        if (e.key === "Escape" || e.key === "Tab") {
+          e.preventDefault();
+          p.onClose();
+        } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          e.preventDefault();
+          items[(at + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length]?.focus();
+        }
+      }}
+    >
+      {entries.map((en) => (
+        <button key={en.label} type="button" role="menuitem" aria-disabled={!en.ok || undefined} style={{ ...item, opacity: en.ok ? 1 : 0.5 }} onClick={() => en.ok && en.on()}>
+          {en.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 /** Utility: generate a unique tab ID. Mirrored in `useStore.tabIdOf`. */
 export function tabId(doc: DocFile): string {

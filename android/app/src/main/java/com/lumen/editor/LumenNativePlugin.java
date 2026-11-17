@@ -55,6 +55,14 @@ public class LumenNativePlugin extends Plugin {
         notifyListeners("resume", new JSObject());
     }
 
+    /** W13.Y4 (EN 301 549 v4.1.1 user preferences): the system font scale (Settings → Display → Font size), 1.0 = default. */
+    @PluginMethod
+    public void getTextScale(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("scale", (double) getContext().getResources().getConfiguration().fontScale);
+        call.resolve(ret);
+    }
+
     @PluginMethod
     public void getLaunchUrl(PluginCall call) {
         JSObject ret = new JSObject();

@@ -324,6 +324,18 @@ export default function App() {
       window.clearTimeout(purge);
     };
   }, []);
+  // W13.Y4: the system text size (Dynamic Type, Android font scale) or this device's own, re-read on resume.
+  useEffect(() => {
+    let stop: (() => void) | null = null;
+    let live = true;
+    void import("./a11y/systemTextSize").then((m) => {
+      if (live) stop = m.installSystemTextSize();
+    });
+    return () => {
+      live = false;
+      stop?.();
+    };
+  }, []);
   useWindowEvent("lumen-open-ai-doctor", () => setAiDoctorOpen(true));
   // Changes agents proposed (plan 5.11): the editor applies approved ones,
   // the status bar counts the waiting ones, a toast announces new ones.
