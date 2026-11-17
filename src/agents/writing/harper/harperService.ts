@@ -33,9 +33,10 @@ function post(): Post | null {
         pending.get(e.data.id)?.(e.data);
         pending.delete(e.data.id);
       };
+      // The worker could not start (its module or harper.js is not in this build): the same as not installed.
       worker.onerror = () => {
         missing = true;
-        for (const [id, done] of pending) done({ type: "failed", id, error: "worker error" });
+        for (const [id, done] of pending) done({ type: "not-installed", id });
         pending.clear();
         worker?.terminate();
         worker = null;
