@@ -11,6 +11,7 @@ npm run owner:session -- accounts    # ישיבה 1: חשבונות, מפתחו�
 npm run owner:session -- gpu         # ישיבה 2: מודלים ונתונים (GPU בענן, ה-Mac כגיבוי)
 npm run owner:session -- devices     # ישיבה 3: מכשירים, שחרורים ומיזוג
 npm run owner:session -- status      # מה נעשה, דקות משוערות מול דקות בפועל
+npm run owner:session -- status --require W13.R14   # יציאה 1 עד שכל צעד שנושא את W13.R14 הושלם עם קבלה תקפה
 npm run owner:session -- check       # רק הבדיקות האוטומטיות: בלי שאלות ובלי רישום
 npm run owner:session -- collect     # כל פקודות הבעלים ב-PR-ים הפתוחים, בלי כפילויות ועם שיוך
 ```
