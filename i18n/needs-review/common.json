@@ -1460,6 +1460,214 @@
     "zh-CN": "tku16y",
     "he": "tku16y"
   },
+  "family.box": {
+    "ar": "wpzf7w",
+    "de": "wpzf7w",
+    "fr": "wpzf7w",
+    "ja": "wpzf7w",
+    "ru": "wpzf7w",
+    "zh-CN": "wpzf7w"
+  },
+  "family.chart": {
+    "ar": "8pjvv",
+    "de": "8pjvv",
+    "fr": "8pjvv",
+    "ja": "8pjvv",
+    "ru": "8pjvv",
+    "zh-CN": "8pjvv"
+  },
+  "family.controls": {
+    "ar": "vmfbtx",
+    "de": "vmfbtx",
+    "fr": "vmfbtx",
+    "ja": "vmfbtx",
+    "ru": "vmfbtx",
+    "zh-CN": "vmfbtx"
+  },
+  "family.depth": {
+    "ar": "1r1ebsc",
+    "de": "1r1ebsc",
+    "fr": "1r1ebsc",
+    "ja": "1r1ebsc",
+    "ru": "1r1ebsc",
+    "zh-CN": "1r1ebsc"
+  },
+  "family.empty": {
+    "ar": "6ie9a2",
+    "de": "6ie9a2",
+    "fr": "6ie9a2",
+    "ja": "6ie9a2",
+    "ru": "6ie9a2",
+    "zh-CN": "6ie9a2"
+  },
+  "family.import.button": {
+    "ar": "1mo8bcp",
+    "de": "1mo8bcp",
+    "fr": "1mo8bcp",
+    "ja": "1mo8bcp",
+    "ru": "1mo8bcp",
+    "zh-CN": "1mo8bcp"
+  },
+  "family.import.cancel": {
+    "ar": "ew9em3",
+    "de": "ew9em3",
+    "fr": "ew9em3",
+    "ja": "ew9em3",
+    "ru": "ew9em3",
+    "zh-CN": "ew9em3"
+  },
+  "family.import.children": {
+    "ar": "srgo9e",
+    "de": "srgo9e",
+    "fr": "srgo9e",
+    "ja": "srgo9e",
+    "ru": "srgo9e",
+    "zh-CN": "srgo9e"
+  },
+  "family.import.confirm": {
+    "ar": "1yfxc59",
+    "de": "1yfxc59",
+    "fr": "1yfxc59",
+    "ja": "1yfxc59",
+    "ru": "1yfxc59",
+    "zh-CN": "1yfxc59"
+  },
+  "family.import.done": {
+    "ar": "1mnydad",
+    "de": "1mnydad",
+    "fr": "1mnydad",
+    "ja": "1mnydad",
+    "ru": "1mnydad",
+    "zh-CN": "1mnydad"
+  },
+  "family.import.failed": {
+    "ar": "lt1o52",
+    "de": "lt1o52",
+    "fr": "lt1o52",
+    "ja": "lt1o52",
+    "ru": "lt1o52",
+    "zh-CN": "lt1o52"
+  },
+  "family.import.family": {
+    "ar": "1ii54cp",
+    "de": "1ii54cp",
+    "fr": "1ii54cp",
+    "ja": "1ii54cp",
+    "ru": "1ii54cp",
+    "zh-CN": "1ii54cp"
+  },
+  "family.import.none": {
+    "ar": "i23nnw",
+    "de": "i23nnw",
+    "fr": "i23nnw",
+    "ja": "i23nnw",
+    "ru": "i23nnw",
+    "zh-CN": "i23nnw"
+  },
+  "family.import.noteTitle": {
+    "ar": "trbumx",
+    "de": "trbumx",
+    "fr": "trbumx",
+    "ja": "trbumx",
+    "ru": "trbumx",
+    "zh-CN": "trbumx"
+  },
+  "family.import.preview": {
+    "ar": "1afvof",
+    "de": "1afvof",
+    "fr": "1afvof",
+    "ja": "1afvof",
+    "ru": "1afvof",
+    "zh-CN": "1afvof"
+  },
+  "family.import.run": {
+    "ar": "o7fto4",
+    "de": "o7fto4",
+    "fr": "o7fto4",
+    "ja": "o7fto4",
+    "ru": "o7fto4",
+    "zh-CN": "o7fto4"
+  },
+  "family.keys": {
+    "ar": "cy3mkk",
+    "de": "cy3mkk",
+    "fr": "cy3mkk",
+    "ja": "cy3mkk",
+    "ru": "cy3mkk",
+    "zh-CN": "cy3mkk"
+  },
+  "family.label": {
+    "ar": "153c6f",
+    "de": "153c6f",
+    "fr": "153c6f",
+    "ja": "153c6f",
+    "ru": "153c6f",
+    "zh-CN": "153c6f"
+  },
+  "family.mode": {
+    "ar": "153c6f",
+    "de": "153c6f",
+    "fr": "153c6f",
+    "ja": "153c6f",
+    "ru": "153c6f",
+    "zh-CN": "153c6f"
+  },
+  "family.mode.ancestors": {
+    "ar": "wi86a1",
+    "de": "wi86a1",
+    "fr": "wi86a1",
+    "ja": "wi86a1",
+    "ru": "wi86a1",
+    "zh-CN": "wi86a1"
+  },
+  "family.mode.descendants": {
+    "ar": "1f05673",
+    "de": "1f05673",
+    "fr": "1f05673",
+    "ja": "1f05673",
+    "ru": "1f05673",
+    "zh-CN": "1f05673"
+  },
+  "family.mode.hourglass": {
+    "ar": "ddcdd7",
+    "de": "ddcdd7",
+    "fr": "ddcdd7",
+    "ja": "ddcdd7",
+    "ru": "ddcdd7",
+    "zh-CN": "ddcdd7"
+  },
+  "family.noYears": {
+    "ar": "lsrtrj",
+    "de": "lsrtrj",
+    "fr": "lsrtrj",
+    "ja": "lsrtrj",
+    "ru": "lsrtrj",
+    "zh-CN": "lsrtrj"
+  },
+  "family.open": {
+    "ar": "1gl4cay",
+    "de": "1gl4cay",
+    "fr": "1gl4cay",
+    "ja": "1gl4cay",
+    "ru": "1gl4cay",
+    "zh-CN": "1gl4cay"
+  },
+  "family.person": {
+    "ar": "dmvj58",
+    "de": "dmvj58",
+    "fr": "dmvj58",
+    "ja": "dmvj58",
+    "ru": "dmvj58",
+    "zh-CN": "dmvj58"
+  },
+  "family.status": {
+    "ar": "3iw82f",
+    "de": "3iw82f",
+    "fr": "3iw82f",
+    "ja": "3iw82f",
+    "ru": "3iw82f",
+    "zh-CN": "3iw82f"
+  },
   "focusLayer.controls": {
     "ar": "y3vc3g",
     "de": "y3vc3g",

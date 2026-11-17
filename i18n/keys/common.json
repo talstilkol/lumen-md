@@ -8701,6 +8701,157 @@
       ]
     },
     {
+      "key": "family.box",
+      "en": "{name}, {years}, {children} children",
+      "vars": [
+        "name",
+        "years",
+        "children"
+      ]
+    },
+    {
+      "key": "family.chart",
+      "en": "Chart",
+      "vars": []
+    },
+    {
+      "key": "family.controls",
+      "en": "Family tree options",
+      "vars": []
+    },
+    {
+      "key": "family.depth",
+      "en": "Generations",
+      "vars": []
+    },
+    {
+      "key": "family.empty",
+      "en": "No people with parents, children or spouses yet. Import a GEDCOM file or add relations.",
+      "vars": []
+    },
+    {
+      "key": "family.import.button",
+      "en": "Import GEDCOM…",
+      "vars": []
+    },
+    {
+      "key": "family.import.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "family.import.children",
+      "en": "children",
+      "vars": []
+    },
+    {
+      "key": "family.import.confirm",
+      "en": "Import this family tree?",
+      "vars": []
+    },
+    {
+      "key": "family.import.done",
+      "en": "Imported {people} people and {edges} relations",
+      "vars": [
+        "people",
+        "edges"
+      ]
+    },
+    {
+      "key": "family.import.failed",
+      "en": "The import did not finish: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "family.import.family",
+      "en": "Family",
+      "vars": []
+    },
+    {
+      "key": "family.import.none",
+      "en": "{file} has no individuals to import",
+      "vars": [
+        "file"
+      ]
+    },
+    {
+      "key": "family.import.noteTitle",
+      "en": "GEDCOM import",
+      "vars": []
+    },
+    {
+      "key": "family.import.preview",
+      "en": "{file}: {people} people, {families} families, {problems} problems",
+      "vars": [
+        "file",
+        "people",
+        "families",
+        "problems"
+      ]
+    },
+    {
+      "key": "family.import.run",
+      "en": "Import",
+      "vars": []
+    },
+    {
+      "key": "family.keys",
+      "en": "↑ parent · ↓ child · ←/→ along the generation · Enter centres on a person · double-click opens",
+      "vars": []
+    },
+    {
+      "key": "family.label",
+      "en": "Family tree",
+      "vars": []
+    },
+    {
+      "key": "family.mode",
+      "en": "Family tree",
+      "vars": []
+    },
+    {
+      "key": "family.mode.ancestors",
+      "en": "Ancestors",
+      "vars": []
+    },
+    {
+      "key": "family.mode.descendants",
+      "en": "Descendants",
+      "vars": []
+    },
+    {
+      "key": "family.mode.hourglass",
+      "en": "Hourglass (ancestors and descendants)",
+      "vars": []
+    },
+    {
+      "key": "family.noYears",
+      "en": "years unknown",
+      "vars": []
+    },
+    {
+      "key": "family.open",
+      "en": "Open {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "family.person",
+      "en": "Around",
+      "vars": []
+    },
+    {
+      "key": "family.status",
+      "en": "{name}: {shown} people shown",
+      "vars": [
+        "name",
+        "shown"
+      ]
+    },
+    {
       "key": "feedback.close",
       "en": "Close",
       "vars": []

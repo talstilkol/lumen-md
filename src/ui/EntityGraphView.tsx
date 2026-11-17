@@ -29,6 +29,7 @@ import "./graph/graphAltStrings";
 import "./graph/graphExportStrings";
 import { GraphExportMenu } from "./graph/GraphExportMenu";
 import { entityScene } from "./graph/entityScene";
+import "./familyStrings";
 import { egoDefault } from "../views/graph/ego";
 import { countedSankey, type FlowInput } from "../views/graph/flows";
 import type { SourceMeta } from "../views/graph/claims";
@@ -45,11 +46,13 @@ const PathFinderPanel = lazy(() => import("../viz/graph/PathFinderPanel"));
 const Graph3DView = lazy(() => import("./graph/Graph3DView"));
 // W13.G11: the graph as a list you walk, one node and its neighbours at a time.
 const GraphListView = lazy(() => import("./graph/GraphListView").then((m) => ({ default: m.GraphListView })));
+// W13.G7: the family tree of the people shown, loaded when chosen.
+const FamilyTreeView = lazy(() => import("./FamilyTreeView"));
 
 /** Above this many entities the view opens as an ego graph (R12.8), never as a hairball. */
 export const EGO_MAX = 50;
 
-export type EntityGraphMode = "graph" | "table" | "list" | "sankey" | "flows" | "matrix" | "paths" | "3d";
+export type EntityGraphMode = "graph" | "table" | "list" | "sankey" | "flows" | "matrix" | "paths" | "3d" | "family";
 
 export interface EntityGraphViewProps {
   entities: readonly Entity[];
@@ -66,11 +69,13 @@ export interface EntityGraphViewProps {
   texts?: ReadonlyMap<string, string>;
   /** W13.G9: where perspectives are kept (tests pass a vault; the app uses the workspace). */
   perspectiveVault?: import("../graph/perspectives").PerspectiveVault;
+  /** W13.G7: person entities with their front matter (born, died, sex), for the family tree. */
+  people?: ReadonlyArray<import("../entities/gedcom").ExportPerson>;
 }
 
 const field: React.CSSProperties = { fontSize: 12, padding: "2px 6px", borderRadius: 4, border: "1px solid hsl(var(--border))", background: "hsl(var(--bg))", color: "hsl(var(--fg))" };
 
-export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialMode = "graph", start, onOpenSource, texts, perspectiveVault }: EntityGraphViewProps) {
+export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialMode = "graph", start, onOpenSource, texts, perspectiveVault, people }: EntityGraphViewProps) {
   const [types, setTypes] = useState<Set<EntityType>>(new Set(ENTITY_TYPES));
   const [preds, setPreds] = useState<Set<string>>(new Set(PREDICATES.map((p) => p.id)));
   const [folder, setFolder] = useState("");
@@ -130,6 +135,9 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
   const egoShown = !!ego.center && center === ego.center;
   // W13.G11: the summary and the list read the same visible graph as the canvas and the table.
   const alt = useMemo(() => entityAltGraph(visible), [visible]);
+  // W13.G7: the family tree is offered when the graph has parents, children or spouses.
+  const hasFamily = useMemo(() => edges.some((e) => e.predicate === "child" || e.predicate === "spouse"), [edges]);
+  const familyPeople = useMemo(() => people ?? entities.filter((e) => e.type === "person").map((entity) => ({ entity })), [people, entities]);
 
   const [positions, setPositions] = useState<Float32Array | null>(null);
   useEffect(() => {
@@ -290,6 +298,7 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
             <option value="matrix">{t("entityGraph.view.mode.matrix")}</option>
             <option value="paths">{t("entityGraph.paths.mode")}</option>
             {allow3d && <option value="3d">{t("graph3d.mode")}</option>}
+            {hasFamily && <option value="family">{t("family.mode")}</option>}
           </select>
         </label>
         <PerspectiveBar
@@ -363,6 +372,10 @@ export function EntityGraphView({ entities, edges, notes, onOpenEntity, initialM
         ) : mode === "list" ? (
           <Suspense fallback={null}>
             <GraphListView graph={alt} start={center || undefined} kindLabel={(k) => t(`entityGraph.type.${k}`)} relationLabel={relationHeading} onOpen={onOpenEntity} />
+          </Suspense>
+        ) : mode === "family" ? (
+          <Suspense fallback={null}>
+            <FamilyTreeView people={familyPeople} edges={visible.edges} start={center || undefined} onOpen={onOpenEntity} />
           </Suspense>
         ) : mode === "graph" ? (
           <GraphCanvas

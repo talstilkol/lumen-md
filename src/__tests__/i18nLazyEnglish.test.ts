@@ -179,6 +179,8 @@ const DOMAINS: Record<string, { module: string; users: string[]; prefixes: strin
   "graphAlt.json": { module: "ui/graph/graphAltStrings.ts", users: ["ui/EntityGraphView.tsx", "ui/GraphView.tsx", "ui/graph/GraphListView.tsx"], prefixes: ["graphAlt."] },
   // W13.G12: "Export view" (SVG, PNG, GEXF) on the entity and note graphs.
   "graphExport.json": { module: "ui/graph/graphExportStrings.ts", users: ["ui/EntityGraphView.tsx", "ui/GraphView.tsx"], prefixes: ["graphExport."] },
+  // W13.G7: the family tree and GEDCOM import / export.
+  "family.json": { module: "ui/familyStrings.ts", users: ["ui/EntityGraphView.tsx", "ui/EntityGraphScreen.tsx"], prefixes: ["family."] },
   "graphView.json": { module: "ui/graphViewStrings.ts", users: ["ui/GraphView.tsx"], prefixes: ["graph.ariaLabel", "graph.filter.property", "graph.filters", "graph.groupBy", "graph.groupBy.folder", "graph.groupBy.none", "graph.groupBy.tag", "graph.groups", "graph.layingOut", "graph.table.caption", "graph.table.linkedTo", "graph.table.links", "graph.table.more", "graph.table.none", "graph.table.note", "graph.table.toggle", "graphView.empty", "graphView.openWorkspace", "graphView.stats", "graph.time."] },
   "imageHostsPanel.json": { module: "ui/imageHostsPanelStrings.ts", users: ["ui/ImageHostsPanel.tsx"], prefixes: ["imageHosts."] },
   "pdfChatPanel.json": { module: "pdf/pdfChatPanelStrings.ts", users: ["pdf/PdfChatPanel.tsx"], prefixes: ["pdf.ask.cite", "pdf.ask.dropped", "pdf.ask.indexing", "pdf.ask.notFound", "pdf.ask.ocr", "pdf.ask.placeholder", "pdf.ask.submit", "pdf.ask.thinking", "pdf.ask.title", "pdf.summarize", "pdf.summary.title"] },
