@@ -63,6 +63,14 @@ These can't be removed by any client-side change.
   has no accounts, by decision. *Mitigation:* caps per address, per /48 and
   per owner value in bytes; eviction takes over-cap owners first; private
   servers use `COLLAB_ACCESS_KEY`.
+- **RR11-469-3** (review 11, info). *What remains:* eviction picks larger
+  unprotected rooms first, so a room just under one share is never picked
+  (size targeting, V9); one dual-stack host can store 50 rooms over IPv4 and
+  50 more over its IPv6 /48 (V10). *Why:* any order of eviction favours some
+  size, and an address family is the only identity the free relay has.
+  *Mitigation:* at most one room evicted per room admitted; IPv4-mapped IPv6
+  is folded into IPv4 (`roomQuota.mjs`); an authenticated reader is never
+  shed, and `evict` re-checks for a reader who joined in between.
 - **M2** (review 21, low). *What remains:* without `--client`, the MCP server
   takes the client's name from what the client reports. *Why:* the app that
   starts the server chooses `--client` anyway, so no name proves anything.
@@ -254,6 +262,13 @@ L1's binding).
   יום; יוצר שחוזר דרך ה-IPv6 שלו נספר כמישהו אחר. *למה:* לממסר החינמי אין
   חשבונות, בהחלטה. *מה מצמצם:* מכסות לכתובת, ל-/48 ולערך בעלים בבתים; הפינוי
   מתחיל בבעלים שחרגו; שרתים פרטיים משתמשים ב-`COLLAB_ACCESS_KEY`.
+- **RR11-469-3** (ביקורת 11, מידע). *מה נשאר:* הפינוי בוחר קודם חדרים לא מוגנים
+  גדולים, כך שחדר מעט מתחת לחלק אחד לא נבחר לעולם (כיוון לפי גודל, V9); מחשב
+  אחד עם IPv4 ו-IPv6 יכול לאחסן 50 חדרים דרך IPv4 ועוד 50 דרך ה-/48 שלו (V10).
+  *למה:* כל סדר פינוי מעדיף גודל כלשהו, ומשפחת הכתובות היא הזהות היחידה שיש
+  לממסר החינמי. *מה מצמצם:* לכל היותר חדר אחד מפונה לכל חדר שמתקבל; IPv6 שממופה
+  מ-IPv4 נספר כ-IPv4 (`roomQuota.mjs`); קורא מאומת לא מנותק לעולם, ו-`evict`
+  בודק שוב אם הצטרף קורא בינתיים.
 - **M2** (ביקורת 21, נמוך). *מה נשאר:* בלי `--client`, שרת ה-MCP לוקח את שם
   הלקוח ממה שהלקוח מדווח. *למה:* האפליקציה שמפעילה את השרת בוחרת את `--client`
   בכל מקרה, כך ששום שם לא מוכיח דבר. *מה מצמצם:* ההרשאות מפרידות בין האפליקציות
