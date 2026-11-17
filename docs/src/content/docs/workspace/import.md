@@ -62,9 +62,11 @@ the folder to the trash instead, so nothing of yours is lost.
   the report lists each one. Locked notes need unlocking in Notes first.
 - OneNote's own `.one` files cannot be read; export pages or sections as
   `.mht`. A direct import through Microsoft Graph (sign in, read only:
-  `Notes.Read`) is built for deployments that register an app with Microsoft
-  (`VITE_ONENOTE_CLIENT_ID`); the sign-in token stays in memory and is sent
-  only to graph.microsoft.com. On such a deployment, picking OneNote shows
+  `Notes.Read`) needs an app registered with Microsoft: the deployment can
+  name one in `/lumen-runtime.json` (`{"onenote": {"clientId": "…"}}`), or
+  you can register your own free app in Microsoft Entra and paste its client
+  ID into the wizard (it stays in this browser). The sign-in token stays in
+  memory and is sent only to graph.microsoft.com. With a client ID, picking OneNote shows
   **Sign in to Microsoft and import from OneNote**: after the sign-in the
   wizard reads every notebook, section group and page, and shows the usual
   review before anything is written.

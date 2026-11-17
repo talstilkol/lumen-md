@@ -1837,5 +1837,50 @@
     "ja": "1gjpbva",
     "ru": "1gjpbva",
     "zh-CN": "1gjpbva"
+  },
+  "importWizard.onenote.clientIdLabel": {
+    "he": "dyxdhj",
+    "ar": "dyxdhj",
+    "de": "dyxdhj",
+    "fr": "dyxdhj",
+    "ja": "dyxdhj",
+    "ru": "dyxdhj",
+    "zh-CN": "dyxdhj"
+  },
+  "importWizard.onenote.clientIdSave": {
+    "he": "1mct5ab",
+    "ar": "1mct5ab",
+    "de": "1mct5ab",
+    "fr": "1mct5ab",
+    "ja": "1mct5ab",
+    "ru": "1mct5ab",
+    "zh-CN": "1mct5ab"
+  },
+  "importWizard.onenote.clientIdHint": {
+    "he": "1mpue9h",
+    "ar": "1mpue9h",
+    "de": "1mpue9h",
+    "fr": "1mpue9h",
+    "ja": "1mpue9h",
+    "ru": "1mpue9h",
+    "zh-CN": "1mpue9h"
+  },
+  "importWizard.onenote.clientIdInvalid": {
+    "he": "w0n45y",
+    "ar": "w0n45y",
+    "de": "w0n45y",
+    "fr": "w0n45y",
+    "ja": "w0n45y",
+    "ru": "w0n45y",
+    "zh-CN": "w0n45y"
+  },
+  "importWizard.onenote.noClientId": {
+    "he": "sfrt0b",
+    "ar": "sfrt0b",
+    "de": "sfrt0b",
+    "fr": "sfrt0b",
+    "ja": "sfrt0b",
+    "ru": "sfrt0b",
+    "zh-CN": "sfrt0b"
   }
 }
