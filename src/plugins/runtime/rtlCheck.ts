@@ -141,7 +141,10 @@ export function contrastRatio(a: [number, number, number], b: [number, number, n
 export const CONTRAST_PAIRS: ReadonlyArray<[string, string, number]> = [
   ["--fg", "--bg", 4.5],
   ["--fg", "--bg-muted", 4.5],
+  ["--fg", "--bg-subtle", 4.5],
   ["--fg-subtle", "--bg", 4.5],
+  // A quote: .prose-lumen blockquote is --fg-subtle on --bg-subtle.
+  ["--fg-subtle", "--bg-subtle", 4.5],
   ["--fg-muted", "--bg", 4.5],
   ["--fg-muted", "--bg-muted", 4.5],
   ["--accent", "--bg", 4.5],
@@ -162,7 +165,9 @@ export function themeContrast(css: string, app: { light: Tokens; dark: Tokens })
   const t = themeTokens(css);
   const out: ContrastResult[] = [];
   for (const mode of ["light", "dark"] as const) {
-    const tokens = { ...app[mode], ...t[mode] };
+    // A theme's :root tokens also apply in dark mode (the theme sheet comes after the app's,
+    // and `:root` and `.dark` match the same <html>): a token set only for light leaks into dark.
+    const tokens = mode === "light" ? { ...app.light, ...t.light } : { ...app.dark, ...t.light, ...t.dark };
     for (const [fg, bg, min] of CONTRAST_PAIRS) {
       const a = parseColour(tokens[fg] ?? "");
       const b = parseColour(tokens[bg] ?? "");
