@@ -450,6 +450,14 @@ function buildEmbed(inner: string, env: Env, blockAllowed: boolean, at?: number)
   if (source === undefined) return notice(env, "notFound", e.target, { target: e.target }, true);
   if (path !== hostKey) ctx.used.add(path);
 
+  // W13.G6: a whole entity note embeds as its infobox card (loaded on demand by the component).
+  if (!e.fragment && path !== hostKey && isEntityEmbed(path, source)) {
+    return {
+      block: true,
+      node: { type: "lumenEntityInfobox", data: { hName: "lumen-entity-infobox", hProperties: { path, text: source } }, children: [] },
+    };
+  }
+
   const name = path === HOST ? "" : baseOf(path).replace(MD_EXT, "");
   let children = env.parse(source).children as unknown as Node[];
   if (e.fragment) {
@@ -521,6 +529,16 @@ function buildEmbed(inner: string, env: Env, blockAllowed: boolean, at?: number)
     },
   };
 }
+
+/**
+ * An entity note (W12.E1): under `ישויות/<type folder>/`, with an
+ * `entity-type:` in its front matter. The folders are entities/model.ts's
+ * TYPE_INFO (kept here as a list so the renderer doesn't load the entity
+ * model; entityInfobox.test.ts checks that the two agree).
+ */
+export const ENTITY_EMBED_FOLDERS = ["אנשים", "מקומות", "ארגונים", "אירועים", "חוקים", "מקורות", "מושגים"];
+const ENTITY_EMBED_PATH = new RegExp(`^ישויות/(?:${ENTITY_EMBED_FOLDERS.join("|")})/[^/]+\\.md$`, "i");
+export const isEntityEmbed = (path: string, source: string) => ENTITY_EMBED_PATH.test(path) && /^---\r?\n(?:(?!---)[^\n]*\n)*?entity-type:[ \t]*\S/.test(source);
 
 /** Text with embeds → text and embed items. */
 function segments(value: string, env: Env, blockAllowed: boolean, base?: number): Item[] {

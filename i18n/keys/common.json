@@ -7168,6 +7168,112 @@
       "vars": []
     },
     {
+      "key": "entityGraph.infobox.author",
+      "en": "Author",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.born",
+      "en": "Born",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.country",
+      "en": "Country",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.date",
+      "en": "Date",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.died",
+      "en": "Died",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.empty",
+      "en": "No fields or relations yet",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.enacted",
+      "en": "Enacted",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.end",
+      "en": "Ended",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.field",
+      "en": "Field",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.founded",
+      "en": "Founded",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.industry",
+      "en": "Field",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.inverse",
+      "en": "(reversed) {relation}",
+      "vars": [
+        "relation"
+      ]
+    },
+    {
+      "key": "entityGraph.infobox.key",
+      "en": "Key relations",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.location",
+      "en": "Location",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.occupation",
+      "en": "Occupation",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.picture",
+      "en": "Picture of {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "entityGraph.infobox.population",
+      "en": "Population",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.status",
+      "en": "Status",
+      "vars": []
+    },
+    {
+      "key": "entityGraph.infobox.times",
+      "en": "{n} sources",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "entityGraph.infobox.website",
+      "en": "Website",
+      "vars": []
+    },
+    {
       "key": "entityGraph.merge.action",
       "en": "Merge",
       "vars": []
