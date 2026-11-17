@@ -39,6 +39,18 @@ describe("the known-issues page", () => {
     expect(build([], "").en).toContain("No open issue is labelled `known-issue` right now.");
   });
 
+  it("review 14 Low 5: with nothing measured it says so, not that every measured agent passes", () => {
+    const none = "# Agents no measured model passes\n\nNo real eval run has been taken yet (eval/results/ holds none that is acceptable): nothing is measured.\n";
+    const pages = build([], none);
+    expect(pages.en).not.toContain("Every AI agent that was measured has a model that passes.");
+    expect(pages.en).toContain("No AI agent has been measured yet");
+    expect(pages.he).toContain("עוד לא נמדד אף סוכן AI");
+    // Measured, and none failing: then the sentence is true.
+    expect(build([], "# Agents\n\nEvery agent measured in 2 run(s) has a default.\n").en).toContain("Every AI agent that was measured has a model that passes.");
+    // The committed failures.md says nothing is measured today.
+    expect(readFileSync(join(ROOT, PAGES.en), "utf8")).toContain("No AI agent has been measured yet");
+  });
+
   it("the committed pages are what the cache and failures.md give (built offline)", () => {
     const rows = JSON.parse(readFileSync(join(ROOT, "docs/src/data/known-issues.json"), "utf8"));
     const pages = build(rows, readFileSync(join(ROOT, "eval/failures.md"), "utf8"));

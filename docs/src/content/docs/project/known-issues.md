@@ -14,4 +14,4 @@ No open issue is labelled `known-issue` right now.
 
 ## AI agents that no tested model passes yet
 
-Every AI agent that was measured has a model that passes.
+No AI agent has been measured yet: eval/results/ holds no accepted real run. Until one is, no agent is known to pass; check what they suggest closely.
