@@ -317,9 +317,10 @@
  },
  {
   "id": "FC2-e2e-wave12",
-  "task": "W12.H2,W12.A1,W12.T2",
+  "task": "W12.A1,W12.T2",
   "pr": 1197,
-  "cmd": "mkdir -p reports/mac-pack/FC2 && npx playwright test e2e/havruta-relay.spec.ts e2e/ask-vault-jump.spec.ts e2e/types-form.spec.ts --reporter=json > reports/mac-pack/FC2/e2e.json",
+  "cmd": "mkdir -p reports/mac-pack/FC2 && npx playwright test e2e/ask-vault-jump.spec.ts e2e/types-form.spec.ts --reporter=json > reports/mac-pack/FC2/e2e.json",
+  "note": "INT8 17.11: e2e/havruta-relay.spec.ts (W12.H2) is not on the train: its Chromium-only skip made e2e/ 20 skip points against the ratchet of 19 (W10.F11). It is on branch fix/fc2-e2e-wave12 (#1197) until a skip point is freed or the relay runs on every engine.",
   "expect": {
    "exit": 0,
    "files": [

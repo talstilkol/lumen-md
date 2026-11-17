@@ -30584,7 +30584,7 @@
      ],
      "why": "החלק הגלוי של חברותא. הכול מורכב מרכיבים שכבר בקוד: ספריא, חדרים מוצפנים, ניקוד לתצוגה.",
      "kind": "CLOUD-CODE",
-     "status": "⏳ #845 · cloud-complete (INT8 17.11 (lane FC2 #1197)); owed: Mac FC2-e2e-wave12",
+     "status": "⏳ #845 · spec written (lane FC2 #1197) but not on the train (INT8 17.11: its one-engine skip would make e2e/ 20 skip points, ratchet 19); owed: a freed skip point or a relay on every engine, then Mac FC2-e2e-wave12",
      "verified": "built",
      "pr": 845,
      "stage": "12.H",
@@ -30602,7 +30602,7 @@
       "who": "Mac",
       "missing": "e2e in two browsers vs a local relay, axe in a browser"
      },
-     "notes": "INT8 17.11 (lane FC2 #1197): e2e/havruta-relay.spec.ts + e2e/_relay.ts written, typechecked; not run (no Vite here); owed: Mac FC2-e2e-wave12 · status before: ⏳ קוד ב-PR #845, #881 — נבדק לא מקוון; ממתין לרכבת"
+     "notes": "INT8 17.11 (lane FC2 #1197): e2e/havruta-relay.spec.ts + e2e/_relay.ts written, typechecked; not run (no Vite here); owed: Mac FC2-e2e-wave12 · status before: ⏳ קוד ב-PR #845, #881 — נבדק לא מקוון; ממתין לרכבת · INT8 17.11: e2e/havruta-relay.spec.ts and e2e/_relay.ts taken out of the train (skip-point ratchet W10.F11: 20 > 19 after wave g3 added e2e/paged-preview.spec.ts); they stay on branch fix/fc2-e2e-wave12."
     },
     {
      "id": "W12.H3",
