@@ -8,10 +8,7 @@ import { useAppStore } from "../store/useStore";
 import { EmptyState } from "./EmptyState";
 import { HelpButton } from "./HelpButton";
 import { filterMatch, highlightParts } from "../text/filterMatch";
-import outlineFilterEnglish from "../i18n/lazy/outlineFilter.json";
-import { registerEnglish } from "../i18n";
 
-registerEnglish(outlineFilterEnglish);
 
 /** The search results' highlight (searchSnippet.tsx): the accent tint, readable in both themes. */
 const MARK: React.CSSProperties = { background: "hsl(var(--accent) / 0.25)", color: "hsl(var(--fg))", padding: 0, borderRadius: 2 };

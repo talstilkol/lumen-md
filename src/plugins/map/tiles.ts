@@ -19,7 +19,6 @@ import type * as Leaflet from "leaflet";
 import { t } from "../../i18n";
 import { airplaneModeOn } from "../../privacy/airplane";
 import { MAP_TILES_EVENT, onlineTilesAllowed, setOnlineTilesAllowed } from "../../privacy/mapTiles";
-import "../../map/offlineMapStrings";
 
 export const TILE_URL = "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
 export const TILE_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
@@ -90,9 +89,13 @@ function consentControl(L: typeof Leaflet, map: Leaflet.Map): void {
   (map as { on?: (e: string, f: () => void) => void }).on?.("unload", () => window.removeEventListener(MAP_TILES_EVENT, onChange));
   // Keep map gestures from starting on the button.
   for (const ev of ["pointerdown", "mousedown", "dblclick", "wheel", "touchstart"]) box.addEventListener(ev, (e) => e.stopPropagation());
-  render();
-  box.append(button, note);
-  host.append(box);
+  // The map's strings load with the button: tiles.ts is reached statically from three views, so it does not pull
+  // the lazy English into their chunks (i18nLazyEnglish).
+  void import("../../map/offlineMapStrings").then(() => {
+    render();
+    box.append(button, note);
+    host.append(box);
+  });
 }
 
 /**
