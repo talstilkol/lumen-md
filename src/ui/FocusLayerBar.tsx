@@ -106,7 +106,7 @@ export function FocusLayerBar({ area }: { area: RefObject<HTMLElement | null> })
   const total = findings.length;
   return (
     <>
-      <div role="group" aria-label={t("focusLayer.controls")} style={{ display: "flex", gap: 10, alignItems: "center", fontSize: 12, color: "hsl(var(--fg))" }}>
+      <div role="group" aria-label={t("focusLayer.controls")} data-reading-mode="focus-layer" style={{ display: "flex", gap: 10, alignItems: "center", fontSize: 12, color: "hsl(var(--fg))" }}>
         <label style={{ display: "flex", gap: 6, alignItems: "center" }}>
           {t("focusLayer.unit")}
           <select style={control} value={unit ?? "off"} onChange={(e) => setUnit(e.currentTarget.value as Unit)} data-testid="focus-unit">

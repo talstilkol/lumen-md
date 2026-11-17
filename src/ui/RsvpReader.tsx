@@ -69,7 +69,7 @@ export function RsvpReader({ content, initialWpm, close }: { content: string; in
 
   if (!word) {
     return (
-      <Modal onClose={close} className="cmd-palette-backdrop" aria-label={t("rsvp.title")} data-testid="rsvp-reader">
+      <Modal onClose={close} className="cmd-palette-backdrop" aria-label={t("rsvp.title")} data-testid="rsvp-reader" data-reading-mode="rsvp">
         <div className="cmd-palette" style={{ padding: 24, maxWidth: 420 }}>
           <p>{t("rsvp.empty")}</p>
           <button type="button" style={btn} onClick={close}>

@@ -5,16 +5,13 @@
  * spread itself (./noteSpread.ts) loads on first use.
  */
 import { useCallback, useEffect, useRef, type RefObject } from "react";
+import { loadNotePlace } from "./notePlace";
 
 export const BOOK_SPREAD_TOGGLE = "lumen-book-spread-toggle";
 
-/** Was this note left in spreads? (Read without loading the spread code.) */
+/** Was this note left in spreads? Its reading profile says (W13.R1; read without loading the spread code). */
 function wasOn(id: string): boolean {
-  try {
-    return (JSON.parse(localStorage.getItem(`lumen.spread:${id}`) ?? "null") as { on?: boolean } | null)?.on === true;
-  } catch {
-    return false;
-  }
+  return loadNotePlace(id).on;
 }
 
 /** `ready`: the preview shows this note's rendered text (it changes when a new render lands). */

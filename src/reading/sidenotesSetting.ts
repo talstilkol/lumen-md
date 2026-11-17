@@ -1,32 +1,37 @@
 /**
- * The margins reading mode's switch (plan W13.R9), kept per device, and
- * the hook that turns it on for a preview. Tiny on purpose: the preview is
- * in the startup bundle, the mode (./sidenotes.ts) loads on first use.
- *
- * When W13.R1's ReadingProfile lands, `sidenotes` is one of its fields and
- * this module reads it from there (the per-note profile wins).
+ * The margins reading mode's switch (plan W13.R9) and the hook that turns
+ * it on for a preview. The switch is the reading profile's `sidenotes`
+ * field (W13.R1, ./settings.ts: the global profile); a switch saved before
+ * that (`lumen.reading.sidenotes`) is moved in on first read. Tiny on
+ * purpose: the preview is in the startup bundle, the mode (./sidenotes.ts)
+ * loads on first use.
  */
 import { useEffect, type RefObject } from "react";
 import type { LineNote } from "./sidenotes";
+import { globalProfile, saveGlobalProfile } from "./settings";
 
-const KEY = "lumen.reading.sidenotes";
+const LEGACY = "lumen.reading.sidenotes";
 const EVENT = "lumen-sidenotes-change";
 
-export function sidenotesOn(): boolean {
+function legacyOn(): boolean {
   try {
-    return localStorage.getItem(KEY) === "1";
+    if (localStorage.getItem(LEGACY) === null) return false;
+    const on = localStorage.getItem(LEGACY) === "1";
+    localStorage.removeItem(LEGACY);
+    if (on) saveGlobalProfile({ ...globalProfile(), sidenotes: true });
+    return on;
   } catch {
     return false;
   }
 }
 
+export function sidenotesOn(): boolean {
+  return legacyOn() || globalProfile().sidenotes;
+}
+
 export function setSidenotes(on: boolean): void {
-  try {
-    if (on) localStorage.setItem(KEY, "1");
-    else localStorage.removeItem(KEY);
-  } catch {
-    /* why: blocked storage — the switch still applies until reload */
-  }
+  // The profile's write is guarded (blocked storage: the switch still applies until reload).
+  saveGlobalProfile({ ...globalProfile(), sidenotes: on });
   memo = on;
   window.dispatchEvent(new CustomEvent(EVENT, { detail: on }));
 }

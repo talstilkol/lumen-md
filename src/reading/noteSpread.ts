@@ -12,9 +12,12 @@ import "./readingViewsStrings";
 import "../pdf/spreadStrings";
 import "./bookSpread.css";
 import { t } from "../i18n";
+import { clearModeRoot, setModeRoot } from "./modeRoot";
 import { announce } from "../a11y/announce";
 import { bookDirOf } from "../pdf/spread";
-import { loadPlace, savePlace, spreadForKey, type BookDir, type SpreadMode } from "./bookSpread";
+import { spreadForKey, type BookDir, type SpreadMode } from "./bookSpread";
+// The note's place lives in its reading profile (W13.R1), on this device.
+import { loadNotePlace as loadPlace, saveNotePlace as savePlace } from "./notePlace";
 import { blocksOf, createSpreadFlow, type SpreadFlow } from "./spreadFlow";
 
 /** The first block in view of a scrolling preview. */
@@ -40,6 +43,7 @@ export function attachNoteSpread(root: HTMLElement, id: string, opts: { mode?: S
   let mode: SpreadMode = opts.mode ?? saved.mode;
   let dir: BookDir = opts.dir ?? saved.dir ?? bookDirOf(flowEl.textContent ?? "");
   root.dataset.bookSpread = mode;
+  setModeRoot(root, "book-spread");
   const oldScroll = root.scrollTop;
   root.scrollTop = 0;
 
@@ -166,6 +170,7 @@ export function attachNoteSpread(root: HTMLElement, id: string, opts: { mode?: S
     flow.dispose();
     bar.remove();
     delete root.dataset.bookSpread;
+    clearModeRoot(root, "book-spread");
     delete root.dataset.spreadIndex;
     delete root.dataset.spreadCount;
     // Back to scrolling at the same block.

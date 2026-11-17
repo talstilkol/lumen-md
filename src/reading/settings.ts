@@ -204,6 +204,9 @@ export type ReadingLayout = (typeof READING_LAYOUTS)[number];
 /** Focus mode's unit (W13.R2): the line, sentence or paragraph being read stays bright. */
 export const FOCUS_UNITS = ["line", "sentence", "paragraph"] as const;
 export type FocusUnit = (typeof FOCUS_UNITS)[number];
+/** Where a book spread starts (W13.R6; the same values as reading/bookSpread's SpreadMode). */
+export const SPREAD_STARTS = ["odd", "even", "none"] as const;
+export type SpreadStart = (typeof SPREAD_STARTS)[number];
 /** Lines highlighted by line focus (0 = off). */
 export const LINE_FOCUS = [0, 1, 3, 5] as const;
 export type LineFocusLines = (typeof LINE_FOCUS)[number];
@@ -233,11 +236,25 @@ export interface ReadingProfile extends ReadingSettings {
   pos: boolean;
   /** W13.R5: syllables (English) and niqqud as the parallel aid (Hebrew). */
   syllables: boolean;
+  /** W13.R9: the margins mode (side notes for footnotes, comments and suggestions). */
+  sidenotes: boolean;
+  /** W13.R6: the note was left in book pages (kept per note on this device: ./notePlace.ts). */
+  spread: boolean;
+  /** W13.R6: which page a spread starts on ("odd": page 1 alone, like a printed book). */
+  spreadMode: SpreadStart;
+  /** W13.R6: page order ("auto": by the note's script). */
+  spreadDir: "auto" | "rtl" | "ltr";
+  /** W13.R6: the reading place — the first block on the page (-1: none yet). */
+  spreadBlock: number;
+  /** W13.R6: where the scrolling view was left when the spread closed (-1: none). */
+  spreadTop: number;
 }
 
 export const PROFILE_LIMITS = {
   rate: AIDS_LIMITS.rate,
   wpm: { min: 150, max: 600, step: 10 },
+  spreadBlock: { min: -1, max: 10_000_000, step: 1 },
+  spreadTop: { min: -1, max: 1e9, step: 1 },
 } as const;
 
 export const DEFAULT_PROFILE: Readonly<ReadingProfile> = Object.freeze({
@@ -256,6 +273,12 @@ export const DEFAULT_PROFILE: Readonly<ReadingProfile> = Object.freeze({
   anchor: false,
   pos: true,
   syllables: false,
+  sidenotes: false,
+  spread: false,
+  spreadMode: "odd",
+  spreadDir: "auto",
+  spreadBlock: -1,
+  spreadTop: -1,
 });
 
 type Check = (v: unknown) => boolean;
@@ -291,6 +314,12 @@ const PROFILE_FIELDS: { [K in keyof ReadingProfile]: Check } = {
   anchor: isBool,
   pos: isBool,
   syllables: isBool,
+  sidenotes: isBool,
+  spread: isBool,
+  spreadMode: oneOf(SPREAD_STARTS),
+  spreadDir: oneOf(["auto", "rtl", "ltr"]),
+  spreadBlock: inRange(PROFILE_LIMITS.spreadBlock),
+  spreadTop: inRange(PROFILE_LIMITS.spreadTop),
 };
 
 export const PROFILE_KEYS = Object.keys(PROFILE_FIELDS) as Array<keyof ReadingProfile>;

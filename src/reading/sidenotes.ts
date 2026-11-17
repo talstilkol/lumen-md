@@ -25,6 +25,7 @@ import { t } from "../i18n";
 import { layoutSidenotes, NARROW_PX, type SidenoteKind } from "./sidenotesLayout";
 import { setSidenotes, sidenotesOn } from "./sidenotesSetting";
 import { announce } from "../a11y/announce";
+import { clearModeRoot, setModeRoot } from "./modeRoot";
 
 /** The palette's switch: margins on or off for every preview, said aloud. */
 export function toggleSidenotes(): void {
@@ -360,10 +361,12 @@ export function attachSidenotes(root: HTMLElement, opts: SidenotesOptions = {}):
   const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(schedule) : null;
   ro?.observe(root);
   doc.documentElement.dataset.sidenotesOn = "";
+  setModeRoot(root, "sidenotes");
   build();
 
   return () => {
     disposed = true;
+    clearModeRoot(root, "sidenotes");
     if (raf) cancelAnimationFrame(raf);
     mo.disconnect();
     ro?.disconnect();

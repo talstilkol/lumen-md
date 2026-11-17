@@ -53,8 +53,19 @@ export function moveColumn(key: "ArrowLeft" | "ArrowRight", doc: Document = docu
 }
 
 /** The three-column preset: split view, the outline shown, scrolling linked. */
+let before: { mode: ReturnType<typeof useAppStore.getState>["mode"]; showOutline: boolean; syncScroll: ReturnType<typeof useAppStore.getState>["syncScroll"] } | null = null;
+
+/** The linked three-column view (W13.R7); the same command again goes back to the view it was opened from. */
 export function openTripleView(): void {
   const s = useAppStore.getState();
+  if (s.mode === "split" && s.showOutline && s.syncScroll === "all") {
+    const b = before ?? { mode: "source", showOutline: false, syncScroll: s.syncScroll };
+    before = null;
+    s.setMode(b.mode === "split" ? "source" : b.mode);
+    useAppStore.setState({ showOutline: b.showOutline, syncScroll: b.syncScroll });
+    return;
+  }
+  before = { mode: s.mode, showOutline: s.showOutline, syncScroll: s.syncScroll };
   s.setMode("split");
   useAppStore.setState({ showOutline: true, syncScroll: "all" });
   announce(t("readingViews.triple.on"));

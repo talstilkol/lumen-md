@@ -207,7 +207,7 @@ export function CompareView({ left, right, onClose }: Props) {
   }, [pieces]);
 
   return (
-    <Modal onClose={onClose} aria-labelledby="cmp-title" className="cmp-dialog" data-testid="compare-view" data-changes={String(runs.length)} onKeyDown={onKeyDown}>
+    <Modal onClose={onClose} aria-labelledby="cmp-title" className="cmp-dialog" data-testid="compare-view" data-reading-mode="compare" data-changes={String(runs.length)} onKeyDown={onKeyDown}>
       <header className="cmp-head">
         <h2 id="cmp-title" className="cmp-title">
           {t("readingViews.compare.title")}

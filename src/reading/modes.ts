@@ -75,16 +75,22 @@ export const modeDef = (id: ReadingModeId): ReadingModeDef => MODE_DEFS.find((m)
  * an id that is not registered here, or an entry here has no root or no
  * command — so a new mode cannot ship around the gate.
  *
- * W13.R1's ReadingProfile can list its modes from here (it owns the profile
- * schema; this module only names the modes and how the gate reaches them).
+ * W13.R1's Reading mode menu (MODE_DEFS above) is in the same file: each of
+ * its modes is a registered entry here (MENU_GATE), so the menu cannot offer
+ * a mode the gate does not open. The markers: ./modeRoot.ts.
  */
 export interface ReadingModeEntry {
   /** The `data-reading-mode` value of the mode's root. */
   id: string;
   /** The plan item that made it. */
   plan: string;
-  /** How it opens: a palette command, or the app shortcut. */
-  open: { command: string } | { shortcut: "focusMode" };
+  /**
+   * How it opens: a palette command, the app shortcut, the Reading mode
+   * menu (W13.R1: the mode is one of MODE_DEFS, opened with its "Open"
+   * button), or — for a view that needs two texts, such as compare — a
+   * module of the e2e hooks (src/testing/e2eHooks.ts) the gate calls.
+   */
+  open: { command: string } | { shortcut: "focusMode" } | { menu: ReadingModeId } | { hook: "reading/openCompare" };
   /** How it closes: Escape, or the same command again (a toggle). */
   close: "Escape" | "toggle";
   /** It shows in the preview pane (the gate switches to preview first). */
@@ -103,6 +109,17 @@ export const READING_MODES: readonly ReadingModeEntry[] = [
   { id: "side-by-side", plan: "W12.H6", open: { command: "view.sideBySide" }, close: "Escape", vault: true, file: "src/ai/mt/openSideBySide.tsx" },
   { id: "daf", plan: "W13.R11", open: { command: "view.daf" }, close: "Escape", file: "src/reading/daf/openDaf.tsx" },
   { id: "bilingual", plan: "W13.R12", open: { command: "view.bilingual" }, close: "Escape", file: "src/reading/bilingual/openBilingual.tsx" },
+  // Registered by INT7 (wave g3): the modes of W13.R2–R9 that the gate did not reach yet.
+  { id: "focus-layer", plan: "W13.R2", open: { shortcut: "focusMode" }, close: "Escape", file: "src/ui/FocusLayerBar.tsx" },
+  { id: "rsvp", plan: "W13.R3", open: { menu: "rsvp" }, close: "Escape", file: "src/ui/RsvpReader.tsx" },
+  { id: "immersive", plan: "W13.R5", open: { menu: "immersive" }, close: "Escape", file: "src/ui/ImmersiveReader.tsx" },
+  { id: "book-spread", plan: "W13.R6", open: { command: "reading.bookSpread" }, close: "toggle", preview: true, file: "src/reading/noteSpread.ts" },
+  { id: "triple", plan: "W13.R7", open: { command: "view.tripleLinked" }, close: "toggle", file: "src/App.tsx" },
+  { id: "compare", plan: "W13.R8", open: { hook: "reading/openCompare" }, close: "Escape", file: "src/reading/CompareView.tsx" },
+  { id: "sidenotes", plan: "W13.R9", open: { command: "reading.sidenotes" }, close: "toggle", preview: true, file: "src/reading/sidenotes.ts" },
 ];
+
+/** The gate's entry for each mode of the Reading mode menu (MODE_DEFS above): page opens the reader, focus the focus mode. */
+export const MENU_GATE: Record<ReadingModeId, string> = { page: "reader", focus: "focus", rsvp: "rsvp", immersive: "immersive" };
 
 export const readingModeSelector = (id: string) => `[data-reading-mode="${id}"]`;

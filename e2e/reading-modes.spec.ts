@@ -46,7 +46,18 @@ const cursor = (page: Page, set?: number) =>
 
 async function open(page: Page, mode: ReadingModeEntry) {
   if ("command" in mode.open) await runCommand(page, mode.open.command);
-  else await page.keyboard.press(process.platform === "darwin" ? "Meta+Shift+KeyF" : "Control+Shift+KeyF");
+  else if ("menu" in mode.open) {
+    // W13.R1: the Reading mode menu, its mode, then "Open".
+    await runCommand(page, "view.readingProfile");
+    await page.getByTestId(`rm-mode-${mode.open.menu}`).check();
+    await page.getByTestId("rm-open").click();
+  } else if ("hook" in mode.open) {
+    const old = "Shalom olam, ze tekst rishon. שלום עולם, זה טקסט ראשון.";
+    await page.evaluate(
+      async ([m, a]) => (await (window as unknown as LumenTestWindow).__lumenTest.load(m as "reading/openCompare")).openCompare({ label: "a", text: a }, { label: "b", text: `${a} עוד מילה.` }),
+      [mode.open.hook, old] as const,
+    );
+  } else await page.keyboard.press(process.platform === "darwin" ? "Meta+Shift+KeyF" : "Control+Shift+KeyF");
 }
 
 for (const locale of ["he", "en"] as const) {

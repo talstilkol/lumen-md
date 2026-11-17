@@ -138,7 +138,7 @@ export function ImmersiveReader({ content, profile, close, translate = localTran
   const colorOf = (pos: Pos | null) => (pos && pos !== "other" && shown[pos] ? POS_COLORS[pos][dark ? "dark" : "light"] : undefined);
 
   return (
-    <Modal onClose={() => (open ? setOpen(null) : close())} aria-labelledby="immersive-title" data-testid="immersive-reader" style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", maxWidth: "none", maxHeight: "none", margin: 0, padding: 0, border: 0, background: "hsl(var(--bg))", color: "hsl(var(--fg))" }}>
+    <Modal onClose={() => (open ? setOpen(null) : close())} aria-labelledby="immersive-title" data-testid="immersive-reader" data-reading-mode="immersive" style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh", maxWidth: "none", maxHeight: "none", margin: 0, padding: 0, border: 0, background: "hsl(var(--bg))", color: "hsl(var(--fg))" }}>
       <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <header style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap", padding: "10px 16px", borderBottom: "1px solid hsl(var(--border))", fontSize: 13 }}>
           <h2 id="immersive-title" style={{ margin: 0, fontSize: 15, fontWeight: 600 }}>
