@@ -144,5 +144,7 @@
   "update.localOnly": "Update check skipped: the privacy policy is “local only”, so nothing is sent.",
   "update.notConfigured": "This build has no update server or key yet; install new versions by hand.",
   "update.upToDate": "Lumen {version} is the latest version.",
-  "voice.languagePrompt": "Select language for voice recognition:"
+  "voice.languagePrompt": "Select language for voice recognition:",
+  "update.held.staged": "Lumen {version} is rolling out in stages; this device gets it in its turn. You have {current}.",
+  "update.held.halted": "Lumen {version} was paused by its makers while a problem is checked. You have {current}, which keeps working."
 }

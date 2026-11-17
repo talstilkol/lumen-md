@@ -445,10 +445,18 @@ export function parseRunArgs(argv) {
   const has = (f) => rest.includes(f);
   if (has("--dry-run") && has("--publish")) throw new Error("--dry-run and --publish together: pick one");
   if (has("--publish") && has("--fake-build")) throw new Error("--fake-build is for dry runs only: a fake bundle is never published");
-  const known = new Set(["--dry-run", "--publish", "--fake-build", "--no-repro", "--no-desktop", "--skip-checks", "--offline"]);
-  const unknown = rest.filter((a) => !known.has(a));
+  const known = new Set(["--dry-run", "--publish", "--fake-build", "--no-repro", "--no-desktop", "--skip-checks", "--offline", "--rollout"]);
+  // W13.T1: --rollout N, the share of devices offered the release first (default: 5 for stable, 100 for a beta).
+  const ri = rest.indexOf("--rollout");
+  let rollout = null;
+  if (ri >= 0) {
+    rollout = Number(rest[ri + 1]);
+    if (!Number.isFinite(rollout) || rollout <= 0 || rollout > 100) throw new Error("--rollout takes a percent above 0 and at most 100");
+  }
+  const unknown = rest.filter((a, i) => !known.has(a) && !(ri >= 0 && i === ri + 1));
   if (unknown.length) throw new Error(`unknown option ${unknown.join(", ")}`);
   return {
+    rollout,
     version: String(version).replace(/^v/, ""),
     publish: has("--publish"),
     dryRun: !has("--publish"),

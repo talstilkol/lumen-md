@@ -616,5 +616,23 @@
     "ja": "1bcg9d8",
     "ru": "1bcg9d8",
     "zh-CN": "1bcg9d8"
+  },
+  "cmd.help.safeMode": {
+    "ar": "1dpszxr",
+    "de": "1dpszxr",
+    "fr": "1dpszxr",
+    "he": "1dpszxr",
+    "ja": "1dpszxr",
+    "ru": "1dpszxr",
+    "zh-CN": "1dpszxr"
+  },
+  "cmd.help.safeMode.hint": {
+    "ar": "9ektud",
+    "de": "9ektud",
+    "fr": "9ektud",
+    "he": "9ektud",
+    "ja": "9ektud",
+    "ru": "9ektud",
+    "zh-CN": "9ektud"
   }
 }

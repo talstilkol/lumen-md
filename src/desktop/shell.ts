@@ -111,6 +111,13 @@ export interface ShellHooks extends OpenDeps {
   dropTab: (id: string) => void;
 }
 
+/** W13.T1: the rollback notice (its strings travel with safe mode's lazy chunk). */
+async function showRollbackNotice(p: { from: string; to: string }): Promise<void> {
+  if (typeof p?.from !== "string" || typeof p?.to !== "string") return;
+  const [{ t }, { showAiToast }] = await Promise.all([import("../i18n"), import("../ui/AiToast"), import("../boot/safeModeStrings")]);
+  showAiToast(t("safeMode.rolledBack", { from: p.from.slice(0, 40), to: p.to.slice(0, 40) }), "info");
+}
+
 /** Start listening (desktop only). Returns a stop function. */
 export async function initDesktopShell(h: ShellHooks): Promise<() => void> {
   if (!isDesktop()) return () => {};
@@ -127,6 +134,8 @@ export async function initDesktopShell(h: ShellHooks): Promise<() => void> {
   offs.push(await listen<string>("lumen-tab-moved", (e) => h.dropTab(e.payload)));
   if (label === "main") {
     offs.push(await listen<OpenRequest>("lumen-open", (e) => void handleOpenRequest(e.payload, h)));
+    // W13.T1: the shell rolled back after two failed starts of a new version; it says so once, at this shell_ready.
+    offs.push(await listen<{ from: string; to: string }>("lumen-boot-rollback", (e) => void showRollbackNotice(e.payload)));
     for (const req of await invoke<OpenRequest[]>("shell_ready")) await handleOpenRequest(req, h);
   }
   for (const [tab, raw] of await invoke<[string, string][]>("tab_pending")) await take(tab, raw);

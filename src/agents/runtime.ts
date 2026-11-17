@@ -24,6 +24,7 @@ import { AiQuotaExceededError, aiQuotaStatus, chargeAiCommandDispatch, consumeAi
 import { mergeOutputs, splitText } from "./runtimeText";
 import { freezeTools, guardUntrustedResult, loadGuard, logTainted, unmarkDelta, unmarkReply } from "./ruleOfTwo";
 import { createRunGuard, stops, type GuardVerdict } from "./runGuard";
+import { safeModeBlocks } from "../boot/bootSentinel";
 import { isAbort, truncate, type ToolEnv, execTool, modelTools, systemPrompt, inputTextOf, languageMode, sameLanguage, inputKeyOf } from "./runtimeSteps";
 export { sameScript, sameLanguage, inputKeyOf } from "./runtimeSteps";
 export { mergeOutputs, splitText } from "./runtimeText";
@@ -104,6 +105,8 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
     return run;
   };
 
+  // W13.T5: safe mode runs no agent (and none after leaving it with agents kept off).
+  if (safeModeBlocks("agent")) return finish("failed", { errorCode: "safe-mode", error: "safe mode: AI agents are off" });
   const grants = new Set<ToolScope>(["read", ...(opts.grants ?? [])]);
   const missing = (def.requires ?? []).filter((g) => !grants.has(g));
   if (missing.length) {

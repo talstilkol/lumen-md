@@ -21,6 +21,7 @@ import type { UiNode } from "./uiTree";
 import { describeBasesUpdate } from "./permissions";
 import { listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "../../storage/workspace";
 import { applyTextEdits, validateEdits } from "../api/edits";
+import { assertNotSafeMode } from "../../boot/bootSentinel";
 
 export const LIMITS = {
   commandsPerPlugin: 50,
@@ -311,6 +312,8 @@ export class PluginDisabledError extends Error {
 }
 
 export async function startPlugin(opts: StartOptions): Promise<PluginInstance> {
+  // W13.T5: safe mode starts no plugin, not even one the user asks for, until they leave it.
+  assertNotSafeMode("plugin");
   // Review 12, L2: the install record's `disabled` flag (review 11, M5) is enforced here, the one way a plugin starts.
   const record = (await (await import("../install")).installedPlugins())[opts.manifest.id];
   if (record?.disabled && record.version === opts.manifest.version) throw new PluginDisabledError(record.id, record.version, record.disabled.rules);

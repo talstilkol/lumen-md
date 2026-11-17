@@ -31,9 +31,20 @@ import "./index.css";
 import { windowLabel } from "./desktop/window";
 import { keepInstallPrompt } from "./pwa/installPrompt";
 import { loadCommandHints } from "./commands/hints";
+import { armBootOk, beginBoot, noteBootCrash } from "./boot/bootSentinel";
 
 // Plan W2.17: this window is a presentation's presenter view (opened by the slides), not the editor.
 const IS_PRESENTER = typeof location !== "undefined" && location.hash === "#lumen-presenter";
+// W13.T5 / T1: the boot sentinel. Only the main editor window counts a start
+// (a presenter, capture or share-link window is not the app starting).
+const WATCH_BOOT = !IS_PRESENTER && windowLabel() === "main" && !/^#view(?:-file)?(?:[=&]|$)/.test(location.hash);
+const BOOT = WATCH_BOOT ? beginBoot(__LUMEN_VERSION__) : null;
+const SafeModeBanner = React.lazy(() => import("./boot/SafeModeBanner").then((m) => ({ default: m.SafeModeBanner })));
+/** Rendered by the root error screen: this start did not succeed. */
+function BootCrashMark() {
+  noteBootCrash();
+  return null;
+}
 const PresenterView = React.lazy(() => import("./slides/PresenterView"));
 
 // Plan W11.P13: Chromium offers its install prompt once, early; keep it for the install dialog.
@@ -229,6 +240,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           height: "100vh", background: "#0c0f17", color: "#e8e8e8",
           fontFamily: "Inter, system-ui, sans-serif", flexDirection: "column", gap: 16,
         }}>
+          <BootCrashMark />
           <h1 style={{ fontSize: 24, fontWeight: 600, margin: 0 }}>{t("boot.crashTitle")}</h1>
           <p style={{ fontSize: 14, opacity: 0.7, margin: 0 }}>{t("boot.crashBody")}</p>
           <button
@@ -261,7 +273,14 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <Suspense fallback={null}>
       <VaultFolderBanner />
     </Suspense>
+    {BOOT?.safeMode && (
+      <Suspense fallback={null}>
+        <SafeModeBanner />
+      </Suspense>
+    )}
     <ToastContainer />
   </React.StrictMode>,
 );
+// The start counts as good once the app has stayed up for a moment without the error screen.
+if (WATCH_BOOT) armBootOk();
 }

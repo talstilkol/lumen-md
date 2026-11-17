@@ -5,7 +5,9 @@
  *   npm run release -- 0.2.0-beta.1 --dry-run     everything, nothing published, the tree left as it was
  *   npm run release -- 0.2.0-beta.1 --publish     the owner's: commit + tag, build, sign, push, GitHub release
  *
- * Options: --fake-build (dry run without node_modules / Rust: stand-in bundles),
+ * Options: --rollout N (W13.T1: the share of devices offered it first; default 5 for stable,
+ * 100 for a beta; `npm run release:rollout` moves it to 25 and 100, or halts it),
+ * --fake-build (dry run without node_modules / Rust: stand-in bundles),
  * --no-repro (one web build instead of two), --no-desktop, --skip-checks
  * (no typecheck / tests), --offline (PR titles from git only).
  *
@@ -42,6 +44,7 @@ import path from "node:path";
 import { bumpManifests, insertChangelog, isBeta, sha256sums, tagOf, verifySums } from "./lib/release.mjs";
 import { LOCALES, addUntranslated } from "./lib/whats-new.mjs";
 import { latestJson } from "./lib/tauriSigning.mjs";
+import { describeRollout, firstStage, saltOf, withRollout } from "./lib/rollout.mjs";
 import {
   bilingualNotes,
   betaChannelPlan,
@@ -343,6 +346,9 @@ export async function main(argv) {
       const he = exists(notesFiles(v).he) ? read(notesFiles(v).he) : "";
       const en = exists(notesFiles(v).en) ? read(notesFiles(v).en) : "";
       latest = latestJson({ tag, repo, sigs, notes: shortNotes({ version: v, he, en }), date: new Date(epoch * 1000) });
+      // W13.T1: staged — a stable release reaches 5% of devices first (npm run release:rollout moves it on, or halts it).
+      latest = withRollout(latest, { percent: o.rollout ?? firstStage(v), salt: saltOf(tag) });
+      console.log(`rollout: ${describeRollout(latest)}`);
       const byName = new Map(bundles.map((b) => [b.name, b.data]));
       const problems = checkLatest(latest, byName, updater.pubkey);
       if (problems.length) throw new Error(`latest.json does not verify:\n  ${problems.join("\n  ")}`);
