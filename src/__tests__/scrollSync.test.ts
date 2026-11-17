@@ -284,6 +284,29 @@ describe("linked panes", () => {
     off();
   });
 
+  it("when the preview re-renders under the reader (a long note's blocks coming in), it follows the source again", async () => {
+    const ed = scroller(2000, 400);
+    const blocks = Array.from({ length: 10 }, (_, i) => ({ sl: i * 10 + 1, sle: i * 10 + 10, top: i * 300, h: 300 }));
+    const pv = fakePreview(blocks, 6000, 400);
+    const a = editorPane(ed, () => fakeView(100));
+    const b = previewPane(pv, () => "");
+    const off = linkPanes(a, b);
+    fire(ed, "mouseenter");
+    ed.scrollTop = 20 * 50; // line 51
+    fire(ed, "scroll");
+    await settle();
+    expect(pv.scrollTop).toBe(1500);
+    // The blocks above grow (estimated placeholders replaced by rendered blocks): every block moves down 200px.
+    pv.querySelectorAll<HTMLElement>("p").forEach((el, i) => {
+      el.getBoundingClientRect = () => ({ top: i * 300 + 200 - pv.scrollTop, bottom: i * 300 + 500 - pv.scrollTop, height: 300, width: 100, left: 0, right: 100, x: 0, y: 0, toJSON() {} }) as DOMRect;
+    });
+    pv.append(document.createElement("div")); // the re-render the observer sees
+    await new Promise((r) => setTimeout(r, 150));
+    expect(pv.scrollTop).toBe(1700);
+    expect(b.topLine()).toBeCloseTo(51, 5);
+    off();
+  });
+
   it("the preview marks the block that holds the source caret", async () => {
     const ed = scroller(2000, 400);
     const view = fakeView(100, 25);
