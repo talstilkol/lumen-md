@@ -30,12 +30,6 @@
       "task": "W10.E1",
       "reason": "the real render handler behind a structured-clone boundary for tests (renderWorker, viewportPreview)",
       "expires": "2027-05-14"
-    },
-    "setInjectionClassifier": {
-      "kind": "pending",
-      "task": "W10.E66",
-      "reason": "the prompt-injection classifier seam: ProtectAI v2 is registered once it is converted and hosted (plan 6.0, 15.9); until then the async guards give what the sync rules give",
-      "expires": "2027-05-14"
     }
   }
 }

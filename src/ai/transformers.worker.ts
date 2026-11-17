@@ -63,6 +63,8 @@ export type WorkerIn =
   | { id: number; type: "translate"; model: string; device: Device; dtype?: string; texts: string[]; srcLang?: string; tgtLang?: string; host?: string }
   | { id: number; type: "caption"; model: string; device: Device; family: CaptionFamily; image: Blob }
   | { id: number; type: "ner"; model: string; device: Device; texts: string[] }
+  /** Sequence-classification logits (plan 2.7, the injection classifier): row-major [texts, labels] and the labels in index order. */
+  | { id: number; type: "seqLogits"; model: string; device: Device; texts: string[]; host?: string }
   /** SigLIP (plan 6.7): images and texts into one space, for image search. `host`: Lumen's converted-model host. */
   | { id: number; type: "imageEmbed"; model: string; device: Device; dtype?: string; host?: string; images: Blob[] }
   | { id: number; type: "textEmbedForImages"; model: string; device: Device; dtype?: string; host?: string; texts: string[] }
@@ -118,6 +120,7 @@ let translator: { key: string; pipe: TranslationPipeline } | null = null;
 type Captioner = { key: string; processor: CaptionProcessor; model: PreTrainedModel };
 let captioner: Captioner | null = null;
 let ner: { key: string; pipe: TokenClassificationPipeline } | null = null;
+let classifier: { key: string; tokenizer: PreTrainedTokenizer; model: PreTrainedModel; labels: string[] } | null = null;
 let queue: Promise<unknown> = Promise.resolve();
 /** Jobs cancelled by the client: skipped when queued, their result discarded when running. */
 const cancelled = new Set<number>();
@@ -421,6 +424,32 @@ async function runNer(id: number, msg: Extract<WorkerIn, { type: "ner" }>): Prom
   return out;
 }
 
+/** Sequence-classification logits, unchanged (the caller applies softmax and its threshold). */
+async function seqLogits(id: number, msg: Extract<WorkerIn, { type: "seqLogits" }>): Promise<{ logits: number[]; labels: string[] }> {
+  const key = `${msg.model}@${msg.device}@${msg.host ?? ""}`;
+  if (classifier?.key !== key) {
+    if (classifier) await classifier.model.dispose();
+    classifier = null;
+    const load = async () => {
+      const opts = { device: msg.device, dtype: "q8", progress_callback: progressFor(id) } as never;
+      const [tokenizer, model] = await Promise.all([AutoTokenizer.from_pretrained(msg.model, { progress_callback: progressFor(id) } as never), AutoModelForSequenceClassification.from_pretrained(msg.model, opts)]);
+      return { tokenizer, model };
+    };
+    const { tokenizer, model } = await withHost(msg.host, load);
+    const id2label = ((model as unknown as { config?: { id2label?: Record<string, string> } }).config?.id2label ?? {}) as Record<string, string>;
+    const labels = Object.keys(id2label).sort((a, b) => Number(a) - Number(b)).map((k) => id2label[k]!);
+    classifier = { key, tokenizer, model, labels };
+  }
+  const out: number[] = [];
+  for (let i = 0; i < msg.texts.length; i += 8) {
+    if (cancelled.has(id)) throw new DOMException("aborted", "AbortError");
+    const inputs = classifier.tokenizer(msg.texts.slice(i, i + 8), { padding: true, truncation: true, max_length: 512 } as never);
+    const { logits } = (await classifier.model(inputs)) as { logits: { tolist(): number[][] } };
+    for (const row of logits.tolist()) out.push(...row);
+  }
+  return { logits: out, labels: classifier.labels };
+}
+
 type Siglip = { key: string; processor: (image: unknown) => Promise<Record<string, unknown>>; tokenizer: PreTrainedTokenizer; vision: PreTrainedModel; text: PreTrainedModel };
 let siglip: Siglip | null = null;
 
@@ -519,6 +548,9 @@ export async function handle(msg: WorkerIn): Promise<void> {
       case "ner":
         post({ id, type: "result", value: await job(id, () => runNer(id, msg)) });
         return;
+      case "seqLogits":
+        post({ id, type: "result", value: await job(id, () => seqLogits(id, msg)) });
+        return;
       case "imageEmbed":
         post({ id, type: "result", value: await job(id, () => imageEmbed(id, msg)) });
         return;
@@ -554,7 +586,10 @@ export async function handle(msg: WorkerIn): Promise<void> {
         reranker = null;
         translator = null;
         ner = null;
+        const cl = classifier;
+        classifier = null;
         await n?.pipe.dispose();
+        await cl?.model.dispose();
         await a?.pipe.dispose();
         await e?.pipe.dispose();
         await r?.model.dispose();
