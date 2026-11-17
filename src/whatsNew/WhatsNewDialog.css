@@ -22,6 +22,13 @@
   box-shadow: var(--shadow-md);
 }
 
+.wn-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .wn-dialog h2 {
   margin: 0;
   font-size: 18px;
@@ -36,6 +43,16 @@
 
 .wn-body {
   overflow: auto;
+}
+/* prose-lumen sets a note's reading column and its page padding; in the dialog the notes fill the dialog */
+.wn-dialog .wn-body.prose-lumen {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  font-size: 15px;
+}
+.wn-dialog .wn-body.prose-lumen > :first-child {
+  margin-top: 0;
 }
 
 .wn-actions {

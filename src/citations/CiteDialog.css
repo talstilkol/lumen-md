@@ -63,6 +63,11 @@
   background: hsl(var(--accent) / 0.15);
 }
 
+/* The muted line on the selected row's tint fell under 4.5:1 (axe color-contrast): full text colour there. */
+.cite-item.sel .cite-meta {
+  color: hsl(var(--fg));
+}
+
 .cite-title {
   font-weight: 600;
 }

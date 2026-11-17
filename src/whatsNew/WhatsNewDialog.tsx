@@ -26,11 +26,14 @@ export function WhatsNewDialog({ notes, version, render, onClose }: { notes: Sho
   return (
     <Modal onClose={onClose} aria-labelledby="wn-title" className="wn-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="wn-dialog" data-testid="whats-new" data-version={notes?.version ?? version}>
-        <h2 id="wn-title">{t("whatsNew.title", { version: notes?.version ?? version })}</h2>
-        <HelpButton topic="getting-started/whats-new" />
+        <div className="wn-head">
+          <h2 id="wn-title">{t("whatsNew.title", { version: notes?.version ?? version })}</h2>
+          <HelpButton topic="getting-started/whats-new" />
+        </div>
         {notes?.date && <p className="wn-date">{notes.date}</p>}
         {notes && !notes.translated && <p className="wn-note">{t("whatsNew.untranslated")}</p>}
-        <div className="wn-body markdown-body" dir="auto">
+        {/* the notes render like a note (prose-lumen: headings, lists); the region scrolls, so it takes keyboard focus */}
+        <div className="wn-body prose-lumen" dir="auto" tabIndex={0} role="region" aria-labelledby="wn-title" data-testid="whats-new-body">
           {/* empty-allow: no release notes for this version is a fact about the build, and Close follows */}
           {notes ? body ?? t("whatsNew.loading") : t("whatsNew.none")}
         </div>

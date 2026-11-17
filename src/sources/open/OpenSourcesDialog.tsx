@@ -152,8 +152,13 @@ export function OpenSourcesDialog(d: DialogDeps) {
             </label>
           ))}
         </div>
-        <ul id="os-results" className="cite-list" role="listbox" aria-label={t("openSources.results")}>
-          {!results.length && <li className="cite-empty">{query.trim() ? t("openSources.noLocal") : t("openSources.hint")}</li>}
+        {/* the hint or "nothing found" beside the listbox, not in it: a listbox holds options only (axe aria-required-children) */}
+        {!results.length && (
+          <p className="cite-empty" role="status" data-testid="open-sources-empty">
+            {query.trim() ? t("openSources.noLocal") : t("openSources.hint")}
+          </p>
+        )}
+        <ul id="os-results" className="cite-list" role="listbox" aria-label={t("openSources.results")} hidden={!results.length}>
           {results.map((r, i) => (
             <li
               key={r.key}
@@ -178,15 +183,21 @@ export function OpenSourcesDialog(d: DialogDeps) {
               {r.terms && (
                 // R12.19: each register's licence light and its terms of use.
                 <span className={`os-terms os-light-${r.terms.light}`} data-testid="open-sources-terms" dir="auto">
-                  {t(`openSources.light.${r.terms.light}`)} · {getLocale() === "he" ? r.terms.noteHe : r.terms.noteEn}{" "}
-                  <a href={r.terms.termsUrl} target="_blank" rel="noopener noreferrer" onMouseDown={(e) => e.stopPropagation()}>
-                    {t("openSources.terms")}
-                  </a>
+                  {t(`openSources.light.${r.terms.light}`)} · {getLocale() === "he" ? r.terms.noteHe : r.terms.noteEn}
                 </span>
               )}
             </li>
           ))}
         </ul>
+        {/* The selected result's terms of use, as a link outside the listbox: an option holds no control (axe nested-interactive). */}
+        {results[sel]?.terms && (
+          <p className={`os-terms os-terms-link os-light-${results[sel].terms!.light}`} data-testid="open-sources-terms-link">
+            {t(`openSources.source.${results[sel].source}`)}:{" "}
+            <a href={results[sel].terms!.termsUrl} target="_blank" rel="noopener noreferrer">
+              {t("openSources.terms")}
+            </a>
+          </p>
+        )}
         <p className="os-status" role="status" aria-live="polite">
           {status}
         </p>

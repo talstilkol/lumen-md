@@ -1,5 +1,8 @@
 /* The open-sources dialog (W7.24): the cite dialog's frame, plus badges and switches. */
-.os-dialog { max-width: 44rem; }
+.os-dialog { max-width: 44rem; max-block-size: 86vh; }
+/* The results keep room for a few rows: with the kinds, the switches and a register's terms the list was squeezed to one line. */
+.os-dialog .cite-list { flex: 1 1 12rem; min-block-size: 7.5rem; }
+.os-dialog > :not(.cite-list) { flex: none; }
 .os-title { font-size: 1rem; margin: 0 0 0.5rem; }
 .os-kinds { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; margin: 0.5rem 0; font-size: 0.85rem; }
 .os-kind { display: inline-flex; align-items: center; gap: 0.25rem; }
@@ -11,7 +14,9 @@
 .os-sends { opacity: 0.75; font-size: 0.8rem; }
 /* R12.19: a register's licence light and terms. */
 .os-terms { flex-basis: 100%; font-size: 0.75rem; opacity: 0.85; }
+.os-terms-link { margin: 0.25rem 0 0; padding-inline: 8px; opacity: 1; }
 .os-light-green::before, .os-light-amber::before, .os-light-red::before { content: "●"; margin-inline-end: 0.25rem; }
 .os-light-green::before { color: hsl(142 60% 38%); }
 .os-light-amber::before { color: hsl(38 90% 45%); }
 .os-light-red::before { color: hsl(0 70% 48%); }
+.os-terms-link a { color: hsl(var(--accent)); text-decoration: underline; }

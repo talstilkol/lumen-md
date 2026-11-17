@@ -31,6 +31,16 @@ describe("What's new dialog (14.6)", () => {
     act(() => m.root.unmount());
   });
 
+  it("the notes read like a note (the app's prose styles), in a region the keyboard can scroll", async () => {
+    const m = await mount({ version: "1.2.0", date: null, markdown: "- x", translated: true });
+    const body = m.host.querySelector<HTMLElement>('[data-testid="whats-new-body"]')!;
+    expect(body.classList.contains("prose-lumen")).toBe(true);
+    expect(body.tabIndex).toBe(0);
+    expect(body.getAttribute("role")).toBe("region");
+    expect(body.getAttribute("aria-labelledby")).toBe("wn-title");
+    act(() => m.root.unmount());
+  });
+
   it("no notes for this version: says so", async () => {
     const m = await mount(null);
     expect(m.host.textContent).toContain("There are no release notes for this version.");
