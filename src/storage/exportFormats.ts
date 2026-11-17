@@ -554,15 +554,21 @@ export async function markdownToEpubBytes(md: string, title = "Document"): Promi
   // An RTL book's language is its first RTL passage's: frontmatter keys
   // and code are Latin and would otherwise decide.
   const bookLang = (bookDir === "rtl" ? firstRtlLanguage(md) : null) ?? "en";
+  const { a11yMetadata, pageListNav, paginate } = await import("../book/epubA11y");
+  // W13.F4: a page list the book sets for itself (a break per chapter, then every ~300 words).
+  const pageEntries: { href: string; n: number; id: string }[] = [];
   const chapters = (parts.length ? parts : [md]).map((c, i) => {
     const chTitle = c.match(/^#\s+(.+)$/m)?.[1] ?? `Chapter ${i + 1}`;
     const dir = markdownBaseDirection(c);
     const lang = (dir === "rtl" ? firstRtlLanguage(c) : null) ?? (dir === bookDir ? bookLang : "en");
+    const href = `chapter${i + 1}.xhtml`;
+    const paged = paginate(mdToXhtml(c), pageEntries.length + 1);
+    for (const p of paged.pages) pageEntries.push({ href, ...p });
     const xhtml =
       `<?xml version="1.0" encoding="utf-8"?>\n<!DOCTYPE html>\n` +
-      `<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="${lang}" lang="${lang}" dir="${dir}"><head><title>${escapeHtml(chTitle)}</title></head>` +
-      `<body>\n${mdToXhtml(c)}\n</body></html>`;
-    return { id: `ch${i + 1}`, href: `chapter${i + 1}.xhtml`, title: chTitle, xhtml };
+      `<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${lang}" lang="${lang}" dir="${dir}"><head><title>${escapeHtml(chTitle)}</title></head>` +
+      `<body>\n${paged.body}\n</body></html>`;
+    return { id: `ch${i + 1}`, href, title: chTitle, xhtml };
   });
 
   const uid = "urn:uuid:" + (globalThis.crypto?.randomUUID?.() ?? Date.now().toString(16));
@@ -576,18 +582,26 @@ export async function markdownToEpubBytes(md: string, title = "Document"): Promi
     `<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">` +
     `<dc:identifier id="bookid">${uid}</dc:identifier>` +
     `<dc:title>${escapeHtml(title)}</dc:title><dc:language>${bookLang}</dc:language>` +
-    `<meta property="dcterms:modified">1970-01-01T00:00:00Z</meta></metadata>` +
+    `<meta property="dcterms:modified">1970-01-01T00:00:00Z</meta>` +
+    a11yMetadata({ lang: bookLang, images: 0, imagesWithoutAlt: 0, pages: pageEntries.length }) +
+    `</metadata>` +
     `<manifest><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/>` +
     chapters.map((c) => `<item id="${c.id}" href="${c.href}" media-type="application/xhtml+xml"/>`).join("") +
     `</manifest><spine${bookDir === "rtl" ? ' page-progression-direction="rtl"' : ""}>` +
     chapters.map((c) => `<itemref idref="${c.id}"/>`).join("") +
     `</spine></package>`;
+  // The book's own language for its navigation (a screen reader reads it in that voice). The navigation is
+  // not in the spine here, so the landmarks name the body only (a link to a non-spine page is an epubcheck error).
+  const navTitle = bookLang.startsWith("he") ? "תוכן העניינים" : "Contents";
   const nav =
     `<?xml version="1.0" encoding="utf-8"?>\n` +
-    `<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${bookLang}" lang="${bookLang}" dir="${bookDir}"><head><title>Contents</title></head>` +
+    `<html xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops" xml:lang="${bookLang}" lang="${bookLang}" dir="${bookDir}"><head><title>${navTitle}</title></head>` +
     `<body><nav epub:type="toc"><ol>` +
     chapters.map((c) => `<li><a href="${c.href}">${escapeHtml(c.title)}</a></li>`).join("") +
-    `</ol></nav></body></html>`;
+    `</ol></nav>` +
+    `<nav epub:type="landmarks" hidden="hidden"><ol>${chapters.length ? `<li><a epub:type="bodymatter" href="${chapters[0].href}">${escapeHtml(chapters[0].title)}</a></li>` : ""}</ol></nav>` +
+    pageListNav(pageEntries, bookLang.startsWith("he") ? "עמודים" : "Pages") +
+    `</body></html>`;
 
   return zip([
     // The mimetype entry must come first and be stored (uncompressed).
