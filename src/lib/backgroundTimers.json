@@ -1,0 +1,25 @@
+{
+ "$comment": "Plan W13.V4: every setInterval in src/ that is not setVisibleInterval (src/lib/visibleInterval.ts, which sleeps in the background) is listed here with why it may run while the app is not on screen. A new one fails src/__tests__/backgroundTimers.test.ts until it is either made visible-only or listed with its reason.",
+ "allowed": {
+  "src/automations/app.ts": "the user's daily automations, checked every 30 minutes",
+  "src/backup/scheduler.ts": "scheduled backups the user set (the interval is injectable for tests)",
+  "src/bench/page.ts": "the benchmark page only, never in the app",
+  "src/collab/versionHistory.ts": "collab snapshots while a shared session is open; the session still receives edits in the background",
+  "src/hooks/useAutosave.ts": "saves unsaved edits: data safety must not wait for the app to be visible",
+  "src/layouts/EditorLayout.tsx": "waits for the editor to mount: at most 80 tries, then stops",
+  "src/meetings/MeetingRecorder.tsx": "the elapsed time while a recording runs",
+  "src/playground/runner.ts": "inside the sandboxed code runner (no document)",
+  "src/slides/PresenterView.tsx": "the presenter's clock while presenting",
+  "src/storage/vault/encrypted/session.ts": "auto-lock of the encrypted vault: security must also run in the background",
+  "src/student/LectureRecorder.tsx": "the elapsed time while a recording runs",
+  "src/sync/autoBackup.ts": "automatic backups the user turned on, every few minutes",
+  "src/sync/e2ee/ui/LanPairing.tsx": "only while two devices are pairing",
+  "src/sync/e2ee/ui/session.ts": "encrypted sync the user turned on, at the interval they chose",
+  "src/sync/gitWatch.ts": "git sync the user turned on, at the interval they chose",
+  "src/tasks/reminders.ts": "task reminders must fire while the app is in the background (notifications)",
+  "src/ui/FineTuneSettings.tsx": "polls a running fine-tune job while its dialog is open",
+  "src/ui/QuickCapture.tsx": "the capture window's clock, only while it is open",
+  "src/ui/UsabilitySelfPanel.tsx": "a usability self-test's clock, only while the test runs",
+  "src/ui/graph/TimeSlider.tsx": "playback the user started with Play; stops at the end or on Pause"
+ }
+}
