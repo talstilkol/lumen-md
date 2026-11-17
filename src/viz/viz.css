@@ -96,6 +96,45 @@
   gap: 8px;
   padding-block-end: 6px;
 }
+.lumen-viz-hcal-nav {
+  display: inline-flex;
+  gap: 6px;
+}
+.lumen-viz-hcal-head button,
+.lumen-viz-hcal-panel .lumen-viz-bar button {
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 12px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  background: transparent;
+  color: hsl(var(--fg));
+  cursor: pointer;
+}
+.lumen-viz-hcal-head button:hover:not(:disabled),
+.lumen-viz-hcal-panel .lumen-viz-bar button:hover {
+  background: hsl(var(--accent) / 0.1);
+}
+.lumen-viz-hcal-head button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.lumen-viz-hcal-panel .lumen-viz-bar {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+  margin-block: 8px;
+}
+/* Today: the day number in an accent disc (aria-current="date" says it to a screen reader). */
+.lumen-viz-hcal-grid td[aria-current="date"] .lumen-viz-hcal-day {
+  display: inline-block;
+  min-inline-size: 1.6em;
+  padding-inline: 4px;
+  border-radius: 999px;
+  text-align: center;
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-fg, 0 0% 100%));
+}
 .lumen-viz-hcal-grid {
   border-collapse: collapse;
   inline-size: 100%;

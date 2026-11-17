@@ -34,6 +34,8 @@ interface Props {
   onItem?: (item: DayItem) => void;
   /** The day to focus first (default the 1st, or today when it is in the month). */
   focusIso?: string;
+  /** Today (ISO): marked with aria-current="date", and the "Today" button goes back to it. */
+  today?: string;
 }
 
 export type GridMove = { days: number } | { month: number } | { weekEdge: "start" | "end" } | null;
@@ -73,7 +75,7 @@ function weekdayNames(locale: string): Array<{ short: string; long: string }> {
   });
 }
 
-export default function HebrewMonthView({ year, month, israel, lang, locale, dir, items, onDay, onItem, focusIso }: Props) {
+export default function HebrewMonthView({ year, month, israel, lang, locale, dir, items, onDay, onItem, focusIso, today }: Props) {
   const [at, setAt] = useState({ year, month });
   useEffect(() => setAt({ year, month }), [year, month]);
   const grid = useMemo(() => hebrewMonthGrid(at.year, at.month, { israel, lang }), [at, israel, lang]);
@@ -141,9 +143,16 @@ export default function HebrewMonthView({ year, month, israel, lang, locale, dir
         <span id={captionId} className="lumen-viz-title" dir="auto" aria-live="polite">
           {grid.name} {grid.yearLabel}
         </span>
-        <button type="button" onClick={() => step(1)} data-hcal-next="">
-          {t("viz.hcal.next")}
-        </button>
+        <span className="lumen-viz-hcal-nav">
+          {today && (
+            <button type="button" onClick={() => goto(today)} data-hcal-today="" disabled={focused === today}>
+              {t("viz.hcal.today")}
+            </button>
+          )}
+          <button type="button" onClick={() => step(1)} data-hcal-next="">
+            {t("viz.hcal.next")}
+          </button>
+        </span>
       </div>
       <table role="grid" aria-labelledby={captionId} className="lumen-viz-hcal-grid" onKeyDown={onKeyDown}>
         <thead>
@@ -165,6 +174,7 @@ export default function HebrewMonthView({ year, month, israel, lang, locale, dir
                     role="gridcell"
                     tabIndex={c.iso === focused ? 0 : -1}
                     aria-selected={c.iso === focused}
+                    aria-current={c.iso === today ? "date" : undefined}
                     aria-label={label(c)}
                     data-iso={c.iso}
                     data-shabbat={c.weekday === 6 || undefined}

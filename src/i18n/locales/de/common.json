@@ -4473,6 +4473,7 @@
   "viz.hcal.nextYear": "Nächstes Jahr",
   "viz.hcal.prev": "Vorheriger Monat",
   "viz.hcal.prevYear": "Vorheriges Jahr",
+  "viz.hcal.today": "Today",
   "viz.kind.bar": "Balkendiagramm",
   "viz.kind.calendar": "Kalender-Heatmap",
   "viz.kind.heatmap": "Heatmap",
