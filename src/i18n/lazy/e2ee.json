@@ -447,5 +447,11 @@
   "e2ee.shared.kind.hotkeys": "Hotkeys",
   "e2ee.shared.kind.settings": "App settings",
   "e2ee.shared.kind.automations": "Automations",
-  "e2ee.shared.kind.agents": "Agent skills"
+  "e2ee.shared.kind.agents": "Agent skills",
+  "e2ee.presence.title": "Show where I am",
+  "e2ee.presence.intro": "The other members of a shared vault see a dot next to the note you have open, with your device's name, and you see theirs. The relay sees sealed bytes only — no names, no notes. Nothing is sent in airplane mode. Off until you turn it on.",
+  "e2ee.presence.on": "Show the other members which note I have open",
+  "e2ee.presence.device": "The name the others see for this device",
+  "e2ee.presence.devicePlaceholder": "For example: Dana's laptop",
+  "e2ee.presence.needName": "Choose a device name first: presence starts once this device has one."
 }

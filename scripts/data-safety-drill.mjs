@@ -3,6 +3,7 @@
  * Data-safety drill on the merged code (plan W4.33).
  *
  *   node scripts/data-safety-drill.mjs [--kills 200] [--full-disk <dir>] [--out reports] [--json]
+ *   node scripts/data-safety-drill.mjs --report <file> [--real <counters.json>] [--runner <cmd>]   (W13.S7, ./drill/sync3.mjs)
  *
  * Every way the app saves a note to a real folder is driven through four
  * kinds of trouble, on a real disk, in real processes:
@@ -318,6 +319,13 @@ if (args[0] === "--external") {
       await fsp.rm(tmp, { force: true });
     }
   }
+}
+
+// ── Plan W13.S7: the three-device sync drill (`--report <file>` [--real <counters.json>] [--runner <cmd>]) ──
+if (args.includes("--report")) {
+  const { syncThreeDevices } = await import("./drill/sync3.mjs");
+  const real = arg("--real", null);
+  process.exit(syncThreeDevices(repo, resolve(repo, arg("--report", "reports/drill/sync-3-devices.json")), { real: real && resolve(repo, real), runner: arg("--runner", null) }));
 }
 
 // ── The parent ───────────────────────────────────────────────────────────

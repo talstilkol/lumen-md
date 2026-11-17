@@ -26,6 +26,8 @@ import type { RoleRecord } from "./records";
 import { InviteScreen } from "./InviteScreen";
 import { MemberList } from "./MemberList";
 import { SharedConsent } from "./SharedConsent";
+import { PresenceSettings } from "./PresenceSettings";
+import { usePresence } from "./usePresence";
 import { JoinScreen, MemberView } from "./MemberView";
 import { card, errorStyle, field, ghost, list, muted, primary, row } from "./styles";
 import { EmptyState, learnHow } from "../../../../ui/EmptyState";
@@ -69,6 +71,9 @@ export function RoleVaultPanel({ onClose, deps, relay, origin, joining = null }:
   const [records, setRecords] = useState<RoleRecord[]>([]);
   const [view, setView] = useState<View>({ v: "list" });
   const [admin, setAdmin] = useState<AdminSession | null>(null);
+  // W13.S6: presence runs while this vault is open here (when switched on).
+  const [presenceVersion, setPresenceVersion] = useState(0);
+  usePresence(admin?.sync, presenceVersion);
   const [invite, setInvite] = useState<Invite | "bad" | null>(joining);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -172,6 +177,7 @@ export function RoleVaultPanel({ onClose, deps, relay, origin, joining = null }:
             ) : (
               <div style={muted}>{t("e2ee.roles.noRelay")}</div>
             )}
+            {records.length > 0 && <PresenceSettings onChange={() => setPresenceVersion((n) => n + 1)} />}
           </section>
         )}
 

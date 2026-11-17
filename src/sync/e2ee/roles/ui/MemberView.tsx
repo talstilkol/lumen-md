@@ -13,6 +13,7 @@
  *   PersonalFolderNote  "only you and the admin can read it".
  */
 
+import { usePresence } from "./usePresence";
 import { useCallback, useEffect, useState } from "react";
 import { t } from "../../../../i18n";
 import "../../strings";
@@ -74,6 +75,8 @@ export function ConfirmCurrent({ onConfirm, busy }: { onConfirm: () => void; bus
 
 export function MemberView({ record, deps, onError }: { record: Extract<RoleRecord, { kind: "member" }>; deps: RoleDeps; onError: (e: unknown) => void }) {
   const [session, setSession] = useState<MemberSession | null>(null);
+  // W13.S6: presence runs while this vault is open here (when switched on).
+  usePresence(session?.sync);
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(true);
   const [news, setNews] = useState<string | null>(null);

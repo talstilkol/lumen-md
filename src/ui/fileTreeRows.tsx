@@ -5,6 +5,7 @@
 import { ChevronDown, ChevronRight, FilePlus2, FileText, FolderPlus, FolderOpen, Folder as FolderIcon, Pencil, Trash2 } from "lucide-react";
 import type { WorkspaceNode } from "../storage/workspace";
 import { t } from "../i18n";
+import { PresenceDot } from "./PresenceDot";
 
 /**
  * The children of one folder to render: the first `limit` rows (folders
@@ -184,6 +185,8 @@ export function rowOf(node: WorkspaceNode, depth: number, ctx: RenderCtx): React
             {node.name}
           </button>
         )}
+        {/* W13.S6: another device of a shared vault has this note open. */}
+        {!isFolder && <PresenceDot path={node.path} />}
 
         {isFolder && (
           <>
