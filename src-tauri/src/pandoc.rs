@@ -100,6 +100,29 @@ pub fn is_format_name(s: &str) -> bool {
         && parts.all(|p| !p.is_empty() && p.bytes().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'_'))
 }
 
+/// What `run` keeps of each pipe; the rest is read and dropped, so the child never blocks on a full pipe.
+const PIPE_KEEP: usize = 1024 * 1024;
+
+/// Read a pipe to its end on its own thread, keeping the first `PIPE_KEEP` bytes (review 14 Low 4: a pipe
+/// read only after the child exits fills at 64 KiB, the child blocks writing, and the wait never ends).
+fn drain<R: std::io::Read + Send + 'static>(pipe: Option<R>) -> std::thread::JoinHandle<Vec<u8>> {
+    std::thread::spawn(move || {
+        let mut kept = Vec::new();
+        let Some(mut r) = pipe else { return kept };
+        let mut buf = [0u8; 8192];
+        loop {
+            match r.read(&mut buf) {
+                Ok(0) | Err(_) => break,
+                Ok(n) => {
+                    let room = PIPE_KEEP.saturating_sub(kept.len());
+                    kept.extend_from_slice(&buf[..n.min(room)]);
+                }
+            }
+        }
+        kept
+    })
+}
+
 fn run(bin: &Path, args: &[OsString], timeout: Duration) -> Result<(Option<i32>, Vec<u8>, Vec<u8>), PandocError> {
     let mut child = Command::new(bin)
         .args(args)
@@ -110,21 +133,37 @@ fn run(bin: &Path, args: &[OsString], timeout: Duration) -> Result<(Option<i32>,
         .env("PANDOC_DATA_DIR", "")
         .spawn()
         .map_err(|e| PandocError::Spawn(e.to_string()))?;
+    // Both pipes are read while the child runs.
+    let stdout = drain(child.stdout.take());
+    let stderr = drain(child.stderr.take());
     let start = Instant::now();
-    loop {
+    let status = loop {
         match child.try_wait() {
-            Ok(Some(_)) => break,
+            Ok(Some(st)) => break st,
             Ok(None) if start.elapsed() > timeout => {
                 let _ = child.kill();
                 let _ = child.wait();
+                // The readers end when the pipes close; they are not waited for (a grandchild may hold one).
                 return Err(PandocError::Timeout(timeout.as_secs()));
             }
             Ok(None) => std::thread::sleep(Duration::from_millis(20)),
-            Err(e) => return Err(PandocError::Io(e.to_string())),
+            Err(e) => {
+                let _ = child.kill();
+                let _ = child.wait();
+                return Err(PandocError::Io(e.to_string()));
+            }
         }
+    };
+    // Pandoc has exited; a process it left holding a pipe still counts against the deadline.
+    while !(stdout.is_finished() && stderr.is_finished()) {
+        if start.elapsed() > timeout {
+            return Err(PandocError::Timeout(timeout.as_secs()));
+        }
+        std::thread::sleep(Duration::from_millis(5));
     }
-    let out = child.wait_with_output().map_err(|e| PandocError::Io(e.to_string()))?;
-    Ok((out.status.code(), out.stdout, out.stderr))
+    let out = stdout.join().map_err(|_| PandocError::Io("the stdout reader failed".into()))?;
+    let err = stderr.join().map_err(|_| PandocError::Io("the stderr reader failed".into()))?;
+    Ok((status.code(), out, err))
 }
 
 /// What the installed pandoc is: its version line and its readers.
@@ -221,6 +260,8 @@ case "$3" in
   opml) printf -- '- outline\n  - child\n' > "$out";;
   t2t) printf '**bold**\n' > "$out";;
   slow) sleep 5;;
+  noisy) head -c 200000 /dev/zero | tr '\0' w >&2; printf 'quiet\n' > "$out";;
+  noisyfail) head -c 200000 /dev/zero | tr '\0' e >&2; echo " the end" >&2; exit 3;;
   *) echo "unknown reader $3" >&2; exit 21;;
 esac
 "#
@@ -316,5 +357,21 @@ esac
             other => panic!("{other:?}"),
         }
         assert_eq!(convert(&bin, &readers, "slow", "txt", b"x", &d, Duration::from_millis(300)), Err(PandocError::Timeout(0)));
+    }
+
+    /// Review 14 Low 4: 200 KB on stderr (over a pipe's 64 KiB) neither deadlocks nor times out.
+    #[cfg(unix)]
+    #[test]
+    fn a_noisy_stderr_does_not_deadlock() {
+        let d = tmp("noisy");
+        let bin = fake(&d, "3.8.2");
+        let readers: Vec<String> = vec!["noisy".into(), "noisyfail".into()];
+        let t = Instant::now();
+        assert_eq!(convert(&bin, &readers, "noisy", "txt", b"x", &d, Duration::from_secs(5)).unwrap(), "quiet\n");
+        match convert(&bin, &readers, "noisyfail", "txt", b"x", &d, Duration::from_secs(5)) {
+            Err(PandocError::Failed { code: Some(3), stderr }) => assert!(stderr.ends_with(" the end\n") && stderr.len() <= 2000 * 4),
+            other => panic!("{other:?}"),
+        }
+        assert!(t.elapsed() < Duration::from_secs(5));
     }
 }
