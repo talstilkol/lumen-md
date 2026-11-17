@@ -7190,14 +7190,6 @@
     "ru": "y9m5zt",
     "zh-CN": "y9m5zt"
   },
-  "xchg.absent": {
-    "ar": "14137kw",
-    "de": "14137kw",
-    "fr": "14137kw",
-    "ja": "14137kw",
-    "ru": "14137kw",
-    "zh-CN": "14137kw"
-  },
   "xchg.against": {
     "ar": "j8nj5i",
     "de": "j8nj5i",
@@ -7317,5 +7309,59 @@
     "ja": "1ccwmzq",
     "ru": "1ccwmzq",
     "zh-CN": "1ccwmzq"
+  },
+  "agentReview.changeRegion": {
+    "ar": "1hjon0e",
+    "de": "1hjon0e",
+    "fr": "1hjon0e",
+    "he": "1hjon0e",
+    "ja": "1hjon0e",
+    "ru": "1hjon0e",
+    "zh-CN": "1hjon0e"
+  },
+  "agentReview.listRegion": {
+    "ar": "1g5431a",
+    "de": "1g5431a",
+    "fr": "1g5431a",
+    "he": "1g5431a",
+    "ja": "1g5431a",
+    "ru": "1g5431a",
+    "zh-CN": "1g5431a"
+  },
+  "xchg.absentBefore": {
+    "ar": "1nnlmzz",
+    "de": "1nnlmzz",
+    "fr": "1nnlmzz",
+    "he": "1nnlmzz",
+    "ja": "1nnlmzz",
+    "ru": "1nnlmzz",
+    "zh-CN": "1nnlmzz"
+  },
+  "xchg.absentAfter": {
+    "ar": "1k05wly",
+    "de": "1k05wly",
+    "fr": "1k05wly",
+    "he": "1k05wly",
+    "ja": "1k05wly",
+    "ru": "1k05wly",
+    "zh-CN": "1k05wly"
+  },
+  "goal.now.readabilityFk": {
+    "ar": "i9o8re",
+    "de": "i9o8re",
+    "fr": "i9o8re",
+    "he": "i9o8re",
+    "ja": "i9o8re",
+    "ru": "i9o8re",
+    "zh-CN": "i9o8re"
+  },
+  "goal.now.readabilityHe5": {
+    "ar": "tgorfa",
+    "de": "tgorfa",
+    "fr": "tgorfa",
+    "he": "tgorfa",
+    "ja": "tgorfa",
+    "ru": "tgorfa",
+    "zh-CN": "tgorfa"
   }
 }

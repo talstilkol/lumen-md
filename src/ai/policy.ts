@@ -150,6 +150,17 @@ export function assertCloudAllowed(what: string, policy: AiPolicy = getAiPolicy(
 }
 
 /** Loopback, private-network and `.local` origins count as "this machine / this network", not the cloud. */
+/** This computer only (localhost, 127.0.0.1, ::1, *.localhost) — not the LAN, which isLocalOrigin allows. */
+export function isLoopbackOrigin(url: string): boolean {
+  let host: string;
+  try {
+    host = new URL(url).hostname.toLowerCase();
+  } catch {
+    return false;
+  }
+  return host === "localhost" || host.endsWith(".localhost") || host === "::1" || host === "[::1]" || /^127\.\d+\.\d+\.\d+$/.test(host);
+}
+
 export function isLocalOrigin(url: string): boolean {
   let host: string;
   try {

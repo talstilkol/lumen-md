@@ -123,6 +123,14 @@ describe("AgentReviewPanel", () => {
     const lines = within(card(file)).getByTestId("agent-change-lines");
     expect([...lines.querySelectorAll("[data-op]")].map((el) => `${el.getAttribute("data-op")}:${el.textContent?.slice(1)}`)).toEqual(["eq:one", "del:two", "add:2"]);
 
+    // Audit r4 A2.6: every scrollable region is reachable by keyboard and named (axe scrollable-region-focusable).
+    // The list is one region; each change is a named group (not a landmark: there can be many).
+    for (const [el, role] of [[inline, "group"], [lines, "group"], [screen.getByTestId("agent-review-body"), "region"]] as const) {
+      expect(el.tabIndex).toBe(0);
+      expect(el.getAttribute("role")).toBe(role);
+      expect(el.getAttribute("aria-label")).toBeTruthy();
+    }
+
     // Shown, not written.
     expect(content()).toBe(doc);
     expect(writes).toEqual([]);

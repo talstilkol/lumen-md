@@ -44,6 +44,8 @@ export function writingDefinition(agentId: string, req: ModelRequest): AgentDefi
     user: (i) => i.user,
     tools: [],
     executorPreference: [...LOCAL_EXECUTORS],
+    // Audit r4 A2.13: a writing agent's text never leaves this computer, whatever the AI policy says.
+    loopbackOnly: true,
     tier: req.tier ?? "small",
     temperature: req.temperature ?? 0.3,
     maxTokens: req.maxTokens ?? 700,

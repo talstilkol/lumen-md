@@ -29,6 +29,7 @@
 import { frequencyKnown, type FrequencyList } from "../../../ai/hebrewFreqKnown";
 import { STOP, plain, sentences } from "../textTools";
 import model from "./hebrewModel.json";
+import { syllables } from "./syllables";
 
 export const FEATURES = ["wordLen", "sentLen", "rare", "ambiguous"] as const;
 export type Feature = (typeof FEATURES)[number];
@@ -169,16 +170,8 @@ export function hebrewReadability(text: string, freq?: FrequencyList, m: HebrewM
 
 /* ─── English: Flesch–Kincaid ────────────────────────────────────────── */
 
-/** Syllables of an English word, by vowel groups with the usual corrections (silent e, -ed, -es, -le, y). */
-export function syllables(word: string): number {
-  let w = word.toLowerCase().replace(/[^a-z]/g, "");
-  if (!w) return 0;
-  if (w.length <= 3) return 1;
-  // A silent ending: "makes", "jumped", "cake" (not "boxes", "wanted", "table": those are heard).
-  w = w.replace(/(?:[^laeiouysxzh]es|[^laeiouydt]ed|[^laeiouy]e)$/, (m) => m[0]).replace(/^y/, "");
-  const groups = w.match(/[aeiouy]{1,2}/g);
-  return Math.max(1, groups ? groups.length : 1);
-}
+/** Syllables of an English word (./syllables.ts). */
+export { syllables };
 
 const EN_WORD = /[A-Za-z]+(?:['’][A-Za-z]+)?/g;
 

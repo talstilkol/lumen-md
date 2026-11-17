@@ -19,13 +19,19 @@
  *   the text, a replacement equal to the original, an unknown kind) is
  *   dropped and counted, never staged.
  *
+ * - Review 13 M9: a suggestion that changes several separate words is
+ *   staged as one range change per hunk (`hunkProposals`), so the review
+ *   panel offers the same per-hunk choice as the editor's suggestions panel.
+ *   Each hunk carries its own context and the text's fingerprint; once one
+ *   is applied the others are found again by their context.
+ *
  * At most MAX_STAGED range changes are staged per run (the staging area
  * holds 200 pending); the rest are listed in the report.
  */
 import { rangeContext, stageChange, textFingerprint } from "./staging";
 import type { ChangeProposal, StagedChange } from "./types";
 import { resolveParagraphAnchor } from "../ai/paragraphAnchors";
-import { fromFinding, type CheckerFinding, type FindingSuggestion, type WritingSuggestion } from "./writing/suggestion";
+import { fromFinding, suggestionDiff, type CheckerFinding, type FindingSuggestion, type WritingSuggestion } from "./writing/suggestion";
 
 export const REPORT_DIR = "בדיקות כתיבה";
 export const MAX_STAGED = 150;
@@ -99,6 +105,33 @@ export function suggestionProposal(s: WritingSuggestion, text: string, path: str
   return { kind: "range", path, from, to, before: s.original, after: s.replacement, context: rangeContext(text, from, to), basis: textFingerprint(text), summary: s.message } as ChangeProposal;
 }
 
+/**
+ * The proposals of a W1 suggestion, one per hunk (review 13 M9): the word-level changes of
+ * `original → replacement`, each with its own range in `text`. One hunk = the whole suggestion.
+ */
+export function hunkProposals(s: WritingSuggestion, text: string, path: string | null): ChangeProposal[] {
+  const whole = suggestionProposal(s, text, path);
+  if (!whole || s.replacement === null) return [];
+  const parts: { from: number; to: number; before: string; after: string }[] = [];
+  let pos = s.range.from;
+  let cur: { from: number; to: number; before: string; after: string } | null = null;
+  for (const op of suggestionDiff(s)) {
+    if (op.type === "equal") {
+      pos += op.text.length;
+      cur = null;
+      continue;
+    }
+    if (!cur) parts.push((cur = { from: pos, to: pos, before: "", after: "" }));
+    if (op.type === "delete") {
+      cur.before += op.text;
+      pos += op.text.length;
+      cur.to = pos;
+    } else cur.after += op.text;
+  }
+  if (parts.length <= 1) return [whole];
+  return parts.map((h, i) => ({ kind: "range", path, from: h.from, to: h.to, before: h.before, after: h.after, context: rangeContext(text, h.from, h.to), basis: textFingerprint(text), summary: `${s.message} (${i + 1}/${parts.length})` }) as ChangeProposal);
+}
+
 /** A checker finding's proposal: the finding made a W1 suggestion for `text` first (null when it is not valid for it). */
 export function toRangeProposal(f: CheckerFinding, text: string, path: string | null): ChangeProposal | null {
   try {
@@ -141,13 +174,12 @@ export function stageWritingSuggestions(input: StageInput): StageResult {
       dropped++;
       continue;
     }
-    if (s.replacement === null || s.blocked || staged.length >= MAX_STAGED) {
+    const parts = s.replacement === null || s.blocked ? [] : hunkProposals(s, text, s.path ?? null);
+    if (!parts.length || staged.length + parts.length > MAX_STAGED) {
       comments.push(s);
       continue;
     }
-    const c = stageSuggestion(s, text, s.path ?? null, { tool: input.tool, agentId: input.agentId });
-    if (c) staged.push(c);
-    else comments.push(s);
+    for (const p of parts) staged.push(stageChange(p, { tool: input.tool, agentId: input.agentId }));
   }
   const reportPath = `${REPORT_DIR}/${input.agentId}-${input.today}.md`;
   const report = comments.length

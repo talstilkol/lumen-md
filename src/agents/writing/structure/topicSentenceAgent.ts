@@ -33,6 +33,7 @@ export const topicSentenceAgent: AgentDefinition<TopicInput, TopicOutput> = regi
   user: (input) => clip(input.text, 4000),
   outputSchema: { type: "object", properties: { hasTopicSentence: { type: "boolean" } }, required: ["hasTopicSentence"] },
   executorPreference: LOCAL_EXECUTORS,
+  loopbackOnly: true,
   tools: [],
   tier: "small",
   temperature: 0,

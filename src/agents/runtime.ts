@@ -325,6 +325,7 @@ export async function runAgent<I extends AgentInput, O = string>(def: AgentDefin
         const t0 = Date.now();
         const sent = await executor.chat({
           charge: chargeOnce,
+          loopbackOnly: def.loopbackOnly,
           messages,
           tools: nativeTools ? offered : undefined,
           schema: nativeSchema ? def.outputSchema : turnSchema,

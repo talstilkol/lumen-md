@@ -282,3 +282,34 @@ describe("ollama executor under local-only (review)", () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe("ollama executor: a writing agent's request goes to this computer only (audit r4 A2.13)", () => {
+  afterEach(() => {
+    base.url = "http://127.0.0.1:11434";
+    localStorage.removeItem("lumen.ai.policy");
+    vi.unstubAllGlobals();
+  });
+
+  it("refuses an Ollama on the LAN or elsewhere under ANY policy when loopbackOnly is set; loopback and the policy's own rule are unchanged", async () => {
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
+    for (const url of ["http://192.168.1.20:11434", "http://10.0.0.5:11434", "https://ollama.example.com"]) {
+      base.url = url;
+      await expect(ollamaExecutor.chat({ loopbackOnly: true, messages: [{ role: "user", content: "a writer's draft" }] })).rejects.toMatchObject({ code: "POLICY" });
+    }
+    expect(fetchSpy).not.toHaveBeenCalled();
+    const { isLoopbackOrigin } = await import("../ai/policy");
+    expect(["http://localhost:11434", "http://127.0.0.1:11434", "http://[::1]:11434"].every(isLoopbackOrigin)).toBe(true);
+    expect(["http://192.168.1.20:11434", "http://box.local:11434"].some(isLoopbackOrigin)).toBe(false);
+  });
+
+  it("every writing agent's runtime definition sets loopbackOnly", async () => {
+    const { writingDefinition } = await import("../agents/writing/model");
+    const { explainChangeAgent } = await import("../agents/writing/explainChange");
+    const { abstractWriterAgent } = await import("../agents/writing/abstractWriter");
+    const { topicSentenceAgent } = await import("../agents/writing/structure/topicSentenceAgent");
+    expect(writingDefinition("styleCoach", { system: "s", user: "u" }).loopbackOnly).toBe(true);
+    for (const def of [explainChangeAgent, abstractWriterAgent, topicSentenceAgent]) expect(def.loopbackOnly).toBe(true);
+  });
+});
+

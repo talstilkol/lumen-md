@@ -91,7 +91,7 @@ export function GoalsDialogImpl({ onClose, now = new Date() }: { onClose: () => 
         <div role="status" style={{ fontSize: 13 }} data-testid="goal-now">
           {[
             t("goal.now.words", { n: n(p.words) }),
-            p.readability ? t("goal.now.readability", { level: t(`goal.level.${p.readability.level}`), score: p.readability.score }) + (p.readability.provisional ? ` ${t("goal.provisional")}` : "") : "",
+            p.readability ? t(p.readability.scale === "fk" ? "goal.now.readabilityFk" : p.readability.scale === "he5" ? "goal.now.readabilityHe5" : "goal.now.readability", { level: t(`goal.level.${p.readability.level}`), score: p.readability.score }) + (p.readability.provisional ? ` ${t("goal.provisional")}` : "") : "",
             p.tone ? t("goal.now.tone", { tone: t(`goal.tone.${p.tone.tone}`) }) : "",
           ]
             .filter(Boolean)

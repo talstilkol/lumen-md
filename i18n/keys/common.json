@@ -477,6 +477,11 @@
       "vars": []
     },
     {
+      "key": "agentReview.changeRegion",
+      "en": "The proposed change",
+      "vars": []
+    },
+    {
       "key": "agentReview.close",
       "en": "Close",
       "vars": []
@@ -538,6 +543,11 @@
     {
       "key": "agentReview.intro",
       "en": "Nothing is written until you approve it. Changes to an open document go into the editor, not straight to the file.",
+      "vars": []
+    },
+    {
+      "key": "agentReview.listRegion",
+      "en": "Proposed changes",
       "vars": []
     },
     {
@@ -9503,6 +9513,22 @@
     {
       "key": "goal.now.readability",
       "en": "readability {level} ({score})",
+      "vars": [
+        "level",
+        "score"
+      ]
+    },
+    {
+      "key": "goal.now.readabilityFk",
+      "en": "readability {level} (Flesch–Kincaid grade {score})",
+      "vars": [
+        "level",
+        "score"
+      ]
+    },
+    {
+      "key": "goal.now.readabilityHe5",
+      "en": "readability {level} ({score} of 5)",
       "vars": [
         "level",
         "score"
@@ -24050,8 +24076,13 @@
       "vars": []
     },
     {
-      "key": "xchg.absent",
-      "en": "(none)",
+      "key": "xchg.absentAfter",
+      "en": "(dropped from the new text)",
+      "vars": []
+    },
+    {
+      "key": "xchg.absentBefore",
+      "en": "(not in the old text)",
       "vars": []
     },
     {

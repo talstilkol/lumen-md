@@ -119,8 +119,12 @@ interface Mention {
   script: "he" | "la";
 }
 
-const QUOTE_FOLD = (s: string) => s.replace(/״/g, '"').replace(/׳/g, "'").replace(/[־-]/g, " ");
-/** The spelling a variant check compares: niqqud kept, quotes folded, the article ה off. */
+const QUOTE_FOLD = (s: string) => s.replace(/״/g, '"').replace(/׳/g, "'").replace(/[־‐‑–]/g, "-").replace(/[ \t]+/g, " ");
+/**
+ * The spelling a variant check compares: niqqud kept, quotes folded (״/" and ׳/' are one key), the article ה off.
+ * Audit r4 A2.10: a maqaf or hyphen is NOT a space — "Tel-Aviv" / "Tel Aviv" and "בן־גוריון" / "בן גוריון" are two
+ * spellings of one name (maqaf and hyphen are one typing, as the quotes are).
+ */
 const formKey = (w: string) => QUOTE_FOLD(w.normalize("NFC")).replace(/^ה(?=[א-ת])/, "");
 
 class Scanner {

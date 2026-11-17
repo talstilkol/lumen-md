@@ -202,3 +202,22 @@ describe("robustness", () => {
     expect(sugs.filter((s) => s.kind === "fact-conflict").map((s) => [s.path, pathOf(s.links![1])].sort().join("|"))).toContain("big/x.md|big/y.md");
   });
 });
+
+describe("audit r4 A2.10: a hyphen or maqaf against a space is a variant", () => {
+  it("Tel Aviv / Tel-Aviv, ישראל ישראלי / ישראל-ישראלי, בן גוריון / בן־גוריון are reported; maqaf against hyphen is one spelling", () => {
+    const notes = [
+      { path: "q4.md", content: "We visited Tel Aviv and Tel-Aviv again." },
+      { path: "q5.md", content: "ישראל ישראלי כתב ספר. ישראל-ישראלי כתב עוד אחד." },
+      { path: "q7.md", content: "דוד בן־גוריון ודוד בן גוריון." },
+      { path: "q8.md", content: "דוד בן־גוריון ודוד בן-גוריון." },
+    ];
+    const entities = [
+      { id: "t", name: "Tel Aviv", aliases: [] },
+      { id: "i", name: "ישראל ישראלי", aliases: [] },
+      { id: "b", name: "דוד בן גוריון", aliases: [] },
+    ];
+    const found = checkVaultConsistency({ notes, entities: entities as never, glossary: [] }).filter((f) => f.kind === "name-variant");
+    expect(found.map((f) => (f as { path?: string }).path).sort()).toEqual(["q4.md", "q5.md", "q7.md"]);
+  });
+});
+

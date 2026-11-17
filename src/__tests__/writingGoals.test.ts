@@ -172,8 +172,24 @@ describe("W13.W14 reads Hebrew readability from W13.W9 (INT7)", () => {
     setReadabilityEngine(hebrewIndexEngine);
     const { readability } = await import("../agents/writing/readability/readability");
     const r = readabilityOf(he)!;
-    expect(r).toEqual({ level: readability(he).band, score: readability(he).score, provisional: false });
+    expect(r).toEqual({ level: readability(he).band, score: readability(he).score, provisional: false, scale: "he5" });
     for (const f of ["ui/NoteGoalStatus.tsx", "ui/GoalsDialog.tsx"]) expect(readFileSync(join(__dirname, "..", f), "utf8"), f).toMatch(/import "\.\.\/agents\/writing\/goals\/hebrewIndex";/);
     setReadabilityEngine(null);
   });
 });
+
+describe("review 13 L6: each readability number says its scale", () => {
+  it("English: the Flesch–Kincaid grade; Hebrew: W9's 1–5 index; the stand-in: provisional — and the dialog's line names it", async () => {
+    const en = "The kid walked to school in the morning. He met his friends in class. The teacher told them a story about a big sea. Everyone listened quietly. Then they went out to play. The sun was shining and it was very nice outside.";
+    expect(readabilityOf(en)?.scale).toBe("fk");
+    const he = "הילד הלך לבית הספר בבוקר. הוא פגש את חבריו בכיתה. המורה סיפרה להם סיפור על ים גדול. כולם הקשיבו בשקט. אחר כך יצאו לחצר לשחק. השמש זרחה והיה נעים מאוד בחוץ.";
+    setReadabilityEngine(null);
+    expect(readabilityOf(he)?.scale).toBe("provisional");
+    const src = readFileSync(join(__dirname, "../ui/GoalsDialog.tsx"), "utf8");
+    expect(src).toMatch(/scale === "fk" \? "goal\.now\.readabilityFk"/);
+    const en18 = JSON.parse(readFileSync(join(__dirname, "../i18n/lazy/writingGoals.json"), "utf8")) as Record<string, string>;
+    expect(en18["goal.now.readabilityFk"]).toMatch(/Flesch–Kincaid grade \{score\}/);
+    expect(en18["goal.now.readabilityHe5"]).toMatch(/\{score\} of 5/);
+  });
+});
+

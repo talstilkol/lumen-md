@@ -119,4 +119,25 @@ describe("the writing suggestions panel (W13.W1)", () => {
     expect(view.state.doc.toString()).toBe("הם חזרו למשרד כדי לבדוק.");
     view.destroy();
   });
+
+  it("audit r4 A2.4: after a keyboard accept or reject, focus moves to the card now in its place (or the panel), never to <body>", () => {
+    const { view, host } = mount();
+    showSuggestions(view, coachRules(TEXT, "en", "everyday"));
+    render(<WritingPanel host={host} state={{ agentLabel: "x" }} onClose={() => {}} />);
+    const ids = () => screen.getAllByTestId("ws-card").map((c) => c.dataset.wsId);
+    const before = ids();
+    const second = screen.getAllByTestId("ws-card")[1];
+    second.focus();
+    fireEvent.keyDown(second, { key: "Delete" });
+    expect(document.activeElement).not.toBe(document.body);
+    expect((document.activeElement as HTMLElement).dataset.wsId).toBe(before[2]);
+    const now = document.activeElement as HTMLElement;
+    fireEvent.keyDown(now, { key: "Enter" });
+    expect(document.activeElement).not.toBe(document.body);
+    expect(screen.getByTestId("writing-panel").contains(document.activeElement)).toBe(true);
+    // Reject all: nothing left — the panel itself holds the focus.
+    fireEvent.click(screen.getByTestId("ws-rejectAll"));
+    expect(document.activeElement).toBe(screen.getByTestId("writing-panel"));
+    view.destroy();
+  });
 });

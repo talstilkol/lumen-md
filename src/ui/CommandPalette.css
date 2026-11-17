@@ -1,28 +1,6 @@
 /* ─── Command palette ─── */
-.cmd-palette-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-sticky);
-  background: hsl(var(--bg) / 0.6);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 14vh;
-  animation: cmdFadeIn var(--duration-fast) var(--ease-out);
-}
-.cmd-palette {
-  width: min(620px, 92vw);
-  max-height: 70vh;
-  background: hsl(var(--bg));
-  border: 1px solid hsl(var(--border-strong));
-  border-radius: 12px;
-  box-shadow: var(--shadow-xl);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  animation: cmdSlideIn var(--duration-fast) var(--ease-out);
-}
+/* The palette's surface (.cmd-palette-backdrop, .cmd-palette) and its keyframes live in src/index.css (F13): dozens of
+   dialogs borrow that look and can open before the palette has ever loaded this file. */
 .cmd-palette-search {
   display: flex;
   align-items: center;
@@ -107,22 +85,4 @@
   padding: 1px 5px;
   font-family: "JetBrains Mono", ui-monospace, monospace;
   font-size: 10px;
-}
-@keyframes cmdFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes cmdSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }

@@ -264,6 +264,11 @@ export interface ExecutorRequest {
   tools?: AgentTool[];
   /** When set, the answer must be JSON matching this schema. */
   schema?: JsonSchema;
+  /**
+   * Only a server on this computer (loopback): an Ollama or LM Studio elsewhere — even on the LAN, even
+   * outside the local-only policy — is refused. Set from AgentDefinition.loopbackOnly (the writing agents).
+   */
+  loopbackOnly?: boolean;
   /** Pins a model; otherwise the executor picks one for `tier`. */
   model?: string;
   tier?: ModelTier;
@@ -408,6 +413,8 @@ export interface AgentDefinition<I extends AgentInput = AgentInput, O = string> 
   validators?: Validator<O>[];
   /** Executors to try, in order. Default: the runtime's policy order. */
   executorPreference?: ExecutorId[];
+  /** Audit r4 A2.13: model servers on this computer only (ExecutorRequest.loopbackOnly), whatever the AI policy. */
+  loopbackOnly?: boolean;
   tier?: ModelTier;
   maxSteps?: number;
   /** Retries after a failed validation (default 2). Interactive agents set 0. */

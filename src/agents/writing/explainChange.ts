@@ -204,11 +204,30 @@ export function entitiesIn(s: string, known: readonly string[] = []): string[] {
   return out;
 }
 
-const diffMulti = (a: string[], b: string[]): { gone: string[]; added: string[] } => {
+/** Audit r4 A2.8: the value of a simple number word, so "3" → "three" is the same number (not a change). */
+const WORD_VALUE: Record<string, number> = Object.fromEntries(
+  [
+    ...["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"].map((w, i) => [w, i] as const),
+    ...["twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"].map((w, i) => [w, (i + 2) * 10] as const),
+    ["hundred", 100], ["thousand", 1000], ["million", 1e6], ["billion", 1e9], ["half", 0.5], ["quarter", 0.25], ["twice", 2], ["once", 1], ["double", 2], ["triple", 3],
+    ["אפס", 0], ["אחד", 1], ["אחת", 1], ["שניים", 2], ["שתיים", 2], ["שני", 2], ["שתי", 2], ["שלושה", 3], ["שלוש", 3], ["שלושת", 3], ["ארבעה", 4], ["ארבע", 4], ["ארבעת", 4],
+    ["חמישה", 5], ["חמש", 5], ["חמשת", 5], ["שישה", 6], ["שש", 6], ["ששת", 6], ["שבעה", 7], ["שבע", 7], ["שבעת", 7], ["שמונה", 8], ["שמונת", 8], ["תשעה", 9], ["תשע", 9], ["תשעת", 9],
+    ["עשרה", 10], ["עשר", 10], ["עשרים", 20], ["שלושים", 30], ["ארבעים", 40], ["חמישים", 50], ["שישים", 60], ["שבעים", 70], ["שמונים", 80], ["תשעים", 90], ["מאה", 100], ["מאתיים", 200], ["אלף", 1000], ["אלפיים", 2000], ["מיליון", 1e6], ["מיליארד", 1e9], ["חצי", 0.5], ["רבע", 0.25],
+  ].map(([w, v]) => [normalizeForMatch(String(w)), Number(v)]),
+);
+/** A number's comparison key: its value for digits and simple number words ("3", "three", "שלושה" → "3"), else the text. */
+export function numberKey(n: string): string {
+  const d = /^-?\d+(?:\.\d+)?%?$/.test(n) ? n : null;
+  if (d) return d.endsWith("%") ? d : String(Number(d));
+  const b = bare(n).find((x) => x in WORD_VALUE);
+  return b !== undefined ? String(WORD_VALUE[b]) : n;
+}
+
+const diffMulti = (a: string[], b: string[], key: (x: string) => string = (x) => x): { gone: string[]; added: string[] } => {
   const left = [...b];
   const gone: string[] = [];
   for (const x of a) {
-    const i = left.indexOf(x);
+    const i = left.findIndex((y) => key(y) === key(x));
     if (i >= 0) left.splice(i, 1);
     else gone.push(x);
   }
@@ -220,7 +239,7 @@ export function meaningChanges(hunks: readonly ChangeHunk[], known: readonly str
   const out: MeaningChange[] = [];
   hunks.forEach((h, i) => {
     // Numbers and negations are read on the whole words around the change, so "15" → "150" (a changed token) and "יבוא" → "לא יבוא" are both seen.
-    const n = diffMulti(numbersIn(h.old.text), numbersIn(h.new.text));
+    const n = diffMulti(numbersIn(h.old.text), numbersIn(h.new.text), numberKey);
     for (let k = 0; k < Math.max(n.gone.length, n.added.length); k++) out.push({ kind: "number", before: n.gone[k] ?? "", after: n.added[k] ?? "", hunk: i });
     const g = diffMulti(negationsIn(h.old.text), negationsIn(h.new.text));
     for (const x of g.gone) out.push({ kind: "negation", before: x, after: "", hunk: i });
@@ -330,6 +349,7 @@ export const explainChangeAgent: AgentDefinition<ExplainChangeInput, string> = r
   ],
   // Local models only: a note's edits never go to a cloud provider; and no tools.
   executorPreference: ["ollama", "webllm"],
+  loopbackOnly: true,
   language: "any",
   maxRetries: 1,
   tier: "small",

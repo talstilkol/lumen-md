@@ -12,6 +12,8 @@
   "goal.level.medium": "medium",
   "goal.none": "No target",
   "goal.now.readability": "readability {level} ({score})",
+  "goal.now.readabilityFk": "readability {level} (Flesch–Kincaid grade {score})",
+  "goal.now.readabilityHe5": "readability {level} ({score} of 5)",
   "goal.now.tone": "tone {tone}",
   "goal.now.words": "Now: {n} words",
   "goal.provisional": "(provisional Hebrew estimate)",
