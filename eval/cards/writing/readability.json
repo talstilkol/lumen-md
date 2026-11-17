@@ -1,0 +1,39 @@
+{
+ "card": {
+  "schema": 1,
+  "tag": "dev",
+  "agent": "readability",
+  "model": {
+   "name": "linear index, 4 features (hebrewModel.json v1)",
+   "digest": "n/a (coefficients in the repository)"
+  },
+  "seed": 9,
+  "temperature": 0,
+  "dataset": {
+   "name": "src/agents/writing/readability/corpusHe.ts (held-out split)",
+   "version": "1",
+   "license": "MIT (written for lumen-md; graded by intended reader)",
+   "origin": "synthetic"
+  },
+  "n": 15,
+  "metrics": {
+   "spearman": {
+    "value": 0.952656,
+    "ci95": [
+     0.776024,
+     0.992537
+    ],
+    "method": "bootstrap"
+   },
+   "withinOneLevel": {
+    "value": 1,
+    "ci95": [
+     1,
+     1
+    ],
+    "method": "bootstrap"
+   }
+  },
+  "notes": "Spearman on 15 held-out passages (bootstrap over passages). Calibration on an open graded corpus is owed (gate 0.10)."
+ }
+}
