@@ -2231,6 +2231,8 @@
   "install.guide.other.title": "في هذا المتصفح",
   "install.intro": "يفتح Lumen المثبَّت في نافذته الخاصة، من أيقونته، ويعمل دون اتصال.",
   "install.title": "تثبيت Lumen",
+  "ipad.key.closeTab": "Close tab",
+  "ipad.key.smartPaste": "Smart paste",
   "israeliTime.academic.inBreak": "في العطلة الأكاديمية ({name}): المقترح {date}",
   "israeliTime.academic.inExams": "خلال فترة الامتحانات: {exams}",
   "israeliTime.dayOff": "يقع في {reason}",

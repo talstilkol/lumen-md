@@ -2231,6 +2231,8 @@
   "install.guide.other.title": "В этом браузере",
   "install.intro": "Установленный Lumen открывается в своём окне, по своему значку, и работает без сети.",
   "install.title": "Установить Lumen",
+  "ipad.key.closeTab": "Close tab",
+  "ipad.key.smartPaste": "Smart paste",
   "israeliTime.academic.inBreak": "В академические каникулы ({name}): предлагается {date}",
   "israeliTime.academic.inExams": "Во время сессии: {exams}",
   "israeliTime.dayOff": "Выпадает на {reason}",

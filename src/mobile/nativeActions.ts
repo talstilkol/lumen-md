@@ -16,6 +16,7 @@
  *    | `lumen://new` | a new note |
  *    | `lumen://search` · `lumen://search?q=…` | search, with the query |
  *    | `lumen://daily` | today's daily note |
+ *    | `lumen://open?path=…` | a note by its vault path (Spotlight, Siri, a second iPad window: W13.M3, M5) |
  *
  *    A widget adds `t=<ms since epoch>` (the tap time), so the app can
  *    log how long the tap took to become a cursor (target: under 1 s).
@@ -38,7 +39,8 @@ export type NativeAction =
   | { kind: "capture"; mode: "text" | "voice"; text: string | null }
   | { kind: "new" }
   | { kind: "search"; query: string }
-  | { kind: "daily" };
+  | { kind: "daily" }
+  | { kind: "open"; path: string };
 
 export interface ParsedAction {
   action: NativeAction;
@@ -80,9 +82,21 @@ export function parseNativeUrl(url: string): ParsedAction | null {
     }
     case "daily":
       return { action: { kind: "daily" }, tappedAt };
+    case "open": {
+      const path = safeVaultPath(q.get("path"));
+      return path ? { action: { kind: "open", path }, tappedAt } : null;
+    }
     default:
       return null;
   }
+}
+
+/** A vault-relative note path from outside the app: no "..", no absolute path, no scheme, at most 1,024 characters. */
+export function safeVaultPath(p: string | null): string | null {
+  if (!p || p.length > 1024) return null;
+  const s = clean(p).trim().replace(/\\/g, "/");
+  if (!s || s.startsWith("/") || /^[a-z]+:/i.test(s) || s.split("/").some((seg) => seg === ".." || seg === "." || seg === "")) return null;
+  return s;
 }
 
 /** A capture queued by a native intent while the app wasn't running. */
@@ -141,6 +155,8 @@ export interface NativeHandlers {
   newNote: () => void;
   search: (query: string) => void;
   daily: () => void;
+  /** Open a note by its vault path (W13.M3/M5); without it, open links are ignored. */
+  openNote?: (path: string) => void;
 }
 
 export function applyAction(p: ParsedAction, h: NativeHandlers): void {
@@ -150,6 +166,7 @@ export function applyAction(p: ParsedAction, h: NativeHandlers): void {
     else h.capture(a.mode, p.tappedAt);
   } else if (a.kind === "new") h.newNote();
   else if (a.kind === "search") h.search(a.query);
+  else if (a.kind === "open") h.openNote?.(a.path);
   else h.daily();
 }
 
@@ -164,6 +181,10 @@ export interface LumenNativePlugin {
   /** A queued image or PDF, base64 (plan W11.P9). */
   captureFile?(o: { file: string }): Promise<{ data: string }>;
   addListener(event: "url" | "resume", fn: (e: { url?: string }) => void): Promise<{ remove: () => Promise<void> }>;
+  /** W13.M1 (Android): is back the app's own (an overlay is open)? Ahead of the predictive back gesture. */
+  setBackState?(o: { overlay: boolean }): Promise<void>;
+  /** W13.M5 (iPad): another window, for a vault path or empty; `opened` is false where windows are not supported. */
+  openWindow?(o: { note?: string }): Promise<{ opened: boolean }>;
 }
 
 const isNativeApp = () => typeof window !== "undefined" && !!(window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
@@ -203,7 +224,22 @@ export async function initNativeBridge(h: NativeHandlers, plugin?: LumenNativePl
     /* no launch link */
   }
   await drain();
-  return () => subs.forEach((s) => void s.remove());
+  // W13.M1: the layout follows the window size class; Android's back closes an overlay before it leaves the app.
+  const stops: Array<() => void> = [];
+  const [{ trackWindowClass }, back] = await Promise.all([import("./windowClass"), import("./backNavigation")]);
+  stops.push(trackWindowClass());
+  const android = (window as unknown as { Capacitor?: { getPlatform?: () => string } }).Capacitor?.getPlatform?.() === "android";
+  document.documentElement.dataset.native = android ? "android" : "ios";
+  if (android && p.setBackState) stops.push(back.installBackNavigation({ setBackState: (o) => p.setBackState!(o) }));
+  // W13.M5: the iPad's UIKeyCommands arrive as "lumen:key-command" and run as the same key presses.
+  if (!android) {
+    const { installKeyCommandBridge } = await import("./keyCommands");
+    stops.push(installKeyCommandBridge(window, { "window.new": () => void p.openWindow?.({}).catch(() => undefined) }));
+  }
+  return () => {
+    subs.forEach((s) => void s.remove());
+    stops.forEach((f) => f());
+  };
 }
 
 let pendingTap: number | null = null;

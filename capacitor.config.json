@@ -14,12 +14,16 @@
       "spinnerColor": "#7c5cff"
     },
     "StatusBar": {
-      "style": "DARK",
-      "backgroundColor": "#0c0f17"
+      "style": "DARK"
     },
     "Keyboard": {
       "resize": "body",
       "resizeOnFullScreen": true
+    },
+    "SystemBars": {
+      "insetsHandling": "css",
+      "style": "DEFAULT",
+      "hidden": false
     }
   },
   "ios": {

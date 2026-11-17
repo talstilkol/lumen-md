@@ -58,6 +58,7 @@ import { useConfigHealth } from "./hooks/useConfigHealth";
 import { docIdentity } from "./renderer/previewDoc";
 import { auditScope } from "./ui/auditScope";
 import { useAppStore, isNarrowScreen } from "./store/useStore";
+import { narrowQuery } from "./mobile/windowClass";
 import { t } from "./i18n";
 import { historyKey } from "./storage/history";
 import { isOPFSAvailable, readWorkspaceFile } from "./storage/workspace";
@@ -117,7 +118,7 @@ export default function App() {
   }, []);
   useEffect(() => {
     if (typeof window.matchMedia !== "function") return;
-    const mq = window.matchMedia("(max-width: 760px)");
+    const mq = window.matchMedia(narrowQuery()); // W13.M1: < 600 dp in the app, ≤ 760 px elsewhere
     const on = () => setNarrow(mq.matches);
     mq.addEventListener?.("change", on);
     return () => mq.removeEventListener?.("change", on);

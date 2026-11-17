@@ -2231,6 +2231,8 @@
   "install.guide.other.title": "In diesem Browser",
   "install.intro": "Ein installiertes Lumen öffnet sich in einem eigenen Fenster, über ein eigenes Symbol, und funktioniert offline.",
   "install.title": "Lumen installieren",
+  "ipad.key.closeTab": "Close tab",
+  "ipad.key.smartPaste": "Smart paste",
   "israeliTime.academic.inBreak": "In den Semesterferien ({name}): vorgeschlagen {date}",
   "israeliTime.academic.inExams": "In der Prüfungszeit: {exams}",
   "israeliTime.dayOff": "Fällt auf {reason}",

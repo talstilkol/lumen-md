@@ -2231,6 +2231,8 @@
   "install.guide.other.title": "בדפדפן הזה",
   "install.intro": "‏Lumen מותקן נפתח בחלון משלו, מהסמל שלו, ועובד בלי אינטרנט.",
   "install.title": "התקנת Lumen",
+  "ipad.key.closeTab": "סגירת לשונית",
+  "ipad.key.smartPaste": "הדבקה חכמה",
   "israeliTime.academic.inBreak": "בחופשה האקדמית ({name}): מוצע {date}",
   "israeliTime.academic.inExams": "בתקופת הבחינות: {exams}",
   "israeliTime.dayOff": "נופל ב{reason}",

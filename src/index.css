@@ -2273,3 +2273,20 @@ dialog.lumen-modal:is([data-reading-mode="side-by-side"], [data-reading-mode="da
   outline: 2px solid hsl(var(--accent));
   outline-offset: -2px;
 }
+
+/* W13.M1: a foldable held open with its hinge between two side-by-side segments
+   (Viewport Segments API): the file tree fills the first segment and the editor the
+   second, so nothing sits under the fold. Wins over a width dragged by hand. */
+@media (horizontal-viewport-segments: 2) {
+  :root {
+    --sidebar-width: env(viewport-segment-width 0 0, 240px) !important;
+  }
+}
+
+/* W13.M5: the iPad pointer. WKWebView turns cursor: pointer into iPadOS's hover
+   highlight, so in the iOS app every control shows it under a trackpad or mouse. */
+@media (any-pointer: fine) {
+  html[data-native="ios"] :is(button:not(:disabled), [role="button"], a[href], summary, [role="tab"], [role="menuitem"], [role="option"]) {
+    cursor: pointer;
+  }
+}

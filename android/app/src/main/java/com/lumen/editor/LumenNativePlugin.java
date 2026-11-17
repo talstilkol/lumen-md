@@ -55,6 +55,14 @@ public class LumenNativePlugin extends Plugin {
         notifyListeners("resume", new JSObject());
     }
 
+    /** Plan W13.M1: the WebView says whether an overlay is open, so back closes it before it leaves the app. */
+    @PluginMethod
+    public void setBackState(PluginCall call) {
+        boolean overlay = Boolean.TRUE.equals(call.getBoolean("overlay", false));
+        if (getActivity() instanceof MainActivity) ((MainActivity) getActivity()).setBackState(overlay);
+        call.resolve();
+    }
+
     @PluginMethod
     public void getLaunchUrl(PluginCall call) {
         JSObject ret = new JSObject();

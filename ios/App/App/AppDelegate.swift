@@ -11,6 +11,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    // W13.M5: every window is a UIScene (Info.plist: UIApplicationSceneManifest), so iPadOS can open several.
+    func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+    }
+
+    // W13.M5: the palette's shortcuts in the iPadOS menu bar and the ⌘ overlay.
+    override func buildMenu(with builder: UIMenuBuilder) {
+        super.buildMenu(with: builder)
+        LumenKeyCommands.build(builder, action: #selector(MainViewController.lumenKeyCommand(_:)))
+    }
+
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.

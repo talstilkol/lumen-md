@@ -2231,6 +2231,8 @@
   "install.guide.other.title": "このブラウザ",
   "install.intro": "インストールした Lumen は専用のアイコンから専用のウィンドウで開き、オフラインでも動作します。",
   "install.title": "Lumen をインストール",
+  "ipad.key.closeTab": "Close tab",
+  "ipad.key.smartPaste": "Smart paste",
   "israeliTime.academic.inBreak": "学期休み（{name}）中：{date} を提案",
   "israeliTime.academic.inExams": "試験期間中：{exams}",
   "israeliTime.dayOff": "{reason}に当たります",

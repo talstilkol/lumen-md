@@ -64,6 +64,8 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "pendingCaptures", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "removeCaptures", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "captureFile", returnType: CAPPluginReturnPromise),
+        // W13.M5: a second window on iPad, for a note or empty.
+        CAPPluginMethod(name: "openWindow", returnType: CAPPluginReturnPromise),
     ]
 
     override public func load() {
@@ -84,9 +86,28 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
     }
 
     @objc func getLaunchUrl(_ call: CAPPluginCall) {
+        // W13.M5: a window opened for one note opens that note, in that window only.
+        if let vc = bridge?.viewController as? MainViewController, let link = vc.launchLink {
+            vc.launchLink = nil
+            call.resolve(["url": link])
+            return
+        }
         let url = LumenLaunch.pending
         LumenLaunch.pending = nil
         call.resolve(["url": url as Any])
+    }
+
+    /// W13.M5: open another window (iPad); `note` is a vault path, or nothing for an empty window.
+    @objc func openWindow(_ call: CAPPluginCall) {
+        let note = call.getString("note").flatMap { $0.isEmpty ? nil : $0 }
+        DispatchQueue.main.async {
+            guard UIApplication.shared.supportsMultipleScenes else {
+                call.resolve(["opened": false])
+                return
+            }
+            LumenWindows.open(note: note)
+            call.resolve(["opened": true])
+        }
     }
 
     @objc func pendingCaptures(_ call: CAPPluginCall) {
@@ -112,6 +133,19 @@ public class LumenNativePlugin: CAPPlugin, CAPBridgedPlugin {
 /// a plugin inside the app target is registered here). Main.storyboard
 /// uses this class instead of CAPBridgeViewController.
 class MainViewController: CAPBridgeViewController {
+    /// W13.M5: the lumen://open link of the note this window was opened for.
+    var launchLink: String?
+
+    /// W13.M5: the palette's app-wide shortcuts, listed by iPadOS while ⌘ is held.
+    override var keyCommands: [UIKeyCommand]? {
+        (super.keyCommands ?? []) + LumenKeyCommands.commands(action: #selector(lumenKeyCommand(_:)))
+    }
+
+    @objc func lumenKeyCommand(_ sender: UIKeyCommand) {
+        guard let id = sender.propertyList as? String else { return }
+        LumenKeyCommands.run(id, in: webView)
+    }
+
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(LumenNativePlugin())
         // Plan W2.19 (W10.E45): LAN discovery for pairing without a code (LanDiscovery.swift).

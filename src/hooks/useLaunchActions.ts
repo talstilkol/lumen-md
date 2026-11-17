@@ -85,6 +85,8 @@ export function useLaunchActions({ setCaptureOpen, setCaptureVoice, setPaletteOp
           setSearchOpen(true);
         },
         daily: () => window.dispatchEvent(new CustomEvent("lumen-open-today")),
+        // W13.M3/M5: Spotlight, Siri and a second iPad window open a note by its vault path.
+        openNote: (path) => window.dispatchEvent(new CustomEvent("lumen-open-file", { detail: { path } })),
       });
     });
     return () => stop?.();

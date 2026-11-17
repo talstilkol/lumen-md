@@ -15,10 +15,11 @@ import {
   type ThemeSettings,
 } from "../lib/themeSettings";
 import { lockedNotes } from "../storage/lockedNotesRegistry";
+import { narrowQuery } from "../mobile/windowClass";
 
-/** The phone layout's breakpoint (index.css: max-width 760px). */
+/** The phone layout's breakpoint (index.css: max-width 760px; in the iOS / Android app, below 600 dp: W13.M1). */
 export function isNarrowScreen(): boolean {
-  return typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia("(max-width: 760px)").matches;
+  return typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(narrowQuery()).matches;
 }
 
 // Monotonic token so a slow lazy-locale fetch can't clobber a newer pick.
