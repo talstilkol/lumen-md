@@ -21,6 +21,7 @@
  * the diagram entirely.
  */
 
+import { setVisibleInterval } from "../lib/visibleInterval";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { log } from "../lib/logger";
 import { fetchWithRetry } from "../lib/fetchRetry";
@@ -115,8 +116,8 @@ export function useFetchSource(
   // Auto-refresh interval.
   useEffect(() => {
     if (!url || !refreshMs) return;
-    const id = window.setInterval(() => setTick((t) => t + 1), refreshMs);
-    return () => window.clearInterval(id);
+    // W13.V4: no network refresh while the app is in the background.
+    return setVisibleInterval(() => setTick((t) => t + 1), refreshMs);
   }, [url, refreshMs]);
 
   const effectiveSource = url

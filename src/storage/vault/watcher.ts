@@ -22,6 +22,7 @@
  * folder is polled about once a second.
  */
 
+import { setVisibleInterval } from "../../lib/visibleInterval";
 import { log } from "../../lib/logger";
 import { isIgnoredDir, isUnderIgnoredDir } from "./ignore";
 import type { VaultBackend, VaultEvent } from "./types";
@@ -266,10 +267,11 @@ export function watchExternalChanges(backend: VaultBackend, opts: WatchOptions =
 
   void compare(); // the first snapshot is the baseline
   const stopObserve = opts.observe?.(() => void compare()) ?? null;
-  const timer = setInterval(() => void compare(), opts.intervalMs ?? 1000);
+  // W13.V4: the poll sleeps while the app is in the background (a phone's battery), and runs on return.
+  const stopTimer = setVisibleInterval(() => void compare(), opts.intervalMs ?? 1000);
   return () => {
     stopped = true;
-    clearInterval(timer);
+    stopTimer();
     stopObserve?.();
     offOwn();
   };

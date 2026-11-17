@@ -16,6 +16,7 @@
  * --dry-run prints the exact commands without running them. Keys are the owner's
  * (plan 15.7) and are read from the environment only; nothing is written to the repo.
  */
+import { energyProblems } from "./lib/mobileEnergy.mjs";
 import { spawnSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
@@ -213,8 +214,11 @@ function check() {
   const key = iosKey();
   try {
     const i = report("iOS", iosPreflight(iosFacts(key)));
-    console.log(`\nAndroid: ${a.length ? `${a.length} missing` : "ready"} · iOS: ${i.length ? `${i.length} missing` : "ready"}`);
-    if (a.length || i.length) process.exitCode = 1;
+    // W13.V4: the battery report, measured on real phones, within 1.5 × the system notes app.
+    const energyFile = path.join(ROOT, "docs/perf/mobile-energy.md");
+    const e = report("Energy", energyProblems(existsSync(energyFile) ? readFileSync(energyFile, "utf8") : "").map((what) => ({ ok: false, blocking: true, what, fix: "run the 30-minute script on the phone and fill the row: docs/perf/mobile-energy.md" })));
+    console.log(`\nAndroid: ${a.length ? `${a.length} missing` : "ready"} · iOS: ${i.length ? `${i.length} missing` : "ready"} · energy: ${e.length ? `${e.length} missing` : "within budget"}`);
+    if (a.length || i.length || e.length) process.exitCode = 1;
   } finally {
     if (key?.temp) rmSync(path.dirname(key.path), { recursive: true, force: true });
   }
