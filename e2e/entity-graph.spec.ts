@@ -244,8 +244,9 @@ test.describe("W12.E7 graph screen in RTL", () => {
 
 test.describe("W12.E2 10,000-note scan off the main thread", () => {
   test("opening the review panel scans 10,000 notes with no long task ≥ 50 ms @nightly", async ({ page, browserName }) => {
-    // skip-reason: the Long Tasks API (PerformanceObserver "longtask") exists in Chromium only | task: W12.E2 | until: 2027-05-16
-    test.skip(browserName !== "chromium", "the Long Tasks API is Chromium-only");
+    // @nightly runs in the perf project only (Desktop Chrome; chromium/firefox/webkit grepInvert it), so this was never a skip:
+    // the Long Tasks API (PerformanceObserver "longtask") is Chromium's, and any other engine fails here instead of passing silently.
+    expect(browserName, "the Long Tasks API is Chromium-only; this @nightly test belongs to the perf project").toBe("chromium");
     test.setTimeout(600_000);
     await bootHebrew(page);
     vaultOrSkip(await opfsWritable(page), browserName);
