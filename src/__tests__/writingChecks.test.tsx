@@ -56,9 +56,9 @@ beforeEach(() => {
 afterEach(() => clearStagedChanges());
 
 describe("the palette", () => {
-  it("L5's five commands, then L6's four, in one builder; each one lazy (the action loads its chunk)", () => {
+  it("L5's five commands, then L6's five, in one builder; each one lazy (the action loads its chunk)", () => {
     const cmds = buildWritingCheckCommands({ getEditorView: () => null, liveDoc: () => ({}) } as unknown as CommandContext);
-    expect(cmds.map((c) => c.id)).toEqual(["writing.consistency", "writing.structure", "writing.argument", "writing.readability", "writing.harper", "writing.repetition", "writing.loanwords", "writing.explainChange", "writing.goals"]);
+    expect(cmds.map((c) => c.id)).toEqual(["writing.consistency", "writing.structure", "writing.argument", "writing.readability", "writing.harper", "writing.repetition", "writing.loanwords", "writing.explainChange", "writing.abstract", "writing.goals"]);
     for (const c of cmds.slice(0, 5)) {
       expect(c.label).toMatch(/^Writing: /);
       expect(c.hint?.length).toBeGreaterThan(20);
