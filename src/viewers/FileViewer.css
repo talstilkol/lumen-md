@@ -5,8 +5,8 @@
   z-index: 60;
   display: flex;
   flex-direction: column;
-  background: var(--bg);
-  color: var(--fg);
+  background: hsl(var(--bg));
+  color: hsl(var(--fg));
   outline: none;
 }
 .fv-toolbar {
@@ -15,7 +15,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid hsl(var(--border));
   font: 13px system-ui, sans-serif;
 }
 .fv-toolbar h2 {
@@ -28,20 +28,20 @@
 .fv-toolbar select {
   background: transparent;
   color: inherit;
-  border: 1px solid var(--border-strong);
+  border: 1px solid hsl(var(--border-strong));
   border-radius: 6px;
   padding: 3px 8px;
   font: inherit;
   cursor: pointer;
 }
 .fv-toolbar button[aria-pressed="true"] {
-  background: var(--bg-muted);
+  background: hsl(var(--bg-muted));
 }
 .fv-spacer {
   flex: 1;
 }
 .fv-meta {
-  color: var(--fg-muted);
+  color: hsl(var(--fg-muted));
 }
 .fv-body {
   flex: 1;
@@ -63,7 +63,7 @@
 }
 .nb-prompt {
   flex: 0 0 3.5em;
-  color: var(--fg-muted);
+  color: hsl(var(--fg-muted));
   font: 12px ui-monospace, monospace;
   text-align: end;
   padding-top: 8px;
@@ -80,7 +80,7 @@ pre.nb-out,
   margin: 0;
   padding: 8px;
   overflow: auto;
-  background: var(--bg-subtle);
+  background: hsl(var(--bg-subtle));
   border-radius: 6px;
   font: 12.5px/1.45 ui-monospace, monospace;
   white-space: pre-wrap;
@@ -107,12 +107,12 @@ pre.nb-out,
 }
 .nb-html th,
 .nb-html td {
-  border: 1px solid var(--border);
+  border: 1px solid hsl(var(--border));
   padding: 2px 6px;
 }
 .nb-inactive figcaption {
   font-size: 12px;
-  color: var(--fg-muted);
+  color: hsl(var(--fg-muted));
 }
 
 /* Data file */
@@ -130,11 +130,11 @@ pre.nb-out,
 }
 .df-row {
   display: grid;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid hsl(var(--border));
 }
 .df-head {
   font-weight: 600;
-  background: var(--bg-subtle);
+  background: hsl(var(--bg-subtle));
 }
 .df-cell {
   padding: 4px 8px;
@@ -143,7 +143,7 @@ pre.nb-out,
   white-space: nowrap;
 }
 .df-value[role="button"]:focus-visible {
-  outline: 2px solid var(--border-strong);
+  outline: 2px solid hsl(var(--border-strong));
 }
 .df-input {
   width: 100%;
@@ -157,7 +157,7 @@ pre.nb-out,
 }
 .df-lane {
   flex: 0 0 240px;
-  background: var(--bg-subtle);
+  background: hsl(var(--bg-subtle));
   border-radius: 8px;
   padding: 8px;
 }
@@ -171,14 +171,14 @@ pre.nb-out,
   padding: 0;
 }
 .df-lane li {
-  background: var(--bg);
-  border: 1px solid var(--border);
+  background: hsl(var(--bg));
+  border: 1px solid hsl(var(--border));
   border-radius: 6px;
   padding: 4px 6px;
   margin-block: 4px;
 }
 .df-count {
-  color: var(--fg-muted);
+  color: hsl(var(--fg-muted));
   font-weight: 400;
 }
 
@@ -189,7 +189,7 @@ pre.nb-out,
   border-radius: 8px;
 }
 .geo-note {
-  color: var(--fg-muted);
+  color: hsl(var(--fg-muted));
 }
 .geo-table {
   margin-top: 12px;
@@ -198,7 +198,27 @@ pre.nb-out,
 }
 .geo-table th,
 .geo-table td {
-  border: 1px solid var(--border);
+  border: 1px solid hsl(var(--border));
   padding: 3px 8px;
   text-align: start;
+}
+
+/* A remote image or stylesheet held back from a notebook output (./notebookHtml). */
+.nb-blocked {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: hsl(var(--fg-muted));
+}
+.nb-html thead th,
+.nb-html tr:first-child th {
+  background: hsl(var(--bg-subtle));
+}
+.nb-out img[data-lumen-blocked] {
+  display: inline-block;
+  min-height: 1.5em;
+  padding: 2px 8px;
+  border: 1px dashed hsl(var(--border-strong));
+  border-radius: 4px;
+  font-size: 12px;
+  color: hsl(var(--fg-muted));
 }

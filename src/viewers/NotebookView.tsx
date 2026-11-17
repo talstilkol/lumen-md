@@ -8,9 +8,11 @@
  * `javascript:` URLs are removed before they reach the DOM. JavaScript and
  * widget outputs are shown as code, labelled as not run.
  */
-import { useEffect, useState, type ReactNode } from "react";
+import "./strings";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { t } from "../i18n";
 import { toTrustedHTML } from "../lib/trustedTypes";
+import { localOnlyHtml } from "./notebookHtml";
 import type { Notebook, NotebookCell, NotebookOutput } from "./notebook";
 import { EmptyState, learnHow } from "../ui/EmptyState";
 
@@ -43,6 +45,25 @@ function fence(source: string, lang: string): string {
   return `${f}${lang}\n${source}\n${f}`;
 }
 
+/** Sanitized HTML or SVG output, with every remote reference removed first (./notebookHtml). */
+function Markup({ markup, kind }: { markup: string; kind: "html" | "svg" }) {
+  const safe = useMemo(() => localOnlyHtml(markup, kind, t("fileViewer.nb.image")), [markup, kind]);
+  return (
+    <>
+      <div
+        className={`nb-out nb-${kind}`}
+        dir={kind === "html" ? "auto" : undefined}
+        dangerouslySetInnerHTML={{ __html: toTrustedHTML(safe.html, kind) as string }}
+      />
+      {safe.blocked > 0 && (
+        <p className="nb-blocked" role="note">
+          {t("fileViewer.nb.blocked", { n: safe.blocked })}
+        </p>
+      )}
+    </>
+  );
+}
+
 function Output({ out, render }: { out: NotebookOutput; render: Render }) {
   switch (out.kind) {
     case "text":
@@ -56,9 +77,9 @@ function Output({ out, render }: { out: NotebookOutput; render: Render }) {
     case "image":
       return <img className="nb-out nb-image" src={out.src} alt={out.alt || t("fileViewer.nb.image")} />;
     case "svg":
-      return <div className="nb-out nb-svg" dangerouslySetInnerHTML={{ __html: toTrustedHTML(out.svg, "svg") as string }} />;
+      return <Markup markup={out.svg} kind="svg" />;
     case "html":
-      return <div className="nb-out nb-html" dir="auto" dangerouslySetInnerHTML={{ __html: toTrustedHTML(out.html, "html") as string }} />;
+      return <Markup markup={out.html} kind="html" />;
     case "markdown":
       return (
         <div className="nb-out nb-md" dir="auto">

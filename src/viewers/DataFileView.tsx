@@ -75,7 +75,7 @@ export function DataTableView({ table, onEdit }: { table: DataTable; onEdit: (ro
         ))}
       </div>
       {/* The height is inline, not only in CSS: the virtualizer needs a bounded scroller to draw only what is on screen. */}
-      <div ref={scroller} className="df-scroll" data-testid="data-scroll" style={{ maxHeight: "calc(100vh - 120px)", overflow: "auto" }}>
+      <div ref={scroller} className="df-scroll" data-testid="data-scroll" tabIndex={0} role="rowgroup" aria-label={t("fileViewer.data.scrollLabel")} style={{ maxHeight: "calc(100vh - 120px)", overflow: "auto" }}>
         <div style={{ height: virtual.getTotalSize(), position: "relative" }}>
           {visibleRows(virtual.getVirtualItems(), table.rows.length).map((v) => (
             <div

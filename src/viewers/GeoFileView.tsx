@@ -11,6 +11,10 @@ import { addBaseTiles } from "../plugins/map/tiles";
 import { featureRows, type GeoCollection } from "./geoFile";
 import { EmptyState, learnHow } from "../ui/EmptyState";
 
+/** The kinds a row can have (./geoFile featureRows), named in the UI language; anything else is shown as the file has it. */
+const KINDS = new Set(["waypoint", "track", "route", "Point", "LineString", "Polygon", "MultiPoint", "MultiLineString", "MultiPolygon"]);
+const kindLabel = (k: string) => (KINDS.has(k) ? t(`fileViewer.geo.kind.${k}`) : k);
+
 export function GeoFileView({ geo }: { geo: GeoCollection }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [tiles, setTiles] = useState<boolean | null>(null);
@@ -69,7 +73,7 @@ export function GeoFileView({ geo }: { geo: GeoCollection }) {
           {rows.map((r, i) => (
             <tr key={i}>
               <td dir="auto">{r.name}</td>
-              <td>{r.type}</td>
+              <td>{kindLabel(r.type)}</td>
               <td dir="ltr">{r.detail}</td>
             </tr>
           ))}
