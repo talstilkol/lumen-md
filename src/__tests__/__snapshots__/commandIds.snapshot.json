@@ -302,6 +302,13 @@
       "icon": "Columns2"
     },
     {
+      "id": "view.bilingual",
+      "label": "📖 Bilingual reader (columns / line under line)",
+      "group": "View",
+      "hint": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
+      "icon": "Columns2"
+    },
+    {
       "id": "view.preview",
       "label": "Preview only",
       "group": "View",
@@ -406,6 +413,13 @@
       "id": "epub.open",
       "label": "Open an EPUB for reading…",
       "group": "File",
+      "icon": "FileText"
+    },
+    {
+      "id": "view.readingProfile",
+      "label": "Reading mode…",
+      "group": "File",
+      "hint": "Choose how this note is read — page, focus and more — and save it for this note or for all notes",
       "icon": "FileText"
     },
     {
@@ -2334,6 +2348,109 @@
       "icon": "Sparkles"
     },
     {
+      "id": "view.tripleLinked",
+      "label": "View: source + preview + outline, scroll linked",
+      "group": "View",
+      "hint": "Three columns that follow each other: scrolling and the caret stay on the same line",
+      "icon": "Columns2"
+    },
+    {
+      "id": "view.columnNext",
+      "label": "View: focus the next column",
+      "group": "View",
+      "hint": "Ctrl+Alt+Shift+→ (mirrored in a right-to-left layout)"
+    },
+    {
+      "id": "view.columnPrev",
+      "label": "View: focus the previous column",
+      "group": "View",
+      "hint": "Ctrl+Alt+Shift+← (mirrored in a right-to-left layout)"
+    },
+    {
+      "id": "reading.sidenotes",
+      "label": "Reading: margin notes (footnotes, comments, suggestions)",
+      "group": "View",
+      "hint": "Each note next to its line: on the right in English, on the left in Hebrew; under its paragraph on a narrow screen",
+      "icon": "Columns2"
+    },
+    {
+      "id": "reading.bookSpread",
+      "label": "Reading: book pages (two-page spread)",
+      "group": "View",
+      "hint": "Turn pages like a book: page 1 on the right in Hebrew, ← for the next pages there; PageDown, Space",
+      "icon": "Columns2"
+    },
+    {
+      "id": "writing.consistency",
+      "label": "Writing: Check the vault's consistency",
+      "group": "Tools",
+      "hint": "Names, dates, numbers and your glossary terms across all notes, against the entity graph — suggestions to review",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.structure",
+      "label": "Writing: Review the note's structure",
+      "group": "Tools",
+      "hint": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.argument",
+      "label": "Writing: Check the argument",
+      "group": "Tools",
+      "hint": "Claims without a source, logical leaps and common fallacies, each with its reason",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.readability",
+      "label": "Writing: Readability of this note",
+      "group": "Tools",
+      "hint": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.harper",
+      "label": "Writing: English grammar (Harper, on this device)",
+      "group": "Tools",
+      "hint": "Local English grammar for the English parts of the note — suggestions to review",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.repetition",
+      "label": "Writing: repetition and clichés",
+      "group": "Edit",
+      "hint": "Words repeated too soon (Hebrew prefixes and forms included), doubled words and clichés — on this device",
+      "icon": "Pencil"
+    },
+    {
+      "id": "writing.loanwords",
+      "label": "Writing: Hebrew alternatives to loanwords",
+      "group": "Edit",
+      "hint": "In the academic register: אימייל → דוא״ל, פידבק → משוב… — proposed, never applied; each term can be switched off",
+      "icon": "Pencil"
+    },
+    {
+      "id": "writing.explainChange",
+      "label": "Writing: explain my change",
+      "group": "Edit",
+      "hint": "Compare with an earlier version: a short summary and every change of a number, a negation or a name — on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.abstract",
+      "label": "Writing: titles, abstract and TL;DR",
+      "group": "Edit",
+      "hint": "Three titles, a 150–250 word abstract and a one-line TL;DR — every sentence tied to a paragraph of the note, on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.goals",
+      "label": "Writing: goals and weekly report",
+      "group": "Edit",
+      "hint": "A word or time target, readability and tone for this note; your week on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -2673,6 +2790,13 @@
       "icon": "Columns2"
     },
     {
+      "id": "view.bilingual",
+      "label": "📖 Bilingual reader (columns / line under line)",
+      "group": "View",
+      "hint": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
+      "icon": "Columns2"
+    },
+    {
       "id": "view.preview",
       "label": "Preview only",
       "group": "View",
@@ -2777,6 +2901,13 @@
       "id": "epub.open",
       "label": "Open an EPUB for reading…",
       "group": "File",
+      "icon": "FileText"
+    },
+    {
+      "id": "view.readingProfile",
+      "label": "Reading mode…",
+      "group": "File",
+      "hint": "Choose how this note is read — page, focus and more — and save it for this note or for all notes",
       "icon": "FileText"
     },
     {
@@ -4828,6 +4959,109 @@
       "icon": "Sparkles"
     },
     {
+      "id": "view.tripleLinked",
+      "label": "View: source + preview + outline, scroll linked",
+      "group": "View",
+      "hint": "Three columns that follow each other: scrolling and the caret stay on the same line",
+      "icon": "Columns2"
+    },
+    {
+      "id": "view.columnNext",
+      "label": "View: focus the next column",
+      "group": "View",
+      "hint": "Ctrl+Alt+Shift+→ (mirrored in a right-to-left layout)"
+    },
+    {
+      "id": "view.columnPrev",
+      "label": "View: focus the previous column",
+      "group": "View",
+      "hint": "Ctrl+Alt+Shift+← (mirrored in a right-to-left layout)"
+    },
+    {
+      "id": "reading.sidenotes",
+      "label": "Reading: margin notes (footnotes, comments, suggestions)",
+      "group": "View",
+      "hint": "Each note next to its line: on the right in English, on the left in Hebrew; under its paragraph on a narrow screen",
+      "icon": "Columns2"
+    },
+    {
+      "id": "reading.bookSpread",
+      "label": "Reading: book pages (two-page spread)",
+      "group": "View",
+      "hint": "Turn pages like a book: page 1 on the right in Hebrew, ← for the next pages there; PageDown, Space",
+      "icon": "Columns2"
+    },
+    {
+      "id": "writing.consistency",
+      "label": "Writing: Check the vault's consistency",
+      "group": "Tools",
+      "hint": "Names, dates, numbers and your glossary terms across all notes, against the entity graph — suggestions to review",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.structure",
+      "label": "Writing: Review the note's structure",
+      "group": "Tools",
+      "hint": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.argument",
+      "label": "Writing: Check the argument",
+      "group": "Tools",
+      "hint": "Claims without a source, logical leaps and common fallacies, each with its reason",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.readability",
+      "label": "Writing: Readability of this note",
+      "group": "Tools",
+      "hint": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.harper",
+      "label": "Writing: English grammar (Harper, on this device)",
+      "group": "Tools",
+      "hint": "Local English grammar for the English parts of the note — suggestions to review",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.repetition",
+      "label": "Writing: repetition and clichés",
+      "group": "Edit",
+      "hint": "Words repeated too soon (Hebrew prefixes and forms included), doubled words and clichés — on this device",
+      "icon": "Pencil"
+    },
+    {
+      "id": "writing.loanwords",
+      "label": "Writing: Hebrew alternatives to loanwords",
+      "group": "Edit",
+      "hint": "In the academic register: אימייל → דוא״ל, פידבק → משוב… — proposed, never applied; each term can be switched off",
+      "icon": "Pencil"
+    },
+    {
+      "id": "writing.explainChange",
+      "label": "Writing: explain my change",
+      "group": "Edit",
+      "hint": "Compare with an earlier version: a short summary and every change of a number, a negation or a name — on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.abstract",
+      "label": "Writing: titles, abstract and TL;DR",
+      "group": "Edit",
+      "hint": "Three titles, a 150–250 word abstract and a one-line TL;DR — every sentence tied to a paragraph of the note, on this device",
+      "icon": "Sparkles"
+    },
+    {
+      "id": "writing.goals",
+      "label": "Writing: goals and weekly report",
+      "group": "Edit",
+      "hint": "A word or time target, readability and tone for this note; your week on this device",
+      "icon": "Sparkles"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -4892,6 +5126,7 @@
     "view.split",
     "view.sideBySide",
     "view.daf",
+    "view.bilingual",
     "view.preview",
     "view.wysiwyg",
     "view.outline",
@@ -4907,6 +5142,7 @@
     "note.capture",
     "capture.triageInbox",
     "epub.open",
+    "view.readingProfile",
     "view.reading",
     "view.highlights",
     "view.review",
@@ -5185,6 +5421,21 @@
     "writing.shorten",
     "writing.expand",
     "writing.panel",
+    "view.tripleLinked",
+    "view.columnNext",
+    "view.columnPrev",
+    "reading.sidenotes",
+    "reading.bookSpread",
+    "writing.consistency",
+    "writing.structure",
+    "writing.argument",
+    "writing.readability",
+    "writing.harper",
+    "writing.repetition",
+    "writing.loanwords",
+    "writing.explainChange",
+    "writing.abstract",
+    "writing.goals",
     "types.page",
     "types.studio"
   ]

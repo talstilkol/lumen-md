@@ -1976,6 +1976,16 @@
       "vars": []
     },
     {
+      "key": "cmd.reading.sidenotes",
+      "en": "Reading: margin notes (footnotes, comments, suggestions)",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.sidenotes.hint",
+      "en": "Each note next to its line: on the right in English, on the left in Hebrew; under its paragraph on a narrow screen",
+      "vars": []
+    },
+    {
       "key": "cmd.related.folderOff",
       "en": "Related notes: on / off for this folder",
       "vars": []
@@ -2833,6 +2843,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.daf",
+      "en": "📜 Page of the Talmud (daf)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.daf.hint",
+      "en": "The note's main text with its commentaries around it, as on a printed daf",
+      "vars": []
+    },
+    {
       "key": "cmd.view.findReplace",
       "en": "Find & Replace",
       "vars": []
@@ -3190,6 +3210,26 @@
       "vars": []
     },
     {
+      "key": "cmd.writing.abstract",
+      "en": "Writing: titles, abstract and TL;DR",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.abstract.hint",
+      "en": "Three titles, a 150–250 word abstract and a one-line TL;DR — every sentence tied to a paragraph of the note, on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.argument",
+      "en": "Writing: Check the argument",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.argument.hint",
+      "en": "Claims without a source, logical leaps and common fallacies, each with its reason",
+      "vars": []
+    },
+    {
       "key": "cmd.writing.coach",
       "en": "Writing: Clarity & Style Coach",
       "vars": []
@@ -3200,6 +3240,16 @@
       "vars": []
     },
     {
+      "key": "cmd.writing.consistency",
+      "en": "Writing: Check the vault's consistency",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.consistency.hint",
+      "en": "Names, dates, numbers and your glossary terms across all notes, against the entity graph — suggestions to review",
+      "vars": []
+    },
+    {
       "key": "cmd.writing.expand",
       "en": "Writing: Bullets → Paragraph",
       "vars": []
@@ -3207,6 +3257,46 @@
     {
       "key": "cmd.writing.expand.hint",
       "en": "One paragraph from the selected bullets, nothing invented; marked as AI text",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.explainChange",
+      "en": "Writing: explain my change",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.explainChange.hint",
+      "en": "Compare with an earlier version: a short summary and every change of a number, a negation or a name — on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.goals",
+      "en": "Writing: goals and weekly report",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.goals.hint",
+      "en": "A word or time target, readability and tone for this note; your week on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.harper",
+      "en": "Writing: English grammar (Harper, on this device)",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.harper.hint",
+      "en": "Local English grammar for the English parts of the note — suggestions to review",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.loanwords",
+      "en": "Writing: Hebrew alternatives to loanwords",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.loanwords.hint",
+      "en": "In the academic register: אימייל → דוא״ל, פידבק → משוב… — proposed, never applied; each term can be switched off",
       "vars": []
     },
     {
@@ -3230,6 +3320,16 @@
       "vars": []
     },
     {
+      "key": "cmd.writing.readability",
+      "en": "Writing: Readability of this note",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.readability.hint",
+      "en": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
+      "vars": []
+    },
+    {
       "key": "cmd.writing.registerHigh",
       "en": "Writing: High Hebrew Register",
       "vars": []
@@ -3250,6 +3350,16 @@
       "vars": []
     },
     {
+      "key": "cmd.writing.repetition",
+      "en": "Writing: repetition and clichés",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.repetition.hint",
+      "en": "Words repeated too soon (Hebrew prefixes and forms included), doubled words and clichés — on this device",
+      "vars": []
+    },
+    {
       "key": "cmd.writing.shorten",
       "en": "Writing: Shorten by 30%",
       "vars": []
@@ -3257,6 +3367,16 @@
     {
       "key": "cmd.writing.shorten.hint",
       "en": "Within ±10% of the target, with no number or name lost or added",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.structure",
+      "en": "Writing: Review the note's structure",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.structure.hint",
+      "en": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only",
       "vars": []
     },
     {
@@ -3559,126 +3679,6 @@
     {
       "key": "palette.select",
       "en": "select",
-      "vars": []
-    },
-    {
-      "key": "cmd.reading.sidenotes",
-      "en": "Reading: margin notes (footnotes, comments, suggestions)",
-      "vars": []
-    },
-    {
-      "key": "cmd.reading.sidenotes.hint",
-      "en": "Each note next to its line: on the right in English, on the left in Hebrew; under its paragraph on a narrow screen",
-      "vars": []
-    },
-    {
-      "key": "cmd.view.daf",
-      "en": "📜 Page of the Talmud (daf)",
-      "vars": []
-    },
-    {
-      "key": "cmd.view.daf.hint",
-      "en": "The note's main text with its commentaries around it, as on a printed daf",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.argument",
-      "en": "Writing: Check the argument",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.argument.hint",
-      "en": "Claims without a source, logical leaps and common fallacies, each with its reason",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.consistency",
-      "en": "Writing: Check the vault's consistency",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.consistency.hint",
-      "en": "Names, dates, numbers and your glossary terms across all notes, against the entity graph — suggestions to review",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.harper",
-      "en": "Writing: English grammar (Harper, on this device)",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.harper.hint",
-      "en": "Local English grammar for the English parts of the note — suggestions to review",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.readability",
-      "en": "Writing: Readability of this note",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.readability.hint",
-      "en": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.structure",
-      "en": "Writing: Review the note's structure",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.structure.hint",
-      "en": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.explainChange",
-      "en": "Writing: explain my change",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.explainChange.hint",
-      "en": "Compare with an earlier version: a short summary and every change of a number, a negation or a name — on this device",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.goals",
-      "en": "Writing: goals and weekly report",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.goals.hint",
-      "en": "A word or time target, readability and tone for this note; your week on this device",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.loanwords",
-      "en": "Writing: Hebrew alternatives to loanwords",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.loanwords.hint",
-      "en": "In the academic register: אימייל → דוא״ל, פידבק → משוב… — proposed, never applied; each term can be switched off",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.repetition",
-      "en": "Writing: repetition and clichés",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.repetition.hint",
-      "en": "Words repeated too soon (Hebrew prefixes and forms included), doubled words and clichés — on this device",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.abstract",
-      "en": "Writing: titles, abstract and TL;DR",
-      "vars": []
-    },
-    {
-      "key": "cmd.writing.abstract.hint",
-      "en": "Three titles, a 150–250 word abstract and a one-line TL;DR — every sentence tied to a paragraph of the note, on this device",
       "vars": []
     }
   ]

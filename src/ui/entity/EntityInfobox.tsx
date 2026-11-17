@@ -122,6 +122,7 @@ export function EntityInfobox({ model, resolveImage, linkOf, hover, dir }: Entit
           )}
         </tbody>
       </table>
+      {/* i18n-allow: "Wikidata" is the source's name, the same in every language */}
       {e.qid && <div className="lumen-infobox-foot">Wikidata {e.qid}</div>}
     </aside>
   );

@@ -2012,6 +2012,11 @@
       ]
     },
     {
+      "key": "base.openAsGraph",
+      "en": "Open as graph",
+      "vars": []
+    },
+    {
       "key": "base.problems",
       "en": "Some expressions could not run:",
       "vars": []
@@ -9371,6 +9376,216 @@
       "vars": []
     },
     {
+      "key": "goal.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "goal.dialog.local",
+      "en": "Kept on this device only. No comparison with anyone else.",
+      "vars": []
+    },
+    {
+      "key": "goal.dialog.thisNote",
+      "en": "This note",
+      "vars": []
+    },
+    {
+      "key": "goal.dialog.title",
+      "en": "Writing goals",
+      "vars": []
+    },
+    {
+      "key": "goal.field.minutes",
+      "en": "Minutes of writing",
+      "vars": []
+    },
+    {
+      "key": "goal.field.readability",
+      "en": "Readability",
+      "vars": []
+    },
+    {
+      "key": "goal.field.tone",
+      "en": "Tone",
+      "vars": []
+    },
+    {
+      "key": "goal.field.words",
+      "en": "Words",
+      "vars": []
+    },
+    {
+      "key": "goal.level.easy",
+      "en": "easy",
+      "vars": []
+    },
+    {
+      "key": "goal.level.hard",
+      "en": "demanding",
+      "vars": []
+    },
+    {
+      "key": "goal.level.medium",
+      "en": "medium",
+      "vars": []
+    },
+    {
+      "key": "goal.none",
+      "en": "No target",
+      "vars": []
+    },
+    {
+      "key": "goal.now.readability",
+      "en": "readability {level} ({score})",
+      "vars": [
+        "level",
+        "score"
+      ]
+    },
+    {
+      "key": "goal.now.tone",
+      "en": "tone {tone}",
+      "vars": [
+        "tone"
+      ]
+    },
+    {
+      "key": "goal.now.words",
+      "en": "Now: {n} words",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "goal.provisional",
+      "en": "(provisional Hebrew estimate)",
+      "vars": []
+    },
+    {
+      "key": "goal.save",
+      "en": "Save the goal",
+      "vars": []
+    },
+    {
+      "key": "goal.status.label",
+      "en": "Writing goal of this note",
+      "vars": []
+    },
+    {
+      "key": "goal.status.readability",
+      "en": "readability",
+      "vars": []
+    },
+    {
+      "key": "goal.status.tone",
+      "en": "tone",
+      "vars": []
+    },
+    {
+      "key": "goal.status.words",
+      "en": "{n} / {goal} words",
+      "vars": [
+        "n",
+        "goal"
+      ]
+    },
+    {
+      "key": "goal.title.readability",
+      "en": "Readability: target {want}, now {now}",
+      "vars": [
+        "want",
+        "now"
+      ]
+    },
+    {
+      "key": "goal.title.tone",
+      "en": "Tone: target {want}, now {now}",
+      "vars": [
+        "want",
+        "now"
+      ]
+    },
+    {
+      "key": "goal.title.words",
+      "en": "{n} of {goal} words ({pct}%)",
+      "vars": [
+        "n",
+        "goal",
+        "pct"
+      ]
+    },
+    {
+      "key": "goal.tone.casual",
+      "en": "casual",
+      "vars": []
+    },
+    {
+      "key": "goal.tone.formal",
+      "en": "formal",
+      "vars": []
+    },
+    {
+      "key": "goal.tone.neutral",
+      "en": "neutral",
+      "vars": []
+    },
+    {
+      "key": "goal.tooShort",
+      "en": "too short to tell",
+      "vars": []
+    },
+    {
+      "key": "goal.week.caption",
+      "en": "Words and minutes of writing per day",
+      "vars": []
+    },
+    {
+      "key": "goal.week.day",
+      "en": "Day",
+      "vars": []
+    },
+    {
+      "key": "goal.week.minutes",
+      "en": "Minutes",
+      "vars": []
+    },
+    {
+      "key": "goal.week.note",
+      "en": "{words} words, {minutes} min",
+      "vars": [
+        "words",
+        "minutes"
+      ]
+    },
+    {
+      "key": "goal.week.reached",
+      "en": "goal reached",
+      "vars": []
+    },
+    {
+      "key": "goal.week.title",
+      "en": "This week ({from} – {to})",
+      "vars": [
+        "from",
+        "to"
+      ]
+    },
+    {
+      "key": "goal.week.total",
+      "en": "{words} words written · {minutes} minutes · {streak} days in a row",
+      "vars": [
+        "words",
+        "minutes",
+        "streak"
+      ]
+    },
+    {
+      "key": "goal.week.words",
+      "en": "Words",
+      "vars": []
+    },
+    {
       "key": "grammar.he.ANI_FUTURE",
       "en": "“אני {wrong}”: write “{fix}”",
       "vars": [
@@ -9746,6 +9961,354 @@
       "vars": []
     },
     {
+      "key": "graph3d.aria",
+      "en": "Entity graph in 3D, {nodes} entities",
+      "vars": [
+        "nodes"
+      ]
+    },
+    {
+      "key": "graph3d.focused",
+      "en": "{name}: {links} links ({index} of {total})",
+      "vars": [
+        "name",
+        "links",
+        "index",
+        "total"
+      ]
+    },
+    {
+      "key": "graph3d.keys",
+      "en": "Arrows: rotate · + / −: zoom · 0: fit · ] / [: next / previous node · Enter: open",
+      "vars": []
+    },
+    {
+      "key": "graph3d.mode",
+      "en": "3D (experimental)",
+      "vars": []
+    },
+    {
+      "key": "graph3d.noWebgl",
+      "en": "3D needs WebGL, which this browser does not offer here. The graph and the table show the same data.",
+      "vars": []
+    },
+    {
+      "key": "graph3d.reduced",
+      "en": "3D is off because your system asks for reduced motion.",
+      "vars": []
+    },
+    {
+      "key": "graph3d.role",
+      "en": "3D graph",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.amends",
+      "en": "Amended by",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.author",
+      "en": "Wrote",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.born_in",
+      "en": "Born here",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.child",
+      "en": "Parents",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.cites",
+      "en": "Cited by",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.died_in",
+      "en": "Died here",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.employer",
+      "en": "Employees",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.enacted_by",
+      "en": "Enacted",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.founded_by",
+      "en": "Founded",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.headquarters",
+      "en": "Headquarters of",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.located_in",
+      "en": "Located here",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.main_subject",
+      "en": "Subject of",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.member_of",
+      "en": "Members",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.part_of",
+      "en": "Parts",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.participant_in",
+      "en": "Participants",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.inverse.student_of",
+      "en": "Students",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.concept.one",
+      "en": "1 concept",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.concept.other",
+      "en": "{n} concepts",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.kind.event.one",
+      "en": "1 event",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.event.other",
+      "en": "{n} events",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.kind.law.one",
+      "en": "1 law",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.law.other",
+      "en": "{n} laws",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.kind.organization.one",
+      "en": "1 organization",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.organization.other",
+      "en": "{n} organizations",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.kind.person.one",
+      "en": "1 person",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.person.other",
+      "en": "{n} people",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.kind.place.one",
+      "en": "1 place",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.place.other",
+      "en": "{n} places",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.kind.source.one",
+      "en": "1 source",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.kind.source.other",
+      "en": "{n} sources",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.list.back",
+      "en": "Back",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.empty",
+      "en": "No node to show with these filters.",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.goTo",
+      "en": "Go to",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.in",
+      "en": "Incoming: {relation}",
+      "vars": [
+        "relation"
+      ]
+    },
+    {
+      "key": "graphAlt.list.keys",
+      "en": "↑/↓ move between neighbours · Enter goes there · Backspace goes back",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.label",
+      "en": "Graph as a list",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.link",
+      "en": "link",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.linkedFrom",
+      "en": "Linked from",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.links",
+      "en": "{n} neighbours in {groups} groups",
+      "vars": [
+        "n",
+        "groups"
+      ]
+    },
+    {
+      "key": "graphAlt.list.linksTo",
+      "en": "Links to",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.none",
+      "en": "No neighbours.",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.list.open",
+      "en": "Open",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.mode.list",
+      "en": "List (one node at a time)",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.clusters.one",
+      "en": "1 cluster",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.clusters.other",
+      "en": "{n} clusters",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.summary.components.one",
+      "en": "1 connected group",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.components.other",
+      "en": "{n} connected groups",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.summary.edges.one",
+      "en": "1 link",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.edges.other",
+      "en": "{n} links",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.summary.empty",
+      "en": "Nothing to show with these filters.",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.hubs",
+      "en": "Most connected: {list}",
+      "vars": [
+        "list"
+      ]
+    },
+    {
+      "key": "graphAlt.summary.nodes.one",
+      "en": "1 node",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.nodes.other",
+      "en": "{n} nodes",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphAlt.summary.unconnected.one",
+      "en": "1 with no link",
+      "vars": []
+    },
+    {
+      "key": "graphAlt.summary.unconnected.other",
+      "en": "{n} with no link",
+      "vars": [
+        "n"
+      ]
+    },
+    {
       "key": "graphClusters.again",
       "en": "Analyse again",
       "vars": []
@@ -9873,6 +10436,268 @@
     {
       "key": "graphClusters.working",
       "en": "Reading the notes and finding clusters…",
+      "vars": []
+    },
+    {
+      "key": "graphExport.empty",
+      "en": "Nothing to export: no node is shown.",
+      "vars": []
+    },
+    {
+      "key": "graphExport.failed",
+      "en": "The export did not finish: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "graphExport.gexf",
+      "en": "GEXF for Gephi",
+      "vars": []
+    },
+    {
+      "key": "graphExport.label",
+      "en": "Export view",
+      "vars": []
+    },
+    {
+      "key": "graphExport.png",
+      "en": "PNG picture",
+      "vars": []
+    },
+    {
+      "key": "graphExport.saved",
+      "en": "Saved {file} ({nodes} nodes)",
+      "vars": [
+        "file",
+        "nodes"
+      ]
+    },
+    {
+      "key": "graphExport.svg",
+      "en": "SVG picture",
+      "vars": []
+    },
+    {
+      "key": "graphExport.title.entities",
+      "en": "Entity graph",
+      "vars": []
+    },
+    {
+      "key": "graphExport.title.notes",
+      "en": "Note graph",
+      "vars": []
+    },
+    {
+      "key": "graphExport.working",
+      "en": "Preparing the file…",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.aria",
+      "en": "Graph of {title}: {nodes} notes",
+      "vars": [
+        "title",
+        "nodes"
+      ]
+    },
+    {
+      "key": "graphPersp.asTable",
+      "en": "As a table",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.color",
+      "en": "Colour",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.colorOf",
+      "en": "Colour of {kind}",
+      "vars": [
+        "kind"
+      ]
+    },
+    {
+      "key": "graphPersp.delete",
+      "en": "Delete view",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.deleted",
+      "en": "Deleted the view “{name}”",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "graphPersp.empty",
+      "en": "No note to show with these kinds.",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.includeOutside",
+      "en": "Notes they link to outside",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.kind",
+      "en": "Kind",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.kinds",
+      "en": "Kinds shown",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.label",
+      "en": "Saved views",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.loadFailed",
+      "en": "Saved views could not be read",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.loadGraphFailed",
+      "en": "The graph could not be built: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "graphPersp.loading",
+      "en": "Building the graph…",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.name",
+      "en": "Name of the view",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.none",
+      "en": "(unsaved)",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.opened",
+      "en": "Opened the view “{name}”",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "graphPersp.outside",
+      "en": "Linked, outside",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.problems",
+      "en": "{n} saved views could not be read and were skipped",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "graphPersp.restored",
+      "en": "The view is back",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.saveAs",
+      "en": "Save view as…",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.saveFailed",
+      "en": "The view was not saved",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.saved",
+      "en": "Saved the view “{name}”",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "graphPersp.scale",
+      "en": "Scale",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.scaleOf",
+      "en": "Scale of {kind}",
+      "vars": [
+        "kind"
+      ]
+    },
+    {
+      "key": "graphPersp.size",
+      "en": "Size",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.size.degree",
+      "en": "By number of links",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.size.fixed",
+      "en": "Fixed",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.sizeOf",
+      "en": "Size of {kind}",
+      "vars": [
+        "kind"
+      ]
+    },
+    {
+      "key": "graphPersp.stats",
+      "en": "{nodes} notes · {edges} links",
+      "vars": [
+        "nodes",
+        "edges"
+      ]
+    },
+    {
+      "key": "graphPersp.style",
+      "en": "Colours and sizes",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.toolbar",
+      "en": "Graph of the rows",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.undo",
+      "en": "Undo",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.update",
+      "en": "Update view",
+      "vars": []
+    },
+    {
+      "key": "graphPersp.view",
+      "en": "Saved view",
       "vars": []
     },
     {
@@ -16355,6 +17180,11 @@
       "vars": []
     },
     {
+      "key": "query.openAsGraph",
+      "en": "Open as graph",
+      "vars": []
+    },
+    {
       "key": "query.title",
       "en": "Query",
       "vars": []
@@ -17006,6 +17836,294 @@
     {
       "key": "readingMode.where.file",
       "en": "In the note's file, as",
+      "vars": []
+    },
+    {
+      "key": "readingViews.column.editor",
+      "en": "Source column",
+      "vars": []
+    },
+    {
+      "key": "readingViews.column.outline",
+      "en": "Outline column",
+      "vars": []
+    },
+    {
+      "key": "readingViews.column.preview",
+      "en": "Preview column",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.after",
+      "en": "After: {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "readingViews.compare.before",
+      "en": "Before: {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "readingViews.compare.body",
+      "en": "Differences",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.columns",
+      "en": "Side by side",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.count",
+      "en": "{n} changes (+{ins} −{del})",
+      "vars": [
+        "n",
+        "ins",
+        "del"
+      ]
+    },
+    {
+      "key": "readingViews.compare.ignoreNiqqud",
+      "en": "Ignore niqqud",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.ignoreWhitespace",
+      "en": "Ignore spaces",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.inline",
+      "en": "Inline",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.inlineLabel",
+      "en": "{old} compared with {new}",
+      "vars": [
+        "old",
+        "new"
+      ]
+    },
+    {
+      "key": "readingViews.compare.layout",
+      "en": "Layout",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.next",
+      "en": "Next change",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.niqqudChange",
+      "en": "niqqud changed: {old} → {new}",
+      "vars": [
+        "old",
+        "new"
+      ]
+    },
+    {
+      "key": "readingViews.compare.none",
+      "en": "No differences",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.position",
+      "en": "Change {i} of {n}",
+      "vars": [
+        "i",
+        "n"
+      ]
+    },
+    {
+      "key": "readingViews.compare.prev",
+      "en": "Previous change",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.sayChange",
+      "en": "Change {i} of {n}: {what}",
+      "vars": [
+        "i",
+        "n",
+        "what"
+      ]
+    },
+    {
+      "key": "readingViews.compare.sayDeleted",
+      "en": "deleted “{text}”",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "readingViews.compare.sayInserted",
+      "en": "inserted “{text}”",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "readingViews.compare.sayPrefix",
+      "en": "prefix changed: {old} → {new}",
+      "vars": [
+        "old",
+        "new"
+      ]
+    },
+    {
+      "key": "readingViews.compare.title",
+      "en": "Compare",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.tools",
+      "en": "Compare tools",
+      "vars": []
+    },
+    {
+      "key": "readingViews.compare.unchanged",
+      "en": "Show {n} unchanged paragraphs",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "readingViews.sidenotes.comment",
+      "en": "Comment",
+      "vars": []
+    },
+    {
+      "key": "readingViews.sidenotes.commentBy",
+      "en": "Comment by {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "readingViews.sidenotes.delete",
+      "en": "Delete “{text}”",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "readingViews.sidenotes.footnote",
+      "en": "Footnote {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "readingViews.sidenotes.insert",
+      "en": "Insert “{text}”",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "readingViews.sidenotes.off",
+      "en": "Margin notes off",
+      "vars": []
+    },
+    {
+      "key": "readingViews.sidenotes.on",
+      "en": "Margin notes on",
+      "vars": []
+    },
+    {
+      "key": "readingViews.sidenotes.replace",
+      "en": "Replace “{old}” with “{new}”",
+      "vars": [
+        "old",
+        "new"
+      ]
+    },
+    {
+      "key": "readingViews.sidenotes.suggestDelete",
+      "en": "Suggested deletion",
+      "vars": []
+    },
+    {
+      "key": "readingViews.sidenotes.suggestInsert",
+      "en": "Suggested insertion",
+      "vars": []
+    },
+    {
+      "key": "readingViews.sidenotes.suggestReplace",
+      "en": "Suggested replacement",
+      "vars": []
+    },
+    {
+      "key": "readingViews.sidenotes.title",
+      "en": "Side notes",
+      "vars": []
+    },
+    {
+      "key": "readingViews.spread.close",
+      "en": "Back to scrolling",
+      "vars": []
+    },
+    {
+      "key": "readingViews.spread.first",
+      "en": "First page",
+      "vars": []
+    },
+    {
+      "key": "readingViews.spread.last",
+      "en": "Last page",
+      "vars": []
+    },
+    {
+      "key": "readingViews.spread.next",
+      "en": "Next pages",
+      "vars": []
+    },
+    {
+      "key": "readingViews.spread.page",
+      "en": "Page {a} of {n}",
+      "vars": [
+        "a",
+        "n"
+      ]
+    },
+    {
+      "key": "readingViews.spread.pages",
+      "en": "Pages {a}–{b} of {n}",
+      "vars": [
+        "a",
+        "b",
+        "n"
+      ]
+    },
+    {
+      "key": "readingViews.spread.prev",
+      "en": "Previous pages",
+      "vars": []
+    },
+    {
+      "key": "readingViews.spread.scroll",
+      "en": "Scrolling",
+      "vars": []
+    },
+    {
+      "key": "readingViews.spread.toolbar",
+      "en": "Book pages",
+      "vars": []
+    },
+    {
+      "key": "readingViews.triple.on",
+      "en": "Three columns: source, preview and outline, scroll linked",
       "vars": []
     },
     {
@@ -18800,6 +19918,11 @@
     {
       "key": "sync.conflict.both",
       "en": "both",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.compareWords",
+      "en": "Compare word by word",
       "vars": []
     },
     {
@@ -21996,6 +23119,159 @@
       "vars": []
     },
     {
+      "key": "wchk.changed",
+      "en": "The note changed — the checks were run again.",
+      "vars": []
+    },
+    {
+      "key": "wchk.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "wchk.count",
+      "en": "{count} findings in this note",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.cut",
+      "en": "(cut)",
+      "vars": []
+    },
+    {
+      "key": "wchk.goto",
+      "en": "Go to",
+      "vars": []
+    },
+    {
+      "key": "wchk.ignore",
+      "en": "Ignore from now on",
+      "vars": []
+    },
+    {
+      "key": "wchk.ignoreLabel",
+      "en": "Ignore “{what}” from now on",
+      "vars": [
+        "what"
+      ]
+    },
+    {
+      "key": "wchk.kind.all",
+      "en": "Everything ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.kind.cliche",
+      "en": "Clichés ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.kind.doubled",
+      "en": "Doubled words ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.kind.loanword",
+      "en": "Loanwords ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.kind.repetition",
+      "en": "Repeated words ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.loanwords.everyday",
+      "en": "Everyday register: loanwords are fine here. Switch to the academic register to see Hebrew alternatives.",
+      "vars": []
+    },
+    {
+      "key": "wchk.loanwords.title",
+      "en": "Hebrew alternatives to loanwords",
+      "vars": []
+    },
+    {
+      "key": "wchk.local",
+      "en": "Checked on this device by rules — no model, nothing sent. Fixes are only proposed: you accept or reject each one in the review panel.",
+      "vars": []
+    },
+    {
+      "key": "wchk.none",
+      "en": "Nothing to flag in this note.",
+      "vars": []
+    },
+    {
+      "key": "wchk.propose",
+      "en": "Propose the fix",
+      "vars": []
+    },
+    {
+      "key": "wchk.proposeAll",
+      "en": "Propose all fixes ({count})",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.proposed",
+      "en": "{count} fixes proposed — review them in the review panel",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "wchk.proposedOne",
+      "en": "Proposed",
+      "vars": []
+    },
+    {
+      "key": "wchk.register",
+      "en": "Register",
+      "vars": []
+    },
+    {
+      "key": "wchk.register.academic",
+      "en": "Academic / legal",
+      "vars": []
+    },
+    {
+      "key": "wchk.register.everyday",
+      "en": "Everyday",
+      "vars": []
+    },
+    {
+      "key": "wchk.repetition.title",
+      "en": "Repetition and clichés",
+      "vars": []
+    },
+    {
+      "key": "wchk.resetIgnored",
+      "en": "Show ignored items again",
+      "vars": []
+    },
+    {
+      "key": "wchk.show",
+      "en": "Show",
+      "vars": []
+    },
+    {
+      "key": "wchk.window",
+      "en": "Window (words)",
+      "vars": []
+    },
+    {
       "key": "whatsNew.close",
       "en": "Got it",
       "vars": []
@@ -22378,309 +23654,6 @@
       "vars": []
     },
     {
-      "key": "yiddish.spell.unknown",
-      "en": "Not in the Yiddish word list",
-      "vars": []
-    },
-    {
-      "key": "airplane.certificate.unsigned",
-      "en": "Not signed yet: the certificate carries its SHA-256 only.",
-      "vars": []
-    },
-    {
-      "key": "readingViews.column.editor",
-      "en": "Source column",
-      "vars": []
-    },
-    {
-      "key": "readingViews.column.outline",
-      "en": "Outline column",
-      "vars": []
-    },
-    {
-      "key": "readingViews.column.preview",
-      "en": "Preview column",
-      "vars": []
-    },
-    {
-      "key": "readingViews.triple.on",
-      "en": "Three columns: source, preview and outline, scroll linked",
-      "vars": []
-    },
-    {
-      "key": "readingViews.compare.after",
-      "en": "After: {name}",
-      "vars": [
-        "name"
-      ]
-    },
-    {
-      "key": "readingViews.compare.before",
-      "en": "Before: {name}",
-      "vars": [
-        "name"
-      ]
-    },
-    {
-      "key": "readingViews.compare.body",
-      "en": "Differences",
-      "vars": []
-    },
-    {
-      "key": "readingViews.compare.close",
-      "en": "Close",
-      "vars": []
-    },
-    {
-      "key": "readingViews.compare.columns",
-      "en": "Side by side",
-      "vars": []
-    },
-    {
-      "key": "readingViews.compare.count",
-      "en": "{n} changes (+{ins} −{del})",
-      "vars": [
-        "n",
-        "ins",
-        "del"
-      ]
-    },
-    {
-      "key": "readingViews.compare.ignoreNiqqud",
-      "en": "Ignore niqqud",
-      "vars": []
-    },
-    {
-      "key": "readingViews.compare.ignoreWhitespace",
-      "en": "Ignore spaces",
-      "vars": []
-    },
-    {
-      "key": "readingViews.compare.inline",
-      "en": "Inline",
-      "vars": []
-    },
-    {
-      "key": "readingViews.compare.inlineLabel",
-      "en": "{old} compared with {new}",
-      "vars": [
-        "old",
-        "new"
-      ]
-    },
-    {
-      "key": "readingViews.compare.layout",
-      "en": "Layout",
-      "vars": []
-    },
-    {
-      "key": "readingViews.compare.next",
-      "en": "Next change",
-      "vars": []
-    },
-    {
-      "key": "readingViews.compare.niqqudChange",
-      "en": "niqqud changed: {old} → {new}",
-      "vars": [
-        "old",
-        "new"
-      ]
-    },
-    {
-      "key": "readingViews.compare.none",
-      "en": "No differences",
-      "vars": []
-    },
-    {
-      "key": "readingViews.compare.position",
-      "en": "Change {i} of {n}",
-      "vars": [
-        "i",
-        "n"
-      ]
-    },
-    {
-      "key": "readingViews.compare.prev",
-      "en": "Previous change",
-      "vars": []
-    },
-    {
-      "key": "readingViews.compare.sayChange",
-      "en": "Change {i} of {n}: {what}",
-      "vars": [
-        "i",
-        "n",
-        "what"
-      ]
-    },
-    {
-      "key": "readingViews.compare.sayDeleted",
-      "en": "deleted “{text}”",
-      "vars": [
-        "text"
-      ]
-    },
-    {
-      "key": "readingViews.compare.sayInserted",
-      "en": "inserted “{text}”",
-      "vars": [
-        "text"
-      ]
-    },
-    {
-      "key": "readingViews.compare.sayPrefix",
-      "en": "prefix changed: {old} → {new}",
-      "vars": [
-        "old",
-        "new"
-      ]
-    },
-    {
-      "key": "readingViews.compare.title",
-      "en": "Compare",
-      "vars": []
-    },
-    {
-      "key": "readingViews.compare.tools",
-      "en": "Compare tools",
-      "vars": []
-    },
-    {
-      "key": "readingViews.compare.unchanged",
-      "en": "Show {n} unchanged paragraphs",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "sync.conflict.compareWords",
-      "en": "Compare word by word",
-      "vars": []
-    },
-    {
-      "key": "readingViews.sidenotes.comment",
-      "en": "Comment",
-      "vars": []
-    },
-    {
-      "key": "readingViews.sidenotes.commentBy",
-      "en": "Comment by {name}",
-      "vars": [
-        "name"
-      ]
-    },
-    {
-      "key": "readingViews.sidenotes.delete",
-      "en": "Delete “{text}”",
-      "vars": [
-        "text"
-      ]
-    },
-    {
-      "key": "readingViews.sidenotes.footnote",
-      "en": "Footnote {n}",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "readingViews.sidenotes.insert",
-      "en": "Insert “{text}”",
-      "vars": [
-        "text"
-      ]
-    },
-    {
-      "key": "readingViews.sidenotes.off",
-      "en": "Margin notes off",
-      "vars": []
-    },
-    {
-      "key": "readingViews.sidenotes.on",
-      "en": "Margin notes on",
-      "vars": []
-    },
-    {
-      "key": "readingViews.sidenotes.replace",
-      "en": "Replace “{old}” with “{new}”",
-      "vars": [
-        "old",
-        "new"
-      ]
-    },
-    {
-      "key": "readingViews.sidenotes.suggestDelete",
-      "en": "Suggested deletion",
-      "vars": []
-    },
-    {
-      "key": "readingViews.sidenotes.suggestInsert",
-      "en": "Suggested insertion",
-      "vars": []
-    },
-    {
-      "key": "readingViews.sidenotes.suggestReplace",
-      "en": "Suggested replacement",
-      "vars": []
-    },
-    {
-      "key": "readingViews.sidenotes.title",
-      "en": "Side notes",
-      "vars": []
-    },
-    {
-      "key": "readingViews.spread.close",
-      "en": "Back to scrolling",
-      "vars": []
-    },
-    {
-      "key": "readingViews.spread.first",
-      "en": "First page",
-      "vars": []
-    },
-    {
-      "key": "readingViews.spread.last",
-      "en": "Last page",
-      "vars": []
-    },
-    {
-      "key": "readingViews.spread.next",
-      "en": "Next pages",
-      "vars": []
-    },
-    {
-      "key": "readingViews.spread.page",
-      "en": "Page {a} of {n}",
-      "vars": [
-        "a",
-        "n"
-      ]
-    },
-    {
-      "key": "readingViews.spread.pages",
-      "en": "Pages {a}–{b} of {n}",
-      "vars": [
-        "a",
-        "b",
-        "n"
-      ]
-    },
-    {
-      "key": "readingViews.spread.prev",
-      "en": "Previous pages",
-      "vars": []
-    },
-    {
-      "key": "readingViews.spread.scroll",
-      "en": "Scrolling",
-      "vars": []
-    },
-    {
-      "key": "readingViews.spread.toolbar",
-      "en": "Book pages",
-      "vars": []
-    },
-    {
       "key": "writingCheck.band.easy",
       "en": "easy",
       "vars": []
@@ -22975,369 +23948,6 @@
       "vars": []
     },
     {
-      "key": "goal.close",
-      "en": "Close",
-      "vars": []
-    },
-    {
-      "key": "goal.dialog.local",
-      "en": "Kept on this device only. No comparison with anyone else.",
-      "vars": []
-    },
-    {
-      "key": "goal.dialog.thisNote",
-      "en": "This note",
-      "vars": []
-    },
-    {
-      "key": "goal.dialog.title",
-      "en": "Writing goals",
-      "vars": []
-    },
-    {
-      "key": "goal.field.minutes",
-      "en": "Minutes of writing",
-      "vars": []
-    },
-    {
-      "key": "goal.field.readability",
-      "en": "Readability",
-      "vars": []
-    },
-    {
-      "key": "goal.field.tone",
-      "en": "Tone",
-      "vars": []
-    },
-    {
-      "key": "goal.field.words",
-      "en": "Words",
-      "vars": []
-    },
-    {
-      "key": "goal.level.easy",
-      "en": "easy",
-      "vars": []
-    },
-    {
-      "key": "goal.level.hard",
-      "en": "demanding",
-      "vars": []
-    },
-    {
-      "key": "goal.level.medium",
-      "en": "medium",
-      "vars": []
-    },
-    {
-      "key": "goal.none",
-      "en": "No target",
-      "vars": []
-    },
-    {
-      "key": "goal.now.readability",
-      "en": "readability {level} ({score})",
-      "vars": [
-        "level",
-        "score"
-      ]
-    },
-    {
-      "key": "goal.now.tone",
-      "en": "tone {tone}",
-      "vars": [
-        "tone"
-      ]
-    },
-    {
-      "key": "goal.now.words",
-      "en": "Now: {n} words",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "goal.provisional",
-      "en": "(provisional Hebrew estimate)",
-      "vars": []
-    },
-    {
-      "key": "goal.save",
-      "en": "Save the goal",
-      "vars": []
-    },
-    {
-      "key": "goal.status.label",
-      "en": "Writing goal of this note",
-      "vars": []
-    },
-    {
-      "key": "goal.status.readability",
-      "en": "readability",
-      "vars": []
-    },
-    {
-      "key": "goal.status.tone",
-      "en": "tone",
-      "vars": []
-    },
-    {
-      "key": "goal.status.words",
-      "en": "{n} / {goal} words",
-      "vars": [
-        "n",
-        "goal"
-      ]
-    },
-    {
-      "key": "goal.title.readability",
-      "en": "Readability: target {want}, now {now}",
-      "vars": [
-        "want",
-        "now"
-      ]
-    },
-    {
-      "key": "goal.title.tone",
-      "en": "Tone: target {want}, now {now}",
-      "vars": [
-        "want",
-        "now"
-      ]
-    },
-    {
-      "key": "goal.title.words",
-      "en": "{n} of {goal} words ({pct}%)",
-      "vars": [
-        "n",
-        "goal",
-        "pct"
-      ]
-    },
-    {
-      "key": "goal.tone.casual",
-      "en": "casual",
-      "vars": []
-    },
-    {
-      "key": "goal.tone.formal",
-      "en": "formal",
-      "vars": []
-    },
-    {
-      "key": "goal.tone.neutral",
-      "en": "neutral",
-      "vars": []
-    },
-    {
-      "key": "goal.tooShort",
-      "en": "too short to tell",
-      "vars": []
-    },
-    {
-      "key": "goal.week.caption",
-      "en": "Words and minutes of writing per day",
-      "vars": []
-    },
-    {
-      "key": "goal.week.day",
-      "en": "Day",
-      "vars": []
-    },
-    {
-      "key": "goal.week.minutes",
-      "en": "Minutes",
-      "vars": []
-    },
-    {
-      "key": "goal.week.note",
-      "en": "{words} words, {minutes} min",
-      "vars": [
-        "words",
-        "minutes"
-      ]
-    },
-    {
-      "key": "goal.week.reached",
-      "en": "goal reached",
-      "vars": []
-    },
-    {
-      "key": "goal.week.title",
-      "en": "This week ({from} – {to})",
-      "vars": [
-        "from",
-        "to"
-      ]
-    },
-    {
-      "key": "goal.week.total",
-      "en": "{words} words written · {minutes} minutes · {streak} days in a row",
-      "vars": [
-        "words",
-        "minutes",
-        "streak"
-      ]
-    },
-    {
-      "key": "goal.week.words",
-      "en": "Words",
-      "vars": []
-    },
-    {
-      "key": "wchk.changed",
-      "en": "The note changed — the checks were run again.",
-      "vars": []
-    },
-    {
-      "key": "wchk.close",
-      "en": "Close",
-      "vars": []
-    },
-    {
-      "key": "wchk.count",
-      "en": "{count} findings in this note",
-      "vars": [
-        "count"
-      ]
-    },
-    {
-      "key": "wchk.cut",
-      "en": "(cut)",
-      "vars": []
-    },
-    {
-      "key": "wchk.goto",
-      "en": "Go to",
-      "vars": []
-    },
-    {
-      "key": "wchk.ignore",
-      "en": "Ignore from now on",
-      "vars": []
-    },
-    {
-      "key": "wchk.ignoreLabel",
-      "en": "Ignore “{what}” from now on",
-      "vars": [
-        "what"
-      ]
-    },
-    {
-      "key": "wchk.kind.all",
-      "en": "Everything ({count})",
-      "vars": [
-        "count"
-      ]
-    },
-    {
-      "key": "wchk.kind.cliche",
-      "en": "Clichés ({count})",
-      "vars": [
-        "count"
-      ]
-    },
-    {
-      "key": "wchk.kind.doubled",
-      "en": "Doubled words ({count})",
-      "vars": [
-        "count"
-      ]
-    },
-    {
-      "key": "wchk.kind.loanword",
-      "en": "Loanwords ({count})",
-      "vars": [
-        "count"
-      ]
-    },
-    {
-      "key": "wchk.kind.repetition",
-      "en": "Repeated words ({count})",
-      "vars": [
-        "count"
-      ]
-    },
-    {
-      "key": "wchk.loanwords.everyday",
-      "en": "Everyday register: loanwords are fine here. Switch to the academic register to see Hebrew alternatives.",
-      "vars": []
-    },
-    {
-      "key": "wchk.loanwords.title",
-      "en": "Hebrew alternatives to loanwords",
-      "vars": []
-    },
-    {
-      "key": "wchk.local",
-      "en": "Checked on this device by rules — no model, nothing sent. Fixes are only proposed: you accept or reject each one in the review panel.",
-      "vars": []
-    },
-    {
-      "key": "wchk.none",
-      "en": "Nothing to flag in this note.",
-      "vars": []
-    },
-    {
-      "key": "wchk.propose",
-      "en": "Propose the fix",
-      "vars": []
-    },
-    {
-      "key": "wchk.proposeAll",
-      "en": "Propose all fixes ({count})",
-      "vars": [
-        "count"
-      ]
-    },
-    {
-      "key": "wchk.proposed",
-      "en": "{count} fixes proposed — review them in the review panel",
-      "vars": [
-        "count"
-      ]
-    },
-    {
-      "key": "wchk.proposedOne",
-      "en": "Proposed",
-      "vars": []
-    },
-    {
-      "key": "wchk.register",
-      "en": "Register",
-      "vars": []
-    },
-    {
-      "key": "wchk.register.academic",
-      "en": "Academic / legal",
-      "vars": []
-    },
-    {
-      "key": "wchk.register.everyday",
-      "en": "Everyday",
-      "vars": []
-    },
-    {
-      "key": "wchk.repetition.title",
-      "en": "Repetition and clichés",
-      "vars": []
-    },
-    {
-      "key": "wchk.resetIgnored",
-      "en": "Show ignored items again",
-      "vars": []
-    },
-    {
-      "key": "wchk.show",
-      "en": "Show",
-      "vars": []
-    },
-    {
-      "key": "wchk.window",
-      "en": "Window (words)",
-      "vars": []
-    },
-    {
       "key": "xchg.absent",
       "en": "(none)",
       "vars": []
@@ -23427,623 +24037,8 @@
       "vars": []
     },
     {
-      "key": "base.openAsGraph",
-      "en": "Open as graph",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.aria",
-      "en": "Graph of {title}: {nodes} notes",
-      "vars": [
-        "title",
-        "nodes"
-      ]
-    },
-    {
-      "key": "graphPersp.asTable",
-      "en": "As a table",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.close",
-      "en": "Close",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.color",
-      "en": "Colour",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.colorOf",
-      "en": "Colour of {kind}",
-      "vars": [
-        "kind"
-      ]
-    },
-    {
-      "key": "graphPersp.delete",
-      "en": "Delete view",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.deleted",
-      "en": "Deleted the view “{name}”",
-      "vars": [
-        "name"
-      ]
-    },
-    {
-      "key": "graphPersp.empty",
-      "en": "No note to show with these kinds.",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.includeOutside",
-      "en": "Notes they link to outside",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.kind",
-      "en": "Kind",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.kinds",
-      "en": "Kinds shown",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.label",
-      "en": "Saved views",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.loadFailed",
-      "en": "Saved views could not be read",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.loadGraphFailed",
-      "en": "The graph could not be built: {error}",
-      "vars": [
-        "error"
-      ]
-    },
-    {
-      "key": "graphPersp.loading",
-      "en": "Building the graph…",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.name",
-      "en": "Name of the view",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.none",
-      "en": "(unsaved)",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.opened",
-      "en": "Opened the view “{name}”",
-      "vars": [
-        "name"
-      ]
-    },
-    {
-      "key": "graphPersp.outside",
-      "en": "Linked, outside",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.problems",
-      "en": "{n} saved views could not be read and were skipped",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphPersp.restored",
-      "en": "The view is back",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.save",
-      "en": "Save",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.saveAs",
-      "en": "Save view as…",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.saveFailed",
-      "en": "The view was not saved",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.saved",
-      "en": "Saved the view “{name}”",
-      "vars": [
-        "name"
-      ]
-    },
-    {
-      "key": "graphPersp.scale",
-      "en": "Scale",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.scaleOf",
-      "en": "Scale of {kind}",
-      "vars": [
-        "kind"
-      ]
-    },
-    {
-      "key": "graphPersp.size",
-      "en": "Size",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.size.degree",
-      "en": "By number of links",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.size.fixed",
-      "en": "Fixed",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.sizeOf",
-      "en": "Size of {kind}",
-      "vars": [
-        "kind"
-      ]
-    },
-    {
-      "key": "graphPersp.stats",
-      "en": "{nodes} notes · {edges} links",
-      "vars": [
-        "nodes",
-        "edges"
-      ]
-    },
-    {
-      "key": "graphPersp.style",
-      "en": "Colours and sizes",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.toolbar",
-      "en": "Graph of the rows",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.undo",
-      "en": "Undo",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.update",
-      "en": "Update view",
-      "vars": []
-    },
-    {
-      "key": "graphPersp.view",
-      "en": "Saved view",
-      "vars": []
-    },
-    {
-      "key": "query.openAsGraph",
-      "en": "Open as graph",
-      "vars": []
-    },
-    {
-      "key": "graph3d.aria",
-      "en": "Entity graph in 3D, {nodes} entities",
-      "vars": [
-        "nodes"
-      ]
-    },
-    {
-      "key": "graph3d.focused",
-      "en": "{name}: {links} links ({index} of {total})",
-      "vars": [
-        "name",
-        "links",
-        "index",
-        "total"
-      ]
-    },
-    {
-      "key": "graph3d.keys",
-      "en": "Arrows: rotate · + / −: zoom · 0: fit · ] / [: next / previous node · Enter: open",
-      "vars": []
-    },
-    {
-      "key": "graph3d.mode",
-      "en": "3D (experimental)",
-      "vars": []
-    },
-    {
-      "key": "graph3d.noWebgl",
-      "en": "3D needs WebGL, which this browser does not offer here. The graph and the table show the same data.",
-      "vars": []
-    },
-    {
-      "key": "graph3d.reduced",
-      "en": "3D is off because your system asks for reduced motion.",
-      "vars": []
-    },
-    {
-      "key": "graph3d.role",
-      "en": "3D graph",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.amends",
-      "en": "Amended by",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.author",
-      "en": "Wrote",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.born_in",
-      "en": "Born here",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.child",
-      "en": "Parents",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.cites",
-      "en": "Cited by",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.died_in",
-      "en": "Died here",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.employer",
-      "en": "Employees",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.enacted_by",
-      "en": "Enacted",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.founded_by",
-      "en": "Founded",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.headquarters",
-      "en": "Headquarters of",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.located_in",
-      "en": "Located here",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.main_subject",
-      "en": "Subject of",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.member_of",
-      "en": "Members",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.part_of",
-      "en": "Parts",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.participant_in",
-      "en": "Participants",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.inverse.student_of",
-      "en": "Students",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.kind.concept.one",
-      "en": "1 concept",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.kind.concept.other",
-      "en": "{n} concepts",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.kind.event.one",
-      "en": "1 event",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.kind.event.other",
-      "en": "{n} events",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.kind.law.one",
-      "en": "1 law",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.kind.law.other",
-      "en": "{n} laws",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.kind.organization.one",
-      "en": "1 organization",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.kind.organization.other",
-      "en": "{n} organizations",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.kind.person.one",
-      "en": "1 person",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.kind.person.other",
-      "en": "{n} people",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.kind.place.one",
-      "en": "1 place",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.kind.place.other",
-      "en": "{n} places",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.kind.source.one",
-      "en": "1 source",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.kind.source.other",
-      "en": "{n} sources",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.list.back",
-      "en": "Back",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.list.empty",
-      "en": "No node to show with these filters.",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.list.goTo",
-      "en": "Go to",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.list.in",
-      "en": "Incoming: {relation}",
-      "vars": [
-        "relation"
-      ]
-    },
-    {
-      "key": "graphAlt.list.keys",
-      "en": "↑/↓ move between neighbours · Enter goes there · Backspace goes back",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.list.label",
-      "en": "Graph as a list",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.list.link",
-      "en": "link",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.list.linkedFrom",
-      "en": "Linked from",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.list.links",
-      "en": "{n} neighbours in {groups} groups",
-      "vars": [
-        "n",
-        "groups"
-      ]
-    },
-    {
-      "key": "graphAlt.list.linksTo",
-      "en": "Links to",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.list.none",
-      "en": "No neighbours.",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.list.open",
-      "en": "Open",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.mode.list",
-      "en": "List (one node at a time)",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.summary.clusters.one",
-      "en": "1 cluster",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.summary.clusters.other",
-      "en": "{n} clusters",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.summary.components.one",
-      "en": "1 connected group",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.summary.components.other",
-      "en": "{n} connected groups",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.summary.edges.one",
-      "en": "1 link",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.summary.edges.other",
-      "en": "{n} links",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.summary.empty",
-      "en": "Nothing to show with these filters.",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.summary.hubs",
-      "en": "Most connected: {list}",
-      "vars": [
-        "list"
-      ]
-    },
-    {
-      "key": "graphAlt.summary.nodes.one",
-      "en": "1 node",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.summary.nodes.other",
-      "en": "{n} nodes",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphAlt.summary.unconnected.one",
-      "en": "1 with no link",
-      "vars": []
-    },
-    {
-      "key": "graphAlt.summary.unconnected.other",
-      "en": "{n} with no link",
-      "vars": [
-        "n"
-      ]
-    },
-    {
-      "key": "graphExport.empty",
-      "en": "Nothing to export: no node is shown.",
-      "vars": []
-    },
-    {
-      "key": "graphExport.failed",
-      "en": "The export did not finish: {error}",
-      "vars": [
-        "error"
-      ]
-    },
-    {
-      "key": "graphExport.gexf",
-      "en": "GEXF for Gephi",
-      "vars": []
-    },
-    {
-      "key": "graphExport.label",
-      "en": "Export view",
-      "vars": []
-    },
-    {
-      "key": "graphExport.png",
-      "en": "PNG picture",
-      "vars": []
-    },
-    {
-      "key": "graphExport.saved",
-      "en": "Saved {file} ({nodes} nodes)",
-      "vars": [
-        "file",
-        "nodes"
-      ]
-    },
-    {
-      "key": "graphExport.svg",
-      "en": "SVG picture",
-      "vars": []
-    },
-    {
-      "key": "graphExport.title.entities",
-      "en": "Entity graph",
-      "vars": []
-    },
-    {
-      "key": "graphExport.title.notes",
-      "en": "Note graph",
-      "vars": []
-    },
-    {
-      "key": "graphExport.working",
-      "en": "Preparing the file…",
+      "key": "yiddish.spell.unknown",
+      "en": "Not in the Yiddish word list",
       "vars": []
     }
   ]
