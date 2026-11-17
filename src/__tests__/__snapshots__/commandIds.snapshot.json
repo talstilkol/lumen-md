@@ -822,6 +822,7 @@
       "label": "Settings",
       "group": "View",
       "hint": "Search settings",
+      "shortcut": "⌘,",
       "icon": "Sparkles"
     },
     {
@@ -1152,6 +1153,13 @@
       "icon": "FileText"
     },
     {
+      "id": "help.safeMode",
+      "label": "Restart in safe mode",
+      "group": "Tools",
+      "hint": "no plugins, CSS snippets or AI agents until you leave it — for when something you added keeps Lumen from working",
+      "icon": "FileText"
+    },
+    {
       "id": "help.credits",
       "label": "Credits & model licences",
       "group": "Tools",
@@ -1310,6 +1318,13 @@
       "label": "Language: 简体中文 — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "left-to-right",
+      "icon": "PanelRightOpen"
+    },
+    {
+      "id": "lang.fa",
+      "label": "Language: فارسی — Beta (machine translation, awaiting native review)",
+      "group": "View",
+      "hint": "right-to-left",
       "icon": "PanelRightOpen"
     },
     {
@@ -1613,6 +1628,12 @@
       "icon": "Link"
     },
     {
+      "id": "edit.hebrewListNumbering",
+      "label": "Number lists with Hebrew letters (א. ב. ג.)",
+      "group": "Edit",
+      "hint": "For this note, in the preview, PDF and Word; the Markdown keeps 1. 2. 3."
+    },
+    {
       "id": "edit.formatDocument",
       "label": "Format document",
       "group": "Edit",
@@ -1685,6 +1706,13 @@
       "label": "Clean direction marks and fix brackets",
       "group": "Edit",
       "hint": "Remove marks that change nothing on screen and swap brackets typed backwards — one undo",
+      "icon": "Pencil"
+    },
+    {
+      "id": "edit.cursorMovement",
+      "label": "Cursor movement: switch to logical",
+      "group": "Edit",
+      "hint": "Arrow keys in mixed Hebrew/English lines: visual (as drawn) or logical (text order). This device only.",
       "icon": "Pencil"
     },
     {
@@ -3384,6 +3412,7 @@
       "label": "Settings",
       "group": "View",
       "hint": "Search settings",
+      "shortcut": "⌘,",
       "icon": "Sparkles"
     },
     {
@@ -3714,6 +3743,13 @@
       "icon": "FileText"
     },
     {
+      "id": "help.safeMode",
+      "label": "Restart in safe mode",
+      "group": "Tools",
+      "hint": "no plugins, CSS snippets or AI agents until you leave it — for when something you added keeps Lumen from working",
+      "icon": "FileText"
+    },
+    {
       "id": "help.credits",
       "label": "Credits & model licences",
       "group": "Tools",
@@ -3872,6 +3908,13 @@
       "label": "Language: 简体中文 — Beta (machine translation, awaiting native review)",
       "group": "View",
       "hint": "left-to-right",
+      "icon": "PanelRightOpen"
+    },
+    {
+      "id": "lang.fa",
+      "label": "Language: فارسی — Beta (machine translation, awaiting native review)",
+      "group": "View",
+      "hint": "right-to-left",
       "icon": "PanelRightOpen"
     },
     {
@@ -4252,6 +4295,12 @@
       "icon": "Link"
     },
     {
+      "id": "edit.hebrewListNumbering",
+      "label": "Number lists with Hebrew letters (א. ב. ג.)",
+      "group": "Edit",
+      "hint": "For this note, in the preview, PDF and Word; the Markdown keeps 1. 2. 3."
+    },
+    {
       "id": "edit.formatDocument",
       "label": "Format document",
       "group": "Edit",
@@ -4324,6 +4373,13 @@
       "label": "Clean direction marks and fix brackets",
       "group": "Edit",
       "hint": "Remove marks that change nothing on screen and swap brackets typed backwards — one undo",
+      "icon": "Pencil"
+    },
+    {
+      "id": "edit.cursorMovement",
+      "label": "Cursor movement: switch to logical",
+      "group": "Edit",
+      "hint": "Arrow keys in mixed Hebrew/English lines: visual (as drawn) or logical (text order). This device only.",
       "icon": "Pencil"
     },
     {
@@ -5383,6 +5439,7 @@
     "help.feedback",
     "help.open",
     "help.diagnostics",
+    "help.safeMode",
     "help.credits",
     "help.usage",
     "help.beta",
@@ -5406,6 +5463,7 @@
     "lang.de",
     "lang.ja",
     "lang.zh-CN",
+    "lang.fa",
     "i18n.suggest",
     "view.findReplace",
     "view.graphView",
@@ -5448,6 +5506,7 @@
     "ai.prompt.he.formal",
     "ai.prompt.he.explain",
     "editor.copyBlockLink",
+    "edit.hebrewListNumbering",
     "edit.formatDocument",
     "edit.formatCodeBlock",
     "edit.suggesting.toggle",
@@ -5459,6 +5518,7 @@
     "edit.suggesting.prev",
     "view.bidiMarks",
     "edit.bidiFix",
+    "edit.cursorMovement",
     "edit.hebrewTypography",
     "outline.moveUp",
     "outline.moveDown",
