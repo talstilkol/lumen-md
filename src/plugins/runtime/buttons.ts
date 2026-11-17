@@ -1,0 +1,3 @@
+/** The plugin screens' buttons, in the app's tokens (there is no global `.btn` rule: preflight leaves a bare button unstyled). */
+export const BTN = "inline-flex items-center gap-1 rounded-md border border-border bg-bg px-3 py-1.5 text-sm text-fg hover:bg-bg-muted disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+export const BTN_PRIMARY = "inline-flex items-center gap-1 rounded-md border border-accent bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";

@@ -99,6 +99,7 @@ export function DevPanel({ connect }: { connect?: (url: string) => Promise<DevCo
             {t("pluginDev.reloads", { n: status.reloads })}
             {status.lastReloadMs != null && ` · ${t("pluginDev.reloadMs", { ms: status.lastReloadMs })}`}
             {inst?.loadMs != null && ` · ${t("pluginDev.loadMs", { ms: Math.round(inst.loadMs) })}`}
+            {inst?.api && ` · ${t(inst.api.mode === "compat" ? "pluginDev.apiCompat" : "pluginDev.api", { version: inst.api.version })}`}
           </span>
           {stats && (
             <span data-testid="plugin-dev-stats">

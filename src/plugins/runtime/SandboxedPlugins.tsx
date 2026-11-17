@@ -19,6 +19,8 @@ import type { PluginManifest } from "./manifest";
 import type { ScanResult } from "./scan";
 import "./devStrings";
 import { explainError } from "../../lib/userError";
+import { apiCompatNote } from "./apiCompatNote";
+import { BTN, BTN_PRIMARY } from "./buttons";
 
 const DevPanel = lazy(() => import("./DevPanel").then((m) => ({ default: m.DevPanel })));
 
@@ -161,6 +163,11 @@ export function SandboxedPlugins() {
               <span data-testid="safety-card" style={{ fontSize: 12 }}>
                 {t("pluginTrust.card.grade", { grade: it.scan.grade, score: it.scan.score })} · {t("pluginTrust.card.perms", { n: it.manifest.capabilities.length })}
               </span>
+              {apiCompatNote(it.manifest)?.installable === false && (
+                <span data-testid="card-api-version" style={{ fontSize: 11, color: "hsl(var(--danger))" }}>
+                  {apiCompatNote(it.manifest)?.text}
+                </span>
+              )}
               <span style={{ fontSize: 11, color: "hsl(var(--fg-muted))" }}>{it.scan.findings.length ? t("pluginTrust.card.notes", { list: describeFindings(it.scan.findings) }) : t("pluginTrust.card.clean")}</span>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                 {installed.has(it.manifest.id) ? (
@@ -168,12 +175,12 @@ export function SandboxedPlugins() {
                     <span data-testid="plugin-installed" style={{ fontSize: 12 }}>
                       {t("pluginTrust.installedBadge")}
                     </span>
-                    <button type="button" className="btn" disabled={busy} onClick={() => void remove(it)}>
+                    <button type="button" className={BTN} disabled={busy} onClick={() => void remove(it)}>
                       {t("pluginTrust.remove")}
                     </button>
                   </>
                 ) : (
-                  <button type="button" className="btn btn-primary" onClick={() => setAsking(it)}>
+                  <button type="button" className={BTN_PRIMARY} onClick={() => setAsking(it)}>
                     {t("pluginTrust.install")}
                   </button>
                 )}

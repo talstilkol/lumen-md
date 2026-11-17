@@ -64,6 +64,8 @@ export const METHOD_CAPABILITY: Readonly<Record<string, Capability | "network">>
   "document.setText": "document:write",
   "document.insertText": "document:write",
   "document.replaceSelection": "document:write",
+  // Plugin API 1.1.0 (W13.L1): replaces document.setText.
+  "document.applyEdits": "document:write",
   "vault.list": "vault:read",
   "vault.read": "vault:read",
   "vault.write": "vault:write",

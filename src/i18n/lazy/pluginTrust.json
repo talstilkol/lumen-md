@@ -55,5 +55,10 @@
   "pluginTrust.bases.title": "“{name}” wants to change {n} notes",
   "pluginTrust.bases.body": "Properties: {properties}. Nothing is written unless you allow it.",
   "pluginTrust.bases.more": "…and {n} more",
-  "pluginTrust.bases.ok": "Change {n} notes"
+  "pluginTrust.bases.ok": "Change {n} notes",
+  "pluginTrust.api.compat": "Built for plugin API {target}. Lumen runs it in compatibility mode (this Lumen has API {current}).",
+  "pluginTrust.api.belowMin": "This plugin needs plugin API {need} or newer; this Lumen has {have}. Update Lumen to install it.",
+  "pluginTrust.api.newerMajor": "This plugin was built for plugin API {need}, a newer major version than this Lumen's {have}. Update Lumen to install it.",
+  "pluginTrust.api.unsupported": "This plugin was built for plugin API {need}, which this Lumen ({have}) no longer runs. Ask its author for an update.",
+  "pluginTrust.api.invalid": "This plugin's API versions are not valid version numbers."
 }

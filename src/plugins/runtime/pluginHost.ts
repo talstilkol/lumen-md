@@ -15,6 +15,7 @@ import { intersectWithManifest, isGranted, METHOD_CAPABILITY, networkGranted, Pl
 import type { PluginManifest } from "./manifest";
 import { DEFAULT_LIMITS, METHOD_RE, type HostToWorker, type SandboxLimits, type WorkerToHost } from "./protocol";
 import { validateUiTree } from "./uiTree";
+import { sandboxSurface } from "../api/surface";
 
 export interface PluginFetchInit {
   method?: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD";
@@ -51,6 +52,8 @@ export interface PluginInstance {
   /** How long the plugin took to start, ms. */
   readonly loadMs: number | null;
   onActivity(fn: () => void): () => void;
+  /** W13.L2: the plugin API version the sandbox speaks to it, and the compatibility warning when that is its older target. */
+  readonly api?: { version: string; mode: "current" | "compat"; warnings: readonly string[] };
 }
 
 /** One call a plugin made to the app, as the host saw it. */
@@ -128,6 +131,14 @@ export async function pluginFetch(plugin: Pick<PluginInstance, "id" | "grants">,
 }
 
 export function loadPlugin(opts: LoadOptions): Promise<PluginInstance> {
+  // W13.L2: a plugin this Lumen cannot run (below its minApiVersion, another major) is refused before a worker starts.
+  let surface: ReturnType<typeof sandboxSurface>;
+  try {
+    surface = sandboxSurface(opts.manifest);
+  } catch (e) {
+    return Promise.reject(e instanceof Error ? e : new Error(String(e)));
+  }
+  for (const w of surface.warnings) log.warn(`[plugin:${opts.manifest.id}] ${w}`);
   const grants = intersectWithManifest(opts.grants, opts.manifest);
   const worker = opts.createWorker ? opts.createWorker() : new Worker(new URL("./host.worker.ts", import.meta.url), { type: "module" });
   const send = (m: HostToWorker) => worker.postMessage(m);
@@ -190,11 +201,13 @@ export function loadPlugin(opts: LoadOptions): Promise<PluginInstance> {
       return loadMs;
     },
     onActivity: (fn) => (activityFns.add(fn), () => void activityFns.delete(fn)),
+    api: { version: surface.apiVersion, mode: surface.warnings.length ? "compat" : "current", warnings: surface.warnings },
   };
 
   /** The host's own check and dispatch of a call the sandbox let through. */
   const handle = async (method: string, args: unknown[]): Promise<unknown> => {
     if (!METHOD_RE.test(method) || !(method in METHOD_CAPABILITY)) throw new PluginDenied(instance.id, method, "no such method");
+    if (!surface.methods.includes(method)) throw new PluginDenied(instance.id, method, `not in plugin API ${surface.apiVersion}`);
     const cap = METHOD_CAPABILITY[method as keyof typeof METHOD_CAPABILITY];
     if (cap === "network") return pluginFetch(instance, args[0], args[1]);
     if (!isGranted(grants, cap)) throw new PluginDenied(instance.id, cap);

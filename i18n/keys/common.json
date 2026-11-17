@@ -16315,6 +16315,20 @@
       "vars": []
     },
     {
+      "key": "pluginDev.api",
+      "en": "plugin API {version}",
+      "vars": [
+        "version"
+      ]
+    },
+    {
+      "key": "pluginDev.apiCompat",
+      "en": "plugin API {version} (compatibility mode)",
+      "vars": [
+        "version"
+      ]
+    },
+    {
       "key": "pluginDev.calls",
       "en": "Last calls ({n})",
       "vars": [
@@ -16447,6 +16461,43 @@
       "key": "pluginDev.used",
       "en": "Calls",
       "vars": []
+    },
+    {
+      "key": "pluginTrust.api.belowMin",
+      "en": "This plugin needs plugin API {need} or newer; this Lumen has {have}. Update Lumen to install it.",
+      "vars": [
+        "need",
+        "have"
+      ]
+    },
+    {
+      "key": "pluginTrust.api.compat",
+      "en": "Built for plugin API {target}. Lumen runs it in compatibility mode (this Lumen has API {current}).",
+      "vars": [
+        "target",
+        "current"
+      ]
+    },
+    {
+      "key": "pluginTrust.api.invalid",
+      "en": "This plugin's API versions are not valid version numbers.",
+      "vars": []
+    },
+    {
+      "key": "pluginTrust.api.newerMajor",
+      "en": "This plugin was built for plugin API {need}, a newer major version than this Lumen's {have}. Update Lumen to install it.",
+      "vars": [
+        "need",
+        "have"
+      ]
+    },
+    {
+      "key": "pluginTrust.api.unsupported",
+      "en": "This plugin was built for plugin API {need}, which this Lumen ({have}) no longer runs. Ask its author for an update.",
+      "vars": [
+        "need",
+        "have"
+      ]
     },
     {
       "key": "pluginTrust.bases.body",

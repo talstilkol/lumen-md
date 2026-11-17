@@ -20,6 +20,7 @@ import type { PluginManifest } from "./manifest";
 import type { UiNode } from "./uiTree";
 import { describeBasesUpdate } from "./permissions";
 import { listWorkspace, readWorkspaceFile, writeWorkspaceFile } from "../../storage/workspace";
+import { applyTextEdits, validateEdits } from "../api/edits";
 
 export const LIMITS = {
   commandsPerPlugin: 50,
@@ -122,6 +123,14 @@ export function appServices(): HostServices {
     "document.setText": (_p, text) => void useAppStore.getState().setContent(str(text, "text", 10 * 1024 * 1024)),
     "document.insertText": (_p, text) => insertAtCursor(str(text, "text", 1024 * 1024)),
     "document.replaceSelection": (_p, text) => insertAtCursor(str(text, "text", 1024 * 1024)),
+    // Plugin API 1.1.0 (W13.L1): one undoable change in the editor; without an editor, the same edits on the stored text.
+    "document.applyEdits": (_p, edits) => {
+      const store = useAppStore.getState();
+      const valid = validateEdits(edits, store.doc.content.length);
+      const handled = !window.dispatchEvent(new CustomEvent("lumen-plugin-edits", { detail: { edits: valid }, cancelable: true }));
+      if (!handled) store.setContent(applyTextEdits(store.doc.content, valid));
+      return valid.length;
+    },
 
     "vault.list": async (_p, dir) => {
       const d = dir === undefined || dir === "" ? "" : pluginVaultPath(dir);
