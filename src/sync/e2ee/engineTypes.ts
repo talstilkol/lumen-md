@@ -260,6 +260,11 @@ export interface E2eeSyncOptions {
   now?: () => number;
   /** This device's selective-sync rule (plan W1.8): the reason a path is kept out, or null. Read every round. */
   exclude?: ExcludeRule;
+  /**
+   * Plan W13.S2 (shared vaults): where an excluded arrival is kept instead —
+   * settings as `<path>.bak`, never loaded — or null to drop it. Read every round.
+   */
+  quarantine?: (path: string) => string | null;
   /** Each step of a round, as it happens (plan W1.8). A listener that throws is ignored. */
   onEvent?: SyncEventListener;
   /**

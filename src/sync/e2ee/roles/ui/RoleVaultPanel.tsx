@@ -25,6 +25,7 @@ import { createRoleVault, joinWithInvite, openAdmin, type AdminSession, type Rol
 import type { RoleRecord } from "./records";
 import { InviteScreen } from "./InviteScreen";
 import { MemberList } from "./MemberList";
+import { SharedConsent } from "./SharedConsent";
 import { JoinScreen, MemberView } from "./MemberView";
 import { card, errorStyle, field, ghost, list, muted, primary, row } from "./styles";
 import { EmptyState, learnHow } from "../../../../ui/EmptyState";
@@ -194,6 +195,7 @@ export function RoleVaultPanel({ onClose, deps, relay, origin, joining = null }:
               <>
                 <InviteScreen session={admin} deps={deps} origin={origin} onError={onError} version={version} />
                 <MemberList session={admin} deps={deps} onError={onError} onChanged={() => setVersion((n) => n + 1)} />
+                <SharedConsent vault={view.record.id} />
               </>
             ) : (
               <PassphraseRow go={t("e2ee.roles.unlock.go")} label={t("e2ee.roles.passphrase")} testid="role-unlock" onSubmit={(p) => void unlock(view.record, p)} />
@@ -202,6 +204,7 @@ export function RoleVaultPanel({ onClose, deps, relay, origin, joining = null }:
         )}
 
         {view.v === "member" && <MemberView key={view.record.id} record={view.record} deps={deps} onError={onError} />}
+        {view.v === "member" && <SharedConsent key={`consent-${view.record.id}`} vault={view.record.id} />}
 
         {view.v !== "list" && (
           <button type="button" style={{ ...ghost, justifySelf: "start" }} onClick={back} data-testid="role-back">

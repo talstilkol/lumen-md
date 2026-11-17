@@ -8649,5 +8649,85 @@
     "ja": "dxkate",
     "ru": "dxkate",
     "zh-CN": "dxkate"
+  },
+  "e2ee.shared.confirm": {
+    "ar": "74s250",
+    "de": "74s250",
+    "fr": "74s250",
+    "ja": "74s250",
+    "ru": "74s250",
+    "zh-CN": "74s250"
+  },
+  "e2ee.shared.intro": {
+    "ar": "ts0a3v",
+    "de": "ts0a3v",
+    "fr": "ts0a3v",
+    "ja": "ts0a3v",
+    "ru": "ts0a3v",
+    "zh-CN": "ts0a3v"
+  },
+  "e2ee.shared.kind.agents": {
+    "ar": "1vcdk8w",
+    "de": "1vcdk8w",
+    "fr": "1vcdk8w",
+    "ja": "1vcdk8w",
+    "ru": "1vcdk8w",
+    "zh-CN": "1vcdk8w"
+  },
+  "e2ee.shared.kind.automations": {
+    "ar": "1qlte4b",
+    "de": "1qlte4b",
+    "fr": "1qlte4b",
+    "ja": "1qlte4b",
+    "ru": "1qlte4b",
+    "zh-CN": "1qlte4b"
+  },
+  "e2ee.shared.kind.hotkeys": {
+    "ar": "1khciow",
+    "de": "1khciow",
+    "fr": "1khciow",
+    "ja": "1khciow",
+    "ru": "1khciow",
+    "zh-CN": "1khciow"
+  },
+  "e2ee.shared.kind.plugins": {
+    "ar": "10renyj",
+    "de": "10renyj",
+    "fr": "10renyj",
+    "ja": "10renyj",
+    "ru": "10renyj",
+    "zh-CN": "10renyj"
+  },
+  "e2ee.shared.kind.settings": {
+    "ar": "z81r9l",
+    "de": "z81r9l",
+    "fr": "z81r9l",
+    "ja": "z81r9l",
+    "ru": "z81r9l",
+    "zh-CN": "z81r9l"
+  },
+  "e2ee.shared.kind.snippets": {
+    "ar": "1fzoiua",
+    "de": "1fzoiua",
+    "fr": "1fzoiua",
+    "ja": "1fzoiua",
+    "ru": "1fzoiua",
+    "zh-CN": "1fzoiua"
+  },
+  "e2ee.shared.kind.themes": {
+    "ar": "1h2ekoj",
+    "de": "1h2ekoj",
+    "fr": "1h2ekoj",
+    "ja": "1h2ekoj",
+    "ru": "1h2ekoj",
+    "zh-CN": "1h2ekoj"
+  },
+  "e2ee.shared.title": {
+    "ar": "1qv2mi4",
+    "de": "1qv2mi4",
+    "fr": "1qv2mi4",
+    "ja": "1qv2mi4",
+    "ru": "1qv2mi4",
+    "zh-CN": "1qv2mi4"
   }
 }

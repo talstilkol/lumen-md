@@ -135,6 +135,7 @@ export abstract class E2eeSyncCore {
       maxAttempts: opts.maxAttempts ?? 8,
       now: opts.now ?? (() => Date.now()),
       exclude: opts.exclude ?? (() => null),
+      quarantine: opts.quarantine ?? (() => null),
       onEvent: opts.onEvent ?? (() => undefined),
       access: opts.access ?? (opts.keys.wrap ? { wrap: opts.keys.wrap } : null),
     };
