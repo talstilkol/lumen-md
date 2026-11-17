@@ -52,14 +52,27 @@ export interface ToolEnv {
 export const NOT_PRIVATE = new Set(["validate_json", "validate_mermaid", "validate_echarts", "csv_parse"]);
 
 /**
+ * Lumen's own network tools whose result is public content only: a web search, a fetched page, and
+ * the built-in Sefaria tools (`sefaria_*`, no `offeredBy`). Every other network tool counts as private.
+ */
+export const PUBLIC_NETWORK = new Set(["fetch_page", "search_web"]);
+const SEFARIA_TOOL = /^sefaria_[a-z_]+$/;
+
+/**
  * Whether a call's result can hold the user's own data (the vault, the
- * editor, a repo). Fail closed: every tool that is not a network call counts,
- * except those that only turn the model's own input around and a quote check
- * against a page this run fetched. The trust class of what it read does not
- * matter: a clipped page or an imported PDF in the vault is the user's data.
+ * editor, a repo, whatever an outside server can reach). Fail closed: every
+ * tool counts, except those that only turn the model's own input around, a
+ * quote check against a page this run fetched, and Lumen's own public
+ * network tools (PUBLIC_NETWORK, Sefaria). A tool an outside server offers
+ * (MCP, `offeredBy`) always counts, whatever its scope: a stdio server not
+ * marked offline is "network" here and can still read the disk (review 12,
+ * M4). The trust class of what it read does not matter: a clipped page or
+ * an imported PDF in the vault is the user's data.
  */
 export function readsUserData(tool: AgentTool, args: Record<string, unknown>): boolean {
-  if (tool.scope === "network" || NOT_PRIVATE.has(tool.name)) return false;
+  if (tool.offeredBy?.length) return true;
+  if (NOT_PRIVATE.has(tool.name)) return false;
+  if (tool.scope === "network" && (PUBLIC_NETWORK.has(tool.name) || SEFARIA_TOOL.test(tool.name))) return false;
   if (tool.name === "extract_quotes" && typeof args.url === "string" && args.url.trim() && !(typeof args.path === "string" && args.path.trim())) return false;
   return true;
 }
@@ -141,6 +154,8 @@ export async function execTool(tools: AgentTool[], call: ToolCall, env: ToolEnv)
     if (readsUserData(tool, args)) env.private = true;
     return { result, note, untrusted };
   } catch (e) {
+    // A failed call may still have read the user's data (its error text, a partial result): fail closed.
+    if (readsUserData(tool, args)) env.private = true;
     if (isAbort(e, env.ctx.signal)) throw e;
     // A write tool that failed after staging withdraws its proposal.
     if (stagedHere.length) {
