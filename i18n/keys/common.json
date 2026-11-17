@@ -23213,6 +23213,221 @@
       "vars": []
     },
     {
+      "key": "vaults.cancel",
+      "en": "Cancel",
+      "vars": []
+    },
+    {
+      "key": "vaults.close",
+      "en": "Close",
+      "vars": []
+    },
+    {
+      "key": "vaults.daysLeft",
+      "en": "{count} days left",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "vaults.empty",
+      "en": "No vault has been opened on this device yet.",
+      "vars": []
+    },
+    {
+      "key": "vaults.error.is-open",
+      "en": "This vault is open. Open another vault first, then delete this one.",
+      "vars": []
+    },
+    {
+      "key": "vaults.error.name-chars",
+      "en": "A name cannot contain / or \\.",
+      "vars": []
+    },
+    {
+      "key": "vaults.error.name-empty",
+      "en": "A vault needs a name.",
+      "vars": []
+    },
+    {
+      "key": "vaults.error.name-long",
+      "en": "Use at most 80 characters.",
+      "vars": []
+    },
+    {
+      "key": "vaults.error.name-taken",
+      "en": "Another vault already has this name.",
+      "vars": []
+    },
+    {
+      "key": "vaults.error.not-found",
+      "en": "This vault is no longer in the list.",
+      "vars": []
+    },
+    {
+      "key": "vaults.failedLastOpen",
+      "en": "Did not open properly last time. Open it in safe mode to check.",
+      "vars": []
+    },
+    {
+      "key": "vaults.intro",
+      "en": "Every vault this device has opened. The details come from a small cache: no vault is opened to show them.",
+      "vars": []
+    },
+    {
+      "key": "vaults.menu",
+      "en": "Actions for {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "vaults.move",
+      "en": "Move to another folder…",
+      "vars": []
+    },
+    {
+      "key": "vaults.moveOpenFirst",
+      "en": "Open this vault first to move it.",
+      "vars": []
+    },
+    {
+      "key": "vaults.moved",
+      "en": "The vault was moved; every note was copied and checked.",
+      "vars": []
+    },
+    {
+      "key": "vaults.notes",
+      "en": "{count} notes",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "vaults.open",
+      "en": "Open now",
+      "vars": []
+    },
+    {
+      "key": "vaults.plugins",
+      "en": "{count} plugins",
+      "vars": [
+        "count"
+      ]
+    },
+    {
+      "key": "vaults.rename",
+      "en": "Rename",
+      "vars": []
+    },
+    {
+      "key": "vaults.renameLabel",
+      "en": "New name",
+      "vars": []
+    },
+    {
+      "key": "vaults.renamed",
+      "en": "Renamed to {name}.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "vaults.restore",
+      "en": "Restore",
+      "vars": []
+    },
+    {
+      "key": "vaults.restored",
+      "en": "{name} is back in the list.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "vaults.safeMode",
+      "en": "Open in safe mode",
+      "vars": []
+    },
+    {
+      "key": "vaults.save",
+      "en": "Save",
+      "vars": []
+    },
+    {
+      "key": "vaults.sync.error",
+      "en": "Sync problem",
+      "vars": []
+    },
+    {
+      "key": "vaults.sync.off",
+      "en": "Not synced",
+      "vars": []
+    },
+    {
+      "key": "vaults.sync.on",
+      "en": "Synced",
+      "vars": []
+    },
+    {
+      "key": "vaults.title",
+      "en": "Vaults",
+      "vars": []
+    },
+    {
+      "key": "vaults.trash",
+      "en": "Move to Recently deleted",
+      "vars": []
+    },
+    {
+      "key": "vaults.trashIntro",
+      "en": "Off the list, with their notes untouched. Restore one within 30 days, or it is forgotten here (the files stay where they are).",
+      "vars": []
+    },
+    {
+      "key": "vaults.trashTitle",
+      "en": "Recently deleted",
+      "vars": []
+    },
+    {
+      "key": "vaults.trashed",
+      "en": "{name} moved to Recently deleted. Its notes were not touched.",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "vaults.where.browser",
+      "en": "In this browser",
+      "vars": []
+    },
+    {
+      "key": "vaults.where.device",
+      "en": "On this {device}",
+      "vars": [
+        "device"
+      ]
+    },
+    {
+      "key": "vaults.where.files",
+      "en": "Files › On My {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "vaults.where.folder",
+      "en": "Folder: {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "vaults.where.thisDevice",
+      "en": "device",
+      "vars": []
+    },
+    {
       "key": "versions.by",
       "en": "{author}, {date}",
       "vars": [

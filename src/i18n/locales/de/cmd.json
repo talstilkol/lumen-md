@@ -557,6 +557,8 @@
   "cmd.vault.toBrowser.hint": "Kopiert jede Notiz aus dem Ordner in den privaten Speicher des Browsers, prüft sie und arbeitet dann dort. Der Ordner bleibt unverändert.",
   "cmd.vault.toFolder": "Tresor in einen Ordner verschieben…",
   "cmd.vault.toFolder.hint": "Kopiert jede Notiz in einen Ordner auf diesem Computer, prüft jede Datei Byte für Byte und arbeitet dann dort. Nichts wird gelöscht.",
+  "cmd.vaults.open": "Vaults…",
+  "cmd.vaults.open.hint": "every vault on this device with its notes, sync and plugins; rename, move, delete, safe mode",
   "cmd.view.asOf": "Was ich damals wusste",
   "cmd.view.asOf.hint": "den Tresor so durchsuchen, wie er an einem früheren Datum war",
   "cmd.view.autoSave.hint": "alle {interval} s",

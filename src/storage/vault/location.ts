@@ -537,9 +537,9 @@ export async function chooseMobileVaultFolder(): Promise<MoveReport | null> {
   return moveVault(to);
 }
 
-/** Phone: work in a folder on the device from now on, without copying (e.g. notes already there). Its name, or null. */
-export async function openMobileFolderAsVault(): Promise<string | null> {
-  const loc = await pickMobileLocation();
+/** Phone: work in a folder on the device from now on, without copying (a picked one, or `given`: a vault from the vault screen, W13.M6). Its name, or null. */
+export async function openMobileFolderAsVault(given?: Extract<StoredLocation, { kind: "mobile" }>): Promise<string | null> {
+  const loc = given ?? (await pickMobileLocation());
   if (!loc) return null;
   await kv.set(LOCATION_KEY, loc);
   await cancelPendingMove(); // its source is no longer the vault

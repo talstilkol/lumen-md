@@ -2816,6 +2816,16 @@
       "vars": []
     },
     {
+      "key": "cmd.vaults.open",
+      "en": "Vaults…",
+      "vars": []
+    },
+    {
+      "key": "cmd.vaults.open.hint",
+      "en": "every vault on this device with its notes, sync and plugins; rename, move, delete, safe mode",
+      "vars": []
+    },
+    {
       "key": "cmd.view.asOf",
       "en": "What I knew then",
       "vars": []

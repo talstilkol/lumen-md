@@ -557,6 +557,8 @@
   "cmd.vault.toBrowser.hint": "ينسخ كل ملاحظة من المجلد إلى التخزين الخاص بالمتصفح، ويتحقق منها، ثم يعمل هناك. لا يتغير المجلد.",
   "cmd.vault.toFolder": "نقل الخزنة إلى مجلد…",
   "cmd.vault.toFolder.hint": "ينسخ كل ملاحظة إلى مجلد على هذا الحاسوب، ويتحقق من كل ملف بايتًا بايتًا، ثم يعمل هناك. لا يُحذف أي شيء.",
+  "cmd.vaults.open": "Vaults…",
+  "cmd.vaults.open.hint": "every vault on this device with its notes, sync and plugins; rename, move, delete, safe mode",
   "cmd.view.asOf": "ما كنت أعرفه آنذاك",
   "cmd.view.asOf.hint": "البحث في الخزنة كما كانت في تاريخ سابق",
   "cmd.view.autoSave.hint": "كل {interval} ث",

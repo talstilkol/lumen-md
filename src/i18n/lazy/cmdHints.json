@@ -245,5 +245,6 @@
   "cmd.file.finishPdfUa.hint": "Adds the PDF/UA identification, the language and the shown title to a tagged PDF, on this device",
   "cmd.help.safeMode.hint": "no plugins, CSS snippets or AI agents until you leave it — for when something you added keeps Lumen from working",
   "cmd.mobile.spotlight.hint": "off, the 50 most recent, or all notes; locked and private notes never",
-  "cmd.mobile.scan.hint": "the camera finds the page; the PDF goes to attachments/ and its text, read on this device, into a new note"
+  "cmd.mobile.scan.hint": "the camera finds the page; the PDF goes to attachments/ and its text, read on this device, into a new note",
+  "cmd.vaults.open.hint": "every vault on this device with its notes, sync and plugins; rename, move, delete, safe mode"
 }

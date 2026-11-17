@@ -341,6 +341,7 @@
   "cmd.vault.openFolder": "Open a folder as the vault…",
   "cmd.vault.toBrowser": "Move the vault back to browser storage",
   "cmd.vault.toFolder": "Move the vault to a folder…",
+  "cmd.vaults.open": "Vaults…",
   "cmd.view.asOf": "What I knew then",
   "cmd.view.autoSave.hint": "every {interval}s",
   "cmd.view.autoSave.off": "Disable Auto-Save",

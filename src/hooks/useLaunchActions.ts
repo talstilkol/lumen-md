@@ -49,6 +49,8 @@ export function useLaunchActions({ setCaptureOpen, setCaptureVoice, setPaletteOp
         openNewDoc(t("doc.untitled"), "", false);
       } else if (l.kind === "action" && l.action === "palette") {
         setPaletteOpen(true);
+      } else if (l.kind === "action" && l.action === "vaults") {
+        void import("../mobile/vaultPickerActions").then((m) => m.openVaultPicker());
       }
       if (l.kind !== "none") clearLaunchParams();
       onDesktopCapture();
@@ -56,6 +58,11 @@ export function useLaunchActions({ setCaptureOpen, setCaptureVoice, setPaletteOp
       onLaunchFiles((name, content, handle) => openTabAction({ name, content, workspaceName: null, handle }));
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // W13.M6: the vault screen's cache — this vault is "opening" until the app has stayed up, then its card is written.
+  useEffect(() => {
+    void import("../mobile/vaultPickerActions").then((m) => m.trackVaultOpen()).catch(() => undefined);
   }, []);
 
   // Plan W3.4: home-screen widgets, App Shortcuts, Siri / Shortcuts and Spotlight

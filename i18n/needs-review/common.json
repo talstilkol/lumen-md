@@ -9126,5 +9126,356 @@
     "ja": "2cw9fd",
     "ru": "2cw9fd",
     "zh-CN": "2cw9fd"
+  },
+  "vaults.title": {
+    "ar": "jv8dis",
+    "de": "jv8dis",
+    "fr": "jv8dis",
+    "he": "jv8dis",
+    "ja": "jv8dis",
+    "ru": "jv8dis",
+    "zh-CN": "jv8dis"
+  },
+  "vaults.intro": {
+    "ar": "14nkmm2",
+    "de": "14nkmm2",
+    "fr": "14nkmm2",
+    "he": "14nkmm2",
+    "ja": "14nkmm2",
+    "ru": "14nkmm2",
+    "zh-CN": "14nkmm2"
+  },
+  "vaults.empty": {
+    "ar": "xbf3us",
+    "de": "xbf3us",
+    "fr": "xbf3us",
+    "he": "xbf3us",
+    "ja": "xbf3us",
+    "ru": "xbf3us",
+    "zh-CN": "xbf3us"
+  },
+  "vaults.open": {
+    "ar": "1ij6jol",
+    "de": "1ij6jol",
+    "fr": "1ij6jol",
+    "he": "1ij6jol",
+    "ja": "1ij6jol",
+    "ru": "1ij6jol",
+    "zh-CN": "1ij6jol"
+  },
+  "vaults.notes": {
+    "ar": "1awnppt",
+    "de": "1awnppt",
+    "fr": "1awnppt",
+    "he": "1awnppt",
+    "ja": "1awnppt",
+    "ru": "1awnppt",
+    "zh-CN": "1awnppt"
+  },
+  "vaults.plugins": {
+    "ar": "urahs4",
+    "de": "urahs4",
+    "fr": "urahs4",
+    "he": "urahs4",
+    "ja": "urahs4",
+    "ru": "urahs4",
+    "zh-CN": "urahs4"
+  },
+  "vaults.sync.off": {
+    "ar": "le5tlw",
+    "de": "le5tlw",
+    "fr": "le5tlw",
+    "he": "le5tlw",
+    "ja": "le5tlw",
+    "ru": "le5tlw",
+    "zh-CN": "le5tlw"
+  },
+  "vaults.sync.on": {
+    "ar": "1j3fnt7",
+    "de": "1j3fnt7",
+    "fr": "1j3fnt7",
+    "he": "1j3fnt7",
+    "ja": "1j3fnt7",
+    "ru": "1j3fnt7",
+    "zh-CN": "1j3fnt7"
+  },
+  "vaults.sync.error": {
+    "ar": "8i1ned",
+    "de": "8i1ned",
+    "fr": "8i1ned",
+    "he": "8i1ned",
+    "ja": "8i1ned",
+    "ru": "8i1ned",
+    "zh-CN": "8i1ned"
+  },
+  "vaults.failedLastOpen": {
+    "ar": "q0lgno",
+    "de": "q0lgno",
+    "fr": "q0lgno",
+    "he": "q0lgno",
+    "ja": "q0lgno",
+    "ru": "q0lgno",
+    "zh-CN": "q0lgno"
+  },
+  "vaults.menu": {
+    "ar": "1r2o9ew",
+    "de": "1r2o9ew",
+    "fr": "1r2o9ew",
+    "he": "1r2o9ew",
+    "ja": "1r2o9ew",
+    "ru": "1r2o9ew",
+    "zh-CN": "1r2o9ew"
+  },
+  "vaults.safeMode": {
+    "ar": "1pqa4lk",
+    "de": "1pqa4lk",
+    "fr": "1pqa4lk",
+    "he": "1pqa4lk",
+    "ja": "1pqa4lk",
+    "ru": "1pqa4lk",
+    "zh-CN": "1pqa4lk"
+  },
+  "vaults.rename": {
+    "ar": "1jhzhtf",
+    "de": "1jhzhtf",
+    "fr": "1jhzhtf",
+    "he": "1jhzhtf",
+    "ja": "1jhzhtf",
+    "ru": "1jhzhtf",
+    "zh-CN": "1jhzhtf"
+  },
+  "vaults.renameLabel": {
+    "ar": "1cn0new",
+    "de": "1cn0new",
+    "fr": "1cn0new",
+    "he": "1cn0new",
+    "ja": "1cn0new",
+    "ru": "1cn0new",
+    "zh-CN": "1cn0new"
+  },
+  "vaults.save": {
+    "ar": "lewgh4",
+    "de": "lewgh4",
+    "fr": "lewgh4",
+    "he": "lewgh4",
+    "ja": "lewgh4",
+    "ru": "lewgh4",
+    "zh-CN": "lewgh4"
+  },
+  "vaults.cancel": {
+    "ar": "ew9em3",
+    "de": "ew9em3",
+    "fr": "ew9em3",
+    "he": "ew9em3",
+    "ja": "ew9em3",
+    "ru": "ew9em3",
+    "zh-CN": "ew9em3"
+  },
+  "vaults.renamed": {
+    "ar": "1wpa093",
+    "de": "1wpa093",
+    "fr": "1wpa093",
+    "he": "1wpa093",
+    "ja": "1wpa093",
+    "ru": "1wpa093",
+    "zh-CN": "1wpa093"
+  },
+  "vaults.move": {
+    "ar": "xbyo5o",
+    "de": "xbyo5o",
+    "fr": "xbyo5o",
+    "he": "xbyo5o",
+    "ja": "xbyo5o",
+    "ru": "xbyo5o",
+    "zh-CN": "xbyo5o"
+  },
+  "vaults.moveOpenFirst": {
+    "ar": "1hu5uum",
+    "de": "1hu5uum",
+    "fr": "1hu5uum",
+    "he": "1hu5uum",
+    "ja": "1hu5uum",
+    "ru": "1hu5uum",
+    "zh-CN": "1hu5uum"
+  },
+  "vaults.moved": {
+    "ar": "1mrm4jb",
+    "de": "1mrm4jb",
+    "fr": "1mrm4jb",
+    "he": "1mrm4jb",
+    "ja": "1mrm4jb",
+    "ru": "1mrm4jb",
+    "zh-CN": "1mrm4jb"
+  },
+  "vaults.trash": {
+    "ar": "wttfza",
+    "de": "wttfza",
+    "fr": "wttfza",
+    "he": "wttfza",
+    "ja": "wttfza",
+    "ru": "wttfza",
+    "zh-CN": "wttfza"
+  },
+  "vaults.trashed": {
+    "ar": "nwu0le",
+    "de": "nwu0le",
+    "fr": "nwu0le",
+    "he": "nwu0le",
+    "ja": "nwu0le",
+    "ru": "nwu0le",
+    "zh-CN": "nwu0le"
+  },
+  "vaults.trashTitle": {
+    "ar": "1i3fhow",
+    "de": "1i3fhow",
+    "fr": "1i3fhow",
+    "he": "1i3fhow",
+    "ja": "1i3fhow",
+    "ru": "1i3fhow",
+    "zh-CN": "1i3fhow"
+  },
+  "vaults.trashIntro": {
+    "ar": "vamga7",
+    "de": "vamga7",
+    "fr": "vamga7",
+    "he": "vamga7",
+    "ja": "vamga7",
+    "ru": "vamga7",
+    "zh-CN": "vamga7"
+  },
+  "vaults.daysLeft": {
+    "ar": "gdd3vc",
+    "de": "gdd3vc",
+    "fr": "gdd3vc",
+    "he": "gdd3vc",
+    "ja": "gdd3vc",
+    "ru": "gdd3vc",
+    "zh-CN": "gdd3vc"
+  },
+  "vaults.restore": {
+    "ar": "4fiyr5",
+    "de": "4fiyr5",
+    "fr": "4fiyr5",
+    "he": "4fiyr5",
+    "ja": "4fiyr5",
+    "ru": "4fiyr5",
+    "zh-CN": "4fiyr5"
+  },
+  "vaults.restored": {
+    "ar": "ubtnpj",
+    "de": "ubtnpj",
+    "fr": "ubtnpj",
+    "he": "ubtnpj",
+    "ja": "ubtnpj",
+    "ru": "ubtnpj",
+    "zh-CN": "ubtnpj"
+  },
+  "vaults.close": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "he": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "vaults.error.name-empty": {
+    "ar": "1e44hi1",
+    "de": "1e44hi1",
+    "fr": "1e44hi1",
+    "he": "1e44hi1",
+    "ja": "1e44hi1",
+    "ru": "1e44hi1",
+    "zh-CN": "1e44hi1"
+  },
+  "vaults.error.name-long": {
+    "ar": "1tv5ee6",
+    "de": "1tv5ee6",
+    "fr": "1tv5ee6",
+    "he": "1tv5ee6",
+    "ja": "1tv5ee6",
+    "ru": "1tv5ee6",
+    "zh-CN": "1tv5ee6"
+  },
+  "vaults.error.name-chars": {
+    "ar": "w7q606",
+    "de": "w7q606",
+    "fr": "w7q606",
+    "he": "w7q606",
+    "ja": "w7q606",
+    "ru": "w7q606",
+    "zh-CN": "w7q606"
+  },
+  "vaults.error.name-taken": {
+    "ar": "1v268vr",
+    "de": "1v268vr",
+    "fr": "1v268vr",
+    "he": "1v268vr",
+    "ja": "1v268vr",
+    "ru": "1v268vr",
+    "zh-CN": "1v268vr"
+  },
+  "vaults.error.not-found": {
+    "ar": "fwbt97",
+    "de": "fwbt97",
+    "fr": "fwbt97",
+    "he": "fwbt97",
+    "ja": "fwbt97",
+    "ru": "fwbt97",
+    "zh-CN": "fwbt97"
+  },
+  "vaults.error.is-open": {
+    "ar": "1bxov3a",
+    "de": "1bxov3a",
+    "fr": "1bxov3a",
+    "he": "1bxov3a",
+    "ja": "1bxov3a",
+    "ru": "1bxov3a",
+    "zh-CN": "1bxov3a"
+  },
+  "vaults.where.browser": {
+    "ar": "c3cs0i",
+    "de": "c3cs0i",
+    "fr": "c3cs0i",
+    "he": "c3cs0i",
+    "ja": "c3cs0i",
+    "ru": "c3cs0i",
+    "zh-CN": "c3cs0i"
+  },
+  "vaults.where.files": {
+    "ar": "1o116lo",
+    "de": "1o116lo",
+    "fr": "1o116lo",
+    "he": "1o116lo",
+    "ja": "1o116lo",
+    "ru": "1o116lo",
+    "zh-CN": "1o116lo"
+  },
+  "vaults.where.device": {
+    "ar": "1n4zbh6",
+    "de": "1n4zbh6",
+    "fr": "1n4zbh6",
+    "he": "1n4zbh6",
+    "ja": "1n4zbh6",
+    "ru": "1n4zbh6",
+    "zh-CN": "1n4zbh6"
+  },
+  "vaults.where.thisDevice": {
+    "ar": "1lu1ipf",
+    "de": "1lu1ipf",
+    "fr": "1lu1ipf",
+    "he": "1lu1ipf",
+    "ja": "1lu1ipf",
+    "ru": "1lu1ipf",
+    "zh-CN": "1lu1ipf"
+  },
+  "vaults.where.folder": {
+    "ar": "15ukavi",
+    "de": "15ukavi",
+    "fr": "15ukavi",
+    "he": "15ukavi",
+    "ja": "15ukavi",
+    "ru": "15ukavi",
+    "zh-CN": "15ukavi"
   }
 }

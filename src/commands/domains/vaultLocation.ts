@@ -59,6 +59,15 @@ export function buildVaultLocationCommands(): Command[] {
             group: t("group.file"),
             action: async () => void (await import("../../mobile/docScanActions")).scanDocumentCommand(),
           },
+          {
+            // W13.M6: the vault screen (the app; elsewhere /?action=vaults).
+            id: "vaults.open",
+            label: t("cmd.vaults.open"),
+            hint: t("cmd.vaults.open.hint"),
+            icon: cmdIcons.FolderOpen,
+            group: t("group.file"),
+            action: async () => void (await import("../../mobile/vaultPickerActions")).openVaultPicker(),
+          },
         ]
       : []),
   ];
