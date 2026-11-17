@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter, RenderSuperseded } from "./pipeline";
 import { registerLineBases } from "./sourceLineRegistry";
 import { useSidenotes } from "../reading/sidenotesSetting";
+import { useNoteSpread } from "../reading/noteSpreadHook";
 import { dashboardLayout, dashboardProps } from "./dashboard";
 import { nextVersion, renderWorkerWarm } from "./renderClient";
 import { subscribePluginLangs } from "../plugins/runtime/rendererRegistry";
@@ -121,6 +122,8 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
   // The document the *displayed* tree was rendered from — it lags `docKey`
   // until the async render for the new document lands.
   const [treeDocKey, setTreeDocKey] = useState<string | null>(docKey);
+  // Book pages (plan W13.R6): a note left in two-page spreads opens in them, once its text is in.
+  useNoteSpread(rootRef, treeDocKey, tree);
   const [error, setError] = useState<string | null>(null);
   const [themeVersion, setThemeVersion] = useState(0);
   const seqRef = useRef(0);

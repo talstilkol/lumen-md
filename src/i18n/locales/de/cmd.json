@@ -383,6 +383,8 @@
   "cmd.privacy.imageHosts.hint": "Websites, für die du „Immer erlauben“ gewählt hast — eine oder alle widerrufen",
   "cmd.reading.aids": "Lesehilfen…",
   "cmd.reading.aids.hint": "Nikud zum Lesen, ein legasthenie-freundliches Layout und Vorlesen mit hervorgehobenem Wort",
+  "cmd.reading.bookSpread": "Lesen: Buchseiten (Doppelseite)",
+  "cmd.reading.bookSpread.hint": "Blättern wie im Buch: auf Hebräisch Seite 1 rechts, ← für die nächsten Seiten; PageDown, Leertaste",
   "cmd.reading.mode": "Lesemodus",
   "cmd.reading.newFromCapture": "Leseliste: neue Quelle aus einer erfassten Seite…",
   "cmd.reading.newFromCapture.hint": "Die gerade geöffnete ausgeschnittene Seite oder ein eingegebener Link",

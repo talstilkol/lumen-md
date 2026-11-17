@@ -71,3 +71,21 @@ the margin next to their line, as Tufte's books and Google Docs do.
   previous / next note, and Enter or Escape go back to the text. A screen
   reader hears each note's kind ("Footnote 2", "Comment by Dana",
   "Suggested insertion").
+
+## Book pages
+
+**Command palette** → **Reading: book pages (two-page spread)** lays the note
+out as the pages of a book, as Apple Books and Kindle do. The EPUB reader has
+the same choice in its toolbar (**Scrolling**, **One page**, **Two pages**,
+**Two pages (cover alone)**).
+
+- **Right to left.** In a Hebrew book, page 1 is on the right and ← turns to
+  the next pages. In an English book, page 1 is on the left and → turns.
+  **Book: right to left / left to right** switches the direction.
+- **Keys:** ← / → in the book's direction, Page Up / Page Down, Space and
+  Shift+Space, Home / End. In the EPUB reader, turning past the last page
+  opens the next chapter, and turning back from the first page opens the end
+  of the previous one.
+- **Your place is kept.** Switching between pages and scrolling keeps the
+  same paragraph on screen. A note or book left in pages opens again in
+  pages, at the same place.

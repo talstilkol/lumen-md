@@ -383,6 +383,8 @@
   "cmd.privacy.imageHosts.hint": "「常に許可」を選んだサイト — 1 つずつ、またはすべて取り消し",
   "cmd.reading.aids": "読書支援…",
   "cmd.reading.aids.hint": "読むための母音記号（ニクード）、ディスレクシアに配慮したレイアウト、単語を強調する読み上げ",
+  "cmd.reading.bookSpread": "読書: 本のページ（見開き）",
+  "cmd.reading.bookSpread.hint": "本のようにめくる: ヘブライ語では1ページ目が右、← で次へ。PageDown、スペース",
   "cmd.reading.mode": "閲覧モード",
   "cmd.reading.newFromCapture": "読書リスト: 取り込んだページから新しい資料…",
   "cmd.reading.newFromCapture.hint": "いま開いているクリップ、または入力したリンク",

@@ -233,6 +233,8 @@
   "cmd.preview": "Preview only",
   "cmd.privacy.imageHosts": "Privacy: allowed image hosts…",
   "cmd.reading.aids": "Reading aids…",
+  "cmd.reading.bookSpread": "Reading: book pages (two-page spread)",
+  "cmd.reading.bookSpread.hint": "Turn pages like a book: page 1 on the right in Hebrew, ← for the next pages there; PageDown, Space",
   "cmd.reading.mode": "Reading mode",
   "cmd.reading.newFromCapture": "Reading list: new source from a captured page…",
   "cmd.reading.newFromLibrary": "Reading list: new source from the citation library…",

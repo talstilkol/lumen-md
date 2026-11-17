@@ -383,6 +383,8 @@
   "cmd.privacy.imageHosts.hint": "Les sites pour lesquels vous avez choisi « Toujours autoriser » — en révoquer un ou tous",
   "cmd.reading.aids": "Aides à la lecture…",
   "cmd.reading.aids.hint": "Voyelles (niqqud) pour la lecture, mise en page adaptée à la dyslexie et lecture à voix haute avec le mot surligné",
+  "cmd.reading.bookSpread": "Lecture : pages de livre (double page)",
+  "cmd.reading.bookSpread.hint": "Tourner les pages comme un livre : en hébreu la page 1 à droite, ← pour les suivantes ; PageDown, Espace",
   "cmd.reading.mode": "Mode lecture",
   "cmd.reading.newFromCapture": "Liste de lecture : nouvelle source depuis une page capturée…",
   "cmd.reading.newFromCapture.hint": "La page découpée ouverte maintenant, ou un lien que vous saisissez",

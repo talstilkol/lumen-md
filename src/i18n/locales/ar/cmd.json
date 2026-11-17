@@ -383,6 +383,8 @@
   "cmd.privacy.imageHosts.hint": "المواقع التي اخترت لها «السماح دائمًا» — ألغِ واحدًا أو الكل",
   "cmd.reading.aids": "أدوات مساعدة القراءة…",
   "cmd.reading.aids.hint": "تشكيل للقراءة، وتخطيط مناسب لعسر القراءة، وقراءة بصوت عالٍ مع إبراز الكلمة",
+  "cmd.reading.bookSpread": "القراءة: صفحات كتاب (صفحتان متقابلتان)",
+  "cmd.reading.bookSpread.hint": "قلّب الصفحات كالكتاب: في العبرية الصفحة 1 يمينًا و← للصفحات التالية؛ PageDown، المسافة",
   "cmd.reading.mode": "وضع القراءة",
   "cmd.reading.newFromCapture": "قائمة القراءة: مصدر جديد من صفحة ملتقطة…",
   "cmd.reading.newFromCapture.hint": "الصفحة المقتطعة المفتوحة الآن، أو رابط تكتبه",

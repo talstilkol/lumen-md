@@ -30,6 +30,9 @@ import {
 import { chapterText, markOffsets, rangeToOffsets } from "./textRange";
 import { loadPrefs, savePrefs, THEMES, type ReaderPrefs, type ReaderTheme } from "./readerPrefs";
 import "./EpubReader.css";
+import "../pdf/spreadStrings";
+import "../reading/readingViewsStrings";
+import { useEpubSpread, type EpubLayout } from "./epubSpread";
 import { HelpButton } from "../ui/HelpButton";
 import { explainError } from "../lib/userError";
 import { EmptyState, learnHow } from "../ui/EmptyState";
@@ -101,6 +104,10 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
   const writes = useRef<Promise<void>>(Promise.resolve());
   const pending = useRef(0);
   const scrollTo = useRef<string | null>(null);
+  // Two-page spreads (plan W13.R6): the page viewport, the scrolling view, and a tick per chapter put in.
+  const pagesRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [renderSeq, setRenderSeq] = useState(0);
 
   useEffect(() => {
     rootRef.current?.focus({ preventScroll: true });
@@ -195,11 +202,12 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
       markOffsets(host, at.start, at.end, { class: "epub-hl", "data-highlight": shortId(a.id), title: describeEpubAnnotation(a).note });
     }
     setUnanchored(missing);
+    setRenderSeq((n) => n + 1);
     const id = scrollTo.current;
     if (id) {
       host.querySelector(`[data-highlight="${CSS.escape(id)}"]`)?.scrollIntoView({ block: "center" });
       scrollTo.current = null;
-    } else if (!fragment) host.parentElement?.scrollTo?.({ top: 0 });
+    } else if (!fragment) scrollRef.current?.scrollTo?.({ top: 0 });
   }, [chapter, annotations]);
 
   // Flash the highlight a link or the list pointed at.
@@ -260,6 +268,16 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
   }, [chapter, annotations, path, readOnly, save]);
 
   const go = (step: 1 | -1) => book && setIndex((i) => Math.min(book.spine.length - 1, Math.max(0, i + step)));
+  const spread = useEpubSpread({
+    path,
+    dir: book?.rtl ? "rtl" : "ltr",
+    chapter: chapter ? chapter.index : null,
+    renderKey: renderSeq,
+    viewport: pagesRef,
+    content: contentRef,
+    scroller: scrollRef,
+    goChapter: (step) => go(step),
+  });
 
   const close = () => {
     void writes.current.then(onClose);
@@ -270,6 +288,7 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
     const forward = book?.rtl ? "ArrowLeft" : "ArrowRight";
     const back = book?.rtl ? "ArrowRight" : "ArrowLeft";
     if (e.key === "Escape") close();
+    else if (spread.onKey(e.key, e.shiftKey)) e.preventDefault();
     else if (e.key === forward) go(1);
     else if (e.key === back) go(-1);
     else if ((e.key === "h" || e.key === "H") && hasSelection) highlight();
@@ -314,7 +333,7 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
   );
 
   return (
-    <div ref={rootRef} className={`epub-reader epub-theme-${prefs.theme}`} style={style} role="dialog" aria-label={book?.title ?? baseName(path)} tabIndex={-1} onKeyDown={onKey} data-testid="epub-reader" data-chapter={chapter ? chapter.index + 1 : undefined} data-chapter-count={total || undefined}>
+    <div ref={rootRef} className={`epub-reader epub-theme-${prefs.theme}`} style={style} role="dialog" aria-label={book?.title ?? baseName(path)} tabIndex={-1} onKeyDown={onKey} data-testid="epub-reader" data-chapter={chapter ? chapter.index + 1 : undefined} data-chapter-count={total || undefined} data-layout={spread.layout} data-spread={spread.index ?? undefined}>
       <div className="epub-toolbar">
         <button type="button" onClick={() => setTocOpen((v) => !v)} aria-expanded={tocOpen}>
           {t("epub.toc")}
@@ -324,6 +343,12 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
         </span>
         <HelpButton topic="workspace/epub-reader" />
         <span className="epub-spacer" />
+        <select data-testid="epub-layout" aria-label={t("pdf.spread.label")} value={spread.layout} onChange={(e) => spread.setLayout(e.target.value as EpubLayout)}>
+          <option value="scroll">{t("readingViews.spread.scroll")}</option>
+          <option value="none">{t("pdf.spread.none")}</option>
+          <option value="odd">{t("pdf.spread.odd")}</option>
+          <option value="even">{t("pdf.spread.even")}</option>
+        </select>
         {(["light", "sepia", "dark"] as ReaderTheme[]).map((th) => (
           <button key={th} type="button" aria-pressed={prefs.theme === th} onClick={() => setPrefs((p) => ({ ...p, theme: th }))}>
             {t(`epub.theme.${th}`)}
@@ -360,23 +385,28 @@ export function EpubReader({ path, fragment = null, openSeq = 0, onClose }: Prop
             {renderToc(book.toc)}
           </nav>
         )}
-        <div className="epub-scroll">
+        <div className="epub-scroll" ref={scrollRef}>
           {error && <p className="epub-error" role="alert">{t("epub.failed", { error })}</p>}
           {!error && !chapter && <p className="epub-loading">{t("epub.loading")}</p>}
           {chapter && <style>{chapter.css.map((c) => scopeCss(c, ".epub-chapter")).join("\n")}</style>}
-          <div
-            ref={contentRef}
-            className="epub-chapter"
-            dir={chapter?.dir ?? (book?.rtl ? "rtl" : "auto")}
-            lang={chapter?.lang ?? book?.language ?? undefined}
-            onClick={onContentClick}
-          />
+          <div ref={pagesRef} className="epub-pages">
+            <div
+              ref={contentRef}
+              className="epub-chapter"
+              dir={chapter?.dir ?? (book?.rtl ? "rtl" : "auto")}
+              lang={chapter?.lang ?? book?.language ?? undefined}
+              onClick={onContentClick}
+            />
+          </div>
           {book && (
             <div className="epub-nav">
               <button type="button" disabled={index === 0} onClick={() => go(-1)}>
                 {t("epub.prev")}
               </button>
-              <span>{t("epub.chapterOf", { n: index + 1, total })}</span>
+              <span aria-live="polite">
+                {t("epub.chapterOf", { n: index + 1, total })}
+                {spread.pages && ` · ${spread.pages.shown.length > 1 ? t("readingViews.spread.pages", { a: String(spread.pages.shown[0]), b: String(spread.pages.shown[1]), n: String(spread.pages.total) }) : t("readingViews.spread.page", { a: String(spread.pages.shown[0] ?? 1), n: String(spread.pages.total) })}`}
+              </span>
               <button type="button" data-testid="epub-next" disabled={index >= total - 1} onClick={() => go(1)}>
                 {t("epub.next")}
               </button>

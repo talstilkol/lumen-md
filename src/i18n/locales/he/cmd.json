@@ -383,6 +383,8 @@
   "cmd.privacy.imageHosts.hint": "אתרים שבחרתם ״תמיד לאפשר״ עבורם — ביטול של אחד או של כולם",
   "cmd.reading.aids": "עזרי קריאה…",
   "cmd.reading.aids.hint": "ניקוד לקריאה, פריסה ידידותית לדיסלקציה והקראה עם הדגשת המילה",
+  "cmd.reading.bookSpread": "קריאה: עמודי ספר (שני עמודים)",
+  "cmd.reading.bookSpread.hint": "דפדוף כמו בספר: בעברית עמוד 1 מימין ו-← לעמודים הבאים; PageDown, רווח",
   "cmd.reading.mode": "מצב קריאה",
   "cmd.reading.newFromCapture": "רשימת קריאה: מקור חדש מדף שנלכד…",
   "cmd.reading.newFromCapture.hint": "הדף הגזור שפתוח עכשיו, או קישור שתקלידו",
