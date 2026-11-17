@@ -12,7 +12,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-export const GLOSSARY_LANGS = ["he", "ar", "ru", "fr", "de", "ja", "zh-CN"];
+export const GLOSSARY_LANGS = ["he", "ar", "ru", "fr", "de", "ja", "zh-CN", "fa"];
 
 export function readGlossary(root) {
   return JSON.parse(readFileSync(join(root, "i18n", "glossary.json"), "utf8"));
