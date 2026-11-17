@@ -73,6 +73,18 @@ notes become plain text (they lead nowhere in a book); links to the web
 stay. The book keeps the same identifier across exports, so a reader keeps
 your place and highlights.
 
+### Accessibility (EPUB Accessibility 1.1)
+
+The book says how it can be read before it is opened: its package lists the
+access modes (text, and visual when there are images), what makes it
+accessible (headings and a table of contents, reading order, text that can
+be resized, text alternatives when every image has one, a page list), that it
+has no hazards (no flashing, motion or sound), and a one-sentence summary in
+the book's language. The book paginates itself — a page at every chapter and
+then every ~300 words, between paragraphs — so a class can say "page 12" and
+every reader lands in the same place. A Hebrew book opens from the right.
+The single-note EPUB export does the same.
+
 ## Print and PDF
 
 **Print / PDF** opens the book in a print window; choose **Save as PDF**
