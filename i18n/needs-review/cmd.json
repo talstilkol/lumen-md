@@ -31,6 +31,22 @@
     "ru": "1b01jxe",
     "zh-CN": "1b01jxe"
   },
+  "cmd.reading.sidenotes": {
+    "ar": "zylsvh",
+    "de": "zylsvh",
+    "fr": "zylsvh",
+    "ja": "zylsvh",
+    "ru": "zylsvh",
+    "zh-CN": "zylsvh"
+  },
+  "cmd.reading.sidenotes.hint": {
+    "ar": "15haiii",
+    "de": "15haiii",
+    "fr": "15haiii",
+    "ja": "15haiii",
+    "ru": "15haiii",
+    "zh-CN": "15haiii"
+  },
   "cmd.screenshotToNote": {
     "ar": "11kn380",
     "de": "11kn380",

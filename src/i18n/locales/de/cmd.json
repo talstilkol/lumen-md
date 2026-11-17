@@ -388,6 +388,8 @@
   "cmd.reading.newFromCapture.hint": "Die gerade geöffnete ausgeschnittene Seite oder ein eingegebener Link",
   "cmd.reading.newFromLibrary": "Leseliste: neue Quelle aus der Zitatbibliothek…",
   "cmd.reading.newFromLibrary.hint": "Ein Zotero-, BibTeX- oder CSL-JSON-Eintrag wird zur Quellennotiz",
+  "cmd.reading.sidenotes": "Lesen: Randnotizen (Fußnoten, Kommentare, Vorschläge)",
+  "cmd.reading.sidenotes.hint": "Jede Notiz neben ihrer Zeile: rechts im Englischen, links im Hebräischen; auf schmalen Bildschirmen unter dem Absatz",
   "cmd.related.folderOff": "Verwandte Notizen: für diesen Ordner an / aus",
   "cmd.related.toggle": "Verwandte Notizen: ein- / ausblenden",
   "cmd.related.toggle.hint": "Notizen nah am Absatz, den du schreibst, und Notizen, die er ohne Link erwähnt",

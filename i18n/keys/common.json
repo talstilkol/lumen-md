@@ -15609,6 +15609,77 @@
       ]
     },
     {
+      "key": "readingViews.sidenotes.comment",
+      "en": "Comment",
+      "vars": []
+    },
+    {
+      "key": "readingViews.sidenotes.commentBy",
+      "en": "Comment by {name}",
+      "vars": [
+        "name"
+      ]
+    },
+    {
+      "key": "readingViews.sidenotes.delete",
+      "en": "Delete “{text}”",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "readingViews.sidenotes.footnote",
+      "en": "Footnote {n}",
+      "vars": [
+        "n"
+      ]
+    },
+    {
+      "key": "readingViews.sidenotes.insert",
+      "en": "Insert “{text}”",
+      "vars": [
+        "text"
+      ]
+    },
+    {
+      "key": "readingViews.sidenotes.off",
+      "en": "Margin notes off",
+      "vars": []
+    },
+    {
+      "key": "readingViews.sidenotes.on",
+      "en": "Margin notes on",
+      "vars": []
+    },
+    {
+      "key": "readingViews.sidenotes.replace",
+      "en": "Replace “{old}” with “{new}”",
+      "vars": [
+        "old",
+        "new"
+      ]
+    },
+    {
+      "key": "readingViews.sidenotes.suggestDelete",
+      "en": "Suggested deletion",
+      "vars": []
+    },
+    {
+      "key": "readingViews.sidenotes.suggestInsert",
+      "en": "Suggested insertion",
+      "vars": []
+    },
+    {
+      "key": "readingViews.sidenotes.suggestReplace",
+      "en": "Suggested replacement",
+      "vars": []
+    },
+    {
+      "key": "readingViews.sidenotes.title",
+      "en": "Side notes",
+      "vars": []
+    },
+    {
       "key": "readingViews.triple.on",
       "en": "Three columns: source, preview and outline, scroll linked",
       "vars": []

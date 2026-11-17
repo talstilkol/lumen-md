@@ -1961,6 +1961,16 @@
       "vars": []
     },
     {
+      "key": "cmd.reading.sidenotes",
+      "en": "Reading: margin notes (footnotes, comments, suggestions)",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.sidenotes.hint",
+      "en": "Each note next to its line: on the right in English, on the left in Hebrew; under its paragraph on a narrow screen",
+      "vars": []
+    },
+    {
       "key": "cmd.related.folderOff",
       "en": "Related notes: on / off for this folder",
       "vars": []

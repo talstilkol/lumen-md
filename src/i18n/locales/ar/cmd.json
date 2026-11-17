@@ -388,6 +388,8 @@
   "cmd.reading.newFromCapture.hint": "الصفحة المقتطعة المفتوحة الآن، أو رابط تكتبه",
   "cmd.reading.newFromLibrary": "قائمة القراءة: مصدر جديد من مكتبة الاستشهادات…",
   "cmd.reading.newFromLibrary.hint": "يصبح عنصر من Zotero أو BibTeX أو CSL-JSON ملاحظة مصدر",
+  "cmd.reading.sidenotes": "القراءة: ملاحظات في الهامش (حواشٍ، تعليقات، اقتراحات)",
+  "cmd.reading.sidenotes.hint": "كل ملاحظة بجانب سطرها: يمينًا في الإنجليزية ويسارًا في العبرية؛ تحت فقرتها على الشاشة الضيقة",
   "cmd.related.folderOff": "ملاحظات ذات صلة: تشغيل / إيقاف لهذا المجلد",
   "cmd.related.toggle": "ملاحظات ذات صلة: إظهار / إخفاء",
   "cmd.related.toggle.hint": "ملاحظات قريبة من الفقرة التي تكتبها، وملاحظات تذكرها دون رابط",

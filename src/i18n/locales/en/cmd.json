@@ -236,6 +236,8 @@
   "cmd.reading.mode": "Reading mode",
   "cmd.reading.newFromCapture": "Reading list: new source from a captured page…",
   "cmd.reading.newFromLibrary": "Reading list: new source from the citation library…",
+  "cmd.reading.sidenotes": "Reading: margin notes (footnotes, comments, suggestions)",
+  "cmd.reading.sidenotes.hint": "Each note next to its line: on the right in English, on the left in Hebrew; under its paragraph on a narrow screen",
   "cmd.related.folderOff": "Related notes: on / off for this folder",
   "cmd.related.toggle": "Related notes: show / hide",
   "cmd.research.ask": "🔎 Research: Ask a Question…",

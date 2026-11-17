@@ -2276,6 +2276,13 @@
       "hint": "Ctrl+Alt+Shift+← (mirrored in a right-to-left layout)"
     },
     {
+      "id": "reading.sidenotes",
+      "label": "Reading: margin notes (footnotes, comments, suggestions)",
+      "group": "View",
+      "hint": "Each note next to its line: on the right in English, on the left in Hebrew; under its paragraph on a narrow screen",
+      "icon": "Columns2"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -4712,6 +4719,13 @@
       "hint": "Ctrl+Alt+Shift+← (mirrored in a right-to-left layout)"
     },
     {
+      "id": "reading.sidenotes",
+      "label": "Reading: margin notes (footnotes, comments, suggestions)",
+      "group": "View",
+      "hint": "Each note next to its line: on the right in English, on the left in Hebrew; under its paragraph on a narrow screen",
+      "icon": "Columns2"
+    },
+    {
       "id": "types.page",
       "label": "Types: all objects by type",
       "icon": "Table"
@@ -5061,6 +5075,7 @@
     "view.tripleLinked",
     "view.columnNext",
     "view.columnPrev",
+    "reading.sidenotes",
     "types.page",
     "types.studio"
   ]

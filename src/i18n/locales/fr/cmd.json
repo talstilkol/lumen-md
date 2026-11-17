@@ -388,6 +388,8 @@
   "cmd.reading.newFromCapture.hint": "La page découpée ouverte maintenant, ou un lien que vous saisissez",
   "cmd.reading.newFromLibrary": "Liste de lecture : nouvelle source depuis la bibliothèque de citations…",
   "cmd.reading.newFromLibrary.hint": "Un élément Zotero, BibTeX ou CSL-JSON devient une note de source",
+  "cmd.reading.sidenotes": "Lecture : notes en marge (notes, commentaires, suggestions)",
+  "cmd.reading.sidenotes.hint": "Chaque note à côté de sa ligne : à droite en anglais, à gauche en hébreu ; sous son paragraphe sur un écran étroit",
   "cmd.related.folderOff": "Notes liées : activer / désactiver pour ce dossier",
   "cmd.related.toggle": "Notes liées : afficher / masquer",
   "cmd.related.toggle.hint": "Les notes proches du paragraphe que vous écrivez, et celles qu’il cite sans lien",

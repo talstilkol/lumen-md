@@ -20,6 +20,7 @@ import { Preview } from "../renderer/Preview";
 import { ErrorBoundary } from "../ui/ErrorBoundary";
 import { WritingGoalBanner } from "../ui/WritingGoalBanner";
 import { useAppStore } from "../store/useStore";
+import { setSidenoteLineNotes } from "../reading/sidenotesSetting";
 import type { ViewMode, SplitAxis } from "../store/useStore";
 import type { CollabSession } from "../collab/yjs";
 import { t } from "../i18n";
@@ -181,6 +182,27 @@ export function EditorLayout({
       unlink?.();
     };
   }, [mode, syncScroll, isVerticalSplit]);
+
+  // The margins mode (plan W13.R9) shows a shared note's comments by their source line.
+  useEffect(() => {
+    if (!collab) return;
+    let comments: typeof import("../collab/comments") | null = null;
+    void import("../collab/comments").then((m) => {
+      comments = m;
+    });
+    setSidenoteLineNotes(() => {
+      if (!comments) return [];
+      const text = collab.ytext.toString();
+      return comments.listComments(collab.commentsDoc, { onlyOpen: true }).flatMap((c) => {
+        const at = comments!.resolveAnchor(collab.doc, c);
+        if (!at) return [];
+        let line = 1;
+        for (let i = text.indexOf("\n"); i !== -1 && i < at.from; i = text.indexOf("\n", i + 1)) line++;
+        return [{ line, text: c.body, author: c.authorName }];
+      });
+    });
+    return () => setSidenoteLineNotes(null);
+  }, [collab]);
 
   // Ctrl+Alt+Shift+← / → : the focus to the column on that side (plan W13.R7; what is on
   // screen, so mirrored in RTL). Ctrl+Alt+← / → without Shift stay outline indent (W2.13).

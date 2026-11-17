@@ -54,3 +54,20 @@ compare documents, and it is right for Hebrew:
   numbers and Hebrew reads exactly as it does without them.
 - **Keys.** F7 goes to the next change and Shift+F7 to the previous one. A
   screen reader hears each change ("Change 3 of 12: deleted …, inserted …").
+
+## Margin notes
+
+**Command palette** → **Reading: margin notes (footnotes, comments,
+suggestions)** moves a note's footnotes, comments (`{>>…<<}`, and a shared
+note's comments) and suggestions (`{++…++}`, `{--…--}`, `{~~old~>new~~}`) into
+the margin next to their line, as Tufte's books and Google Docs do.
+
+- The margin is on the right of English text and on the **left of Hebrew**.
+  Notes that would overlap are pushed down, so one never covers another.
+- Pointing at a note or its mark highlights both and draws a line between
+  them.
+- On a screen narrower than 700px, each note sits under its paragraph.
+- **Keys:** a footnote number goes to its note. In a note, ↑ / ↓ go to the
+  previous / next note, and Enter or Escape go back to the text. A screen
+  reader hears each note's kind ("Footnote 2", "Comment by Dana",
+  "Suggested insertion").
