@@ -132,7 +132,7 @@ export function wrapWorkerChannels(scope: ChannelScope, d: ChannelDeps): string[
           const len = Number(this.getResponseHeader?.("content-length"));
           end(this.status || 0, Number.isFinite(len) && this.getResponseHeader?.("content-length") != null ? len : null);
         });
-        send.call(this, body ?? null);
+        send.call(this, (body ?? null) as XMLHttpRequestBodyInit | null);
       };
       // A synchronous request cannot wait for the window's answer: it is decided now (fail closed).
       if (d.checks && d.airplane() === null && !this.__lumenSync) void d.heard().then(go);
