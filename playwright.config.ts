@@ -75,6 +75,8 @@ export default defineConfig({
       },
     },
     { name: "webkit", grepInvert: NOT_IN_PR_RUNS, use: { ...devices["Desktop Safari"] } },
+    // W13.M6 and later mobile screens: a phone (Pixel 7, touch, 412 px), only specs tagged @mobile.
+    { name: "mobile-chrome", grep: /@mobile/, use: { ...devices["Pixel 7"], ...(CHROMIUM ? { launchOptions: { executablePath: CHROMIUM } } : {}) } },
     // `npx playwright test --project=perf` (.github/workflows/nightly-perf.yml).
     { name: "perf", grep: NIGHTLY, use: { ...devices["Desktop Chrome"] } },
     // `npm run perf:inp`: 20 interactions and keypress → paint with the CPU 4× slower (plan W1.22).

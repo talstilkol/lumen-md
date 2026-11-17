@@ -547,6 +547,8 @@
   "cmd.vault.toBrowser.hint": "Копирует каждую заметку из папки в частное хранилище браузера, проверяет и затем работает там. Папка не меняется.",
   "cmd.vault.toFolder": "Переместить хранилище в папку…",
   "cmd.vault.toFolder.hint": "Копирует каждую заметку в папку на этом компьютере, проверяет каждый файл байт за байтом и затем работает там. Ничего не удаляется.",
+  "cmd.vaults.open": "Vaults…",
+  "cmd.vaults.open.hint": "every vault on this device with its notes, sync and plugins; rename, move, delete, safe mode",
   "cmd.view.asOf": "Что я знал тогда",
   "cmd.view.asOf.hint": "поиск по хранилищу в том виде, в каком оно было в прошлую дату",
   "cmd.view.autoSave.hint": "каждые {interval} с",

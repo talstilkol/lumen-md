@@ -547,6 +547,8 @@
   "cmd.vault.toBrowser.hint": "Copies every note from the folder into the browser's private storage, checks it, then works there. The folder is not changed.",
   "cmd.vault.toFolder": "Move the vault to a folder…",
   "cmd.vault.toFolder.hint": "Copies every note to a folder on this computer, checks each file byte for byte, then works there. Nothing is deleted.",
+  "cmd.vaults.open": "Vaults…",
+  "cmd.vaults.open.hint": "every vault on this device with its notes, sync and plugins; rename, move, delete, safe mode",
   "cmd.view.asOf": "What I knew then",
   "cmd.view.asOf.hint": "search the vault as it was on a past date",
   "cmd.view.autoSave.hint": "every {interval}s",

@@ -547,6 +547,8 @@
   "cmd.vault.toBrowser.hint": "Copie chaque note du dossier dans le stockage privé du navigateur, la vérifie, puis travaille là. Le dossier n'est pas modifié.",
   "cmd.vault.toFolder": "Déplacer le coffre dans un dossier…",
   "cmd.vault.toFolder.hint": "Copie chaque note dans un dossier de cet ordinateur, vérifie chaque fichier octet par octet, puis travaille là. Rien n'est supprimé.",
+  "cmd.vaults.open": "Vaults…",
+  "cmd.vaults.open.hint": "every vault on this device with its notes, sync and plugins; rename, move, delete, safe mode",
   "cmd.view.asOf": "Ce que je savais alors",
   "cmd.view.asOf.hint": "chercher dans le coffre tel qu’il était à une date passée",
   "cmd.view.autoSave.hint": "toutes les {interval} s",

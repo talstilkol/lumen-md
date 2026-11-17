@@ -240,5 +240,6 @@
   "cmd.writing.consistency.hint": "Names, dates, numbers and your glossary terms across all notes, against the entity graph — suggestions to review",
   "cmd.writing.harper.hint": "Local English grammar for the English parts of the note — suggestions to review",
   "cmd.writing.readability.hint": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
-  "cmd.writing.structure.hint": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only"
+  "cmd.writing.structure.hint": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only",
+  "cmd.vaults.open.hint": "every vault on this device with its notes, sync and plugins; rename, move, delete, safe mode"
 }

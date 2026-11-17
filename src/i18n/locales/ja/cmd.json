@@ -547,6 +547,8 @@
   "cmd.vault.toBrowser.hint": "フォルダー内のすべてのノートをブラウザーのプライベートストレージにコピーして確認し、そこで作業します。フォルダーは変更されません。",
   "cmd.vault.toFolder": "保管庫をフォルダーに移動…",
   "cmd.vault.toFolder.hint": "すべてのノートをこのコンピューター上のフォルダーにコピーし、各ファイルを1バイトずつ確認してから、そこで作業します。何も削除されません。",
+  "cmd.vaults.open": "Vaults…",
+  "cmd.vaults.open.hint": "every vault on this device with its notes, sync and plugins; rename, move, delete, safe mode",
   "cmd.view.asOf": "あの時知っていたこと",
   "cmd.view.asOf.hint": "過去の日付時点のボールトを検索",
   "cmd.view.autoSave.hint": "{interval}秒ごと",

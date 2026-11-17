@@ -539,5 +539,23 @@
     "ja": "12myrs1",
     "ru": "12myrs1",
     "zh-CN": "12myrs1"
+  },
+  "cmd.vaults.open": {
+    "ar": "2u4tg6",
+    "de": "2u4tg6",
+    "fr": "2u4tg6",
+    "he": "2u4tg6",
+    "ja": "2u4tg6",
+    "ru": "2u4tg6",
+    "zh-CN": "2u4tg6"
+  },
+  "cmd.vaults.open.hint": {
+    "ar": "138zp6l",
+    "de": "138zp6l",
+    "fr": "138zp6l",
+    "he": "138zp6l",
+    "ja": "138zp6l",
+    "ru": "138zp6l",
+    "zh-CN": "138zp6l"
   }
 }

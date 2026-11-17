@@ -9,7 +9,7 @@
  *    A message shared from WhatsApp or Telegram goes through the chat
  *    parser first (`sharedChat`, plan W5.7, audit W10.C10), on both paths:
  *    it keeps its app, author and time.
- *  - shortcuts: `/?action=new` → a new note, `/?action=palette` → ⌘K,
+ *  - shortcuts: `/?action=new` → a new note, `/?action=palette` → ⌘K, `/?action=vaults` → the vault screen (W13.M6),
  *    `/?capture=1` → the quick-capture box (plan 4.16).
  *    `/?capture=voice` → the box, already recording a voice note (plan W1.13).
  *  - file_handlers: files opened with the installed app (Chrome / Edge
@@ -20,7 +20,7 @@ import { chatShareText, parseSharedChatMessage } from "../capture/chats/share";
 
 export type Launch =
   | { kind: "share"; title: string; body: string }
-  | { kind: "action"; action: "new" | "palette" | "capture" | "voice" }
+  | { kind: "action"; action: "new" | "palette" | "capture" | "voice" | "vaults" }
   | { kind: "none" };
 
 function hostOf(u: string): string {
@@ -63,7 +63,7 @@ export function sharedChat(item: SharedItem): string | null {
 export function parseLaunch(search: string): Launch {
   const q = new URLSearchParams(search);
   const action = q.get("action");
-  if (action === "new" || action === "palette" || action === "capture") return { kind: "action", action };
+  if (action === "new" || action === "palette" || action === "capture" || action === "vaults") return { kind: "action", action };
   if (q.get("capture") === "1") return { kind: "action", action: "capture" };
   if (q.get("capture") === "voice") return { kind: "action", action: "voice" };
   const shared = sharedItem(search);

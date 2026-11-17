@@ -11,6 +11,7 @@ import type { Command } from "../../ui/CommandPalette";
 import { t } from "../../i18n";
 
 const actions = () => import("../../ui/vaultFolderActions");
+const inApp = () => typeof window !== "undefined" && !!(window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.();
 
 export function buildVaultLocationCommands(): Command[] {
   return [
@@ -38,6 +39,19 @@ export function buildVaultLocationCommands(): Command[] {
       group: t("group.file"),
       action: async () => (await actions()).moveVaultToBrowser(),
     },
+    // W13.M6: the vault screen (the app; elsewhere /?action=vaults).
+    ...(inApp()
+      ? [
+          {
+            id: "vaults.open",
+            label: t("cmd.vaults.open"),
+            hint: t("cmd.vaults.open.hint"),
+            icon: cmdIcons.FolderOpen,
+            group: t("group.file"),
+            action: async () => void (await import("../../mobile/vaultPickerActions")).openVaultPicker(),
+          },
+        ]
+      : []),
   ];
 }
 
