@@ -2,7 +2,7 @@
 title: Your vault in a folder
 description: Keep your notes in a real folder on your computer, in the browser or the desktop app, move them there and back without losing a byte, and see changes other programs make.
 type: how-to
-tasks: ["4.2", "4.3", "4.4"]
+tasks: ["4.2", "4.3", "4.4", "W10.F4"]
 ---
 
 By default the web app keeps your notes in the browser's private storage
@@ -46,6 +46,19 @@ The app can reach only the folder you picked: paths that leave it,
 including through a symbolic link, are refused. Every save writes a
 temporary file and renames it, so other programs never see a half-written
 note.
+
+## Moving the vault safely
+
+Moving the vault between browser storage and a folder copies every file and
+checks it before Lumen switches over, and never deletes the old copy.
+
+- If files with the same names but different content are already in the
+  target folder, nothing is moved, and Lumen names one of them.
+- If one folder may be inside the other and Lumen can't check that on disk,
+  the vault is not moved.
+- If the move stops, nothing is deleted and you can resume.
+- A note saved in the old place while the move was finishing comes along
+  with its newer text, as a conflict copy next to the note where needed.
 
 ## Changes made outside Lumen
 

@@ -2,7 +2,7 @@
 title: Personal data before the cloud
 description: When your AI policy lets a request leave this device, Lumen hides e-mails, phone numbers, ID numbers, cards, IBANs, plates and birth dates on the device first, and puts them back in the answer.
 type: how-to
-tasks: ["2.6"]
+tasks: ["2.6", "W10.C23"]
 ---
 
 Under the **local only** policy nothing leaves your device, so there is
@@ -64,3 +64,12 @@ and names are sent as written.
   values reaches the provider (`e2e/pii-redaction.spec.ts`).
 - **The held-out test split** is scored in CI by
   `scripts/golden/evals/ner-pii.mjs`.
+
+## Names
+
+E-mails, phone numbers, ID numbers, cards, IBANs, plates and birth dates are
+found by rules on this device. Names need a name finder, and Lumen uses one
+only when it is already on this device: a downloaded name model
+(DictaBERT-NER for Hebrew, a separate model for English), or Ollama running
+here. Without one, the preview before a cloud request says that names are
+not hidden. Lumen never downloads a model or calls a service for this.

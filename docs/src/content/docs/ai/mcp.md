@@ -2,7 +2,7 @@
 title: MCP and the lumen CLI
 description: Let Claude Desktop, Claude Code or your IDE search and read your vault — off by default, with scopes per client, and every change waits for your approval.
 type: reference
-tasks: ["W13.X1", "W12.T4", "W11.I7", "W11.I8", "W7.18", "W8.1"]
+tasks: ["W13.X1", "W12.T4", "W11.I7", "W11.I8", "W7.18", "W8.1", "W10.C1", "W10.C3", "W11.I5", "W11.I6"]
 ---
 
 Lumen's vault can be used from outside the app in two ways:
@@ -269,6 +269,37 @@ your files. Nothing is connected until you add a server and turn it on.
   each server's credentials tied to the server that issued them.
 - **Suggested servers** (off until you turn them on): Knesset (Knessy, MIT),
   data.gov.il, Zotero, your files.
+
+### Approving a tool call
+
+Lumen keeps a fingerprint (SHA-256) of each tool's definition: its name,
+description, schemas and annotations. The first one you approve is the
+tool's pin.
+
+- A tool you never approved asks before its first call, even a *read* one.
+- A tool whose definition changed since its pin asks again, whatever its
+  permission, and shows what the server says it does now.
+- The dialog shows what the call sends and offers **Allow once**, **Allow
+  until I close Lumen**, **Allow for this vault** or **Don't allow**. Only
+  *Allow for this vault* moves the pin.
+
+Requests to a remote server carry the protocol headers the 2026-07-28
+specification requires (`MCP-Protocol-Version`, `Mcp-Method`, and
+`Mcp-Name` for a tool call).
+
+### When a server asks you something
+
+A server can ask a question in the middle of a call (*elicitation*). Lumen
+shows a dialog titled with the server's name:
+
+- **Form:** you see and can edit every answer before it is sent. A field
+  that looks like a password, key or token is not shown, and the dialog says
+  why. Servers may not ask for secrets.
+- **Link:** the full address and its host are shown as text, with a
+  warning for Punycode and look-alike hosts. Nothing is fetched. The link
+  opens only if you say so, in your system browser on the desktop or in a
+  new tab on the web, where neither Lumen nor the model can read the page.
+- **Decline** and **Cancel** are always there, and Esc cancels.
 
 ## The ledger
 

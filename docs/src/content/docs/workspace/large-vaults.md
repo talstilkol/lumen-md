@@ -2,12 +2,18 @@
 title: Large vaults and long notes
 description: How Lumen stays fast with 10,000 notes and with a single 2 MB note — and how that is measured.
 type: how-to
-tasks: ["W10.E1", "W6.45", "W1.22", "8.4"]
+tasks: ["W10.E1", "W6.45", "W1.22", "8.4", "W10.E20"]
 ---
 
 Lumen is built to stay responsive with a vault of **10,000 notes** and with a
 single note of **2 MB** (plan 8.4). Nothing needs to be switched on; this page
 explains what happens and what to expect.
+
+## Opening the app
+
+Before the app has loaded, the last note you had open is shown as plain,
+editable text, so you can start typing at once. What you type is kept when
+the editor takes over. The chunks the start needs are fetched in parallel.
 
 ## A vault with thousands of notes
 

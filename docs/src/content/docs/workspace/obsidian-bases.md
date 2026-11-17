@@ -2,7 +2,7 @@
 title: Obsidian Bases (.base files)
 description: Open, embed and edit Obsidian Bases files — what is supported, what is not, and how the golden set is checked.
 type: how-to
-tasks: ["W12.V1", "W4.30", "W1.12"]
+tasks: ["W12.V1", "W4.30", "W1.12", "W12.T3", "W12.T5"]
 ---
 
 A vault that comes from Obsidian keeps its **Bases**: `.base` files (YAML)
@@ -64,6 +64,25 @@ Not supported, with a clear message instead of a wrong value:
 - `icon()` — the error reads "Bases function icon() is not supported here yet".
   Obsidian's icon set is too large to load in a note.
 - `html()` — shown as plain text, never as markup (counted as not supported).
+
+## A base for every type
+
+Each type in the vault gets a base built from its schema, with no file to
+write: **Types: all objects by type** and **All <type>** in the command
+palette open it. It filters the type's notes, shows the name and the
+pinned fields as columns, and has three views: a table, cards, and a kanban
+grouped by the type's first select field. **Save as .base** writes it as an
+ordinary `.base` file. A saved file never changes without your approval
+when the schema does.
+
+## Kanban and filters
+
+- In a kanban, drag a card to another column, or use Alt with the arrow
+  keys. Only note properties and `file.folder` can be changed this way, and
+  only Markdown notes move.
+- In the **Filters** panel, drag filters to reorder them, or use Alt+Up and
+  Alt+Down, and move a filter between **This view** and **All views**. The
+  order is saved in the `.base` file.
 
 ## Differences to know
 

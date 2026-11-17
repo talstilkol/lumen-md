@@ -2,7 +2,7 @@
 title: Entity graph
 description: People, places, organisations, events, laws, sources and concepts found in your notes, each relation backed by an exact quote from a paragraph, reviewed by you before anything is written.
 type: how-to
-tasks: ["W12.X3", "W12.E7", "W12.V2", "R12.8", "W12.E10", "W13.G4", "W13.G9"]
+tasks: ["W12.X3", "W12.E7", "W12.V2", "R12.8", "W12.E10", "W13.G4", "W13.G9", "R12.6", "R12.7"]
 ---
 
 ## What it is
@@ -67,6 +67,23 @@ the relations between them ("born in", "member of", "cites", …).
   them are included. Save a view under a name, update it, or delete it
   (with undo). A Base or a query can open as a graph of its rows, and as
   a table again.
+
+## Timeline
+
+An entity or a case has a timeline: its claims in time order, laid out
+right to left in Hebrew (the earliest at the right). Each claim shows how
+certain its date is, in words, and links to its source paragraph. Claims
+without a date are listed apart and never placed on the line.
+
+- Dates are read from the text: Gregorian and Hebrew dates, with Hebrew
+  prefixes, the run-together forms PDFs produce, and "yesterday" or "today"
+  counted from the note's own date.
+- The time checker asks about gaps: an impossible date, roles that overlap,
+  an order that contradicts itself.
+- **What did I know on date X** shows only what had been recorded by that
+  day.
+- On the keyboard the line is a list of buttons: the arrows move in reading
+  order, Home and End jump to the ends, Enter opens the source.
 
 ## Reviewing and finding entities
 

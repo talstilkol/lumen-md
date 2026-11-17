@@ -2,7 +2,7 @@
 title: Very large vaults
 description: How Lumen stays fast with 100,000 notes. The search index holds one copy of the text, is kept between sessions, and is updated one note at a time, and big embedding indexes are stored compactly.
 type: how-to
-tasks: ["W6.36", "W2.22"]
+tasks: ["W6.36", "W2.22", "W10.E16", "W10.E17"]
 ---
 
 This page picks up where [Large vaults and long notes](/workspace/large-vaults/) leaves off. Heavy users reach 50,000 to 100,000 notes, which is where most note apps
@@ -58,6 +58,16 @@ slow down. Lumen is measured against a synthetic vault of 100,000 notes:
   passages, their vectors are kept in memory as 8-bit integers. That is a
   quarter of the memory, with scores within 1% of the full-precision ones.
   Vectors are unpacked one note at a time, when a search needs them.
+
+## The file tree
+
+In a large vault the file tree draws only the rows in view, so 100,000
+notes keep a few dozen rows on the page. It follows the WAI-ARIA tree
+pattern: ↑ and ↓ move, Home and End jump to the ends, the arrow toward the
+text opens a folder (→ in a left-to-right tree, ← in a right-to-left one),
+and Enter opens a note. The open note is scrolled into view when it changes.
+The synthetic test vault includes attachments, and opening it is checked
+against a two-second target.
 
 ## Measuring it yourself
 

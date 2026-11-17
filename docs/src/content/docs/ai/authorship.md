@@ -2,7 +2,7 @@
 title: AI-written text
 description: Text the AI wrote is shown lighter until you edit it — in the editor, saved per note, and optionally in the export.
 type: how-to
-tasks: ["5.9"]
+tasks: ["5.9", "W10.E37"]
 ---
 
 Whatever an AI command puts into your note — a draft from **Write**, a
@@ -44,8 +44,9 @@ the comment. The ordinary exports and **Save** leave it out.
 
 ## Limits
 
-- The marks show in the source and split views; WYSIWYG doesn't draw them,
-  but text the AI writes there is found again in the source view while the
-  answer is recent.
+- The marks show in the source, split and WYSIWYG views. Text the AI inserts
+  in WYSIWYG is marked as it is inserted. A mark whose place can't be found
+  exactly in the WYSIWYG document (one inside a link's address, say) is left
+  out there rather than guessed; the source view still shows it.
 - An answer older than 15 minutes, or text you copy from an answer and
   paste, is not marked.

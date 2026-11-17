@@ -2,7 +2,7 @@
 title: Cursor movement in Hebrew and English
 description: Choose how the arrow keys move through a line that mixes Hebrew and English — visually, as the line looks (the default, like Word), or logically, in the order of the text.
 type: how-to
-tasks: ["W13.H1"]
+tasks: ["W13.H1", "W11.H3"]
 ---
 
 A line such as `ראה iPhone 15 בחנות` holds two directions: the Hebrew runs
@@ -49,3 +49,12 @@ a character and matches what Backspace and Delete do.
 
 The choice is a personal preference of this device, like a keyboard layout:
 it is not written into notes and it is not synced to your other devices.
+
+## How it is tested
+
+Ten mixed Hebrew and English lines (a Latin word, digits, a URL, code, a
+wiki link, a footnote or a tag at either end) are each checked for Home,
+End, a three-press round trip and a word jump, together with twelve caret
+bugs reported on Obsidian's forum. The expectations for both modes are in
+`e2e/cursor-scenarios.ts`; the browser runs are `e2e/rtl-caret.spec.ts` and
+`e2e/bidi-editing.spec.ts`.
