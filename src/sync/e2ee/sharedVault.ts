@@ -59,6 +59,32 @@ const RULES: ReadonlyArray<{ kind: ProtectedKind; prefix: string }> = [
   { kind: "automations", prefix: ".lumen/automations-state.json" },
   { kind: "automations", prefix: ".lumen/automations-log.json" },
   { kind: "agents", prefix: ".lumen/skills/" },
+  // Review 14 M3: an MCP server's queued changes and its ledger are an agent's actions.
+  { kind: "agents", prefix: ".lumen/mcp/" },
+  // Review 14 M3: a member's unsigned plugin policy would block every install on every device; clip templates and
+  // the Zotero connection are this device's configuration.
+  { kind: "settings", prefix: ".lumen/plugin-policy.json" },
+  { kind: "settings", prefix: ".lumen/clip-templates.json" },
+  { kind: "settings", prefix: ".lumen/zotero-web.json" },
+];
+
+/**
+ * Review 14 M3: `.lumen/` in a shared channel is an allow-list. The vault's own data — what members share on
+ * purpose — passes; any other `.lumen/` path is protected as settings (out without consent, an arrival kept as
+ * `.bak`), so a file a later version adds there is not shared until it is listed here.
+ */
+const SHARED_DATA: readonly string[] = [
+  ".lumen/vault-id",
+  ".lumen/types/",
+  ".lumen/entities/",
+  ".lumen/graph/perspectives.json",
+  ".lumen/searches.json",
+  ".lumen/learning.json",
+  ".lumen/review.json",
+  ".lumen/reading-positions.json",
+  ".lumen/maps/",
+  ".lumen/zotero-library.csl.json",
+  ".lumen/zotero-annotations.json",
 ];
 
 const BAK = ".bak";
@@ -66,6 +92,23 @@ const BAK = ".bak";
 /** Unicode and case games (`.Lumen/Plugins/`, a full-width dot) don't get a path past the rules. */
 function canonical(path: string): string {
   return path.normalize("NFKC").replace(/\\/g, "/").replace(/^\/+/, "").toLowerCase();
+}
+
+/**
+ * The path's segments as Windows would write them (review 14 M3): a trailing dot or space is stripped there
+ * (`.lumen./plugins` lands in `.lumen/plugins`), and empty and `.` segments (`./`, `//`) name nothing.
+ * `trimmed` says whether any segment lost a trailing dot or space.
+ */
+function segments(p: string): { segs: string[]; trimmed: boolean } {
+  let trimmed = false;
+  const segs: string[] = [];
+  for (const raw of p.split("/")) {
+    if (raw === "" || raw === "." || raw === "..") continue;
+    const seg = raw.replace(/[. ]+$/, "");
+    if (seg !== raw) trimmed = true;
+    if (seg) segs.push(seg);
+  }
+  return { segs, trimmed };
 }
 
 /**
@@ -77,11 +120,15 @@ function canonical(path: string): string {
 export function protectedKind(path: string): ProtectedKind | null {
   let p = canonical(path);
   if (p.endsWith(BAK)) p = p.slice(0, -BAK.length);
-  const segs = p.split("/");
+  const { segs, trimmed } = segments(p);
   for (let i = 0; i < segs.length; i++) {
     if (segs[i] !== ".lumen" && segs[i] !== ".obsidian") continue;
     const tail = segs.slice(i).join("/");
     for (const r of RULES) if (r.prefix.endsWith("/") ? tail.startsWith(r.prefix) : tail === r.prefix) return r.kind;
+    if (segs[i] !== ".lumen" || tail === ".lumen") continue;
+    // A name Windows would rewrite is refused under `.lumen/`, even for shared data: what lands there is not what was checked.
+    if (trimmed) return "settings";
+    if (!SHARED_DATA.some((d) => (d.endsWith("/") ? tail.startsWith(d) || tail === d.slice(0, -1) : tail === d))) return "settings";
   }
   return null;
 }
