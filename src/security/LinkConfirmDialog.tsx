@@ -16,7 +16,6 @@ const BTN = "inline-flex items-center rounded-md border border-border bg-bg px-3
 const BTN_PRIMARY = "inline-flex items-center rounded-md border border-accent bg-accent px-3 py-1.5 text-sm font-medium text-accent-fg hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 const sourceLabel = (source: string): string => {
-  if (source.startsWith("clip:")) return source.slice(5);
   const k = source.slice(5);
   return k === "new" || k === "capture" || k === "open" ? t(`link.source.${k}`) : source;
 };
@@ -41,7 +40,7 @@ export function LinkConfirmDialog(props: { decision: LinkDecision; onAnswer: (a:
         </h2>
         {d.describe && (
           <p id="link-confirm-what" style={{ margin: "0 0 10px", fontSize: 14, overflowWrap: "anywhere" }}>
-            <bdi>{t(d.describe.key, d.describe.values)}</bdi>
+            <bdi dir="auto">{t(d.describe.key, d.describe.values)}</bdi>
           </p>
         )}
         {d.warning && (
