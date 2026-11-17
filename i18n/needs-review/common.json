@@ -1003,6 +1003,174 @@
     "ru": "nir8qt",
     "zh-CN": "nir8qt"
   },
+  "immersive.close": {
+    "ar": "vz1wmi",
+    "de": "vz1wmi",
+    "fr": "vz1wmi",
+    "ja": "vz1wmi",
+    "ru": "vz1wmi",
+    "zh-CN": "vz1wmi"
+  },
+  "immersive.closeWord": {
+    "ar": "1l0xxoj",
+    "de": "1l0xxoj",
+    "fr": "1l0xxoj",
+    "ja": "1l0xxoj",
+    "ru": "1l0xxoj",
+    "zh-CN": "1l0xxoj"
+  },
+  "immersive.label.adj": {
+    "ar": "dno6nq",
+    "de": "dno6nq",
+    "fr": "dno6nq",
+    "ja": "dno6nq",
+    "ru": "dno6nq",
+    "zh-CN": "dno6nq"
+  },
+  "immersive.label.noun": {
+    "ar": "1t7tq29",
+    "de": "1t7tq29",
+    "fr": "1t7tq29",
+    "ja": "1t7tq29",
+    "ru": "1t7tq29",
+    "zh-CN": "1t7tq29"
+  },
+  "immersive.label.verb": {
+    "ar": "1vfqjm1",
+    "de": "1vfqjm1",
+    "fr": "1vfqjm1",
+    "ja": "1vfqjm1",
+    "ru": "1vfqjm1",
+    "zh-CN": "1vfqjm1"
+  },
+  "immersive.labels": {
+    "ar": "bw936b",
+    "de": "bw936b",
+    "fr": "bw936b",
+    "ja": "bw936b",
+    "ru": "bw936b",
+    "zh-CN": "bw936b"
+  },
+  "immersive.lineFocus": {
+    "ar": "tblr77",
+    "de": "tblr77",
+    "fr": "tblr77",
+    "ja": "tblr77",
+    "ru": "tblr77",
+    "zh-CN": "tblr77"
+  },
+  "immersive.nikud": {
+    "ar": "41suv6",
+    "de": "41suv6",
+    "fr": "41suv6",
+    "ja": "41suv6",
+    "ru": "41suv6",
+    "zh-CN": "41suv6"
+  },
+  "immersive.noVoice": {
+    "ar": "7iezqn",
+    "de": "7iezqn",
+    "fr": "7iezqn",
+    "ja": "7iezqn",
+    "ru": "7iezqn",
+    "zh-CN": "7iezqn"
+  },
+  "immersive.page": {
+    "ar": "5jbdtt",
+    "de": "5jbdtt",
+    "fr": "5jbdtt",
+    "ja": "5jbdtt",
+    "ru": "5jbdtt",
+    "zh-CN": "5jbdtt"
+  },
+  "immersive.pos": {
+    "ar": "gabgci",
+    "de": "gabgci",
+    "fr": "gabgci",
+    "ja": "gabgci",
+    "ru": "gabgci",
+    "zh-CN": "gabgci"
+  },
+  "immersive.pos.adj": {
+    "ar": "q9fe6d",
+    "de": "q9fe6d",
+    "fr": "q9fe6d",
+    "ja": "q9fe6d",
+    "ru": "q9fe6d",
+    "zh-CN": "q9fe6d"
+  },
+  "immersive.pos.noun": {
+    "ar": "wdn8vi",
+    "de": "wdn8vi",
+    "fr": "wdn8vi",
+    "ja": "wdn8vi",
+    "ru": "wdn8vi",
+    "zh-CN": "wdn8vi"
+  },
+  "immersive.pos.verb": {
+    "ar": "ra2pxl",
+    "de": "ra2pxl",
+    "fr": "ra2pxl",
+    "ja": "ra2pxl",
+    "ru": "ra2pxl",
+    "zh-CN": "ra2pxl"
+  },
+  "immersive.speak": {
+    "ar": "br6gp2",
+    "de": "br6gp2",
+    "fr": "br6gp2",
+    "ja": "br6gp2",
+    "ru": "br6gp2",
+    "zh-CN": "br6gp2"
+  },
+  "immersive.syllables": {
+    "ar": "37qm8t",
+    "de": "37qm8t",
+    "fr": "37qm8t",
+    "ja": "37qm8t",
+    "ru": "37qm8t",
+    "zh-CN": "37qm8t"
+  },
+  "immersive.title": {
+    "ar": "mf8i03",
+    "de": "mf8i03",
+    "fr": "mf8i03",
+    "ja": "mf8i03",
+    "ru": "mf8i03",
+    "zh-CN": "mf8i03"
+  },
+  "immersive.translate": {
+    "ar": "qhhums",
+    "de": "qhhums",
+    "fr": "qhhums",
+    "ja": "qhhums",
+    "ru": "qhhums",
+    "zh-CN": "qhhums"
+  },
+  "immersive.translateFailed": {
+    "ar": "qe8aru",
+    "de": "qe8aru",
+    "fr": "qe8aru",
+    "ja": "qe8aru",
+    "ru": "qe8aru",
+    "zh-CN": "qe8aru"
+  },
+  "immersive.translating": {
+    "ar": "1glov4e",
+    "de": "1glov4e",
+    "fr": "1glov4e",
+    "ja": "1glov4e",
+    "ru": "1glov4e",
+    "zh-CN": "1glov4e"
+  },
+  "immersive.word": {
+    "ar": "1t5204d",
+    "de": "1t5204d",
+    "fr": "1t5204d",
+    "ja": "1t5204d",
+    "ru": "1t5204d",
+    "zh-CN": "1t5204d"
+  },
   "jewishLang.dict.pending": {
     "ar": "fstejs",
     "de": "fstejs",
@@ -2133,6 +2301,22 @@
     "ja": "1kfhgw2",
     "ru": "1kfhgw2",
     "zh-CN": "1kfhgw2"
+  },
+  "readingMode.mode.immersive": {
+    "ar": "mf8i03",
+    "de": "mf8i03",
+    "fr": "mf8i03",
+    "ja": "mf8i03",
+    "ru": "mf8i03",
+    "zh-CN": "mf8i03"
+  },
+  "readingMode.mode.immersive.hint": {
+    "ar": "382wbo",
+    "de": "382wbo",
+    "fr": "382wbo",
+    "ja": "382wbo",
+    "ru": "382wbo",
+    "zh-CN": "382wbo"
   },
   "readingMode.mode.page": {
     "ar": "1sfsa6u",

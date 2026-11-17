@@ -66,5 +66,7 @@
   "readingMode.layout.sideBySide": "Beside its translation",
   "readingMode.layout.spread": "Two-page spread",
   "readingMode.mode.rsvp": "One word at a time (RSVP)",
-  "readingMode.mode.rsvp.hint": "Each word at a fixed point, with its recognition letter marked; slows at punctuation; rewind a sentence any time."
+  "readingMode.mode.rsvp.hint": "Each word at a fixed point, with its recognition letter marked; slows at punctuation; rewind a sentence any time.",
+  "readingMode.mode.immersive": "Immersive reader",
+  "readingMode.mode.immersive.hint": "Parts of speech in colour, syllables or niqqud, a word's translation and sound, and line focus — all on this device."
 }

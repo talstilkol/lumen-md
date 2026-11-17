@@ -13,6 +13,7 @@ goes back to what it was.
 | Mode | What it does |
 |---|---|
 | Page | The note as a clean page to read and highlight, alone or beside its translation. |
+| Immersive reader | Parts of speech in colour, syllables or niqqud, a word's translation and sound, line focus. |
 | One word at a time (RSVP) | Experimental. Each word at a fixed point with rewind built in. |
 | Focus | A distraction-free screen for the editor. The line, the sentence or the paragraph you are in stays bright and the rest dims (as in iA Writer), with optional readability highlights. |
 
@@ -73,6 +74,33 @@ word, the 2nd of 2–5 letters, the 3rd of 6–9, the 4th of 10–13, else the
 letters or more the prefix letters (ו ה ב כ ל מ ש) are skipped, leaving at
 least three — ״וכשהבית״ is read from ״בית״. A word that only looks prefixed
 (״מחשבה״) puts the point one letter later. Niqqud stays on its letter.
+
+## Immersive reader
+
+After Microsoft's Immersive Reader, with what it lacks in Hebrew. Choose
+*Immersive reader* in the menu and **Open**:
+
+- **Parts of speech** in colour — nouns, verbs, adjectives, each on or
+  off — with **labels** above the words (*n*, *v*, *adj*; ש״ע, פ׳, ת׳) so the
+  colour is never the only cue. The words are tagged on this device: rules
+  and a small lexicon, no model and no download.
+- **Syllables** for English (*syl·la·ble*) by rule; for Hebrew the parallel
+  aid is **niqqud for reading**, added by the on-device model and never
+  written to the note.
+- **A word**: click it (or move with the arrows and press Enter) to see its
+  part of speech and its translation from the offline lexicon; when the
+  lexicon has none, *Translate on this device* uses the local translation
+  layers, which ask before downloading anything. *Read aloud* uses this
+  device's voices only.
+- **Line focus** of 1, 3 or 5 lines follows the word you are on; ↑ ↓ move a
+  line, ← → a word along the text.
+
+How accurate the tagging is, on hand-tagged sentences that were never used
+to tune it: **English 93.2%** (302 of 324 words); **Hebrew 85.7%** (282 of
+329). The Hebrew goal is 90%; a local model (DictaBERT-joint, once its
+licence is cleared) is the next step. Present participles that work as
+adjectives (מרוצים, מבוגרים) and verbs outside the lexicon are the usual
+misses.
 
 ## Anchor emphasis — experimental, weak evidence
 
@@ -146,7 +174,7 @@ are clamped (a `width: 200` reads as the widest column).
 
 | Key | Values |
 |---|---|
-| `mode` | `page`, `focus`, `rsvp` |
+| `mode` | `page`, `focus`, `rsvp`, `immersive` |
 | `font` | `default`, `heebo`, `frankRuhl`, `notoSans`, `notoSerif`, `assistant`, `davidLibre` |
 | `size`, `lineHeight`, `width` | 14–28 px, 1.3–2.4, 40–120 ch |
 | `spacedHebrew`, `dyslexiaLatin`, `aids` | `true` / `false` |
@@ -159,4 +187,5 @@ are clamped (a `width: 200` reads as the widest column).
 | `focusUnit` | `line`, `sentence`, `paragraph` (with `mode: focus`) |
 | `hemingway` | `true` / `false` |
 | `anchor` | `true` / `false` (anchor emphasis, off by default) |
+| `pos`, `syllables` | `true` / `false` (immersive reader) |
 | `wpm` | 150–600 (RSVP) |
