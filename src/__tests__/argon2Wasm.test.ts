@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { argon2id as argon2idAny, type Argon2Input } from "../sync/e2ee/primitives";
-import { argon2FillWasm, setArgon2WasmDisabled } from "../sync/e2ee/primitives/wasm/argon2fillLoader";
+import { argon2FillWasm, __setArgon2WasmDisabledForTests } from "../sync/e2ee/primitives/wasm/argon2fillLoader";
 import { ARGON2_FILL_WASM_B64, ARGON2_FILL_WASM_SHA256 } from "../sync/e2ee/primitives/wasm/argon2fillWasm";
 
 // The in-house primitive (the interface's default), synchronous.
@@ -18,11 +18,11 @@ const RFC_TAG = "0d640df58d78766c08c037a34a8b53c9d01ef0452d75b65eb52520e96b01e65
 
 const both = (input: Argon2Input): [string, string] => {
   const wasm = hex(argon2id(input));
-  setArgon2WasmDisabled(true);
+  __setArgon2WasmDisabledForTests(true);
   try {
     return [wasm, hex(argon2id(input))];
   } finally {
-    setArgon2WasmDisabled(false);
+    __setArgon2WasmDisabledForTests(false);
   }
 };
 
@@ -80,12 +80,12 @@ describe("Argon2id: the WebAssembly memory fill (W4.20)", () => {
   });
 
   it("falls back to the TypeScript fill when WebAssembly is off, with the same RFC tag", () => {
-    setArgon2WasmDisabled(true);
+    __setArgon2WasmDisabledForTests(true);
     try {
       expect(argon2FillWasm(1024)).toBeNull();
       expect(hex(argon2id(RFC9106))).toBe(RFC_TAG);
     } finally {
-      setArgon2WasmDisabled(false);
+      __setArgon2WasmDisabledForTests(false);
     }
   });
 });

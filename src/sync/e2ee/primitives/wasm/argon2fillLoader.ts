@@ -27,9 +27,9 @@ const MAX_BYTES = 4 * 1024 * 1024 * 1024 - PAGE;
 
 let module: WebAssembly.Module | null | undefined;
 
-/** Force the TypeScript fill (tests: both paths must give the same bytes). */
+/** Test hook (not a feature seam): force the TypeScript fill, so a test can hold both paths to the same bytes. */
 let disabled = false;
-export function setArgon2WasmDisabled(off: boolean): void {
+export function __setArgon2WasmDisabledForTests(off: boolean): void {
   disabled = off;
 }
 

@@ -32,9 +32,9 @@ async function defaultDeps(): Promise<ProtectAiDeps> {
     isCached: async (id) => {
       const entry = (await loadConvertedRegistry()).get(id);
       if (!entry || typeof navigator === "undefined" || !navigator.storage?.getDirectory) return false;
-      const { isModelCached } = await import("../ai/modelCache");
-      const root = (await navigator.storage.getDirectory()) as unknown as Parameters<typeof isModelCached>[0];
-      return isModelCached(root, entry, "q8");
+      // The OPFS root is opened by modelCache (the one place model files are read), not here.
+      const { isModelCachedInOpfs } = await import("../ai/modelCache");
+      return isModelCachedInOpfs(entry, "q8");
     },
     logits: async (texts, model, host, signal) => (await import("../ai/transformersEngine")).sequenceLogitsLocal(texts, model, { host, signal }),
   };
