@@ -1,4 +1,7 @@
 {
+  "toast.abstractFailed": "Could not write the abstract: {error}",
+  "toast.abstractNoModel": "No local model answered: showing sentences taken from the note.",
+  "toast.abstractWorking": "Writing the titles and the abstract…",
   "toast.actionItemsAdded": "✅ Actions ajoutées",
   "toast.actionItemsFailed": "Échec de l'extraction des actions : {error}",
   "toast.addedTag": "✅ Tags ajoutés : {count}",
@@ -40,6 +43,10 @@
   "toast.documentRefactoredSuccessfully": "Document refactorisé avec succès !",
   "toast.documentTooShortForOutline": "Document trop court pour générer un plan",
   "toast.documentTranslated": "✅ Document traduit",
+  "toast.explainChangeFailed": "Could not explain the change: {error}",
+  "toast.explainChangeNoHistory": "This note has no earlier version yet. Save it, edit, and try again.",
+  "toast.explainChangePick": "Compare the note now with which version?",
+  "toast.explainChangeWorking": "Comparing the versions…",
   "toast.extractingActionItems": "✅ Extraction des actions…",
   "toast.generatingChart": "📊 Génération du graphique…",
   "toast.generatingDiagram": "🧩 Génération du diagramme…",

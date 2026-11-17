@@ -1,0 +1,40 @@
+{
+ "card": {
+  "schema": 1,
+  "tag": "dev",
+  "agent": "structureCritic",
+  "model": {
+   "name": "rules (no model; the topic-sentence model is optional)",
+   "digest": "n/a (no model weights)"
+  },
+  "seed": 7,
+  "temperature": 0,
+  "dataset": {
+   "name": "eval/writing/structureCritic/synthetic",
+   "version": "1",
+   "license": "MIT (written for lumen-md; synthetic)",
+   "origin": "synthetic"
+  },
+  "n": 120,
+  "metrics": {
+   "precision": {
+    "value": 1,
+    "ci95": [
+     1,
+     1
+    ],
+    "method": "bootstrap"
+   },
+   "recall": {
+    "value": 1,
+    "ci95": [
+     1,
+     1
+    ],
+    "method": "bootstrap"
+   }
+  }
+ },
+ "predictions": 108,
+ "labels": 108
+}

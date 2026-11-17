@@ -1,5 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { renderMarkdown, renderMarkdownFast, extractFrontmatter, RenderSuperseded } from "./pipeline";
+import { registerLineBases } from "./sourceLineRegistry";
+import { useSidenotes } from "../reading/sidenotesSetting";
+import { useNoteSpread } from "../reading/noteSpreadHook";
 import { dashboardLayout, dashboardProps } from "./dashboard";
 import { nextVersion, renderWorkerWarm } from "./renderClient";
 import { subscribePluginLangs } from "../plugins/runtime/rendererRegistry";
@@ -49,7 +52,7 @@ let fullPipelineWarm = false;
 /** Synchronous plain-text pass; null if it throws (the full pass reports). */
 function safeFastRender(markdownText: string): React.ReactElement | null {
   try {
-    return renderMarkdownFast(markdownText);
+    return renderMarkdownFast(markdownText, { lines: true });
   } catch {
     return null;
   }
@@ -57,6 +60,8 @@ function safeFastRender(markdownText: string): React.ReactElement | null {
 
 export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset = 0 }: Props) {
   const rootRef = useRef<HTMLDivElement | null>(null);
+  // The margins reading mode (plan W13.R9), loaded when switched on.
+  useSidenotes(rootRef);
   const textRef = useRef(markdownText);
   textRef.current = markdownText;
   const editRef = useRef(onSourceEdit);
@@ -117,6 +122,8 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
   // The document the *displayed* tree was rendered from — it lags `docKey`
   // until the async render for the new document lands.
   const [treeDocKey, setTreeDocKey] = useState<string | null>(docKey);
+  // Book pages (plan W13.R6): a note left in two-page spreads opens in them, once its text is in.
+  useNoteSpread(rootRef, treeDocKey, tree);
   const [error, setError] = useState<string | null>(null);
   const [themeVersion, setThemeVersion] = useState(0);
   const seqRef = useRef(0);
@@ -174,10 +181,12 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
     const stale = () => seq !== seqRef.current;
     const channel = () => ({ id: channelRef.current!, version: nextVersion(channelRef.current!) });
     const render = async (): Promise<React.ReactElement | null> => {
-      if (markdownText.length < LARGE_DOC_CHARS) return renderMarkdown(markdownText, isDark, { channel: channel() });
+      if (markdownText.length < LARGE_DOC_CHARS) return renderMarkdown(markdownText, isDark, { channel: channel(), lines: true });
       const m = await import("./incrementalPreview");
-      if (!m.canRenderInBlocks(markdownText)) return renderMarkdown(markdownText, isDark, { channel: channel() });
+      if (!m.canRenderInBlocks(markdownText)) return renderMarkdown(markdownText, isDark, { channel: channel(), lines: true });
       const inc = (incrementalRef.current ??= new m.IncrementalPreview());
+      // Scroll sync (plan W13.R7) turns a block's key into its first line.
+      if (rootRef.current) registerLineBases(rootRef.current, () => inc.lineBases());
       // Viewport first (plan 8.1 step 3): the blocks in view, then the rest while idle.
       const el = await inc.render(markdownText, isDark, stale, {
         focusOffset: focusRef.current,
@@ -200,7 +209,7 @@ export function Preview({ markdownText, docKey = null, onSourceEdit, focusOffset
         ? import("./embedContext")
             .then((m) => m.loadEmbedContext(markdownText, renderedFor))
             .catch(() => undefined)
-            .then(async (embeds) => ({ el: await renderMarkdown(markdownText, isDark, { embeds, channel: channel() }), embeds }))
+            .then(async (embeds) => ({ el: await renderMarkdown(markdownText, isDark, { embeds, channel: channel(), lines: true }), embeds }))
         : render().then((el) => ({ el, embeds: undefined }));
       rendered
         .then(({ el, embeds }) => {

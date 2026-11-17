@@ -356,6 +356,36 @@ export const STEPS = [
     covers: ["mobile:(check|android|ios)", "gcloud firebase test android", "ANDROID_HOME|ANDROID_KEYSTORE|ASC_KEY|APPLE_TEAM_ID", "Codemagic", "gradlew", "Play Console|TestFlight"],
   },
   {
+    id: "devices/reading-study",
+    session: "devices",
+    minutes: 240,
+    plan: ["W13.R14", "W13.R3", "W13.R4"],
+    prs: [],
+    en: "Reading study: 6 readers (2 with dyslexia), every reading mode, time, comprehension and preference",
+    he: "בדיקת קריאה: 6 קוראים (שניים עם דיסלקציה), כל מצבי הקריאה, זמן, הבנה והעדפה",
+    do: {
+      en: ["Recruit 6 readers, 2 of them with dyslexia; give each a pseudonymous id (r1…r6) and a different slot 0–5. No names are recorded.", "Per reader: `node scripts/owner/readingStudy.mjs blank r1 --slot 0 [--dyslexia] > eval/results/reading/r1.json`, then run the six readings in that order: the passage in the mode named, timed; the three questions; a 1–5 preference.", "Fill in seconds, answers (option index) and preference; `node scripts/owner/readingStudy.mjs summary` writes the summary and the keep/drop decision for RSVP and anchor emphasis."],
+      he: ["לגייס 6 קוראים, שניים מהם עם דיסלקציה; לתת לכל אחד מזהה בדוי (r1…r6) ומשבצת אחרת 0–5. לא רושמים שמות.", "לכל קורא: ‏`node scripts/owner/readingStudy.mjs blank r1 --slot 0 [--dyslexia] > eval/results/reading/r1.json`, ואז שש הקריאות לפי הסדר: הקטע במצב שנקבע, עם מדידת זמן; שלוש השאלות; העדפה 1–5.", "למלא שניות, תשובות (מספר האפשרות) והעדפה; ‏`node scripts/owner/readingStudy.mjs summary` כותב את הסיכום ואת ההחלטה — נשאר או יוצא — ל-RSVP ולעוגן הקריאה."],
+    },
+    checks: [
+      {
+        id: "sessions",
+        auto: true,
+        en: "6 valid sessions (2 with dyslexia) and a decision for each experimental mode",
+        he: "6 סשנים תקינים (שניים עם דיסלקציה) והחלטה לכל מצב ניסיוני",
+        run: async (ctx) => {
+          const { loadProtocol, readSessions, status } = await import("./readingStudy.mjs");
+          const protocol = loadProtocol(ctx.path("eval/reading-study/protocol.json"));
+          const s = status(readSessions(ctx.path("eval/results/reading")), protocol);
+          const decisions = Object.entries(s.decisions).map(([k, v]) => `${k}: ${v.decision}`).join(", ");
+          return ok(s.done, `${s.sessions} sessions, ${s.dyslexic} with dyslexia; ${decisions}`, `${s.sessions}/6 sessions, ${s.dyslexic}/2 with dyslexia${s.invalid.length ? `, ${s.invalid.length} invalid` : ""}`);
+        },
+      },
+      manual("consent", "Each reader agreed to take part; no names or other personal data were recorded", "כל קורא הסכים להשתתף; לא נרשמו שמות או פרטים אישיים אחרים"),
+    ],
+    covers: ["reading study|readingStudy\\.mjs|W13\\.R14"],
+  },
+  {
     id: "devices/live-and-merge",
     session: "devices",
     minutes: 25,

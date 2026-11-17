@@ -5,11 +5,20 @@
  *   npm run eval:card                       every *.json under eval/results and eval/cards
  *   npm run eval:card -- <file|dir> …       these reports
  *   npm run eval:card -- --json             one line of JSON per report
+ *   npm run eval:card -- --agent <id>       the writing agent's card (eval/cards/writing/<id>.json), W13.W2
+ *   npm run eval:card -- --suite writing --check
+ *                                           every writing eval set (eval/writing/<agent>) has a complete,
+ *                                           current card: its dataset version is the set's manifest, and the
+ *                                           set has ≥ 150 items in Hebrew and in English
+ *                                           an agent without an eval set (eval/writing/<id>): its card in
+ *                                           eval/cards/writing/<id>.json, or any report whose card.agent or
+ *                                           top-level agent is <id> (W13.W6–W12); exit 2 without an id
  *
  * Exit 1 when any report has no card or its card is missing a field
  * (scripts/lib/evalCard.mjs lists them). Exit 0 with nothing to check.
  */
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -45,9 +54,94 @@ export function checkReports(paths, { root = ROOT } = {}) {
   });
 }
 
+/** W13.W2: the dataset version a writing card must carry — the manifest's version and its files' digests. */
+export function writingSetVersion(root, agent) {
+  const m = JSON.parse(readFileSync(join(root, "eval/writing", agent, "manifest.json"), "utf8"));
+  return { m, version: `${m.version}+${createHash("sha256").update(m.files["he.jsonl"].sha256 + m.files["en.jsonl"].sha256).digest("hex").slice(0, 12)}` };
+}
+
+/** The card of one writing agent, with what is wrong with it (complete, current, ≥ 150 items a language). */
+export function checkWritingAgent(agent, { root = ROOT } = {}) {
+  const file = join("eval/cards/writing", `${agent}.json`);
+  const [r] = existsSync(join(root, file)) ? checkReports([file], { root }) : [{ file, problems: ["no card (run its eval with LUMEN_WRITE_CARDS=1)"] }];
+  if (!existsSync(join(root, "eval/writing", agent, "manifest.json"))) return { ...r, problems: [...r.problems, `no eval set eval/writing/${agent}`] };
+  const { m, version } = writingSetVersion(root, agent);
+  const problems = [...r.problems];
+  for (const lang of ["he", "en"]) {
+    const f = m.files?.[`${lang}.jsonl`];
+    const lines = existsSync(join(root, "eval/writing", agent, `${lang}.jsonl`)) ? readFileSync(join(root, "eval/writing", agent, `${lang}.jsonl`), "utf8").trim().split("\n").length : 0;
+    if (!f || lines < 150) problems.push(`eval/writing/${agent}/${lang}.jsonl: ${lines} items (≥ 150 needed)`);
+    else if (createHash("sha256").update(readFileSync(join(root, "eval/writing", agent, `${lang}.jsonl`), "utf8")).digest("hex") !== f.sha256) problems.push(`eval/writing/${agent}/${lang}.jsonl does not match its manifest`);
+  }
+  if (!r.problems.length) {
+    const card = cardOf(JSON.parse(readFileSync(join(root, file), "utf8")));
+    if (card.dataset.version !== version) problems.push(`card.dataset.version ${card.dataset.version} is stale (the set is ${version}): re-run the eval`);
+  }
+  return { ...r, problems };
+}
+
+/** Every writing agent with an eval set (a folder with a manifest; W13.W9/W10's plain fixtures are not sets). */
+export function writingAgentsWithSets(root = ROOT) {
+  const dir = join(root, "eval/writing");
+  return existsSync(dir) ? readdirSync(dir, { withFileTypes: true }).filter((e) => e.isDirectory() && existsSync(join(dir, e.name, "manifest.json"))).map((e) => e.name).sort() : [];
+}
+
+/**
+ * The reports that carry one agent's card: its file under eval/cards/writing,
+ * and every report in the default folders whose card names the agent.
+ * @param {string} agent
+ * @param {{ root?: string }} [o]
+ */
+export function agentReports(agent, { root = ROOT } = {}) {
+  const own = join(root, "eval/cards/writing", `${agent}.json`);
+  const named = DEFAULT_DIRS.flatMap((d) => jsonFiles(resolve(root, d))).filter((f) => {
+    try {
+      const j = JSON.parse(readFileSync(f, "utf8"));
+      return j?.card?.agent === agent || j?.agent === agent;
+    } catch {
+      return false;
+    }
+  });
+  return [...new Set([...(existsSync(own) ? [own] : []), ...named])].map((f) => relative(root, f));
+}
+
 export function main(argv, { root = ROOT, log = console.log, err = console.error } = {}) {
   const json = argv.includes("--json");
-  const results = checkReports(argv.filter((a) => !a.startsWith("--")), { root });
+  const at = (flag) => (argv.includes(flag) ? argv[argv.indexOf(flag) + 1] : undefined);
+  const ai = argv.indexOf("--agent");
+  const agent = at("--agent");
+  const suite = at("--suite");
+  if (ai >= 0 && (!agent || agent.startsWith("--"))) {
+    err("eval:card: --agent needs an agent id");
+    return 2;
+  }
+  if (suite !== undefined && suite !== "writing") {
+    err(`eval:card: unknown suite ${suite} (known: writing)`);
+    return 1;
+  }
+  // An agent with an eval set (W13.W2) is held to its set; one without (W13.W6–W10) to its card alone.
+  if (suite === "writing" || (agent !== undefined && existsSync(join(root, "eval/writing", agent, "manifest.json")))) {
+    const agents = agent !== undefined ? [agent] : writingAgentsWithSets(root);
+    const results = agents.map((a) => checkWritingAgent(a, { root }));
+    for (const r of results) {
+      if (json) log(JSON.stringify(r));
+      else if (r.problems.length) err(`✗ ${r.file}\n    ${r.problems.join("\n    ")}`);
+      else log(`✓ ${r.file} (${r.tag}) — card complete`);
+    }
+    const bad = results.filter((r) => r.problems.length).length;
+    if (!json) log(`eval:card: ${results.length - bad}/${results.length} writing agents carry a complete, current card`);
+    return bad || !results.length ? 1 : 0;
+  }
+  if (agent !== undefined) {
+    const files = agentReports(agent, { root });
+    if (!files.length) {
+      err(`eval:card: no card for agent "${agent}" (expected eval/cards/writing/${agent}.json)`);
+      return 1;
+    }
+    argv = [...argv.slice(0, ai), ...argv.slice(ai + 2), ...files];
+  }
+  const skip = new Set(["--json", "--check"]);
+  const results = checkReports(argv.filter((a) => !a.startsWith("--") && !skip.has(a)), { root });
   for (const r of results) {
     if (json) log(JSON.stringify(r));
     else if (r.problems.length) err(`✗ ${r.file}\n    ${r.problems.join("\n    ")}`);

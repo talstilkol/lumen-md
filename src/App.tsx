@@ -91,6 +91,8 @@ import { useWindowEvent } from "./hooks/useWindowEvent";
 import { useOpenedOnce } from "./hooks/useOpenedOnce";
 const GraphOverlay = lazy(() => import("./ui/GraphOverlay").then((m) => ({ default: m.GraphOverlay })));
 import { DropHint } from "./ui/DropHint";
+// W13.R7: the linked three-column view is a reading mode; its root carries the marker (src/reading/modes.ts).
+import { modeRoot } from "./reading/modeRoot";
 
 export default function App() {
   const doc = useAppStore((s) => s.doc);
@@ -104,6 +106,7 @@ export default function App() {
   const reorderTabs = useAppStore((s) => s.reorderTabs);
   const mode = useAppStore((s) => s.mode);
   const showOutline = useAppStore((s) => s.showOutline);
+  const syncScroll = useAppStore((s) => s.syncScroll);
   const outlineSheet = useAppStore((s) => s.outlineSheet);
   // Phone width (plan 10.2.4): the outline shows as a bottom sheet, opened on demand.
   const [narrow, setNarrow] = useState(isNarrowScreen);
@@ -183,6 +186,7 @@ export default function App() {
   const [runtimeMetricsOpen, setRuntimeMetricsOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
+  useWindowEvent("lumen-open-focus", () => setFocusMode(true));
   const [tourOpen, setTourOpen] = useState(false);
   const [setupOpen, setSetupOpen] = useState(false);
 
@@ -435,7 +439,7 @@ export default function App() {
             preview sections inflate to the full document height, their inner
             scrollers never overflow, and pane scrolling + scroll-sync go
             dead — the whole page scrolls as one block instead. */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, minHeight: 0 }} {...modeRoot("triple", mode === "split" && showOutline && syncScroll === "all")}>
           <DocTabs
             tabs={openTabs.map((t) => ({
               id: t.id,

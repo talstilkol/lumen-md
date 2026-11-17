@@ -8,12 +8,16 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { t } from "../i18n";
 import { loadEntityGraph, type EntityGraphData } from "../entities/graphData";
+import { splitFrontmatter } from "../entities/frontmatter";
 import type { EntityVault } from "../entities/vaultIo";
 import { useAppStore } from "../store/useStore";
 import { Modal } from "./Modal";
 import { explainError } from "../lib/userError";
 import "./entityGraphStrings";
 import { EmptyState, learnHow } from "./EmptyState";
+// W13.G7: family trees in (GEDCOM 5.5.1 / 7.0) and out (7.0).
+import { GedcomImport } from "./GedcomImport";
+import "./familyStrings";
 
 export interface EntityGraphScreenProps {
   onClose: () => void;
@@ -32,15 +36,27 @@ const EXPORT_FORMATS = [
   ["graphml", "GraphML"],
   ["turtle", "RDF/Turtle (PROV-O)"],
   ["neo4j", "Neo4j CSV"],
+  ["gedcom", "GEDCOM 7"],
 ] as const;
 
 const bar: React.CSSProperties = { display: "flex", alignItems: "center", gap: 12, padding: "8px 16px", borderBottom: "1px solid hsl(var(--border))" };
 const muted: React.CSSProperties = { padding: "2rem", color: "hsl(var(--fg-muted))" };
 
+/** Person entities with their notes' front matter (born, died, sex) for the family tree. */
+function peopleOfData(d: EntityGraphData) {
+  return d.entities.filter((e) => e.type === "person").map((entity) => {
+    const path = d.noteOf.get(entity.id);
+    const text = path ? d.texts.get(path) : undefined;
+    return { entity, props: text ? splitFrontmatter(text).props : {} };
+  });
+}
+
 export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphScreenProps) {
   const [data, setData] = useState<EntityGraphData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState<string | null>(null);
+  // W13.G7: a GEDCOM import reloads the graph.
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
     let off = false;
@@ -51,7 +67,7 @@ export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphSc
     return () => {
       off = true;
     };
-  }, [vault]);
+  }, [vault, reload]);
 
   const open = async (id: string) => {
     const path = data?.noteOf.get(id);
@@ -77,6 +93,16 @@ export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphSc
   // W12.E8: the graph as JSON-LD, GraphML, Turtle (PROV-O) or Neo4j import CSV, downloaded — never sent anywhere.
   const exportAs = async (format: string) => {
     if (!data || !format) return;
+    if (format === "gedcom") {
+      // W13.G7: the people and their spouse / child relations as GEDCOM 7.0.
+      const { exportGedcom, peopleOf } = await import("../entities/gedcom");
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([exportGedcom(peopleOf(data.entities, data.noteOf, data.texts), data.edges)], { type: "text/vnd.familysearch.gedcom;charset=utf-8" }));
+      a.download = "family.ged";
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      return;
+    }
     const { exportGraph } = await import("../entities/export");
     const files = exportGraph({ entities: data.entities, edges: data.edges }, format as "jsonld" | "graphml" | "turtle" | "neo4j");
     for (const [name, text] of Object.entries(files)) {
@@ -112,6 +138,7 @@ export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphSc
             </select>
           </label>
         )}
+        {data && <GedcomImport files={data.texts} taken={new Set(data.entities.map((e) => e.id))} vault={vault} onImported={() => setReload((n) => n + 1)} />}
         <button type="button" className="icon-btn" onClick={onClose} style={{ marginInlineStart: data && data.entities.length > 0 ? undefined : "auto", width: "auto", padding: "4px 12px", fontSize: 12 }}>
           {t("entityGraph.screen.close")}
         </button>
@@ -137,7 +164,7 @@ export function EntityGraphScreen({ onClose, vault, initialMode }: EntityGraphSc
                 onBack={() => setPage(null)}
               />
             ) : (
-              <EntityGraphView entities={data.entities} edges={data.edges} notes={data.notes} onOpenEntity={setPage} initialMode={initialMode} />
+              <EntityGraphView entities={data.entities} edges={data.edges} notes={data.notes} texts={data.texts} onOpenEntity={setPage} onOpenSource={(note, anchor) => void openAt(note, anchor)} initialMode={initialMode} people={peopleOfData(data)} />
             )}
           </Suspense>
         )}

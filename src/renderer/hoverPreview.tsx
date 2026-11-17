@@ -15,6 +15,7 @@ import type { ReactElement } from "react";
 import { renderHoverCard } from "./pipeline";
 export { PREVIEW_LINES, previewMarkdown } from "./hoverMarkdown";
 import { resolveWikiTarget, splitWikiTarget } from "./wikiLinks";
+import { isEntityEmbed } from "./embeds";
 import { ensureIndex, indexedFiles, indexedNoteText } from "../storage/workspaceIndex";
 import { isOPFSAvailable } from "../storage/workspace";
 import { t } from "../i18n";
@@ -41,6 +42,12 @@ async function noteFor(target: string): Promise<{ path: string; content: string;
 export async function renderPreview(target: string): Promise<ReactElement | null> {
   const n = await noteFor(target);
   if (!n) return null;
+  // W13.G6: a mention of an entity shows the entity's infobox.
+  if (!n.fragment && isEntityEmbed(n.path, n.content)) {
+    const { entityHoverCard } = await import("../ui/entity/EntityInfoboxBlock");
+    const card = await entityHoverCard(n.path, n.content);
+    if (card) return card;
+  }
   const key = `${n.path}\u0000${n.modified}\u0000${n.fragment ?? ""}\u0000${n.content.length}`;
   let el = cache.get(key);
   if (!el) {

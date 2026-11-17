@@ -37,6 +37,24 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       action: () => void import("../../ai/mt/openSideBySide").then((m) => m.openSideBySide()),
     },
     {
+      id: "view.daf",
+      label: t("cmd.view.daf"),
+      hint: t("cmd.view.daf.hint"),
+      icon: cmdIcons.Columns2,
+      group: t("group.view"),
+      // W13.R11: the main text with its commentaries around it (lazy; reads the vault only).
+      action: () => void import("../../reading/daf/openDaf").then((m) => m.openDaf()),
+    },
+    {
+      id: "view.bilingual",
+      label: t("cmd.view.bilingual"),
+      hint: t("cmd.view.bilingual.hint"),
+      icon: cmdIcons.Columns2,
+      group: t("group.view"),
+      // W13.R12: official versions or the W12.H6 sidecar, by verse; columns, interlinear, source only.
+      action: () => void import("../../reading/bilingual/openBilingual").then((m) => m.openBilingual()),
+    },
+    {
       id: "view.preview",
       label: t("cmd.view.preview"),
       shortcut: "⌘3",
@@ -164,6 +182,15 @@ export function buildViewCommands({ setSearchOpen, setRuntimeMetricsOpen, vimEna
       group: t("group.file"),
       // Plan W1.14: copies the book into the vault and opens it in the reader.
       action: () => void import("../../epub/openEpub").then((m) => m.pickAndOpenEpub()),
+    },
+    {
+      id: "view.readingProfile",
+      label: t("cmd.reading.profile"),
+      hint: t("desc.reading.profile"),
+      icon: cmdIcons.FileText,
+      group: t("group.file"),
+      // Plan W13.R1: one menu for every reading mode and the note's reading profile.
+      action: () => void import("../../ui/ReadingModeMenu").then((m) => m.openReadingModeMenu()),
     },
     {
       id: "view.reading",

@@ -1,4 +1,7 @@
 {
+  "toast.abstractFailed": "Could not write the abstract: {error}",
+  "toast.abstractNoModel": "No local model answered: showing sentences taken from the note.",
+  "toast.abstractWorking": "Writing the titles and the abstract…",
   "toast.actionItemsAdded": "✅ 已添加待办事项",
   "toast.actionItemsFailed": "待办事项提取失败：{error}",
   "toast.addedTag": "✅ 已添加标签：{count}",
@@ -40,6 +43,10 @@
   "toast.documentRefactoredSuccessfully": "文档重构成功！",
   "toast.documentTooShortForOutline": "文档太短，无法生成大纲",
   "toast.documentTranslated": "✅ 文档已翻译",
+  "toast.explainChangeFailed": "Could not explain the change: {error}",
+  "toast.explainChangeNoHistory": "This note has no earlier version yet. Save it, edit, and try again.",
+  "toast.explainChangePick": "Compare the note now with which version?",
+  "toast.explainChangeWorking": "Comparing the versions…",
   "toast.extractingActionItems": "✅ 正在提取待办事项…",
   "toast.generatingChart": "📊 正在生成图表…",
   "toast.generatingDiagram": "🧩 正在生成图示…",

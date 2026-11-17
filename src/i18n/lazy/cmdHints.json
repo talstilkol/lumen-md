@@ -235,5 +235,10 @@
   "cmd.voice.corpusRecorder.hint": "Record, check and export a CC0 speech corpus on this device (no upload)",
   "cmd.voice.meeting.hint": "Record a meeting, transcribe it on this device, and insert its decisions, tasks with owner and date, and open questions",
   "cmd.window.new.hint": "Another editor window; drag tabs between windows",
-  "cmd.file.exportTypstPdf.hint": "Compiled on this device by typst.ts, with a Hebrew font; nothing is sent"
+  "cmd.file.exportTypstPdf.hint": "Compiled on this device by typst.ts, with a Hebrew font; nothing is sent",
+  "cmd.writing.argument.hint": "Claims without a source, logical leaps and common fallacies, each with its reason",
+  "cmd.writing.consistency.hint": "Names, dates, numbers and your glossary terms across all notes, against the entity graph — suggestions to review",
+  "cmd.writing.harper.hint": "Local English grammar for the English parts of the note — suggestions to review",
+  "cmd.writing.readability.hint": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
+  "cmd.writing.structure.hint": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only"
 }

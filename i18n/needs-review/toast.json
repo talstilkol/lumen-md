@@ -1,0 +1,58 @@
+{
+  "toast.abstractFailed": {
+    "ar": "hhva1b",
+    "de": "hhva1b",
+    "fr": "hhva1b",
+    "ja": "hhva1b",
+    "ru": "hhva1b",
+    "zh-CN": "hhva1b"
+  },
+  "toast.abstractNoModel": {
+    "ar": "1j8n66m",
+    "de": "1j8n66m",
+    "fr": "1j8n66m",
+    "ja": "1j8n66m",
+    "ru": "1j8n66m",
+    "zh-CN": "1j8n66m"
+  },
+  "toast.abstractWorking": {
+    "ar": "1s7uye1",
+    "de": "1s7uye1",
+    "fr": "1s7uye1",
+    "ja": "1s7uye1",
+    "ru": "1s7uye1",
+    "zh-CN": "1s7uye1"
+  },
+  "toast.explainChangeFailed": {
+    "ar": "kbrs3p",
+    "de": "kbrs3p",
+    "fr": "kbrs3p",
+    "ja": "kbrs3p",
+    "ru": "kbrs3p",
+    "zh-CN": "kbrs3p"
+  },
+  "toast.explainChangeNoHistory": {
+    "ar": "b807oq",
+    "de": "b807oq",
+    "fr": "b807oq",
+    "ja": "b807oq",
+    "ru": "b807oq",
+    "zh-CN": "b807oq"
+  },
+  "toast.explainChangePick": {
+    "ar": "qu814z",
+    "de": "qu814z",
+    "fr": "qu814z",
+    "ja": "qu814z",
+    "ru": "qu814z",
+    "zh-CN": "qu814z"
+  },
+  "toast.explainChangeWorking": {
+    "ar": "195476t",
+    "de": "195476t",
+    "fr": "195476t",
+    "ja": "195476t",
+    "ru": "195476t",
+    "zh-CN": "195476t"
+  }
+}

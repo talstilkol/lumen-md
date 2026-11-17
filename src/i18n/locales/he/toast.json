@@ -1,4 +1,7 @@
 {
+  "toast.abstractFailed": "לא ניתן היה לכתוב את התקציר: {error}",
+  "toast.abstractNoModel": "אף מודל מקומי לא ענה: מוצגים משפטים מתוך הפתק.",
+  "toast.abstractWorking": "כותב כותרות ותקציר…",
   "toast.actionItemsAdded": "✅ המשימות נוספו",
   "toast.actionItemsFailed": "חילוץ המשימות נכשל: {error}",
   "toast.addedTag": "✅ תגיות שנוספו: {count}",
@@ -40,6 +43,10 @@
   "toast.documentRefactoredSuccessfully": "המסמך עבר ריפקטורינג בהצלחה!",
   "toast.documentTooShortForOutline": "המסמך קצר מדי ליצירת מבנה",
   "toast.documentTranslated": "✅ המסמך תורגם",
+  "toast.explainChangeFailed": "לא ניתן היה להסביר את השינוי: {error}",
+  "toast.explainChangeNoHistory": "לפתק אין עדיין גרסה קודמת. שמרו, ערכו ונסו שוב.",
+  "toast.explainChangePick": "להשוות את הפתק כעת לאיזו גרסה?",
+  "toast.explainChangeWorking": "משווה בין הגרסאות…",
   "toast.extractingActionItems": "✅ מחלץ משימות…",
   "toast.generatingChart": "📊 יוצר תרשים…",
   "toast.generatingDiagram": "🧩 יוצר דיאגרמה…",

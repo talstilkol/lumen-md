@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "plan": "W13.W16",
+  "rule": "Each writing agent runs a rule engine or a local model. A model agent's default for a device is the first candidate, in this order, whose RAM (OLLAMA_CATALOG ramGB) fits the device and whose licence class is allowed (models/registry.json); once W13.W17 measures them on the Mac, the highest measured score that fits wins, and a measured model must have a pinned digest. No model with a conditional or forbidden licence is ever a default.",
+  "tiers": [4, 8, 16, 32],
+  "candidates": {
+    "he": ["gemma4:26b", "gemma4:e4b", "gemma4:e2b", "qwen3:8b", "hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF", "qwen3:4b"],
+    "en": ["qwen3:14b", "qwen3:8b", "gemma4:e4b", "gemma4:e2b", "qwen3:4b"]
+  },
+  "agents": {
+    "proofreader": { "kind": "llm", "plan": "5.x" },
+    "stylist": { "kind": "llm", "plan": "5.x" },
+    "styleCoach": { "kind": "llm", "plan": "W13.W3" },
+    "toneShifter": { "kind": "llm", "plan": "W13.W4" },
+    "concision": { "kind": "llm", "plan": "W13.W5" },
+    "consistency": { "kind": "llm", "plan": "W13.W6" },
+    "structureCritic": { "kind": "llm", "plan": "W13.W7" },
+    "argumentChecker": { "kind": "llm", "plan": "W13.W8" },
+    "abstractWriter": { "kind": "llm", "plan": "W13.W12" },
+    "explainChange": { "kind": "llm", "plan": "W13.W13" },
+    "readability": { "kind": "rules", "engine": "lumen-rules", "plan": "W13.W9" },
+    "grammarEn": { "kind": "rules", "engine": "harper", "plan": "W13.W10" },
+    "repetition": { "kind": "rules", "engine": "lumen-rules", "plan": "W13.W11" },
+    "goals": { "kind": "rules", "engine": "lumen-rules", "plan": "W13.W14" },
+    "loanwords": { "kind": "rules", "engine": "lumen-rules", "plan": "W13.W15" },
+    "spelling": { "kind": "rules", "engine": "nspell", "plan": "W5.x", "external": ["hspell-he-dictionary"] }
+  },
+  "engines": {
+    "lumen-rules": { "license": "lumen-md's own code", "registry": null },
+    "harper": { "license": "Apache-2.0", "registry": "harper" },
+    "nspell": { "license": "MIT", "registry": "nspell" }
+  },
+  "measured": {},
+  "digests": {
+    "gemma4:26b": null,
+    "gemma4:e4b": null,
+    "gemma4:e2b": null,
+    "qwen3:14b": null,
+    "qwen3:8b": null,
+    "qwen3:4b": null,
+    "hf.co/dicta-il/DictaLM-3.0-1.7B-Thinking-GGUF": null
+  },
+  "digestsNote": "Pinned by the Mac measurement day (W13.W17) from `ollama show --modelfile` / the pulled manifest; null = not pinned yet, so the model cannot carry a measured score."
+}

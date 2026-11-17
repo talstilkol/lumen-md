@@ -1,9 +1,9 @@
 {
  "about": "W10.F7: a decision for every open PR whose head is not in the train (npm run train:missing). in = a task or train brings it; rejected = it will not go in, and why; replaced = what carries it instead. A decision is about one head: a PR that moves needs a new one.",
  "train": "verify/train-7",
- "trainHead": "91810ed48a819199840f8fdfce75f9af2274e4e8",
+ "trainHead": "03731e4fc359b639e6d9dc1610bc05404b69809e",
  "decided": "2026-11-17",
- "note": "Integrator INT6b (17.11): lane FA (#1110 #1111 #1116-#1119 #1127-#1130) and lane F11 (#1120-#1126) are merged into verify/train-7 from 78da492534; their heads are in the train. No other open PR was undecided against this head. trainHead is the integration head this file was checked against (before this commit): review 11 L13 asks the file to name the train head itself, which a commit of this file cannot do, so train:missing reports that line as stale after the push until the rule reads trainHead as an ancestor.",
+ "note": "Integrator INT7 (17.11): wave g3 (#1131-#1171, 41 PRs) is merged into verify/train-7 from a6ef1580a2; their heads are in the train. W13 statuses stay as plan.json has them (the WIP gate refuses wave-13 starts). trainHead is the integration head this file was checked against (before this commit).",
  "decisions": [
   {
    "pr": 109,
@@ -607,288 +607,505 @@
    "pr": 1131,
    "head": "da22b4d704e07e11956b327a7eb697f5862999dd",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R10"
   },
   {
    "pr": 1132,
    "head": "d58b9e0d60466c56c033f4b2fbbc99b07d6d2c2f",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R1"
   },
   {
    "pr": 1133,
    "head": "319b51832138d866b900d4415096873401e29f69",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.W11"
   },
   {
    "pr": 1134,
    "head": "1a9c9d145a993cb6463f4c0c60e38661fe2f4a69",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.G11"
   },
   {
    "pr": 1135,
    "head": "5e77c1bce25b096e7c5dbcd30e91a6143b67dda9",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R11"
   },
   {
    "pr": 1136,
    "head": "19ae3bd83fcd2721212be1597cc33c65c7a1e9ad",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.G12"
   },
   {
    "pr": 1137,
    "head": "4e417ec4e7c46615feca02e57ca4229cd340fb40",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.W12"
   },
   {
    "pr": 1138,
    "head": "5221f81bce3b149e6b5a809783630f34049b8612",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R12"
   },
   {
    "pr": 1139,
    "head": "373950350ad5d825f464a1c416dfd91d0235b3f3",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R2"
   },
   {
    "pr": 1140,
    "head": "719d0f9d087c2de34fd3ecc03cd4e4d0b3ef6f96",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R13"
   },
   {
    "pr": 1141,
    "head": "8cd69373289560ff28a6c8bf649143773f340902",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.W1"
   },
   {
    "pr": 1142,
    "head": "764ee4310a12a745687bf120bbf263f97a1fffd1",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.W3"
   },
   {
    "pr": 1143,
    "head": "989033036090a4350f945acea40e0c596d8526b2",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.W4"
   },
   {
    "pr": 1144,
    "head": "603cb6e567b55ad2969fb3576c6772569efb227f",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.W16"
   },
   {
    "pr": 1145,
    "head": "7d63622a90cd41a035f03b2eb54b9728ecc69c83",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.W5"
   },
   {
    "pr": 1146,
    "head": "fe965567bbe28b162831581993100571a8ef9669",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.W2"
   },
   {
    "pr": 1147,
    "head": "a26a6c5a5a5797e2956f665b681227ca37ab3377",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R7"
   },
   {
    "pr": 1148,
    "head": "227872e24afc7b1a0e4935a1b66d1fe310a7932a",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R14"
   },
   {
    "pr": 1149,
    "head": "ad1a5ca9228f61da9452006df302cfd663923b62",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R3"
   },
   {
    "pr": 1150,
    "head": "a0223f5fab8bd4c6d33d8a53acc0be0e979f8c0e",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.G9"
   },
   {
    "pr": 1151,
    "head": "53841363a921aa02ef51206dad7ee7f083e0ddb2",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R4"
   },
   {
    "pr": 1152,
    "head": "8bee936522e284bfdf2993ebf272989d8596ccb3",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R8"
   },
   {
    "pr": 1153,
    "head": "368fe1bafd684f5b9e1d7816e97771f3a410253c",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.W6"
   },
   {
    "pr": 1154,
    "head": "e2da61939fb475036281b2d44df6c36dd62106a0",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.W7"
   },
   {
    "pr": 1155,
    "head": "4b45895af5ade3fd8fe54d000bca899c58f73713",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.W8"
   },
   {
    "pr": 1156,
    "head": "6bcd35e3adc475aaf8c85fa432075cf83843084a",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.W9"
   },
   {
    "pr": 1157,
    "head": "5ce290797f2a2c45d9f0ab4e8e7ad066fdb971b7",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.W10"
   },
   {
    "pr": 1158,
    "head": "19b981e423db3f6c0103045a6be0aafd3124d9e3",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "the next integration"
   },
   {
    "pr": 1159,
    "head": "263ad66bc1e8537b676f52a4f6cea1dabfcc97de",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.G10"
   },
   {
    "pr": 1160,
    "head": "51594ff7839d90aff4e4ef72de073aceb44eb671",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R9"
   },
   {
    "pr": 1161,
    "head": "b1384065db7038ead6f2d690513506caccd4056a",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R6"
   },
   {
    "pr": 1162,
    "head": "52ca0026e9cf7a60aac69d69156563728ea405a8",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.R5"
   },
   {
    "pr": 1163,
    "head": "5ee50779dcd5df8a13543994987cfeeb37f95d95",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.G8"
   },
   {
    "pr": 1164,
    "head": "4f26ad69e618c825a3ad68f32b83af3a1ff71141",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.G1"
   },
   {
    "pr": 1165,
    "head": "b740685007dd7537d9371f43baa931706d9030a5",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.G2"
   },
   {
    "pr": 1166,
    "head": "e15b05ef9c46e454f89a743eaee9559065df325f",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.G3"
   },
   {
    "pr": 1167,
    "head": "cf0dae0d1e4299e58384d46dacb631517480ee93",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.G4"
   },
   {
    "pr": 1168,
    "head": "d6e7b275118cbaf254661afc8743b15f0bd98e6b",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.G5"
   },
   {
    "pr": 1169,
    "head": "7c060d4e0770dd380548e1912d858164a610e28e",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.G6"
   },
   {
    "pr": 1170,
    "head": "33038fb18d4c19d23c6216b72c4b6469973baee9",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.G7"
   },
   {
    "pr": 1171,
    "head": "5749ac0739ce311c90391c20186495f8b241c769",
    "decision": "in",
-   "reason": "Integrator INT6b (17.11): an open draft of a g3 lane that ran beside INT6b (checked through REST); not finished at this integration, so it goes in at the next one, after its review. Wave 13 is held by the W6.39 frozen-wave gate while wave 12 is over its limit: its task cannot start in the plan until then, or until the owner decides.",
+   "reason": "Integrator INT7 (17.11): merged into verify/train-7 with --no-ff on int7 (wave g3, W13 reading / writing / graphs), so this head is in the train. Wave 13's plan statuses are held by the WIP gate (frozen-wave decision); they are not changed here.",
    "via": "W13.G13"
+  },
+  {
+   "pr": 1172,
+   "head": "ad81597bb878860c1e9aa2481b5c6ecfd85bb9c1",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC3 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC3"
+  },
+  {
+   "pr": 1173,
+   "head": "87fec937164aa67e49a65a482abd2ecb0d1e48b6",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC3 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC3"
+  },
+  {
+   "pr": 1174,
+   "head": "ec8d60d0a20fb2ea77c907445c9370176b017380",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC3 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC3"
+  },
+  {
+   "pr": 1175,
+   "head": "5d8be30cadcdcffc7c799565d7c5cd993e5f932f",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC3 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC3"
+  },
+  {
+   "pr": 1176,
+   "head": "0ebb315ad1fa81d8231e9176cca0ac48d9b09ea8",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC3 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC3"
+  },
+  {
+   "pr": 1177,
+   "head": "7084197b8c883d42df0323e8688a50313a0b0b09",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane F12 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane F12"
+  },
+  {
+   "pr": 1178,
+   "head": "40e5881afa1a2383b5f5d130e063622f6747211e",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane F12 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane F12"
+  },
+  {
+   "pr": 1179,
+   "head": "8270f0753a1e5e866601a7cb8150df71323620cb",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane F12 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane F12"
+  },
+  {
+   "pr": 1180,
+   "head": "095bde8c7166057b202f35c6730c813895ca591b",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane F12 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane F12"
+  },
+  {
+   "pr": 1181,
+   "head": "fcbddecac4f5543cb22989de9d8e59d2441bd85e",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane F12 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane F12"
+  },
+  {
+   "pr": 1182,
+   "head": "b2583dd3662f9c744ab0783ddb883a74a2bb5c5a",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane F12 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane F12"
+  },
+  {
+   "pr": 1183,
+   "head": "ac2edaa40598ecb4b84ba6e36bf14f0d60266f7e",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1184,
+   "head": "9c34bd559de3b51f73cbf98ad76daaff4d21dc69",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1185,
+   "head": "fa98cae75759a7001eafa57aa419e03ee6aac47b",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1186,
+   "head": "2fa02c0447ec4a4750ffa97299d1a8b40dabb1bf",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1187,
+   "head": "d1924f63309ab2acae12ae673007483b68c4b78c",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1188,
+   "head": "134f63895d2604941e154a86493479cb308def35",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1189,
+   "head": "6c5557476ade5a5b1fd0f4c4c2a6f3d001866f3d",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1190,
+   "head": "2c8da392f4d654e9c69e479bfbcf008c79668398",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1191,
+   "head": "3e30f694dc7c301d9f160b71841bfff7b9fa3935",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC1 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC1"
+  },
+  {
+   "pr": 1192,
+   "head": "556b8590f316ebff51b8e14ca9efce2e31bb254b",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1193,
+   "head": "ff98cf6fb789a7d7f7c211315fd342d5c733c63b",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1194,
+   "head": "f252529e456b2cce02d9bf6e81ef391a124d4594",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1195,
+   "head": "a7ebbe9eea4a3f5dfa816e0418d749ff9477843d",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1196,
+   "head": "1afce28c4e23d277aa22c814419360577fcecb73",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1197,
+   "head": "3b954767c84506234a3a8b0b44ba8381cb29d72b",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1198,
+   "head": "06def6f303ffbd16ebbe92060e96f38972ae53fa",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1199,
+   "head": "b247b6b0a545d4e4d0e04f5e743974d394ea1956",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1200,
+   "head": "6bea42e3a035c2ee277d0ae0b32747f9b3aefc70",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1201,
+   "head": "35adf4b53a1498c90ca859a3bcab127ee2ab0650",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
+  },
+  {
+   "pr": 1202,
+   "head": "ecf22466348ddbc29d788aae3ee663773dc9a8f7",
+   "decision": "in",
+   "reason": "Integrator INT7 (17.11): an open draft of lane FC2 that ran beside INT7 (checked through REST); not part of wave g3, so it goes in at the next integration, after its review.",
+   "via": "lane FC2"
   }
  ]
 }

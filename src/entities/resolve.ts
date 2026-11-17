@@ -136,12 +136,12 @@ export function jaroWinkler(a: string, b: string): number {
   const A = [...a];
   const B = [...b];
   if (!A.length || !B.length) return 0;
-  const window = Math.max(0, Math.floor(Math.max(A.length, B.length) / 2) - 1);
+  const span = Math.max(0, Math.floor(Math.max(A.length, B.length) / 2) - 1);
   const usedB = new Array<boolean>(B.length).fill(false);
   const matchA: string[] = [];
   const posA: number[] = [];
   A.forEach((c, i) => {
-    for (let j = Math.max(0, i - window); j <= Math.min(B.length - 1, i + window); j++) {
+    for (let j = Math.max(0, i - span); j <= Math.min(B.length - 1, i + span); j++) {
       if (!usedB[j] && B[j] === c) {
         usedB[j] = true;
         matchA.push(c);

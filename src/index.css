@@ -2246,3 +2246,30 @@
 dialog.lumen-modal::backdrop {
   background: transparent;
 }
+/* Reading modes drawn as a sheet over the note (W12.H6 side by side, W13.R11 daf, W13.R12 bilingual): a surface,
+   a margin and a dimmed page — without it the sheet was transparent over the editor (INT7). */
+dialog.lumen-modal:is([data-reading-mode="side-by-side"], [data-reading-mode="daf"], [data-reading-mode="bilingual"]) {
+  margin: auto;
+  block-size: fit-content;
+  padding: 16px;
+  background: hsl(var(--bg));
+  border: 1px solid hsl(var(--border));
+  border-radius: 10px;
+  box-shadow: 0 12px 40px hsl(0 0% 0% / 0.25);
+}
+dialog.lumen-modal:is([data-reading-mode="side-by-side"], [data-reading-mode="daf"], [data-reading-mode="bilingual"])::backdrop {
+  background: hsl(0 0% 0% / 0.35);
+}
+
+/* W13.R7: the preview block that holds the source caret (scroll-linked panes). */
+[data-preview-root] [data-sync-caret] {
+  box-shadow: -3px 0 0 0 hsl(var(--accent) / 0.55);
+  border-radius: 2px;
+}
+[data-preview-root] [data-sync-caret]:dir(rtl) {
+  box-shadow: 3px 0 0 0 hsl(var(--accent) / 0.55);
+}
+[data-preview-root]:focus-visible {
+  outline: 2px solid hsl(var(--accent));
+  outline-offset: -2px;
+}

@@ -1,0 +1,5 @@
+/**
+ * The plan's dod names this file; the cases are JSX, so they live in
+ * ./pathFinder.cases.tsx (not a *.test.* name, so they run once, from here).
+ */
+import "./pathFinder.cases";

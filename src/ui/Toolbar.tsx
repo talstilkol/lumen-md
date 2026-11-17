@@ -450,6 +450,7 @@ export function Toolbar({
             onClick={() => exec(() => setSplitAxis("vertical"))}
           />
           <MenuDivider />
+          <MenuItem icon={<BookOpen size={14} />} label={t("cmd.reading.profile")} description={t("desc.reading.profile")} onClick={() => exec(() => void import("./ReadingModeMenu").then((m) => m.openReadingModeMenu()))} />
           <MenuItem
             icon={<Eye size={14} />}
             label={pageView ? t("toolbar.pageView.on") : t("toolbar.pageView.off")}

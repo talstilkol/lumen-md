@@ -26,6 +26,7 @@
   "base.moveFailed": "Couldn't move it: {error}",
   "base.moved": "Moved {name} to {date}",
   "base.notFound": "{path} is not in the workspace.",
+  "base.openAsGraph": "Open as graph",
   "base.problems": "Some expressions could not run:",
   "base.saveSort": "Save this sort to {file}",
   "base.saved": "Saved to {file}",

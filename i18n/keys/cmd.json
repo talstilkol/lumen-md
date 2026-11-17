@@ -1961,6 +1961,16 @@
       "vars": []
     },
     {
+      "key": "cmd.reading.bookSpread",
+      "en": "Reading: book pages (two-page spread)",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.bookSpread.hint",
+      "en": "Turn pages like a book: page 1 on the right in Hebrew, ← for the next pages there; PageDown, Space",
+      "vars": []
+    },
+    {
       "key": "cmd.reading.mode",
       "en": "Reading mode",
       "vars": []
@@ -1983,6 +1993,21 @@
     {
       "key": "cmd.reading.newFromLibrary.hint",
       "en": "A Zotero, BibTeX or CSL-JSON item becomes a source note",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.profile",
+      "en": "Reading mode…",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.sidenotes",
+      "en": "Reading: margin notes (footnotes, comments, suggestions)",
+      "vars": []
+    },
+    {
+      "key": "cmd.reading.sidenotes.hint",
+      "en": "Each note next to its line: on the right in English, on the left in Hebrew; under its paragraph on a narrow screen",
       "vars": []
     },
     {
@@ -2793,6 +2818,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.bilingual",
+      "en": "📖 Bilingual reader (columns / line under line)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.bilingual.hint",
+      "en": "A Sefaria text with its official translation, or a note with its translation file, aligned verse by verse",
+      "vars": []
+    },
+    {
       "key": "cmd.view.calendar",
       "en": "Show / hide the calendar",
       "vars": []
@@ -2810,6 +2845,36 @@
     {
       "key": "cmd.view.canvas.hint",
       "en": "Infinite canvas for visual notes",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.columnNext",
+      "en": "View: focus the next column",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.columnNext.hint",
+      "en": "Ctrl+Alt+Shift+→ (mirrored in a right-to-left layout)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.columnPrev",
+      "en": "View: focus the previous column",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.columnPrev.hint",
+      "en": "Ctrl+Alt+Shift+← (mirrored in a right-to-left layout)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.daf",
+      "en": "📜 Page of the Talmud (daf)",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.daf.hint",
+      "en": "The note's main text with its commentaries around it, as on a printed daf",
       "vars": []
     },
     {
@@ -3045,6 +3110,16 @@
       "vars": []
     },
     {
+      "key": "cmd.view.tripleLinked",
+      "en": "View: source + preview + outline, scroll linked",
+      "vars": []
+    },
+    {
+      "key": "cmd.view.tripleLinked.hint",
+      "en": "Three columns that follow each other: scrolling and the caret stay on the same line",
+      "vars": []
+    },
+    {
       "key": "cmd.view.tsChecks.hint",
       "en": "Type errors and completions in ```ts blocks (downloads the TypeScript compiler, ~1.3 MB)",
       "vars": []
@@ -3160,6 +3235,206 @@
       "vars": []
     },
     {
+      "key": "cmd.writing.abstract",
+      "en": "Writing: titles, abstract and TL;DR",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.abstract.hint",
+      "en": "Three titles, a 150–250 word abstract and a one-line TL;DR — every sentence tied to a paragraph of the note, on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.argument",
+      "en": "Writing: Check the argument",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.argument.hint",
+      "en": "Claims without a source, logical leaps and common fallacies, each with its reason",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.coach",
+      "en": "Writing: Clarity & Style Coach",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.coach.hint",
+      "en": "Long sentences, passives, action nouns, hedges and wordy phrases, on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.consistency",
+      "en": "Writing: Check the vault's consistency",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.consistency.hint",
+      "en": "Names, dates, numbers and your glossary terms across all notes, against the entity graph — suggestions to review",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.expand",
+      "en": "Writing: Bullets → Paragraph",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.expand.hint",
+      "en": "One paragraph from the selected bullets, nothing invented; marked as AI text",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.explainChange",
+      "en": "Writing: explain my change",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.explainChange.hint",
+      "en": "Compare with an earlier version: a short summary and every change of a number, a negation or a name — on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.goals",
+      "en": "Writing: goals and weekly report",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.goals.hint",
+      "en": "A word or time target, readability and tone for this note; your week on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.harper",
+      "en": "Writing: English grammar (Harper, on this device)",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.harper.hint",
+      "en": "Local English grammar for the English parts of the note — suggestions to review",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.loanwords",
+      "en": "Writing: Hebrew alternatives to loanwords",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.loanwords.hint",
+      "en": "In the academic register: אימייל → דוא״ל, פידבק → משוב… — proposed, never applied; each term can be switched off",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.panel",
+      "en": "Writing: Show Suggestions",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.panel.hint",
+      "en": "The open writing suggestions of this note",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.proofreadHe",
+      "en": "Writing: Hebrew Proofreading",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.proofreadHe.hint",
+      "en": "Number gender, את/עם, the article in a construct — local rules, as suggestions",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.readability",
+      "en": "Writing: Readability of this note",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.readability.hint",
+      "en": "A Hebrew readability level (Flesch–Kincaid for English) and what raises it",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.registerHigh",
+      "en": "Writing: High Hebrew Register",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.registerHigh.hint",
+      "en": "עברית גבוהה ותקנית for the selection, meaning checked",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.registerSpoken",
+      "en": "Writing: Spoken Hebrew Register",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.registerSpoken.hint",
+      "en": "עברית מדוברת וטבעית for the selection, meaning checked",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.repetition",
+      "en": "Writing: repetition and clichés",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.repetition.hint",
+      "en": "Words repeated too soon (Hebrew prefixes and forms included), doubled words and clichés — on this device",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.shorten",
+      "en": "Writing: Shorten by 30%",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.shorten.hint",
+      "en": "Within ±10% of the target, with no number or name lost or added",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.structure",
+      "en": "Writing: Review the note's structure",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.structure.hint",
+      "en": "Heading levels, opening and closing, long paragraphs and topic sentences — comments only",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.toneFormal",
+      "en": "Writing: Formal Tone (3 versions)",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.toneFormal.hint",
+      "en": "Rewrite the selection formally; numbers, names and negations are checked",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.toneFriendly",
+      "en": "Writing: Friendly Tone (3 versions)",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.toneFriendly.hint",
+      "en": "Rewrite the selection warmly; numbers, names and negations are checked",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.toneNeutral",
+      "en": "Writing: Neutral Tone (3 versions)",
+      "vars": []
+    },
+    {
+      "key": "cmd.writing.toneNeutral.hint",
+      "en": "Rewrite the selection plainly; numbers, names and negations are checked",
+      "vars": []
+    },
+    {
       "key": "desc.commandPalette",
       "en": "Search and run any command",
       "vars": []
@@ -3247,6 +3522,11 @@
     {
       "key": "desc.print",
       "en": "Open browser print dialog",
+      "vars": []
+    },
+    {
+      "key": "desc.reading.profile",
+      "en": "Choose how this note is read — page, focus and more — and save it for this note or for all notes",
       "vars": []
     },
     {

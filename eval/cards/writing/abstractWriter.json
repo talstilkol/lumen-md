@@ -1,0 +1,48 @@
+{
+  "plan": "W13.W12",
+  "agent": "abstractWriter",
+  "card": {
+    "schema": 1,
+    "tag": "dev",
+    "model": {
+      "name": "none: the R12.9 gate is deterministic; the drafts are scripted",
+      "digest": "n/a (no model weights)"
+    },
+    "seed": 12,
+    "temperature": 0,
+    "dataset": {
+      "name": "src/__tests__/abstractWriter.test.ts (scripted drafts)",
+      "version": "1",
+      "license": "MIT (written for lumen-md)",
+      "origin": "synthetic"
+    },
+    "n": 17,
+    "metrics": {
+      "supportedKept": {
+        "value": 1,
+        "ci95": [
+          1,
+          1
+        ],
+        "method": "bootstrap"
+      },
+      "adversarialDeleted": {
+        "value": 1,
+        "ci95": [
+          1,
+          1
+        ],
+        "method": "bootstrap"
+      },
+      "keptAnchored": {
+        "value": 1,
+        "ci95": [
+          1,
+          1
+        ],
+        "method": "bootstrap"
+      }
+    }
+  },
+  "owed": "annotator preference vs the extractive baseline (W13.W18); real-model run (W13.W17, Mac)"
+}

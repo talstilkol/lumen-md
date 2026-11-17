@@ -1,6 +1,9 @@
 {
   "versionHistory.by": "by {author}",
   "versionHistory.close": "Close",
+  "versionHistory.compare": "Compare with the current text",
+  "versionHistory.compareCurrent": "Current text",
+  "versionHistory.compareOld": "Version of {when}",
   "versionHistory.diffChars": "Δ {n} chars difference",
   "versionHistory.keepNow": "Keep a version now",
   "versionHistory.noVersions": "No versions yet. A version is kept every couple of minutes while you type, on every save and when you close the tab.",

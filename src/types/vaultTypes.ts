@@ -9,7 +9,7 @@ import { isOPFSAvailable, listWorkspaceFolder, readWorkspaceFile } from "../stor
 import { onWorkspaceChanged } from "../storage/workspaceEvents";
 import { log } from "../lib/logger";
 import { TYPES_DIR, type TypeDef } from "./typeSchema";
-import { argumentTypes } from "../argument/argumentMap";
+import { argumentTypes } from "../argument/argumentTypes";
 import { loadTypeRegistry, type TypeRegistry } from "./typeRegistry";
 import { TYPES_CHANGED_EVENT } from "./typeEvents";
 import { ENTITY_TYPES_FEATURE, entityTypeDefs } from "../entities/types";

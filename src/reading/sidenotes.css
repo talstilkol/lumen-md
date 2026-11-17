@@ -1,0 +1,27 @@
+/* W13.R9: side notes, Tufte style. The margin is the inline end: right in LTR, left in RTL. */
+[data-preview-root][data-sidenotes="margin"] { --sn-width: clamp(180px, 26%, 300px); position: relative; }
+[data-preview-root][data-sidenotes="margin"] > .prose-lumen,
+[data-preview-root][data-sidenotes="margin"] > :not(.sn-layer) { margin-inline-end: calc(var(--sn-width) + 28px); }
+[data-preview-root][data-sidenotes] section.footnotes,
+[data-preview-root][data-sidenotes] section[data-footnotes],
+[data-preview-root][data-sidenotes] mark.critic-comment { display: none; }
+html[data-sidenotes-on] .footnote-popover { display: none; }
+.sn-layer { position: absolute; top: 0; inset-inline-end: 12px; width: var(--sn-width); pointer-events: none; }
+.sn-wire { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.sn-wire path { fill: none; stroke: hsl(var(--accent)); stroke-width: 1.25; stroke-dasharray: 3 3; }
+.sn-list { position: relative; margin: 0; padding: 0; }
+.sn-item { position: absolute; inset-inline: 0; pointer-events: auto; }
+.sn-note { display: block; font-size: 0.82em; line-height: 1.45; color: hsl(var(--fg-muted)); padding: 4px 8px; border-inline-start: 2px solid hsl(var(--border-strong)); border-radius: 2px; background: hsl(var(--bg-subtle) / 0.6); overflow-wrap: anywhere; }
+.sn-note.sn-inline { margin: 0.25em 0 0.9em; max-width: 60ch; }
+.sn-note:focus-visible { outline: 2px solid hsl(var(--accent)); outline-offset: 2px; }
+.sn-note.sn-active { color: hsl(var(--fg)); border-inline-start-color: hsl(var(--accent)); background: hsl(var(--accent) / 0.08); }
+.sn-num { font-weight: 700; margin-inline-end: 0.4em; color: hsl(var(--fg)); font-variant-numeric: tabular-nums; }
+.sn-by { font-weight: 600; color: hsl(var(--fg)); }
+.sn-body p { margin: 0; display: inline; }
+.sn-insert { border-inline-start-color: hsl(140 55% 38%); }
+.sn-delete { border-inline-start-color: hsl(0 70% 50%); }
+.sn-replace { border-inline-start-color: hsl(35 85% 45%); }
+.sn-comment { border-inline-start-color: hsl(45 90% 45%); }
+[data-sidenotes] [data-sn-mark]::after { content: attr(data-sn-mark); font-size: 0.7em; vertical-align: super; margin-inline-start: 1px; color: hsl(var(--accent)); font-weight: 700; text-decoration: none; display: inline-block; }
+[data-sidenotes] .sn-active[data-sn-anchor] { background: hsl(var(--accent) / 0.14); border-radius: 2px; }
+@media (prefers-reduced-motion: no-preference) { .sn-item { transition: top 0.12s ease-out; } }

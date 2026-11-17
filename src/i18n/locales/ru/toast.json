@@ -1,4 +1,7 @@
 {
+  "toast.abstractFailed": "Could not write the abstract: {error}",
+  "toast.abstractNoModel": "No local model answered: showing sentences taken from the note.",
+  "toast.abstractWorking": "Writing the titles and the abstract…",
   "toast.actionItemsAdded": "✅ Задачи добавлены",
   "toast.actionItemsFailed": "Не удалось извлечь задачи: {error}",
   "toast.addedTag": "✅ Добавлено тегов: {count}",
@@ -40,6 +43,10 @@
   "toast.documentRefactoredSuccessfully": "Документ успешно переработан!",
   "toast.documentTooShortForOutline": "Документ слишком короткий для создания структуры",
   "toast.documentTranslated": "✅ Документ переведён",
+  "toast.explainChangeFailed": "Could not explain the change: {error}",
+  "toast.explainChangeNoHistory": "This note has no earlier version yet. Save it, edit, and try again.",
+  "toast.explainChangePick": "Compare the note now with which version?",
+  "toast.explainChangeWorking": "Comparing the versions…",
   "toast.extractingActionItems": "✅ Извлечение задач…",
   "toast.generatingChart": "📊 Создание графика…",
   "toast.generatingDiagram": "🧩 Создание диаграммы…",

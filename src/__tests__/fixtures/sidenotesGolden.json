@@ -1,0 +1,152 @@
+[
+ {
+  "name": "01-he",
+  "dir": "rtl",
+  "md": "# פתק 1\n\nבראשית ברא[^1] אלוהים את השמיים ואת הארץ.\n\nהמחקר בחן[^2] את השפעת[^3] הלמידה המרחוק על תלמידי תיכון. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<}\n\nהעיר ירושלים[^4] נבנתה מחדש[^5] פעמים רבות[^6] לאורך ההיסטוריה. {++ומסקנה נוספת++}\n\nהספרייה הלאומית[^7] פתחה את ארכיון כתבי היד לציבור. {--מילה מיותרת--}\n\n[^1]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^2]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^3]: כך במהדורה השנייה.\n[^4]: המונח נטבע בשנות החמישים.\n[^5]: ראו גם את המקור המקורי בכתב היד.\n[^6]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^7]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n"
+ },
+ {
+  "name": "02-en",
+  "dir": "ltr",
+  "md": "# Note 2\n\nTypography in Hebrew books follows conventions older than print. {==important==}{>>check this figure<<}\n\nThe model[^1] was trained locally on a laptop without a network. {++and one more finding++}\n\nMargins in a well-set book carry notes close to their text. {--a redundant phrase--}\n\nReaders return[^2] to footnotes more often when they sit beside the line. {~~old~>new~~}\n\nThe committee reviewed the proposal and asked for a revised budget. {==important==}{>>check this figure<<}\n\n[^1]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^2]: So in the second edition.\n"
+ },
+ {
+  "name": "03-he",
+  "dir": "rtl",
+  "md": "# פתק 3\n\nהעיר ירושלים[^1] נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++}\n\nהספרייה הלאומית פתחה את ארכיון כתבי היד לציבור. {--מילה מיותרת--}\n\nהניסוי נערך[^2] בשלושה שלבים במשך שנה שלמה. {~~ישן~>חדש~~}\n\nבראשית ברא אלוהים את השמיים ואת הארץ. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<}\n\nהמחקר בחן[^3] את השפעת הלמידה המרחוק על תלמידי תיכון.\n\nהעיר ירושלים נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++}\n\n[^1]: כך במהדורה השנייה.\n[^2]: המונח נטבע בשנות החמישים.\n[^3]: ראו גם את המקור המקורי בכתב היד.\n"
+ },
+ {
+  "name": "04-en",
+  "dir": "ltr",
+  "md": "# Note 4\n\nMargins in[^1] a well-set book carry notes close to their text. {--a redundant phrase--}\n\nReaders return[^2] to footnotes[^3] more often when they sit beside the line. {~~old~>new~~}\n\nThe committee[^4] reviewed the[^5] proposal and[^6] asked for a revised budget. {==important==}{>>check this figure<<}\n\nTypography in[^7] Hebrew books follows conventions older than print.\n\nThe model[^8] was trained[^9] locally on a laptop without a network. {++and one more finding++}\n\nMargins in[^10] a well-set[^11] book carry[^12] notes close to their text.\n\nReaders return[^13] to footnotes more often when they sit beside the line. {==important==}{>>check this figure<<} {--a redundant phrase--}\n\n[^1]: The term was coined in the 1950s.\n[^2]: See the original manuscript.\n[^3]: Figures from the 2024 census.\n[^4]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^5]: So in the second edition.\n[^6]: The term was coined in the 1950s.\n[^7]: See the original manuscript.\n[^8]: Figures from the 2024 census.\n[^9]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^10]: So in the second edition.\n[^11]: The term was coined in the 1950s.\n[^12]: See the original manuscript.\n[^13]: Figures from the 2024 census.\n"
+ },
+ {
+  "name": "05-he",
+  "dir": "rtl",
+  "md": "# פתק 5\n\nהניסוי נערך[^1] בשלושה שלבים במשך שנה שלמה. {~~ישן~>חדש~~}\n\nבראשית ברא אלוהים את השמיים ואת הארץ. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<}\n\nהמחקר בחן[^2] את השפעת הלמידה המרחוק על תלמידי תיכון.\n\nהעיר ירושלים נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++}\n\nהספרייה הלאומית[^3] פתחה את ארכיון כתבי היד לציבור.\n\nהניסוי נערך בשלושה שלבים במשך שנה שלמה. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<} {--מילה מיותרת--}\n\nבראשית ברא[^4] אלוהים את השמיים ואת הארץ.\n\nהמחקר בחן את השפעת הלמידה המרחוק על תלמידי תיכון. {~~ישן~>חדש~~}\n\n[^1]: ראו גם את המקור המקורי בכתב היד.\n[^2]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^3]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^4]: כך במהדורה השנייה.\n"
+ },
+ {
+  "name": "06-en",
+  "dir": "ltr",
+  "md": "# Note 6\n\nThe committee reviewed the proposal and asked for a revised budget. {==important==}{>>check this figure<<}\n\nTypography in[^1] Hebrew books follows conventions older than print.\n\nThe model was trained locally on a laptop without a network. {++and one more finding++}\n\nMargins in[^2] a well-set book carry notes close to their text.\n\n[^1]: Figures from the 2024 census.\n[^2]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n"
+ },
+ {
+  "name": "07-he",
+  "dir": "rtl",
+  "md": "# פתק 7\n\nהמחקר בחן[^1] את השפעת הלמידה המרחוק על תלמידי תיכון.\n\nהעיר ירושלים[^2] נבנתה מחדש[^3] פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++}\n\nהספרייה הלאומית[^4] פתחה את[^5] ארכיון כתבי[^6] היד לציבור.\n\nהניסוי נערך[^7] בשלושה שלבים במשך שנה שלמה. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<} {--מילה מיותרת--}\n\nבראשית ברא[^8] אלוהים את[^9] השמיים ואת הארץ.\n\n[^1]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^2]: כך במהדורה השנייה.\n[^3]: המונח נטבע בשנות החמישים.\n[^4]: ראו גם את המקור המקורי בכתב היד.\n[^5]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^6]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^7]: כך במהדורה השנייה.\n[^8]: המונח נטבע בשנות החמישים.\n[^9]: ראו גם את המקור המקורי בכתב היד.\n"
+ },
+ {
+  "name": "08-en",
+  "dir": "ltr",
+  "md": "# Note 8\n\nThe model was trained locally on a laptop without a network. {++and one more finding++}\n\nMargins in[^1] a well-set book carry notes close to their text.\n\nReaders return to footnotes more often when they sit beside the line. {==important==}{>>check this figure<<} {--a redundant phrase--}\n\nThe committee[^2] reviewed the proposal and asked for a revised budget.\n\nTypography in Hebrew books follows conventions older than print. {~~old~>new~~}\n\nThe model[^3] was trained locally on a laptop without a network. {++and one more finding++}\n\n[^1]: So in the second edition.\n[^2]: The term was coined in the 1950s.\n[^3]: See the original manuscript.\n"
+ },
+ {
+  "name": "09-he",
+  "dir": "rtl",
+  "md": "# פתק 9\n\nהספרייה הלאומית[^1] פתחה את ארכיון כתבי היד לציבור.\n\nהניסוי נערך בשלושה שלבים במשך שנה שלמה. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<} {--מילה מיותרת--}\n\nבראשית ברא[^2] אלוהים את השמיים ואת הארץ.\n\nהמחקר בחן את השפעת הלמידה המרחוק על תלמידי תיכון. {~~ישן~>חדש~~}\n\nהעיר ירושלים[^3] נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++}\n\nהספרייה הלאומית פתחה את ארכיון כתבי היד לציבור. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<}\n\nהניסוי נערך[^4] בשלושה שלבים במשך שנה שלמה.\n\n[^1]: המונח נטבע בשנות החמישים.\n[^2]: ראו גם את המקור המקורי בכתב היד.\n[^3]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^4]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n"
+ },
+ {
+  "name": "10-en",
+  "dir": "ltr",
+  "md": "# Note 10\n\nReaders return[^1] to footnotes more often when they sit beside the line. {==important==}{>>check this figure<<} {--a redundant phrase--}\n\nThe committee[^2] reviewed the[^3] proposal and asked for a revised budget.\n\nTypography in[^4] Hebrew books[^5] follows conventions[^6] older than print. {~~old~>new~~}\n\nThe model[^7] was trained locally on a laptop without a network. {++and one more finding++}\n\nMargins in[^8] a well-set[^9] book carry notes close to their text. {==important==}{>>check this figure<<}\n\nReaders return[^10] to footnotes[^11] more often[^12] when they sit beside the line.\n\nThe committee[^13] reviewed the proposal and asked for a revised budget. {--a redundant phrase--}\n\nTypography in[^14] Hebrew books[^15] follows conventions older than print.\n\n[^1]: See the original manuscript.\n[^2]: Figures from the 2024 census.\n[^3]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^4]: So in the second edition.\n[^5]: The term was coined in the 1950s.\n[^6]: See the original manuscript.\n[^7]: Figures from the 2024 census.\n[^8]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^9]: So in the second edition.\n[^10]: The term was coined in the 1950s.\n[^11]: See the original manuscript.\n[^12]: Figures from the 2024 census.\n[^13]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^14]: So in the second edition.\n[^15]: The term was coined in the 1950s.\n"
+ },
+ {
+  "name": "11-he",
+  "dir": "rtl",
+  "md": "# פתק 11\n\nבראשית ברא[^1] אלוהים את השמיים ואת הארץ.\n\nהמחקר בחן את השפעת הלמידה המרחוק על תלמידי תיכון. {~~ישן~>חדש~~}\n\nהעיר ירושלים[^2] נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++}\n\nהספרייה הלאומית פתחה את ארכיון כתבי היד לציבור. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<}\n\n[^1]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^2]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n"
+ },
+ {
+  "name": "12-en",
+  "dir": "ltr",
+  "md": "# Note 12\n\nTypography in Hebrew books follows conventions older than print. {~~old~>new~~}\n\nThe model[^1] was trained locally on a laptop without a network. {++and one more finding++}\n\nMargins in a well-set book carry notes close to their text. {==important==}{>>check this figure<<}\n\nReaders return[^2] to footnotes more often when they sit beside the line.\n\nThe committee reviewed the proposal and asked for a revised budget. {--a redundant phrase--}\n\n[^1]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^2]: So in the second edition.\n"
+ },
+ {
+  "name": "13-he",
+  "dir": "rtl",
+  "md": "# פתק 13\n\nהעיר ירושלים[^1] נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++}\n\nהספרייה הלאומית[^2] פתחה את[^3] ארכיון כתבי היד לציבור. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<}\n\nהניסוי נערך[^4] בשלושה שלבים[^5] במשך שנה[^6] שלמה.\n\nבראשית ברא[^7] אלוהים את השמיים ואת הארץ. {--מילה מיותרת--}\n\nהמחקר בחן[^8] את השפעת[^9] הלמידה המרחוק על תלמידי תיכון.\n\nהעיר ירושלים[^10] נבנתה מחדש[^11] פעמים רבות[^12] לאורך ההיסטוריה. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<} {++ומסקנה נוספת++}\n\n[^1]: כך במהדורה השנייה.\n[^2]: המונח נטבע בשנות החמישים.\n[^3]: ראו גם את המקור המקורי בכתב היד.\n[^4]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^5]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^6]: כך במהדורה השנייה.\n[^7]: המונח נטבע בשנות החמישים.\n[^8]: ראו גם את המקור המקורי בכתב היד.\n[^9]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^10]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^11]: כך במהדורה השנייה.\n[^12]: המונח נטבע בשנות החמישים.\n"
+ },
+ {
+  "name": "14-en",
+  "dir": "ltr",
+  "md": "# Note 14\n\nMargins in a well-set book carry notes close to their text. {==important==}{>>check this figure<<}\n\nReaders return[^1] to footnotes more often when they sit beside the line.\n\nThe committee reviewed the proposal and asked for a revised budget. {--a redundant phrase--}\n\nTypography in[^2] Hebrew books follows conventions older than print.\n\nThe model was trained locally on a laptop without a network. {==important==}{>>check this figure<<} {++and one more finding++}\n\nMargins in[^3] a well-set book carry notes close to their text. {~~old~>new~~}\n\nReaders return to footnotes more often when they sit beside the line.\n\n[^1]: The term was coined in the 1950s.\n[^2]: See the original manuscript.\n[^3]: Figures from the 2024 census.\n"
+ },
+ {
+  "name": "15-he",
+  "dir": "rtl",
+  "md": "# פתק 15\n\nהניסוי נערך[^1] בשלושה שלבים במשך שנה שלמה.\n\nבראשית ברא אלוהים את השמיים ואת הארץ. {--מילה מיותרת--}\n\nהמחקר בחן[^2] את השפעת הלמידה המרחוק על תלמידי תיכון.\n\nהעיר ירושלים נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<} {++ומסקנה נוספת++}\n\nהספרייה הלאומית[^3] פתחה את ארכיון כתבי היד לציבור. {~~ישן~>חדש~~}\n\nהניסוי נערך בשלושה שלבים במשך שנה שלמה.\n\nבראשית ברא[^4] אלוהים את השמיים ואת הארץ.\n\nהמחקר בחן את השפעת הלמידה המרחוק על תלמידי תיכון. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<} {--מילה מיותרת--}\n\n[^1]: ראו גם את המקור המקורי בכתב היד.\n[^2]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^3]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^4]: כך במהדורה השנייה.\n"
+ },
+ {
+  "name": "16-en",
+  "dir": "ltr",
+  "md": "# Note 16\n\nThe committee[^1] reviewed the proposal and asked for a revised budget. {--a redundant phrase--}\n\nTypography in[^2] Hebrew books[^3] follows conventions older than print.\n\nThe model[^4] was trained[^5] locally on[^6] a laptop without a network. {==important==}{>>check this figure<<} {++and one more finding++}\n\nMargins in[^7] a well-set book carry notes close to their text. {~~old~>new~~}\n\n[^1]: Figures from the 2024 census.\n[^2]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^3]: So in the second edition.\n[^4]: The term was coined in the 1950s.\n[^5]: See the original manuscript.\n[^6]: Figures from the 2024 census.\n[^7]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n"
+ },
+ {
+  "name": "17-he",
+  "dir": "rtl",
+  "md": "# פתק 17\n\nהמחקר בחן[^1] את השפעת הלמידה המרחוק על תלמידי תיכון.\n\nהעיר ירושלים נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<} {++ומסקנה נוספת++}\n\nהספרייה הלאומית[^2] פתחה את ארכיון כתבי היד לציבור. {~~ישן~>חדש~~}\n\nהניסוי נערך בשלושה שלבים במשך שנה שלמה.\n\nבראשית ברא[^3] אלוהים את השמיים ואת הארץ.\n\n[^1]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^2]: כך במהדורה השנייה.\n[^3]: המונח נטבע בשנות החמישים.\n"
+ },
+ {
+  "name": "18-en",
+  "dir": "ltr",
+  "md": "# Note 18\n\nThe model was trained locally on a laptop without a network. {==important==}{>>check this figure<<} {++and one more finding++}\n\nMargins in[^1] a well-set book carry notes close to their text. {~~old~>new~~}\n\nReaders return to footnotes more often when they sit beside the line.\n\nThe committee[^2] reviewed the proposal and asked for a revised budget.\n\nTypography in Hebrew books follows conventions older than print. {==important==}{>>check this figure<<} {--a redundant phrase--}\n\nThe model[^3] was trained locally on a laptop without a network. {++and one more finding++}\n\n[^1]: So in the second edition.\n[^2]: The term was coined in the 1950s.\n[^3]: See the original manuscript.\n"
+ },
+ {
+  "name": "19-he",
+  "dir": "rtl",
+  "md": "# פתק 19\n\nהספרייה הלאומית[^1] פתחה את ארכיון כתבי היד לציבור. {~~ישן~>חדש~~}\n\nהניסוי נערך[^2] בשלושה שלבים[^3] במשך שנה שלמה.\n\nבראשית ברא[^4] אלוהים את[^5] השמיים ואת[^6] הארץ.\n\nהמחקר בחן[^7] את השפעת הלמידה המרחוק על תלמידי תיכון. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<} {--מילה מיותרת--}\n\nהעיר ירושלים[^8] נבנתה מחדש[^9] פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++}\n\nהספרייה הלאומית[^10] פתחה את[^11] ארכיון כתבי[^12] היד לציבור.\n\nהניסוי נערך[^13] בשלושה שלבים במשך שנה שלמה.\n\n[^1]: המונח נטבע בשנות החמישים.\n[^2]: ראו גם את המקור המקורי בכתב היד.\n[^3]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^4]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^5]: כך במהדורה השנייה.\n[^6]: המונח נטבע בשנות החמישים.\n[^7]: ראו גם את המקור המקורי בכתב היד.\n[^8]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^9]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^10]: כך במהדורה השנייה.\n[^11]: המונח נטבע בשנות החמישים.\n[^12]: ראו גם את המקור המקורי בכתב היד.\n[^13]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n"
+ },
+ {
+  "name": "20-en",
+  "dir": "ltr",
+  "md": "# Note 20\n\nReaders return to footnotes more often when they sit beside the line.\n\nThe committee[^1] reviewed the proposal and asked for a revised budget.\n\nTypography in Hebrew books follows conventions older than print. {==important==}{>>check this figure<<} {--a redundant phrase--}\n\nThe model[^2] was trained locally on a laptop without a network. {++and one more finding++}\n\nMargins in a well-set book carry notes close to their text.\n\nReaders return[^3] to footnotes more often when they sit beside the line.\n\nThe committee reviewed the proposal and asked for a revised budget. {==important==}{>>check this figure<<} {~~old~>new~~}\n\nTypography in[^4] Hebrew books follows conventions older than print.\n\n[^1]: See the original manuscript.\n[^2]: Figures from the 2024 census.\n[^3]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^4]: So in the second edition.\n"
+ },
+ {
+  "name": "21-he",
+  "dir": "rtl",
+  "md": "# פתק 21\n\nבראשית ברא[^1] אלוהים את השמיים ואת הארץ.\n\nהמחקר בחן את השפעת הלמידה המרחוק על תלמידי תיכון. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<} {--מילה מיותרת--}\n\nהעיר ירושלים[^2] נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++}\n\nהספרייה הלאומית פתחה את ארכיון כתבי היד לציבור.\n\n[^1]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^2]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n"
+ },
+ {
+  "name": "22-en",
+  "dir": "ltr",
+  "md": "# Note 22\n\nTypography in[^1] Hebrew books follows conventions older than print. {==important==}{>>check this figure<<} {--a redundant phrase--}\n\nThe model[^2] was trained[^3] locally on a laptop without a network. {++and one more finding++}\n\nMargins in[^4] a well-set[^5] book carry[^6] notes close to their text.\n\nReaders return[^7] to footnotes more often when they sit beside the line.\n\nThe committee[^8] reviewed the[^9] proposal and asked for a revised budget. {==important==}{>>check this figure<<} {~~old~>new~~}\n\n[^1]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^2]: So in the second edition.\n[^3]: The term was coined in the 1950s.\n[^4]: See the original manuscript.\n[^5]: Figures from the 2024 census.\n[^6]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^7]: So in the second edition.\n[^8]: The term was coined in the 1950s.\n[^9]: See the original manuscript.\n"
+ },
+ {
+  "name": "23-he",
+  "dir": "rtl",
+  "md": "# פתק 23\n\nהעיר ירושלים[^1] נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++}\n\nהספרייה הלאומית פתחה את ארכיון כתבי היד לציבור.\n\nהניסוי נערך[^2] בשלושה שלבים במשך שנה שלמה.\n\nבראשית ברא אלוהים את השמיים ואת הארץ. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<} {~~ישן~>חדש~~}\n\nהמחקר בחן[^3] את השפעת הלמידה המרחוק על תלמידי תיכון.\n\nהעיר ירושלים נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++} {--מילה מיותרת--}\n\n[^1]: כך במהדורה השנייה.\n[^2]: המונח נטבע בשנות החמישים.\n[^3]: ראו גם את המקור המקורי בכתב היד.\n"
+ },
+ {
+  "name": "24-en",
+  "dir": "ltr",
+  "md": "# Note 24\n\nMargins in a well-set book carry notes close to their text.\n\nReaders return[^1] to footnotes more often when they sit beside the line.\n\nThe committee reviewed the proposal and asked for a revised budget. {==important==}{>>check this figure<<} {~~old~>new~~}\n\nTypography in[^2] Hebrew books follows conventions older than print.\n\nThe model was trained locally on a laptop without a network. {++and one more finding++} {--a redundant phrase--}\n\nMargins in[^3] a well-set book carry notes close to their text.\n\nReaders return to footnotes more often when they sit beside the line. {==important==}{>>check this figure<<}\n\n[^1]: The term was coined in the 1950s.\n[^2]: See the original manuscript.\n[^3]: Figures from the 2024 census.\n"
+ },
+ {
+  "name": "25-he",
+  "dir": "rtl",
+  "md": "# פתק 25\n\nהניסוי נערך[^1] בשלושה שלבים במשך שנה שלמה.\n\nבראשית ברא[^2] אלוהים את[^3] השמיים ואת הארץ. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<} {~~ישן~>חדש~~}\n\nהמחקר בחן[^4] את השפעת[^5] הלמידה המרחוק[^6] על תלמידי תיכון.\n\nהעיר ירושלים[^7] נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++} {--מילה מיותרת--}\n\nהספרייה הלאומית[^8] פתחה את[^9] ארכיון כתבי היד לציבור.\n\nהניסוי נערך[^10] בשלושה שלבים[^11] במשך שנה[^12] שלמה. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<}\n\nבראשית ברא[^13] אלוהים את השמיים ואת הארץ.\n\nהמחקר בחן[^14] את השפעת[^15] הלמידה המרחוק על תלמידי תיכון.\n\n[^1]: ראו גם את המקור המקורי בכתב היד.\n[^2]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^3]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^4]: כך במהדורה השנייה.\n[^5]: המונח נטבע בשנות החמישים.\n[^6]: ראו גם את המקור המקורי בכתב היד.\n[^7]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^8]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^9]: כך במהדורה השנייה.\n[^10]: המונח נטבע בשנות החמישים.\n[^11]: ראו גם את המקור המקורי בכתב היד.\n[^12]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^13]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^14]: כך במהדורה השנייה.\n[^15]: המונח נטבע בשנות החמישים.\n"
+ },
+ {
+  "name": "26-en",
+  "dir": "ltr",
+  "md": "# Note 26\n\nThe committee reviewed the proposal and asked for a revised budget. {==important==}{>>check this figure<<} {~~old~>new~~}\n\nTypography in[^1] Hebrew books follows conventions older than print.\n\nThe model was trained locally on a laptop without a network. {++and one more finding++} {--a redundant phrase--}\n\nMargins in[^2] a well-set book carry notes close to their text.\n\n[^1]: Figures from the 2024 census.\n[^2]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n"
+ },
+ {
+  "name": "27-he",
+  "dir": "rtl",
+  "md": "# פתק 27\n\nהמחקר בחן[^1] את השפעת הלמידה המרחוק על תלמידי תיכון.\n\nהעיר ירושלים נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++} {--מילה מיותרת--}\n\nהספרייה הלאומית[^2] פתחה את ארכיון כתבי היד לציבור.\n\nהניסוי נערך בשלושה שלבים במשך שנה שלמה. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<}\n\nבראשית ברא[^3] אלוהים את השמיים ואת הארץ.\n\n[^1]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n[^2]: כך במהדורה השנייה.\n[^3]: המונח נטבע בשנות החמישים.\n"
+ },
+ {
+  "name": "28-en",
+  "dir": "ltr",
+  "md": "# Note 28\n\nThe model[^1] was trained locally on a laptop without a network. {++and one more finding++} {--a redundant phrase--}\n\nMargins in[^2] a well-set[^3] book carry notes close to their text.\n\nReaders return[^4] to footnotes[^5] more often[^6] when they sit beside the line. {==important==}{>>check this figure<<}\n\nThe committee[^7] reviewed the proposal and asked for a revised budget.\n\nTypography in[^8] Hebrew books[^9] follows conventions older than print.\n\nThe model[^10] was trained[^11] locally on[^12] a laptop without a network. {++and one more finding++} {~~old~>new~~}\n\n[^1]: So in the second edition.\n[^2]: The term was coined in the 1950s.\n[^3]: See the original manuscript.\n[^4]: Figures from the 2024 census.\n[^5]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^6]: So in the second edition.\n[^7]: The term was coined in the 1950s.\n[^8]: See the original manuscript.\n[^9]: Figures from the 2024 census.\n[^10]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^11]: So in the second edition.\n[^12]: The term was coined in the 1950s.\n"
+ },
+ {
+  "name": "29-he",
+  "dir": "rtl",
+  "md": "# פתק 29\n\nהספרייה הלאומית[^1] פתחה את ארכיון כתבי היד לציבור.\n\nהניסוי נערך בשלושה שלבים במשך שנה שלמה. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<}\n\nבראשית ברא[^2] אלוהים את השמיים ואת הארץ.\n\nהמחקר בחן את השפעת הלמידה המרחוק על תלמידי תיכון.\n\nהעיר ירושלים[^3] נבנתה מחדש פעמים רבות לאורך ההיסטוריה. {++ומסקנה נוספת++} {~~ישן~>חדש~~}\n\nהספרייה הלאומית פתחה את ארכיון כתבי היד לציבור. {==חשוב==}{>>כדאי לבדוק את הנתון הזה<<} {--מילה מיותרת--}\n\nהניסוי נערך[^4] בשלושה שלבים במשך שנה שלמה.\n\n[^1]: המונח נטבע בשנות החמישים.\n[^2]: ראו גם את המקור המקורי בכתב היד.\n[^3]: הנתונים מתוך הלשכה המרכזית לסטטיסטיקה, 2024.\n[^4]: השוו לגרסה המוקדמת של הטקסט, שבה הנוסח שונה מעט ויש בה הערה ארוכה יותר שמסבירה את הרקע ההיסטורי של המונח.\n"
+ },
+ {
+  "name": "30-en",
+  "dir": "ltr",
+  "md": "# Note 30\n\nReaders return to footnotes more often when they sit beside the line. {==important==}{>>check this figure<<}\n\nThe committee[^1] reviewed the proposal and asked for a revised budget.\n\nTypography in Hebrew books follows conventions older than print.\n\nThe model[^2] was trained locally on a laptop without a network. {++and one more finding++} {~~old~>new~~}\n\nMargins in a well-set book carry notes close to their text. {==important==}{>>check this figure<<} {--a redundant phrase--}\n\nReaders return[^3] to footnotes more often when they sit beside the line.\n\nThe committee reviewed the proposal and asked for a revised budget.\n\nTypography in[^4] Hebrew books follows conventions older than print.\n\n[^1]: See the original manuscript.\n[^2]: Figures from the 2024 census.\n[^3]: Compare the early draft, where the wording differs slightly and a longer note explains the historical background of the term at some length.\n[^4]: So in the second edition.\n"
+ }
+]

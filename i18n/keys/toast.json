@@ -4,6 +4,23 @@
   "source": "src/i18n/locales/en/toast.json",
   "entries": [
     {
+      "key": "toast.abstractFailed",
+      "en": "Could not write the abstract: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.abstractNoModel",
+      "en": "No local model answered: showing sentences taken from the note.",
+      "vars": []
+    },
+    {
+      "key": "toast.abstractWorking",
+      "en": "Writing the titles and the abstract…",
+      "vars": []
+    },
+    {
       "key": "toast.actionItemsAdded",
       "en": "✅ Action items added",
       "vars": []
@@ -241,6 +258,28 @@
     {
       "key": "toast.documentTranslated",
       "en": "✅ Document translated",
+      "vars": []
+    },
+    {
+      "key": "toast.explainChangeFailed",
+      "en": "Could not explain the change: {error}",
+      "vars": [
+        "error"
+      ]
+    },
+    {
+      "key": "toast.explainChangeNoHistory",
+      "en": "This note has no earlier version yet. Save it, edit, and try again.",
+      "vars": []
+    },
+    {
+      "key": "toast.explainChangePick",
+      "en": "Compare the note now with which version?",
+      "vars": []
+    },
+    {
+      "key": "toast.explainChangeWorking",
+      "en": "Comparing the versions…",
       "vars": []
     },
     {

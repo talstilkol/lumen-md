@@ -12,6 +12,7 @@
  *   npm run heldout -- scan [--diff REV] [--prs 12,34|open] [--paths a,b] [--require-key] [--out FILE]
  *                                             contamination check: canaries anywhere, item n-grams with the key
  *   npm run heldout -- log [--verify]         who asked for a score, when, on which versions
+ *   npm run heldout -- --check writing        the writing agents' set (W13.W18): present, sealed, 2 annotators, kappa >= 0.6
  *   npm run heldout -- export --to R --out F  a copy of the sets for one run on a cloud GPU (plan W6.18), encrypted to
  *                                             that run's key; the cloud scores it with LUMEN_HELDOUT_EXPORT=F and the run key
  *
@@ -126,6 +127,15 @@ function loadBundle(id, key) {
   const digest = setDigest(cs);
   if (digest !== b.digest) throw new Error(`${id}: the bundle's items do not match its digest`);
   return { ...b, commitments: cs };
+}
+
+// ── --check <prefix> (W13.W18): the set is present, sealed, and its annotators agree ──
+
+if (opts.check !== undefined) {
+  const { checkWritingSet } = await import("./lib/heldoutCheck.mjs");
+  const r = checkWritingSet(manifest, String(opts.check || "writing"));
+  for (const line of r.lines) console.log(line);
+  process.exit(r.ok ? 0 : 1);
 }
 
 // ── status ────────────────────────────────────────────────────────────────

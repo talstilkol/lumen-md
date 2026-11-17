@@ -1,0 +1,21 @@
+# Development set (English): the rules of src/text/englishPos.ts were tuned on these sentences only.
+The/O little/A boy/N walked/V to/O school/N in/O the/O morning/N
+The/O new/A teacher/N explained/V the/O lesson/N to/O the/O students/N
+We/O study/V English/N every/O day/N
+The/O government/N decided/V on/O a/O new/A economic/A plan/N
+He/O writes/V a/O long/A letter/N to/O his/O friend/N
+In/O the/O big/A city/N there/O are/V many/O people/N
+She/O wants/V to/O study/V at/O the/O university/N
+The/O old/A books/N are/V in/O the/O library/N
+Yesterday/O I/O saw/V a/O very/O interesting/A film/N
+The/O company/N developed/V a/O new/A product/N
+The/O students/N started/V writing/V their/O papers/N
+I/O think/V the/O idea/N is/V good/A
+The/O scientific/A study/N showed/V important/A results/N
+They/O will/O arrive/V tomorrow/O evening/N
+The/O black/A dog/N ran/V in/O the/O garden/N
+We/O have/V a/O hard/A problem/N
+The/O road/N to/O Jerusalem/N is/V long/A
+The/O sun/N rises/V early/O
+The/O manager/N asked/V the/O workers/N to/O continue/V
+Such/O a/O decision/N requires/V careful/A thought/N

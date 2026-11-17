@@ -1,10 +1,14 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, waitFor } from "@testing-library/react";
 
-vi.mock("../i18n", () => ({ registerEnglish: () => undefined, t: (k: string, p?: Record<string, string>) => {
-  if (p) return Object.entries(p).reduce((s, [k2, v]) => s.replace(`{${k2}}`, v), k);
-  return k;
-}}));
+vi.mock("../i18n", () => {
+  const t = (k: string, p?: Record<string, string>) => {
+    if (p) return Object.entries(p).reduce((s, [k2, v]) => s.replace(`{${k2}}`, v), k);
+    return k;
+  };
+  // W13.G11's summary counts with tPlural.
+  return { registerEnglish: () => undefined, t, tPlural: (k: string, n: number) => `${k}:${n}` };
+});
 vi.mock("../lib/logger", () => ({
   log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
 }));
@@ -95,5 +99,33 @@ describe("GraphView by touch (plan 10.2.1)", () => {
     expect(onOpenFile).not.toHaveBeenCalled();
     press(fireEvent, surface, "mouse", 3);
     await waitFor(() => expect(onOpenFile).toHaveBeenCalledWith("a.md", "# A"));
+  });
+});
+
+describe("GraphView as a list (W13.G11)", () => {
+  it("the list button walks the notes; the summary counts the same graph", async () => {
+    const ws = await import("../storage/workspace");
+    const index = await import("../storage/workspaceIndex");
+    vi.mocked(index.indexedFiles).mockReturnValue([
+      { path: "a.md", wikiTargets: ["b"], meta: {}, modified: 1 },
+      { path: "b.md", wikiTargets: [], meta: {}, modified: 1 },
+    ] as never);
+    vi.mocked(ws.readWorkspaceFile).mockResolvedValue("# A");
+    const { fireEvent, screen, act } = await import("@testing-library/react");
+    const { GraphView } = await import("../ui/GraphView");
+    const onOpenFile = vi.fn();
+    render(<GraphView onOpenFile={onOpenFile} />);
+    fireEvent.click(await screen.findByTestId("graph-as-list"));
+    const current = await screen.findByTestId("graph-list-current");
+    expect(screen.queryByRole("application")).toBeNull();
+    const goto = screen.getByTestId("graph-list-goto") as HTMLSelectElement;
+    expect([...goto.options].map((o) => o.value).sort()).toEqual(["a.md", "b.md"]);
+    const from = current.textContent;
+    const neighbour = document.querySelector<HTMLButtonElement>("button[data-neighbour]")!;
+    await act(async () => void fireEvent.click(neighbour));
+    expect(screen.getByTestId("graph-list-current").textContent).not.toBe(from);
+    fireEvent.click(screen.getByTestId("graph-list-open"));
+    await waitFor(() => expect(onOpenFile).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByTestId("graph-summary").textContent).toContain("graphAlt.summary.nodes:2"), { timeout: 2000 });
   });
 });
