@@ -145,7 +145,7 @@ describe("C5: the conflict dialog shows what differs", () => {
     expect(marked("calendar-conflict-there")).toHaveLength(1);
     expect(marked("calendar-conflict-here")[0]).toMatch(/Due .*20.*\(differs\)/);
     expect(marked("calendar-conflict-there")[0]).toMatch(/Due .*22/);
-    expect(conflictDiffers(null, (conflict.remote as { todo: never }).todo)).toEqual(new Set(["summary", "due", "state"]));
+    expect(conflictDiffers(null, (conflict.remote as unknown as { todo: never }).todo)).toEqual(new Set(["summary", "due", "state"]));
   });
 
   it("shows the due date as a date, not as 2026-11-20, and the path left to right", () => {
