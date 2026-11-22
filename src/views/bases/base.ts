@@ -29,6 +29,7 @@ import YAML, { isMap, isScalar, isSeq, parseDocument, YAMLMap, YAMLSeq, type Doc
 import { FormulaError } from "../formula/ast";
 import { evaluateBases, parseBases, type BasesEvalOptions, type BasesScope, type BasesVault } from "./evaluate";
 import type { BasesNode } from "./expr";
+import { typedSortKey } from "../../properties/valueTypes";
 import { equalValues, fromYaml, isEmptyValue, isTagged, parseWikiLink, sortCompare, toText, truthy, type BasesFile, type BValue } from "./values";
 import { builtinSummary, compileFilter, sortDate } from "./fastFilters";
 export { builtinSummary, compileFilter } from "./fastFilters";
@@ -630,7 +631,14 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
   const keys = [...(view.groupBy ? [view.groupBy] : []), ...view.sort];
   // Dates parsed once per row, not once per comparison (10,000 rows: ~5× faster).
   // …and emptiness once per row too (W6.46).
-  const decorated = matched.map((r) => ({ r, d: keys.map((k) => sortDate(r.cells[k.property])), e: keys.map((k) => isEmptyValue(r.cells[k.property])) }));
+  // …and amounts / addresses read once per row: two amounts sort by number, two
+  // addresses by city, street and house number (plan R12.17).
+  const decorated = matched.map((r) => ({
+    r,
+    d: keys.map((k) => sortDate(r.cells[k.property])),
+    e: keys.map((k) => isEmptyValue(r.cells[k.property])),
+    t: keys.map((k) => typedSortKey(r.cells[k.property])),
+  }));
   decorated.sort((x, y) => {
     const a = x.r;
     const b = y.r;
@@ -638,7 +646,14 @@ export function runBase(base: BaseModel, files: readonly BasesFile[], opts: RunO
       const k = keys[i];
       const da = x.d[i];
       const db = y.d[i];
-      const d = da !== null && db !== null ? Math.sign(da - db) : sortCompare(a.cells[k.property], b.cells[k.property]);
+      const ta = x.t[i];
+      const tb = y.t[i];
+      const d =
+        da !== null && db !== null
+          ? Math.sign(da - db)
+          : ta !== null && tb !== null && typeof ta === typeof tb
+            ? ta < tb ? -1 : ta > tb ? 1 : 0
+            : sortCompare(a.cells[k.property], b.cells[k.property]);
       // Empty values stay last in both directions.
       if (d) return x.e[i] || y.e[i] ? d : k.direction === "DESC" ? -d : d;
     }

@@ -10957,8 +10957,40 @@
       ]
     },
     {
+      "key": "props.readAs",
+      "en": "Read as {value}",
+      "vars": [
+        "value"
+      ]
+    },
+    {
       "key": "props.readOnly",
       "en": "Edit this value in the editor",
+      "vars": []
+    },
+    {
+      "key": "props.reading.apartment",
+      "en": "apt",
+      "vars": []
+    },
+    {
+      "key": "props.reading.approx",
+      "en": "about",
+      "vars": []
+    },
+    {
+      "key": "props.reading.lowerBound",
+      "en": "at least",
+      "vars": []
+    },
+    {
+      "key": "props.reading.poBox",
+      "en": "PO Box",
+      "vars": []
+    },
+    {
+      "key": "props.reading.upperBound",
+      "en": "at most",
       "vars": []
     },
     {
@@ -10986,6 +11018,16 @@
       "vars": [
         "key"
       ]
+    },
+    {
+      "key": "props.type.address",
+      "en": "Address",
+      "vars": []
+    },
+    {
+      "key": "props.type.amount",
+      "en": "Amount",
+      "vars": []
     },
     {
       "key": "props.type.checkbox",
