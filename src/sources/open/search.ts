@@ -13,7 +13,7 @@
  *    link only — never a full copy of link-only content.
  */
 
-import { mayCopy, RIGHTS_URL, type Rights } from "./rights";
+import { mayCopy, REGISTER_TERMS, RIGHTS_URL, type Rights, type SourceTerms } from "./rights";
 import type { OpenSourceId } from "./gate";
 import { parseSourceRef, type SourceRef } from "../sefaria/refs";
 import { matchLaw, searchTermOf } from "../knesset/lawNames";
@@ -21,10 +21,14 @@ import { lawCitation, type SavedLaw } from "../knesset/store";
 import { recordUrl, searchLaws } from "../knesset/odata";
 import { plain, quoteBlock as workQuote, workUrl, type Library, type Work } from "../benyehuda/library";
 import { searchDatasets, type DatasetHit } from "../datagov/api";
+import { formatNumber, lookup, registerNumber, type RegisterConfig, type RegisterRecord } from "../registers/ckanRegister";
+import { AMUTOT } from "../amutot/register";
+import { COMPANIES } from "../companies/register";
+import { parseYalkutRef, yalkutUrl, type YalkutRef } from "../reshumot/yalkut";
 
-export type Kind = "verse" | "law" | "work" | "dataset" | "series";
+export type Kind = "verse" | "law" | "work" | "dataset" | "series" | "register" | "gazette";
 
-export const KINDS: readonly Kind[] = ["verse", "law", "work", "dataset", "series"];
+export const KINDS: readonly Kind[] = ["verse", "law", "work", "dataset", "series", "register", "gazette"];
 
 export interface OpenResult {
   /** Unique within one search. */
@@ -38,7 +42,9 @@ export interface OpenResult {
   url: string;
   /** True when the item came from this device (no request was made). */
   local: boolean;
-  payload: { ref?: SourceRef; lawId?: number; lawName?: string; savedLaw?: SavedLaw; work?: Work; dataset?: DatasetHit; seriesId?: string };
+  payload: { ref?: SourceRef; lawId?: number; lawName?: string; savedLaw?: SavedLaw; work?: Work; dataset?: DatasetHit; seriesId?: string; record?: RegisterRecord; yalkut?: YalkutRef };
+  /** R12.19: the register's licence light and terms of use, shown with the result. */
+  terms?: SourceTerms;
 }
 
 export interface LocalSources {
@@ -89,6 +95,12 @@ export function searchLocal(query: string, src: LocalSources, kind: Kind | null 
     for (const h of src.library.search(q, 5))
       out.push({ key: `benyehuda:${h.work.id}`, source: "benyehuda", kind: "work", title: plain(h.work.title), detail: h.work.authors, rights: "public-domain", url: workUrl(h.work), local: true, payload: { work: h.work } });
   }
+  if (src.enabled.registers && want("gazette")) {
+    // R12.19: a Yalkut HaPirsumim reference is a link; nothing is fetched.
+    const y = parseYalkutRef(q);
+    const terms = REGISTER_TERMS.reshumot;
+    if (y) out.push({ key: `reshumot:${y.issue}:${y.page ?? ""}`, source: "registers", kind: "gazette", title: `ילקוט הפרסומים ${y.issue}${y.page ? `, עמ׳ ${y.page}` : ""}`, detail: terms.he, rights: terms.rights, url: yalkutUrl(y.issue), local: true, payload: { yalkut: y }, terms });
+  }
   if (src.enabled.datagov && want("series")) {
     const words = normWords(q);
     for (const s of KNOWN_SERIES) {
@@ -122,6 +134,19 @@ export async function searchOnline(query: string, enabled: Record<OpenSourceId, 
       }),
     );
   }
+  if (enabled.registers && (!kind || kind === "register")) {
+    // R12.19: a nine-digit number goes only to the register it belongs to; a name to both.
+    const n = registerNumber(q);
+    const registers: RegisterConfig[] = [AMUTOT, COMPANIES].filter((c) => !n || c.numberPrefixes.includes(n.slice(0, 2)));
+    for (const cfg of registers)
+      jobs.push(
+        lookup(cfg, q, fetchImpl, 5).then((recs) => {
+          const terms = REGISTER_TERMS[cfg.source];
+          for (const r of recs.slice(0, 5))
+            out.push({ key: `${cfg.source}:${r.number}`, source: "registers", kind: "register", title: r.name || formatNumber(r.number), detail: [formatNumber(r.number), r.status].filter(Boolean).join(" · "), rights: terms.rights, url: r.url, local: false, payload: { record: r }, terms });
+        }),
+      );
+  }
   await Promise.all(jobs);
   return out;
 }
@@ -150,7 +175,7 @@ export function insertionFor(r: OpenResult, content: string | null): string {
 export function attributionFor(r: OpenResult): string {
   const deed = RIGHTS_URL[r.rights];
   const mark = RIGHTS_LABEL_HE[r.rights];
-  const where = { sefaria: "Sefaria", knesset: "הכנסת", datagov: r.kind === "series" ? 'הלמ"ס' : "data.gov.il", benyehuda: "פרויקט בן־יהודה" }[r.source];
+  const where = { sefaria: "Sefaria", knesset: "הכנסת", datagov: r.kind === "series" ? 'הלמ"ס' : "data.gov.il", benyehuda: "פרויקט בן־יהודה", registers: r.terms?.he ?? "data.gov.il" }[r.source];
   return `מקור: [${where}](${r.url}) · ${deed ? `[${mark}](${deed})` : mark}`;
 }
 

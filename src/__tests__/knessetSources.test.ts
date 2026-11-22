@@ -252,7 +252,7 @@ describe("the gate: nothing is sent before the user acts", () => {
   it("sources start off except Sefaria, and the choice is remembered", () => {
     const store = new Map<string, string>();
     const s = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v) };
-    expect(enabledSources(s)).toEqual({ sefaria: true, knesset: false, datagov: false, benyehuda: false });
+    expect(enabledSources(s)).toEqual({ sefaria: true, knesset: false, datagov: false, benyehuda: false, registers: false });
     setSourceEnabled("knesset", true, s);
     expect(enabledSources(s).knesset).toBe(true);
     expect(rightsOfSefariaLicense("CC-BY-NC")).toBe("link-only");

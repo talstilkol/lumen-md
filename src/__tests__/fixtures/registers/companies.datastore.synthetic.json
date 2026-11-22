@@ -1,0 +1,52 @@
+{
+ "_synthetic": "SYNTHETIC: written by hand in the shape of a CKAN datastore_search answer (data.gov.il, API v3) for plan R12.19. The organisations, numbers and fields' values are invented; only the field names follow the register's published schema. Replace with a recorded live answer (owed: the network is closed to the build that wrote this).",
+ "success": true,
+ "result": {
+  "resource_id": "f004176c-b85f-4542-8901-7b3176f9a054",
+  "fields": [
+   {
+    "id": "_id",
+    "type": "int"
+   },
+   {
+    "id": "מספר חברה",
+    "type": "numeric"
+   },
+   {
+    "id": "שם חברה",
+    "type": "text"
+   },
+   {
+    "id": "שם באנגלית",
+    "type": "text"
+   },
+   {
+    "id": "סטטוס חברה",
+    "type": "text"
+   },
+   {
+    "id": "סוג תאגיד",
+    "type": "text"
+   }
+  ],
+  "records": [
+   {
+    "_id": 1,
+    "מספר חברה": 510000001,
+    "שם חברה": "דוגמה טכנולוגיות בע\"מ",
+    "שם באנגלית": "EXAMPLE TECHNOLOGIES LTD",
+    "סטטוס חברה": "פעילה",
+    "סוג תאגיד": "חברה פרטית"
+   },
+   {
+    "_id": 2,
+    "מספר חברה": 520000002,
+    "שם חברה": "דוגמה החזקות בע\"מ",
+    "שם באנגלית": "EXAMPLE HOLDINGS LTD",
+    "סטטוס חברה": "פעילה",
+    "סוג תאגיד": "חברה ציבורית"
+   }
+  ],
+  "total": 2
+ }
+}

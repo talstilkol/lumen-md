@@ -7,22 +7,29 @@ import { ledgerFetch } from "../../ai/privacyLedger";
 import { uiConfirm } from "../../ui/PromptDialog";
 import { t } from "../../i18n";
 import { enabledSources, gatedFetch, SourceOffError, type OpenSourceId } from "./gate";
-import { insertionFor, searchLocal, searchOnline, type Kind, type LocalSources, type OpenResult } from "./search";
+import { attributionFor as attributionOf, insertionFor, searchLocal, searchOnline, type Kind, type LocalSources, type OpenResult } from "./search";
+import { AMUTOT } from "../amutot/register";
+import { REGISTERS_REASON } from "../registers/ckanRegister";
+import { COMPANIES } from "../companies/register";
 
 export { searchLocal };
 
-/** Each host is ledgered under its own source's reason. */
-const HOSTS: Array<{ test: (h: string) => boolean; source: OpenSourceId; reason: string }> = [
+/** The register resources on data.gov.il (R12.19): their requests belong to the registers source, not to datasets. */
+const REGISTER_RESOURCES = new Set([AMUTOT.resourceId, COMPANIES.resourceId]);
+
+/** Each host is ledgered under its own source's reason (the first rule that matches). */
+const HOSTS: Array<{ test: (h: string, u: URL) => boolean; source: OpenSourceId; reason: string }> = [
   { test: (h) => h === "knesset.gov.il", source: "knesset", reason: "Knesset records (OData): the law or bill name only" },
+  { test: (h, u) => h === "data.gov.il" && REGISTER_RESOURCES.has(u.searchParams.get("resource_id") ?? ""), source: "registers", reason: REGISTERS_REASON },
   { test: (h) => h === "data.gov.il" || h === "apis.cbs.gov.il", source: "datagov", reason: "Government data (data.gov.il, CBS): the search words or dataset id only" },
 ];
 
 /** One fetch for a dialog search: asks once; each request goes to the ledger under its source; an off source is never sent to. */
-function dialogFetch(confirm: () => Promise<boolean>): typeof fetch {
+export function dialogFetch(confirm: () => Promise<boolean>): typeof fetch {
   const byHost: typeof fetch = (input, init) => {
-    const host = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url).hostname;
-    const h = HOSTS.find((x) => x.test(host));
-    if (!h || !enabledSources()[h.source]) throw new SourceOffError(h?.source ?? host);
+    const url = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
+    const h = HOSTS.find((x) => x.test(url.hostname, url));
+    if (!h || !enabledSources()[h.source]) throw new SourceOffError(h?.source ?? url.hostname);
     return ledgerFetch({ force: { category: "cloud-text", reason: h.reason }, consent: true })(input, init);
   };
   return gatedFetch({ source: "open", reason: "", confirm, base: byHost });
@@ -38,7 +45,7 @@ export async function loadLocal(): Promise<Omit<LocalSources, "enabled">> {
 }
 
 export function searchOnlineGated(q: string, enabled: Record<OpenSourceId, boolean>, kind: Kind | null): Promise<OpenResult[] | null> {
-  if (!enabled.knesset && !enabled.datagov) return Promise.resolve([]);
+  if (!enabled.knesset && !enabled.datagov && !enabled.registers) return Promise.resolve([]);
   const confirm = () => uiConfirm({ message: t("openSources.confirm", { query: q }) });
   return (async () => {
     try {
@@ -79,6 +86,16 @@ export async function insertion(r: OpenResult): Promise<string | null> {
     const d = await import("../datagov/app");
     const res = await d.addSeries(r.payload.seriesId, ask(r.title));
     return res?.markdown ?? null;
+  }
+  if (r.kind === "register" && r.payload.record) {
+    // R12.19: the record becomes a source note (quote + retrieval date); this note gets a link and the credit.
+    const { saveSourceNote } = await import("../registers/app");
+    const saved = await saveSourceNote(r.payload.record);
+    return `${saved.link} — ${attributionOf(r)}`;
+  }
+  if (r.kind === "gazette" && r.payload.yalkut) {
+    const { yalkutCitation } = await import("../reshumot/yalkut");
+    return yalkutCitation(r.payload.yalkut);
   }
   return insertionFor(r, null);
 }
