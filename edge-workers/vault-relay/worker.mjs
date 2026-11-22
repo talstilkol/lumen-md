@@ -12,7 +12,12 @@
  *
  * It is the same relay as the Node server: every request goes to
  * createVaultRelay() from sync-server/vault-relay.js, unchanged in what it
- * checks (tokens, sizes, the limits, the proof of work). Only the parts a
+ * checks (tokens, sizes, the limits, the proof of work, and in role spaces,
+ * plan W12.S4, the admin-signed ACL and each write's Ed25519 writer
+ * signature: sync-server/vault-relay-roles.js, verified with the Worker's
+ * WebCrypto; the per-signer counters that stop replays are an object of the
+ * space in this Durable Object's storage). Every request header reaches it
+ * as sent (X-Lumen-Role carries a signed delete). Only the parts a
  * Node process keeps on its disk or in its memory live here in the Durable
  * Object's storage:
  *   - the objects (`m|` metadata, `d|` chunks of CHUNK bytes; a SQLite
