@@ -76,6 +76,11 @@ The ink is an SVG image written into the Markdown:
 
 - The eraser removes whole strokes, not parts of one.
 - Handwriting recognition (turning Hebrew handwriting into text) is not part
-  of this feature yet.
+  of this feature yet. When a local recogniser has been measured and passes
+  its bar on a public Hebrew handwriting benchmark, the recognised text will
+  be kept hidden in the ink block (`data-ink-text`) so that search finds
+  words you wrote by hand. Until that measurement passes, the switch stays
+  off and the app offers no recognition. Cloud recognisers such as MyScript
+  are not used: they send your strokes to a server.
 - An ink you write by hand in SVG, without `data-ink-pts`, is shown and kept,
   but its strokes cannot be erased in the pad.

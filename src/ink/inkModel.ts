@@ -60,6 +60,12 @@ export interface Ink {
   /** The accessible name stored in the file (`aria-label`). */
   label: string;
   strokes: InkStroke[];
+  /**
+   * W12.R4: recognised text, kept hidden in `data-ink-text` so search finds
+   * a handwritten word. Written only while the recogniser has passed its
+   * measured gate (./inkText.ts); never shown.
+   */
+  text?: string;
 }
 
 export const INK_MARKER = "data-lumen-ink";
@@ -152,7 +158,7 @@ export function toMarkdown(ink: Ink): string {
   const h = Math.max(1, Math.round(ink.height));
   const head =
     `<svg xmlns="http://www.w3.org/2000/svg" ${INK_MARKER}="1" data-ink-id="${escapeAttr(ink.id)}" data-ink-dir="${ink.dir}" data-ink-place="${ink.placement}"` +
-    ` viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${escapeAttr(ink.label)}" style="${placementStyle(ink)}">`;
+    ` viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="${escapeAttr(ink.label)}" style="${placementStyle(ink)}"${ink.text ? ` data-ink-text="${escapeAttr(ink.text)}"` : ""}>`;
   const lines = [head];
   for (const s of ink.strokes) {
     const color = COLOR.test(s.color) ? s.color.toLowerCase() : "#1f2937";
@@ -210,6 +216,7 @@ export function parseInk(block: string): Ink | null {
     placement: a["data-ink-place"] === "side" ? "side" : "block",
     label: a["aria-label"] ?? "",
     strokes,
+    ...(a["data-ink-text"] ? { text: a["data-ink-text"] } : {}),
   };
 }
 
