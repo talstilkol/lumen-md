@@ -1,6 +1,7 @@
 import { useCommands, openNewDoc } from "./commands/useCommands";
 import { lazy, Suspense, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { EditorHandle } from "./editor/Editor";
+import type { SettingsTab } from "./settings/schema";
 
 import { Toolbar } from "./ui/Toolbar";
 import { Outline } from "./ui/Outline";
@@ -15,14 +16,12 @@ const CanvasWhiteboard = lazy(() => import("./ui/CanvasTldraw").then(m => ({ def
 const PluginGallery = lazy(() => import("./ui/PluginGallery").then(m => ({ default: m.PluginGallery })));
 const TemplateGallery = lazy(() => import("./ui/TemplateGallery").then(m => ({ default: m.TemplateGallery })));
 const AuditLog = lazy(() => import("./ui/AuditLog").then(m => ({ default: m.AuditLog })));
-const OrgSettings = lazy(() => import("./ui/OrgSettings").then(m => ({ default: m.OrgSettings })));
-const TrustedKeysSettings = lazy(() => import("./ui/TrustedKeysSettings").then(m => ({ default: m.TrustedKeysSettings })));
-const ThemeSettings = lazy(() => import("./ui/ThemeSettings").then(m => ({ default: m.ThemeSettings })));
-const AiSettingsPanel = lazy(() => import("./ui/AiSettingsPanel").then(m => ({ default: m.AiSettingsPanel })));
+// One settings screen (plan 11.1); the theme, AI, training, trusted-key and
+// organization dialogs are its tabs.
+const SettingsScreen = lazy(() => import("./ui/SettingsScreen").then(m => ({ default: m.SettingsScreen })));
 const PrivacyLedgerPanel = lazy(() => import("./ui/PrivacyLedgerPanel").then(m => ({ default: m.PrivacyLedgerPanel })));
 const TrashPanel = lazy(() => import("./ui/TrashPanel").then(m => ({ default: m.TrashPanel })));
 const AiDoctorPanel = lazy(() => import("./ui/AiDoctorPanel").then(m => ({ default: m.AiDoctorPanel })));
-const FineTuneSettings = lazy(() => import("./ui/FineTuneSettings").then(m => ({ default: m.FineTuneSettings })));
 const VersionHistory = lazy(() => import("./ui/VersionHistory").then(m => ({ default: m.VersionHistory })));
 const MarkdownTableEditor = lazy(() => import("./ui/MarkdownTableEditor").then(m => ({ default: m.MarkdownTableEditor })));
 import { htmlToMarkdown } from "./storage/fileFormats";
@@ -136,11 +135,12 @@ export default function App() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [templateGalleryOpen, setTemplateGalleryOpen] = useState(false);
   const [auditLogOpen, setAuditLogOpen] = useState(false);
-  const [fineTuneOpen, setFineTuneOpen] = useState(false);
-  const [orgSettingsOpen, setOrgSettingsOpen] = useState(false);
-  const [trustedKeysOpen, setTrustedKeysOpen] = useState(false);
-  const [themeSettingsOpen, setThemeSettingsOpen] = useState(false);
-  const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
+  // The open settings tab, or null when the settings screen is closed.
+  const [settingsTab, setSettingsTab] = useState<SettingsTab | null>(null);
+  const setFineTuneOpen = useCallback((open: boolean) => setSettingsTab(open ? "fineTune" : null), []);
+  const setOrgSettingsOpen = useCallback((open: boolean) => setSettingsTab(open ? "org" : null), []);
+  const setTrustedKeysOpen = useCallback((open: boolean) => setSettingsTab(open ? "security" : null), []);
+  const setThemeSettingsOpen = useCallback((open: boolean) => setSettingsTab(open ? "appearance" : null), []);
   const [aiDoctorOpen, setAiDoctorOpen] = useState(false);
   const [trashOpen, setTrashOpen] = useState(false);
   // The search dialog loads on first open and then stays mounted, so an
@@ -733,9 +733,14 @@ export default function App() {
     return () => window.removeEventListener("lumen-run-command", onRun);
   }, []);
   useEffect(() => {
-    const onOpen = () => setAiSettingsOpen(true);
-    window.addEventListener("lumen-open-ai-settings", onOpen);
-    return () => window.removeEventListener("lumen-open-ai-settings", onOpen);
+    const onOpenAi = () => setSettingsTab("ai");
+    const onOpen = (e: Event) => setSettingsTab((e as CustomEvent<{ tab?: SettingsTab }>).detail?.tab ?? "general");
+    window.addEventListener("lumen-open-ai-settings", onOpenAi);
+    window.addEventListener("lumen-open-settings", onOpen);
+    return () => {
+      window.removeEventListener("lumen-open-ai-settings", onOpenAi);
+      window.removeEventListener("lumen-open-settings", onOpen);
+    };
   }, []);
   useEffect(() => {
     const onOpen = () => setPrivacyOpen(true);
@@ -1080,14 +1085,10 @@ export default function App() {
             // pro users have no org, so their own id is the scope.
             orgId={auditScope({ id: authUserId ?? "", orgId: authOrgId }) || "personal"}
           />}
-          {fineTuneOpen && <FineTuneSettings open={fineTuneOpen} onClose={() => setFineTuneOpen(false)} />}
-          {orgSettingsOpen && <OrgSettings open={orgSettingsOpen} onClose={() => setOrgSettingsOpen(false)} onOpenAuditLog={() => setAuditLogOpen(true)} />}
-          {trustedKeysOpen && <TrustedKeysSettings open={trustedKeysOpen} onClose={() => setTrustedKeysOpen(false)} />}
-          {aiSettingsOpen && <AiSettingsPanel open={aiSettingsOpen} onClose={() => setAiSettingsOpen(false)} />}
+          {settingsTab && <SettingsScreen key={settingsTab} tab={settingsTab} onClose={() => setSettingsTab(null)} onOpenAuditLog={() => { setSettingsTab(null); setAuditLogOpen(true); }} />}
           {aiDoctorOpen && <AiDoctorPanel open={aiDoctorOpen} onClose={() => setAiDoctorOpen(false)} />}
           {privacyOpen && <PrivacyLedgerPanel open={privacyOpen} onClose={() => setPrivacyOpen(false)} />}
           {trashOpen && <TrashPanel open={trashOpen} onClose={() => setTrashOpen(false)} />}
-          {themeSettingsOpen && <ThemeSettings open={themeSettingsOpen} onClose={() => setThemeSettingsOpen(false)} />}
         </ErrorBoundary>
       </Suspense>
 

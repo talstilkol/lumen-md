@@ -44,7 +44,7 @@ export interface DocFile {
 
 let nextLoadId = 0;
 
-interface AppState {
+export interface AppState {
   doc: DocFile;
   mode: ViewMode;
   theme: Theme;

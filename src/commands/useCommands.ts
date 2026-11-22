@@ -1525,6 +1525,16 @@ export function useCommands({
         },
       },
       {
+        id: "settings.open",
+        label: t("settings.title"),
+        hint: t("settings.search"),
+        icon: cmdIcons.Sparkles,
+        group: t("group.view"),
+        action: () => {
+          window.dispatchEvent(new CustomEvent("lumen-open-settings"));
+        },
+      },
+      {
         id: "ai.agentSettings",
         label: t("cmd.ai.agentSettings"),
         hint: t("cmd.ai.agentSettings.hint"),

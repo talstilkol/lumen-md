@@ -1439,5 +1439,13 @@
   "cmd.ai.cancel": "AI: ביטול",
   "cmd.ai.cancel.hint": "עוצר כל בקשת AI שרצה (גם Esc עושה זאת)",
   "toast.aiCancelled": "בקשת ה-AI בוטלה ({count})",
-  "toast.aiNothingRunning": "אין בקשת AI שרצה"
+  "toast.aiNothingRunning": "אין בקשת AI שרצה",
+  "settings.title": "הגדרות",
+  "settings.search": "חיפוש בהגדרות",
+  "settings.empty": "אין הגדרה שמתאימה",
+  "settings.general": "כללי",
+  "settings.language": "שפה",
+  "settings.telemetryOptOut": "לא לשלוח דוחות שגיאה",
+  "settings.imported": "יובאו {n} הגדרות, {skipped} דולגו",
+  "settings.importFailed": "הקובץ הזה אינו קובץ הגדרות של Lumen."
 }

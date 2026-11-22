@@ -1550,6 +1550,15 @@ const en: Strings = {
   "chart.reason.radar": "{k} measures for {n} items — compare their profiles.",
   "chart.reason.summary": "No category or time column — comparing column averages.",
   "chart.alternatives": "Chart suggestions",
+  // Settings screen (plan 11.1)
+  "settings.title": "Settings",
+  "settings.search": "Search settings",
+  "settings.empty": "No setting matches",
+  "settings.general": "General",
+  "settings.language": "Language",
+  "settings.telemetryOptOut": "Send no error reports",
+  "settings.imported": "{n} settings imported, {skipped} skipped",
+  "settings.importFailed": "That file isn't a Lumen settings file.",
 };
 
 
