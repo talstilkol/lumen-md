@@ -29,8 +29,8 @@ describe("support page and FUNDING.yml agree (W10.B21)", () => {
     });
   }
 
-  it("today: no account is open, so no donation link and no 'may lead to an empty page'", () => {
-    expect(active("github")).toBe(false);
+  it("GitHub Sponsors is open (owner decision W11.O8); Open Collective not yet; no 'may lead to an empty page'", () => {
+    expect(active("github")).toBe(true);
     expect(active("open_collective")).toBe(false);
     expect(html).not.toMatch(/may lead to an empty page|יכולים להוביל לדף ריק/);
     expect(liveHrefs).toContain("https://github.com/talstilkol/lumen-md");
