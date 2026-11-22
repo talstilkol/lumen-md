@@ -10,6 +10,6 @@ custom: ["https://lumen-md.vercel.app/support.html"]
 # "coming" label marked `funding:github` / `funding:open_collective` there with
 # the link; supportFunding.test.ts and sustainability.test.ts fail while they disagree.
 #   1. GitHub Sponsors for the personal account (0% fees; Israel is a supported region):
-# github: [talstilkol]
+github: [talstilkol]
 #   2. Open Source Collective accepted the collective "lumen-md" (10% host fee):
-# open_collective: lumen-md
+open_collective: lumen-md

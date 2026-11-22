@@ -106,11 +106,9 @@ describe("FUNDING.yml", () => {
   it("uses only keys GitHub reads, and links the live support page", () => {
     const allowed = ["community_bridge", "github", "issuehunt", "ko_fi", "liberapay", "open_collective", "otechie", "patreon", "tidelift", "polar", "buy_me_a_coffee", "thanks_dev", "lfx_crowdfunding", "custom"];
     for (const l of live) expect(allowed, l).toContain(l.split(":")[0]);
-    expect(live).toEqual(['custom: ["https://lumen-md.vercel.app/support.html"]']);
+    // OWNER-DECISION draft (wave g6 L5, W5.25): both accounts exist and are switched on.
+    expect(live).toEqual(["custom: [\"https://lumen-md.vercel.app/support.html\"]", "github: [talstilkol]", "open_collective: lumen-md"]);
     expect(existsSync(join(ROOT, "public/support.html"))).toBe(true);
-    // The two accounts are ready to switch on once they exist.
-    expect(yml).toContain("# github: [talstilkol]");
-    expect(yml).toContain("# open_collective: lumen-md");
   });
 
   it("the support page links an account only once FUNDING.yml switches it on: 0 links to empty pages (W10.B21)", () => {
