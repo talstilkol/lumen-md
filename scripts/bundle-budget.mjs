@@ -131,7 +131,11 @@ async function main() {
     c.kb += kb;
     c.files++;
     const ok = kb <= rule.budgetKb;
-    if (!ok) failed++;
+    if (!ok) {
+      failed++;
+      // An annotation, so the failing file shows on the PR without the job log.
+      if (process.env.GITHUB_ACTIONS) console.log(`::error title=bundle budget::${rule.name}: ${file} is ${kb.toFixed(1)} KB gzipped, budget ${rule.budgetKb} KB`);
+    }
     const mark = ok ? "✓" : "✗";
     console.log(
       `  ${mark} ${rule.name.padEnd(20)} ${format(kb)} / ${format(rule.budgetKb)}   ${file}`,
