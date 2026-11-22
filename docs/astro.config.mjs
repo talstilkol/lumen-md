@@ -82,6 +82,7 @@ export default defineConfig({
             { label: "Sync providers (WebDAV, S3, Dropbox, Drive)", slug: "sync/cloud" },
             { label: "Encrypted sync (E2EE)", slug: "sync/e2ee" },
             { label: "Keys, rotation and revocation", slug: "sync/e2ee-keys", translations: { he: "מפתחות, החלפה וביטול" } },
+            { label: "Real servers and conditional writes", slug: "sync/real-servers", translations: { he: "שרתים אמיתיים וכתיבות מותנות" } },
             { label: "Read-mode publishing", slug: "sync/publish" },
           ],
         },
