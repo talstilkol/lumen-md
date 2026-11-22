@@ -10126,6 +10126,36 @@
       "vars": []
     },
     {
+      "key": "pdf.spread.even",
+      "en": "Two pages (cover alone)",
+      "vars": []
+    },
+    {
+      "key": "pdf.spread.label",
+      "en": "Page layout",
+      "vars": []
+    },
+    {
+      "key": "pdf.spread.ltr",
+      "en": "Book: left to right",
+      "vars": []
+    },
+    {
+      "key": "pdf.spread.none",
+      "en": "One page",
+      "vars": []
+    },
+    {
+      "key": "pdf.spread.odd",
+      "en": "Two pages",
+      "vars": []
+    },
+    {
+      "key": "pdf.spread.rtl",
+      "en": "Book: right to left",
+      "vars": []
+    },
+    {
       "key": "pdf.summarize",
       "en": "Summarize",
       "vars": []
