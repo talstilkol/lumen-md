@@ -256,6 +256,34 @@ function buildThreeWayHunks(
   return mergeAdjacent(out);
 }
 
+/**
+ * W12.S3: the base lines a conflict replaced, on the conflict itself.
+ *
+ * The line walk above emits a replaced line as the two sides' inserts (the
+ * `conflict`) followed by the base line both sides deleted (a `both` hunk
+ * with no text on either side). For the three-column view the base belongs
+ * in the conflict's middle column, so such a deletion next to a conflict
+ * with no base of its own is folded into it. The merged text is unchanged:
+ * a `both` deletion contributes nothing to `applyMerge`.
+ */
+export function attachBase(hunks: readonly DiffHunk[]): DiffHunk[] {
+  const out: DiffHunk[] = hunks.map((h) => ({ ...h, local: [...h.local], remote: [...h.remote], base: [...h.base] }));
+  const deletion = (h: DiffHunk | undefined) => !!h && h.op === "both" && !h.local.length && !h.remote.length && h.base.length > 0;
+  for (let i = 0; i < out.length; i++) {
+    const h = out[i];
+    if (h.op !== "conflict" || h.base.length) continue;
+    if (deletion(out[i + 1])) {
+      h.base = out[i + 1].base;
+      out.splice(i + 1, 1);
+    } else if (deletion(out[i - 1])) {
+      h.base = out[i - 1].base;
+      out.splice(i - 1, 1);
+      i--;
+    }
+  }
+  return out;
+}
+
 /** Merge consecutive hunks of the same op so the UI doesn't paint a row per line. */
 function mergeAdjacent(hunks: DiffHunk[]): DiffHunk[] {
   const out: DiffHunk[] = [];

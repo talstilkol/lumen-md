@@ -32,10 +32,17 @@ draw.
 ## Sync conflicts
 
 When the same note changed on this device and in the cloud since the
-last sync, Lumen shows both versions side by side. Changes that don't
-overlap are merged for you; for each part that does, choose this device's
-or the cloud's version. You can also keep one side as a whole, or cancel
-and decide later.
+last sync, Lumen shows three columns: this device's version, the common
+base (the text as it was before either change), and the other version.
+In a right-to-left language this device's column is on the right. Changes
+that don't overlap are merged for you; for each part that does, choose
+this device's version, the other one, or both. The **Result** box under
+the columns starts from your choices and can be edited by hand, and
+**Apply merge** saves exactly what it holds (**Reset to picks** undoes
+hand edits). **Alt+↓** / **Alt+↑** (or **F7** / **Shift+F7**) move between
+conflicts. You can also keep one side as a whole, or cancel and decide
+later. The same dialog opens for an end-to-end encrypted sync, a git pull
+and a note changed outside Lumen.
 
 ## Dialogs
 

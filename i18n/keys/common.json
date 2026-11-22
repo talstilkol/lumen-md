@@ -13036,6 +13036,11 @@
       "vars": []
     },
     {
+      "key": "sync.conflict.base",
+      "en": "base",
+      "vars": []
+    },
+    {
       "key": "sync.conflict.body",
       "en": "Both sides changed since the last sync. Pick what to keep, or take one side wholesale.",
       "vars": []
@@ -13051,13 +13056,46 @@
       "vars": []
     },
     {
+      "key": "sync.conflict.hunk",
+      "en": "Conflict {n} of {total}",
+      "vars": [
+        "n",
+        "total"
+      ]
+    },
+    {
       "key": "sync.conflict.local",
       "en": "local",
       "vars": []
     },
     {
+      "key": "sync.conflict.next",
+      "en": "Next conflict",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.prev",
+      "en": "Previous conflict",
+      "vars": []
+    },
+    {
       "key": "sync.conflict.remote",
       "en": "remote",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.resetResult",
+      "en": "Reset to picks",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.result",
+      "en": "Result",
+      "vars": []
+    },
+    {
+      "key": "sync.conflict.resultHint",
+      "en": "Starts from your picks above. Edit it freely; Apply merge saves exactly this text.",
       "vars": []
     },
     {
