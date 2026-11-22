@@ -32,6 +32,8 @@
   "canvas.export.failed": "Export fehlgeschlagen: {error}",
   "canvas.export.label": "Bild exportieren",
   "canvas.export.working": "Exportiere…",
+  "canvas.hl.deleted": "Quelle gelöscht",
+  "canvas.hl.page": "S. {n}",
   "canvas.jsonCanvas.export": "Als .canvas exportieren",
   "canvas.jsonCanvas.exported": "{name}.canvas gespeichert: {nodes} Knoten, {edges} Kanten",
   "canvas.jsonCanvas.failed": "JSON Canvas konnte nicht importiert werden: {error}",

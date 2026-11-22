@@ -32,6 +32,8 @@
   "canvas.export.failed": "書き出しに失敗しました: {error}",
   "canvas.export.label": "画像を書き出す",
   "canvas.export.working": "書き出し中…",
+  "canvas.hl.deleted": "元の箇所は削除されました",
+  "canvas.hl.page": "{n}ページ",
   "canvas.jsonCanvas.export": ".canvas に書き出す",
   "canvas.jsonCanvas.exported": "{name}.canvas を保存しました: ノード {nodes}、エッジ {edges}",
   "canvas.jsonCanvas.failed": "JSON Canvas を読み込めませんでした: {error}",

@@ -32,6 +32,8 @@
   "canvas.export.failed": "הייצוא נכשל: {error}",
   "canvas.export.label": "ייצוא תמונה",
   "canvas.export.working": "מייצא…",
+  "canvas.hl.deleted": "המקור נמחק",
+  "canvas.hl.page": "עמ׳ {n}",
   "canvas.jsonCanvas.export": "ייצוא ‎.canvas",
   "canvas.jsonCanvas.exported": "נשמר {name}.canvas: {nodes} צמתים, {edges} קשתות",
   "canvas.jsonCanvas.failed": "לא ניתן לייבא את ה-JSON Canvas: {error}",
